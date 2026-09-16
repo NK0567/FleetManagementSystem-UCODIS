@@ -76,19 +76,21 @@
           <Item :icone="LayoutDashboard" libelle="Vue d'ensemble" :to="{ name: 'maintenance-dashboard' }" />
         </Section>
 
-        <Section libelle="Interventions">
+        <Section libelle="Atelier">
           <Item :icone="Wrench" libelle="Ordres de travail" :to="{ name: 'maintenance-ordres' }" />
-          <Item :icone="CalendarClock" libelle="Plans d'entretien" :to="{ name: 'maintenance-plans' }" />
           <Item v-if="params.estActif('maintenance_echeances')" :icone="AlertTriangle" libelle="Échéances" :to="{ name: 'maintenance-echeances' }" />
+          <Item v-if="params.estActif('maintenance_atelier')" :icone="Users" libelle="Charge d'atelier" :to="{ name: 'maintenance-atelier' }" />
+          <Item v-if="params.estActif('maintenance_equipe_mobile')" :icone="Truck" libelle="Équipe mobile" :to="{ name: 'maintenance-equipe-mobile' }" />
+        </Section>
+
+        <Section v-if="params.estActif('maintenance_fiabilite') || params.estActif('maintenance_indisponibilites')" libelle="Suivi & fiabilité">
+          <Item v-if="params.estActif('maintenance_fiabilite')" :icone="Gauge" libelle="Fiabilité" :to="{ name: 'maintenance-fiabilite' }" />
           <Item v-if="params.estActif('maintenance_indisponibilites')" :icone="CalendarOff" libelle="Indisponibilités" :to="{ name: 'maintenance-indisponibilites' }" />
         </Section>
 
-        <Section v-if="params.estActif('maintenance_atelier') || params.estActif('maintenance_fiabilite')" libelle="Analyse">
-          <Item v-if="params.estActif('maintenance_atelier')" :icone="Users" libelle="Charge d'atelier" :to="{ name: 'maintenance-atelier' }" />
-          <Item v-if="params.estActif('maintenance_fiabilite')" :icone="Gauge" libelle="Fiabilité" :to="{ name: 'maintenance-fiabilite' }" />
-        </Section>
-
         <Section libelle="Paramétrage">
+          <Item :icone="CalendarClock" libelle="Plans d'entretien" :to="{ name: 'maintenance-plans' }" />
+          <Item v-if="params.estActif('maintenance_achats')" :icone="PackageSearch" libelle="Achats & stock" :to="{ name: 'maintenance-achats' }" />
           <Item :icone="Settings2" libelle="Paramètres de l'atelier" :to="{ name: 'maintenance-parametres' }" />
         </Section>
       </template>
@@ -112,7 +114,7 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import {
   Building, CalendarClock, CalendarDays, CalendarOff, CalendarRange, ChartPie, CircleUser,
   ClipboardList, Fuel, Gauge, IdCard, LayoutDashboard, Link2, ListChecks, LogOut,
-  MapPin, MapPinned, Network, Package, Radio, ShieldCheck, FileText, Settings2,
+  MapPin, MapPinned, Network, Package, PackageSearch, Radio, ShieldCheck, FileText, Settings2,
   Tag, TriangleAlert as AlertTriangle, Truck, UserCheck, Users, Wrench,
 } from '@lucide/vue'
 import { useAuthStore } from '../stores/auth'

@@ -99,8 +99,12 @@ const router = createRouter({
       component: () => import('../views/maintenance/EcheancesView.vue'), meta: dashboard },
     { path: '/maintenance/indisponibilites', name: 'maintenance-indisponibilites',
       component: () => import('../views/maintenance/IndisponibilitesView.vue'), meta: dashboard },
+    { path: '/maintenance/equipe-mobile', name: 'maintenance-equipe-mobile',
+      component: () => import('../views/maintenance/EquipeMobileView.vue'), meta: dashboard },
     { path: '/maintenance/fiabilite', name: 'maintenance-fiabilite',
       component: () => import('../views/maintenance/FiabiliteView.vue'), meta: dashboard },
+    { path: '/maintenance/achats', name: 'maintenance-achats',
+      component: () => import('../views/maintenance/AchatsStockView.vue'), meta: dashboard },
     { path: '/maintenance/parametres', name: 'maintenance-parametres',
       component: () => import('../views/maintenance/ParametresAtelierView.vue'), meta: dashboard },
 

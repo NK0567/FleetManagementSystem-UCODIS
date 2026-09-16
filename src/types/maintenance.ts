@@ -421,3 +421,44 @@ export interface MouvementStock {
   numeroBonCommande?: string
   stockApres: number
 }
+
+/* ══════════════════════════════════════════════════════════════
+   Équipe mobile - patrouille conjointe dépannage / sécurisation /
+   contrôles inopinés. La mention d'une fuite de citerne dans
+   « sécurisation » n'a pas d'équivalent en fret sec et devient une
+   sécurisation d'accident générique.
+   ══════════════════════════════════════════════════════════════ */
+export type TypeMissionMobile =
+  | 'depannage_mecanique' | 'depannage_electrique' | 'securisation'
+  | 'controle_alcool_drogue' | 'controle_clandestin' | 'surveillance'
+
+export const LIB_MISSION_MOBILE: Record<TypeMissionMobile, string> = {
+  depannage_mecanique:    'Dépannage mécanique',
+  depannage_electrique:   'Dépannage électrique',
+  securisation:           "Sécurisation d'accident",
+  controle_alcool_drogue: 'Contrôle alcool et drogue',
+  controle_clandestin:    'Détection passagers clandestins',
+  surveillance:           'Surveillance comportementale',
+}
+
+export interface InterventionMobile {
+  id: string
+  reference: string
+  type: TypeMissionMobile
+  vehiculeId?: string
+  vehiculePlaque?: string
+  lieu: string
+  lat?: number
+  lng?: number
+  declencheLe: string
+  arriveeLe?: string
+  clotureLe?: string
+  /** Composition de l'équipe : responsable de mission, HSE, mécanicien, électricien. */
+  equipe: string[]
+  resolu: boolean
+  ordreTravailId?: string
+  /** Pour les contrôles : nombre de tests réalisés et nombre de positifs. */
+  testsRealises?: number
+  testsPositifs?: number
+  observation?: string
+}

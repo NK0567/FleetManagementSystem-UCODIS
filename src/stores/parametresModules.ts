@@ -52,6 +52,10 @@ export const useParametresModulesStore = defineStore('parametresModules', () => 
       description: "Historique détaillé des immobilisations du parc, par code et par famille de cause." },
     { cle: 'maintenance_fiabilite', libelle: 'Maintenance · Fiabilité', actif: false,
       description: "MTBF par sous-système, top véhicules problématiques, coût cumulé par véhicule." },
+    { cle: 'maintenance_equipe_mobile', libelle: 'Maintenance · Équipe mobile', actif: false,
+      description: "Interventions de la patrouille conjointe : dépannage sur route, sécurisation d'accident, contrôles alcool et drogue inopinés." },
+    { cle: 'maintenance_achats', libelle: 'Maintenance · Achats & stock', actif: false,
+      description: "Catalogue de pièces, fournisseurs et mouvements de stock, avec seuils d'alerte de réapprovisionnement." },
   ])
 
   function estActif(cle: string) { return modules.value.find(m => m.cle === cle)?.actif ?? false }

@@ -6,7 +6,7 @@ import {
 import type {
   OrdreTravail, Indisponibilite, PanneDiagnostiquee, CompetenceAtelier,
   DemandeAchat, PieceConsommee, PlanEntretien, OperationEntretien, EcheanceEntretien,
-  SousSysteme, ParametresAtelier,
+  SousSysteme, ParametresAtelier, InterventionMobile,
 } from '../types/maintenance'
 import { useConfigurationStore } from './configuration'
 import { useCarburantStore } from './carburant'
@@ -259,6 +259,31 @@ export const useMaintenanceStore = defineStore('maintenance', () => {
     indisponibilites.value.forEach(i => { const f = familleDuCode(i.code); acc[f] = (acc[f] ?? 0) + (coutIndispo(i) ?? 0) })
     return acc
   })
+
+  /* ══════════════════════════════════════════════════════════
+     Équipe mobile - patrouille conjointe dépannage, sécurisation et
+     contrôles inopinés. Objectifs suivis : au moins 20 tests par
+     mois, positivité nulle, 90 % d'interventions résolues, délai
+     moyen inférieur à 2 h.
+     ══════════════════════════════════════════════════════════ */
+  const interventionsMobiles = ref<InterventionMobile[]>([
+    { id: 'IM-001', reference: 'IM-2026-0012', type: 'depannage_mecanique',
+      vehiculeId: 'v-tr-9', vehiculePlaque: '4029 TBA',
+      lieu: 'RN2, PK 84 - environs de Moramanga', lat: -18.94, lng: 48.22,
+      declencheLe: '2026-08-29T09:50:00', arriveeLe: '2026-08-29T11:15:00',
+      clotureLe: '2026-08-29T13:40:00',
+      equipe: ['Naina Rakotobe (mission)', 'Fanja Rasoa (HSE)', 'Rakoto Andrianina (mécanique)'],
+      resolu: false, ordreTravailId: 'OT-2026-0033',
+      observation: "Accrochage à l'arrière, tôlerie endommagée. Camion remorqué au dépôt de Tanjombato." },
+    { id: 'IM-002', reference: 'IM-2026-0011', type: 'controle_alcool_drogue',
+      lieu: 'Relais de Moramanga',
+      declencheLe: '2026-08-25T05:30:00', arriveeLe: '2026-08-25T05:45:00',
+      clotureLe: '2026-08-25T08:00:00',
+      equipe: ['Naina Rakotobe (mission)', 'Fanja Rasoa (HSE)'],
+      resolu: true, testsRealises: 8, testsPositifs: 0,
+      observation: 'Contrôle inopiné sur huit conducteurs au départ. Aucun test positif.' },
+  ])
+  const mobilesEnCours = computed(() => interventionsMobiles.value.filter(i => !i.clotureLe))
 
   /* ══════════════════════════════════════════════════════════
      Plans d'entretien - le plan Sinotruk Howo reprend tel quel
@@ -624,6 +649,7 @@ export const useMaintenanceStore = defineStore('maintenance', () => {
     indisponibilites, indisposEnCours, indisposDuVehicule, dureeIndispo,
     joursPerdusParFamille, ratioHumainTechnique,
     coutIndispo, coutJournalierDe, coutParFamille, coutTotalImmobilisations,
+    interventionsMobiles, mobilesEnCours,
     plans, getPlan, planDuModele, echeancesDuVehicule, echeancesDuParc, PREAVIS_KM, PREAVIS_JOURS,
     derniersPassages, passagesDe, enregistrerPassage,
     creerPlan, majPlan, basculerPlanActif, supprimerPlan, dupliquerPlan,
