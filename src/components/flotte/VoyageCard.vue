@@ -52,7 +52,7 @@ function selectSidebar(no: string) {
 }
 
 const STATUTS: Record<string, string> = {
-  planifie: 'Planifié', affecte: 'Affecté', en_cours: 'En cours',
+  en_attente: 'En attente', planifie: 'Planifié', affecte: 'Affecté', en_cours: 'En cours',
   livre: 'Livré', cloture: 'Clôturé', litige: 'En litige', annule: 'Annulé',
 }
 
@@ -94,10 +94,14 @@ const champ = 'flex flex-col gap-1'
 const champLabel = 'text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.04em]'
 const lecture = 'text-[13px] text-foreground'
 
+const kmRetourSaisi = ref<number | null>(null)
+watch(courant, v => { kmRetourSaisi.value = v?.kmArrivee ?? null }, { immediate: true })
+
 function cloturerVoyage() {
-  if (!courant.value) return
-  const res = store.cloturer(courant.value.id)
-  if (!res.ok) alert(res.motif)
+  if (!courant.value || kmRetourSaisi.value == null) return
+  const res = store.cloturer(courant.value.id, kmRetourSaisi.value)
+  if (!res.ok) { alert(res.motif); return }
+  if (res.alerteEcart) alert(`Voyage clôturé. ${res.alerteEcart}`)
 }
 </script>
 
@@ -275,7 +279,14 @@ function cloturerVoyage() {
             </div>
           </div>
           <p v-if="dossier && !dossier.complet" class="text-[11px] text-warning mt-2">Dossier incomplet : la clôture du voyage est bloquée.</p>
-          <button v-if="courant.statut === 'livre'" :class="cls.btnPrimary" class="w-full justify-center mt-3.5" @click="cloturerVoyage">Clôturer le voyage</button>
+          <template v-if="courant.statut === 'livre'">
+            <div :class="champ" class="mt-3.5">
+              <label :class="champLabel">Kilométrage au retour *</label>
+              <input v-model.number="kmRetourSaisi" type="number" :class="cls.fieldInput" placeholder="Obligatoire pour clôturer" />
+              <p v-if="courant.kmDepart != null" class="text-[11px] text-muted-foreground">Départ relevé à {{ courant.kmDepart.toLocaleString('fr-FR') }} km.</p>
+            </div>
+            <button :class="cls.btnPrimary" class="w-full justify-center mt-2.5" :disabled="kmRetourSaisi == null" @click="cloturerVoyage">Clôturer le voyage</button>
+          </template>
         </FormSection>
 
         <!-- 9. CARBURANT DU CAMION -->

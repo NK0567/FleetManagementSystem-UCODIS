@@ -248,7 +248,7 @@ export interface AffectationVehicule {
  * (fiche de voyage, bon de livraison, carnet de bord) sous une forme
  * activable, comme convenu. */
 
-export type StatutVoyage = 'planifie' | 'affecte' | 'en_cours' | 'livre' | 'cloture' | 'litige' | 'annule'
+export type StatutVoyage = 'en_attente' | 'planifie' | 'affecte' | 'en_cours' | 'livre' | 'cloture' | 'litige' | 'annule'
 export type RoleEtape = 'depart' | 'chargement' | 'repos' | 'controle' | 'livraison' | 'arrivee'
 
 export interface EtapeVoyage {
@@ -339,6 +339,9 @@ export interface Voyage {
   nbEcarts: number
   nbArretsNonJustifies: number
   createdAt: string
+  /** Renseigné quand le chauffeur refuse l'ordre de transport depuis son espace. */
+  refuseLe?: string
+  motifRefus?: string
 }
 
 /* ── Écarts d'itinéraire (Flotte · Conformité) ────────────────

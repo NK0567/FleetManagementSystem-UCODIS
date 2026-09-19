@@ -70,6 +70,7 @@ interface OngletModule { cle: string; libelle: string; route: string }
 /** Un onglet par module réellement construit · ajouté ici au fur et à mesure. */
 const ongletsModules = computed<OngletModule[]>(() => [
   { cle: 'administration', libelle: 'Personnel', route: 'admin-tableau-bord' },
+  { cle: 'planification', libelle: 'Planification', route: 'planification-kanban' },
   { cle: 'flotte', libelle: 'Flotte', route: 'flotte-tableau-bord' },
   { cle: 'maintenance', libelle: 'Maintenance', route: 'maintenance-dashboard' },
 ])
@@ -90,6 +91,7 @@ const menuMobile = ref(false)
  */
 function detecterModule(chemin: string): string {
   if (chemin.startsWith('/maintenance')) return 'maintenance'
+  if (chemin.startsWith('/planification')) return 'planification'
   if (chemin.startsWith('/flotte')) return 'flotte'
   return 'administration'
 }

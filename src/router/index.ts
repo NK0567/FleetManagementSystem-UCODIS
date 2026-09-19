@@ -40,6 +40,15 @@ const router = createRouter({
     { path: '/administration/parametres', name: 'admin-parametres',
       component: () => import('../views/admin/ParametresModulesView.vue'), meta: dashboard },
 
+    /* ══ MODULE PLANIFICATION ════════════════════════════════════
+       Groupe des livraisons du futur TMS, étudié comme référence pour cette
+       intégration : tableau kanban des ordres de transport, de leur création
+       à leur clôture. Adapté à la logique d'UCODIS - des sites desservis sur
+       un trajet plutôt que des lignes de commande et des colis, propres à un
+       entrepôt de dispatching. */
+    { path: '/planification', name: 'planification-kanban',
+      component: () => import('../views/planification/PlanificationView.vue'), meta: dashboard },
+
     /* ══ MODULE FLOTTE ═══════════════════════════════════════════
        Module 1 du cahier des charges, comme sur les projets de référence
        (le socle FMS : onglet « Flotte », dossier views/fleet). Construit selon le

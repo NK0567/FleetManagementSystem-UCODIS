@@ -168,6 +168,7 @@ const page = ref(1)
 const pageSize = ref(15)
 
 const STATUT: Record<StatutVoyage, { label: string; cls: string }> = {
+  en_attente: { label: 'En attente', cls: 'bg-warning-bg text-warning' },
   planifie: { label: 'Planifié', cls: 'bg-neutral-bg text-neutral' },
   affecte: { label: 'Affecté', cls: 'bg-primary/10 text-primary' },
   en_cours: { label: 'En cours', cls: 'bg-info-bg text-info' },

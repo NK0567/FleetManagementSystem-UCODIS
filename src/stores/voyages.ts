@@ -288,12 +288,130 @@ export const useVoyagesStore = defineStore('voyages', () => {
     if (v) v.statut = statut
   }
 
-  /** Clôture bloquée tant que le dossier documentaire est incomplet. */
-  function cloturer(id: string): { ok: boolean; motif?: string } {
+  /* ══════════════════════════════════════════════════════════
+     Planification - cycle de vie Kanban de l'ordre de transport.
+     En attente → Planifié → En cours → Terminé, avec Annulé
+     atteignable depuis Planifié (refus chauffeur) à tout moment.
+     Le statut Terminé correspond à « livre » : la clôture propre-
+     ment dite (kilométrage retour, dossier documentaire) reste un
+     second temps, déjà géré par cloturer() ci-dessous.
+     ══════════════════════════════════════════════════════════ */
+  const enAttente = computed(() => voyages.value.filter(v => v.statut === 'en_attente'))
+  const planifies = computed(() => voyages.value.filter(v => v.statut === 'planifie'))
+  const enCoursKanban = computed(() => voyages.value.filter(v => v.statut === 'en_cours'))
+  const termines = computed(() => voyages.value.filter(v => v.statut === 'livre' || v.statut === 'cloture'))
+  const annules = computed(() => voyages.value.filter(v => v.statut === 'annule'))
+
+  /** Création rapide d'un ordre de transport : seuls véhicule et date
+   *  prévue sont exigés, sans aucun site. Le trajet se définit dans un
+   *  second temps, une fois l'ordre ouvert en fiche. */
+  function creerRapide(saisie: {
+    vehiculeId: string; vehiculePlaque: string; chauffeurId?: string; chauffeurNom?: string
+    semiRemorqueId?: string; semiRemorquePlaque?: string; clientNom: string; datePlanifiee: string
+    numeroOT?: string; typeProduit: string; poidsChargeKg: number
+  }) {
+    return creer({
+      statut: 'en_attente',
+      clientNom: saisie.clientNom || 'Client non précisé',
+      toleranceEcartPoidsPourcent: 1,
+      origine: '-', destination: '-',
+      vehiculeId: saisie.vehiculeId, vehiculePlaque: saisie.vehiculePlaque,
+      chauffeurId: saisie.chauffeurId, chauffeurNom: saisie.chauffeurNom,
+      semiRemorqueId: saisie.semiRemorqueId, semiRemorquePlaque: saisie.semiRemorquePlaque,
+      datePlanifiee: saisie.datePlanifiee, numeroOT: saisie.numeroOT,
+      kmReference: 0,
+      marchandise: { typeProduit: saisie.typeProduit, nombreCartons: 0, poidsChargeKg: saisie.poidsChargeKg || 0 },
+    })
+  }
+
+  /** Définit ou remplace le trajet d'un ordre encore en attente ou
+   *  planifié : trajet de référence, ou séquence de sites composée à
+   *  la main. Recalcule origine, destination et kilométrage de
+   *  référence à partir de la séquence retenue. */
+  function definirTrajet(voyageId: string, trajetId: string | undefined, etapesPersonnalisees: EtapeVoyage[]) {
+    const v = getById(voyageId)
+    if (!v) return
+    const trajetsStore = useTrajetsStore()
+    const t = trajetId ? trajetsStore.getById(trajetId) : null
+    const source = t ? t.etapes : etapesPersonnalisees
+    const tries = [...source].sort((a, b) => a.ordre - b.ordre)
+    v.trajetId = trajetId
+    v.trajetLibelle = t?.libelle
+    v.etapes = tries.map(e => ({ ...e, id: `${voyageId}-${e.id}`, franchi: false }))
+    v.origine = tries[0]?.siteNom ?? '-'
+    v.destination = tries[tries.length - 1]?.siteNom ?? '-'
+    v.kmReference = t?.distanceEstimeeKm ?? trajetsStore.distanceSimulee(etapesPersonnalisees)
+  }
+
+  /** Planifier : fait passer l'ordre d'En attente à Planifié. Exige
+   *  qu'un trajet d'au moins un site ait été défini au préalable. */
+  function planifier(id: string): { ok: boolean; motif?: string } {
+    const v = getById(id)
+    if (!v) return { ok: false, motif: 'Ordre introuvable.' }
+    if (v.statut !== 'en_attente') return { ok: false, motif: "Cet ordre n'est plus en attente." }
+    if (!v.etapes.length) return { ok: false, motif: 'Définissez le trajet avant de planifier cet ordre.' }
+    changerStatut(id, 'planifie')
+    return { ok: true }
+  }
+
+  /** Le chauffeur confirme l'ordre depuis son espace : passage à En
+   *  cours, avec horodatage du départ réel. */
+  function confirmerParChauffeur(id: string) {
+    const v = getById(id)
+    if (!v || v.statut !== 'planifie') return
+    v.statut = 'en_cours'
+    v.dateDepartReel = new Date().toISOString()
+  }
+
+  /** Le chauffeur refuse l'ordre depuis son espace : passage direct à
+   *  Annulé, avec le motif du refus conservé sur la fiche. */
+  function refuserParChauffeur(id: string, motif: string) {
+    const v = getById(id)
+    if (!v || v.statut !== 'planifie') return
+    v.statut = 'annule'
+    v.refuseLe = new Date().toISOString()
+    v.motifRefus = motif
+  }
+
+  /** Le chauffeur valide le passage à un site depuis son espace, sans
+   *  jamais pouvoir en sauter un. Une fois tous les sites validés,
+   *  l'ordre passe automatiquement à Terminé. */
+  function validerEtape(voyageId: string, etapeId: string) {
+    const v = getById(voyageId)
+    if (!v || v.statut !== 'en_cours') return
+    const tries = [...v.etapes].sort((a, b) => a.ordre - b.ordre)
+    const index = tries.findIndex(e => e.id === etapeId)
+    if (index < 0 || tries[index]!.franchi) return
+    if (tries.slice(0, index).some(e => !e.franchi)) return
+    const etape = v.etapes.find(e => e.id === etapeId)
+    if (etape) etape.franchi = true
+    if (v.etapes.every(e => e.franchi)) {
+      v.statut = 'livre'
+      v.dateArriveeReelle = new Date().toISOString()
+    }
+  }
+
+  /** Clôture bloquée tant que le kilométrage au retour n'est pas
+   *  saisi, qu'il est inférieur au kilométrage au départ, ou que le
+   *  dossier documentaire est incomplet. Un écart anormalement élevé
+   *  par rapport au kilométrage de référence est signalé à l'appelant
+   *  sans bloquer la clôture : c'est à l'utilisateur de juger. */
+  function cloturer(id: string, kmArrivee: number): { ok: boolean; motif?: string; alerteEcart?: string } {
+    const v = getById(id)
+    if (!v) return { ok: false, motif: 'Voyage introuvable.' }
+    if (kmArrivee == null || Number.isNaN(kmArrivee)) return { ok: false, motif: 'Le kilométrage au retour est obligatoire pour clôturer le voyage.' }
+    if (v.kmDepart != null && kmArrivee < v.kmDepart) return { ok: false, motif: 'Le kilométrage au retour ne peut pas être inférieur au kilométrage au départ.' }
     const c = completudeDossier(id)
     if (!c.complet) return { ok: false, motif: `Dossier incomplet : ${c.manquants.map(m => LIB_DOC[m]).join(', ')}` }
+    v.kmArrivee = kmArrivee
+    const kmReel = v.kmDepart != null ? kmArrivee - v.kmDepart : null
+    let alerteEcart: string | undefined
+    if (kmReel != null && v.kmReference > 0) {
+      const ecartPct = Math.abs(kmReel - v.kmReference) / v.kmReference * 100
+      if (ecartPct > 20) alerteEcart = `Kilométrage réel (${kmReel} km) très éloigné du kilométrage de référence (${v.kmReference} km), écart de ${ecartPct.toFixed(0)} %.`
+    }
     changerStatut(id, 'cloture')
-    return { ok: true }
+    return { ok: true, alerteEcart }
   }
 
   return {
@@ -302,5 +420,7 @@ export const useVoyagesStore = defineStore('voyages', () => {
     getById, arretsDuVoyage, documentsDuVoyage,
     completudeDossier, ecartPoids, ecartKm,
     creer, changerStatut, cloturer,
+    enAttente, planifies, enCoursKanban, termines, annules,
+    creerRapide, definirTrajet, planifier, confirmerParChauffeur, refuserParChauffeur, validerEtape,
   }
 })
