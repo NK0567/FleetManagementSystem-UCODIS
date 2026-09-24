@@ -29,13 +29,6 @@
         </Section>
       </template>
 
-      <!-- MODULE : Planification -->
-      <template v-else-if="nav.moduleActif === 'planification'">
-        <Section libelle="Ordres de transport">
-          <Item :icone="LayoutDashboard" libelle="Tableau kanban" :to="{ name: 'planification-kanban' }" />
-        </Section>
-      </template>
-
       <!-- MODULE : Flotte -->
       <template v-else-if="nav.moduleActif === 'flotte'">
         <Section libelle="Tableau de bord">

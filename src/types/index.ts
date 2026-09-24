@@ -263,6 +263,44 @@ export interface EtapeVoyage {
   intervalleMin: number
   pausePrevueMin?: number
   franchi: boolean
+  /** Propre au module Planification : chaque ligne porte son propre
+   *  destinataire plutôt que l'ordre entier. Absent = transfert entre
+   *  sites internes plutôt que livraison chez un client. */
+  destinataire?: string
+  adresseLivraison?: string
+  /** Horodatage de la signature électronique recueillie sur place. */
+  signeLe?: string
+  /** Historique des notifications automatiques envoyées au destinataire
+   *  de cette ligne, simulées puisqu'aucun canal SMS ou e-mail réel
+   *  n'est branché dans cette maquette. */
+  notifications?: NotificationClient[]
+  /** Bon de livraison électronique, émis automatiquement dès la
+   *  signature recueillie. */
+  eBL?: BonLivraisonElectronique
+  /** Enquête de satisfaction, envoyée avec le e-BL ; la réponse reste
+   *  facultative pour le destinataire. */
+  satisfactionEnvoyeeLe?: string
+  satisfactionNote?: number
+  satisfactionCommentaire?: string
+}
+
+export type TypeNotificationClient = 'planification' | 'demarrage' | 'livraison'
+
+export interface NotificationClient {
+  id: string
+  type: TypeNotificationClient
+  canal: 'sms' | 'email'
+  envoyeeLe: string
+  contenu: string
+}
+
+export interface BonLivraisonElectronique {
+  reference: string
+  emisLe: string
+  destinataire: string
+  adresse: string
+  produit: string
+  signePar: string
 }
 
 export interface Trajet {
@@ -339,9 +377,10 @@ export interface Voyage {
   nbEcarts: number
   nbArretsNonJustifies: number
   createdAt: string
-  /** Renseigné quand le chauffeur refuse l'ordre de transport depuis son espace. */
-  refuseLe?: string
-  motifRefus?: string
+  /** Renseigné quand le planificateur ou le responsable annule la
+   *  tournée : jamais une action du chauffeur, à aucun moment. */
+  annuleLe?: string
+  motifAnnulation?: string
 }
 
 /* ── Écarts d'itinéraire (Flotte · Conformité) ────────────────

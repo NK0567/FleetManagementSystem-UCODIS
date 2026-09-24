@@ -8,50 +8,47 @@
       </div>
     </div>
 
-    <!-- Mon ordre de transport : à confirmer ou en cours -->
-    <div v-if="monOrdrePlanifie" :class="L.card" class="mb-3 !border-info/30 bg-info-bg/40">
-      <div :class="L.cardTitle"><Truck class="w-4 h-4 text-info" /> Ordre de transport à confirmer</div>
-      <p class="text-[13px] text-foreground mb-3">
-        <span class="font-mono font-semibold">{{ monOrdrePlanifie.numeroOT || monOrdrePlanifie.reference }}</span>
-        pour {{ monOrdrePlanifie.clientNom }}, prévu le {{ fmtDateHeure(monOrdrePlanifie.datePlanifiee) }}
-        · {{ monOrdrePlanifie.etapes.length }} site(s) à desservir.
-      </p>
-      <div v-if="!refusOuvert" class="flex items-center gap-2">
-        <button :class="clsForm.btnPrimary" @click="accepter"><Check class="w-4 h-4" /> Accepter</button>
-        <button :class="clsForm.btnOutline" @click="refusOuvert = true"><X class="w-4 h-4" /> Refuser</button>
-      </div>
-      <div v-else class="flex flex-col gap-2">
-        <textarea v-model="motifRefus" rows="2" :class="clsForm.fieldTextarea" placeholder="Motif du refus…"></textarea>
-        <div class="flex items-center gap-2">
-          <button :class="clsForm.btnOutline" @click="refusOuvert = false; motifRefus = ''">Annuler</button>
-          <button :class="clsForm.btnPrimary" class="!bg-danger hover:!bg-danger/90" :disabled="!motifRefus.trim()" @click="refuser">Confirmer le refus</button>
-        </div>
-      </div>
-    </div>
-
-    <div v-if="monOrdreEnCours" :class="L.card" class="mb-3 !border-primary/30">
+    <!-- Ma tournée : plus d'étape de validation de ma part, je suis seulement
+         notifié de la tournée qui m'a été confiée. Signer ma première
+         livraison la fait elle-même passer de planifiée à en cours. -->
+    <div v-if="maTournee" :class="L.card" class="mb-3 !border-primary/30">
       <div :class="L.cardTitle">
-        <MapPin class="w-4 h-4 text-primary" /> Mon voyage en cours
+        <Truck class="w-4 h-4 text-primary" /> {{ maTournee.statut === 'planifie' ? 'Ma tournée à venir' : 'Ma tournée en cours' }}
         <span class="ml-auto text-[11px] font-normal text-muted-foreground">
-          {{ monOrdreEnCours.etapes.filter(e => e.franchi).length }}/{{ monOrdreEnCours.etapes.length }} sites validés
+          {{ maTournee.etapes.filter(e => e.franchi).length }}/{{ maTournee.etapes.length }} livraisons signées
         </span>
       </div>
       <p class="text-[12px] text-muted-foreground mb-3">
-        Validez chaque site dans l'ordre, au fur et à mesure que vous le desservez. Aucun site ne peut être sauté.
+        <span class="font-mono font-semibold text-foreground">{{ maTournee.numeroOT || maTournee.reference }}</span> ·
+        <template v-if="maTournee.statut === 'planifie'">signer la première livraison démarre la tournée.</template>
+        <template v-else>recueillez la signature du destinataire à chaque livraison, dans l'ordre.</template>
+        Aucune livraison ne peut être sautée.
       </p>
       <div class="flex flex-col gap-1.5">
-        <div v-for="(e, i) in etapesTriees" :key="e.id" class="flex items-center gap-2.5 rounded-md px-3 py-2.5"
-             :class="e.franchi ? 'bg-success-bg' : 'bg-background'">
-          <component :is="e.franchi ? CircleCheck : Circle" class="w-4 h-4 shrink-0" :class="e.franchi ? 'text-success' : 'text-muted-foreground'" />
-          <span class="text-[11px] font-semibold text-muted-foreground w-5">{{ i + 1 }}</span>
-          <span class="text-[13px] text-foreground flex-1">{{ e.siteNom }}</span>
-          <span v-if="e.franchi" class="text-[11px] text-success font-medium">Validé</span>
-          <button v-else-if="peutValider(i)" :class="clsForm.btnPrimary" class="!py-1 !px-2.5 !text-[11px]" @click="valider(e.id)">Valider le passage</button>
-          <span v-else class="text-[11px] text-muted-foreground italic">En attente du site précédent</span>
+        <div v-for="(e, i) in lignesTriees" :key="e.id" class="rounded-md px-3 py-2.5" :class="e.franchi ? 'bg-success-bg' : 'bg-background'">
+          <div class="flex items-center gap-2.5">
+            <component :is="e.franchi ? CircleCheck : Circle" class="w-4 h-4 shrink-0" :class="e.franchi ? 'text-success' : 'text-muted-foreground'" />
+            <span class="text-[11px] font-semibold text-muted-foreground w-5">{{ i + 1 }}</span>
+            <div class="flex-1 min-w-0">
+              <span class="text-[13px] text-foreground">{{ e.destinataire ?? e.siteNom }}</span>
+              <span v-if="e.destinataire" class="text-[11px] text-muted-foreground"> · {{ e.adresseLivraison }}</span>
+              <span v-else class="text-[11px] text-muted-foreground"> · transfert interne</span>
+            </div>
+            <span v-if="e.franchi" class="text-[11px] text-success font-medium shrink-0">{{ e.destinataire ? `Signée par ${e.eBL?.signePar}` : 'Confirmé' }}</span>
+            <button v-else-if="peutSigner(i) && ligneEnSignature !== e.id" :class="clsForm.btnPrimary" class="!py-1 !px-2.5 !text-[11px] shrink-0" @click="ouvrirSignature(e)">
+              {{ e.destinataire ? 'Recueillir la signature' : 'Confirmer le passage' }}
+            </button>
+            <span v-else-if="!peutSigner(i)" class="text-[11px] text-muted-foreground italic shrink-0">En attente de la livraison précédente</span>
+          </div>
+          <div v-if="ligneEnSignature === e.id && e.destinataire" class="flex items-center gap-2 mt-2.5 pl-[26px]">
+            <input v-model="nomSignataire" :class="clsForm.fieldInput" class="!h-[32px] !text-[12px]" placeholder="Nom de la personne qui réceptionne…" />
+            <button :class="clsForm.btnOutline" class="!py-1 !px-2.5 !text-[11px] shrink-0" @click="ligneEnSignature = null">Annuler</button>
+            <button :class="clsForm.btnPrimary" class="!py-1 !px-2.5 !text-[11px] shrink-0" :disabled="!nomSignataire.trim()" @click="confirmerSignature(e.id)">Confirmer la signature</button>
+          </div>
         </div>
       </div>
-      <p v-if="monOrdreEnCours.etapes.length && monOrdreEnCours.etapes.every(e => e.franchi)" class="text-[12px] text-success font-medium mt-3 flex items-center gap-1.5">
-        <CircleCheck class="w-4 h-4" /> Tous les sites sont desservis, ce voyage vient de se clôturer.
+      <p v-if="maTournee.etapes.length && maTournee.etapes.every(e => e.franchi)" class="text-[12px] text-success font-medium mt-3 flex items-center gap-1.5">
+        <CircleCheck class="w-4 h-4" /> Toutes les livraisons sont signées, cette tournée vient de se terminer.
       </p>
     </div>
 
@@ -150,12 +147,11 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { Check, CircleCheck, Circle, CircleX, Clock, FileText, ListChecks, MapPin, Truck, X } from '@lucide/vue'
+import { CircleCheck, Circle, CircleX, Clock, FileText, ListChecks, Truck } from '@lucide/vue'
 import StatusPill from '../../components/ui/StatusPill.vue'
 import * as L from '../../lib/listClasses'
 import * as clsForm from '../../lib/formClasses'
 import { formatDate } from '../../utils/helpers'
-import { fmtDateHeure } from '../../utils/voyageUtils'
 import { useAuthStore } from '../../stores/auth'
 import { usePersonnelStore } from '../../stores/personnel'
 import { useFonctionStore } from '../../stores/fonctions'
@@ -190,31 +186,33 @@ const motifBlocage = computed(() => {
   return 'Une de vos pièces obligatoires est expirée ou absente.'
 })
 
-/* ── Mon ordre de transport : confirmation ou suivi des sites ────── */
-const monOrdrePlanifie = computed(() =>
-  moi.value ? voyages.planifies.find(v => v.chauffeurId === moi.value!.id) ?? null : null)
-const monOrdreEnCours = computed(() =>
-  moi.value ? voyages.enCoursKanban.find(v => v.chauffeurId === moi.value!.id) ?? null : null)
-const etapesTriees = computed(() => monOrdreEnCours.value ? [...monOrdreEnCours.value.etapes].sort((a, b) => a.ordre - b.ordre) : [])
+/* ── Ma tournée : planifiée ou déjà en cours, peu importe - je ne fais
+     que recueillir la signature du destinataire à chaque livraison,
+     dans l'ordre. Signer la première la fait elle-même passer en
+     cours, sans étape de validation à part. ────────────────────── */
+const maTournee = computed(() =>
+  moi.value ? [...voyages.planifies, ...voyages.enCoursKanban].find(v => v.chauffeurId === moi.value!.id) ?? null : null)
+const lignesTriees = computed(() => maTournee.value ? [...maTournee.value.etapes].sort((a, b) => a.ordre - b.ordre) : [])
 
-function peutValider(index: number) {
-  return etapesTriees.value.slice(0, index).every(e => e.franchi) && !etapesTriees.value[index]?.franchi
-}
-function valider(etapeId: string) {
-  if (!monOrdreEnCours.value) return
-  voyages.validerEtape(monOrdreEnCours.value.id, etapeId)
+function peutSigner(index: number) {
+  return lignesTriees.value.slice(0, index).every(e => e.franchi) && !lignesTriees.value[index]?.franchi
 }
 
-const refusOuvert = ref(false)
-const motifRefus = ref('')
-function accepter() {
-  if (!monOrdrePlanifie.value) return
-  voyages.confirmerParChauffeur(monOrdrePlanifie.value.id)
+/** Un transfert entre sites internes se confirme directement, sans
+ *  destinataire à faire signer. Une livraison chez un client, elle,
+ *  exige de recueillir le nom de la personne qui réceptionne avant de
+ *  valider : c'est elle qui signe, pas le chauffeur en son nom. */
+const ligneEnSignature = ref<string | null>(null)
+const nomSignataire = ref('')
+function ouvrirSignature(e: { id: string; destinataire?: string }) {
+  if (!e.destinataire) { voyages.signerLigne(maTournee.value!.id, e.id); return }
+  ligneEnSignature.value = e.id
+  nomSignataire.value = e.destinataire
 }
-function refuser() {
-  if (!monOrdrePlanifie.value || !motifRefus.value.trim()) return
-  voyages.refuserParChauffeur(monOrdrePlanifie.value.id, motifRefus.value.trim())
-  refusOuvert.value = false
-  motifRefus.value = ''
+function confirmerSignature(etapeId: string) {
+  if (!maTournee.value || !nomSignataire.value.trim()) return
+  voyages.signerLigne(maTournee.value.id, etapeId, nomSignataire.value.trim())
+  ligneEnSignature.value = null
+  nomSignataire.value = ''
 }
 </script>

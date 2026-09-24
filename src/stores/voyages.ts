@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { Voyage, StatutVoyage, ArretReleve, DocumentVoyage, TypeDocVoyage, EtapeVoyage } from '../types'
+import type { Voyage, StatutVoyage, ArretReleve, DocumentVoyage, TypeDocVoyage, EtapeVoyage, NotificationClient } from '../types'
 import { calculerEcartPoids, calculerEcartKm } from '../utils/voyageUtils'
 import { useTrajetsStore } from './trajets'
 import { aujourdhuiISO } from '../utils/horloge'
@@ -197,6 +197,49 @@ export const useVoyagesStore = defineStore('voyages', () => {
       marchandise: { typeProduit: 'Textile', nombreCartons: 380, poidsChargeKg: 7600, poidsDechargeKg: 7600 },
       nbEcarts: 0, nbArretsNonJustifies: 0, createdAt: '2026-08-21T13:00:00',
     },
+    /* Exemple de tournée multi-destinataires déjà terminée, telle que
+       produite par le module Planification : deux lignes signées, l'une
+       avec une réponse déjà reçue à l'enquête de satisfaction, l'autre
+       encore en attente - pour montrer les deux états sans manipulation. */
+    {
+      id: 'VOY-012', reference: 'VOY-2026-0158', numeroOT: 'OT-2026-04430',
+      statut: 'livre',
+      clientNom: 'Leader Price Antsirabe et 1 autre(s)', toleranceEcartPoidsPourcent: 1,
+      etapes: [
+        {
+          id: 'VOY-012-L1', ordre: 1, siteNom: 'Lot II M 12, Antsirabe', destinataire: 'Leader Price Antsirabe',
+          adresseLivraison: 'Lot II M 12, Antsirabe', lat: -19.8667, lng: 47.0333, role: 'livraison', intervalleMin: 0, franchi: true,
+          signeLe: '2026-09-01T09:40:00',
+          eBL: { reference: 'EBL-OT-2026-04430-01', emisLe: '2026-09-01T09:40:00', destinataire: 'Leader Price Antsirabe', adresse: 'Lot II M 12, Antsirabe', produit: 'Produits alimentaires secs', signePar: 'Notiavina R., réceptionniste' },
+          satisfactionEnvoyeeLe: '2026-09-01T09:40:00', satisfactionNote: 5, satisfactionCommentaire: 'Livraison à l\'heure, chauffeur très courtois.',
+          notifications: [
+            { id: 'NOTIF-011-1', type: 'planification', canal: 'sms', envoyeeLe: '2026-09-01T06:00:00', contenu: 'Votre livraison a été planifiée pour le 01/09/2026. Véhicule 4028 TBA, chauffeur Tsiory Rabearison, arrivée estimée à environ 25 min de trajet.' },
+            { id: 'NOTIF-011-2', type: 'demarrage', canal: 'sms', envoyeeLe: '2026-09-01T07:05:00', contenu: 'Votre livraison est en cours. Chauffeur Tsiory Rabearison, arrivée estimée dans environ 25 min. Contact : Tsiory Rabearison.' },
+            { id: 'NOTIF-011-3', type: 'livraison', canal: 'sms', envoyeeLe: '2026-09-01T09:40:00', contenu: 'Votre livraison a été effectuée et confirmée par signature électronique. Le bon de livraison électronique vous a été transmis.' },
+          ],
+        },
+        {
+          id: 'VOY-012-L2', ordre: 2, siteNom: 'Route Circulaire, Antsirabe', destinataire: 'Quincaillerie Centrale Antsirabe',
+          adresseLivraison: 'Route Circulaire, Antsirabe', lat: -19.8721, lng: 47.0389, role: 'livraison', intervalleMin: 0, franchi: true,
+          signeLe: '2026-09-01T10:25:00',
+          eBL: { reference: 'EBL-OT-2026-04430-02', emisLe: '2026-09-01T10:25:00', destinataire: 'Quincaillerie Centrale Antsirabe', adresse: 'Route Circulaire, Antsirabe', produit: 'Produits alimentaires secs', signePar: 'Quincaillerie Centrale Antsirabe' },
+          satisfactionEnvoyeeLe: '2026-09-01T10:25:00',
+          notifications: [
+            { id: 'NOTIF-011-4', type: 'livraison', canal: 'sms', envoyeeLe: '2026-09-01T10:25:00', contenu: 'Votre livraison a été effectuée et confirmée par signature électronique. Le bon de livraison électronique vous a été transmis.' },
+          ],
+        },
+      ],
+      origine: 'Lot II M 12, Antsirabe', destination: 'Route Circulaire, Antsirabe',
+      vehiculeId: 'v-tr-8', vehiculePlaque: '4028 TBA',
+      semiRemorqueId: 'v-sr-8', semiRemorquePlaque: 'RM 4108',
+      chauffeurId: 'p-017', chauffeurNom: 'Tsiory Rabearison',
+      datePlanifiee: '2026-09-01T06:00:00',
+      dateDepartReel: '2026-09-01T07:05:00',
+      dateArriveeReelle: '2026-09-01T10:25:00',
+      kmReference: 30,
+      marchandise: { typeProduit: 'Produits alimentaires secs', nombreCartons: 0, poidsChargeKg: 1400 },
+      nbEcarts: 0, nbArretsNonJustifies: 0, createdAt: '2026-09-01T05:30:00',
+    },
   ])
 
   /* Hydratation : chaque voyage reçoit une COPIE des étapes de son trajet de
@@ -302,17 +345,28 @@ export const useVoyagesStore = defineStore('voyages', () => {
   const termines = computed(() => voyages.value.filter(v => v.statut === 'livre' || v.statut === 'cloture'))
   const annules = computed(() => voyages.value.filter(v => v.statut === 'annule'))
 
+  /** Résume les destinataires des lignes d'une tournée pour l'affichage
+   *  d'ensemble : jamais un client unique porté par l'ordre lui-même,
+   *  seulement un résumé calculé à partir de ses lignes. */
+  function resumeDestinataires(etapes: EtapeVoyage[]): string {
+    const noms = [...new Set(etapes.map(e => e.destinataire).filter((n): n is string => !!n))]
+    if (!noms.length) return etapes.length ? 'Transferts internes' : 'Aucune ligne'
+    if (noms.length === 1) return noms[0]!
+    return `${noms[0]} et ${noms.length - 1} autre(s)`
+  }
+
   /** Création rapide d'un ordre de transport : seuls véhicule et date
-   *  prévue sont exigés, sans aucun site. Le trajet se définit dans un
-   *  second temps, une fois l'ordre ouvert en fiche. */
+   *  prévue sont exigés, sans aucune ligne. Les lignes de livraison se
+   *  définissent dans un second temps, une fois l'ordre ouvert en
+   *  fiche - jamais un client unique porté par l'ordre lui-même. */
   function creerRapide(saisie: {
     vehiculeId: string; vehiculePlaque: string; chauffeurId?: string; chauffeurNom?: string
-    semiRemorqueId?: string; semiRemorquePlaque?: string; clientNom: string; datePlanifiee: string
+    semiRemorqueId?: string; semiRemorquePlaque?: string; datePlanifiee: string
     numeroOT?: string; typeProduit: string; poidsChargeKg: number
   }) {
     return creer({
       statut: 'en_attente',
-      clientNom: saisie.clientNom || 'Client non précisé',
+      clientNom: 'Aucune ligne',
       toleranceEcartPoidsPourcent: 1,
       origine: '-', destination: '-',
       vehiculeId: saisie.vehiculeId, vehiculePlaque: saisie.vehiculePlaque,
@@ -324,67 +378,115 @@ export const useVoyagesStore = defineStore('voyages', () => {
     })
   }
 
-  /** Définit ou remplace le trajet d'un ordre encore en attente ou
-   *  planifié : trajet de référence, ou séquence de sites composée à
-   *  la main. Recalcule origine, destination et kilométrage de
-   *  référence à partir de la séquence retenue. */
-  function definirTrajet(voyageId: string, trajetId: string | undefined, etapesPersonnalisees: EtapeVoyage[]) {
+  /** Remplace les lignes de livraison d'un ordre encore en attente :
+   *  chacune porte son propre destinataire, client ou transfert entre
+   *  sites internes. Le résumé affiché sur l'ordre se recalcule à
+   *  partir de ces lignes plutôt que d'être saisi à part. */
+  function definirLignes(voyageId: string, lignes: EtapeVoyage[]) {
     const v = getById(voyageId)
     if (!v) return
-    const trajetsStore = useTrajetsStore()
-    const t = trajetId ? trajetsStore.getById(trajetId) : null
-    const source = t ? t.etapes : etapesPersonnalisees
-    const tries = [...source].sort((a, b) => a.ordre - b.ordre)
-    v.trajetId = trajetId
-    v.trajetLibelle = t?.libelle
-    v.etapes = tries.map(e => ({ ...e, id: `${voyageId}-${e.id}`, franchi: false }))
+    const tries = [...lignes].sort((a, b) => a.ordre - b.ordre)
+    v.etapes = tries.map((e, i) => ({ ...e, ordre: i + 1, franchi: false }))
+    v.clientNom = resumeDestinataires(v.etapes)
     v.origine = tries[0]?.siteNom ?? '-'
     v.destination = tries[tries.length - 1]?.siteNom ?? '-'
-    v.kmReference = t?.distanceEstimeeKm ?? trajetsStore.distanceSimulee(etapesPersonnalisees)
+    const trajetsStore = useTrajetsStore()
+    v.kmReference = trajetsStore.distanceSimulee(tries)
   }
 
-  /** Planifier : fait passer l'ordre d'En attente à Planifié. Exige
-   *  qu'un trajet d'au moins un site ait été défini au préalable. */
+  /** Notification automatique envoyée au destinataire d'une ligne :
+   *  aucun canal SMS ou e-mail réel n'est branché dans cette maquette,
+   *  le contenu est simulé mais structuré comme un envoi réel le
+   *  serait. La durée reste une estimation simulée à partir de la
+   *  distance, faute d'historique réel à ce stade. */
+  function notifier(v: Voyage, e: EtapeVoyage, type: 'planification' | 'demarrage' | 'livraison') {
+    if (!e.destinataire) return
+    const kmParLigne = Math.max(v.kmReference / v.etapes.length, 15)
+    const dureeEstimeeMin = Math.round(kmParLigne / 45 * 60)
+    const contenu = type === 'planification'
+      ? `Votre livraison a été planifiée pour le ${new Date(v.datePlanifiee).toLocaleDateString('fr-FR')}. Véhicule ${v.vehiculePlaque ?? '-'}, chauffeur ${v.chauffeurNom ?? '-'}, arrivée estimée à environ ${dureeEstimeeMin} min de trajet.`
+      : type === 'demarrage'
+      ? `Votre livraison est en cours. Chauffeur ${v.chauffeurNom ?? '-'}, arrivée estimée dans environ ${dureeEstimeeMin} min. Contact : ${v.chauffeurNom ?? '-'}.`
+      : `Votre livraison a été effectuée et confirmée par signature électronique. Le bon de livraison électronique vous a été transmis.`
+    const notif: NotificationClient = {
+      id: `NOTIF-${Date.now()}-${Math.round(Math.random() * 999)}`,
+      type, canal: 'sms', envoyeeLe: new Date().toISOString(), contenu,
+    }
+    e.notifications = [...(e.notifications ?? []), notif]
+  }
+
+  /** Planifier : le planificateur affecte l'ordre à un chauffeur et un
+   *  véhicule ; l'ordre passe alors à Planifié. Il n'y a pas d'étape de
+   *  validation où le chauffeur accepterait ou refuserait l'ordre - le
+   *  passage à En cours se déclenche seulement quand le chauffeur
+   *  commence réellement à exécuter la tournée, en signant sa première
+   *  livraison (voir signerLigne). Chaque destinataire d'une ligne
+   *  client reçoit à la planification une notification annonçant le
+   *  jour, le véhicule, le chauffeur et une arrivée estimée. */
   function planifier(id: string): { ok: boolean; motif?: string } {
     const v = getById(id)
     if (!v) return { ok: false, motif: 'Ordre introuvable.' }
     if (v.statut !== 'en_attente') return { ok: false, motif: "Cet ordre n'est plus en attente." }
-    if (!v.etapes.length) return { ok: false, motif: 'Définissez le trajet avant de planifier cet ordre.' }
-    changerStatut(id, 'planifie')
+    if (!v.etapes.length) return { ok: false, motif: 'Ajoutez au moins une ligne de livraison avant de planifier cet ordre.' }
+    v.statut = 'planifie'
+    v.etapes.forEach(e => notifier(v, e, 'planification'))
     return { ok: true }
   }
 
-  /** Le chauffeur confirme l'ordre depuis son espace : passage à En
-   *  cours, avec horodatage du départ réel. */
-  function confirmerParChauffeur(id: string) {
+  /** Annuler reste réservé au planificateur ou au responsable : ce
+   *  n'est jamais une action que le chauffeur peut poser depuis son
+   *  espace, à aucun moment du cycle de vie de la tournée. */
+  function annuler(id: string, motif: string): { ok: boolean; motif?: string } {
     const v = getById(id)
-    if (!v || v.statut !== 'planifie') return
-    v.statut = 'en_cours'
-    v.dateDepartReel = new Date().toISOString()
-  }
-
-  /** Le chauffeur refuse l'ordre depuis son espace : passage direct à
-   *  Annulé, avec le motif du refus conservé sur la fiche. */
-  function refuserParChauffeur(id: string, motif: string) {
-    const v = getById(id)
-    if (!v || v.statut !== 'planifie') return
+    if (!v) return { ok: false, motif: 'Ordre introuvable.' }
+    if (v.statut === 'livre' || v.statut === 'cloture' || v.statut === 'annule') return { ok: false, motif: 'Cet ordre ne peut plus être annulé.' }
+    if (!motif.trim()) return { ok: false, motif: "Un motif d'annulation est obligatoire." }
     v.statut = 'annule'
-    v.refuseLe = new Date().toISOString()
-    v.motifRefus = motif
+    v.annuleLe = new Date().toISOString()
+    v.motifAnnulation = motif.trim()
+    return { ok: true }
   }
 
-  /** Le chauffeur valide le passage à un site depuis son espace, sans
-   *  jamais pouvoir en sauter un. Une fois tous les sites validés,
-   *  l'ordre passe automatiquement à Terminé. */
-  function validerEtape(voyageId: string, etapeId: string) {
+  /** Recueille la signature électronique du destinataire d'une ligne,
+   *  sur l'appareil du chauffeur, sans jamais pouvoir en sauter une :
+   *  ce n'est pas le chauffeur qui atteste être passé, c'est le
+   *  destinataire qui confirme avoir été livré. Signer la toute
+   *  première ligne d'un ordre encore Planifié fait passer la tournée
+   *  à En cours du même geste - il n'y a pas d'étape de démarrage
+   *  distincte que le chauffeur poserait à part : commencer à livrer,
+   *  c'est ce qui démarre la tournée. Chaque signature déclenche sa
+   *  propre notification de livraison, le bon de livraison électronique
+   *  et l'envoi de l'enquête de satisfaction pour cette ligne. Une fois
+   *  toutes les lignes signées, la tournée passe automatiquement à
+   *  Terminé. */
+  function signerLigne(voyageId: string, etapeId: string, signePar?: string) {
     const v = getById(voyageId)
-    if (!v || v.statut !== 'en_cours') return
+    if (!v || (v.statut !== 'planifie' && v.statut !== 'en_cours')) return
     const tries = [...v.etapes].sort((a, b) => a.ordre - b.ordre)
     const index = tries.findIndex(e => e.id === etapeId)
     if (index < 0 || tries[index]!.franchi) return
     if (tries.slice(0, index).some(e => !e.franchi)) return
+
+    if (v.statut === 'planifie') {
+      v.statut = 'en_cours'
+      v.dateDepartReel = new Date().toISOString()
+      v.etapes.filter(e => !e.franchi).forEach(e => notifier(v, e, 'demarrage'))
+    }
+
     const etape = v.etapes.find(e => e.id === etapeId)
-    if (etape) etape.franchi = true
+    if (etape) {
+      etape.franchi = true
+      etape.signeLe = new Date().toISOString()
+      if (etape.destinataire) {
+        notifier(v, etape, 'livraison')
+        etape.eBL = {
+          reference: `EBL-${v.numeroOT || v.reference}-${String(index + 1).padStart(2, '0')}`,
+          emisLe: etape.signeLe, destinataire: etape.destinataire, adresse: etape.adresseLivraison ?? '',
+          produit: v.marchandise.typeProduit, signePar: signePar || etape.destinataire,
+        }
+        etape.satisfactionEnvoyeeLe = etape.signeLe
+      }
+    }
     if (v.etapes.every(e => e.franchi)) {
       v.statut = 'livre'
       v.dateArriveeReelle = new Date().toISOString()
@@ -421,6 +523,6 @@ export const useVoyagesStore = defineStore('voyages', () => {
     completudeDossier, ecartPoids, ecartKm,
     creer, changerStatut, cloturer,
     enAttente, planifies, enCoursKanban, termines, annules,
-    creerRapide, definirTrajet, planifier, confirmerParChauffeur, refuserParChauffeur, validerEtape,
+    creerRapide, definirLignes, planifier, annuler, signerLigne,
   }
 })
