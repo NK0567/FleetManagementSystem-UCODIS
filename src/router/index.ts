@@ -10,6 +10,13 @@ const router = createRouter({
   routes: [
     { path: '/', name: 'login', component: LoginView },
 
+    /* Espace client, public : aucun compte, un lien propre à chaque
+       ligne de livraison. Sans meta.requiresAuth ni layout dashboard,
+       pour rester accessible sans connexion et hors de la coquille
+       applicative. */
+    { path: '/suivi/:etapeId', name: 'suivi-livraison',
+      component: () => import('../views/public/SuiviLivraisonView.vue') },
+
     /* ══ MODULE ADMINISTRATION ═══════════════════════════════════
        Même découpage que sur les autres projets bâtis sur le socle FMS : tableau de
        bord, congés et absences, personnel, configuration.          */

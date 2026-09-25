@@ -240,6 +240,35 @@ export const useVoyagesStore = defineStore('voyages', () => {
       marchandise: { typeProduit: 'Produits alimentaires secs', nombreCartons: 0, poidsChargeKg: 1400 },
       nbEcarts: 0, nbArretsNonJustifies: 0, createdAt: '2026-09-01T05:30:00',
     },
+    /* Exemple prêt à confirmer côté client : le chauffeur est déjà
+       arrivé sur place, il ne manque plus que la confirmation du
+       destinataire - directement testable via son lien de suivi,
+       sans manipulation préalable. */
+    {
+      id: 'VOY-013', reference: 'VOY-2026-0159', numeroOT: 'OT-2026-04440',
+      statut: 'en_cours',
+      clientNom: 'Super U Toamasina', toleranceEcartPoidsPourcent: 1,
+      etapes: [
+        {
+          id: 'VOY-013-L1', ordre: 1, siteNom: 'Boulevard Joffre, Toamasina', destinataire: 'Super U Toamasina',
+          adresseLivraison: 'Boulevard Joffre, Toamasina', lat: -18.1492, lng: 49.4023, role: 'livraison', intervalleMin: 0, franchi: false,
+          arriveeLe: '2026-09-24T09:15:00',
+          notifications: [
+            { id: 'NOTIF-013-1', type: 'planification', canal: 'sms', envoyeeLe: '2026-09-24T06:00:00', contenu: 'Votre livraison a été planifiée pour le 24/09/2026. Véhicule 4026 TBA, chauffeur Herizo Rakotondrabe, arrivée estimée à environ 20 min de trajet.' },
+            { id: 'NOTIF-013-2', type: 'demarrage', canal: 'sms', envoyeeLe: '2026-09-24T08:50:00', contenu: 'Votre livraison est en cours. Chauffeur Herizo Rakotondrabe, arrivée estimée dans environ 20 min. Contact : Herizo Rakotondrabe.' },
+          ],
+        },
+      ],
+      origine: 'Dépôt UCODIS Toamasina', destination: 'Boulevard Joffre, Toamasina',
+      vehiculeId: 'v-tr-6', vehiculePlaque: '4026 TBA',
+      semiRemorqueId: 'v-sr-6', semiRemorquePlaque: 'RM 4106',
+      chauffeurId: 'p-015', chauffeurNom: 'Herizo Rakotondrabe',
+      datePlanifiee: '2026-09-24T06:00:00',
+      dateDepartReel: '2026-09-24T08:50:00',
+      kmReference: 15,
+      marchandise: { typeProduit: 'Boissons', nombreCartons: 0, poidsChargeKg: 2200 },
+      nbEcarts: 0, nbArretsNonJustifies: 0, createdAt: '2026-09-24T05:30:00',
+    },
   ])
 
   /* Hydratation : chaque voyage reçoit une COPIE des étapes de son trajet de
@@ -284,6 +313,18 @@ export const useVoyagesStore = defineStore('voyages', () => {
   ])
 
   const getById = (id: string) => voyages.value.find(v => v.id === id)
+
+  /** Retrouve une ligne de livraison n'importe où dans le parc, à
+   *  partir du seul identifiant de la ligne : c'est la clé du lien de
+   *  suivi envoyé au destinataire, qui n'a pas de compte dans le
+   *  système et ne connaît donc pas l'identifiant de la tournée. */
+  function trouverLigne(etapeId: string): { voyage: Voyage; etape: EtapeVoyage } | null {
+    for (const voyage of voyages.value) {
+      const etape = voyage.etapes.find(e => e.id === etapeId)
+      if (etape) return { voyage, etape }
+    }
+    return null
+  }
 
   const enCours = computed(() => voyages.value.filter(v => v.statut === 'en_cours'))
   const aCloturer = computed(() => voyages.value.filter(v => v.statut === 'livre'))
@@ -404,15 +445,22 @@ export const useVoyagesStore = defineStore('voyages', () => {
     const kmParLigne = Math.max(v.kmReference / v.etapes.length, 15)
     const dureeEstimeeMin = Math.round(kmParLigne / 45 * 60)
     const contenu = type === 'planification'
-      ? `Votre livraison a été planifiée pour le ${new Date(v.datePlanifiee).toLocaleDateString('fr-FR')}. Véhicule ${v.vehiculePlaque ?? '-'}, chauffeur ${v.chauffeurNom ?? '-'}, arrivée estimée à environ ${dureeEstimeeMin} min de trajet.`
+      ? `Votre livraison a été planifiée pour le ${new Date(v.datePlanifiee).toLocaleDateString('fr-FR')}. Véhicule ${v.vehiculePlaque ?? '-'}, chauffeur ${v.chauffeurNom ?? '-'}, arrivée estimée à environ ${dureeEstimeeMin} min de trajet. Suivez votre livraison : ${lienSuivi(e.id)}`
       : type === 'demarrage'
-      ? `Votre livraison est en cours. Chauffeur ${v.chauffeurNom ?? '-'}, arrivée estimée dans environ ${dureeEstimeeMin} min. Contact : ${v.chauffeurNom ?? '-'}.`
-      : `Votre livraison a été effectuée et confirmée par signature électronique. Le bon de livraison électronique vous a été transmis.`
+      ? `Votre livraison est en cours. Chauffeur ${v.chauffeurNom ?? '-'}, arrivée estimée dans environ ${dureeEstimeeMin} min. Contact : ${v.chauffeurNom ?? '-'}. Suivez votre livraison : ${lienSuivi(e.id)}`
+      : `Votre livraison a été effectuée et confirmée par signature électronique. Le bon de livraison électronique vous a été transmis : ${lienSuivi(e.id)}`
     const notif: NotificationClient = {
       id: `NOTIF-${Date.now()}-${Math.round(Math.random() * 999)}`,
       type, canal: 'sms', envoyeeLe: new Date().toISOString(), contenu,
     }
     e.notifications = [...(e.notifications ?? []), notif]
+  }
+
+  /** Lien de suivi propre à chaque ligne, envoyé au destinataire par SMS
+   *  ou e-mail : il ouvre son propre espace, sans compte ni mot de
+   *  passe, comme un lien de suivi de colis. */
+  function lienSuivi(etapeId: string) {
+    return `${window.location.origin}/suivi/${etapeId}`
   }
 
   /** Planifier : le planificateur affecte l'ordre à un chauffeur et un
@@ -459,19 +507,47 @@ export const useVoyagesStore = defineStore('voyages', () => {
    *  et l'envoi de l'enquête de satisfaction pour cette ligne. Une fois
    *  toutes les lignes signées, la tournée passe automatiquement à
    *  Terminé. */
-  function signerLigne(voyageId: string, etapeId: string, signePar?: string) {
+  /** Le chauffeur marque son arrivée sur le point de livraison, avant
+   *  de recueillir la signature du destinataire : deux gestes
+   *  distincts. Il ne peut arriver sur un point que si le précédent a
+   *  déjà été signé - aucun point ne peut être sauté, dans un sens
+   *  comme dans l'autre. La toute première arrivée d'une tournée
+   *  encore Planifiée la fait passer En cours : c'est bien le
+   *  chauffeur qui atteint le terrain qui démarre l'exécution, pas sa
+   *  signature. */
+  function marquerArrivee(voyageId: string, etapeId: string): { ok: boolean; motif?: string } {
     const v = getById(voyageId)
-    if (!v || (v.statut !== 'planifie' && v.statut !== 'en_cours')) return
+    if (!v || (v.statut !== 'planifie' && v.statut !== 'en_cours')) return { ok: false, motif: 'Ordre introuvable ou déjà terminé.' }
     const tries = [...v.etapes].sort((a, b) => a.ordre - b.ordre)
     const index = tries.findIndex(e => e.id === etapeId)
-    if (index < 0 || tries[index]!.franchi) return
-    if (tries.slice(0, index).some(e => !e.franchi)) return
+    if (index < 0) return { ok: false, motif: 'Ligne introuvable.' }
+    if (tries[index]!.arriveeLe) return { ok: false, motif: 'Arrivée déjà enregistrée pour ce point.' }
+    if (tries.slice(0, index).some(e => !e.franchi)) return { ok: false, motif: 'Le point précédent doit être signé avant celui-ci.' }
 
     if (v.statut === 'planifie') {
       v.statut = 'en_cours'
       v.dateDepartReel = new Date().toISOString()
       v.etapes.filter(e => !e.franchi).forEach(e => notifier(v, e, 'demarrage'))
     }
+    const etape = v.etapes.find(e => e.id === etapeId)
+    if (etape) etape.arriveeLe = new Date().toISOString()
+    return { ok: true }
+  }
+
+  /** Recueille la signature électronique du destinataire d'une ligne,
+   *  sur l'appareil du chauffeur : ce n'est pas le chauffeur qui
+   *  atteste être passé - il l'a déjà fait en marquant son arrivée -
+   *  c'est le destinataire qui confirme avoir été livré. La signature
+   *  déclenche automatiquement la notification de livraison, le bon de
+   *  livraison électronique et l'envoi de l'enquête de satisfaction
+   *  pour cette ligne. Une fois toutes les lignes signées, la tournée
+   *  passe automatiquement à Terminé. */
+  function signerLigne(voyageId: string, etapeId: string, signePar?: string) {
+    const v = getById(voyageId)
+    if (!v || v.statut !== 'en_cours') return
+    const tries = [...v.etapes].sort((a, b) => a.ordre - b.ordre)
+    const index = tries.findIndex(e => e.id === etapeId)
+    if (index < 0 || tries[index]!.franchi || !tries[index]!.arriveeLe) return
 
     const etape = v.etapes.find(e => e.id === etapeId)
     if (etape) {
@@ -491,6 +567,17 @@ export const useVoyagesStore = defineStore('voyages', () => {
       v.statut = 'livre'
       v.dateArriveeReelle = new Date().toISOString()
     }
+  }
+
+  /** Réponse du destinataire à l'enquête de satisfaction, depuis son
+   *  propre espace de suivi - jamais saisie à sa place par le
+   *  chauffeur ou le planificateur. Ne s'applique qu'à une ligne déjà
+   *  signée, et une seule fois. */
+  function repondreSatisfaction(etapeId: string, note: number, commentaire?: string) {
+    const trouve = trouverLigne(etapeId)
+    if (!trouve || !trouve.etape.franchi || trouve.etape.satisfactionNote != null) return
+    trouve.etape.satisfactionNote = Math.min(5, Math.max(1, Math.round(note)))
+    if (commentaire?.trim()) trouve.etape.satisfactionCommentaire = commentaire.trim()
   }
 
   /** Clôture bloquée tant que le kilométrage au retour n'est pas
@@ -523,6 +610,7 @@ export const useVoyagesStore = defineStore('voyages', () => {
     completudeDossier, ecartPoids, ecartKm,
     creer, changerStatut, cloturer,
     enAttente, planifies, enCoursKanban, termines, annules,
-    creerRapide, definirLignes, planifier, annuler, signerLigne,
+    creerRapide, definirLignes, planifier, annuler, marquerArrivee, signerLigne,
+    trouverLigne, repondreSatisfaction, lienSuivi,
   }
 })

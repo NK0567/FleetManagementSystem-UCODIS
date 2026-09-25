@@ -27,7 +27,7 @@ import type { DropdownItem } from '../ui/SearchableDropdown.vue'
 import FleetMap from './FleetMap.vue'
 import {
   AlertCircle, ArrowDown, ArrowUp, CalendarClock, CheckCircle2, Circle,
-  FileCheck, Mail, MapPin, Package, ShieldAlert, Smartphone, Star, Truck, UserCheck, X, XCircle,
+  FileCheck, Mail, MapPin, MapPinCheck, Package, ShieldAlert, Smartphone, Star, Truck, UserCheck, X, XCircle,
 } from '@lucide/vue'
 import * as cls from '../../lib/formClasses'
 import { useVoyagesStore } from '../../stores/voyages'
@@ -257,6 +257,7 @@ const marqueursCarte = computed(() => lignesAffichees.value.map((l, i) => ({
    électronique, générés automatiquement par le store à la
    planification et à chaque signature. ─────────────────────────── */
 const lignesAvecDestinataire = computed(() => lignesAffichees.value.filter(l => l.destinataire))
+const destinatairesUniques = computed(() => [...new Set(lignesAvecDestinataire.value.map(l => l.destinataire!))])
 const totalNotifications = computed(() => lignesAvecDestinataire.value.reduce((s, l) => s + (l.notifications?.length ?? 0), 0))
 const totalEBL = computed(() => lignesAvecDestinataire.value.filter(l => l.eBL).length)
 const eBLOuvert = ref<string | null>(null)
@@ -374,10 +375,14 @@ function annuler() {
           </p>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-x-5 gap-y-4">
-            <div class="flex flex-col gap-1.5">
+            <div class="flex flex-col gap-1.5 relative group/dest">
               <label class="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.03em]">Destinataires</label>
-              <div class="h-[38px] px-2.5 rounded-md border border-border bg-background flex items-center text-[13px] text-foreground truncate">{{ courant?.clientNom ?? 'Aucune ligne' }}</div>
+              <div class="h-[38px] px-2.5 rounded-md border border-border bg-background flex items-center text-[13px] text-foreground truncate" :class="destinatairesUniques.length > 1 ? 'underline decoration-dotted underline-offset-2 cursor-help' : ''">{{ courant?.clientNom ?? 'Aucune ligne' }}</div>
               <span class="text-[10px] text-muted-foreground">Calculé à partir des lignes ci-dessous</span>
+              <div v-if="destinatairesUniques.length > 1" class="hidden group-hover/dest:block absolute left-0 top-full mt-1 z-20 bg-card border border-border rounded-md shadow-lg px-3 py-2 min-w-[220px]">
+                <p class="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.04em] mb-1">{{ destinatairesUniques.length }} destinataires</p>
+                <p v-for="d in destinatairesUniques" :key="d" class="text-[12px] text-foreground leading-snug">{{ d }}</p>
+              </div>
             </div>
             <div class="flex flex-col gap-1.5">
               <label class="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.03em]">Marchandise</label>
@@ -423,8 +428,8 @@ function annuler() {
           <div v-if="!lignesAffichees.length" class="text-xs text-muted-foreground py-2 mb-3">Aucune ligne pour l'instant.</div>
           <div v-else class="flex flex-col gap-1.5 mb-4">
             <div v-for="(l, i) in lignesAffichees" :key="l.id" class="flex items-center gap-2.5 rounded-md px-3 py-2.5"
-                 :class="l.franchi ? 'bg-success-bg' : 'bg-background'">
-              <component :is="l.franchi ? CheckCircle2 : Circle" class="w-4 h-4 shrink-0" :class="l.franchi ? 'text-success' : 'text-muted-foreground'" />
+                 :class="l.franchi ? 'bg-success-bg' : l.arriveeLe ? 'bg-info-bg' : 'bg-background'">
+              <component :is="l.franchi ? CheckCircle2 : l.arriveeLe ? MapPinCheck : Circle" class="w-4 h-4 shrink-0" :class="l.franchi ? 'text-success' : l.arriveeLe ? 'text-info' : 'text-muted-foreground'" />
               <span class="text-[11px] font-semibold text-muted-foreground w-5">{{ i + 1 }}</span>
               <component :is="l.destinataire ? Package : MapPin" class="w-3.5 h-3.5 text-muted-foreground shrink-0" />
               <div class="flex-1 min-w-0">
@@ -432,7 +437,8 @@ function annuler() {
                 <span v-if="l.destinataire" class="text-[11px] text-muted-foreground"> · {{ l.adresseLivraison }}</span>
                 <span v-else class="text-[11px] text-muted-foreground"> · transfert interne</span>
               </div>
-              <span v-if="l.franchi" class="text-[11px] text-success shrink-0">Signée</span>
+              <span v-if="l.franchi" class="text-[11px] text-success shrink-0">{{ l.destinataire ? `Signée par ${l.eBL?.signePar}` : 'Confirmé' }}</span>
+              <span v-else-if="l.arriveeLe" class="text-[11px] text-info shrink-0">Arrivé, signature attendue</span>
               <button v-if="l.eBL" class="text-[11px] text-primary underline bg-transparent border-0 cursor-pointer shrink-0" @click="eBLOuvert = l.id">Voir le e-BL</button>
               <template v-if="modifiable">
                 <button class="w-6 h-6 rounded border-0 bg-transparent text-muted-foreground cursor-pointer inline-flex items-center justify-center hover:text-foreground hover:bg-border/40 shrink-0" :disabled="i === 0" @click="deplacerLigne(l.id, -1)"><ArrowUp class="w-3.5 h-3.5" /></button>
@@ -487,13 +493,15 @@ function annuler() {
         <FormSection v-if="courant && lignesAvecDestinataire.length" title="Communication client" :recaps="[`${totalNotifications} notification(s)`, `${totalEBL} e-BL`]" :default-open="false">
           <p class="text-[12px] text-muted-foreground mb-3.5 leading-relaxed">
             Chaque destinataire reçoit automatiquement une notification au démarrage de la tournée, puis à sa
-            livraison, avec le bon de livraison électronique et une enquête de satisfaction facultative. Aucun
-            canal SMS ou e-mail réel n'est branché : ces envois restent simulés dans cette maquette.
+            livraison, avec un lien vers son propre espace de suivi - sans compte ni mot de passe, comme un
+            lien de suivi de colis. Le canal SMS ou e-mail réel n'est pas branché dans cette maquette, mais le
+            lien lui-même est fonctionnel : ouvrez-le pour voir ce que le destinataire voit.
           </p>
           <div class="flex flex-col gap-3">
             <div v-for="l in lignesAvecDestinataire" :key="l.id" class="rounded-lg border border-border px-3.5 py-3">
               <div class="flex items-center justify-between mb-2">
                 <span class="text-xs font-semibold text-foreground">{{ l.destinataire }}</span>
+                <RouterLink :to="`/suivi/${l.id}`" target="_blank" class="text-[11px] text-primary underline">Ouvrir son espace de suivi</RouterLink>
               </div>
               <div v-if="!l.notifications?.length" class="text-[11px] text-muted-foreground">Aucune notification envoyée pour l'instant.</div>
               <div v-else class="flex flex-col gap-1.5">

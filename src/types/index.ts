@@ -268,6 +268,10 @@ export interface EtapeVoyage {
    *  sites internes plutôt que livraison chez un client. */
   destinataire?: string
   adresseLivraison?: string
+  /** Le chauffeur marque son arrivée sur place, avant de recueillir la
+   *  signature du destinataire : deux gestes distincts, l'un atteste
+   *  qu'il est passé, l'autre que la livraison a bien été reçue. */
+  arriveeLe?: string
   /** Horodatage de la signature électronique recueillie sur place. */
   signeLe?: string
   /** Historique des notifications automatiques envoyées au destinataire

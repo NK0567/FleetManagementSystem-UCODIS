@@ -25,21 +25,29 @@
         Aucune livraison ne peut être sautée.
       </p>
       <div class="flex flex-col gap-1.5">
-        <div v-for="(e, i) in lignesTriees" :key="e.id" class="rounded-md px-3 py-2.5" :class="e.franchi ? 'bg-success-bg' : 'bg-background'">
+        <div v-for="(e, i) in lignesTriees" :key="e.id" class="rounded-md px-3 py-2.5" :class="e.franchi ? 'bg-success-bg' : e.arriveeLe ? 'bg-info-bg' : 'bg-background'">
           <div class="flex items-center gap-2.5">
-            <component :is="e.franchi ? CircleCheck : Circle" class="w-4 h-4 shrink-0" :class="e.franchi ? 'text-success' : 'text-muted-foreground'" />
+            <component :is="e.franchi ? CircleCheck : e.arriveeLe ? MapPinCheck : Circle" class="w-4 h-4 shrink-0" :class="e.franchi ? 'text-success' : e.arriveeLe ? 'text-info' : 'text-muted-foreground'" />
             <span class="text-[11px] font-semibold text-muted-foreground w-5">{{ i + 1 }}</span>
             <div class="flex-1 min-w-0">
               <span class="text-[13px] text-foreground">{{ e.destinataire ?? e.siteNom }}</span>
               <span v-if="e.destinataire" class="text-[11px] text-muted-foreground"> · {{ e.adresseLivraison }}</span>
               <span v-else class="text-[11px] text-muted-foreground"> · transfert interne</span>
             </div>
+
             <span v-if="e.franchi" class="text-[11px] text-success font-medium shrink-0">{{ e.destinataire ? `Signée par ${e.eBL?.signePar}` : 'Confirmé' }}</span>
-            <button v-else-if="peutSigner(i) && ligneEnSignature !== e.id" :class="clsForm.btnPrimary" class="!py-1 !px-2.5 !text-[11px] shrink-0" @click="ouvrirSignature(e)">
-              {{ e.destinataire ? 'Recueillir la signature' : 'Confirmer le passage' }}
+
+            <button v-else-if="!e.arriveeLe && peutArriver(i)" :class="clsForm.btnOutline" class="!py-1 !px-2.5 !text-[11px] shrink-0" @click="arriver(e.id)">
+              <MapPinCheck class="w-3.5 h-3.5" /> Marquer l'arrivée
             </button>
-            <span v-else-if="!peutSigner(i)" class="text-[11px] text-muted-foreground italic shrink-0">En attente de la livraison précédente</span>
+            <span v-else-if="!e.arriveeLe" class="text-[11px] text-muted-foreground italic shrink-0">En attente du point précédent</span>
+
+            <template v-else-if="!e.destinataire">
+              <button :class="clsForm.btnPrimary" class="!py-1 !px-2.5 !text-[11px] shrink-0" @click="confirmerSignature(e.id)">Confirmer le passage</button>
+            </template>
+            <button v-else-if="ligneEnSignature !== e.id" :class="clsForm.btnPrimary" class="!py-1 !px-2.5 !text-[11px] shrink-0" @click="ouvrirSignature(e)">Recueillir la signature</button>
           </div>
+          <p v-if="e.arriveeLe && !e.franchi && e.destinataire" class="text-[11px] text-info mt-1 pl-[26px]">Arrivé sur place, signature du destinataire à recueillir.</p>
           <div v-if="ligneEnSignature === e.id && e.destinataire" class="flex items-center gap-2 mt-2.5 pl-[26px]">
             <input v-model="nomSignataire" :class="clsForm.fieldInput" class="!h-[32px] !text-[12px]" placeholder="Nom de la personne qui réceptionne…" />
             <button :class="clsForm.btnOutline" class="!py-1 !px-2.5 !text-[11px] shrink-0" @click="ligneEnSignature = null">Annuler</button>
@@ -49,6 +57,10 @@
       </div>
       <p v-if="maTournee.etapes.length && maTournee.etapes.every(e => e.franchi)" class="text-[12px] text-success font-medium mt-3 flex items-center gap-1.5">
         <CircleCheck class="w-4 h-4" /> Toutes les livraisons sont signées, cette tournée vient de se terminer.
+      </p>
+      <p v-if="maTournee.statut === 'en_cours'" class="text-[11px] text-muted-foreground mt-3 pt-3 border-t border-border/60">
+        Les contrôles de route (checklist, remontée d'anomalie) que je dois aussi faire au long du trajet
+        restent à rattacher à cette tournée : l'écran de saisie sur le terrain n'est pas encore construit.
       </p>
     </div>
 
@@ -147,7 +159,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { CircleCheck, Circle, CircleX, Clock, FileText, ListChecks, Truck } from '@lucide/vue'
+import { CircleCheck, Circle, CircleX, Clock, FileText, ListChecks, MapPinCheck, Truck } from '@lucide/vue'
 import StatusPill from '../../components/ui/StatusPill.vue'
 import * as L from '../../lib/listClasses'
 import * as clsForm from '../../lib/formClasses'
@@ -189,29 +201,35 @@ const motifBlocage = computed(() => {
 /* ── Ma tournée : planifiée ou déjà en cours, peu importe - je ne fais
      que recueillir la signature du destinataire à chaque livraison,
      dans l'ordre. Signer la première la fait elle-même passer en
-     cours, sans étape de validation à part. ────────────────────── */
+     cours, sans étape de validation à part. Deux gestes distincts par
+     point : marquer l'arrivée d'abord, puis recueillir la signature du
+     destinataire - ou confirmer directement pour un transfert interne,
+     qui n'a personne à faire signer. ──────────────────────────────── */
 const maTournee = computed(() =>
   moi.value ? [...voyages.planifies, ...voyages.enCoursKanban].find(v => v.chauffeurId === moi.value!.id) ?? null : null)
 const lignesTriees = computed(() => maTournee.value ? [...maTournee.value.etapes].sort((a, b) => a.ordre - b.ordre) : [])
 
-function peutSigner(index: number) {
-  return lignesTriees.value.slice(0, index).every(e => e.franchi) && !lignesTriees.value[index]?.franchi
+/** L'arrivée sur un point n'est possible que si le précédent est déjà signé. */
+function peutArriver(index: number) {
+  return lignesTriees.value.slice(0, index).every(e => e.franchi)
+}
+function arriver(etapeId: string) {
+  if (!maTournee.value) return
+  const res = voyages.marquerArrivee(maTournee.value.id, etapeId)
+  if (!res.ok) alert(res.motif)
 }
 
-/** Un transfert entre sites internes se confirme directement, sans
- *  destinataire à faire signer. Une livraison chez un client, elle,
- *  exige de recueillir le nom de la personne qui réceptionne avant de
- *  valider : c'est elle qui signe, pas le chauffeur en son nom. */
 const ligneEnSignature = ref<string | null>(null)
 const nomSignataire = ref('')
 function ouvrirSignature(e: { id: string; destinataire?: string }) {
-  if (!e.destinataire) { voyages.signerLigne(maTournee.value!.id, e.id); return }
   ligneEnSignature.value = e.id
-  nomSignataire.value = e.destinataire
+  nomSignataire.value = e.destinataire ?? ''
 }
 function confirmerSignature(etapeId: string) {
-  if (!maTournee.value || !nomSignataire.value.trim()) return
-  voyages.signerLigne(maTournee.value.id, etapeId, nomSignataire.value.trim())
+  if (!maTournee.value) return
+  const ligne = maTournee.value.etapes.find(e => e.id === etapeId)
+  if (ligne?.destinataire && !nomSignataire.value.trim()) return
+  voyages.signerLigne(maTournee.value.id, etapeId, nomSignataire.value.trim() || undefined)
   ligneEnSignature.value = null
   nomSignataire.value = ''
 }

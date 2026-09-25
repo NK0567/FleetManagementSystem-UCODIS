@@ -51,8 +51,13 @@
             <div class="flex items-center gap-1.5 text-[12px] text-foreground mb-0.5">
               <UserRound class="w-3.5 h-3.5 text-muted-foreground shrink-0" /> <span class="truncate">{{ v.chauffeurNom ?? 'Aucun chauffeur' }}</span>
             </div>
-            <div class="flex items-center gap-1.5 text-[12px] text-muted-foreground mb-2.5">
-              <Container class="w-3.5 h-3.5 shrink-0" /> <span class="truncate">{{ v.vehiculePlaque ?? '-' }} · {{ v.clientNom }}</span>
+            <div class="flex items-center gap-1.5 text-[12px] text-muted-foreground mb-2.5 relative group/dest">
+              <Container class="w-3.5 h-3.5 shrink-0" />
+              <span class="truncate" :class="destinataires(v).length > 1 ? 'underline decoration-dotted underline-offset-2 cursor-help' : ''">{{ v.vehiculePlaque ?? '-' }} · {{ v.clientNom }}</span>
+              <div v-if="destinataires(v).length > 1" class="hidden group-hover/dest:block absolute left-0 top-full mt-1 z-20 bg-card border border-border rounded-md shadow-lg px-3 py-2 min-w-[200px]">
+                <p class="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.04em] mb-1">{{ destinataires(v).length }} destinataires</p>
+                <p v-for="d in destinataires(v)" :key="d" class="text-[12px] text-foreground leading-snug">{{ d }}</p>
+              </div>
             </div>
 
             <div class="grid grid-cols-2 gap-2 pt-2.5 border-t border-border">
@@ -115,6 +120,13 @@ const recherche = ref('')
 const aPropos = ref(false)
 const ficheOuverte = ref(false)
 const ficheId = ref('')
+
+/** Un ordre n'est jamais figé à un seul client : la liste complète des
+ *  destinataires reste consultable au survol de la carte, plutôt que
+ *  de se figer sur le premier nom affiché. */
+function destinataires(v: { etapes: { destinataire?: string }[] }) {
+  return [...new Set(v.etapes.map(e => e.destinataire).filter((d): d is string => !!d))]
+}
 
 function correspond(v: { reference: string; numeroOT?: string; clientNom: string; vehiculePlaque?: string; chauffeurNom?: string; etapes: { destinataire?: string }[] }) {
   if (!recherche.value.trim()) return true
