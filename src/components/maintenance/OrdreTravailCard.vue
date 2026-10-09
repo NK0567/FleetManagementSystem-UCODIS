@@ -2,9 +2,9 @@
 /**
  * Fiche d'ordre de travail, reprise de la structure du socle FMS :
  * déclaration, diagnostic ISO 14224, pièces et main-d'œuvre, clôture.
- * La clôture suit la règle du cahier des charges UCODIS - plus stricte
- * que celle du socle FMS - avec triple validation technicien, responsable,
- * puis directeur, chacune horodatée.
+ * La fin d'intervention se fait en deux temps : le technicien interne,
+ * ou l'atelier externe, déclare l'intervention terminée ; le responsable
+ * maintenance valide, ce qui clôture l'ordre.
  */
 import { ref, computed, watch } from 'vue'
 import CardModalShell from '../shared/CardModalShell.vue'
@@ -13,6 +13,7 @@ import SearchableDropdown from '../ui/SearchableDropdown.vue'
 import type { DropdownItem } from '../ui/SearchableDropdown.vue'
 import { CheckCircle2, Circle, TriangleAlert } from '@lucide/vue'
 import { useMaintenanceStore } from '../../stores/maintenance'
+import { usePrestatairesStore } from '../../stores/prestataires'
 import {
   LIB_ORIGINE_OT, LIB_SOUS_SYSTEME, LIB_MODE_DEFAILLANCE, LIB_CAUSE_RACINE,
   LIB_TYPE_MAINTENANCE, LIB_GRAVITE_OT, LIB_STATUT_OT,
@@ -22,7 +23,7 @@ import { fmtDateHeure } from '../../utils/voyageUtils'
 import * as cls from '../../lib/formClasses'
 
 const props = defineProps<{ ordres: OrdreTravail[]; ordreId: string }>()
-const emit = defineEmits<{ close: [] }>()
+const emit = defineEmits<{ close: []; creer: [] }>()
 
 const store = useMaintenanceStore()
 const idCourant = ref(props.ordreId)
@@ -81,7 +82,32 @@ function cloturerOT() {
   if (!ok) alert("Diagnostic incomplet ou description des travaux manquante : la clôture n'est pas possible.")
 }
 function validerResp() { if (item.value) store.validerParResponsable(item.value.id, 'Hery Andriamalala') }
-function validerDir() { if (item.value) store.validerParDirecteur(item.value.id, 'Directeur UCODIS') }
+function refuserFin() { if (item.value) store.refuserFin(item.value.id) }
+
+/* ── Atelier externe ──────────────────────────────────────────── */
+const prestatairesStore = usePrestatairesStore()
+const optAteliers = computed<DropdownItem[]>(() => prestatairesStore.ateliersAutorises.map(p => ({ id: p.id, label: p.nom })))
+const externeOuvert = ref(false)
+const externeLocal = ref({ prestataireId: '', remiseLe: '', retourPrevuLe: '', montantDevisAr: undefined as number | undefined })
+function confierExterne() {
+  const p = prestatairesStore.getById(externeLocal.value.prestataireId)
+  if (!item.value || !p || !externeLocal.value.remiseLe) { alert("Choisissez l'atelier et la date de remise du véhicule."); return }
+  if (!p.autorise) { alert(`${p.nom} n'est pas un atelier autorisé.`); return }
+  const r = store.confierAtelierExterne(item.value.id, { prestataireId: p.id, prestataireNom: p.nom, remiseLe: externeLocal.value.remiseLe,
+    retourPrevuLe: externeLocal.value.retourPrevuLe || undefined, montantDevisAr: externeLocal.value.montantDevisAr })
+  if (!r.ok) { alert(r.motif); return }
+  externeOuvert.value = false
+}
+const avancementLocal = ref('')
+watch(item, v => { avancementLocal.value = v?.avancementExterne ?? '' }, { immediate: true })
+function majAvancement() { if (item.value) store.suivreAtelierExterne(item.value.id, { avancement: avancementLocal.value }) }
+const retourLocal = ref('')
+function retourExterne() {
+  if (!item.value) return
+  if (!retourLocal.value) { alert('Indiquez la date de retour du véhicule.'); return }
+  const r = store.retourAtelierExterne(item.value.id, travauxLocal.value, retourLocal.value)
+  if (!r.ok) alert(r.motif)
+}
 </script>
 
 <template>
@@ -97,6 +123,7 @@ function validerDir() { if (item.value) store.validerParDirecteur(item.value.id,
     :has-next="hasNext"
     hide-action-bar
     @close="emit('close')"
+    @create="emit('creer')"
     @go-prev="goPrev"
     @go-next="goNext"
     @select-sidebar="selectSidebar"
@@ -181,10 +208,48 @@ function validerDir() { if (item.value) store.validerParDirecteur(item.value.id,
           </div>
         </FormSection>
 
-        <!-- 4. CLÔTURE -->
+        <!-- 4. ATELIER EXTERNE -->
+        <FormSection title="Atelier externe" :recaps="[item.prestataire ?? 'atelier interne']" :default-open="!!item.prestataire">
+          <template v-if="item.prestataire">
+            <div class="grid grid-cols-3 gap-x-6 gap-y-4 max-sm:grid-cols-1">
+              <div class="flex flex-col gap-1"><label class="text-[11px] font-semibold text-muted-foreground uppercase">Atelier</label><span class="text-sm text-foreground">{{ item.prestataire }}</span></div>
+              <div class="flex flex-col gap-1"><label class="text-[11px] font-semibold text-muted-foreground uppercase">Remis le</label><span class="text-sm text-foreground">{{ item.remiseAtelierLe ? new Date(item.remiseAtelierLe).toLocaleDateString('fr-FR') : '-' }}</span></div>
+              <div class="flex flex-col gap-1"><label class="text-[11px] font-semibold text-muted-foreground uppercase">{{ item.retourLe ? 'Retour le' : 'Retour prévu le' }}</label><span class="text-sm text-foreground">{{ (item.retourLe ?? item.retourPrevuLe) ? new Date((item.retourLe ?? item.retourPrevuLe)!).toLocaleDateString('fr-FR') : '-' }}</span></div>
+              <div class="flex flex-col gap-1"><label class="text-[11px] font-semibold text-muted-foreground uppercase">Montant du devis</label><span class="text-sm text-foreground">{{ item.montantDevisAr != null ? item.montantDevisAr.toLocaleString('fr-FR') + ' Ar' : '-' }}</span></div>
+            </div>
+            <p class="text-[11px] text-muted-foreground mt-3">Le travail interne de l'atelier externe n'est pas planifié ici : seule l'exécution de l'intervention est suivie. Sa qualification (diagnostic, cause, pièces, coût) reste la même que pour l'atelier interne.</p>
+            <template v-if="item.statut !== 'cloture' && item.statut !== 'attente_validation'">
+              <div :class="cls.field" class="mt-3">
+                <label :class="cls.fieldLabel">Avancement communiqué par l'atelier</label>
+                <div class="flex gap-2"><input v-model="avancementLocal" :class="cls.fieldInput" class="flex-1" placeholder="Ex. pièce reçue, remontage en cours…" /><button :class="cls.btnOutline" @click="majAvancement">Enregistrer</button></div>
+              </div>
+              <div :class="cls.field" class="mt-3">
+                <label :class="cls.fieldLabel">Retour du véhicule</label>
+                <div class="flex gap-2 items-center flex-wrap"><input v-model="retourLocal" type="date" :class="cls.fieldInput" class="!w-[180px]" /><button :class="cls.btnPrimary" @click="retourExterne">Retour : l'atelier déclare l'intervention terminée</button></div>
+                <span class="text-[11px] text-muted-foreground">Les travaux réalisés se décrivent dans la section Clôture ; le responsable valide ensuite.</span>
+              </div>
+            </template>
+          </template>
+          <template v-else-if="item.statut !== 'cloture' && item.statut !== 'attente_validation'">
+            <p class="text-xs text-muted-foreground mb-3">L'intervention est faite par l'atelier interne. Elle peut être confiée à un atelier externe autorisé.</p>
+            <button v-if="!externeOuvert" :class="cls.btnOutline" @click="externeOuvert = true">Confier à un atelier externe</button>
+            <div v-else class="flex flex-col gap-3">
+              <div class="grid grid-cols-2 gap-3 max-sm:grid-cols-1">
+                <div :class="cls.field"><label :class="cls.fieldLabel">Atelier *</label><SearchableDropdown v-model="externeLocal.prestataireId" :items="optAteliers" placeholder="Choisir un atelier autorisé…" /></div>
+                <div :class="cls.field"><label :class="cls.fieldLabel">Remise du véhicule *</label><input v-model="externeLocal.remiseLe" type="date" :class="cls.fieldInput" /></div>
+                <div :class="cls.field"><label :class="cls.fieldLabel">Retour prévu</label><input v-model="externeLocal.retourPrevuLe" type="date" :class="cls.fieldInput" /></div>
+                <div :class="cls.field"><label :class="cls.fieldLabel">Montant du devis (Ar)</label><input v-model.number="externeLocal.montantDevisAr" type="number" min="0" :class="cls.fieldInput" /></div>
+              </div>
+              <div class="flex gap-2"><button :class="cls.btnOutline" @click="externeOuvert = false">Annuler</button><button :class="cls.btnPrimary" @click="confierExterne">Confier l'intervention</button></div>
+            </div>
+          </template>
+          <p v-else class="text-xs text-muted-foreground">Intervention réalisée par l'atelier interne.</p>
+        </FormSection>
+
+        <!-- 5. CLÔTURE -->
         <FormSection title="Clôture" :recaps="[LIB_STATUT_OT[item.statut]]" :default-open="item.statut !== 'ouvert' && item.statut !== 'diagnostique'">
           <template v-if="item.statut === 'cloture'">
-            <div class="flex items-center gap-2 text-success text-sm mb-3"><CheckCircle2 class="w-4 h-4" /> Ordre clôturé le {{ fmtDateHeure(item.clotureLe!) }}</div>
+            <div class="flex items-center gap-2 text-success text-sm mb-3"><CheckCircle2 class="w-4 h-4" /> Ordre clôturé le {{ fmtDateHeure(item.clotureLe!) }}<template v-if="item.valideParResponsable">, validé par {{ item.valideParResponsable }}</template></div>
             <p class="text-xs text-foreground leading-relaxed mb-3">{{ item.travauxRealises }}</p>
           </template>
           <template v-else>
@@ -192,21 +257,21 @@ function validerDir() { if (item.value) store.validerParDirecteur(item.value.id,
               <label :class="cls.fieldLabel">Travaux réalisés *</label>
               <textarea v-model="travauxLocal" rows="3" :class="cls.fieldTextarea" placeholder="Description des travaux effectués…" :disabled="item.statut === 'attente_validation'"></textarea>
             </div>
-            <button v-if="item.statut !== 'attente_validation'" :class="cls.btnPrimary" @click="cloturerOT">Soumettre à validation</button>
+            <button v-if="item.statut !== 'attente_validation' && !item.prestataire" :class="cls.btnPrimary" @click="cloturerOT">Le technicien déclare l'intervention terminée</button>
+            <p v-else-if="item.statut !== 'attente_validation'" class="text-[11px] text-muted-foreground">Intervention confiée à {{ item.prestataire }} : la fin se déclare au retour du véhicule (section Atelier externe).</p>
 
             <div v-else class="flex flex-col gap-2 mt-2">
-              <p class="text-[11px] text-muted-foreground mb-1">La clôture exige la double validation hiérarchique : responsable, puis directeur.</p>
               <div class="flex items-center gap-2 text-xs">
-                <component :is="item.valideParResponsable ? CheckCircle2 : Circle" class="w-4 h-4" :class="item.valideParResponsable ? 'text-success' : 'text-muted-foreground'" />
-                <span>Responsable : {{ item.valideParResponsable ? `${item.valideParResponsable}, le ${fmtDateHeure(item.valideParResponsableLe!)}` : 'en attente' }}</span>
-                <button v-if="!item.valideParResponsable" :class="cls.btnOutline" class="ml-auto !py-1 !px-2.5 !text-[11px]" @click="validerResp">Valider</button>
+                <CheckCircle2 class="w-4 h-4 text-success" />
+                <span>Intervention déclarée terminée par {{ item.termineDeclarePar ?? item.cloturePar }}<template v-if="item.termineDeclareLe">, le {{ fmtDateHeure(item.termineDeclareLe) }}</template></span>
               </div>
               <div class="flex items-center gap-2 text-xs">
-                <component :is="item.valideParDirecteur ? CheckCircle2 : Circle" class="w-4 h-4" :class="item.valideParDirecteur ? 'text-success' : 'text-muted-foreground'" />
-                <span>Directeur : {{ item.valideParDirecteur ? `${item.valideParDirecteur}, le ${fmtDateHeure(item.valideParDirecteurLe!)}` : 'en attente' }}</span>
-                <button v-if="!item.valideParDirecteur" :class="cls.btnOutline" class="ml-auto !py-1 !px-2.5 !text-[11px] disabled:opacity-40 disabled:cursor-not-allowed" :disabled="!item.valideParResponsable" @click="validerDir">Valider</button>
+                <Circle class="w-4 h-4 text-muted-foreground" />
+                <span>Validation du responsable maintenance : en attente</span>
+                <button :class="cls.btnOutline" class="ml-auto !py-1 !px-2.5 !text-[11px]" @click="refuserFin">Refuser, l'intervention reprend</button>
+                <button :class="cls.btnPrimary" class="!py-1 !px-2.5 !text-[11px]" @click="validerResp">Valider et clôturer</button>
               </div>
-              <p v-if="!item.valideParResponsable" class="text-[11px] text-warning flex items-center gap-1.5 mt-1"><TriangleAlert class="w-3.5 h-3.5" /> Le directeur ne peut valider qu'après le responsable.</p>
+              <p class="text-[11px] text-muted-foreground flex items-center gap-1.5 mt-1"><TriangleAlert class="w-3.5 h-3.5" /> La validation clôture l'ordre et rend le véhicule de nouveau disponible.</p>
             </div>
           </template>
         </FormSection>

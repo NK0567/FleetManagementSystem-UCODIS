@@ -3,7 +3,7 @@
     <div :class="L.pageHeader">
       <div>
         <div :class="L.pageTitle">Paramètres de l'atelier</div>
-        <div :class="L.pageSub">Les trois valeurs qui gouvernent les indicateurs de charge et de coût</div>
+        <div :class="L.pageSub">Valeurs de référence, codes et contrôles de la maintenance</div>
       </div>
     </div>
 
@@ -67,7 +67,45 @@
         </div>
       </div>
 
-      <!-- Fonctionnalités désactivées, activables ici -->
+      <!-- 4. Codification des indisponibilités -->
+      <div :class="L.card" class="lg:col-span-2">
+        <div class="flex items-center justify-between mb-1">
+          <div :class="L.cardTitle" class="!mb-0"><Tags class="w-4 h-4 text-primary" /> Codification des indisponibilités</div>
+          <button class="text-[11px] text-muted-foreground underline bg-transparent border-0 cursor-pointer p-0" @click="codif.reinitialiser(codesUtilises)">Revenir aux codes proposés</button>
+        </div>
+        <p class="text-[11px] text-muted-foreground mb-3">Chaque entreprise renseigne ses propres causes d'indisponibilité, rangées par famille. Ces codes servent à qualifier chaque immobilisation et à cumuler les jours perdus.</p>
+        <div class="grid grid-cols-[110px_160px_1fr_32px] gap-2 items-center text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.03em] pb-1.5 border-b border-border max-sm:hidden">
+          <span>Code</span><span>Famille</span><span>Libellé</span><span></span>
+        </div>
+        <div v-for="c in codif.codes" :key="c.code" class="grid grid-cols-[110px_160px_1fr_32px] gap-2 items-center py-1.5 border-b border-border/60 max-sm:grid-cols-1">
+          <span class="text-xs font-mono text-foreground">{{ c.code }}</span>
+          <select :value="c.famille" :class="F.fieldInput" class="!h-[32px] !text-[12px]" @change="codif.modifier(c.code, { famille: ($event.target as HTMLSelectElement).value as FamilleIndispo })">
+            <option v-for="(lib, f) in LIB_FAMILLE_INDISPO" :key="f" :value="f">{{ lib }}</option>
+          </select>
+          <input :value="c.libelle" :class="F.fieldInput" class="!h-[32px] !text-[12px]" @change="codif.modifier(c.code, { libelle: ($event.target as HTMLInputElement).value })" />
+          <button class="w-8 h-8 flex items-center justify-center rounded-md border-0 bg-transparent text-muted-foreground hover:text-danger hover:bg-danger-bg cursor-pointer" title="Supprimer ce code" @click="supprimerCode(c.code)"><Trash2 class="w-3.5 h-3.5" /></button>
+        </div>
+        <div class="grid grid-cols-[110px_160px_1fr_auto] gap-2 items-center mt-3 max-sm:grid-cols-1">
+          <input v-model="nouveauCode.code" :class="F.fieldInput" class="!h-[32px] !text-[12px] uppercase" placeholder="Code" maxlength="6" />
+          <select v-model="nouveauCode.famille" :class="F.fieldInput" class="!h-[32px] !text-[12px]">
+            <option v-for="(lib, f) in LIB_FAMILLE_INDISPO" :key="f" :value="f">{{ lib }}</option>
+          </select>
+          <input v-model="nouveauCode.libelle" :class="F.fieldInput" class="!h-[32px] !text-[12px]" placeholder="Libellé de la cause" />
+          <button :class="F.btnPrimary" class="!py-1.5 !text-[12px]" @click="ajouterCode">Ajouter</button>
+        </div>
+        <p v-if="erreurCode" class="text-[11px] text-danger mt-1.5">{{ erreurCode }}</p>
+      </div>
+
+      <!-- 5. Points de contrôle du véhicule -->
+      <ReglagePointsControle class="lg:col-span-2" />
+
+      <!-- 6. Seuils des pneumatiques -->
+      <ReglageSeuilsPneus />
+
+      <!-- 7. Objectifs de l'équipe mobile -->
+      <ReglageObjectifsMobile v-if="params.estActif('maintenance_equipe_mobile')" />
+
+      <!-- 8. Écrans facultatifs du module -->
       <div :class="L.card">
         <div :class="L.cardTitle"><Settings2 class="w-4 h-4 text-primary" /> Écrans du module</div>
         <p class="text-[11px] text-muted-foreground mb-3 leading-relaxed">
@@ -101,17 +139,36 @@
  * n'est pas reprise dans la liste des spécialités.
  */
 import { ref, computed } from 'vue'
-import { Building2, Coins, CalendarOff, ChevronRight, Settings2 } from '@lucide/vue'
+import { Building2, Coins, CalendarOff, ChevronRight, Settings2, Tags, Trash2 } from '@lucide/vue'
+import ReglagePointsControle from '../../components/maintenance/ReglagePointsControle.vue'
+import ReglageSeuilsPneus from '../../components/maintenance/ReglageSeuilsPneus.vue'
+import ReglageObjectifsMobile from '../../components/maintenance/ReglageObjectifsMobile.vue'
+import { useCodificationIndispoStore } from '../../stores/codificationIndispo'
 import { useMaintenanceStore } from '../../stores/maintenance'
 import { useParametresModulesStore } from '../../stores/parametresModules'
 import BadgeOrigine from '../../components/maintenance/BadgeOrigine.vue'
-import { LIB_COMPETENCE } from '../../types/maintenance'
-import type { CompetenceAtelier } from '../../types/maintenance'
+import { LIB_COMPETENCE, LIB_FAMILLE_INDISPO } from '../../types/maintenance'
+import type { CompetenceAtelier, FamilleIndispo } from '../../types/maintenance'
 import * as L from '../../lib/listClasses'
 import * as F from '../../lib/formClasses'
 
 const store = useMaintenanceStore()
+const codif = useCodificationIndispoStore()
+const codesUtilises = computed(() => [...new Set(store.indisponibilites.map(i => i.code))])
+function supprimerCode(code: string) {
+  const n = store.indisponibilites.filter(i => i.code === code).length
+  if (n) { alert(`Le code ${code} qualifie ${n} immobilisation(s) enregistrée(s) : il ne peut pas être supprimé. Modifiez plutôt son libellé.`); return }
+  codif.supprimer(code)
+}
+const nouveauCode = ref({ code: '', famille: 'technique' as FamilleIndispo, libelle: '' })
+const erreurCode = ref('')
+function ajouterCode() {
+  const res = codif.ajouter(nouveauCode.value)
+  erreurCode.value = res.ok ? '' : (res.motif ?? '')
+  if (res.ok) nouveauCode.value = { code: '', famille: nouveauCode.value.famille, libelle: '' }
+}
 const params = useParametresModulesStore()
+
 function fmtAr(n: number) { return n.toLocaleString('fr-FR') + ' Ar' }
 
 const COMPETENCES: CompetenceAtelier[] = ['mecanique', 'electricite', 'pneumatique']

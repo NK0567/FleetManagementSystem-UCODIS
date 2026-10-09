@@ -295,7 +295,9 @@ const sep = 'w-px h-5 bg-border shrink-0'
         <div :class="L.pageTitle">{{ title }}</div>
         <div v-if="subtitle" :class="L.pageSub">{{ subtitle }}</div>
       </div>
-      <slot name="header-actions" />
+      <div v-if="$slots['header-actions']" class="flex items-center gap-2 flex-wrap justify-end">
+        <slot name="header-actions" />
+      </div>
     </div>
 
     <!-- Contenu optionnel au-dessus de la table (ex. bandeau de KPIs) -->

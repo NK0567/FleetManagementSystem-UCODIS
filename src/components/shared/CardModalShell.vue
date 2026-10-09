@@ -9,7 +9,7 @@
  * d'actions (slot), zone de formulaire (slot), navigation prev/next, gestion
  * Escape + confirmation si modifications non enregistrées.
  */
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, getCurrentInstance } from 'vue'
 import {
   ArrowLeft, Check, SquarePen, LoaderCircle, X, Plus, EllipsisVertical,
   Maximize2, Minimize2, ChevronLeft, ChevronRight, CircleAlert,
@@ -70,6 +70,12 @@ const emit = defineEmits<{
 }>()
 
 const showUnsavedDiscardDialog = ref(false)
+
+/* Un bouton de la barre de titre n'apparaît que si la fiche qui utilise la
+   coquille sait y répondre : jamais d'icône qui ne fait rien au clic. */
+const vnodeProps = getCurrentInstance()?.vnode.props ?? {}
+const peutModifier = computed(() => props.showEdit && !!vnodeProps.onEnterEdit)
+const peutCreer = computed(() => props.showTitleNewButton && !!vnodeProps.onCreate)
 
 const showNumberAsPrimary = computed(
   () => !!props.pageNumber && props.pageTitle.startsWith(props.pageNumber),
@@ -241,7 +247,7 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
                     </template>
                     <template v-else>
                       <button
-                        v-if="showEdit"
+                        v-if="peutModifier"
                         @click="emit('enter-edit')"
                         :disabled="isLoading || actionsDisabled"
                         class="cursor-pointer p-2 text-primary hover:bg-background rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
@@ -250,7 +256,7 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
                         <SquarePen class="w-5 h-5" />
                       </button>
                       <button
-                        v-if="showTitleNewButton"
+                        v-if="peutCreer"
                         :disabled="isLoading || actionsDisabled"
                         class="cursor-pointer p-2 text-primary hover:bg-background rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
                         title="Créer"

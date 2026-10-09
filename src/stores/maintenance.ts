@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { useCodificationIndispoStore } from './codificationIndispo'
+import { ref, computed, watch } from 'vue'
 import {
-  MAX_PANNES_SIMULTANEES, COMPETENCE_PAR_SOUS_SYSTEME, PRIORITE_PAR_GRAVITE, familleDuCode,
+  MAX_PANNES_SIMULTANEES, COMPETENCE_PAR_SOUS_SYSTEME, PRIORITE_PAR_GRAVITE,
 } from '../types/maintenance'
 import type {
   OrdreTravail, Indisponibilite, PanneDiagnostiquee, CompetenceAtelier,
@@ -28,6 +29,7 @@ import { useCarburantStore } from './carburant'
  * technicien puis responsable puis directeur, chacune horodatée.
  */
 export const useMaintenanceStore = defineStore('maintenance', () => {
+  const codification = useCodificationIndispoStore()
 
   /* ══════════════════════════════════════════════════════════
      Paramètres de l'atelier
@@ -231,7 +233,7 @@ export const useMaintenanceStore = defineStore('maintenance', () => {
   }
   const joursPerdusParFamille = computed(() => {
     const acc: Record<string, number> = { technique: 0, reglementaire: 0, administrative: 0, humaine: 0 }
-    indisponibilites.value.forEach(i => { acc[familleDuCode(i.code)] = (acc[familleDuCode(i.code)] ?? 0) + dureeIndispo(i) })
+    indisponibilites.value.forEach(i => { acc[codification.familleDuCode(i.code)] = (acc[codification.familleDuCode(i.code)] ?? 0) + dureeIndispo(i) })
     return acc
   })
   /** Le type se déduit du préfixe de la plaque : « RM » pour les
@@ -256,7 +258,7 @@ export const useMaintenanceStore = defineStore('maintenance', () => {
   const coutParFamille = computed(() => {
     if (!coutImmoRenseigne.value) return null
     const acc: Record<string, number> = { technique: 0, reglementaire: 0, administrative: 0, humaine: 0 }
-    indisponibilites.value.forEach(i => { const f = familleDuCode(i.code); acc[f] = (acc[f] ?? 0) + (coutIndispo(i) ?? 0) })
+    indisponibilites.value.forEach(i => { const f = codification.familleDuCode(i.code); acc[f] = (acc[f] ?? 0) + (coutIndispo(i) ?? 0) })
     return acc
   })
 
@@ -613,11 +615,11 @@ export const useMaintenanceStore = defineStore('maintenance', () => {
     if (p.origine === 'achat') o.statut = 'attente_piece'
   }
 
-  /** Clôture - exige diagnostic complet et travaux décrits, puis
-   *  attend la triple validation exigée par le cahier des charges
-   *  UCODIS : technicien (implicite à cette étape), responsable,
-   *  directeur. La clôture définitive n'a lieu qu'une fois les deux
-   *  validations hiérarchiques recueillies. */
+  /** Fin d'intervention, en deux temps : le technicien interne, ou
+   *  l'atelier externe, déclare l'intervention terminée ; le responsable
+   *  maintenance valide ensuite, ce qui clôture l'ordre, referme
+   *  l'indisponibilité du véhicule et alimente le temps moyen de
+   *  réparation. Le diagnostic complet et les travaux décrits sont exigés. */
   function cloturer(id: string, travaux: string, par: string): boolean {
     const o = getById(id); if (!o) return false
     if (!o.sousSysteme || !o.modeDefaillance || !o.causeRacine || !travaux.trim()) return false
@@ -625,22 +627,160 @@ export const useMaintenanceStore = defineStore('maintenance', () => {
     o.travauxRealises = travaux
     o.coutPiecesAr = coutOT(o)
     o.cloturePar = par
+    o.termineDeclarePar = par
+    o.termineDeclareLe = new Date().toISOString()
     return true
   }
   function validerParResponsable(id: string, par: string) {
     const o = getById(id); if (!o || o.statut !== 'attente_validation') return
     o.valideParResponsable = par
     o.valideParResponsableLe = new Date().toISOString()
-  }
-  function validerParDirecteur(id: string, par: string) {
-    const o = getById(id); if (!o || o.statut !== 'attente_validation' || !o.valideParResponsable) return
-    o.valideParDirecteur = par
-    o.valideParDirecteurLe = new Date().toISOString()
     o.statut = 'cloture'
-    o.clotureLe = o.valideParDirecteurLe
+    o.clotureLe = o.valideParResponsableLe
     const ind = indisponibilites.value.find(i => i.ordreTravailId === id && !i.fin)
     if (ind) { ind.fin = o.clotureLe; ind.dureeJours = dureeIndispo(ind) }
   }
+  /** Le responsable refuse la fin déclarée : l'intervention reprend. */
+  function refuserFin(id: string) {
+    const o = getById(id); if (!o || o.statut !== 'attente_validation') return
+    o.statut = 'en_cours'; o.termineDeclarePar = undefined; o.termineDeclareLe = undefined
+  }
+
+  /* ══ Reprise de l'historique ═══════════════════════════════ */
+  /** Mots repérés dans un libellé libre pour proposer un sous-système de la
+   *  nomenclature ; la proposition est toujours validée par une personne. */
+  const MOTS_SOUS_SYSTEME: [SousSysteme, string[]][] = [
+    ['freinage', ['frein', 'garniture', 'plaquette', 'tambour', 'disque']],
+    ['moteur', ['moteur', 'vidange', 'huile', 'injecteur', 'culasse', 'courroie']],
+    ['transmission', ['boîte', 'boite', 'embrayage', 'pont', 'cardan', 'vitesse']],
+    ['electricite', ['batterie', 'alternateur', 'démarreur', 'demarreur', 'phare', 'feu', 'électri', 'electri', 'câble']],
+    ['circuit_air', ['air', 'compresseur', 'valve', 'flexible']],
+    ['circuit_carburant', ['gazole', 'gasoil', 'carburant', 'réservoir', 'pompe à']],
+    ['direction_suspension', ['direction', 'suspension', 'amortisseur', 'ressort', 'lame', 'rotule']],
+    ['roues_roulements', ['roue', 'roulement', 'pneu', 'jante', 'moyeu']],
+    ['chassis_tolerie', ['châssis', 'chassis', 'tôle', 'tole', 'carrosserie', 'pare-choc', 'soudure']],
+    ['refroidissement', ['radiateur', 'refroidissement', 'ventilateur', 'thermostat', 'durite']],
+  ]
+  function proposerSousSysteme(libelle: string): SousSysteme | null {
+    const t = libelle.toLowerCase()
+    return MOTS_SOUS_SYSTEME.find(([, mots]) => mots.some(m => t.includes(m)))?.[0] ?? null
+  }
+  /** Importe des interventions anciennes, déjà réalisées, avec leur
+   *  sous-système validé : elles rejoignent l'historique du véhicule,
+   *  clôturées, sans rendre le véhicule indisponible. */
+  function importerHistorique(lignes: { vehiculeId: string; vehiculePlaque: string; date: string; libelle: string; coutAr: number; sousSysteme: SousSysteme }[]) {
+    // Un fichier réimporté par erreur ne doit pas doubler l'historique :
+    // même véhicule, même date et même description = déjà présent.
+    const deja = (l: { vehiculeId: string; date: string; libelle: string }) => ordres.value.some(o =>
+      o.vehiculeId === l.vehiculeId && o.declareLe.slice(0, 10) === l.date && o.symptome.trim().toLowerCase() === l.libelle.trim().toLowerCase())
+    const nouvelles = lignes.filter(l => !deja(l))
+    nouvelles.forEach(l => {
+      const ref = `HIS-${l.date.slice(0, 7)}-${++seqOT}`
+      ordres.value.push({ id: ref, reference: ref, vehiculeId: l.vehiculeId, vehiculePlaque: l.vehiculePlaque, origine: 'constat_garage',
+        declarePar: 'Reprise historique', declareLe: l.date, symptome: l.libelle, gravite: 'mineure', typeMaintenance: 'correctif',
+        sousSysteme: l.sousSysteme, statut: 'cloture', mecaniciens: [], pieces: [], temps: [], travauxRealises: l.libelle,
+        montantDevisAr: l.coutAr, prestataire: 'Reprise historique', clotureLe: l.date, valideParResponsable: 'Reprise historique', valideParResponsableLe: l.date })
+    })
+    return { importees: nouvelles.length, ignorees: lignes.length - nouvelles.length }
+  }
+
+  /* ══ Équipe mobile ═════════════════════════════════════════ */
+  /** Objectifs de l'équipe mobile, paramétrables par entreprise. */
+  const objectifsMobile = ref({ testsParMois: 20, tauxResolutionPct: 90, delaiMaxMinutes: 120 })
+  try { const b = localStorage.getItem('fms-ucodis-objectifs-mobile'); if (b) Object.assign(objectifsMobile.value, JSON.parse(b)) } catch { /* défaut */ }
+  watch(objectifsMobile, v => { try { localStorage.setItem('fms-ucodis-objectifs-mobile', JSON.stringify(v)) } catch { /* tant pis */ } }, { deep: true })
+  let seqMobile = 40
+  /** Déclenche une intervention de l'équipe mobile, avec la position du
+   *  camion et l'équipe envoyée ; l'heure de départ est celle du déclenchement. */
+  function declencherMobile(d: Pick<InterventionMobile, 'type' | 'vehiculeId' | 'vehiculePlaque' | 'lieu' | 'lat' | 'lng' | 'equipe'>): { ok: boolean; motif?: string; id?: string } {
+    if ((d.type.startsWith('depannage') || d.type === 'securisation') && !d.vehiculeId) return { ok: false, motif: 'Un dépannage ou une sécurisation concerne un camion : choisissez-le.' }
+    if (!d.lieu.trim()) return { ok: false, motif: 'Indiquez la position du camion.' }
+    if (!d.equipe.length) return { ok: false, motif: "Indiquez l'équipe envoyée." }
+    if (d.vehiculeId && interventionsMobiles.value.some(i => i.vehiculeId === d.vehiculeId && !i.clotureLe))
+      return { ok: false, motif: `Une intervention est déjà en cours pour ${d.vehiculePlaque}.` }
+    const ref = `MOB-${new Date().getFullYear()}-${String(++seqMobile).padStart(4, '0')}`
+    interventionsMobiles.value.unshift({ ...d, lieu: d.lieu.trim(), id: ref, reference: ref, declencheLe: new Date().toISOString(), resolu: false })
+    return { ok: true, id: ref }
+  }
+  function arriveeMobile(id: string) {
+    const i = interventionsMobiles.value.find(x => x.id === id); if (i && !i.arriveeLe) i.arriveeLe = new Date().toISOString()
+  }
+  /** Clôture : résolue sur place, ou non résolue avec ouverture d'un ordre
+   *  de travail pour le véhicule (qui devient indisponible). */
+  function cloturerMobile(id: string, resolu: boolean, observation: string, ouvrirOT: boolean, tests?: { realises: number; positifs: number }): { ok: boolean; motif?: string } {
+    const i = interventionsMobiles.value.find(x => x.id === id); if (!i || i.clotureLe) return { ok: false, motif: 'Intervention déjà clôturée.' }
+    if (tests) {
+      if (!(tests.realises >= 0) || !(tests.positifs >= 0) || !Number.isInteger(tests.realises) || !Number.isInteger(tests.positifs)) return { ok: false, motif: 'Indiquez des nombres de tests entiers et positifs.' }
+      if (tests.positifs > tests.realises) return { ok: false, motif: 'Il ne peut pas y avoir plus de tests positifs que de tests réalisés.' }
+      i.testsRealises = tests.realises; i.testsPositifs = tests.positifs
+    }
+    if (!i.arriveeLe) i.arriveeLe = new Date().toISOString()
+    i.clotureLe = new Date().toISOString(); i.resolu = resolu; i.observation = observation || i.observation
+    if (ouvrirOT && i.vehiculeId && i.vehiculePlaque) {
+      i.ordreTravailId = creerOT({ vehiculeId: i.vehiculeId, vehiculePlaque: i.vehiculePlaque, origine: 'equipe_mobile', declarePar: i.equipe[0] ?? 'Équipe mobile',
+        declareLe: i.clotureLe, symptome: `Dépannage sur route (${i.lieu}) non résolu sur place.${observation ? ' ' + observation : ''}`, gravite: 'majeure', typeMaintenance: 'correctif' })
+    }
+    return { ok: true }
+  }
+
+  /* ══ Qualification des indisponibilités ════════════════════ */
+  /** Requalifie une immobilisation avec un code de la codification de
+   *  l'entreprise ; la famille suit le code. */
+  function qualifierIndispo(id: string, code: string) {
+    const i = indisponibilites.value.find(x => x.id === id); if (!i) return
+    i.code = code; i.famille = codification.familleDuCode(code)
+  }
+  /** Immobilisation déclarée hors ordre de travail (visite, congé du
+   *  chauffeur, dossier administratif...). */
+  function declarerIndispo(d: { vehiculeId: string; vehiculePlaque: string; code: string; debut: string; commentaire?: string }): { ok: boolean; motif?: string } {
+    if (indisponibilites.value.some(i => i.vehiculeId === d.vehiculeId && !i.fin))
+      return { ok: false, motif: `${d.vehiculePlaque} est déjà immobilisé : qualifiez ou levez l'immobilisation en cours.` }
+    if (new Date(d.debut).getTime() > Date.now()) return { ok: false, motif: "Le début de l'immobilisation ne peut pas être dans le futur." }
+    indisponibilites.value.unshift({ id: `IND-${Date.now()}`, vehiculeId: d.vehiculeId, vehiculePlaque: d.vehiculePlaque,
+      code: d.code, famille: codification.familleDuCode(d.code), debut: d.debut, commentaire: d.commentaire })
+    return { ok: true }
+  }
+  /** Lève une immobilisation sans ordre de travail ; celle d'un ordre se
+   *  referme à sa clôture. */
+  function leverIndispo(id: string) {
+    const i = indisponibilites.value.find(x => x.id === id); if (!i || i.fin || i.ordreTravailId) return
+    i.fin = new Date().toISOString(); i.dureeJours = dureeIndispo(i)
+  }
+
+  /* ══ Atelier externe ═══════════════════════════════════════ */
+  /** Confie l'intervention à un atelier externe autorisé : l'ordre garde
+   *  sa qualification (diagnostic, cause, pièces, coût), seul son
+   *  exécutant change. */
+  function confierAtelierExterne(id: string, d: { prestataireId: string; prestataireNom: string; remiseLe: string; retourPrevuLe?: string; montantDevisAr?: number }): { ok: boolean; motif?: string } {
+    const o = getById(id); if (!o) return { ok: false, motif: 'Ordre introuvable.' }
+    if (o.statut === 'cloture' || o.statut === 'attente_validation') return { ok: false, motif: "L'intervention est déjà terminée." }
+    if (d.retourPrevuLe && d.retourPrevuLe < d.remiseLe) return { ok: false, motif: 'Le retour prévu ne peut pas précéder la remise du véhicule.' }
+    if (d.montantDevisAr != null && d.montantDevisAr < 0) return { ok: false, motif: 'Le montant du devis ne peut pas être négatif.' }
+    o.prestataireId = d.prestataireId; o.prestataire = d.prestataireNom
+    o.remiseAtelierLe = d.remiseLe; o.retourPrevuLe = d.retourPrevuLe
+    if (d.montantDevisAr != null) o.montantDevisAr = d.montantDevisAr
+    o.mecaniciens = []
+    if (o.statut === 'ouvert' || o.statut === 'diagnostique') o.statut = 'en_cours'
+    return { ok: true }
+  }
+  function suivreAtelierExterne(id: string, d: { avancement?: string; retourPrevuLe?: string; montantDevisAr?: number }) {
+    const o = getById(id); if (!o) return
+    if (d.avancement !== undefined) o.avancementExterne = d.avancement
+    if (d.retourPrevuLe !== undefined) o.retourPrevuLe = d.retourPrevuLe
+    if (d.montantDevisAr !== undefined) o.montantDevisAr = d.montantDevisAr
+  }
+  /** Retour du véhicule : l'atelier externe déclare l'intervention
+   *  terminée, qui attend ensuite la validation du responsable. */
+  function retourAtelierExterne(id: string, travaux: string, retourLe: string): { ok: boolean; motif?: string } {
+    const o = getById(id); if (!o || !o.prestataire) return { ok: false, motif: 'Ordre introuvable.' }
+    if (o.remiseAtelierLe && retourLe < o.remiseAtelierLe) return { ok: false, motif: 'Le retour ne peut pas précéder la remise du véhicule.' }
+    if (retourLe > new Date().toISOString().slice(0, 10)) return { ok: false, motif: 'La date de retour ne peut pas être dans le futur.' }
+    if (!cloturer(id, travaux, o.prestataire))
+      return { ok: false, motif: "Diagnostic incomplet ou description des travaux manquante : l'atelier ne peut pas encore déclarer l'intervention terminée." }
+    o.retourLe = retourLe
+    return { ok: true }
+  }
+  const auxAteliersExternes = computed(() => ordres.value.filter(o => o.prestataireId && o.statut !== 'cloture' && o.statut !== 'annule'))
 
   return {
     ordres, getById, ouverts, enAttentePiece, ordresDuVehicule,
@@ -662,6 +802,10 @@ export const useMaintenanceStore = defineStore('maintenance', () => {
     parametresAtelier, majParametresAtelier, capaciteRenseignee,
     VALEURS_SIMULATION, marquerSaisiParClient, restaurerSimulation, estSimule, groupesSimules,
     capaciteHeuresParJour, capaciteHeuresParSemaine, tarifRenseigne, coutImmoRenseigne,
-    creerOT, diagnostiquer, ajouterPiece, ajouterPanne, cloturer, validerParResponsable, validerParDirecteur,
+    creerOT, diagnostiquer, ajouterPiece, ajouterPanne, cloturer, validerParResponsable, refuserFin,
+    qualifierIndispo, declarerIndispo, leverIndispo,
+    proposerSousSysteme, importerHistorique,
+    objectifsMobile, declencherMobile, arriveeMobile, cloturerMobile,
+    confierAtelierExterne, suivreAtelierExterne, retourAtelierExterne, auxAteliersExternes,
   }
 })

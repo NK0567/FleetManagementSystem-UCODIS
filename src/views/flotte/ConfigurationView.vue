@@ -202,6 +202,7 @@
             <th :class="L.th">Ville</th>
             <th :class="L.th">Contact</th>
             <th :class="L.th">Téléphone</th>
+            <th :class="L.th">Notifications</th>
             <th :class="L.th"></th>
           </tr></thead>
           <tbody>
@@ -210,6 +211,7 @@
               <td :class="L.td" class="text-muted-foreground">{{ c.ville ?? '-' }}</td>
               <td :class="L.td" class="text-muted-foreground">{{ c.contact ?? '-' }}</td>
               <td :class="L.td" class="text-muted-foreground">{{ c.telephone ?? '-' }}</td>
+              <td :class="L.td" class="text-muted-foreground">{{ LIB_CANAL[c.canalPrefere ?? 'sms'] }}</td>
               <td :class="L.td">
                 <div class="flex items-center gap-2">
                   <button class="text-[11px] text-primary hover:underline bg-transparent border-0 cursor-pointer" @click="ouvrirEditionClient(c)">Modifier</button>
@@ -361,6 +363,8 @@
       </div>
     </div>
 
+    <ConfigCarburantOnglet v-if="onglet === 'carburant'" />
+
     <!-- ══ Type d'écart : modification ═══════════════════════ -->
     <div v-if="formType" class="fixed inset-0 z-[1000] flex items-center justify-center bg-black/40 px-4" @click.self="formType = null">
       <div class="bg-card rounded-lg border border-border shadow-lg w-full max-w-lg p-4">
@@ -449,6 +453,10 @@
           <div :class="F.field"><label :class="F.fieldLabel">Ville</label><input v-model="formClient.ville" :class="F.fieldInput" /></div>
           <div :class="F.field"><label :class="F.fieldLabel">Contact</label><input v-model="formClient.contact" :class="F.fieldInput" /></div>
           <div :class="F.field"><label :class="F.fieldLabel">Téléphone</label><input v-model="formClient.telephone" :class="F.fieldInput" /></div>
+          <div :class="F.field"><label :class="F.fieldLabel">E-mail</label><input v-model="formClient.email" :class="F.fieldInput" /></div>
+          <div :class="F.field"><label :class="F.fieldLabel">Canal des notifications de livraison</label>
+            <select v-model="formClient.canalPrefere" :class="F.fieldInput"><option v-for="(lib, k) in LIB_CANAL" :key="k" :value="k">{{ lib }}</option></select>
+          </div>
         </div>
         <div class="flex items-center justify-end gap-2 mt-4">
           <button :class="cls.btnOutline" @click="showClientForm = false">Annuler</button>
@@ -473,8 +481,9 @@ import { AlertCircle, Archive, Award, BellRing, ChevronDown, ChevronUp, Clock, P
 import SearchableDropdown from '../../components/ui/SearchableDropdown.vue'
 import type { DropdownItem } from '../../components/ui/SearchableDropdown.vue'
 import FleetMap from '../../components/flotte/FleetMap.vue'
+import ConfigCarburantOnglet from '../../components/flotte/ConfigCarburantOnglet.vue'
 import { useTrajetsStore } from '../../stores/trajets'
-import { useClientsStore, type Client } from '../../stores/clients'
+import { useClientsStore, LIB_CANAL, type Client, type CanalNotification } from '../../stores/clients'
 import { useConfigTypesEcartStore, LIB_CATEGORIE_ECART, type CategorieEcart, type ConfigTypeEcart } from '../../stores/ecarts'
 import { useConfigurationStore } from '../../stores/configuration'
 import { useScoresConducteursStore } from '../../stores/scoresConducteurs'
@@ -493,13 +502,14 @@ const configStore = useConfigurationStore()
 const scoresStore = useScoresConducteursStore()
 const p = configStore.parametres
 
-type Onglet = 'trajets' | 'clients' | 'ecarts' | 'parametres'
+type Onglet = 'trajets' | 'clients' | 'ecarts' | 'parametres' | 'carburant'
 const onglet = ref<Onglet>('trajets')
 const onglets = computed(() => [
   { key: 'trajets' as const, label: 'Trajets de référence', compte: trajetsStore.trajets.length },
   { key: 'clients' as const, label: 'Clients', compte: clientsStore.clients.length },
   { key: 'ecarts' as const, label: "Types d'écart", compte: typesEcartStore.types.length },
   { key: 'parametres' as const, label: 'Paramètres', compte: 0 },
+  { key: 'carburant' as const, label: 'Carburant', compte: 0 },
 ])
 
 /* ── Trajets ──────────────────────────────────────────────── */
@@ -620,9 +630,9 @@ function deplacerEtape(index: number, sens: -1 | 1) {
 /* ── Clients ──────────────────────────────────────────────── */
 const showClientForm = ref(false)
 const clientEnEdition = ref<Client | null>(null)
-const formClient = ref({ nom: '', ville: '', contact: '', telephone: '' })
-function ouvrirNouveauClient() { clientEnEdition.value = null; formClient.value = { nom: '', ville: '', contact: '', telephone: '' }; showClientForm.value = true }
-function ouvrirEditionClient(c: Client) { clientEnEdition.value = c; formClient.value = { nom: c.nom, ville: c.ville ?? '', contact: c.contact ?? '', telephone: c.telephone ?? '' }; showClientForm.value = true }
+const formClient = ref({ nom: '', ville: '', contact: '', telephone: '', email: '', canalPrefere: 'sms' as CanalNotification })
+function ouvrirNouveauClient() { clientEnEdition.value = null; formClient.value = { nom: '', ville: '', contact: '', telephone: '', email: '', canalPrefere: 'sms' }; showClientForm.value = true }
+function ouvrirEditionClient(c: Client) { clientEnEdition.value = c; formClient.value = { nom: c.nom, ville: c.ville ?? '', contact: c.contact ?? '', telephone: c.telephone ?? '', email: c.email ?? '', canalPrefere: c.canalPrefere ?? 'sms' }; showClientForm.value = true }
 function enregistrerClient() {
   if (!formClient.value.nom.trim()) return
   if (clientEnEdition.value) clientsStore.modifier(clientEnEdition.value.id, formClient.value)

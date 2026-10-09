@@ -6,7 +6,7 @@
     :items="pageItems"
     :total="totalCount"
     :total-text="`${totalCount} ordre(s) de travail`"
-    search-placeholder="Référence, plaque, symptôme…"
+    search-placeholder="Référence, plaque, symptôme, sous-système…"
     scope-label="Statut :"
     :scope-options="scopeOptions"
     v-model:scope="activeScope"
@@ -19,6 +19,7 @@
     @open-card="(o) => openCard((o as OrdreTravail).id)"
   >
     <template #header-actions>
+      <button :class="L.btnOutline" @click="importOuvert = true"><Upload class="w-4 h-4" /> Importer l'historique</button>
       <button :class="L.btnPrimary" @click="creationOuverte = true"><Plus class="w-4 h-4" /> Déclarer une panne</button>
     </template>
 
@@ -106,41 +107,21 @@
     <template #empty><Wrench class="w-8 h-8" /><p class="text-sm">Aucun ordre de travail</p></template>
   </ListPageLayout>
 
-  <OrdreTravailCard v-if="ficheId" :ordres="store.ordres" :ordre-id="ficheId" @close="ficheId = null" />
+  <OrdreTravailCard v-if="ficheId" :ordres="store.ordres" :ordre-id="ficheId" @close="ficheId = null" @creer="ficheId = null; creationOuverte = true" />
 
-  <!-- Déclaration d'une panne -->
-  <div v-if="creationOuverte" class="fixed inset-0 z-[1000] flex items-center justify-center bg-black/40 px-4" @click.self="creationOuverte = false">
-    <div class="bg-card rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
-      <div class="bg-primary px-5 py-3.5 flex items-center justify-between">
-        <h3 class="text-white font-semibold">Déclarer une panne</h3>
-        <button class="text-white/80 hover:text-white bg-transparent border-0 cursor-pointer" @click="creationOuverte = false"><X class="w-5 h-5" /></button>
-      </div>
-      <div class="p-5 flex flex-col gap-3.5">
-        <div :class="F.field">
-          <label :class="F.fieldLabel">Véhicule *</label>
-          <SearchableDropdown v-model="formNouvel.vehiculeId" :items="optVehicules" placeholder="Choisir…" />
-        </div>
-        <div :class="F.field">
-          <label :class="F.fieldLabel">Symptôme constaté *</label>
-          <textarea v-model="formNouvel.symptome" rows="3" :class="F.fieldTextarea" placeholder="Ce qui a été observé…"></textarea>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div :class="F.field">
-            <label :class="F.fieldLabel">Gravité *</label>
-            <SearchableDropdown v-model="formNouvel.gravite" :items="optGravite" placeholder="Sélectionner…" />
-          </div>
-          <div :class="F.field">
-            <label :class="F.fieldLabel">Origine</label>
-            <SearchableDropdown v-model="formNouvel.origine" :items="optOrigine" placeholder="Sélectionner…" />
-          </div>
-        </div>
-      </div>
-      <div class="flex items-center justify-end gap-2 px-5 py-3.5 border-t border-border">
-        <button :class="cls.btnOutline" @click="creationOuverte = false">Annuler</button>
-        <button :class="cls.btnPrimary" :disabled="!formNouvel.vehiculeId || !formNouvel.symptome.trim()" @click="declarerPanne">Déclarer</button>
-      </div>
-    </div>
-  </div>
+  <ImportCsvModal
+    v-if="importOuvert"
+    titre="Importer l'historique des interventions"
+    :champs="CHAMPS_IMPORT"
+    :apercu-colonnes="COLONNES_APERCU"
+    :modele="MODELE_CSV"
+    description-controles="Contrôles appliqués : véhicule reconnu par sa plaque, date passée (AAAA-MM-JJ ou JJ/MM/AAAA), description obligatoire, sous-système reconnu (colonne du fichier, sinon proposé d'après la description), intervention pas déjà présente."
+    :valider="validerLigneImport"
+    @close="importOuvert = false"
+    @importer="lignes => importerLignes(lignes as unknown as LigneHistorique[])"
+  />
+
+  <OrdreTravailFormModal v-if="creationOuverte" @close="creationOuverte = false" @cree="id => { creationOuverte = false; ficheId = id }" />
 </template>
 
 <script setup lang="ts">
@@ -151,18 +132,21 @@
  * indisponibilité, comme sur le socle FMS.
  */
 import { ref, computed, watch } from 'vue'
-import { Clock, Coins, PackageSearch, Plus, ShieldCheck, Wrench, X } from '@lucide/vue'
+import { Clock, Coins, PackageSearch, Plus, ShieldCheck, Upload, Wrench, X } from '@lucide/vue'
 import ListPageLayout from '../../components/shared/ListPageLayout.vue'
 import type { ListColumn } from '../../components/shared/ListPageLayout.vue'
 import SearchableDropdown from '../../components/ui/SearchableDropdown.vue'
 import type { DropdownItem } from '../../components/ui/SearchableDropdown.vue'
 import OrdreTravailCard from '../../components/maintenance/OrdreTravailCard.vue'
+import OrdreTravailFormModal from '../../components/maintenance/OrdreTravailFormModal.vue'
+import ImportCsvModal from '../../components/ui/ImportCsvModal.vue'
+import type { ChampImport, LigneValidee } from '../../components/ui/ImportCsvModal.vue'
 import { useMaintenanceStore } from '../../stores/maintenance'
 import { useVehiculeStore } from '../../stores/vehicules'
 import {
   LIB_ORIGINE_OT, LIB_SOUS_SYSTEME, LIB_MODE_DEFAILLANCE, LIB_TYPE_MAINTENANCE, LIB_GRAVITE_OT, LIB_STATUT_OT,
 } from '../../types/maintenance'
-import type { OrdreTravail, StatutOT, GraviteOT, OrigineOT } from '../../types/maintenance'
+import type { OrdreTravail, StatutOT, GraviteOT, OrigineOT, SousSysteme } from '../../types/maintenance'
 import { fmtDateHeure } from '../../utils/voyageUtils'
 import * as L from '../../lib/listClasses'
 import * as F from '../../lib/formClasses'
@@ -204,7 +188,7 @@ const filtered = computed(() => {
     if (activeScope.value === 'ouverts' && (o.statut === 'cloture' || o.statut === 'annule')) return false
     if (activeScope.value === 'piece' && o.statut !== 'attente_piece') return false
     if (activeScope.value === 'cloture' && o.statut !== 'cloture') return false
-    if (q && !`${o.reference} ${o.vehiculePlaque} ${o.symptome}`.toLowerCase().includes(q)) return false
+    if (q && !`${o.reference} ${o.vehiculePlaque} ${o.symptome} ${o.sousSysteme ? LIB_SOUS_SYSTEME[o.sousSysteme] : ''}`.toLowerCase().includes(q)) return false
     return true
   }).sort((a, b) => {
     const dir = sortDir.value === 'asc' ? 1 : -1
@@ -239,22 +223,65 @@ const columns = computed<ListColumn[]>(() => [
 
 /* ── Déclaration d'une panne ─────────────────────────────────── */
 const creationOuverte = ref(false)
-const formNouvel = ref({ vehiculeId: '', symptome: '', gravite: 'mineure' as GraviteOT, origine: 'remontee_chauffeur' as OrigineOT })
-const optVehicules = computed<DropdownItem[]>(() => vehicules.liste.map(v => ({ id: v.id, label: v.immatriculation, sublabel: `${v.marque} ${v.modele}` })))
-const optGravite: DropdownItem[] = Object.entries(LIB_GRAVITE_OT).map(([id, v]) => ({ id, label: v.label }))
-const optOrigine: DropdownItem[] = Object.entries(LIB_ORIGINE_OT).map(([id, label]) => ({ id, label }))
 
-function declarerPanne() {
-  const v = vehicules.parId(formNouvel.value.vehiculeId)
-  if (!v || !formNouvel.value.symptome.trim()) return
-  const ref = store.creerOT({
-    vehiculeId: v.id, vehiculePlaque: v.immatriculation,
-    origine: formNouvel.value.origine, declarePar: 'Hery Andriamalala', declareLe: new Date().toISOString(),
-    symptome: formNouvel.value.symptome.trim(), gravite: formNouvel.value.gravite, typeMaintenance: 'correctif',
-    kilometrage: v.kilometrage,
-  })
-  creationOuverte.value = false
-  formNouvel.value = { vehiculeId: '', symptome: '', gravite: 'mineure', origine: 'remontee_chauffeur' }
-  ficheId.value = ref
+/* ── Reprise de l'historique ─────────────────────────────────── */
+const importOuvert = ref(false)
+const CHAMPS_IMPORT: ChampImport[] = [
+  { cle: 'plaque', libelle: 'Immatriculation véhicule', requis: true },
+  { cle: 'date', libelle: 'Date', requis: true },
+  { cle: 'description', libelle: 'Description', requis: true },
+  { cle: 'cout', libelle: 'Coût (Ar)', requis: false },
+  { cle: 'sousSysteme', libelle: 'Sous-système', requis: false },
+]
+const COLONNES_APERCU = [
+  { cle: 'vehiculePlaque', libelle: 'Véhicule' },
+  { cle: 'date', libelle: 'Date' },
+  { cle: 'libelle', libelle: 'Description' },
+  { cle: 'sousSystemeLib', libelle: 'Sous-système' },
+  { cle: 'coutAr', libelle: 'Coût (Ar)' },
+]
+const MODELE_CSV = ['Immatriculation véhicule', 'Date', 'Description', 'Coût', 'Sous-système']
+interface LigneHistorique { vehiculeId: string; vehiculePlaque: string; date: string; libelle: string; coutAr: number; sousSysteme: SousSysteme }
+
+/** Accepte AAAA-MM-JJ ou JJ/MM/AAAA (export tableur courant) et ramène au format ISO. */
+function normaliserDate(d: string) {
+  const m = d.match(/^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$/)
+  return m ? `${m[3]}-${m[2]!.padStart(2, '0')}-${m[1]!.padStart(2, '0')}` : d.slice(0, 10)
+}
+function dateValide(d: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return false
+  const t = new Date(d + 'T00:00:00Z')
+  return !isNaN(t.getTime()) && t.toISOString().slice(0, 10) === d && t.getTime() <= Date.now()
+}
+const sansAccent = (t: string) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
+function sousSystemeDe(valeur: string, description: string): SousSysteme | null {
+  if (valeur) {
+    const v = sansAccent(valeur)
+    const trouve = (Object.entries(LIB_SOUS_SYSTEME) as [SousSysteme, string][]).find(([k, lib]) => sansAccent(k) === v || sansAccent(lib) === v)
+    if (trouve) return trouve[0]
+  }
+  return store.proposerSousSysteme(description) as SousSysteme | null
+}
+function validerLigneImport(ligne: Record<string, string>, mapping: Record<string, string>): LigneValidee {
+  const val = (cle: string) => (mapping[cle] ? (ligne[mapping[cle]!] ?? '').trim() : '')
+  const plaque = val('plaque')
+  if (!plaque) return { valide: false, motif: 'Immatriculation manquante' }
+  const v = vehicules.liste.find(x => x.immatriculation.replace(/\s/g, '').toLowerCase() === plaque.replace(/\s/g, '').toLowerCase())
+  if (!v) return { valide: false, motif: `Véhicule inconnu « ${plaque} »` }
+  const date = normaliserDate(val('date'))
+  if (!dateValide(date)) return { valide: false, motif: `Date invalide ou future « ${val('date')} »` }
+  const libelle = val('description')
+  if (!libelle) return { valide: false, motif: 'Description manquante' }
+  const coutBrut = val('cout').replace(/[\s\u00a0]/g, '').replace(',', '.')
+  const coutAr = coutBrut ? Number(coutBrut) : 0
+  if (Number.isNaN(coutAr) || coutAr < 0) return { valide: false, motif: `Coût invalide « ${val('cout')} »` }
+  const ss = sousSystemeDe(val('sousSysteme'), libelle)
+  if (!ss) return { valide: false, motif: 'Sous-système non reconnu : renseignez la colonne Sous-système' }
+  if (store.ordres.some(o => o.vehiculeId === v.id && o.declareLe.slice(0, 10) === date && o.symptome.trim().toLowerCase() === libelle.toLowerCase()))
+    return { valide: false, motif: 'Intervention déjà présente dans l\'historique' }
+  return { valide: true, donnees: { vehiculeId: v.id, vehiculePlaque: v.immatriculation, date, libelle, coutAr, sousSysteme: ss, sousSystemeLib: LIB_SOUS_SYSTEME[ss] } }
+}
+function importerLignes(lignes: LigneHistorique[]) {
+  store.importerHistorique(lignes.map(l => ({ vehiculeId: l.vehiculeId, vehiculePlaque: l.vehiculePlaque, date: l.date, libelle: l.libelle, coutAr: l.coutAr, sousSysteme: l.sousSysteme })))
 }
 </script>

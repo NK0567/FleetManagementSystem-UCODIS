@@ -196,7 +196,11 @@ export interface Vehicule {
   modele: string
   categorie: string
   carburant: string
+  /** Capacité du réservoir en litres, pour le contrôle des pleins. */
+  capaciteReservoirL?: number
   chargeMaxKg?: number
+  /** Volume utile de la caisse, pour la semi-remorque. */
+  volumeMaxM3?: number
   site: string
   statut: StatutVehicule
   motifIndisponibilite?: string
@@ -248,7 +252,7 @@ export interface AffectationVehicule {
  * (fiche de voyage, bon de livraison, carnet de bord) sous une forme
  * activable, comme convenu. */
 
-export type StatutVoyage = 'en_attente' | 'planifie' | 'affecte' | 'en_cours' | 'livre' | 'cloture' | 'litige' | 'annule'
+export type StatutVoyage = 'en_attente' | 'planifie' | 'confirme' | 'pret' | 'affecte' | 'en_cours' | 'livre' | 'cloture' | 'litige' | 'annule'
 export type RoleEtape = 'depart' | 'chargement' | 'repos' | 'controle' | 'livraison' | 'arrivee'
 
 export interface EtapeVoyage {
@@ -271,9 +275,90 @@ export interface EtapeVoyage {
   /** Le chauffeur marque son arrivée sur place, avant de recueillir la
    *  signature du destinataire : deux gestes distincts, l'un atteste
    *  qu'il est passé, l'autre que la livraison a bien été reçue. */
+  /** Confirmation de disponibilité du destinataire, recueillie par
+   *  téléphone avant le chargement, pour éviter un retour coûteux si le
+   *  client s'avère finalement indisponible. Distincte de la signature
+   *  de livraison, qui n'intervient qu'après le passage du chauffeur. */
+  confirmeLe?: string
+  /** Le destinataire, appelé avant chargement, indique ne pas pouvoir être
+   *  livré à la date prévue. Sa ligne sort de la tournée : elle ne compte
+   *  plus ni pour la confirmation des autres destinataires, ni pour le
+   *  chargement, ni pour l'exécution - l'indisponibilité d'un client
+   *  n'affecte jamais les autres. */
+  indisponibleLe?: string
+  motifIndisponibilite?: string
+  /** Date à laquelle le client dit pouvoir être livré. */
+  dateDisponibleClient?: string
+  /** Replanification : le planificateur programme une nouvelle date avec
+   *  le client, puis attend sa confirmation. La date reste « proposée »
+   *  tant que le client ne l'a pas confirmée. */
+  dateProposeePlanif?: string
+  dateConfirmeeLe?: string
+  /** Ce que l'entrepôt déclare avoir chargé pour cette ligne, pour que le
+   *  chauffeur puisse le contrôler avant de valider. */
+  contenuCharge?: string
+  /** Les articles de cette ligne, tirés de ce que l'entrepôt déclare avoir
+   *  chargé pour ce destinataire. */
+  articles?: ArticleLigne[]
+  /** Le client a demandé sur place de reporter à une autre date : la
+   *  marchandise retourne à l'entrepôt pour être replanifiée, et la ligne
+   *  sort de la tournée. Distinct d'un point simplement reporté, qui sera
+   *  retenté plus tard dans la même tournée. */
+  retourEntrepotLe?: string
+  motifRetour?: string
+  retourRecuLe?: string
+  /** L'entrepôt contrôle l'état de la marchandise à son retour, avant de la
+   *  considérer réceptionnée : c'est un produit qui a voyagé et qu'on ne
+   *  peut pas simplement supposer intact. */
+  retourConformeLe?: string
+  retourNonConformeLe?: string
+  motifRetourNonConforme?: string
+  /** Renseigné une fois que le chauffeur a rapporté à l'entrepôt les
+   *  articles non livrés de cette ligne : sans quoi le rappel doit rester
+   *  visible pour lui, même après la fin de la tournée qui le portait. */
+  articlesRapportesLe?: string
+  /** Une fois la nouvelle date confirmée par le client, cette ligne est
+   *  reprise automatiquement dans un nouvel ordre, à cette date : cet
+   *  identifiant relie l'une à l'autre. */
+  repriseDansVoyageId?: string
+  /** Reliquat d'une livraison partielle (articles non livrés) repris dans un
+   *  ordre en attente : date retenue et ordre de reprise. */
+  reliquatReprisLe?: string
+  reliquatDate?: string
+  reliquatRepriseDansVoyageId?: string
+  /** Contrôle du chauffeur, ligne par ligne : ce que l'entrepôt déclare pour
+   *  ce destinataire est conforme, ou non. Une ligne non conforme sort de la
+   *  tournée, à recharger et à replanifier, sans affecter les autres. */
+  chargementConformeLe?: string
+  chargementNonConformeLe?: string
+  motifNonConformite?: string
+  /** Poids et volume de cette ligne, quand elle vient d'une commande
+   *  regroupée : sert à recalculer le poids chargé de l'ordre entier. */
+  poidsKg?: number
+  volumeM3?: number
   arriveeLe?: string
-  /** Horodatage de la signature électronique recueillie sur place. */
-  signeLe?: string
+  /** Le chauffeur déclare, depuis son propre appareil, avoir effectué la
+   *  livraison : ça fait avancer sa tournée, mais ça ne prouve pas que le
+   *  client a reçu la marchandise. Un chauffeur pourrait le déclarer sans
+   *  être passé chez le client. */
+  livreParChauffeurLe?: string
+  /** Confirmation de réception par le client lui-même, depuis son propre
+   *  espace de suivi : seule cette action fait foi, jamais une saisie faite
+   *  sur l'appareil du chauffeur. */
+  receptionConfirmeeClientLe?: string
+  /** Vrai quand la réponse de disponibilité a été enregistrée par un agent
+   *  au téléphone plutôt que par le client depuis son lien. La page du client
+   *  affiche la même chose dans les deux cas. */
+  reponseViaAgent?: boolean
+  /** Le client conteste la déclaration du chauffeur : il n'a rien reçu, ou
+   *  pas ce qui est déclaré. La ligne passe en litige, à traiter par le
+   *  planificateur ; c'est le garde-fou contre une livraison déclarée mais
+   *  jamais faite. */
+  receptionContesteeLe?: string
+  motifContestation?: string
+  /** Le planificateur a traité la contestation (enquête, avoir, relivraison...). */
+  contestationTraiteeLe?: string
+  noteTraitementContestation?: string
   /** Historique des notifications automatiques envoyées au destinataire
    *  de cette ligne, simulées puisqu'aucun canal SMS ou e-mail réel
    *  n'est branché dans cette maquette. */
@@ -286,6 +371,33 @@ export interface EtapeVoyage {
   satisfactionEnvoyeeLe?: string
   satisfactionNote?: number
   satisfactionCommentaire?: string
+  /** Adresse e-mail simulée du destinataire, pour montrer clairement à
+   *  qui la notification serait envoyée - aucun envoi réel n'est
+   *  branché dans cette maquette. */
+  emailDestinataire?: string
+  /** Canal des notifications pour cette ligne : repris de la commande, ou du
+   *  canal préféré du client par défaut. */
+  canalNotification?: 'sms' | 'email' | 'sms_email'
+  /** Commande dont cette ligne est la livraison : toute ligne d'un ordre est
+   *  une commande, reçue du système de commandes ou saisie dans l'ordre. */
+  commandeId?: string
+  /** Contenu commandé : pré-remplit la déclaration de chargement de l'entrepôt. */
+  contenuCommande?: string
+  /** Référence externe de la commande (ex. numéro de bon de livraison),
+   *  reprise sur la ligne pour suivre le bon jusqu'au camion. */
+  referenceExterne?: string
+  /** Le point est reporté quand le chauffeur ne peut pas le livrer sur
+   *  le moment (client fermé, absent...) : la séquence continue sans
+   *  lui plutôt que de bloquer les livraisons suivantes. Il reste
+   *  accessible pour être retenté ensuite. */
+  reporteLe?: string
+  motifReport?: string
+  /** Le point est annulé quand le client annule sa commande en cours de
+   *  route : contrairement à un report, il ne sera plus jamais retenté.
+   *  Distinct de l'annulation de la tournée entière, qui reste réservée
+   *  au planificateur. */
+  ligneAnnuleeLe?: string
+  motifAnnulationLigne?: string
 }
 
 export type TypeNotificationClient = 'planification' | 'demarrage' | 'livraison'
@@ -298,13 +410,28 @@ export interface NotificationClient {
   contenu: string
 }
 
+/** Un article d'une ligne de livraison : une ligne peut en compter plusieurs,
+ *  et chacun a son propre sort - le premier peut être livré pendant que le
+ *  deuxième présente une anomalie. */
+export interface ArticleLigne {
+  id: string
+  libelle: string
+  statut?: 'livre' | 'non_livre'
+  motif?: string
+}
+
 export interface BonLivraisonElectronique {
   reference: string
   emisLe: string
   destinataire: string
   adresse: string
   produit: string
-  signePar: string
+  /** Nom du client qui a confirmé la réception depuis son espace de suivi.
+   *  Vide tant que seul le chauffeur a déclaré la livraison. */
+  signePar?: string
+  /** Articles de la ligne qui n'ont pas pu être livrés, avec le motif : la
+   *  livraison est alors partielle. */
+  articlesNonLivres?: { libelle: string; motif: string }[]
 }
 
 export interface Trajet {
@@ -353,6 +480,51 @@ export interface Marchandise {
   poidsDechargeKg?: number
 }
 
+/** Une commande de transport, enregistrée dès qu'elle arrive, avant tout
+ *  rattachement à un chargement : un destinataire, une adresse, un contenu,
+ *  une date souhaitée. Elle attend, seule, d'être regroupée avec d'autres
+ *  dans un chargement au moment de composer une tournée. */
+export interface Commande {
+  id: string
+  destinataire: string
+  adresseLivraison: string
+  lat: number
+  lng: number
+  /** Un site interne, pour un transfert plutôt qu'une livraison client. */
+  siteId?: string
+  contenu: string
+  poidsKg: number
+  volumeM3?: number
+  dateSouhaitee: string
+  /** Canal des notifications pour cette commande ; par défaut celui de la
+   *  fiche client, précisable ici (livraison chez un tiers, par exemple). */
+  canalNotification?: 'sms' | 'email' | 'sms_email'
+  /** Nombre d'unités à livrer (cartons, colis, palettes... selon le
+   *  paramétrage de l'entreprise). */
+  nombreUnites?: number
+  /** Référence de la commande dans le système de gestion commerciale de
+   *  l'entreprise (par exemple le numéro de bon de livraison). Son libellé
+   *  et son caractère obligatoire se paramètrent. */
+  referenceExterne?: string
+  commentaire?: string
+  /** Qui a émis la demande de livraison, et comment elle est arrivée. */
+  emisPar?: string
+  emisParRole?: string
+  origine?: 'demande' | 'systeme_externe' | 'planificateur'
+  /** en_attente : attend un ordre ; affectee : dans un ordre ;
+   *  rejetee : renvoyée à l'émetteur avec un motif, modifiable puis
+   *  renvoyable ; annulee : retirée par son émetteur. */
+  statut: 'en_attente' | 'affectee' | 'rejetee' | 'annulee'
+  motifRejet?: string
+  rejeteeLe?: string
+  rejeteePar?: string
+  motifAnnulation?: string
+  annuleeLe?: string
+  /** Renseigné une fois la commande affectée à un ordre de transport. */
+  voyageId?: string
+  createdAt: string
+}
+
 export interface Voyage {
   id: string
   reference: string
@@ -385,6 +557,23 @@ export interface Voyage {
    *  tournée : jamais une action du chauffeur, à aucun moment. */
   annuleLe?: string
   motifAnnulation?: string
+  /** Double contrôle du chargement, entre Confirmé et Prêt pour
+   *  exécution : l'entrepôt déclare avoir chargé, puis le chauffeur
+   *  contrôle et valide à son tour que ce qui a été chargé correspond
+   *  à ce qui doit l'être - un partage de responsabilité, ni l'un ni
+   *  l'autre ne suffisant seul. */
+  chargementEntrepotLe?: string
+  chargementChauffeurLe?: string
+  /** Certains clients n'exigent pas d'être appelés avant chargement :
+   *  l'étape de confirmation reste possible pour tous, mais peut être
+   *  désactivée tournée par tournée. Vrai par défaut. */
+  confirmationRequise?: boolean
+  /** Ordre créé automatiquement pour regrouper des lignes replanifiées à une
+   *  même date : les lignes replanifiées au même jour s'y ajoutent au lieu de
+   *  créer chacune un ordre d'une seule ligne. */
+  creeParReplanification?: boolean
+  /** Notifications envoyées au chauffeur affecté (tournée confiée, annulée). */
+  notificationsChauffeur?: { le: string; message: string }[]
 }
 
 /* ── Écarts d'itinéraire (Flotte · Conformité) ────────────────
@@ -430,7 +619,7 @@ export interface EcartItineraire {
  * GPS est retiré : aucun prestataire de ce type n'est nommé dans les
  * documents UCODIS. */
 
-export type CanalRecharge = 'mobile' | 'import' | 'regularisation'
+export type CanalRecharge = 'manuelle' | 'mobile' | 'import' | 'carte' | 'regularisation'
 export type StatutRecharge = 'valide' | 'anomalie' | 'en_qualification' | 'qualifie' | 'en_validation' | 'refacture' | 'classe'
 export type QualifEcartCarburant = 'technique' | 'conduite' | 'prelevement' | 'saisie'
 
@@ -468,6 +657,12 @@ export interface RechargeCarburant {
   commentaire?: string
   montantRefacture?: number
   validation?: { valideur: string; role: string; decision: 'approuve' | 'rejete'; date: string; commentaire?: string }
+  /** Reçu de la station, photographié depuis le téléphone ou joint au bureau. */
+  recu?: { nom: string; dataUrl?: string }
+  /** Transaction de carte carburant rapprochée de ce plein. */
+  transactionId?: string
+  saisiPar?: string
+  saisiLe?: string
 }
 
 export interface PeriodeConso {
@@ -481,6 +676,13 @@ export interface PeriodeConso {
   refConso: number
   ecartPct: number
   chauffeurNom?: string
+  /** Clé stable de la période (véhicule, premier et dernier plein). */
+  id?: string
+  chauffeurId?: string
+  trajetId?: string
+  trajetLibelle?: string
+  /** Origine de la référence retenue : véhicule et corridor, corridor, ou défaut. */
+  origineRef?: 'vehicule' | 'corridor' | 'defaut'
 }
 
 /* ── Sites (Flotte · référentiel géographique) ────────────────

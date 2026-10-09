@@ -103,6 +103,8 @@
 </template>
 
 <script setup lang="ts">
+import { useCodificationIndispoStore } from '../../stores/codificationIndispo'
+const libelleDuCode = (c: string) => useCodificationIndispoStore().libelleDuCode(c)
 /**
  * Vue d'ensemble du module Maintenance, reprise du socle FMS.
  * Chaque bloc renvoie vers l'écran détaillé correspondant.
@@ -111,7 +113,7 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { Wrench, Gauge, AlertTriangle, CalendarOff, CalendarClock, PackageSearch } from '@lucide/vue'
 import { useMaintenanceStore } from '../../stores/maintenance'
-import { LIB_SOUS_SYSTEME, LIB_STATUT_OT, libelleDuCode } from '../../types/maintenance'
+import { LIB_SOUS_SYSTEME, LIB_STATUT_OT } from '../../types/maintenance'
 import type { StatutOT } from '../../types/maintenance'
 import * as L from '../../lib/listClasses'
 

@@ -1,7 +1,7 @@
 <template>
   <ListPageLayout
     title="Équipe mobile"
-    :subtitle="`Patrouille conjointe - dépannage, sécurisation, contrôles inopinés · ${store.mobilesEnCours.length} en cours`"
+    :subtitle="`${store.mobilesEnCours.length} en cours`"
     :columns="columns"
     :items="pageItems"
     :total="totalCount"
@@ -16,8 +16,15 @@
     v-model:page="page"
     v-model:page-size="pageSize"
     @reset-filters="resetFilters"
+    @open-card="(i: any) => ouvrirFiche(i.id)"
   >
+    <template #header-actions>
+      <button :class="L.btnOutline" @click="reglageOuvert = !reglageOuvert"><Target class="w-4 h-4" /> Objectifs</button>
+      <button :class="L.btnPrimary" @click="declenchementOuvert = true"><Plus class="w-4 h-4" /> Déclencher une intervention</button>
+    </template>
+
     <template #above-table>
+      <ReglageObjectifsMobile v-if="reglageOuvert" class="mb-3.5" />
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-3.5">
         <div v-for="k in kpis" :key="k.label" :class="L.kpiCard">
           <p class="text-xl font-bold leading-none" :class="k.cls">{{ k.value }}</p>
@@ -28,7 +35,7 @@
     </template>
 
     <template #cell-reference="{ item }">
-      <span class="font-mono font-semibold text-foreground">{{ item.reference }}</span>
+      <button class="font-mono font-semibold text-foreground hover:text-primary hover:underline bg-transparent border-0 p-0 cursor-pointer" @click.stop="ouvrirFiche(item.id)">{{ item.reference }}</button>
       <div class="text-[11px] text-muted-foreground">{{ LIB_MISSION_MOBILE[item.type] }}</div>
     </template>
 
@@ -46,11 +53,11 @@
 
     <template #cell-delai="{ item }">
       <span v-if="delaiIntervention(item) != null" class="text-xs font-medium"
-        :class="(delaiIntervention(item) ?? 0) > 120 ? 'text-danger' : 'text-success'">
+        :class="(delaiIntervention(item) ?? 0) > obj.delaiMaxMinutes ? 'text-danger' : 'text-success'">
         {{ fmtDuree(delaiIntervention(item) ?? 0) }}
       </span>
       <span v-else class="text-muted-foreground">-</span>
-      <div class="text-[11px] text-muted-foreground">cible &lt; 2 h</div>
+      <div class="text-[11px] text-muted-foreground">cible ≤ {{ fmtDuree(obj.delaiMaxMinutes) }}</div>
     </template>
 
     <template #cell-tests="{ item }">
@@ -93,13 +100,18 @@
 
         <p v-if="item.observation" class="text-[11px] text-muted-foreground leading-snug">{{ item.observation }}</p>
 
-        <div v-if="item.ordreTravailId" class="bg-info-bg text-info rounded-md px-2.5 py-2 text-[11px] leading-snug">
-          Un ordre de travail a été ouvert : <strong class="font-mono">{{ item.ordreTravailId }}</strong>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div><div class="text-muted-foreground text-[11px]">Départ</div>{{ fmtDateHeure(item.declencheLe) }}</div>
+          <div><div class="text-muted-foreground text-[11px]">Arrivée</div>{{ item.arriveeLe ? fmtDateHeure(item.arriveeLe) : 'en route' }}</div>
         </div>
+        <div v-if="item.ordreTravailId" class="text-xs"><div class="text-muted-foreground text-[11px]">Ordre de travail</div><span class="font-mono">{{ item.ordreTravailId }}</span></div>
+        <button :class="L.btnPrimary" class="w-full justify-center" @click="ouvrirFiche(item.id)">Ouvrir la fiche</button>
       </div>
     </template>
 
     <template #empty><Users class="w-8 h-8" /><p class="text-sm">Aucune intervention</p></template>
+    <InterventionMobileCard v-if="ficheId" :interventions="filtered" :intervention-id="ficheId" @close="ficheId = null" @creer="ficheId = null; declenchementOuvert = true" />
+    <InterventionMobileFormModal v-if="declenchementOuvert" @close="declenchementOuvert = false" @cree="id => { declenchementOuvert = false; ficheId = id }" />
   </ListPageLayout>
 </template>
 
@@ -112,7 +124,10 @@
  * types/maintenance.ts).
  */
 import { ref, computed, watch } from 'vue'
-import { Users } from '@lucide/vue'
+import { Users, Plus, Target } from '@lucide/vue'
+import InterventionMobileCard from '../../components/maintenance/InterventionMobileCard.vue'
+import InterventionMobileFormModal from '../../components/maintenance/InterventionMobileFormModal.vue'
+import ReglageObjectifsMobile from '../../components/maintenance/ReglageObjectifsMobile.vue'
 import ListPageLayout from '../../components/shared/ListPageLayout.vue'
 import type { ListColumn } from '../../components/shared/ListPageLayout.vue'
 import { useMaintenanceStore } from '../../stores/maintenance'
@@ -122,6 +137,11 @@ import { fmtDateHeure } from '../../utils/voyageUtils'
 import * as L from '../../lib/listClasses'
 
 const store = useMaintenanceStore()
+const reglageOuvert = ref(false)
+const declenchementOuvert = ref(false)
+const ficheId = ref<string | null>(null)
+function ouvrirFiche(id: string) { ficheId.value = id }
+const obj = computed(() => store.objectifsMobile)
 
 const searchQuery = ref('')
 const activeScope = ref('')
@@ -165,10 +185,10 @@ const delaiMoyen = computed(() => {
 })
 
 const kpis = computed(() => [
-  { label: 'Tests réalisés', value: String(totalTests.value), cls: totalTests.value >= 20 ? 'text-success' : 'text-warning', cible: 'cible ≥ 20 / mois' },
+  { label: 'Tests réalisés', value: String(totalTests.value), cls: totalTests.value >= obj.value.testsParMois ? 'text-success' : 'text-warning', cible: `cible ≥ ${obj.value.testsParMois} / mois` },
   { label: 'Tests positifs', value: String(totalPositifs.value), cls: totalPositifs.value === 0 ? 'text-success' : 'text-danger', cible: 'cible 0' },
-  { label: 'Taux de résolution', value: tauxResolution.value != null ? tauxResolution.value + ' %' : '-', cls: (tauxResolution.value ?? 0) >= 90 ? 'text-success' : 'text-danger', cible: 'cible ≥ 90 %' },
-  { label: 'Délai moyen', value: delaiMoyen.value != null ? fmtDuree(delaiMoyen.value) : '-', cls: (delaiMoyen.value ?? 0) <= 120 ? 'text-success' : 'text-danger', cible: 'cible < 2 h' },
+  { label: 'Taux de résolution', value: tauxResolution.value != null ? tauxResolution.value + ' %' : '-', cls: (tauxResolution.value ?? 0) >= obj.value.tauxResolutionPct ? 'text-success' : 'text-danger', cible: `cible ≥ ${obj.value.tauxResolutionPct} %` },
+  { label: 'Délai moyen', value: delaiMoyen.value != null ? fmtDuree(delaiMoyen.value) : '-', cls: (delaiMoyen.value ?? 0) <= obj.value.delaiMaxMinutes ? 'text-success' : 'text-danger', cible: `cible ≤ ${fmtDuree(obj.value.delaiMaxMinutes)}` },
 ])
 
 const columns = computed<ListColumn[]>(() => [

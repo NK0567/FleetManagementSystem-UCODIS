@@ -52,12 +52,14 @@ import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { Menu, X } from '@lucide/vue'
 import logo from '../assets/logo-ucodis.png'
+import { useParametresPlanificationStore } from '../stores/parametresPlanification'
 import { useAuthStore } from '../stores/auth'
 import { useNavigationStore } from '../stores/navigation'
 
 const router = useRouter()
 const route = useRoute()
 const auth = useAuthStore()
+const paramsPlanif = useParametresPlanificationStore()
 const nav = useNavigationStore()
 
 const separateur = 'w-px h-5 bg-black/10 mx-3.5 shrink-0'
@@ -68,12 +70,21 @@ const ongletActif = 'text-primary !border-primary font-semibold'
 interface OngletModule { cle: string; libelle: string; route: string }
 
 /** Un onglet par module réellement construit · ajouté ici au fur et à mesure. */
-const ongletsModules = computed<OngletModule[]>(() => [
-  { cle: 'administration', libelle: 'Personnel', route: 'admin-tableau-bord' },
-  { cle: 'planification', libelle: 'Planification', route: 'planification-kanban' },
-  { cle: 'flotte', libelle: 'Flotte', route: 'flotte-tableau-bord' },
-  { cle: 'maintenance', libelle: 'Maintenance', route: 'maintenance-dashboard' },
-])
+const ongletsModules = computed<OngletModule[]>(() => {
+  const base: OngletModule[] = [
+    { cle: 'administration', libelle: 'Personnel', route: 'admin-tableau-bord' },
+    { cle: 'planification', libelle: 'Planification', route: 'planification-kanban' },
+    { cle: 'flotte', libelle: 'Flotte', route: 'flotte-tableau-bord' },
+    { cle: 'maintenance', libelle: 'Maintenance', route: 'maintenance-dashboard' },
+  ]
+  /* L'agent doit toujours pouvoir revenir à ses confirmations après être
+   *  passé sur un autre module. Onglet visible pour ce seul rôle. */
+  if (auth.role === 'charge_clientele') base.unshift({ cle: 'confirmations', libelle: 'Confirmations clients', route: 'confirmations-clients' })
+  /* L'émetteur des demandes de livraison (rôle réglé dans les paramètres de la
+   *  planification) retrouve toujours son espace. */
+  if (paramsPlanif.peutEmettre(auth.role)) base.unshift({ cle: 'demandes', libelle: 'Demandes de livraison', route: 'demandes-livraison' })
+  return base
+})
 
 function aller(item: OngletModule) {
   nav.setModule(item.cle)
@@ -90,6 +101,8 @@ const menuMobile = ref(false)
  * « administration » et écrase le module qu'on vient de choisir.
  */
 function detecterModule(chemin: string): string {
+  if (chemin.startsWith('/confirmations-clients')) return 'confirmations'
+  if (chemin.startsWith('/demandes-livraison')) return 'demandes'
   if (chemin.startsWith('/maintenance')) return 'maintenance'
   if (chemin.startsWith('/planification')) return 'planification'
   if (chemin.startsWith('/flotte')) return 'flotte'

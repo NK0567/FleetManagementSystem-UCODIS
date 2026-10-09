@@ -5,8 +5,9 @@ import { useDocumentsStore } from './documentsPersonnel'
 import { useVoyagesStore } from './voyages'
 import { usePersonnelStore } from './personnel'
 import { aujourdhuiISO } from '../utils/horloge'
+import { useEcoconduiteStore } from './ecoconduite'
 
-export type FamilleScore = 'securite' | 'itineraire' | 'reglementaire' | 'livraison' | 'discipline'
+export type FamilleScore = 'securite' | 'itineraire' | 'reglementaire' | 'livraison' | 'discipline' | 'ecoconduite'
 
 /** Poids et couleurs repris tels quels du socle FMS : une méthodologie de notation, pas un équipement. */
 export const PONDERATIONS: Record<FamilleScore, { libelle: string; poids: number; couleur: string }> = {
@@ -15,6 +16,8 @@ export const PONDERATIONS: Record<FamilleScore, { libelle: string; poids: number
   reglementaire: { libelle: 'Conformité réglementaire', poids: 20, couleur: '#ca8a04' },
   livraison: { libelle: 'Qualité de livraison', poids: 15, couleur: '#16a34a' },
   discipline: { libelle: 'Discipline administrative', poids: 10, couleur: '#7c3aed' },
+  /** Poids réglable (Configuration, onglet Carburant) ; les poids affichés sont ramenés à 100 %. */
+  ecoconduite: { libelle: 'Écoconduite', poids: 10, couleur: '#0d9488' },
 }
 
 export interface PalierPrime { min: number; montant: number; libelle: string }
@@ -53,6 +56,7 @@ export const useScoresConducteursStore = defineStore('scoresConducteurs', () => 
   const docsStore = useDocumentsStore()
   const voyagesStore = useVoyagesStore()
   const personnelStore = usePersonnelStore()
+  const ecoStore = useEcoconduiteStore()
 
   /** Grille éditable, jamais mutée directement : voir modifierPalier. */
   const grillePrime = ref<PalierPrime[]>(GRILLE_PRIME_DEFAUT.map(p => ({ ...p })))
@@ -67,7 +71,8 @@ export const useScoresConducteursStore = defineStore('scoresConducteurs', () => 
     const voyages = voyagesStore.voyages.filter(v => v.chauffeurId === conducteurId)
     const voyagesEnLitige = voyages.filter(v => v.statut === 'litige').length
 
-    return [
+    const eco = ecoStore.noteConducteur(conducteurId)
+    const liste: DetailFamilleScore[] = [
       { famille: 'securite', libelle: PONDERATIONS.securite.libelle, poids: PONDERATIONS.securite.poids,
         evenements: critiques + majeurs, note: Math.max(0, 100 - critiques * 25 - majeurs * 10),
         calcul: critiques || majeurs
@@ -91,7 +96,12 @@ export const useScoresConducteursStore = defineStore('scoresConducteurs', () => 
         calcul: nonJustifies
           ? `100, moins 30 par écart qualifié « non justifié » (${nonJustifies}).`
           : 'Aucun écart non justifié sur la période.' },
+      { famille: 'ecoconduite', libelle: PONDERATIONS.ecoconduite.libelle, poids: ecoStore.parametres.poidsScore,
+        evenements: eco.acc + eco.ral, note: eco.note, calcul: eco.calcul },
     ]
+    // Poids ramenés à 100 % pour l'affichage comme pour le calcul.
+    const total = liste.reduce((s, x) => s + x.poids, 0)
+    return total ? liste.map(x => ({ ...x, poids: Math.round((x.poids * 100) / total) })) : liste
   }
 
   function scoreGlobal(conducteurId: string): number {

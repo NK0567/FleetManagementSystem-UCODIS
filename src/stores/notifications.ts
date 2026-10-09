@@ -3,6 +3,9 @@ import { computed, ref } from 'vue'
 import { useAbsenceStore } from './absences'
 import { aujourdhuiISO } from '../utils/horloge'
 import { useCalendrierStore } from './calendrier'
+import { usePneusStore } from './pneus'
+import { useCarburantStore } from './carburant'
+import { useCartesCarburantStore } from './cartesCarburant'
 
 export interface Notification {
   id: string
@@ -20,6 +23,9 @@ export interface Notification {
 export const useNotificationStore = defineStore('notifications', () => {
   const absences = useAbsenceStore()
   const calendrier = useCalendrierStore()
+  const pneus = usePneusStore()
+  const carburant = useCarburantStore()
+  const cartes = useCartesCarburantStore()
   const lus = ref(new Set<string>())
 
   const liste = computed<Notification[]>(() => {
@@ -60,6 +66,30 @@ export const useNotificationStore = defineStore('notifications', () => {
           lu: lus.value.has(`fer-${f.id}`),
         })
       })
+
+    /* Pneus hors seuil (pression, sculpture) ou à faire pivoter. */
+    carburant.anomalies.forEach(r => {
+      const id = `plein-${r.id}`
+      out.push({ id, type: 'systeme', titre: 'Plein à qualifier', message: `${r.vehiculePlaque} · ${r.litres} L à ${r.lieu} : ${r.controles.filter(c => !c.ok).map(c => c.libelle.toLowerCase()).join(', ')}`, lu: lus.value.has(id) })
+    })
+    carburant.ecartsAQualifier.forEach(p => {
+      const id = `ecart-${p.id}`
+      out.push({ id, type: 'systeme', titre: 'Écart de consommation à qualifier', message: `${p.vehiculePlaque} · ${p.ecartPct > 0 ? '+' : ''}${p.ecartPct} % sur la référence`, lu: lus.value.has(id) })
+    })
+    cartes.enDepassement.forEach(t => {
+      const id = `tx-${t.id}`
+      out.push({ id, type: 'systeme', titre: 'Carte carburant : limite dépassée', message: `${t.station}, ${t.litres} L : ${cartes.depassements(t).join(', ')}`, lu: lus.value.has(id) })
+    })
+
+    pneus.alertes.forEach(({ pneu, motifs }) => {
+      out.push({
+        id: `pneu-${pneu.id}-${motifs.join('|')}`,
+        type: 'systeme',
+        titre: 'Alerte pneumatique',
+        message: `${pneu.vehiculePlaque ?? ''} · ${pneu.numeroSerie} : ${motifs.join(', ')}`,
+        lu: lus.value.has(`pneu-${pneu.id}-${motifs.join('|')}`),
+      })
+    })
 
     return out
   })

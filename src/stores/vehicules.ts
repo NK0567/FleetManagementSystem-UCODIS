@@ -46,6 +46,7 @@ function seedVehicules(): Vehicule[] {
       id: `v-tr-${i + 1}`, immatriculation: immat,
       vin: `LZGJTR${(2024000 + i).toString()}`, type: 'tracteur',
       marque, modele, categorie: 'Tracteur routier', carburant: 'Diesel',
+      capaciteReservoirL: marque === 'Sinotruk' || (marque === 'Foton' && i !== 4) ? 500 : marque === 'Dongfeng' ? 450 : 400,
       site: 'Dépôt UCODIS Tanjombato', statut, motifIndisponibilite: motif, kilometrage: km,
       annee: 2021 + (i % 4), dateMiseEnCirculation: `${2021 + (i % 4)}-0${(i % 9) + 1}-15`,
       modeAcquisition: i % 3 === 0 ? 'leasing' : 'achat',
@@ -58,7 +59,7 @@ function seedVehicules(): Vehicule[] {
       id: `v-sr-${i + 1}`, immatriculation: immat,
       vin: `LZGJSR${(2024000 + i).toString()}`, type: 'semi_remorque',
       marque, modele, categorie: 'Semi-remorque', carburant: 'Sans objet',
-      chargeMaxKg: 32_000, site: 'Dépôt UCODIS Tanjombato',
+      chargeMaxKg: 32_000, volumeMaxM3: 86, site: 'Dépôt UCODIS Tanjombato',
       statut, motifIndisponibilite: undefined, kilometrage: km,
       annee: 2020 + (i % 5), dateMiseEnCirculation: `${2020 + (i % 5)}-0${(i % 9) + 1}-01`,
       modeAcquisition: 'achat', coutAcquisitionAr: 58_000_000 + i * 1_500_000,
@@ -104,6 +105,15 @@ export const useVehiculeStore = defineStore('vehicules', () => {
   const auParc = computed(() => liste.value.filter(v => v.statut !== 'vendu'))
 
   function parId(id: string) { return liste.value.find(v => v.id === id) ?? null }
+  /** Capacité du réservoir, réglable depuis Configuration (onglet Carburant). */
+  function modifierCapaciteReservoir(id: string, litres: number | undefined) {
+    const v = parId(id); if (v) v.capaciteReservoirL = litres && litres > 0 ? litres : undefined
+  }
+  /** Conducteur affecté au véhicule à une date donnée (affectation en vigueur ce jour-là). */
+  function conducteurAffecteLe(vehiculeId: string, dateISO: string) {
+    const jour = dateISO.slice(0, 10)
+    return affectations.value.find(a => a.vehiculeId === vehiculeId && a.dateDebut.slice(0, 10) <= jour && (!a.dateFin || a.dateFin.slice(0, 10) >= jour))?.conducteurId ?? null
+  }
 
   const tracteursLibres = computed(() => tracteurs.value.filter(t => !attelageActif(t.id) && t.statut !== 'hors_service' && t.statut !== 'vendu'))
   const semiRemorquesLibres = computed(() => semiRemorques.value.filter(s => !attelageDe(s.id) && s.statut !== 'hors_service' && s.statut !== 'vendu'))
@@ -295,7 +305,7 @@ export const useVehiculeStore = defineStore('vehicules', () => {
   }
 
   return {
-    liste, tracteurs, semiRemorques, attelages, affectations, LIBELLES_STATUT,
+    liste, tracteurs, semiRemorques, attelages, affectations, LIBELLES_STATUT, modifierCapaciteReservoir, conducteurAffecteLe,
     disponibles, enCirculation, immobilises, archives, auParc,
     tracteursLibres, semiRemorquesLibres, tracteursSansConducteur,
     parId, attelageActif, attelageDe, affectationActive, atteler, dételer, affecterConducteur, retirerAffectation,

@@ -24,7 +24,7 @@
         <Minimize2 class="w-3.5 h-3.5" /> Tout replier
       </button>
       <div class="flex gap-1 ml-auto">
-        <button :class="[switcherBtn, switcherActive]" title="Vue hiérarchique"><ListTree class="w-4 h-4" /></button>
+        <button :class="[switcherBtn, switcherActive]" title="Vue hiérarchique" aria-pressed="true" @click="changeTab('hierarchie')"><ListTree class="w-4 h-4" /></button>
         <button :class="switcherBtn" title="Organigramme" @click="changeTab('organigramme')"><Network class="w-4 h-4" /></button>
       </div>
     </div>
@@ -38,7 +38,7 @@
     <div class="flex items-center gap-2 mb-3">
       <div class="flex gap-1 ml-auto">
         <button :class="switcherBtn" title="Vue hiérarchique" @click="changeTab('hierarchie')"><ListTree class="w-4 h-4" /></button>
-        <button :class="[switcherBtn, switcherActive]" title="Organigramme"><Network class="w-4 h-4" /></button>
+        <button :class="[switcherBtn, switcherActive]" title="Organigramme" aria-pressed="true" @click="changeTab('organigramme')"><Network class="w-4 h-4" /></button>
       </div>
     </div>
     <EntiteOrgChart @ouvrir="ouvrir" />

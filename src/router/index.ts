@@ -17,6 +17,21 @@ const router = createRouter({
     { path: '/suivi/:etapeId', name: 'suivi-livraison',
       component: () => import('../views/public/SuiviLivraisonView.vue') },
 
+    /* Liste de chargement imprimable : accessible sans navigation dans
+       le tableau de bord, pour s'ouvrir proprement dans un nouvel
+       onglet destiné à l'impression. */
+    { path: '/chargement/:voyageId', name: 'liste-chargement',
+      component: () => import('../views/public/ListeChargementView.vue') },
+
+    /* Page dédiée de l'agent qui appelle les clients : atteinte comme
+       destination de connexion pour ce rôle précis, jamais comme un onglet
+       du module Planification que d'autres rôles verraient. */
+    /* Espace de l'émetteur des demandes de livraison (rôle paramétrable). */
+    { path: '/demandes-livraison', name: 'demandes-livraison',
+      component: () => import('../views/planification/DemandesLivraisonView.vue'), meta: dashboard },
+    { path: '/confirmations-clients', name: 'confirmations-clients',
+      component: () => import('../views/planification/ConfirmationsClientsView.vue'), meta: dashboard },
+
     /* ══ MODULE ADMINISTRATION ═══════════════════════════════════
        Même découpage que sur les autres projets bâtis sur le socle FMS : tableau de
        bord, congés et absences, personnel, configuration.          */
@@ -90,6 +105,8 @@ const router = createRouter({
       component: () => import('../views/flotte/ConformiteView.vue'), meta: dashboard },
     { path: '/flotte/carburant', name: 'flotte-carburant',
       component: () => import('../views/flotte/CarburantView.vue'), meta: dashboard },
+    { path: '/flotte/cartes-carburant', name: 'flotte-cartes-carburant',
+      component: () => import('../views/flotte/CartesCarburantView.vue'), meta: dashboard },
     { path: '/flotte/controles', name: 'flotte-controles',
       component: () => import('../views/flotte/ControlesView.vue'), meta: dashboard },
     { path: '/flotte/departs', name: 'flotte-departs',
@@ -115,6 +132,10 @@ const router = createRouter({
       component: () => import('../views/maintenance/EcheancesView.vue'), meta: dashboard },
     { path: '/maintenance/indisponibilites', name: 'maintenance-indisponibilites',
       component: () => import('../views/maintenance/IndisponibilitesView.vue'), meta: dashboard },
+    { path: '/maintenance/controles', name: 'maintenance-controles',
+      component: () => import('../views/maintenance/ControlesVehiculeView.vue'), meta: dashboard },
+    { path: '/maintenance/pneumatiques', name: 'maintenance-pneumatiques',
+      component: () => import('../views/maintenance/PneumatiquesView.vue'), meta: dashboard },
     { path: '/maintenance/equipe-mobile', name: 'maintenance-equipe-mobile',
       component: () => import('../views/maintenance/EquipeMobileView.vue'), meta: dashboard },
     { path: '/maintenance/fiabilite', name: 'maintenance-fiabilite',
@@ -142,7 +163,7 @@ router.beforeEach(to => {
   if (to.meta.requiresAuth && !auth.connecte) return { name: 'login' }
 
   if (to.name === 'login' && auth.connecte) {
-    return auth.cotéGestion ? { name: 'admin-tableau-bord' } : { name: 'espace-accueil' }
+    return auth.cotéGestion ? { name: auth.role === 'charge_clientele' ? 'confirmations-clients' : auth.role === 'commercial' ? 'demandes-livraison' : 'admin-tableau-bord' } : { name: 'espace-accueil' }
   }
 
   /* Le personnel roulant ne voit que son espace. */

@@ -7,10 +7,12 @@
       </div>
     </div>
     <ParametresModulesContent />
+    <ParametresPlanification />
   </div>
 </template>
 
 <script setup lang="ts">
 import * as L from '../../lib/listClasses'
 import ParametresModulesContent from '../../components/ParametresModulesContent.vue'
+import ParametresPlanification from '../../components/ParametresPlanification.vue'
 </script>

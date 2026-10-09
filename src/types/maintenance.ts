@@ -81,11 +81,10 @@ export const LIB_FAMILLE_INDISPO: Record<FamilleIndispo, string> = {
   humaine:        'Humaine',
 }
 
-export type CodeIndispo =
-  | 'MTN' | 'PNN' | 'DPN' | 'ACC'
-  | 'CTV' | 'VIS'
-  | 'DRG' | 'NDP' | 'DSC'
-  | 'CON' | 'TRH' | 'MED' | 'ABS' | 'SAN'
+/** Code d'indisponibilité : librement défini par chaque entreprise dans le
+ *  paramétrage (store codificationIndispo) ; CODES_INDISPO n'est que la
+ *  liste proposée au départ. */
+export type CodeIndispo = string
 
 export interface DefinitionIndispo {
   code: CodeIndispo
@@ -334,6 +333,18 @@ export interface OrdreTravail {
 
   dureeEstimeeH?: number
   planifieeLe?: string
+
+  /** Intervention confiée à un atelier externe : le FMS ne planifie pas son
+   *  travail interne, il en suit l'exécution. */
+  prestataireId?: string
+  remiseAtelierLe?: string
+  retourPrevuLe?: string
+  retourLe?: string
+  avancementExterne?: string
+  /** Déclaration de fin d'intervention, préalable à la validation du
+   *  responsable : par le technicien interne ou par l'atelier externe. */
+  termineDeclarePar?: string
+  termineDeclareLe?: string
 }
 
 /* ══════════════════════════════════════════════════════════════

@@ -26,7 +26,7 @@ const nav = useNavigationStore()
     <div id="below-topbar" class="flex flex-col flex-1 min-h-0 relative">
       <AppNavBar />
       <div class="flex flex-1 min-h-0">
-        <AppSidebar v-if="nav.moduleActif !== 'planification'" />
+        <AppSidebar v-if="nav.moduleActif !== 'planification' && nav.moduleActif !== 'confirmations' && nav.moduleActif !== 'demandes'" />
         <main class="flex-1 min-w-0 overflow-y-auto bg-background zone-scroll">
           <slot />
         </main>

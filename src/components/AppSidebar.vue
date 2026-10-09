@@ -40,6 +40,7 @@
           <Item v-if="params.estActif('voyages')" :icone="Package" libelle="Voyages" :to="{ name: 'flotte-voyages' }" />
           <Item v-if="params.estActif('conformite')" :icone="ShieldCheck" libelle="Conformité" :to="{ name: 'flotte-conformite' }" />
           <Item v-if="params.estActif('carburant')" :icone="Fuel" libelle="Carburant" :to="{ name: 'flotte-carburant' }" />
+          <Item v-if="params.estActif('carburant')" :icone="CreditCard" libelle="Cartes carburant" :to="{ name: 'flotte-cartes-carburant' }" />
         </Section>
 
         <Section libelle="Parc véhicules">
@@ -80,7 +81,12 @@
           <Item :icone="Wrench" libelle="Ordres de travail" :to="{ name: 'maintenance-ordres' }" />
           <Item v-if="params.estActif('maintenance_echeances')" :icone="AlertTriangle" libelle="Échéances" :to="{ name: 'maintenance-echeances' }" />
           <Item v-if="params.estActif('maintenance_atelier')" :icone="Users" libelle="Charge d'atelier" :to="{ name: 'maintenance-atelier' }" />
+          <Item :icone="ClipboardCheck" libelle="Contrôles du véhicule" :to="{ name: 'maintenance-controles' }" />
           <Item v-if="params.estActif('maintenance_equipe_mobile')" :icone="Truck" libelle="Équipe mobile" :to="{ name: 'maintenance-equipe-mobile' }" />
+        </Section>
+
+        <Section libelle="Pneumatique">
+          <Item :icone="CircleDot" libelle="Pneus" :to="{ name: 'maintenance-pneumatiques' }" />
         </Section>
 
         <Section v-if="params.estActif('maintenance_fiabilite') || params.estActif('maintenance_indisponibilites')" libelle="Suivi & fiabilité">
@@ -113,7 +119,7 @@ import { computed, defineComponent, h, type Component, type PropType } from 'vue
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import {
   Building, CalendarClock, CalendarDays, CalendarOff, CalendarRange, ChartPie, CircleUser,
-  ClipboardList, Fuel, Gauge, IdCard, LayoutDashboard, Link2, ListChecks, LogOut,
+  ClipboardCheck, ClipboardList, CircleDot, CreditCard, Fuel, Gauge, IdCard, LayoutDashboard, Link2, ListChecks, LogOut,
   MapPin, MapPinned, Network, Package, PackageSearch, Radio, ShieldCheck, FileText, Settings2,
   Tag, TriangleAlert as AlertTriangle, Truck, UserCheck, Users, Wrench,
 } from '@lucide/vue'

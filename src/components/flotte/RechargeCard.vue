@@ -19,6 +19,7 @@ import SearchableDropdown from '../ui/SearchableDropdown.vue'
 import type { DropdownItem } from '../ui/SearchableDropdown.vue'
 import { useCarburantStore, LIB_CANAL, LIB_QUALIF } from '../../stores/carburant'
 import { useAuthStore } from '../../stores/auth'
+import { useCartesCarburantStore } from '../../stores/cartesCarburant'
 import { fmtDateHeure } from '../../utils/voyageUtils'
 import type { RechargeCarburant, StatutRecharge, QualifEcartCarburant } from '../../types'
 import * as F from '../../lib/formClasses'
@@ -26,6 +27,9 @@ import * as Lc from '../../lib/listClasses'
 
 const props = defineProps<{ recharges: RechargeCarburant[]; rechargeId: string }>()
 const emit = defineEmits<{ close: []; voirConducteur: [id: string] }>()
+const cartes = useCartesCarburantStore()
+const transaction = computed(() => item.value?.transactionId ? cartes.transactionParId(item.value.transactionId) : undefined)
+const carteTx = computed(() => transaction.value ? cartes.getById(transaction.value.carteId) : undefined)
 
 const store = useCarburantStore()
 const auth = useAuthStore()
@@ -48,7 +52,7 @@ function selectSidebar(no: string) {
 
 const STATUT: Record<StatutRecharge, { label: string; cls: string }> = {
   valide: { label: 'Conforme', cls: 'bg-success-bg text-success' },
-  anomalie: { label: 'En anomalie', cls: 'bg-danger-bg text-danger' },
+  anomalie: { label: 'À qualifier', cls: 'bg-warning-bg text-warning' },
   en_qualification: { label: 'En qualification', cls: 'bg-warning-bg text-warning' },
   qualifie: { label: 'Qualifiée', cls: 'bg-neutral-bg text-neutral' },
   en_validation: { label: 'En validation', cls: 'bg-warning-bg text-warning' },
@@ -157,6 +161,26 @@ const optQualif = computed<DropdownItem[]>(() => Object.entries(LIB_QUALIF).map(
           </div>
         </FormSection>
 
+        <FormSection title="Reçu et paiement" :recaps="[item.recu ? 'reçu joint' : 'sans reçu', transaction ? 'carte carburant' : 'hors carte']" :default-open="!!item.recu || !!transaction">
+          <div class="grid grid-cols-2 gap-x-6 gap-y-4 max-sm:grid-cols-1">
+            <div class="flex flex-col gap-1">
+              <label :class="F.fieldLabel">Reçu de la station</label>
+              <template v-if="item.recu">
+                <a v-if="item.recu.dataUrl" :href="item.recu.dataUrl" target="_blank" rel="noopener" class="text-sm text-primary hover:underline w-fit">{{ item.recu.nom }}</a>
+                <span v-else class="text-sm text-foreground">{{ item.recu.nom }}</span>
+                <img v-if="item.recu.dataUrl?.startsWith('data:image')" :src="item.recu.dataUrl" alt="Reçu" class="mt-1 w-40 rounded-md border border-border" />
+              </template>
+              <span v-else class="text-sm text-muted-foreground">Aucun reçu joint</span>
+            </div>
+            <div class="flex flex-col gap-1">
+              <label :class="F.fieldLabel">Transaction de carte rapprochée</label>
+              <span v-if="transaction" class="text-sm text-foreground">{{ transaction.id }} · carte {{ carteTx?.numero }}<span class="block text-[11px] text-muted-foreground">{{ fmtDateHeure(transaction.date) }}, {{ transaction.litres }} L, {{ fmtAr(transaction.montantAr) }}</span></span>
+              <span v-else class="text-sm text-muted-foreground">Aucune</span>
+            </div>
+            <div v-if="item.saisiPar" class="flex flex-col gap-1"><label :class="F.fieldLabel">Saisi par</label><span class="text-sm text-foreground">{{ item.saisiPar }}<template v-if="item.saisiLe">, le {{ fmtDateHeure(item.saisiLe) }}</template></span></div>
+          </div>
+        </FormSection>
+
         <FormSection title="Contrôles de vraisemblance" :recaps="[nbEchecs ? `${nbEchecs} en échec` : 'tous conformes']">
           <ul class="flex flex-col gap-1.5">
             <li v-for="c in item.controles" :key="c.code" class="flex items-start gap-2.5 rounded-md px-3 py-2" :class="c.ok ? 'bg-background' : 'bg-danger-bg'">
@@ -228,6 +252,7 @@ const optQualif = computed<DropdownItem[]>(() => Object.entries(LIB_QUALIF).map(
               <label :class="F.fieldLabel">Montant proposé (Ar)</label>
               <input v-model.number="montantPropose" type="number" min="0" :class="F.fieldInput" />
             </div>
+            <p class="text-[11px] text-muted-foreground mb-2">Au plus le montant du plein, {{ fmtAr(item.montant) }}.</p>
             <button :class="Lc.btnPrimary" :disabled="!montantPropose" @click="proposerRefacturation">Soumettre à validation</button>
           </template>
 

@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
+
+const CLE_STOCKAGE = 'fms-ucodis-modules-actifs'
 
 export interface ModuleConfigurable {
   cle: string
@@ -57,6 +59,19 @@ export const useParametresModulesStore = defineStore('parametresModules', () => 
     { cle: 'maintenance_achats', libelle: 'Maintenance · Achats & stock', actif: false,
       description: "Catalogue de pièces, fournisseurs et mouvements de stock, avec seuils d'alerte de réapprovisionnement." },
   ])
+
+  // Le choix d'activation est conservé d'une session à l'autre. Une clé
+  // ajoutée plus tard garde sa valeur par défaut ; une clé disparue est ignorée.
+  try {
+    const brut = localStorage.getItem(CLE_STOCKAGE)
+    if (brut) {
+      const etats = JSON.parse(brut) as Record<string, boolean>
+      for (const m of modules.value) { const e = etats[m.cle]; if (typeof e === 'boolean') m.actif = e }
+    }
+  } catch { /* stockage indisponible ou illisible : valeurs par défaut */ }
+  watch(modules, v => {
+    try { localStorage.setItem(CLE_STOCKAGE, JSON.stringify(Object.fromEntries(v.map(m => [m.cle, m.actif])))) } catch { /* ignoré */ }
+  }, { deep: true })
 
   function estActif(cle: string) { return modules.value.find(m => m.cle === cle)?.actif ?? false }
   function basculer(cle: string) {

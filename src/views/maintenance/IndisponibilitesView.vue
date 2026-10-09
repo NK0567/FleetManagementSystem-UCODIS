@@ -16,7 +16,12 @@
     v-model:page="page"
     v-model:page-size="pageSize"
     @reset-filters="resetFilters"
+    @open-card="(i: any) => ouvrirFiche(i.id)"
   >
+    <template #header-actions>
+      <button :class="L.btnPrimary" @click="declarationOuverte = true"><Plus class="w-4 h-4" /> Déclarer une immobilisation</button>
+    </template>
+
     <template #above-table>
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-3.5">
         <div v-for="k in kpis" :key="k.label" :class="L.kpiCard">
@@ -26,7 +31,7 @@
       </div>
     </template>
 
-    <template #cell-vehicule="{ item }"><span class="font-mono font-semibold text-foreground">{{ item.vehiculePlaque }}</span></template>
+    <template #cell-vehicule="{ item }"><button class="font-mono font-semibold text-foreground hover:text-primary hover:underline bg-transparent border-0 p-0 cursor-pointer" @click.stop="ouvrirFiche(item.id)">{{ item.vehiculePlaque }}</button></template>
 
     <template #cell-code="{ item }">
       <span class="text-[11px] font-mono font-bold px-2 py-0.5 rounded" :class="CLS_FAMILLE[item.famille]">{{ item.code }}</span>
@@ -67,28 +72,25 @@
           <div><div class="text-muted-foreground text-[11px]">Durée</div>{{ store.dureeIndispo(item) }} jour(s)</div>
           <div><div class="text-muted-foreground text-[11px]">Famille</div>{{ LIB_FAMILLE_INDISPO[item.famille] }}</div>
         </div>
-        <p v-if="item.commentaire" class="text-[11px] text-muted-foreground leading-snug">{{ item.commentaire }}</p>
-
-        <div v-if="store.coutIndispo(item) != null" class="bg-danger-bg rounded-md px-2.5 py-2">
-          <MentionSimulation groupe="immobilisation" texte="coût journalier simulé" class="mb-1" />
-          <p class="text-base font-bold leading-none text-danger">{{ fmtAr(store.coutIndispo(item)!) }}</p>
-          <p class="text-[11px] text-danger/80 mt-1 leading-snug">
-            {{ store.dureeIndispo(item) }} jour(s) × {{ fmtAr(store.coutJournalierDe(item)!) }} de manque à gagner.
-            Cette immobilisation relève de la famille {{ LIB_FAMILLE_INDISPO[item.famille].toLowerCase() }}.
-          </p>
-        </div>
-        <div v-else class="bg-background border border-border rounded-md px-2.5 py-2 text-[11px] text-muted-foreground leading-snug">
-          Les jours perdus sont comptés mais non valorisés : le coût d'immobilisation journalier n'est pas
-          renseigné dans Paramétrage → Paramètres de l'atelier.
-        </div>
+        <div v-if="store.coutIndispo(item) != null" class="text-xs"><div class="text-muted-foreground text-[11px]">Coût</div><span class="text-danger font-semibold">{{ fmtAr(store.coutIndispo(item)!) }}</span></div>
+        <div v-if="item.ordreTravailId" class="text-xs"><div class="text-muted-foreground text-[11px]">Ordre de travail</div><span class="font-mono">{{ item.ordreTravailId }}</span></div>
+        <button :class="L.btnPrimary" class="w-full justify-center" @click="ouvrirFiche(item.id)">Ouvrir la fiche</button>
       </div>
     </template>
 
     <template #empty><CalendarOff class="w-8 h-8" /><p class="text-sm">Aucune immobilisation</p></template>
+    <IndispoCard v-if="ficheId" :indisponibilites="filtered" :indispo-id="ficheId" @close="ficheId = null" @creer="ficheId = null; declarationOuverte = true" />
+    <IndispoFormModal v-if="declarationOuverte" @close="declarationOuverte = false" @cree="id => { declarationOuverte = false; ficheId = id }" />
   </ListPageLayout>
 </template>
 
 <script setup lang="ts">
+import { useCodificationIndispoStore } from '../../stores/codificationIndispo'
+const codif = useCodificationIndispoStore()
+const libelleDuCode = (c: string) => codif.libelleDuCode(c)
+import { Plus } from '@lucide/vue'
+import IndispoCard from '../../components/maintenance/IndispoCard.vue'
+import IndispoFormModal from '../../components/maintenance/IndispoFormModal.vue'
 /**
  * Immobilisations et codes d'indisponibilité, repris du socle FMS
  * (US 3.3.1). Les codes réglementaires propres au transport français ou
@@ -100,13 +102,15 @@ import { CalendarOff } from '@lucide/vue'
 import ListPageLayout from '../../components/shared/ListPageLayout.vue'
 import type { ListColumn } from '../../components/shared/ListPageLayout.vue'
 import { useMaintenanceStore } from '../../stores/maintenance'
-import MentionSimulation from '../../components/maintenance/MentionSimulation.vue'
-import { LIB_FAMILLE_INDISPO, libelleDuCode } from '../../types/maintenance'
+import { LIB_FAMILLE_INDISPO } from '../../types/maintenance'
 import type { FamilleIndispo } from '../../types/maintenance'
 import { fmtDateHeure } from '../../utils/voyageUtils'
 import * as L from '../../lib/listClasses'
 
 const store = useMaintenanceStore()
+const declarationOuverte = ref(false)
+const ficheId = ref<string | null>(null)
+function ouvrirFiche(id: string) { ficheId.value = id }
 function fmtAr(n: number) { return n.toLocaleString('fr-FR') + ' Ar' }
 
 const searchQuery = ref('')
