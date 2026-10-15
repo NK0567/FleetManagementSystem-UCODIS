@@ -27,8 +27,8 @@ const form = ref({
 const erreur = ref('')
 const optFournisseurs = computed<DropdownItem[]>(() => prestataires.autorisesDeType('fournisseur_carburant').map(p => ({ id: p.id, label: p.nom })))
 const optRattachement: DropdownItem[] = Object.entries(LIB_RATTACHEMENT).map(([id, label]) => ({ id, label }))
-const optVehicules = computed<DropdownItem[]>(() => vehicules.tracteurs.filter(v => v.statut !== 'vendu').map(v => ({ id: v.id, label: v.immatriculation, sublabel: `${v.marque} ${v.modele}` })))
-const optChauffeurs = computed<DropdownItem[]>(() => personnel.liste.filter(p => p.fonctionId === 'f-cond').map(p => ({ id: p.id, label: p.nomComplet })))
+const optVehicules = computed<DropdownItem[]>(() => vehicules.tracteurs.filter(v => v.statut !== 'sorti').map(v => ({ id: v.id, label: v.immatriculation, sublabel: `${v.marque} ${v.modele}` })))
+const optChauffeurs = computed<DropdownItem[]>(() => personnel.liste.filter(p => personnel.estConducteur(p)).map(p => ({ id: p.id, label: p.nomComplet })))
 const vide = (n: number | undefined | '') => (n === '' || n == null ? undefined : n)
 
 function enregistrer() {
@@ -64,11 +64,11 @@ function enregistrer() {
         </FormSection>
         <FormSection title="Limites">
           <div class="grid grid-cols-3 gap-x-6 gap-y-4 max-sm:grid-cols-1">
-            <div :class="F.field"><label :class="F.fieldLabel">Montant par mois (Ar)</label><input v-model.number="form.montantMensuelAr" type="number" min="0" :class="F.fieldInput" /></div>
+            <div :class="F.field"><label :class="F.fieldLabel">Montant par mois ({{ $devise() }})</label><input v-model.number="form.montantMensuelAr" type="number" min="0" :class="F.fieldInput" /></div>
             <div :class="F.field"><label :class="F.fieldLabel">Volume par mois (L)</label><input v-model.number="form.volumeMensuelL" type="number" min="0" :class="F.fieldInput" /></div>
             <div :class="F.field"><label :class="F.fieldLabel">Transactions par jour</label><input v-model.number="form.transactionsParJour" type="number" min="0" :class="F.fieldInput" /></div>
             <div :class="F.field"><label :class="F.fieldLabel">Horaire autorisé : début (h)</label><input v-model.number="form.heureDebut" type="number" min="0" max="23" :class="F.fieldInput" /></div>
-            <div :class="F.field"><label :class="F.fieldLabel">Horaire autorisé : fin (h)</label><input v-model.number="form.heureFin" type="number" min="0" max="23" :class="F.fieldInput" /></div>
+            <div :class="F.field"><label :class="F.fieldLabel">Horaire autorisé : fin (h, exclue)</label><input v-model.number="form.heureFin" type="number" min="0" max="23" :class="F.fieldInput" /></div>
             <div :class="F.field"><label :class="F.fieldLabel">Zone (villes, séparées par une virgule)</label><input v-model="form.zones" :class="F.fieldInput" placeholder="vide : partout" /></div>
           </div>
         </FormSection>

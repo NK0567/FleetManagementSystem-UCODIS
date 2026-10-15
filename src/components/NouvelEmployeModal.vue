@@ -73,11 +73,6 @@
               <input v-model="form.lieuNaissance" :class="F.fieldInput" placeholder="Ex. Antananarivo" />
             </div>
           </div>
-          <p class="text-[11px] text-muted-foreground mt-3">
-            Genre, situation familiale et lieu de naissance ne sont exigés par aucun document
-            UCODIS : ils restent optionnels, comme sur les fiches d'identité des projets de
-            flotte précédents.
-          </p>
         </FormSection>
 
         <FormSection title="Affectation" :recaps="[fonctionChoisie?.libelle, entiteChoisie?.nom]">
@@ -169,6 +164,7 @@ import { useFonctionStore } from '../stores/fonctions'
 import { useEntiteStore } from '../stores/entites'
 import { useClassificationStore } from '../stores/classification'
 import { useParametresStore } from '../stores/parametres'
+import { useConfigurationStore } from '../stores/configuration'
 import { aujourdhuiISO } from '../utils/horloge'
 import type { Personnel, StatutPersonnel, TypeContrat } from '../types'
 
@@ -181,10 +177,11 @@ const entites = useEntiteStore()
 const classification = useClassificationStore()
 const params = useParametresStore()
 
-const CONTRATS: TypeContrat[] = ['CDI', 'CDD', 'Journalier', 'Stage']
+/** Types de contrat paramétrés dans la configuration. */
+const CONTRATS = computed<TypeContrat[]>(() => useConfigurationStore().parametres.typesContrat)
 const TYPES_PIECE: NonNullable<Personnel['typePieceIdentite']>[] = ['CIN', 'Passeport', 'Permis de séjour']
 const SITUATIONS: NonNullable<Personnel['situationFamiliale']>[] = ['Célibataire', 'Marié(e)', 'Divorcé(e)', 'Veuf/Veuve']
-const STATUTS: Record<StatutPersonnel, string> = { actif: 'Actif', conge: 'En congé', suspendu: 'Suspendu', archive: 'Archivé' }
+const STATUTS: Record<StatutPersonnel, string> = { actif: 'Actif', conge: 'En congé', suspendu: 'Suspendu', fin_contrat: 'Fin de contrat', archive: 'Archivé' }
 
 const vide = () => ({
   matricule: '',
@@ -192,7 +189,7 @@ const vide = () => ({
   telephone: '', email: '', genre: '' as Personnel['genre'] | '', lieuNaissance: '',
   situationFamiliale: '' as Personnel['situationFamiliale'] | '',
   typePieceIdentite: 'CIN' as NonNullable<Personnel['typePieceIdentite']>,
-  site: params.sites[0]?.nom ?? '', contrat: 'CDI' as TypeContrat,
+  site: params.sites[0]?.nom ?? '', contrat: (CONTRATS.value[0] ?? '') as TypeContrat,
   dateEntree: aujourdhuiISO(), statut: 'actif' as StatutPersonnel,
 })
 const form = ref(vide())

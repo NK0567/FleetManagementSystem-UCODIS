@@ -30,7 +30,7 @@
               v-for="n in notifs.liste.slice(0, 12)" :key="n.id"
               class="flex gap-2.5 px-3.5 py-2.5 border-b border-border last:border-0 cursor-pointer hover:bg-background"
               :class="{ 'bg-primary/5': !n.lu }"
-              @click="notifs.marquerLu(n.id)"
+              @click="ouvrirNotification(n)"
             >
               <span class="w-2 h-2 rounded-full shrink-0 mt-1.5" :class="POINT[n.type]"></span>
               <div class="min-w-0">
@@ -42,6 +42,7 @@
               Aucune alerte en cours
             </div>
           </div>
+          <button class="w-full py-2.5 text-[12px] text-primary bg-transparent border-0 border-t border-border cursor-pointer hover:bg-background" @click="ouvert = null; router.push({ name: 'flotte-alertes' })">Voir toutes les alertes</button>
         </div>
       </div>
 
@@ -115,6 +116,11 @@ import { useNotificationStore } from '../stores/notifications'
 const router = useRouter()
 const auth = useAuthStore()
 const notifs = useNotificationStore()
+function ouvrirNotification(n: { id: string; alerte?: string; route?: string; query?: Record<string, string> }) {
+  notifs.marquerLu(n.id)
+  if (n.alerte) { ouvert.value = null; router.push({ name: 'flotte-alertes', query: { alerte: n.alerte } }) }
+  else if (n.route && router.hasRoute(n.route)) { ouvert.value = null; router.push({ name: n.route, query: n.query }) }
+}
 const parametresOuverts = ref(false)
 
 const iconBtn =

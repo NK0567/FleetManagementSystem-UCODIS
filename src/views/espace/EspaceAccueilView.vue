@@ -6,7 +6,10 @@
         <div :class="L.pageTitle">Ma situation</div>
         <div :class="L.pageSub">{{ auth.user?.nom }} · {{ dateDuJour }}</div>
       </div>
+      <button v-if="auth.role === 'conducteur' && auth.user?.personnelId" :class="clsForm.btnPrimary" @click="pleinOuvert = true"><Fuel class="w-4 h-4" /> Déclarer un plein</button>
     </div>
+    <div v-if="pleinEnregistre" class="flex items-center gap-2 bg-success-bg text-success rounded-lg px-3.5 py-2.5 mb-3 text-xs">Plein {{ pleinEnregistre }} enregistré avec son reçu.</div>
+    <RechargeFormModal v-if="pleinOuvert" :pour-chauffeur-id="auth.user?.personnelId" @close="pleinOuvert = false" @cree="id => { pleinOuvert = false; pleinEnregistre = id }" />
 
     <!-- Ma tournée : plus d'étape de validation de ma part, je suis seulement
          notifié de la tournée qui m'a été confiée. Signer ma première
@@ -206,7 +209,7 @@
       </p>
       <p v-if="maTournee.statut === 'en_cours'" class="text-[11px] text-muted-foreground mt-3 pt-3 border-t border-border/60">
         Les contrôles de route (checklist, remontée d'anomalie) que je dois aussi faire au long du trajet
-        restent à rattacher à cette tournée : l'écran de saisie sur le terrain n'est pas encore construit.
+        restent à rattacher à cette tournée.
       </p>
     </div>
 
@@ -282,15 +285,15 @@
       <div :class="L.cardTitle"><Clock class="w-4 h-4 text-primary" /> Les limites en vigueur</div>
       <div class="grid grid-cols-3 gap-3 max-md:grid-cols-1">
         <div class="bg-background rounded-lg p-3.5 text-center">
-          <div class="text-2xl font-bold">{{ params.valeurs.conduiteMaxJournaliereH }} h</div>
+          <div class="text-2xl font-bold">{{ Math.round(config.parametres.tcjMaxMin / 6) / 10 }} h</div>
           <div class="text-[11px] text-muted-foreground mt-1">Conduite maximale par jour</div>
         </div>
         <div class="bg-background rounded-lg p-3.5 text-center">
-          <div class="text-2xl font-bold">{{ params.valeurs.reposMinJournalierH }} h</div>
+          <div class="text-2xl font-bold">{{ config.parametres.reposMinAvantDepartH }} h</div>
           <div class="text-[11px] text-muted-foreground mt-1">Repos minimal par jour</div>
         </div>
         <div class="bg-background rounded-lg p-3.5 text-center">
-          <div class="text-2xl font-bold">{{ params.valeurs.conduiteMaxHebdoH }} h</div>
+          <div class="text-2xl font-bold">{{ config.parametres.plafondHebdoH }} h</div>
           <div class="text-[11px] text-muted-foreground mt-1">Conduite maximale par semaine</div>
         </div>
       </div>
@@ -305,7 +308,8 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { AlertTriangle, Bell, CircleCheck, ShieldAlert, Circle, CircleX, Clock, FileText, ListChecks, MapPinCheck, Truck } from '@lucide/vue'
+import { AlertTriangle, Bell, CircleCheck, ShieldAlert, Circle, CircleX, Clock, FileText, Fuel, ListChecks, MapPinCheck, Truck } from '@lucide/vue'
+import RechargeFormModal from '../../components/flotte/RechargeFormModal.vue'
 import StatusPill from '../../components/ui/StatusPill.vue'
 import * as L from '../../lib/listClasses'
 import * as clsForm from '../../lib/formClasses'
@@ -319,9 +323,13 @@ import { useFonctionStore } from '../../stores/fonctions'
 import { useDocumentsStore, LIBELLE_TYPE_DOC } from '../../stores/documentsPersonnel'
 import { useParametresStore } from '../../stores/parametres'
 import { useVoyagesStore } from '../../stores/voyages'
+import { useConfigurationStore } from '../../stores/configuration'
 import { aujourdhuiDate } from '../../utils/horloge'
 
 const auth = useAuthStore()
+const config = useConfigurationStore()
+const pleinOuvert = ref(false)
+const pleinEnregistre = ref('')
 const personnel = usePersonnelStore()
 const fonctions = useFonctionStore()
 const docs = useDocumentsStore()
@@ -334,7 +342,7 @@ const dateDuJour = aujourdhuiDate().toLocaleDateString('fr-FR', {
 
 const moi = computed(() => (auth.user?.personnelId ? personnel.parId(auth.user.personnelId) : null))
 const mesDocs = computed(() => (moi.value ? docs.parPersonnel(moi.value.id) : []))
-const manquantes = computed(() => (moi.value ? docs.piecesManquantes(moi.value.id) : []))
+const manquantes = computed(() => (moi.value ? docs.piecesAbsentes(moi.value.id) : []))
 const responsabilites = computed(() =>
   moi.value ? fonctions.parId(moi.value.fonctionId)?.responsabilites ?? [] : [],
 )

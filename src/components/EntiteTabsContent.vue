@@ -159,11 +159,6 @@
         </table>
       </div>
     </div>
-    <p class="text-[11px] text-muted-foreground mt-3 leading-relaxed max-w-3xl">
-      Cette entité porte le planning de voyage, la fiche de voyage et le carnet de bord ·
-      aujourd'hui rattachés provisoirement aux modules 1 et 2, en l'absence d'un module
-      « Opérations et voyages ». Elle reste en attente d'une confirmation d'UCODIS.
-    </p>
   </template>
 </template>
 

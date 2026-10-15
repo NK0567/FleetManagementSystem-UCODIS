@@ -16,11 +16,12 @@ export const useParametresStore = defineStore('parametres', () => {
     nifStat: 'à renseigner',
     parcTracteurs: 10,
     parcSemiRemorques: 10,
+    prefixeMatricule: 'UCT-',
   })
 
   const sites = ref<Site[]>([
     { id: 's1', code: 'SIEGE', nom: 'Siège Antananarivo', adresse: 'Antananarivo', type: 'siege' },
-    { id: 's2', code: 'DEPOT', nom: 'Dépôt UCODIS Tanjombato', adresse: 'Tanjombato, Antananarivo', type: 'depot' },
+    { id: 's2', code: 'DEPOT', nom: 'Dépôt Tanjombato', adresse: 'Tanjombato, Antananarivo', type: 'depot' },
     { id: 's3', code: 'GARAGE', nom: 'Garage Antananarivo', adresse: 'Antananarivo', type: 'garage' },
   ])
 

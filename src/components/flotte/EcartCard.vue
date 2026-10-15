@@ -1,19 +1,20 @@
 <script setup lang="ts">
 /**
- * Fiche d'écart d'itinéraire, reprise de la fiche d'écart du socle FMS :
- * même coquille CardModalShell, mêmes sections, même logique de
- * qualification. Le lien sur le nom du chauffeur ouvre son tableau de
- * bord personnel (US demandée) au lieu de rester un texte simple.
+ * Fiche d'écart d'itinéraire : identification, trajet prévu et réel,
+ * mesures propres au type d'écart, chronologie, justification et
+ * qualification. Le nom du conducteur ouvre son tableau de bord.
  */
-import { ref, computed } from 'vue'
-import { AlertCircle, Info } from '@lucide/vue'
+import { ref, computed, watch } from 'vue'
+import { AlertCircle } from '@lucide/vue'
 import CardModalShell from '../shared/CardModalShell.vue'
 import FormSection from '../ui/form-field/FormSection.vue'
 import FleetMap from './FleetMap.vue'
 import SearchableDropdown from '../ui/SearchableDropdown.vue'
 import type { DropdownItem } from '../ui/SearchableDropdown.vue'
-import { useEcartsStore, LIB_TYPE_ECART, LIB_NATURE, LIB_GRAVITE } from '../../stores/ecarts'
+import { useEcartsStore, LIB_TYPE_ECART, LIB_NATURE, LIB_GRAVITE, mesuresEcart } from '../../stores/ecarts'
 import { useVoyagesStore } from '../../stores/voyages'
+import { useVehiculeStore } from '../../stores/vehicules'
+import { useTelematiqueStore } from '../../stores/telematique'
 import { useAuthStore } from '../../stores/auth'
 import { fmtDateHeure } from '../../utils/voyageUtils'
 import type { EcartItineraire, NatureEcart, DecisionEcart } from '../../types'
@@ -21,6 +22,8 @@ import * as F from '../../lib/formClasses'
 import * as Lc from '../../lib/listClasses'
 
 const props = defineProps<{ ecarts: EcartItineraire[]; ecartId: string }>()
+const vehiculesStore = useVehiculeStore()
+const telematique = useTelematiqueStore()
 const emit = defineEmits<{ close: []; ouvrirVoyage: [id: string]; voirConducteur: [id: string] }>()
 
 const store = useEcartsStore()
@@ -49,10 +52,10 @@ const LIB_DECISION: Record<DecisionEcart, string> = {
   sanction: 'Signalement à la Direction',
 }
 
-const OPTIONS_NATURE: { value: Exclude<NatureEcart, 'a_qualifier'>; label: string; aide: string }[] = [
-  { value: 'autorisee', label: 'Déviation autorisée', aide: "Consécutive à une instruction enregistrée de l'exploitation ou du client." },
-  { value: 'subie', label: 'Déviation subie', aide: 'Route coupée, accident, barrage, intempérie, panne, consigne de sécurité.' },
-  { value: 'non_justifiee', label: 'Déviation non justifiée', aide: 'Aucune justification recevable dans le délai. Devient une infraction du conducteur.' },
+const OPTIONS_NATURE: { value: Exclude<NatureEcart, 'a_qualifier'>; label: string }[] = [
+  { value: 'autorisee', label: LIB_NATURE.autorisee.label },
+  { value: 'subie', label: LIB_NATURE.subie.label },
+  { value: 'non_justifiee', label: LIB_NATURE.non_justifiee.label },
 ]
 
 const nature = ref<Exclude<NatureEcart, 'a_qualifier'>>('subie')
@@ -67,22 +70,21 @@ const tracePrevu = computed(() => {
   const v = voyagesStore.getById(item.value.voyageId)
   return v?.etapes.map(e => ({ lat: e.lat, lng: e.lng })) ?? []
 })
-/** Le tracé réel n'est pas mesuré (aucun boîtier) : seul le point de l'écart est connu. */
+/** Trajet réel relevé autour de l'écart, quand des positions ont été reçues. */
+const traceReelle = computed(() => {
+  const e = item.value; if (!e) return []
+  const vid = e.vehiculeId ?? vehiculesStore.liste.find(v => v.immatriculation === e.vehiculePlaque)?.id
+  if (!vid) return []
+  const t = new Date(e.detecteLe).getTime()
+  return telematique.trace(vid, new Date(t - 3 * 3_600_000).toISOString(), new Date(t + ((e.dureeMin ?? 0) + 180) * 60_000).toISOString())
+})
 const marqueurEcart = computed(() => {
   if (!item.value) return []
   return [{ id: 'ecart', lat: item.value.lat, lng: item.value.lng, couleur: '#dc2626', libelle: item.value.lieu ?? 'Écart relevé', sousTitre: 'Position de l\u2019écart' }]
 })
 
-const mesures = computed(() => {
-  const e = item.value
-  if (!e) return []
-  return [
-    { label: 'Durée hors séquence', value: e.dureeMin ? fmtDuree(e.dureeMin) : '-', cls: (e.dureeMin ?? 0) > 30 ? 'text-danger' : 'text-foreground' },
-    { label: 'Distance parcourue', value: e.distanceKm != null ? `${e.distanceKm} km` : '-', cls: 'text-foreground' },
-    { label: 'Écart latéral maximal', value: e.ecartLateralMaxM != null ? `${(e.ecartLateralMaxM / 1000).toFixed(1)} km` : '-', cls: (e.ecartLateralMaxM ?? 0) > 5000 ? 'text-danger' : 'text-foreground' },
-    { label: 'Gravité retenue', value: LIB_GRAVITE[e.gravite].label, cls: 'text-muted-foreground' },
-  ]
-})
+/** Seules les mesures qui ont un sens pour le type d'écart sont affichées. */
+const mesures = computed(() => (item.value ? mesuresEcart(item.value) : []))
 function fmtDuree(min: number) {
   return min >= 60 ? `${Math.floor(min / 60)} h ${min % 60 ? (min % 60) + ' min' : ''}`.trim() : `${min} min`
 }
@@ -90,31 +92,38 @@ function fmtDuree(min: number) {
 const chronologie = computed(() => {
   const e = item.value
   if (!e) return []
-  const out: { titre: string; heure: string; detail?: string; cls: string }[] = []
-  out.push({ titre: 'Écart détecté', heure: fmtHeure(e.detecteLe), detail: LIB_TYPE_ECART[e.type], cls: 'bg-warning' })
-  voyagesStore.arretsDuVoyage(e.voyageId).filter(a => !a.dansSiteDeclare).forEach(a => out.push({
-    titre: `Arrêt non planifié · ${fmtDuree(a.dureeMin)}`, heure: fmtHeure(a.debut), detail: a.lieu,
-    cls: a.justifie ? 'bg-success' : 'bg-danger',
-  }))
-  if (e.justifieLe) out.push({ titre: 'Justification déposée par le chauffeur', heure: fmtDateHeure(e.justifieLe), cls: 'bg-info' })
-  if (e.qualifieLe) out.push({ titre: `Qualifié · ${LIB_NATURE[e.nature].label}`, heure: fmtDateHeure(e.qualifieLe), detail: e.qualifiePar, cls: 'bg-foreground' })
-  return out
+  const out: { le: string; titre: string; detail?: string; cls: string }[] = []
+  out.push({ le: e.detecteLe, titre: 'Écart détecté', detail: LIB_TYPE_ECART[e.type], cls: 'bg-warning' })
+  /* Les arrêts du même voyage, tels qu'ils sont qualifiés dans les écarts. */
+  store.ecartsDuVoyage(e.voyageId)
+    .filter(a => a.id !== e.id && (a.type === 'arret_non_planifie' || a.type === 'repos_hors_parking'))
+    .forEach(a => out.push({
+      le: a.detecteLe, titre: `${LIB_TYPE_ECART[a.type]}${a.dureeMin ? ` · ${fmtDuree(a.dureeMin)}` : ''} · ${LIB_NATURE[a.nature].label}`, detail: a.lieu,
+      cls: a.nature === 'non_justifiee' ? 'bg-danger' : a.nature === 'a_qualifier' ? 'bg-warning' : 'bg-success',
+    }))
+  if (e.justifieLe) out.push({ le: e.justifieLe, titre: 'Justification déposée par le conducteur', cls: 'bg-info' })
+  if (e.qualifieLe) out.push({ le: e.qualifieLe, titre: `Qualifié · ${LIB_NATURE[e.nature].label}`, detail: e.qualifiePar, cls: 'bg-foreground' })
+  return out.sort((a, b) => a.le.localeCompare(b.le)).map(x => ({ ...x, heure: fmtDateHeure(x.le) }))
 })
-function fmtHeure(iso: string) { return new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) }
 
-const dateLimite = computed(() => (item.value ? new Date(+new Date(item.value.detecteLe) + 24 * 3_600_000).toISOString() : ''))
+/** Délai de justification réglé dans la configuration, onglet Télématique. */
+const dateLimite = computed(() => (item.value ? new Date(+new Date(item.value.detecteLe) + Math.max(0, telematique.parametres.delaiJustificationH) * 3_600_000).toISOString() : ''))
 
+const erreurJustif = ref('')
+watch(idCourant, () => { erreur.value = ''; erreurJustif.value = ''; saisieJustif.value = ''; motif.value = '' })
 function deposerJustification() {
-  if (!item.value || !saisieJustif.value.trim()) return
-  store.justifier(item.value.id, saisieJustif.value.trim())
+  erreurJustif.value = ''
+  if (!item.value) return
+  const r = store.justifier(item.value.id, saisieJustif.value)
+  if (!r.ok) { erreurJustif.value = r.motif ?? ''; return }
   saisieJustif.value = ''
 }
 function qualifier() {
   erreur.value = ''
   if (!item.value) return
-  if (!motif.value.trim()) { erreur.value = "Le motif est obligatoire : c'est lui qui rend le dossier opposable."; return }
-  store.qualifier(item.value.id, nature.value, motif.value.trim(), auth.user?.nom ?? 'Responsable Flotte',
+  const r = store.qualifier(item.value.id, nature.value, motif.value, auth.user?.nom ?? 'Responsable Flotte',
     nature.value === 'non_justifiee' ? decision.value : 'classe')
+  if (!r.ok) { erreur.value = r.motif ?? ''; return }
   motif.value = ''
 }
 
@@ -152,13 +161,6 @@ const pageTitle = "Écart d'itinéraire"
     <template #form>
       <div class="px-6 py-5 max-w-3xl mx-auto">
 
-        <div v-if="item.nature === 'a_qualifier'" class="flex items-start gap-2.5 bg-warning-bg text-warning rounded-lg px-3.5 py-2.5 mb-5">
-          <Info class="w-4 h-4 shrink-0 mt-px" />
-          <p class="text-xs leading-relaxed">
-            Statut <strong>« à qualifier »</strong>. Seule une qualification en <strong>déviation non justifiée</strong> alimente le score du conducteur.
-          </p>
-        </div>
-
         <FormSection title="Identification" :recaps="[item.id, LIB_TYPE_ECART[item.type], item.voyageRef]">
           <div class="grid grid-cols-2 gap-x-6 gap-y-4 max-sm:grid-cols-1">
             <div class="flex flex-col gap-1"><label :class="F.fieldLabel">Type d'écart</label><span class="text-sm font-medium text-foreground">{{ LIB_TYPE_ECART[item.type] }}</span></div>
@@ -172,7 +174,7 @@ const pageTitle = "Écart d'itinéraire"
             <div class="flex flex-col gap-1"><label :class="F.fieldLabel">Trajet</label><span class="text-sm text-foreground">{{ item.trajetLibelle ?? 'Trajet ponctuel' }}</span></div>
             <div class="flex flex-col gap-1"><label :class="F.fieldLabel">Véhicule</label><span class="text-sm font-mono font-semibold text-foreground">{{ item.vehiculePlaque }}</span></div>
             <div class="flex flex-col gap-1">
-              <label :class="F.fieldLabel">Chauffeur</label>
+              <label :class="F.fieldLabel">Conducteur</label>
               <button v-if="item.chauffeurId" class="text-sm text-primary hover:underline bg-transparent border-0 p-0 cursor-pointer text-left w-fit"
                       title="Ouvrir le tableau de bord du conducteur" @click="emit('voirConducteur', item.chauffeurId)">
                 {{ item.chauffeurNom }}
@@ -188,18 +190,15 @@ const pageTitle = "Écart d'itinéraire"
         </FormSection>
 
         <FormSection title="Itinéraire prévu et trajet réel" :recaps="[item.dureeMin ? fmtDuree(item.dureeMin) : null, item.ecartLateralMaxM ? `${(item.ecartLateralMaxM / 1000).toFixed(1)} km d'écart` : null]">
-          <FleetMap :trace-prevu="tracePrevu" :marqueurs="marqueurEcart" height="320px" :show-legend="false" :ajuster-vue="true" />
-          <p class="text-[11px] text-muted-foreground mt-2 leading-relaxed">
-            Ligne pointillée bleue : trajet de référence. Marqueur rouge : position relevée au moment de l'écart.
-            Aucun tracé réel continu n'est disponible : aucun boîtier de géolocalisation n'est nommé dans les documents UCODIS.
-          </p>
+          <FleetMap :trace-prevu="tracePrevu" :trace-reelle="traceReelle" :marqueurs="marqueurEcart" height="320px" :show-legend="true"
+                    :legend="[{ label: 'Trajet prévu', color: '#1D4ED8' }, { label: 'Trajet réel', color: '#16a34a' }, { label: 'Position de l\u2019écart', color: '#dc2626' }]" :ajuster-vue="true" />
         </FormSection>
 
-        <FormSection title="Mesures" :recaps="[LIB_TYPE_ECART[item.type]]">
-          <div class="grid grid-cols-4 gap-3 max-sm:grid-cols-2">
+        <FormSection v-if="mesures.length" title="Mesures" :recaps="[LIB_TYPE_ECART[item.type]]">
+          <div class="grid grid-cols-3 gap-3 max-sm:grid-cols-2">
             <div v-for="m in mesures" :key="m.label">
               <label :class="F.fieldLabel">{{ m.label }}</label>
-              <p class="text-lg font-bold" :class="m.cls">{{ m.value }}</p>
+              <p class="text-lg font-bold text-foreground">{{ m.value }}</p>
             </div>
           </div>
         </FormSection>
@@ -214,15 +213,17 @@ const pageTitle = "Écart d'itinéraire"
           </ol>
         </FormSection>
 
-        <FormSection title="Justification du chauffeur" :recaps="[item.justificationChauffeur ? 'déposée' : 'en attente']">
+        <FormSection title="Justification du conducteur" :recaps="[item.justificationChauffeur ? 'déposée' : 'en attente']">
           <template v-if="item.justificationChauffeur">
             <p class="text-sm text-foreground leading-relaxed bg-background rounded-md px-3 py-2.5">{{ item.justificationChauffeur }}</p>
             <p class="text-[11px] text-muted-foreground mt-1.5">Déposée le {{ fmtDateHeure(item.justifieLe) }}</p>
           </template>
+          <p v-else-if="item.nature !== 'a_qualifier'" class="text-xs text-muted-foreground">Aucune justification déposée.</p>
           <template v-else>
-            <p class="text-xs text-muted-foreground mb-2">Aucune justification déposée. Fenêtre ouverte jusqu'au {{ fmtDateHeure(dateLimite) }}.</p>
-            <textarea v-model="saisieJustif" rows="3" :class="F.fieldTextarea" placeholder="Saisir la justification transmise par le chauffeur…" />
-            <button :class="Lc.btnOutline" class="mt-2" :disabled="!saisieJustif.trim()" @click="deposerJustification">Enregistrer la justification</button>
+            <p class="text-xs text-muted-foreground mb-2">À déposer avant le {{ fmtDateHeure(dateLimite) }}.</p>
+            <textarea v-model="saisieJustif" rows="3" :class="F.fieldTextarea" placeholder="Justification transmise par le conducteur" />
+            <p v-if="erreurJustif" class="text-[12px] text-danger flex items-center gap-1.5 mt-1.5"><AlertCircle class="w-3.5 h-3.5" /> {{ erreurJustif }}</p>
+            <button :class="Lc.btnOutline" class="mt-2" @click="deposerJustification">Enregistrer la justification</button>
           </template>
         </FormSection>
 
@@ -233,15 +234,12 @@ const pageTitle = "Écart d'itinéraire"
                      class="flex items-start gap-2 rounded-md border px-2.5 py-2 cursor-pointer transition-colors"
                      :class="nature === opt.value ? 'border-primary bg-primary/5' : 'border-border hover:bg-background'">
                 <input type="radio" :value="opt.value" v-model="nature" class="accent-primary mt-0.5" />
-                <span>
-                  <span class="text-xs font-medium text-foreground block">{{ opt.label }}</span>
-                  <span class="text-[11px] text-muted-foreground">{{ opt.aide }}</span>
-                </span>
+                <span class="text-xs font-medium text-foreground">{{ opt.label }}</span>
               </label>
             </div>
             <div :class="F.field" class="mb-2.5">
               <label :class="F.fieldLabel">Motif <span class="text-danger">*</span></label>
-              <textarea v-model="motif" rows="3" :class="F.fieldTextarea" placeholder="Motiver la décision - c'est ce qui rend le dossier opposable." />
+              <textarea v-model="motif" rows="3" :class="F.fieldTextarea" placeholder="Motif de la décision" />
             </div>
             <div v-if="nature === 'non_justifiee'" :class="F.field" class="mb-2.5">
               <label :class="F.fieldLabel">Suite donnée</label>

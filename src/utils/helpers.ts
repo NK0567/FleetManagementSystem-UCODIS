@@ -13,7 +13,7 @@ export function initiales(nom: string): string {
 /** Affiche une date ISO au format jj/mm/aaaa. */
 export function formatDate(iso?: string | null): string {
   if (!iso) return '-'
-  const [a, m, j] = iso.split('-')
+  const [a, m, j] = iso.slice(0, 10).split('-')
   if (!a || !m || !j) return iso
   return `${j}/${m}/${a}`
 }

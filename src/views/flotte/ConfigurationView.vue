@@ -88,6 +88,9 @@
                 <select :value="e.role" :class="F.fieldSelect" class="!h-[28px] !text-[11px] w-[130px]" @change="ev => majEtape(i, { role: (ev.target as HTMLSelectElement).value as RoleEtape })">
                   <option v-for="(lib, r) in LIB_ROLE_ETAPE" :key="r" :value="r">{{ lib }}</option>
                 </select>
+                <label v-if="e.role === 'livraison'" class="flex items-center gap-1 mt-1 text-[11px] text-muted-foreground cursor-pointer">
+                  <input type="checkbox" class="accent-primary" :checked="!!e.pompeExigee" @change="majEtape(i, { pompeExigee: !e.pompeExigee })" /> Pompe exigée
+                </label>
               </td>
               <td :class="L.td">
                 <input :value="e.intervalleMin ?? 0" type="number" min="0" step="5" :class="F.fieldInput" class="!h-[28px] !text-[11px] w-[80px]" @change="ev => majEtape(i, { intervalleMin: Number((ev.target as HTMLInputElement).value) })" />
@@ -129,7 +132,7 @@
             <Plus class="w-3.5 h-3.5" /> Ajouter
           </button>
           <p class="text-[11px] text-muted-foreground ml-auto">
-            {{ trajet.distanceEstimeeKm }} km · {{ fmtDuree(trajet.dureeEstimeeMin) }}, recalculés à chaque modification
+            {{ trajet.distanceEstimeeKm }} km · {{ fmtDuree(trajet.dureeEstimeeMin) }}
           </p>
         </div>
       </div>
@@ -167,11 +170,13 @@
                 </select>
               </td>
               <td :class="L.td">
-                <div v-if="t.seuilValeur != null" class="flex items-center gap-1">
-                  <input :value="t.seuilValeur" type="number" :class="F.fieldInput" class="!h-[28px] !text-[11px] w-[70px]" @change="ev => typesEcartStore.majType(t.id, { seuilValeur: Number((ev.target as HTMLInputElement).value) })" />
+                <span v-if="SEUIL_PARAMETRE[t.code]" class="text-xs">{{ p[SEUIL_PARAMETRE[t.code]!] }} {{ t.seuilUnite }}</span>
+                <div v-else-if="t.seuilValeur != null" class="flex items-center gap-1">
+                  <input :value="t.seuilValeur" type="number" min="0" :class="F.fieldInput" class="!h-[28px] !text-[11px] w-[70px]" @change="ev => majSeuilType(t.id, (ev.target as HTMLInputElement).value)" />
                   <span class="text-[11px] text-muted-foreground">{{ t.seuilUnite }}</span>
                 </div>
                 <span v-else class="text-muted-foreground">-</span>
+                <p v-if="erreursSeuil[t.id]" class="text-[11px] text-danger">{{ erreursSeuil[t.id] }}</p>
               </td>
               <td :class="L.td">
                 <button class="text-[11px] font-medium px-2 py-0.5 rounded-full border-0 cursor-pointer" :class="t.actif ? 'bg-success-bg text-success' : 'bg-background text-muted-foreground'" @click="typesEcartStore.basculerActif(t.id)">
@@ -228,88 +233,43 @@
     <div v-else-if="onglet === 'parametres'" class="grid grid-cols-1 lg:grid-cols-2 gap-3.5 items-start">
 
       <div :class="L.card">
-        <div class="flex items-center gap-2 mb-3"><Clock class="w-4 h-4 text-primary" /><h2 :class="L.cardTitle" class="!mb-0">Temps réglementaires</h2></div>
+        <div class="flex items-center gap-2 mb-3"><Clock class="w-4 h-4 text-primary" /><h2 :class="L.cardTitle" class="!mb-0">Temps de conduite et de repos</h2></div>
         <div class="grid grid-cols-2 gap-3">
-          <div :class="F.field">
-            <label :class="F.fieldLabel">Conduite continue max (min)</label>
-            <input v-model.number="p.tccMaxMin" type="number" :class="F.fieldInput" />
-          </div>
-          <div :class="F.field">
-            <label :class="F.fieldLabel">Arrêt après conduite continue (min)</label>
-            <input v-model.number="p.pauseApresTccMin" type="number" :class="F.fieldInput" />
-          </div>
-          <div :class="F.field">
-            <label :class="F.fieldLabel">Conduite journalière max (min)</label>
-            <input v-model.number="p.tcjMaxMin" type="number" :class="F.fieldInput" />
-          </div>
-          <div :class="F.field">
-            <label :class="F.fieldLabel">Travail journalier max (min)</label>
-            <input v-model.number="p.ttjMaxMin" type="number" :class="F.fieldInput" />
-          </div>
-          <div :class="F.field">
-            <label :class="F.fieldLabel">Repos hebdomadaire (h)</label>
-            <input v-model.number="p.trhMinH" type="number" :class="F.fieldInput" />
-          </div>
-          <div :class="F.field">
-            <label :class="F.fieldLabel">Plafond hebdomadaire (h)</label>
-            <input v-model.number="p.plafondHebdoH" type="number" :class="F.fieldInput" />
-          </div>
-        </div>
-        <p class="text-[11px] text-muted-foreground mt-2">
-          Alimente la catégorie « Temps réglementaires » de l'onglet Types d'écart, désactivée par défaut :
-          aucune réglementation malgache du transport routier n'a été fournie pour valider ces seuils.
-        </p>
-      </div>
-
-      <div :class="L.card">
-        <div class="flex items-center gap-2 mb-3"><SlidersHorizontal class="w-4 h-4 text-primary" /><h2 :class="L.cardTitle" class="!mb-0">Seuils d'exploitation</h2></div>
-        <div class="grid grid-cols-2 gap-3">
-          <div :class="F.field">
-            <label :class="F.fieldLabel">Litres par bon de carburant</label>
-            <input v-model.number="p.litresParBonDefaut" type="number" :class="F.fieldInput" />
-          </div>
-          <div :class="F.field">
-            <label :class="F.fieldLabel">Tolérance kilométrique (%)</label>
-            <input v-model.number="p.toleranceKmPct" type="number" :class="F.fieldInput" />
-          </div>
-          <div :class="F.field">
-            <label :class="F.fieldLabel">Seuil d'arrêt non planifié (min)</label>
-            <input v-model.number="p.seuilArretMin" type="number" :class="F.fieldInput" />
-          </div>
-          <div :class="F.field">
-            <label :class="F.fieldLabel">Plafond bihebdomadaire (h)</label>
-            <input v-model.number="p.plafondBihebdoH" type="number" :class="F.fieldInput" />
-          </div>
-        </div>
-      </div>
-
-      <!-- Seuils d'alerte : gouvernent le déclenchement des alertes, ajustables sans intervention technique. -->
-      <div :class="L.card" class="lg:col-span-2">
-        <div class="flex items-center justify-between mb-3">
-          <h2 :class="L.cardTitle" class="!mb-0"><BellRing class="w-4 h-4 text-primary" /> Seuils d'alerte</h2>
-          <span class="text-[11px] text-muted-foreground">ajustables sans intervention technique</span>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="flex flex-col gap-2">
-            <p class="text-xs font-semibold text-foreground">Préavis d'entretien préventif</p>
-            <div class="grid grid-cols-2 gap-2">
-              <div :class="F.field">
-                <label :class="F.fieldLabel">Kilomètres avant</label>
-                <input v-model.number="p.preavisEntretienKm" type="number" min="0" :class="[F.fieldInput, configStore.seuilHorsBornes('preavisEntretienKm') ? 'border-danger' : '']" />
-              </div>
-              <div :class="F.field">
-                <label :class="F.fieldLabel">Jours avant</label>
-                <input v-model.number="p.preavisEntretienJours" type="number" min="0" :class="[F.fieldInput, configStore.seuilHorsBornes('preavisEntretienJours') ? 'border-danger' : '']" />
-              </div>
-            </div>
-            <p v-if="configStore.seuilHorsBornes('preavisEntretienKm')" class="text-[11px] text-danger flex items-center gap-1">
-              <AlertCircle class="w-3 h-3" /> Attendu entre {{ configStore.BORNES_SEUILS.preavisEntretienKm.min }} et {{ configStore.BORNES_SEUILS.preavisEntretienKm.max.toLocaleString('fr-FR') }} km.
+          <div v-for="c in CHAMPS_TEMPS" :key="c.cle" :class="F.field">
+            <label :class="F.fieldLabel">{{ c.libelle }}</label>
+            <input v-model.number="p[c.cle]" type="number" min="0" :class="[F.fieldInput, configStore.seuilHorsBornes(c.cle) ? 'border-danger' : '']" />
+            <p v-if="configStore.seuilHorsBornes(c.cle)" class="text-[11px] text-danger flex items-center gap-1">
+              <AlertCircle class="w-3 h-3" /> Attendu entre {{ configStore.BORNES_SEUILS[c.cle].min }} et {{ configStore.BORNES_SEUILS[c.cle].max }} {{ configStore.BORNES_SEUILS[c.cle].unite }}.
             </p>
           </div>
+          <div :class="F.field">
+            <label :class="F.fieldLabel">Plafond de conduite sur deux semaines (h)</label>
+            <input :value="p.plafondBihebdoH ?? ''" type="number" min="0" placeholder="Non contrôlé" :class="[F.fieldInput, configStore.seuilHorsBornes('plafondBihebdoH') ? 'border-danger' : '']" @input="majBihebdo($event.target as HTMLInputElement)" />
+            <p v-if="configStore.seuilHorsBornes('plafondBihebdoH')" class="text-[11px] text-danger flex items-center gap-1">
+              <AlertCircle class="w-3 h-3" /> Attendu entre {{ configStore.BORNES_SEUILS.plafondBihebdoH.min }} et {{ configStore.BORNES_SEUILS.plafondBihebdoH.max }} h.
+            </p>
+          </div>
+          <div :class="F.field">
+            <label :class="F.fieldLabel">Conduite de nuit non autorisée : début</label>
+            <input :value="nuit.debut" type="time" :class="[F.fieldInput, erreurNuit ? 'border-danger' : '']" @change="majNuit('debut', ($event.target as HTMLInputElement).value)" />
+          </div>
+          <div :class="F.field">
+            <label :class="F.fieldLabel">Conduite de nuit non autorisée : fin</label>
+            <input :value="nuit.fin" type="time" :class="[F.fieldInput, erreurNuit ? 'border-danger' : '']" @change="majNuit('fin', ($event.target as HTMLInputElement).value)" />
+          </div>
+          <p v-if="erreurNuit" class="col-span-2 text-[11px] text-danger flex items-center gap-1"><AlertCircle class="w-3 h-3" /> {{ erreurNuit }}</p>
+        </div>
+      </div>
 
+      <!-- Seuils d'alerte : gouvernent le déclenchement des alertes. -->
+      <div :class="L.card">
+        <div class="flex items-center justify-between mb-3">
+          <h2 :class="L.cardTitle" class="!mb-0"><BellRing class="w-4 h-4 text-primary" /> Seuils d'alerte</h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="flex flex-col gap-2">
-            <p class="text-xs font-semibold text-foreground">Rayon de validation d'un passage</p>
+            <p class="text-xs font-semibold text-foreground">Rayon par défaut d'un site sans zone</p>
             <div :class="F.field">
               <label :class="F.fieldLabel">Distance au site (m)</label>
               <input v-model.number="p.rayonValidationPassageM" type="number" min="0" step="100" :class="[F.fieldInput, configStore.seuilHorsBornes('rayonValidationPassageM') ? 'border-danger' : '']" />
@@ -319,51 +279,46 @@
             </p>
           </div>
 
-          <div class="flex flex-col gap-2">
-            <p class="text-xs font-semibold text-foreground">Préavis d'échéance documentaire</p>
-            <div :class="F.field">
-              <label :class="F.fieldLabel">Jours avant expiration</label>
-              <input v-model.number="p.preavisDocumentaireJours" type="number" min="0" :class="[F.fieldInput, configStore.seuilHorsBornes('preavisDocumentaireJours') ? 'border-danger' : '']" />
-            </div>
-            <p v-if="configStore.seuilHorsBornes('preavisDocumentaireJours')" class="text-[11px] text-danger flex items-center gap-1">
-              <AlertCircle class="w-3 h-3" /> Attendu entre {{ configStore.BORNES_SEUILS.preavisDocumentaireJours.min }} et {{ configStore.BORNES_SEUILS.preavisDocumentaireJours.max }} jours.
-            </p>
-          </div>
         </div>
       </div>
 
-      <!-- Grille de prime conducteur : montants non communiqués par UCODIS, modifiables sans développeur. -->
+      <!-- Entreprise : monnaie et fonctions du personnel roulant -->
       <div :class="L.card" class="lg:col-span-2">
-        <div class="flex items-center justify-between mb-3">
-          <h2 :class="L.cardTitle" class="!mb-0"><Award class="w-4 h-4 text-primary" /> Grille de prime conducteur</h2>
-          <button class="text-[11px] text-muted-foreground hover:text-foreground cursor-pointer bg-transparent border-0" @click="scoresStore.reinitialiserGrillePrime()">
-            Réinitialiser
-          </button>
-        </div>
-        <p class="text-[11px] text-warning bg-warning-bg rounded-md px-2.5 py-2 mb-3">
-          Montants indicatifs, non communiqués par UCODIS, à valider par la Direction et les Ressources humaines
-          avant toute activation réelle.
-        </p>
-        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
-          <div v-for="(palier, i) in scoresStore.grillePrime" :key="i" class="flex flex-col gap-2 rounded-lg border border-border p-3">
-            <div :class="F.field">
-              <label :class="F.fieldLabel">Libellé</label>
-              <input :value="palier.libelle" type="text" :class="F.fieldInput" @change="scoresStore.modifierPalier(i, { libelle: ($event.target as HTMLInputElement).value })" />
-            </div>
-            <div :class="F.field">
-              <label :class="F.fieldLabel">Score minimum</label>
-              <input :value="palier.min" type="number" min="0" max="100" :class="F.fieldInput" @change="scoresStore.modifierPalier(i, { min: Number(($event.target as HTMLInputElement).value) })" />
-            </div>
-            <div :class="F.field">
-              <label :class="F.fieldLabel">Montant (Ar)</label>
-              <input :value="palier.montant" type="number" min="0" step="10000" :class="F.fieldInput" @change="scoresStore.modifierPalier(i, { montant: Number(($event.target as HTMLInputElement).value) })" />
+        <div class="flex items-center gap-2 mb-3"><Building2 class="w-4 h-4 text-primary" /><h2 :class="L.cardTitle" class="!mb-0">Entreprise</h2></div>
+        <div class="grid grid-cols-1 md:grid-cols-[180px_1fr_1fr] gap-4">
+          <div :class="F.field">
+            <label :class="F.fieldLabel">Monnaie des montants</label>
+            <input v-model="p.devise" :class="F.fieldInput" maxlength="6" placeholder="ex. EUR" />
+            <p v-if="!p.devise?.trim()" class="text-[11px] text-warning mt-0.5">Monnaie vide : les montants s'affichent sans unité.</p>
+          </div>
+          <div v-for="g in GROUPES_FONCTIONS" :key="g.cle">
+            <p :class="F.fieldLabel" class="mb-1.5">{{ g.libelle }}</p>
+            <div class="flex flex-wrap gap-1">
+              <button v-for="f in fonctionsStore.liste" :key="f.id" type="button" class="px-2 py-0.5 rounded-full text-[11px] border-0 cursor-pointer"
+                :class="p[g.cle].includes(f.id) ? 'bg-primary/10 text-primary' : 'bg-background text-muted-foreground'" @click="basculerFonction(g.cle, f.id)">{{ f.libelle }}</button>
             </div>
           </div>
         </div>
+        <p v-if="erreurFonction" class="text-[12px] text-danger mt-2">{{ erreurFonction }}</p>
+        <div class="mt-3">
+          <p :class="F.fieldLabel" class="mb-1.5">Types de contrat</p>
+          <div class="flex flex-wrap items-center gap-1">
+            <span v-for="t in p.typesContrat" :key="t" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] bg-primary/10 text-primary">{{ t }}<button type="button" class="bg-transparent border-0 p-0 cursor-pointer text-danger" :title="`Retirer ${t}`" @click="retirerContrat(t)">×</button></span>
+            <input v-model="nouveauContrat" :class="F.fieldInput" class="!h-[28px] !w-[150px] !text-[12px]" placeholder="nouveau type" @keyup.enter="ajouterContrat" />
+            <button type="button" :class="F.btnOutline" class="!py-1 !text-[12px]" @click="ajouterContrat">Ajouter</button>
+          </div>
+          <p v-if="erreurContrat" class="text-[12px] text-danger mt-1">{{ erreurContrat }}</p>
+        </div>
+        <label class="flex items-center gap-2 text-[13px] cursor-pointer mt-3"><input v-model="p.gestionPersonnelRaccordee" type="checkbox" class="accent-primary" /> Gestion du personnel raccordée</label>
       </div>
     </div>
 
     <ConfigCarburantOnglet v-if="onglet === 'carburant'" />
+    <ConfigDocumentsOnglet v-if="onglet === 'documents'" />
+    <ConfigSecuriteOnglet v-if="onglet === 'securite'" @aller="k => (onglet = k as Onglet)" />
+    <ConfigTelematiqueOnglet v-if="onglet === 'telematique'" />
+    <ConfigReferentielsOnglet v-if="onglet === 'referentiels'" />
+    <ConfigImportsIndicateursOnglet v-if="onglet === 'imports'" />
 
     <!-- ══ Type d'écart : modification ═══════════════════════ -->
     <div v-if="formType" class="fixed inset-0 z-[1000] flex items-center justify-center bg-black/40 px-4" @click.self="formType = null">
@@ -372,8 +327,8 @@
 
         <div class="grid grid-cols-2 gap-3">
           <div :class="F.field">
-            <label :class="F.fieldLabel">Code *</label>
-            <input v-model="formType.code" type="text" :class="F.fieldInput" class="font-mono" placeholder="VOL-MANQ" />
+            <label :class="F.fieldLabel">Code</label>
+            <span class="h-[38px] flex items-center font-mono text-[13px] text-foreground">{{ formType.code }}</span>
           </div>
           <div :class="F.field">
             <label :class="F.fieldLabel">Catégorie *</label>
@@ -387,11 +342,11 @@
             <label :class="F.fieldLabel">Gravité *</label>
             <SearchableDropdown v-model="formType.gravite" :items="optGraviteEcart" placeholder="Sélectionner…" />
           </div>
-          <div :class="F.field">
-            <label :class="F.fieldLabel">Seuil et unité</label>
-            <div class="flex gap-2">
-              <input v-model.number="formType.seuilValeur" type="number" :class="F.fieldInput" class="w-[90px]" placeholder="Valeur" />
-              <input v-model="formType.seuilUnite" type="text" :class="F.fieldInput" placeholder="L, %, min…" />
+          <div v-if="!SEUIL_PARAMETRE[formType.code] && formType.seuilUnite" :class="F.field">
+            <label :class="F.fieldLabel">Seuil</label>
+            <div class="flex items-center gap-2">
+              <input v-model.number="formType.seuilValeur" type="number" min="0" :class="F.fieldInput" class="w-[90px]" />
+              <span class="text-[12px] text-muted-foreground">{{ formType.seuilUnite }}</span>
             </div>
           </div>
           <div :class="F.field" class="col-span-2">
@@ -472,22 +427,28 @@
  * Configuration, reprise du socle FMS : quatre onglets (Trajets de
  * référence, Clients, Types d'écart, Paramètres). L'onglet Trajets
  * réutilise SelecteurTrajet, déjà construit pour le formulaire de
- * création de voyage · même logique, pas de code dupliqué. Les temps
- * réglementaires de conduite du socle FMS ne sont pas repris, faute de
- * réglementation malgache fournie pour les fonder.
+ * création de voyage · même logique, pas de code dupliqué. Les temps de
+ * conduite et de repos se règlent selon la réglementation qui s'applique à
+ * l'entreprise ; aucune n'est codée en dur (FMS-PA-04).
  */
 import { ref, computed } from 'vue'
-import { AlertCircle, Archive, Award, BellRing, ChevronDown, ChevronUp, Clock, Pencil, Plus, Route, SlidersHorizontal, Undo2, X } from '@lucide/vue'
+import { AlertCircle, Archive, Building2, BellRing, ChevronDown, ChevronUp, Clock, Pencil, Plus, Route, Undo2, X } from '@lucide/vue'
 import SearchableDropdown from '../../components/ui/SearchableDropdown.vue'
 import type { DropdownItem } from '../../components/ui/SearchableDropdown.vue'
 import FleetMap from '../../components/flotte/FleetMap.vue'
 import ConfigCarburantOnglet from '../../components/flotte/ConfigCarburantOnglet.vue'
+import ConfigDocumentsOnglet from '../../components/flotte/ConfigDocumentsOnglet.vue'
+import ConfigSecuriteOnglet from '../../components/flotte/ConfigSecuriteOnglet.vue'
+import ConfigTelematiqueOnglet from '../../components/flotte/ConfigTelematiqueOnglet.vue'
+import ConfigReferentielsOnglet from '../../components/flotte/ConfigReferentielsOnglet.vue'
+import ConfigImportsIndicateursOnglet from '../../components/flotte/ConfigImportsIndicateursOnglet.vue'
 import { useTrajetsStore } from '../../stores/trajets'
 import { useClientsStore, LIB_CANAL, type Client, type CanalNotification } from '../../stores/clients'
 import { useConfigTypesEcartStore, LIB_CATEGORIE_ECART, type CategorieEcart, type ConfigTypeEcart } from '../../stores/ecarts'
 import { useConfigurationStore } from '../../stores/configuration'
-import { useScoresConducteursStore } from '../../stores/scoresConducteurs'
 import { useSitesStore } from '../../stores/sites'
+import { useFonctionStore } from '../../stores/fonctions'
+import { usePersonnelStore } from '../../stores/personnel'
 import { LIB_ROLE_ETAPE } from '../../utils/voyageUtils'
 import type { EtapeVoyage, RoleEtape, Trajet, GraviteEcart } from '../../types'
 import * as L from '../../lib/listClasses'
@@ -499,10 +460,9 @@ const clientsStore = useClientsStore()
 const sitesStore = useSitesStore()
 const typesEcartStore = useConfigTypesEcartStore()
 const configStore = useConfigurationStore()
-const scoresStore = useScoresConducteursStore()
 const p = configStore.parametres
 
-type Onglet = 'trajets' | 'clients' | 'ecarts' | 'parametres' | 'carburant'
+type Onglet = 'trajets' | 'clients' | 'ecarts' | 'parametres' | 'carburant' | 'documents' | 'securite' | 'telematique' | 'referentiels' | 'imports'
 const onglet = ref<Onglet>('trajets')
 const onglets = computed(() => [
   { key: 'trajets' as const, label: 'Trajets de référence', compte: trajetsStore.trajets.length },
@@ -510,7 +470,71 @@ const onglets = computed(() => [
   { key: 'ecarts' as const, label: "Types d'écart", compte: typesEcartStore.types.length },
   { key: 'parametres' as const, label: 'Paramètres', compte: 0 },
   { key: 'carburant' as const, label: 'Carburant', compte: 0 },
+  { key: 'documents' as const, label: 'Documents', compte: 0 },
+  { key: 'securite' as const, label: 'Sécurité', compte: 0 },
+  { key: 'telematique' as const, label: 'Télématique', compte: 0 },
+  { key: 'referentiels' as const, label: 'Référentiels', compte: 0 },
+  { key: 'imports' as const, label: 'Imports et indicateurs', compte: 0 },
 ])
+
+/** Seuils de temps de conduite et de repos (FMS-PA-04), avec leurs bornes attendues. */
+const CHAMPS_TEMPS = [
+  { cle: 'tccMaxMin', libelle: 'Conduite continue max (min)' },
+  { cle: 'pauseApresTccMin', libelle: 'Pause obligatoire après conduite continue (min)' },
+  { cle: 'tcjMaxMin', libelle: 'Conduite journalière max (min)' },
+  { cle: 'ttjMaxMin', libelle: 'Travail journalier max (min)' },
+  { cle: 'plafondHebdoH', libelle: 'Plafond de conduite hebdomadaire (h)' },
+  { cle: 'reposMinAvantDepartH', libelle: 'Repos minimal avant un départ (h)' },
+  { cle: 'trhMinH', libelle: 'Repos hebdomadaire (h)' },
+] as const
+
+/** Plage de conduite de nuit non autorisée : les deux heures vides, elle n'est pas contrôlée. */
+const nuit = ref({ debut: p.nuitInterditeDebut ?? '', fin: p.nuitInterditeFin ?? '' })
+const erreurNuit = ref('')
+function majNuit(cle: 'debut' | 'fin', valeur: string) {
+  nuit.value[cle] = valeur
+  const r = configStore.majPlageNuit(nuit.value.debut, nuit.value.fin)
+  erreurNuit.value = r.ok ? '' : r.motif ?? ''
+}
+
+/** Plafond facultatif : un champ vide le retire du contrôle. */
+function majBihebdo(champ: HTMLInputElement) {
+  const v = champ.value.trim()
+  p.plafondBihebdoH = v === '' || Number.isNaN(Number(v)) ? null : Number(v)
+}
+
+/* ── Entreprise ───────────────────────────────────────────── */
+const fonctionsStore = useFonctionStore()
+const GROUPES_FONCTIONS = [
+  { cle: 'fonctionsConducteur', libelle: 'Fonctions de conducteur' },
+  { cle: 'fonctionsAide', libelle: "Fonctions d'aide conducteur" },
+] as const
+const erreurFonction = ref('')
+const nouveauContrat = ref(''); const erreurContrat = ref('')
+const personnelStore = usePersonnelStore()
+function ajouterContrat() {
+  const r = configStore.ajouterTypeContrat(nouveauContrat.value)
+  erreurContrat.value = r.ok ? '' : r.motif ?? ''
+  if (r.ok) nouveauContrat.value = ''
+}
+function retirerContrat(t: string) {
+  const r = configStore.retirerTypeContrat(t, personnelStore.liste.filter(x => x.contrat === t).length)
+  erreurContrat.value = r.ok ? '' : r.motif ?? ''
+}
+/** Une fonction est soit conducteur, soit aide ; chaque groupe garde au moins une fonction. */
+function basculerFonction(cle: 'fonctionsConducteur' | 'fonctionsAide', id: string) {
+  erreurFonction.value = ''
+  const liste = p[cle]
+  const autre = p[cle === 'fonctionsConducteur' ? 'fonctionsAide' : 'fonctionsConducteur']
+  const i = liste.indexOf(id)
+  if (i >= 0) {
+    if (liste.length === 1) { erreurFonction.value = 'Chaque groupe garde au moins une fonction.'; return }
+    liste.splice(i, 1)
+  } else {
+    if (autre.includes(id)) { erreurFonction.value = 'Cette fonction est déjà dans l\'autre groupe.'; return }
+    liste.push(id)
+  }
+}
 
 /* ── Trajets ──────────────────────────────────────────────── */
 const afficherArchives = ref(false)
@@ -560,6 +584,8 @@ function enregistrerTrajet() {
 const optClients = computed<DropdownItem[]>(() => clientsStore.clients.map(c => ({ id: c.nom, label: c.nom })))
 
 /* ── Types d'écart ────────────────────────────────────────── */
+/** Les seuils des temps réglementaires ne se règlent qu'à un endroit : l'onglet Paramètres. */
+const SEUIL_PARAMETRE: Record<string, 'tccMaxMin' | 'tcjMaxMin' | 'ttjMaxMin' | 'trhMinH' | undefined> = { TCC: 'tccMaxMin', TCJ: 'tcjMaxMin', TTJ: 'ttjMaxMin', TRH: 'trhMinH' }
 interface FormType { id: string; code: string; libelle: string; categorie: CategorieEcart; gravite: 'mineur' | 'majeur' | 'critique'; seuilValeur: number | null; seuilUnite: string; description: string }
 const formType = ref<FormType | null>(null)
 const erreurType = ref('')
@@ -572,19 +598,23 @@ function ouvrirEditionType(t: ConfigTypeEcart) {
   }
 }
 
+const erreursSeuil = ref<Record<string, string>>({})
+function majSeuilType(id: string, valeur: string) {
+  const r = typesEcartStore.majType(id, { seuilValeur: valeur === '' ? NaN : Number(valeur) })
+  erreursSeuil.value = { ...erreursSeuil.value, [id]: r.ok ? '' : r.motif ?? '' }
+}
+
 function enregistrerType() {
   const f = formType.value
   if (!f) return
   erreurType.value = ''
-  if (!f.code.trim() || !f.libelle.trim()) { erreurType.value = 'Le code et le libellé sont obligatoires.'; return }
-  const doublon = typesEcartStore.types.some(t => t.id !== f.id && t.code.trim().toUpperCase() === f.code.trim().toUpperCase())
-  if (doublon) { erreurType.value = `Le code ${f.code.trim().toUpperCase()} est déjà utilisé.`; return }
-  if (f.seuilValeur != null && !f.seuilUnite.trim()) { erreurType.value = 'Un seuil doit porter son unité : litres, pourcent, minutes…'; return }
-
-  typesEcartStore.majType(f.id, {
-    code: f.code.trim().toUpperCase(), libelle: f.libelle.trim(), categorie: f.categorie, gravite: f.gravite,
-    seuilValeur: f.seuilValeur ?? undefined, seuilUnite: f.seuilUnite.trim() || undefined, description: f.description.trim() || undefined,
+  /* Le code et l'unité du seuil sont fixés : seuls le libellé, la catégorie, la gravité, le seuil et la description se modifient. */
+  const avecSeuil = !SEUIL_PARAMETRE[f.code] && !!f.seuilUnite
+  const r = typesEcartStore.majType(f.id, {
+    libelle: f.libelle, categorie: f.categorie, gravite: f.gravite, description: f.description.trim() || undefined,
+    ...(avecSeuil ? { seuilValeur: f.seuilValeur ?? NaN } : {}),
   })
+  if (!r.ok) { erreurType.value = r.motif ?? ''; return }
   formType.value = null
 }
 

@@ -32,7 +32,7 @@ const SEED: Entite[] = [
   {
     id: 'e4', code: 'CND', nom: 'Équipe conduite', type: 'equipe', parentId: 'e2',
     responsableNom: 'Hery Andriamalala', responsableId: 'p-002',
-    effectif: 15, site: 'Dépôt UCODIS Tanjombato', statut: 'validee',
+    effectif: 15, site: 'Dépôt Tanjombato', statut: 'validee',
     description: "Dix conducteurs et cinq aides conducteurs, un conducteur par tracteur du parc.",
   },
   {
@@ -50,7 +50,7 @@ const SEED: Entite[] = [
   {
     id: 'e7', code: 'DEP', nom: 'Équipe dépôt', type: 'service', parentId: 'e1',
     responsableNom: 'Naina Rakotobe', responsableId: 'p-006',
-    effectif: 2, site: 'Dépôt UCODIS Tanjombato', statut: 'validee',
+    effectif: 2, site: 'Dépôt Tanjombato', statut: 'validee',
     description: "Comptage et vérification des marchandises chargées, contrôle du poids par rapport à la charge maximale autorisée.",
   },
   {

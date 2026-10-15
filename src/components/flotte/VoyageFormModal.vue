@@ -19,7 +19,7 @@
 
           <div :class="F.field">
             <label :class="F.fieldLabel">
-              Chauffeur <span class="text-muted-foreground font-normal">- déduit de l'affectation</span>
+              Conducteur <span class="text-muted-foreground font-normal">- déduit de l'affectation</span>
             </label>
             <div class="h-[38px] px-2.5 rounded-md border flex items-center text-[13px]"
                  :class="chauffeur ? 'bg-primary/5 border-primary/20 text-primary font-medium' : 'bg-background border-border text-muted-foreground'">
@@ -42,7 +42,7 @@
 
         <!-- Véhicules écartés : un seul bandeau groupé, comme la référence -->
         <p v-if="vehiculesEcartes.length" class="text-[12px] text-warning leading-relaxed -mt-2">
-          {{ vehiculesEcartes.length }} véhicule(s) écarté(s) pour pièce administrative expirée :
+          {{ vehiculesEcartes.length }} véhicule(s) écarté(s) :
           {{ vehiculesEcartes.map(v => `${v.plaque} (${v.motif})`).join(' · ') }}
         </p>
 
@@ -137,14 +137,14 @@ const erreur = ref('')
 /** Un véhicule dont un document est expiré n'est pas proposé · motif détaillé, comme la référence. */
 const vehiculesEcartes = computed(() =>
   vehicules.tracteurs
-    .filter(t => !docsVehicule.enRegle(t.id))
+    .filter(t => t.statut !== 'sorti' && (!docsVehicule.enRegle(t.id) || !vehicules.estUtilisable(t)))
     .map(t => ({
       plaque: t.immatriculation,
-      motif: docsVehicule.documentsDe(t.id).filter(d => docsVehicule.etat(d) === 'expire').map(d => d.type).join(', ') || 'document expiré',
+      motif: !vehicules.estUtilisable(t) ? `${vehicules.LIBELLES_STATUT[t.statut].toLowerCase()}${t.motifIndisponibilite ? ` : ${t.motifIndisponibilite}` : ''}` : docsVehicule.manquants(t.id).map(d => d.libelle).join(', ') || 'document non valide',
     })))
 
 const optVehicules = computed<DropdownItem[]>(() =>
-  vehicules.tracteurs.filter(t => docsVehicule.enRegle(t.id)).map(t => ({ id: t.id, label: t.immatriculation, sublabel: `${t.marque} ${t.modele}` })))
+  vehicules.tracteurs.filter(t => docsVehicule.enRegle(t.id) && vehicules.estUtilisable(t)).map(t => ({ id: t.id, label: t.immatriculation, sublabel: `${t.marque} ${t.modele}` })))
 
 const chauffeur = computed(() => {
   if (!form.value.vehiculeId) return null
@@ -172,6 +172,8 @@ const blocages = computed(() => {
   const out: string[] = []
   if (form.value.vehiculeId && !chauffeur.value) out.push("Ce véhicule n'a aucun conducteur affecté : affectez un conducteur avant de créer le voyage.")
   if (form.value.vehiculeId && !semiRemorque.value) out.push("Ce véhicule n'est attelé à aucune semi-remorque.")
+  const pompe = voyages.controlePompe(form.value.vehiculeId || undefined, etapes.value)
+  if (!pompe.ok && pompe.motif) out.push(pompe.motif)
   return out
 })
 
@@ -188,13 +190,13 @@ function enregistrer() {
   const at = vehicules.attelageActif(form.value.vehiculeId)
   const tries = [...etapes.value].sort((a, b) => a.ordre - b.ordre)
 
-  const id = voyages.creer({
+  const r = voyages.creerVoyage({
     statut: 'planifie',
     clientNom: form.value.clientNom || (t?.clientNom ?? 'Client non précisé'),
     toleranceEcartPoidsPourcent: 1,
     trajetId: form.value.trajetId || undefined,
     trajetLibelle: t?.libelle,
-    origine: tries[0]?.siteNom ?? 'Dépôt UCODIS Tanjombato',
+    origine: tries[0]?.siteNom ?? 'Dépôt Tanjombato',
     destination: tries[tries.length - 1]?.siteNom ?? '-',
     vehiculeId: form.value.vehiculeId,
     vehiculePlaque: vehicule?.immatriculation,
@@ -206,9 +208,9 @@ function enregistrer() {
     kmReference: t?.distanceEstimeeKm ?? trajets.distanceSimulee(etapes.value),
     numeroOT: form.value.numeroOT || undefined,
     marchandise: { typeProduit: form.value.typeProduit, nombreCartons: 0, poidsChargeKg: form.value.poidsChargeKg || 0 },
-    etapesPersonnalisees: form.value.trajetId ? undefined : etapes.value,
+    etapesPersonnalisees: tries,
   })
-
-  emit('created', id)
+  if (!r.ok || !r.id) { erreur.value = r.motif ?? ''; return }
+  emit('created', r.id)
 }
 </script>

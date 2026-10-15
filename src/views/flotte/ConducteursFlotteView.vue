@@ -1,13 +1,13 @@
 <template>
   <ListPageLayout
     title="Conducteurs"
-    :subtitle="`${personnel.conducteurs.length} conducteur(s) enregistré(s) · ${nonAffectables.length} non affectable(s)`"
+    :subtitle="`${personnel.conducteurs.length} conducteur(s) et ${personnel.aides.length} aide(s) · ${nonAffectables.length} non affectable(s)`"
     :columns="columns"
     :items="pageItems"
     :total="totalCount"
-    :total-text="`${totalCount} conducteur(s)`"
+    :total-text="`${totalCount} personne(s)`"
     search-placeholder="Nom, matricule, n° de permis…"
-    scope-label="Statut :"
+    scope-label="Fonction :"
     :scope-options="scopeOptions"
     v-model:scope="activeScope"
     v-model:search-query="searchQuery"
@@ -18,13 +18,25 @@
     @reset-filters="resetFilters"
     @open-card="(c) => ouvrirFiche((c as Personnel).id)"
   >
+    <template #header-actions>
+      <RouterLink v-if="config.parametres.gestionPersonnelRaccordee" :to="{ name: 'admin-employes' }" :class="L.btnOutline" class="no-underline"><Users class="w-4 h-4" /> Gérer les personnes dans Employés</RouterLink>
+      <template v-else>
+        <button :class="L.btnOutline" @click="importOuvert = true"><Upload class="w-4 h-4" /> Importer</button>
+        <button :class="L.btnPrimary" @click="creationOuverte = true"><Plus class="w-4 h-4" /> Nouvelle personne</button>
+      </template>
+    </template>
+
+    <template #filters>
+      <div :class="L.fpField"><label :class="L.fpFieldLabel">Affectation</label><SearchableDropdown v-model="filtreAffectation" :items="optAffectation" placeholder="Toutes" compact /></div>
+      <button class="mt-auto py-[7px] bg-transparent border-0 text-xs text-muted-foreground cursor-pointer hover:text-primary" @click="resetFilters">Réinitialiser</button>
+    </template>
+
     <template #above-table>
       <div v-if="nonAffectables.length" class="flex items-start gap-2.5 bg-danger-bg text-danger rounded-lg px-3.5 py-2.5 mb-3.5">
         <ShieldAlert class="w-4 h-4 shrink-0 mt-px" />
         <p class="text-xs leading-relaxed">
           {{ nonAffectables.length }} conducteur(s) ne peuvent pas être affectés :
           <span v-for="(c, i) in nonAffectables" :key="c.id">{{ i ? ' · ' : '' }}{{ c.nomComplet }} ({{ motifBlocage(c.id) }})</span>.
-          L'autorisation de départ leur sera refusée tant que la pièce n'est pas régularisée.
         </p>
       </div>
 
@@ -41,27 +53,30 @@
         <UserAvatar :nom="item.nomComplet" taille="sm" />
         <div>
           <p class="font-medium text-foreground text-xs">{{ item.nomComplet }}</p>
-          <p class="text-[11px] text-muted-foreground">{{ item.matricule }}</p>
+          <p class="text-[11px] text-muted-foreground">{{ item.matricule }} · {{ item.fonctionLibelle }}</p>
         </div>
       </div>
     </template>
-    <template #cell-permis="{ item }">
-      <span v-if="permisEcheance(item.id)" class="text-[11px] font-medium px-1.5 py-0.5 rounded" :class="classeEcheance(permisEcheance(item.id))">{{ formatDate(permisEcheance(item.id)) }}</span>
-      <span v-else class="text-muted-foreground text-xs">-</span>
-    </template>
-    <template #cell-visite="{ item }">
-      <span v-if="visiteEcheance(item.id)" class="text-[11px] font-medium px-1.5 py-0.5 rounded" :class="classeEcheance(visiteEcheance(item.id))">{{ formatDate(visiteEcheance(item.id)) }}</span>
-      <span v-else class="text-muted-foreground text-xs">-</span>
+    <template #cell-pieces="{ item }">
+      <div v-for="pc in piecesSuivies(item.id)" :key="pc.code" class="text-[11px] truncate">
+        {{ pc.libelle }} : <span class="font-medium px-1.5 py-0.5 rounded" :class="classeDoc(pc.doc)">{{ texteDoc(pc) }}</span>
+      </div>
     </template>
     <template #cell-score="{ item }">
-      <div class="flex items-center gap-2">
+      <span v-if="!estRoulant(item)" class="text-muted-foreground text-xs">-</span>
+      <div v-else class="flex items-center gap-2">
         <div class="w-16 h-1.5 bg-background rounded-full overflow-hidden"><div class="h-full rounded-full" :class="barreScore(scoreDe(item.id))" :style="{ width: scoreDe(item.id) + '%' }"></div></div>
         <span class="text-xs font-semibold" :class="texteScore(scoreDe(item.id))">{{ scoreDe(item.id) }}</span>
       </div>
     </template>
     <template #cell-statut="{ item }">
-      <span v-if="motifBlocage(item.id)" class="text-xs font-medium px-2 py-0.5 rounded-full bg-danger-bg text-danger">Non affectable</span>
-      <span v-else class="text-xs font-medium px-2 py-0.5 rounded-full" :class="estAffecte(item.id) ? 'bg-primary/10 text-primary' : 'bg-success-bg text-success'">{{ estAffecte(item.id) ? 'Affecté' : 'Disponible' }}</span>
+      <span v-if="!estRoulant(item)" class="text-muted-foreground text-xs">-</span>
+      <span v-else-if="motifBlocage(item.id)" class="text-xs font-medium px-2 py-0.5 rounded-full bg-danger-bg text-danger">Non affectable</span>
+      <span v-else class="text-xs font-medium px-2 py-0.5 rounded-full" :class="estAffecte(item.id) ? 'bg-primary/10 text-primary' : 'bg-success-bg text-success'">{{ estAffecte(item.id) ? 'Affecté' : 'Affectable' }}</span>
+    </template>
+    <template #cell-disponibilite="{ item }">
+      <span class="text-xs font-medium px-2 py-0.5 rounded-full" :class="LIB_DISPONIBILITE[dispos.disponibilite(item.id).etat].cls">{{ LIB_DISPONIBILITE[dispos.disponibilite(item.id).etat].label }}</span>
+      <div v-if="dispos.disponibilite(item.id).detail" class="text-[11px] text-muted-foreground truncate">{{ dispos.disponibilite(item.id).detail }}</div>
     </template>
 
     <template #details-panel="{ item }">
@@ -74,37 +89,49 @@
           </div>
         </div>
 
-        <div v-if="motifBlocage(item.id)" class="bg-danger-bg text-danger rounded-md px-2.5 py-2 text-[11px] leading-snug">
-          Affectation refusée : {{ motifBlocage(item.id) }}. L'autorisation de départ ne peut pas être délivrée tant que la pièce n'est pas régularisée.
+        <div v-if="estRoulant(item) && motifBlocage(item.id)" class="bg-danger-bg text-danger rounded-md px-2.5 py-2 text-[11px] leading-snug">
+          Affectation refusée : {{ motifBlocage(item.id) }}
         </div>
 
         <div class="grid grid-cols-2 gap-2 text-xs">
-          <div><div class="text-muted-foreground text-[11px]">N° de permis</div><span class="font-mono text-[11px]">{{ permisDoc(item.id)?.reference ?? '-' }}</span></div>
-          <div><div class="text-muted-foreground text-[11px]">Catégorie</div>{{ permisDoc(item.id)?.categorie ?? '-' }}</div>
-          <div><div class="text-muted-foreground text-[11px]">Exp. permis</div><span :class="classeEcheance(permisEcheance(item.id))" class="px-1.5 py-0.5 rounded">{{ formatDate(permisEcheance(item.id)) }}</span></div>
-          <div><div class="text-muted-foreground text-[11px]">Visite médicale</div><span :class="classeEcheance(visiteEcheance(item.id))" class="px-1.5 py-0.5 rounded">{{ formatDate(visiteEcheance(item.id)) }}</span></div>
+          <div v-for="pc in piecesSuivies(item.id)" :key="pc.code"><div class="text-muted-foreground text-[11px]">{{ pc.libelle }}</div><span :class="classeDoc(pc.doc)" class="px-1.5 py-0.5 rounded">{{ texteDoc(pc) }}</span></div>
           <div><div class="text-muted-foreground text-[11px]">Score conduite</div><span :class="texteScore(scoreDe(item.id))" class="font-semibold">{{ scoreDe(item.id) }} / 100</span></div>
           <div><div class="text-muted-foreground text-[11px]">Écarts</div>{{ ecartsStore.ecartsDuChauffeur(item.id).length }}</div>
         </div>
 
         <button :class="L.btnPrimary" class="w-full justify-center" @click="ouvrirFiche(item.id)">Ouvrir la fiche</button>
-        <button :class="L.btnOutline" class="w-full justify-center" @click="voirPageComplete(item.id)"><ExternalLink class="w-4 h-4" /> Voir la page complète</button>
       </div>
     </template>
 
     <template #empty>
       <User class="w-8 h-8" />
-      <p class="text-sm">Aucun conducteur trouvé</p>
+      <p class="text-sm">Aucune personne trouvée</p>
     </template>
 
+ <NouveauConducteurModal v-if="creationOuverte" @close="creationOuverte = false" @cree="id => { creationOuverte = false; ficheId = id }" />
+    <ImportCsvModal v-if="importOuvert" titre="Importer des personnes" :champs="CHAMPS_IMPORT" import-id="personnes" :apercu-colonnes="COLONNES_APERCU" :modele="MODELE_CSV"
+      description-controles="Prénom, nom, fonction et pièce d'identité obligatoires ; fonction connue ; pièce d'identité unique."
+      :valider="validerLigne" @close="importOuvert = false" @importer="lignes => importer(lignes as unknown as LigneImport[])" />
     <ConducteurFicheCard v-if="ficheId" :conducteurs="filtered" :conducteur-id="ficheId" @close="ficheId = null" @voir-page-complete="voirPageComplete" />
   </ListPageLayout>
 </template>
 
 <script setup lang="ts">
+import { useIndicateursStore } from '../../stores/indicateurs'
+import { useFormationsStore } from '../../stores/formations'
 import { computed, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import { ExternalLink, ShieldAlert, User, UserCheck, Users, UserX } from '@lucide/vue'
+import { useRouter, RouterLink } from 'vue-router'
+import { useConfigurationStore } from '../../stores/configuration'
+import { Plus, ShieldAlert, Upload, User, UserCheck, Users, UserX } from '@lucide/vue'
+import SearchableDropdown from '../../components/ui/SearchableDropdown.vue'
+import type { DropdownItem } from '../../components/ui/SearchableDropdown.vue'
+import NouveauConducteurModal from '../../components/flotte/NouveauConducteurModal.vue'
+import { IMPORTS } from '../../stores/imports'
+import ImportCsvModal from '../../components/ui/ImportCsvModal.vue'
+import type { ChampImport, LigneValidee } from '../../components/ui/ImportCsvModal.vue'
+import { useFonctionStore } from '../../stores/fonctions'
+import { useEntiteStore } from '../../stores/entites'
+import { aujourdhuiISO } from '../../utils/horloge'
 import ListPageLayout from '../../components/shared/ListPageLayout.vue'
 import type { ListColumn } from '../../components/shared/ListPageLayout.vue'
 import UserAvatar from '../../components/ui/UserAvatar.vue'
@@ -113,15 +140,23 @@ import { useVehiculeStore } from '../../stores/vehicules'
 import { usePersonnelStore } from '../../stores/personnel'
 import { useDocumentsStore } from '../../stores/documentsPersonnel'
 import { useEcartsStore } from '../../stores/ecarts'
+import { useScoresConducteursStore } from '../../stores/scoresConducteurs'
+import { useDisponibilitesStore, LIB_DISPONIBILITE } from '../../stores/disponibilites'
 import type { Personnel } from '../../types'
-import { formatDate, etatEcheance } from '../../utils/helpers'
+import { formatDate } from '../../utils/helpers'
 import * as L from '../../lib/listClasses'
 
 const vehicules = useVehiculeStore()
 const personnel = usePersonnelStore()
 const docsPersonnel = useDocumentsStore()
 const ecartsStore = useEcartsStore()
+const scoresStore = useScoresConducteursStore()
+const dispos = useDisponibilitesStore()
+/** Conducteurs et aides conducteurs, distingués par leur fonction (FMS-DB-09). */
+const roulants = computed(() => [...personnel.conducteurs, ...personnel.aides])
+const estRoulant = (p: Personnel) => personnel.estConducteur(p) || personnel.estAide(p)
 const router = useRouter()
+const config = useConfigurationStore()
 
 const searchQuery = ref('')
 const activeScope = ref('')
@@ -131,73 +166,92 @@ const sortDir = ref<'asc' | 'desc'>('asc')
 const page = ref(1)
 const pageSize = ref(15)
 
-function permisDoc(id: string) { return docsPersonnel.parPersonnel(id).find(d => d.type === 'permis') }
-function permisEcheance(id: string) { return permisDoc(id)?.dateExpiration }
-function visiteEcheance(id: string) { return docsPersonnel.parPersonnel(id).find(d => d.type === 'visite_medicale')?.dateExpiration }
-function classeEcheance(date?: string) {
-  const e = etatEcheance(date)
-  return e === 'expire' ? 'bg-danger-bg text-danger' : e === 'proche' ? 'bg-warning-bg text-warning' : 'text-muted-foreground'
+/** État du document selon son propre délai de préavis, comme partout ailleurs. */
+/** Pièces obligatoires datées ou non en règle : celles dont l'échéance se suit. */
+function piecesSuivies(id: string) { return docsPersonnel.piecesObligatoires(id).filter(pc => !pc.valide || !!pc.doc?.dateExpiration) }
+function texteDoc(pc: ReturnType<typeof piecesSuivies>[number]) {
+  if (!pc.doc) return 'absente'
+  if (pc.etat === 'annule') return 'annulée'
+  if (pc.etat === 'perdu') return 'perdue'
+  return pc.doc.dateExpiration ? formatDate(pc.doc.dateExpiration) : 'sans échéance'
+}
+function classeDoc(doc?: Parameters<typeof docsPersonnel.etat>[0]) {
+  const e = doc ? docsPersonnel.etat(doc) : null
+  return !doc || e === 'expire' || e === 'annule' || e === 'perdu' ? 'bg-danger-bg text-danger' : e === 'proche' ? 'bg-warning-bg text-warning' : 'text-muted-foreground'
 }
 function motifBlocage(id: string) {
-  const c = personnel.parId(id)
-  if (!c?.habilite) return 'non habilité'
-  if (!docsPersonnel.enRegle(id)) return 'pièce expirée'
-  return null
+  const e = dispos.eligibilite(id)
+  return e.ok ? null : e.motif ?? null
 }
-const nonAffectables = computed(() => personnel.conducteurs.filter(c => motifBlocage(c.id)))
+const nonAffectables = computed(() => roulants.value.filter(c => motifBlocage(c.id)))
 function estAffecte(id: string) { return !!vehicules.affectations.find(a => a.conducteurId === id && !a.dateFin) }
+/** Engagé ce jour-là : en mission ou sur une mission planifiée à la date du jour. */
+function estEngage(id: string) { const e = dispos.disponibilite(id).etat; return e === 'en_mission' || e === 'mission_planifiee' }
+const estDisponibleAffectable = (id: string) => !motifBlocage(id) && !estAffecte(id) && !estEngage(id)
+/** Numéro du permis de conduire, pour la recherche. */
+function numeroPermis(id: string) { return docsPersonnel.parPersonnel(id).find(d => d.type === 'permis')?.reference ?? '' }
 
-/** Score simplifié : 100 de départ, pénalisé par écart non justifié et pièce non en règle. */
-function scoreDe(id: string) {
-  let s = 100
-  s -= ecartsStore.ecartsDuChauffeur(id).filter(e => e.nature === 'non_justifiee').length * 15
-  s -= ecartsStore.ecartsDuChauffeur(id).filter(e => e.nature === 'a_qualifier').length * 5
-  if (!docsPersonnel.enRegle(id)) s -= 20
-  return Math.max(0, Math.min(100, s))
-}
-function barreScore(s: number) { return s >= 80 ? 'bg-success' : s >= 60 ? 'bg-warning' : 'bg-danger' }
-function texteScore(s: number) { return s >= 80 ? 'text-success' : s >= 60 ? 'text-warning' : 'text-danger' }
+/** Score de conduite : le même calcul que la page du conducteur (FMS-SC-07). */
+function scoreDe(id: string) { return scoresStore.scoreGlobal(id) }
+/** Bandes du score : cible de l'indicateur, puis seuil de formation (paramétrage). */
+const indScore = useIndicateursStore()
+const formationsScore = useFormationsStore()
+const bandeScore = (s: number) => s >= (indScore.cible('score') ?? 80) ? 0 : s >= formationsScore.seuilScore ? 1 : 2
+function barreScore(s: number) { return ['bg-success', 'bg-warning', 'bg-danger'][bandeScore(s)] }
+function texteScore(s: number) { return ['text-success', 'text-warning', 'text-danger'][bandeScore(s)] }
 
 const kpis = computed(() => [
-  { label: 'Conducteurs', value: personnel.conducteurs.length, icon: Users, bg: 'bg-primary/10', iconColor: 'text-primary' },
-  { label: 'Disponibles et affectables', value: personnel.conducteurs.filter(c => !motifBlocage(c.id) && !estAffecte(c.id)).length, icon: UserCheck, bg: 'bg-success-bg', iconColor: 'text-success' },
+  { label: 'Conducteurs et aides', value: roulants.value.length, icon: Users, bg: 'bg-primary/10', iconColor: 'text-primary' },
+  { label: 'Disponibles et affectables', value: roulants.value.filter(c => estDisponibleAffectable(c.id)).length, icon: UserCheck, bg: 'bg-success-bg', iconColor: 'text-success' },
   { label: 'Non affectables', value: nonAffectables.value.length, icon: UserX, bg: 'bg-danger-bg', iconColor: 'text-danger' },
-  { label: 'Échéances proches', value: personnel.conducteurs.filter(c => etatEcheance(permisEcheance(c.id)) === 'proche' || etatEcheance(visiteEcheance(c.id)) === 'proche').length, icon: ShieldAlert, bg: 'bg-warning-bg', iconColor: 'text-warning' },
+  { label: 'Échéances proches', value: roulants.value.filter(c => docsPersonnel.parPersonnel(c.id).some(d => docsPersonnel.etat(d) === 'proche')).length, icon: ShieldAlert, bg: 'bg-warning-bg', iconColor: 'text-warning' },
 ])
 
 const scopeOptions = [
-  { value: '', label: 'Tous' },
-  { value: 'disponible', label: 'Disponibles' },
-  { value: 'affecte', label: 'Affectés' },
-  { value: 'bloque', label: 'Non affectables' },
+  { value: '', label: 'Conducteurs et aides' },
+  { value: 'conducteurs', label: 'Conducteurs' },
+  { value: 'aides', label: 'Aides conducteurs' },
+  { value: 'tous', label: 'Tout le personnel' },
+]
+const filtreAffectation = ref('')
+const optAffectation: DropdownItem[] = [
+  { id: '', label: 'Toutes' },
+  { id: 'disponible', label: 'Disponibles et affectables' },
+  { id: 'affecte', label: 'Affectés' },
+  { id: 'bloque', label: 'Non affectables' },
 ]
 
 const columns = computed<ListColumn[]>(() => [
   { key: 'conducteur', label: 'Conducteur', sortable: true, hideable: false, width: 170 },
-  { key: 'permis', label: 'Permis (expiration)', width: 130 },
-  { key: 'visite', label: 'Visite médicale', width: 130 },
+  { key: 'pieces', label: 'Pièces obligatoires', width: 230 },
   { key: 'score', label: 'Score conduite', width: 130 },
-  { key: 'statut', label: 'Statut', width: 130 },
+  { key: 'statut', label: 'Affectation', width: 130 },
+  { key: 'disponibilite', label: 'Disponibilité', width: 170 },
 ])
 
-watch([activeScope, searchQuery, pageSize], () => { page.value = 1 })
-function resetFilters() { activeScope.value = ''; searchQuery.value = ''; page.value = 1 }
+watch([activeScope, searchQuery, pageSize, filtreAffectation], () => { page.value = 1 })
+function resetFilters() { activeScope.value = ''; searchQuery.value = ''; filtreAffectation.value = ''; page.value = 1 }
 
 const filtered = computed(() => {
-  let rows = personnel.conducteurs.filter(c => {
-    if (activeScope.value === 'disponible' && (motifBlocage(c.id) || estAffecte(c.id))) return false
-    if (activeScope.value === 'affecte' && !estAffecte(c.id)) return false
-    if (activeScope.value === 'bloque' && !motifBlocage(c.id)) return false
+  const base = activeScope.value === 'tous' ? personnel.actifs : roulants.value
+  let rows = base.filter(c => {
+    if (activeScope.value === 'conducteurs' && !personnel.estConducteur(c)) return false
+    if (activeScope.value === 'aides' && !personnel.estAide(c)) return false
+    if (filtreAffectation.value && !estRoulant(c)) return false
+    if (filtreAffectation.value === 'disponible' && !estDisponibleAffectable(c.id)) return false
+    if (filtreAffectation.value === 'affecte' && !estAffecte(c.id)) return false
+    if (filtreAffectation.value === 'bloque' && !motifBlocage(c.id)) return false
     if (searchQuery.value) {
       const q = searchQuery.value.toLowerCase()
-      if (!`${c.nomComplet} ${c.matricule}`.toLowerCase().includes(q)) return false
+      if (!`${c.nomComplet} ${c.matricule} ${numeroPermis(c.id)}`.toLowerCase().includes(q)) return false
     }
     return true
   })
   if (sortKey.value) {
-    const k = sortKey.value as keyof Personnel
+    /* La colonne Conducteur se trie sur le nom complet. */
+    const k = (sortKey.value === 'conducteur' ? 'nomComplet' : sortKey.value) as keyof Personnel
     rows = [...rows].sort((a, b) => {
-      const cmp = String(a[k] ?? '').localeCompare(String(b[k] ?? ''))
+      const cmp = String(a[k] ?? '').localeCompare(String(b[k] ?? ''), 'fr')
       return sortDir.value === 'asc' ? cmp : -cmp
     })
   }
@@ -208,5 +262,42 @@ const totalCount = computed(() => filtered.value.length)
 const pageItems = computed(() => { const s = (page.value - 1) * pageSize.value; return filtered.value.slice(s, s + pageSize.value) })
 
 function ouvrirFiche(id: string) { ficheId.value = id }
+
+/* ── Saisie et import dans le FMS, sans dépendre d'un module du personnel (FMS-DB-08) ── */
+const creationOuverte = ref(false)
+const importOuvert = ref(false)
+const fonctions = useFonctionStore()
+const entites = useEntiteStore()
+const CHAMPS_IMPORT: ChampImport[] = IMPORTS.personnes.champs
+const COLONNES_APERCU = [{ cle: 'nomComplet', libelle: 'Nom' }, { cle: 'fonctionLibelle', libelle: 'Fonction' }, { cle: 'cin', libelle: "Pièce d'identité" }]
+const MODELE_CSV = ['Prénom', 'Nom', 'Fonction', "Pièce d'identité", 'Téléphone', "Date d'entrée"]
+interface LigneImport { prenom: string; nom: string; nomComplet: string; fonctionId: string; fonctionLibelle: string; cin: string; telephone: string; dateEntree: string }
+const vusImport = new Set<string>()
+watch(importOuvert, () => vusImport.clear())
+const norm = (x: string) => x.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+/** Toutes les fonctions de l'entreprise s'importent : conducteurs, aides et personnel technique. */
+function validerLigne(ligne: Record<string, string>, mapping: Record<string, string>): LigneValidee {
+  const val = (c: string) => (mapping[c] ? (ligne[mapping[c]!] ?? '').trim() : '')
+  const prenom = val('prenom'), nom = val('nom'), cin = val('cin')
+  if (!prenom || !nom) return { valide: false, motif: 'Prénom ou nom manquant' }
+  if (!cin) return { valide: false, motif: "Pièce d'identité manquante" }
+  const fn = fonctions.liste.find(f => norm(f.libelle) === norm(val('fonction')) || norm(f.code) === norm(val('fonction')))
+  if (!fn) return { valide: false, motif: `Fonction non reconnue « ${val('fonction')} »` }
+  if (personnel.liste.some(p => p.cin === cin)) return { valide: false, motif: `Pièce d'identité déjà enregistrée (${cin})` }
+  if (vusImport.has(cin)) return { valide: false, motif: `Pièce d'identité en double dans le fichier (${cin})` }
+  const dateEntree = val('dateEntree')
+  if (dateEntree && !/^\d{4}-\d{2}-\d{2}$/.test(dateEntree)) return { valide: false, motif: `Date d'entrée invalide « ${dateEntree} » (format AAAA-MM-JJ)` }
+  vusImport.add(cin)
+  const l: LigneImport = { prenom, nom: nom.toUpperCase(), nomComplet: `${prenom} ${nom.toUpperCase()}`, fonctionId: fn.id, fonctionLibelle: fn.libelle, cin, telephone: val('telephone'), dateEntree: dateEntree || aujourdhuiISO() }
+  return { valide: true, donnees: l as unknown as Record<string, unknown> }
+}
+function importer(lignes: LigneImport[]) {
+  lignes.forEach(l => {
+    const fn = fonctions.parId(l.fonctionId)!
+    personnel.creer({ prenom: l.prenom, nom: l.nom, fonctionId: fn.id, fonctionLibelle: fn.libelle, entiteId: fn.entiteId, entiteNom: entites.parId(fn.entiteId)?.nom ?? '',
+      site: '', telephone: l.telephone, cin: l.cin, dateNaissance: '', contrat: config.parametres.typesContrat[0] ?? '', dateEntree: l.dateEntree, conduit: fn.conduit })
+  })
+  /* La fenêtre reste ouverte pour que le rapport d'import se lise. */
+}
 function voirPageComplete(id: string) { router.push({ name: 'flotte-conducteur-dashboard', params: { id } }) }
 </script>

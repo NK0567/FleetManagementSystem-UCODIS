@@ -37,7 +37,7 @@
       <span class="text-xs">{{ item.sousSysteme ? LIB_SOUS_SYSTEME[item.sousSysteme] : '-' }}</span>
     </template>
     <template #cell-fournisseur="{ item }">
-      <span class="text-xs">{{ achatsStore.getFournisseur(item.fournisseurPrincipalId ?? '')?.nom ?? '-' }}</span>
+      <span class="text-xs">{{ achatsStore.fournisseurPrincipal(item) }}</span>
     </template>
     <template #cell-stock="{ item }">
       <span class="text-xs font-semibold" :class="(item.stockActuel ?? 0) <= (item.seuilAlerte ?? 0) ? 'text-danger' : 'text-foreground'">
@@ -52,7 +52,6 @@
     <!-- ══════════ FOURNISSEURS ══════════ -->
     <template #cell-nomFournisseur="{ item }">
       <span class="font-medium text-foreground">{{ item.nom }}</span>
-      <span v-if="!item.actif" class="ml-1.5 text-[10px] px-1.5 py-0.5 rounded-full bg-neutral-bg text-neutral">Inactif</span>
     </template>
     <template #cell-contact="{ item }">
       <span class="text-xs">{{ item.contact ?? '-' }}</span>
@@ -102,7 +101,7 @@
           <div><div class="text-muted-foreground text-[11px]">Stock actuel</div>{{ item.stockActuel }}</div>
           <div><div class="text-muted-foreground text-[11px]">Seuil d'alerte</div>{{ item.seuilAlerte }}</div>
           <div class="col-span-2"><div class="text-muted-foreground text-[11px]">Fournisseur principal</div>
-            {{ achatsStore.getFournisseur(item.fournisseurPrincipalId ?? '')?.nom ?? '-' }}</div>
+            {{ achatsStore.fournisseurPrincipal(item) }}</div>
         </div>
         <div v-if="(item.stockActuel ?? 0) <= (item.seuilAlerte ?? 0)" class="bg-danger-bg text-danger rounded-md px-2.5 py-2 text-[11px]">
           Stock au ou sous le seuil - réapprovisionnement à prévoir.
@@ -124,7 +123,7 @@
         </div>
         <div class="grid grid-cols-2 gap-2 text-xs">
           <div><div class="text-muted-foreground text-[11px]">Téléphone</div>{{ item.telephone ?? '-' }}</div>
-          <div><div class="text-muted-foreground text-[11px]">Délai moyen</div>{{ item.delaiLivraisonJoursMoyen ?? '-' }} j</div>
+          <div><div class="text-muted-foreground text-[11px]">Délai moyen</div>{{ item.delaiLivraisonJoursMoyen != null ? item.delaiLivraisonJoursMoyen + ' j' : '-' }}</div>
         </div>
         <div class="text-[11px] font-semibold text-muted-foreground mt-1">Références fournies</div>
         <ul class="flex flex-col gap-1">
@@ -166,6 +165,7 @@
  * réunis dans un même écran à trois vues, avec indicateurs au-dessus
  * et panneau d'aperçu à droite.
  */
+import { devise } from '../../lib/monnaie'
 import { ref, computed, watch } from 'vue'
 import { PackageSearch, Package, Truck, TriangleAlert, Wallet } from '@lucide/vue'
 import ListPageLayout from '../../components/shared/ListPageLayout.vue'
@@ -177,7 +177,7 @@ import type { SousSysteme } from '../../types/maintenance'
 import * as L from '../../lib/listClasses'
 
 const achatsStore = useAchatsStore()
-function fmtAr(n?: number) { return n != null ? n.toLocaleString('fr-FR') + ' Ar' : '-' }
+function fmtAr(n?: number) { return n != null ? n.toLocaleString('fr-FR') + ' ' + devise() : '-' }
 
 type Vue = 'produits' | 'fournisseurs' | 'mouvements'
 
@@ -223,13 +223,13 @@ const scopeOptions = [
 
 const sousTitre = computed(() =>
   vue.value === 'produits' ? `${achatsStore.produitsSousSeuil.length} référence(s) au ou sous le seuil d'alerte`
-  : vue.value === 'fournisseurs' ? `${achatsStore.fournisseurs.filter(f => f.actif).length} fournisseur(s) actif(s)`
+  : vue.value === 'fournisseurs' ? `${achatsStore.fournisseurs.length} fournisseur(s) de pièces autorisé(s)`
   : 'Entrées (réceptions) et sorties (bons de sortie magasin)')
 
 const kpis = computed(() => [
   { label: 'Références catalogue', value: String(achatsStore.produits.length), icon: Package, bg: 'bg-info-bg', iconColor: 'text-info' },
   { label: 'Sous le seuil', value: String(achatsStore.produitsSousSeuil.length), icon: TriangleAlert, bg: 'bg-danger-bg', iconColor: 'text-danger' },
-  { label: 'Fournisseurs actifs', value: String(achatsStore.fournisseurs.filter(f => f.actif).length), icon: Truck, bg: 'bg-success-bg', iconColor: 'text-success' },
+  { label: 'Fournisseurs autorisés', value: String(achatsStore.fournisseurs.length), icon: Truck, bg: 'bg-success-bg', iconColor: 'text-success' },
   { label: 'Valeur du stock', value: fmtAr(achatsStore.valeurStock), icon: Wallet, bg: 'bg-warning-bg', iconColor: 'text-warning' },
 ])
 
@@ -260,7 +260,7 @@ const columns = computed(() => COLONNES[vue.value])
 const searchPlaceholder = computed(() =>
   vue.value === 'produits' ? 'Référence, désignation…'
   : vue.value === 'fournisseurs' ? 'Nom, contact…'
-  : 'Produit, motif, OT…')
+  : 'Produit, motif, ordre de travail…')
 
 const messageVide = computed(() =>
   vue.value === 'produits' ? 'Aucun produit au catalogue'

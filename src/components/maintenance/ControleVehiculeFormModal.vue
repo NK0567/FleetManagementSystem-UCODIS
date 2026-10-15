@@ -1,5 +1,6 @@
 <script setup lang="ts">
-/** Saisie d'un nouveau contrôle du véhicule (FMS-MA-09). */
+import { maintenant } from '../../utils/horloge'
+/** Saisie d'un nouveau contrôle du véhicule. */
 import { ref, computed, watch } from 'vue'
 import { TriangleAlert } from '@lucide/vue'
 import CreateModalShell from '../shared/CreateModalShell.vue'
@@ -17,11 +18,11 @@ const store = useControlesVehiculeStore()
 const vehiculesStore = useVehiculeStore()
 const auth = useAuthStore()
 
-const maintenantLocal = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16) }
+const maintenantLocal = () => { const d = maintenant(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16) }
 const form = ref({ moment: 'retour_voyage' as MomentControle, vehiculeId: '', date: maintenantLocal(), kilometrage: undefined as number | undefined, commentaire: '', resultats: {} as Record<string, ResultatPoint> })
 const erreur = ref('')
 
-const optVehicules = computed<DropdownItem[]>(() => vehiculesStore.liste.map(v => ({ id: v.id, label: v.immatriculation, sublabel: `${v.marque} ${v.modele}` })))
+const optVehicules = computed<DropdownItem[]>(() => vehiculesStore.auParc.map(v => ({ id: v.id, label: v.immatriculation, sublabel: `${v.marque} ${v.modele}` })))
 const optMoments: DropdownItem[] = Object.entries(LIB_MOMENT_CONTROLE).map(([id, label]) => ({ id, label }))
 const points = computed(() => store.points[form.value.moment])
 const bloquantsSaisis = computed(() => points.value.filter(p => p.bloquant && form.value.resultats[p.code] === 'anomalie'))
@@ -33,18 +34,13 @@ watch(() => form.value.vehiculeId, id => { const v = vehiculesStore.liste.find(x
 function toutConforme() { points.value.forEach(p => { if (!form.value.resultats[p.code]) form.value.resultats[p.code] = 'conforme' }) }
 
 function enregistrer() {
-  erreur.value = ''
   const v = vehiculesStore.liste.find(x => x.id === form.value.vehiculeId)
-  if (!v || !form.value.date) { erreur.value = 'Indiquez le véhicule et la date du contrôle.'; return }
-  if (new Date(form.value.date).getTime() > Date.now() + 60_000) { erreur.value = 'La date du contrôle ne peut pas être dans le futur.'; return }
-  if (!points.value.length) { erreur.value = "Aucun point de contrôle n'est défini pour ce moment : renseignez-les dans Paramètres de l'atelier."; return }
-  const manquants = points.value.filter(p => !form.value.resultats[p.code])
-  if (manquants.length) { erreur.value = `Renseignez tous les points : ${manquants.map(p => p.libelle).join(', ')}.`; return }
-  if (form.value.kilometrage != null && form.value.kilometrage < 0) { erreur.value = 'Le kilométrage ne peut pas être négatif.'; return }
-  const c = store.enregistrer({ moment: form.value.moment, vehiculeId: v.id, vehiculePlaque: v.immatriculation, date: form.value.date,
-    controlePar: auth.user?.nom ?? 'Maintenancier', kilometrage: form.value.kilometrage, resultats: { ...form.value.resultats },
+  const km = (form.value.kilometrage as unknown) === '' ? undefined : form.value.kilometrage
+  const r = store.enregistrer({ moment: form.value.moment, vehiculeId: v?.id ?? '', vehiculePlaque: v?.immatriculation ?? '', date: form.value.date,
+    controlePar: auth.user?.nom ?? 'Maintenancier', kilometrage: km, resultats: { ...form.value.resultats },
     commentaire: form.value.commentaire.trim() || undefined })
-  emit('cree', c.id)
+  erreur.value = r.ok ? '' : r.motif ?? ''
+  if (r.ok && r.id) emit('cree', r.id)
 }
 </script>
 

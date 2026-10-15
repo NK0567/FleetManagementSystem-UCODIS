@@ -1,7 +1,7 @@
 <template>
   <ListPageLayout
-    title="Sites & géofences"
-    subtitle="Référentiel des sites géographiques UCODIS"
+    title="Sites"
+    subtitle="Référentiel des sites et de leurs zones de géorepérage"
     :columns="columns"
     :items="pageItems"
     :total="totalCount"
@@ -45,7 +45,7 @@
       <button class="font-medium text-foreground hover:text-primary hover:underline bg-transparent border-0 p-0 cursor-pointer text-left" @click.stop="openCard(item.id)">{{ item.nom }}</button>
     </template>
     <template #cell-ville="{ item }"><span class="text-muted-foreground text-xs">{{ item.ville }}</span></template>
-    <template #cell-type="{ item }"><span class="text-[11px] font-medium px-2 py-0.5 rounded-full" :class="typeBadge(item.type)">{{ item.type }}</span></template>
+    <template #cell-type="{ item }"><span class="text-[11px] font-medium px-2 py-0.5 rounded-full" :class="typeBadge(item.type)" :style="styleType(item.type)">{{ item.type }}</span></template>
     <template #cell-statut="{ item }">
       <span class="text-[11px] font-medium px-2 py-0.5 rounded-full" :class="item.actif ? 'bg-success-bg text-success' : 'bg-background text-muted-foreground border border-border'">
         {{ item.actif ? 'Actif' : 'Inactif' }}
@@ -60,13 +60,12 @@
           <div class="text-xs text-muted-foreground">{{ item.ville }}{{ item.region ? ` · ${item.region}` : '' }}</div>
         </div>
         <div class="flex gap-2 flex-wrap">
-          <span class="text-[11px] font-medium px-2 py-0.5 rounded-full" :class="typeBadge(item.type)">{{ item.type }}</span>
+          <span class="text-[11px] font-medium px-2 py-0.5 rounded-full" :class="typeBadge(item.type)" :style="styleType(item.type)">{{ item.type }}</span>
           <span class="text-[11px] font-medium px-2 py-0.5 rounded-full" :class="item.actif ? 'bg-success-bg text-success' : 'bg-background text-muted-foreground border border-border'">
             {{ item.actif ? 'Actif' : 'Inactif' }}
           </span>
         </div>
         <button :class="L.btnPrimary" class="w-full justify-center" @click="openCard(item.id)">Ouvrir la fiche</button>
-        <button :class="L.btnOutline" class="w-full justify-center" @click="openEdit(item.id)">Modifier</button>
       </div>
     </template>
 
@@ -89,11 +88,13 @@ import SearchableDropdown from '../../components/ui/SearchableDropdown.vue'
 import type { DropdownItem } from '../../components/ui/SearchableDropdown.vue'
 import SiteCard from '../../components/flotte/SiteCard.vue'
 import SiteFormModal from '../../components/flotte/SiteFormModal.vue'
+import { useTypesSitesStore } from '../../stores/typesSites'
 import { useSitesStore } from '../../stores/sites'
 import type { SiteReseau, TypeSiteReseau } from '../../types'
 import * as L from '../../lib/listClasses'
 
 const store = useSitesStore()
+const typesSites = useTypesSitesStore()
 
 const showCreate = ref(false)
 const editId = ref<string | undefined>(undefined)
@@ -107,7 +108,6 @@ const page = ref(1)
 const pageSize = ref(15)
 
 function openCreate() { editId.value = undefined; showCreate.value = true }
-function openEdit(id: string) { editId.value = id; showCreate.value = true }
 function openCard(id: string) { openCardId.value = id }
 
 const scopeOptions = [
@@ -141,9 +141,10 @@ const filtered = computed(() => {
     return true
   })
   if (sortKey.value) {
-    const k = sortKey.value as keyof SiteReseau
+    /* La colonne Statut se trie sur l'état actif ou inactif. */
+    const val = (x: SiteReseau) => sortKey.value === 'statut' ? (x.actif ? 'Actif' : 'Inactif') : String(x[sortKey.value as keyof SiteReseau] ?? '')
     rows = [...rows].sort((a, b) => {
-      const cmp = String(a[k] ?? '').localeCompare(String(b[k] ?? ''))
+      const cmp = val(a).localeCompare(val(b), 'fr')
       return sortDir.value === 'asc' ? cmp : -cmp
     })
   }
@@ -153,17 +154,7 @@ const filtered = computed(() => {
 const totalCount = computed(() => filtered.value.length)
 const pageItems = computed(() => { const s = (page.value - 1) * pageSize.value; return filtered.value.slice(s, s + pageSize.value) })
 
-const TYPE_BADGE: Record<TypeSiteReseau, string> = {
-  'Dépôt': 'bg-primary/10 text-primary', 'Entrepôt client': 'bg-success-bg text-success',
-  'Zone à risque': 'bg-danger-bg text-danger', 'Point de contrôle': 'bg-info-bg text-info', 'Relais': 'bg-warning-bg text-warning',
-}
-function typeBadge(t: TypeSiteReseau) { return TYPE_BADGE[t] ?? 'bg-background text-muted-foreground' }
-
-const optType: DropdownItem[] = [
-  { id: 'Dépôt', label: 'Dépôt' },
-  { id: 'Entrepôt client', label: 'Entrepôt client' },
-  { id: 'Zone à risque', label: 'Zone à risque' },
-  { id: 'Point de contrôle', label: 'Point de contrôle' },
-  { id: 'Relais', label: 'Relais' },
-]
+function typeBadge(t: TypeSiteReseau) { return typesSites.get(t) ? '' : 'bg-background text-muted-foreground' }
+function styleType(t: TypeSiteReseau) { const c = typesSites.get(t)?.couleur; return c ? { background: c + '1F', color: c } : {} }
+const optType = computed<DropdownItem[]>(() => typesSites.types.map(t => ({ id: t.libelle, label: t.libelle })))
 </script>

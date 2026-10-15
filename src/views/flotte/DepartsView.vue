@@ -1,12 +1,12 @@
 <template>
   <ListPageLayout
     title="Autorisations de départ"
-    subtitle="Contrôle des départs de 5 h à 6 h · 1 en attente de décision"
+    :subtitle="`${store.enAttente.length} demande(s) en attente de décision · ${store.accordees.length} départ(s) accordé(s)`"
     :columns="columns"
     :items="pageItems"
     :total="totalCount"
     :total-text="`${totalCount} autorisation(s)`"
-    search-placeholder="Référence, plaque, chauffeur…"
+    search-placeholder="Référence, plaque, conducteur…"
     scope-label="Statut :"
     :scope-options="scopeOptions"
     v-model:scope="activeScope"
@@ -18,6 +18,10 @@
     @reset-filters="resetFilters"
     @open-card="(a) => ouvrirFiche((a as AutorisationDepart).id)"
   >
+    <template #header-actions>
+      <button :class="L.btnPrimary" @click="demandeOuverte = true"><Plus class="w-4 h-4" /> Nouvelle demande</button>
+    </template>
+
     <template #above-table>
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-3.5">
         <div v-for="k in kpis" :key="k.label" :class="L.kpiItem">
@@ -35,9 +39,9 @@
     <template #cell-chauffeur="{ item }"><span class="text-xs">{{ item.chauffeurNom }}</span></template>
     <template #cell-controles="{ item }">
       <div class="flex items-center gap-1">
-        <component :is="c.conforme ? CircleCheck : CircleX" v-for="(c, i) in item.controles" :key="i" class="w-4 h-4" :class="c.conforme ? 'text-success' : 'text-danger'" />
+        <component :is="c.conforme ? CircleCheck : CircleX" v-for="(c, i) in store.controlesDe(item)" :key="i" class="w-4 h-4" :class="c.conforme ? 'text-success' : 'text-danger'" />
       </div>
-      <div class="text-[11px] text-muted-foreground mt-0.5">{{ store.nbConformes(item) }}/4 conformes</div>
+      <div class="text-[11px] text-muted-foreground mt-0.5">{{ store.nbConformes(item) }}/{{ store.controlesDe(item).length }} conformes</div>
     </template>
     <template #cell-decision="{ item }">
       <span v-if="!item.decideLe" class="text-xs font-medium px-2 py-0.5 rounded-full bg-warning-bg text-warning">En attente</span>
@@ -57,9 +61,9 @@
           <div class="text-xs text-muted-foreground font-mono">{{ item.vehiculePlaque }} · {{ item.chauffeurNom }}</div>
         </div>
         <div class="flex flex-col gap-1.5">
-          <div v-for="(c, i) in item.controles" :key="i" class="flex items-center gap-2 text-xs">
+          <div v-for="(c, i) in store.controlesDe(item)" :key="i" class="flex items-center gap-2 text-xs">
             <component :is="c.conforme ? CircleCheck : CircleX" class="w-3.5 h-3.5 shrink-0" :class="c.conforme ? 'text-success' : 'text-danger'" />
-            {{ LIB_CONTROLE_DEPART[c.controle] }}
+            {{ libelleControleDepart(c) }}
           </div>
         </div>
         <button :class="L.btnPrimary" class="w-full justify-center" @click="ouvrirFiche(item.id)">Ouvrir la fiche</button>
@@ -72,16 +76,19 @@
     </template>
 
     <AutorisationCard v-if="ficheId" :autorisations="filtered" :autorisation-id="ficheId" @close="ficheId = null" />
+    <DemandeDepartFormModal v-if="demandeOuverte" @close="demandeOuverte = false" @cree="id => { demandeOuverte = false; ficheId = id }" />
   </ListPageLayout>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { CircleCheck, CircleX, Clock, ShieldCheck, ThumbsDown, ThumbsUp } from '@lucide/vue'
+import { useRoute } from 'vue-router'
+import { CircleCheck, CircleX, Clock, Plus, ShieldCheck, ThumbsDown, ThumbsUp } from '@lucide/vue'
 import ListPageLayout from '../../components/shared/ListPageLayout.vue'
 import type { ListColumn } from '../../components/shared/ListPageLayout.vue'
 import AutorisationCard from '../../components/flotte/AutorisationCard.vue'
-import { useDepartsStore, LIB_CONTROLE_DEPART } from '../../stores/departs'
+import DemandeDepartFormModal from '../../components/flotte/DemandeDepartFormModal.vue'
+import { useDepartsStore, libelleControleDepart } from '../../stores/departs'
 import type { AutorisationDepart } from '../../types'
 import { fmtDateHeure } from '../../utils/voyageUtils'
 import * as L from '../../lib/listClasses'
@@ -91,6 +98,11 @@ const store = useDepartsStore()
 const searchQuery = ref('')
 const activeScope = ref('')
 const ficheId = ref<string | null>(null)
+/* Élément ouvert depuis une alerte : il arrive avec son identifiant. */
+const routeLien = useRoute()
+if (typeof routeLien.query.autorisation === 'string') ficheId.value = routeLien.query.autorisation
+watch(() => routeLien.query.autorisation, v => { if (typeof v === 'string') ficheId.value = v })
+const demandeOuverte = ref(false)
 const sortKey = ref('')
 const sortDir = ref<'asc' | 'desc'>('desc')
 const page = ref(1)
@@ -113,7 +125,7 @@ const scopeOptions = [
 const columns = computed<ListColumn[]>(() => [
   { key: 'autorisation', label: 'Autorisation', sortable: true, hideable: false, width: 150 },
   { key: 'vehicule', label: 'Véhicule', width: 110 },
-  { key: 'chauffeur', label: 'Chauffeur', width: 150 },
+  { key: 'chauffeur', label: 'Conducteur', width: 150 },
   { key: 'controles', label: 'Contrôles', width: 140 },
   { key: 'decision', label: 'Décision', width: 130 },
   { key: 'date', label: 'Demandée le', sortable: true, width: 130 },

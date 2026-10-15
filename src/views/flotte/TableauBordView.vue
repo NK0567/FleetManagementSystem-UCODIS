@@ -3,7 +3,7 @@
 
     <div class="flex items-center justify-between mb-3.5 gap-3 flex-wrap">
       <div>
-        <div class="text-lg font-semibold">Tableau de bord Flotte</div>
+        <div class="text-lg font-semibold">Vue d'ensemble</div>
         <div class="text-[13px] text-muted-foreground mt-px">{{ dateDuJour }}</div>
       </div>
       <RouterLink :to="{ name: 'flotte-carte' }" :class="btnPrimary">
@@ -15,7 +15,7 @@
     <div class="grid grid-cols-4 gap-2.5 mb-3.5 max-lg:grid-cols-2">
       <div :class="kpiCard">
         <div class="flex items-start justify-between mb-1">
-          <div :class="kpiLabel">Tracteurs actifs</div>
+          <div :class="kpiLabel">Véhicules motorisés disponibles</div>
           <div :class="kpiAccent" class="bg-info-bg"><Truck class="w-[17px] h-[17px] text-info" /></div>
         </div>
         <div :class="kpiValue">{{ tracteursActifs }}</div>
@@ -24,7 +24,7 @@
       </div>
       <div :class="kpiCard">
         <div class="flex items-start justify-between mb-1">
-          <div :class="kpiLabel">Semi-remorques actives</div>
+          <div :class="kpiLabel">Véhicules tractés disponibles</div>
           <div :class="kpiAccent" class="bg-info-bg"><Container class="w-[17px] h-[17px] text-info" /></div>
         </div>
         <div :class="kpiValue">{{ semisActives }}</div>
@@ -53,19 +53,41 @@
       </div>
     </div>
 
-    <!-- Statut opérationnel -->
+    <!-- Disponibilité du parc (FMS-RA-01) -->
+    <div class="bg-card border border-border rounded-lg p-4 mb-3.5">
+      <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+        <div class="flex items-center gap-1.5 text-sm font-semibold text-foreground"><Gauge class="w-4 h-4 text-primary" /> Disponibilité du parc</div>
+        <RouterLink :to="{ name: 'flotte-rapports' }" class="text-[11px] font-semibold text-primary no-underline hover:underline">Rapports</RouterLink>
+      </div>
+      <div class="grid grid-cols-5 gap-3 max-lg:grid-cols-2">
+        <div>
+          <div class="text-[24px] font-semibold leading-none" :class="ind.couleur('disponibilite', tauxDispo)">{{ tauxDispo != null ? tauxDispo + ' %' : '-' }}</div>
+          <div class="text-[12px] text-muted-foreground mt-1">{{ ind.libelle('disponibilite') }} sur 30 jours</div>
+          <div v-if="ind.texteCible('disponibilite')" class="text-[11px] text-muted-foreground">{{ ind.texteCible('disponibilite') }}</div>
+        </div>
+        <div><div class="text-[24px] font-semibold leading-none text-success">{{ parc.disponibles }}</div><div class="text-[12px] text-muted-foreground mt-1">Disponibles</div></div>
+        <div><div class="text-[24px] font-semibold leading-none text-primary">{{ parc.enMission }}</div><div class="text-[12px] text-muted-foreground mt-1">En mission</div></div>
+        <div><div class="text-[24px] font-semibold leading-none" :class="parc.immobilises.length ? 'text-danger' : 'text-foreground'">{{ parc.immobilises.length }}</div><div class="text-[12px] text-muted-foreground mt-1">Immobilisés</div></div>
+        <div>
+          <div class="text-[24px] font-semibold leading-none">{{ parc.ageMoyen != null ? parc.ageMoyen.toLocaleString('fr-FR') + ' ans' : '-' }}</div>
+          <div class="text-[12px] text-muted-foreground mt-1">{{ ind.libelle('ageMoyen') }}</div>
+          <div v-if="ind.texteCible('ageMoyen')" class="text-[11px]" :class="ind.couleur('ageMoyen', parc.ageMoyen)">{{ ind.texteCible('ageMoyen') }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Situation de la flotte, comme sur la carte : chaque situation ouvre la carte filtrée -->
     <div class="bg-card border border-border rounded-lg p-4 mb-3.5">
       <div class="flex items-center gap-1.5 text-sm font-semibold text-foreground mb-3">
-        <Activity class="w-4 h-4 text-primary" /> Statut opérationnel
+        <Activity class="w-4 h-4 text-primary" /> État de mouvement
       </div>
       <div class="flex gap-2.5 flex-wrap">
-        <span v-for="s in repartitionOp" :key="s.key"
-              class="inline-flex items-center gap-2 rounded-full pl-3 pr-2 py-1.5 text-[13px] font-medium"
-              :style="{ background: s.color + '1A', color: s.color }">
-          <span class="w-2 h-2 rounded-full shrink-0" :style="{ background: s.color }"></span>
-          {{ s.label }}
-          <span class="text-[11px] font-bold rounded-full px-1.5 py-px" :style="{ background: s.color + '30' }">{{ s.nb }}</span>
-        </span>
+        <RouterLink v-for="s in SITUATIONS" :key="s" :to="{ name: 'flotte-carte', query: { situation: s } }"
+              class="inline-flex items-center gap-2 rounded-full pl-3 pr-2 py-1.5 text-[13px] font-medium no-underline hover:opacity-80"
+              :class="CLS_SITUATION[s]">
+          {{ LIB_SITUATION[s] }}
+          <span class="text-[11px] font-bold rounded-full px-1.5 py-px bg-card/60">{{ situations.compte.value[s] }}</span>
+        </RouterLink>
       </div>
     </div>
 
@@ -75,21 +97,20 @@
       <div :class="card">
         <div class="flex items-center justify-between mb-3">
           <div :class="cardTitle" class="!mb-0"><TriangleAlert class="w-4 h-4 text-danger" /> Dernières alertes</div>
-          <span class="text-[11px] font-semibold text-muted-foreground bg-background rounded-full px-2 py-0.5">{{ docsVehicule.alertesActives.length }} alertes</span>
+          <RouterLink :to="{ name: 'flotte-alertes' }" class="text-[11px] font-semibold text-muted-foreground bg-background rounded-full px-2 py-0.5 no-underline hover:text-primary">{{ alertes.enCours.length }} alertes</RouterLink>
         </div>
         <div class="flex flex-col gap-0.5 max-h-[360px] overflow-y-auto">
-          <div v-for="d in alertesTriees" :key="d.id" class="flex items-center gap-3 py-2.5 border-b border-border last:border-0">
-            <span class="w-2 h-2 rounded-full shrink-0" :class="docsVehicule.etat(d) === 'expire' ? 'bg-danger' : 'bg-warning'"></span>
+          <RouterLink v-for="a in alertesTriees" :key="a.cle" :to="{ name: 'flotte-alertes', query: { alerte: a.cle } }" class="flex items-center gap-3 py-2.5 border-b border-border last:border-0 no-underline hover:bg-background">
+            <span class="w-2 h-2 rounded-full shrink-0" :class="a.gravite === 'critique' ? 'bg-danger' : 'bg-warning'"></span>
             <div class="min-w-0 flex-1">
-              <div class="text-[13px] font-semibold text-foreground">{{ vehicules.parId(d.vehiculeId)?.immatriculation }}</div>
-              <div class="text-[11px] text-muted-foreground">{{ d.type }}</div>
-              <div class="text-[11px] text-muted-foreground">Échéance : {{ formatDate(d.echeance) }}</div>
+              <div class="text-[13px] font-semibold text-foreground">{{ a.titre }}</div>
+              <div class="text-[11px] text-muted-foreground">{{ a.message }}</div>
             </div>
             <span class="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0"
-                  :class="docsVehicule.etat(d) === 'expire' ? 'bg-danger-bg text-danger' : 'bg-warning-bg text-warning'">
-              {{ docsVehicule.etat(d) === 'expire' ? 'Critique' : 'Avertissement' }}
+                  :class="a.gravite === 'critique' ? 'bg-danger-bg text-danger' : 'bg-warning-bg text-warning'">
+              {{ a.gravite === 'critique' ? 'Critique' : 'Avertissement' }}
             </span>
-          </div>
+          </RouterLink>
           <div v-if="alertesTriees.length === 0" class="text-center text-muted-foreground text-[13px] py-8">Aucune alerte en cours.</div>
         </div>
       </div>
@@ -97,10 +118,10 @@
       <!-- Véhicules récents -->
       <div :class="card">
         <div class="flex items-center justify-between mb-3">
-          <div :class="cardTitle" class="!mb-0"><MapPin class="w-4 h-4 text-primary" /> Véhicules récents</div>
-          <RouterLink :to="{ name: 'flotte-carte' }" class="text-[11px] font-semibold text-primary no-underline hover:underline">Voir tout</RouterLink>
+          <div :class="cardTitle" class="!mb-0"><MapPin class="w-4 h-4 text-primary" /> Véhicules suivis</div>
+          <RouterLink :to="{ name: 'flotte-carte' }" class="text-[11px] font-semibold text-primary no-underline hover:underline">Voir sur la carte</RouterLink>
         </div>
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto max-h-[360px] overflow-y-auto">
           <table class="w-full text-[12px]">
             <thead>
               <tr class="text-left text-[10px] uppercase tracking-[0.04em] text-muted-foreground">
@@ -111,7 +132,8 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="t in vehiculesRecents" :key="t.id" class="border-t border-border">
+              <tr v-for="t in vehiculesSuivis" :key="t.id" class="border-t border-border cursor-pointer hover:bg-background"
+                  @click="router.push({ name: 'flotte-vehicules', query: { vehicule: t.id } })">
                 <td class="py-2 font-mono font-semibold text-primary">{{ t.immatriculation }}</td>
                 <td class="py-2 text-muted-foreground truncate max-w-[110px]">{{ conducteurDe(t.id) ?? '-' }}</td>
                 <td class="py-2">
@@ -133,7 +155,7 @@
         <span class="text-[13px] font-semibold text-danger">{{ vehicules.immobilises.length }} véhicule(s) immobilisé(s)</span>
       </div>
       <div class="divide-y divide-border">
-        <RouterLink v-for="v in vehicules.immobilises" :key="v.id" :to="{ name: 'flotte-vehicules' }"
+        <RouterLink v-for="v in vehicules.immobilises" :key="v.id" :to="{ name: 'flotte-vehicules', query: { vehicule: v.id } }"
                     class="flex items-center gap-3 px-4 py-2.5 no-underline text-foreground hover:bg-background">
           <div class="w-9 h-9 rounded-lg bg-background flex items-center justify-center shrink-0"><Truck class="w-4 h-4 text-muted-foreground" /></div>
           <div class="min-w-0 flex-1">
@@ -176,10 +198,6 @@
             <span class="text-[13px] font-semibold tabular-nums">{{ s.nb }}</span>
           </div>
         </div>
-        <p class="text-[11px] text-muted-foreground mt-3.5 pt-3 border-t border-border leading-relaxed">
-          Le statut ne se saisit pas à la main : il se déduit des faits enregistrés
-          (attelage, affectation, ordre de réparation).
-        </p>
       </div>
     </div>
   </div>
@@ -187,20 +205,38 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { RouterLink } from 'vue-router'
-import { Activity, ArrowRight, ChartColumn, Container, FileWarning, Link2, MapPin, TriangleAlert, Truck, Users } from '@lucide/vue'
+import { RouterLink, useRouter } from 'vue-router'
+import { useSituationsFlotte, LIB_SITUATION, CLS_SITUATION, SITUATIONS } from '../../composables/situationsFlotte'
+import { Activity, ArrowRight, Gauge, ChartColumn, Container, FileWarning, Link2, MapPin, TriangleAlert, Truck, Users } from '@lucide/vue'
 import StatusPill from '../../components/ui/StatusPill.vue'
 import UserAvatar from '../../components/ui/UserAvatar.vue'
 import { useVehiculeStore } from '../../stores/vehicules'
 import { usePersonnelStore } from '../../stores/personnel'
+import { useIndicateursStore } from '../../stores/indicateurs'
+import { useReportingStore } from '../../stores/reporting'
+import { useMaintenanceStore } from '../../stores/maintenance'
 import { useDocumentsVehiculeStore } from '../../stores/documentsVehicule'
-import { formatDate } from '../../utils/helpers'
+import { useDisponibilitesStore } from '../../stores/disponibilites'
+import { useAlertesStore } from '../../stores/alertes'
+import { useTelematiqueStore } from '../../stores/telematique'
 import { aujourdhuiDate } from '../../utils/horloge'
 import type { StatutOperationnel } from '../../stores/vehicules'
 
 const vehicules = useVehiculeStore()
+const ind = useIndicateursStore()
+const reporting = useReportingStore()
+const maintenance = useMaintenanceStore()
+/** Disponibilité du parc (FMS-RA-01) : même calcul que les rapports et la fiabilité. */
+const parc = computed(() => reporting.etatDuParc())
+const tauxDispo = computed(() => maintenance.tauxDisponibilite(parc.value.total))
 const personnel = usePersonnelStore()
 const docsVehicule = useDocumentsVehiculeStore()
+const alertes = useAlertesStore()
+const dispos = useDisponibilitesStore()
+const telematique = useTelematiqueStore()
+/** Mêmes situations que la carte temps réel. */
+const situations = useSituationsFlotte()
+const router = useRouter()
 
 const btnPrimary = 'px-4 py-[7px] rounded-md text-[13px] font-medium cursor-pointer flex items-center gap-1.5 bg-primary text-primary-foreground no-underline transition-colors hover:bg-primary/90'
 const kpiCard = 'bg-card border border-border rounded-lg px-3.5 py-3'
@@ -216,9 +252,11 @@ const cardTitle = 'flex items-center gap-1.5 text-sm font-semibold text-foregrou
 const dateDuJour = computed(() => aujourdhuiDate().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }))
 function pct(n: number, total: number) { return total > 0 ? Math.round((n / total) * 100) : 0 }
 
-const tracteursActifs = computed(() => vehicules.tracteurs.filter(v => v.statut === 'affecte' || v.statut === 'actif').length)
-const semisActives = computed(() => vehicules.semiRemorques.filter(v => v.statut === 'affecte' || v.statut === 'actif').length)
-const conducteursDisponibles = computed(() => personnel.conducteurs.filter(c => c.statut === 'actif' && c.habilite).length)
+/** Disponible : même définition que le bloc « Disponibles » (libre ou affecté, hors mission et hors immobilisation). */
+const estDisponible = (v: { statut: string }) => v.statut === 'disponible' || v.statut === 'affecte'
+const tracteursActifs = computed(() => vehicules.tracteurs.filter(estDisponible).length)
+const semisActives = computed(() => vehicules.semiRemorques.filter(estDisponible).length)
+const conducteursDisponibles = computed(() => personnel.conducteurs.filter(c => dispos.disponibilite(c.id).etat === 'disponible' && dispos.eligibilite(c.id).ok).length)
 
 const COULEURS_OP: Record<StatutOperationnel, string> = {
   en_mouvement: '#16a34a', arrete: '#6b7280', allume_immobile: '#ca8a04', signal_perdu: '#dc2626',
@@ -229,28 +267,19 @@ const LIBELLES_OP: Record<StatutOperationnel, string> = {
 function couleurOp(id: string) { return COULEURS_OP[vehicules.statutsOp[id] ?? 'arrete'] }
 function libelleOp(id: string) { return LIBELLES_OP[vehicules.statutsOp[id] ?? 'arrete'] }
 
-const repartitionOp = computed(() => {
-  const ordre: StatutOperationnel[] = ['en_mouvement', 'allume_immobile', 'arrete', 'signal_perdu']
-  return ordre.map(key => ({
-    key, label: LIBELLES_OP[key], color: COULEURS_OP[key],
-    nb: vehicules.tracteurs.filter(t => vehicules.statutsOp[t.id] === key).length,
-  }))
-})
-
 function conducteurDe(vehiculeId: string) {
   const af = vehicules.affectationActive(vehiculeId)
   return af ? personnel.parId(af.conducteurId)?.nomComplet ?? null : null
 }
 
-/** Les positions simulées se rattachent au point le plus proche du corridor de référence. */
-const VILLES_CORRIDOR = ['Antananarivo', 'Moramanga', 'Brickaville', 'Toamasina']
 function positionApprox(vehiculeId: string) {
   const pos = vehicules.positions[vehiculeId]
-  if (!pos) return '-'
-  return `${VILLES_CORRIDOR[pos.waypoint] ?? VILLES_CORRIDOR[0]}, Madagascar`
+  if (!pos || !vehicules.aBoitier(vehiculeId)) return '-'
+  return telematique.lieuDe(pos)
 }
 
-const vehiculesRecents = computed(() => vehicules.tracteurs.slice(0, 5))
+/** Véhicules équipés d'un boîtier, donc suivis par la télématique. */
+const vehiculesSuivis = computed(() => vehicules.tracteurs.filter(t => vehicules.aBoitier(t.id)))
 
 function attelageDe(tracteurId: string) { return vehicules.attelageActif(tracteurId) }
 function semiDe(tracteurId: string) {
@@ -260,17 +289,17 @@ function semiDe(tracteurId: string) {
 }
 
 const COULEURS_STATUT: Record<string, string> = {
-  actif: 'bg-success', affecte: 'bg-primary', reparation: 'bg-warning',
-  hors_service: 'bg-danger', vendu: 'bg-neutral',
+  disponible: 'bg-success', affecte: 'bg-info', en_mission: 'bg-primary', en_maintenance: 'bg-warning',
+  immobilise: 'bg-danger', hors_service: 'bg-danger', sorti: 'bg-neutral',
 }
 const repartitionParc = computed(() => {
-  const ordre: Array<keyof typeof vehicules.LIBELLES_STATUT> = ['actif', 'affecte', 'reparation', 'hors_service', 'vendu']
+  const ordre: Array<keyof typeof vehicules.LIBELLES_STATUT> = ['disponible', 'affecte', 'en_mission', 'en_maintenance', 'immobilise', 'hors_service', 'sorti']
   return ordre
     .map(statut => ({ statut, nb: vehicules.liste.filter(v => v.statut === statut).length, couleur: COULEURS_STATUT[statut] }))
     .filter(s => s.nb > 0)
 })
 
 const alertesTriees = computed(() =>
-  [...docsVehicule.alertesActives].sort((a, b) => (docsVehicule.etat(a) === 'expire' ? 0 : 1) - (docsVehicule.etat(b) === 'expire' ? 0 : 1)).slice(0, 8),
+  [...alertes.enCours].sort((a, b) => (a.gravite === 'critique' ? 0 : 1) - (b.gravite === 'critique' ? 0 : 1)).slice(0, 8),
 )
 </script>

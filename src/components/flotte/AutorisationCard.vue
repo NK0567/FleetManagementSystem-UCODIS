@@ -1,33 +1,43 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { CircleCheck, CircleX, Circle, ChevronDown, TriangleAlert } from '@lucide/vue'
+import { CircleCheck, CircleX, ChevronDown, TriangleAlert } from '@lucide/vue'
 import CardModalShell from '../shared/CardModalShell.vue'
 import FormSection from '../ui/form-field/FormSection.vue'
-import { useDepartsStore, LIB_CONTROLE_DEPART } from '../../stores/departs'
-import { POINTS_CHECKLIST_ROUTE } from '../../stores/controles'
+import { useDepartsStore, libelleControleDepart, controleBloque } from '../../stores/departs'
+import { useControlesStore } from '../../stores/controles'
+import { useAuthStore } from '../../stores/auth'
 import { fmtDateHeure } from '../../utils/voyageUtils'
 import * as cls from '../../lib/formClasses'
-import type { AutorisationDepart } from '../../types'
+import type { AutorisationDepart, ResultatControleDepart } from '../../types'
 
 const props = defineProps<{ autorisations: AutorisationDepart[]; autorisationId: string }>()
 const emit = defineEmits<{ close: [] }>()
 
 const store = useDepartsStore()
+const controlesStore = useControlesStore()
+const auth = useAuthStore()
+const moi = computed(() => auth.user?.nom ?? 'Responsable flotte')
+const erreur = ref('')
+const controles = computed(() => item.value ? store.controlesDe(item.value) : [])
 const idCourant = ref(props.autorisationId)
 const item = computed<AutorisationDepart | null>(() => store.getById(idCourant.value) ?? props.autorisations.find(a => a.id === idCourant.value) ?? null)
 
-/* ── Checklist des 16 points, remplie directement depuis cette fiche ── */
+/* Contrôle avant départ, rempli point par point depuis cette fiche. */
 const checklistOuverte = ref(false)
-const checklistLocale = ref<Record<string, boolean>>({})
+/* Rien n'est pré-coché : chaque point se note « Conforme » ou « Anomalie ». */
+const checklistLocale = ref<Record<string, boolean | undefined>>({})
+const erreurChecklist = ref('')
 function initChecklistLocale() {
   const existante = item.value?.checklistDepart
-  checklistLocale.value = Object.fromEntries(POINTS_CHECKLIST_ROUTE.map(p => [p.code, existante?.[p.code] ?? true]))
+  checklistLocale.value = Object.fromEntries(controlesStore.pointsActifs.map(p => [p.code, existante?.[p.code]]))
+  erreurChecklist.value = ''
 }
 watch(item, initChecklistLocale, { immediate: true })
 function validerChecklist() {
   if (!item.value) return
-  store.validerChecklistDepart(item.value.id, { ...checklistLocale.value })
-  checklistOuverte.value = false
+  const r = store.validerChecklistDepart(item.value.id, { ...checklistLocale.value })
+  erreurChecklist.value = r.ok ? '' : r.motif ?? ''
+  if (r.ok) checklistOuverte.value = false
 }
 
 const index = computed(() => props.autorisations.findIndex(a => a.id === idCourant.value))
@@ -50,13 +60,28 @@ const statutCls = computed(() => {
 
 function accorder() {
   if (!item.value) return
-  store.accorder(item.value.id, 'Hery Andriamalala')
+  const r = store.accorder(item.value.id, moi.value)
+  erreur.value = r.ok ? '' : r.motif ?? ''
+}
+/* Contrôles du conducteur : cochés conforme ou non conforme par la personne qui délivre. */
+const commentaires = ref<Record<string, string>>({})
+watch(item, a => { commentaires.value = Object.fromEntries(Object.entries(a?.saisiesConducteur ?? {}).map(([k, v]) => [k, v.commentaire ?? ''])) }, { immediate: true })
+const erreurConducteur = ref('')
+function cocher(c: ResultatControleDepart, conforme: boolean) {
+  if (!item.value || !c.code) return
+  const r = store.saisirControleConducteur(item.value.id, c.code, conforme, commentaires.value[c.code] ?? '', moi.value)
+  erreurConducteur.value = r.ok ? '' : r.motif ?? ''
+  if (r.ok) erreur.value = ''
+}
+function commenter(c: ResultatControleDepart) {
+  const s = c.code ? item.value?.saisiesConducteur?.[c.code] : undefined
+  if (s && c.code && (s.commentaire ?? '') !== (commentaires.value[c.code] ?? '').trim()) cocher(c, s.conforme)
 }
 const peutPartir = computed(() => (item.value ? store.peutPartir(item.value) : false))
 const motifRefus = ref('')
 function refuser() {
   if (!item.value || !motifRefus.value.trim()) return
-  store.refuser(item.value.id, 'Hery Andriamalala', motifRefus.value.trim())
+  store.refuser(item.value.id, moi.value, motifRefus.value.trim())
   motifRefus.value = ''
 }
 </script>
@@ -90,47 +115,53 @@ function refuser() {
             <div class="flex flex-col gap-1"><label class="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.04em]">Référence</label><span class="text-sm font-mono font-medium text-foreground">{{ item.reference }}</span></div>
             <div class="flex flex-col gap-1"><label class="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.04em]">Voyage</label><span class="text-sm font-mono text-foreground">{{ item.voyageRef ?? '-' }}</span></div>
             <div class="flex flex-col gap-1"><label class="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.04em]">Véhicule</label><span class="text-sm font-mono text-foreground">{{ item.vehiculePlaque }}</span></div>
-            <div class="flex flex-col gap-1"><label class="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.04em]">Chauffeur</label><span class="text-sm text-foreground">{{ item.chauffeurNom }}</span></div>
+            <div class="flex flex-col gap-1"><label class="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.04em]">Conducteur</label><span class="text-sm text-foreground">{{ item.chauffeurNom }}</span></div>
             <div class="flex flex-col gap-1"><label class="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.04em]">Demandée le</label><span class="text-sm text-foreground">{{ fmtDateHeure(item.demandeeLe) }}</span></div>
-            <div class="flex flex-col gap-1"><label class="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.04em]">Suivi activé</label><span class="text-sm text-foreground">{{ item.suiviActiveLe ? fmtDateHeure(item.suiviActiveLe) : '-' }}</span></div>
+            <div class="flex flex-col gap-1"><label class="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.04em]">Caméra</label><span class="text-sm text-foreground">{{ item.cameraActiveeLe ? `activée le ${fmtDateHeure(item.cameraActiveeLe)}` : !store.aCamera(item.vehiculeId) ? 'véhicule non équipé' : item.decideLe && !item.accordee ? 'non activée, départ refusé' : 'activée à la délivrance' }}</span></div>
+            <div class="flex flex-col gap-1"><label class="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.04em]">Suivi GPS activé</label><span class="text-sm text-foreground">{{ item.suiviActiveLe ? fmtDateHeure(item.suiviActiveLe) : '-' }}</span></div>
           </div>
         </FormSection>
 
-        <FormSection title="Contrôles avant départ" :recaps="[`${item.controles.filter(c => c.conforme).length}/4 conformes`]" :default-open="true">
+        <FormSection title="Contrôles avant départ" :recaps="[`${controles.filter(c => c.conforme).length}/${controles.length} conformes`]" :default-open="true">
           <div class="flex flex-col gap-2">
-            <div v-for="(c, i) in item.controles" :key="i" class="rounded-md overflow-hidden" :class="c.conforme ? 'bg-background' : 'bg-danger-bg'">
+            <div v-for="(c, i) in controles" :key="i" class="rounded-md overflow-hidden" :class="c.conforme ? 'bg-background' : 'bg-danger-bg'">
               <div class="flex items-start gap-2.5 px-3 py-2" :class="c.controle === 'checklist' ? 'cursor-pointer' : ''" @click="c.controle === 'checklist' && (checklistOuverte = !checklistOuverte)">
                 <component :is="c.conforme ? CircleCheck : CircleX" class="w-4 h-4 shrink-0 mt-px" :class="c.conforme ? 'text-success' : 'text-danger'" />
                 <div class="min-w-0 flex-1">
-                  <p class="text-xs font-medium" :class="c.conforme ? 'text-foreground' : 'text-danger'">{{ LIB_CONTROLE_DEPART[c.controle] }}</p>
+                  <p class="text-xs font-medium" :class="c.conforme ? 'text-foreground' : 'text-danger'">{{ libelleControleDepart(c) }}<span v-if="c.controle === 'conducteur' && c.bloquant === false" class="ml-1.5 text-[11px] font-normal text-muted-foreground">non bloquant</span></p>
                   <p v-if="c.controle === 'checklist'" class="text-[11px]" :class="item.checklistValideeLe ? 'text-muted-foreground' : 'text-warning'">
-                    {{ item.checklistValideeLe ? `Checklist validée le ${fmtDateHeure(item.checklistValideeLe)}.` : 'Checklist avant départ non encore réalisée.' }}
+                    {{ item.checklistValideeLe ? `Contrôle validé le ${fmtDateHeure(item.checklistValideeLe)}.` : 'Contrôle avant départ non encore réalisé.' }}
                   </p>
+                  <p v-else-if="c.controle === 'conducteur' && !item.decideLe" class="text-[11px] text-muted-foreground">{{ c.renseigne ? (c.conforme ? 'Conforme.' : 'Non conforme.') : 'Non renseigné.' }}</p>
                   <p v-else-if="c.detail" class="text-[11px] text-muted-foreground">{{ c.detail }}</p>
+                  <div v-if="c.controle === 'conducteur' && !item.decideLe && c.code" class="flex items-center gap-2 mt-1.5 flex-wrap">
+                    <button type="button" class="px-2.5 py-1 rounded-md text-[11px] font-medium border cursor-pointer"
+                      :class="c.renseigne && c.conforme ? 'bg-success text-white border-success' : 'bg-card text-foreground border-border'" @click="cocher(c, true)">Conforme</button>
+                    <button type="button" class="px-2.5 py-1 rounded-md text-[11px] font-medium border cursor-pointer"
+                      :class="c.renseigne && !c.conforme ? 'bg-danger text-white border-danger' : 'bg-card text-foreground border-border'" @click="cocher(c, false)">Non conforme</button>
+                    <input v-model="commentaires[c.code]" :class="cls.fieldInput" class="!h-[28px] !text-[12px] flex-1 min-w-[160px]" placeholder="Commentaire" @blur="commenter(c)" @keyup.enter="commenter(c)" />
+                  </div>
+                  <p v-else-if="c.controle === 'conducteur' && c.code && item.saisiesConducteur?.[c.code]?.par" class="text-[11px] text-muted-foreground">Renseigné par {{ item.saisiesConducteur?.[c.code]?.par }}</p>
                 </div>
                 <ChevronDown v-if="c.controle === 'checklist'" class="w-4 h-4 shrink-0 text-muted-foreground transition-transform" :class="checklistOuverte ? 'rotate-180' : ''" />
               </div>
 
-              <!-- Checklist des 16 points, remplie directement depuis cette fiche. -->
               <div v-if="c.controle === 'checklist' && checklistOuverte" class="px-3.5 pb-3.5">
-                <p class="text-[11px] text-muted-foreground mb-2.5">Point par point, avant que le camion ne quitte l'atelier.</p>
-                <div class="grid grid-cols-2 gap-x-6 gap-y-1.5 mb-3">
-                  <label v-for="pt in POINTS_CHECKLIST_ROUTE" :key="pt.code" class="flex items-center gap-2 text-xs text-foreground cursor-pointer">
-                    <input v-model="checklistLocale[pt.code]" type="checkbox" class="w-4 h-4 rounded cursor-pointer" />
-                    {{ pt.libelle }}
-                  </label>
+                <div class="flex flex-col mb-3">
+                  <div v-for="pt in controlesStore.pointsActifs" :key="pt.code" class="flex items-center gap-2 py-1 border-b border-border/60 last:border-0">
+                    <span class="text-xs text-foreground flex-1">{{ pt.libelle }}</span>
+                    <button type="button" class="px-2.5 py-1 rounded-md text-[11px] font-medium border cursor-pointer"
+                      :class="checklistLocale[pt.code] === true ? 'bg-success text-white border-success' : 'bg-card text-foreground border-border'" @click="checklistLocale[pt.code] = true" :disabled="!!item.decideLe">Conforme</button>
+                    <button type="button" class="px-2.5 py-1 rounded-md text-[11px] font-medium border cursor-pointer"
+                      :class="checklistLocale[pt.code] === false ? 'bg-danger text-white border-danger' : 'bg-card text-foreground border-border'" @click="checklistLocale[pt.code] = false" :disabled="!!item.decideLe">Anomalie</button>
+                  </div>
                 </div>
-                <button :class="cls.btnPrimary" class="w-full justify-center" @click="validerChecklist">Valider la checklist avant départ</button>
+                <p v-if="erreurChecklist" class="text-[12px] text-danger mb-2">{{ erreurChecklist }}</p>
+                <button v-if="!item.decideLe" :class="cls.btnPrimary" class="w-full justify-center" @click="validerChecklist">Valider le contrôle avant départ</button>
               </div>
             </div>
           </div>
-          <div class="grid grid-cols-2 gap-4 mt-3.5 text-xs">
-            <div class="flex items-center gap-1.5"><component :is="item.briefingSecuriteFait ? CircleCheck : Circle" class="w-3.5 h-3.5" :class="item.briefingSecuriteFait ? 'text-success' : 'text-muted-foreground'" /> Briefing sécurité</div>
-            <div class="flex items-center gap-1.5"><component :is="item.reposHebdoVerifie ? CircleCheck : Circle" class="w-3.5 h-3.5" :class="item.reposHebdoVerifie ? 'text-success' : 'text-muted-foreground'" /> Repos hebdomadaire vérifié</div>
-          </div>
-          <p class="text-[11px] text-muted-foreground mt-3 leading-relaxed">
-            Les quatre contrôles doivent tous être conformes. Aucun voyage ne peut être créé sans autorisation délivrée.
-          </p>
+          <p v-if="erreurConducteur" class="text-[12px] text-danger mt-2">{{ erreurConducteur }}</p>
         </FormSection>
 
         <FormSection title="Décision" :recaps="[statutLabel, item.decidePar]" :default-open="!item.decideLe">
@@ -142,11 +173,11 @@ function refuser() {
             <p v-if="item.motifRefus" class="text-sm text-danger leading-relaxed mt-3">{{ item.motifRefus }}</p>
           </template>
           <template v-else>
-            <div v-if="!peutPartir" class="flex items-start gap-2.5 bg-danger-bg text-danger rounded-lg px-3.5 py-2.5 mb-3">
+            <div v-if="erreur" class="flex items-start gap-2.5 bg-danger-bg text-danger rounded-lg px-3.5 py-2.5 mb-3 text-xs"><TriangleAlert class="w-4 h-4 shrink-0 mt-px" /> {{ erreur }}</div>
+            <div v-else-if="!peutPartir" class="flex items-start gap-2.5 bg-danger-bg text-danger rounded-lg px-3.5 py-2.5 mb-3">
               <TriangleAlert class="w-4 h-4 shrink-0 mt-px" />
               <p class="text-xs leading-relaxed">
-                {{ item.controles.filter(c => !c.conforme).length }} contrôle(s) non conforme(s). Le départ ne peut
-                pas être autorisé tant qu'ils ne sont pas levés.
+                Départ bloqué : {{ controles.filter(controleBloque).map(c => c.controle === 'conducteur' ? `${libelleControleDepart(c)} (${(c.detail ?? 'non conforme').replace(/\.$/, '').toLowerCase()}).` : c.detail ?? libelleControleDepart(c)).join(' ') }}
               </p>
             </div>
             <div class="flex items-center gap-2">

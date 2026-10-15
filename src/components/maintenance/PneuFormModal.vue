@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { maintenant } from '../../utils/horloge'
 /** Enregistrement d'un pneu à l'achat (FMS-MA-14). */
 import { ref, computed } from 'vue'
 import CreateModalShell from '../shared/CreateModalShell.vue'
@@ -14,7 +15,7 @@ const emit = defineEmits<{ close: []; cree: [id: string] }>()
 const store = usePneusStore()
 const prestataires = usePrestatairesStore()
 
-const form = ref({ numeroSerie: '', marque: '', taille: '', profil: '', indiceChargeVitesse: '', dateFabrication: '', fournisseurId: '', prixAr: undefined as number | undefined, dateAchat: new Date().toISOString().slice(0, 10), etat: 'neuf' })
+const form = ref({ numeroSerie: '', marque: '', taille: '', profil: '', indiceChargeVitesse: '', dateFabrication: '', fournisseurId: '', prixAr: undefined as number | undefined, dateAchat: maintenant().toISOString().slice(0, 10), etat: 'neuf' })
 const erreur = ref('')
 const optFournisseurs = computed<DropdownItem[]>(() => prestataires.autorisesDeType('fournisseur_pneus').map(p => ({ id: p.id, label: p.nom })))
 const optEtat: DropdownItem[] = [{ id: 'neuf', label: 'Neuf' }, { id: 'rechape', label: 'Rechapé' }]
@@ -57,7 +58,7 @@ function enregistrer() {
           <div class="grid grid-cols-2 gap-x-6 gap-y-4 max-sm:grid-cols-1">
             <div :class="F.field"><label :class="F.fieldLabel">Fournisseur</label><SearchableDropdown v-model="form.fournisseurId" :items="optFournisseurs" placeholder="Choisir…" /></div>
             <div :class="F.field"><label :class="F.fieldLabel">Date d'achat *</label><input v-model="form.dateAchat" type="date" :class="F.fieldInput" /></div>
-            <div :class="F.field"><label :class="F.fieldLabel">Prix (Ar) *</label><input v-model.number="form.prixAr" type="number" min="0" :class="F.fieldInput" /></div>
+            <div :class="F.field"><label :class="F.fieldLabel">Prix ({{ $devise() }}) *</label><input v-model.number="form.prixAr" type="number" min="0" :class="F.fieldInput" /></div>
           </div>
         </FormSection>
       </div>

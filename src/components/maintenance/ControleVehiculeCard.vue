@@ -1,5 +1,5 @@
 <script setup lang="ts">
-/** Fiche d'un contrôle du véhicule (FMS-MA-09). */
+/** Fiche d'un contrôle du véhicule. */
 import { ref, computed } from 'vue'
 import { TriangleAlert, Wrench } from '@lucide/vue'
 import { useRouter } from 'vue-router'
@@ -32,7 +32,7 @@ function libelle(code: string) {
   if (!c) return code
   return c.libelles?.[code] ?? store.points[c.moment]?.find(p => p.code === code)?.libelle ?? code
 }
-function bloquant(code: string) { return !!item.value && store.points[item.value.moment]?.some(p => p.code === code && p.bloquant) }
+function bloquant(code: string) { return !!item.value && store.estBloquant(item.value, code) }
 const anomalies = computed(() => item.value ? Object.entries(item.value.resultats).filter(([, r]) => r === 'anomalie').map(([c]) => c) : [])
 const bloquants = computed(() => item.value ? store.anomaliesBloquantes(item.value) : [])
 const ot = computed(() => item.value?.ordreTravailId ? maintenance.getById(item.value.ordreTravailId) : null)
@@ -96,14 +96,14 @@ function voirOT() { if (ot.value) router.push({ name: 'maintenance-ordres', quer
               <Wrench class="w-4 h-4 shrink-0 mt-px" />
               <p class="text-xs leading-relaxed">
                 Ordre de travail <strong class="font-mono">{{ ot.reference }}</strong> ouvert sur anomalie bloquante,
-                statut : {{ LIB_STATUT_OT[ot.statut] }}. Le véhicule reste indisponible jusqu'à sa clôture.
+                statut : {{ LIB_STATUT_OT[ot.statut] }}.
               </p>
             </div>
             <button :class="F.btnOutline" @click="voirOT">Voir l'ordre de travail</button>
           </template>
           <div v-else-if="anomalies.length" class="flex items-start gap-2.5 bg-warning-bg text-warning rounded-lg px-3.5 py-2.5">
             <TriangleAlert class="w-4 h-4 shrink-0 mt-px" />
-            <p class="text-xs leading-relaxed">Anomalie non bloquante : aucun ordre de travail ouvert automatiquement.</p>
+            <p class="text-xs leading-relaxed">Anomalie non bloquante, aucun ordre de travail.</p>
           </div>
           <p v-else class="text-xs text-muted-foreground">Contrôle conforme, aucune suite.</p>
         </FormSection>

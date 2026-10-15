@@ -1,10 +1,5 @@
 <script setup lang="ts">
-/**
- * Fiche site, reprise de la fiche site du socle FMS : édition en place
- * via CardModalShell (pas une fiche en lecture seule comme la plupart
- * des autres fiches du projet), sur le même principe que la fiche
- * employé et la fiche véhicule d'UCODIS gèrent déjà l'édition.
- */
+/** Fiche site : informations, adresse et zone de géorepérage, éditables en place (FMS-DB-14). */
 import { ref, computed, watch } from 'vue'
 import SearchableDropdown from '../ui/SearchableDropdown.vue'
 import type { DropdownItem } from '../ui/SearchableDropdown.vue'
@@ -12,12 +7,17 @@ import CardModalShell from '../shared/CardModalShell.vue'
 import FormSection from '../ui/form-field/FormSection.vue'
 import * as cls from '../../lib/formClasses'
 import { useSitesStore } from '../../stores/sites'
+import { useTypesSitesStore } from '../../stores/typesSites'
+import ZoneSiteEditeur from './ZoneSiteEditeur.vue'
+import { CircleCheck, TriangleAlert } from '@lucide/vue'
 import type { SiteReseau, TypeSiteReseau } from '../../types'
 
 const props = defineProps<{ sites: SiteReseau[]; siteId: string }>()
 const emit = defineEmits<{ close: [] }>()
 
 const store = useSitesStore()
+const typesSites = useTypesSitesStore()
+const erreur = ref(''); const succes = ref('')
 
 const localIndex = ref(props.sites.findIndex(s => s.id === props.siteId))
 const current = computed(() => props.sites[localIndex.value] ?? props.sites[0]!)
@@ -36,52 +36,46 @@ function selectSidebar(no: string) {
 
 const isEditMode = ref(false)
 const saving = ref(false)
-const form = ref({ type: '' as TypeSiteReseau | '', nom: '', ville: '', region: '', actif: true })
+const form = ref({ type: '' as TypeSiteReseau | '', nom: '', ville: '', region: '', adresse: '', actif: true, lat: null as number | null, lng: null as number | null, rayonM: null as number | null })
 
 function loadForm() {
   const s = current.value
-  form.value = { type: s.type, nom: s.nom, ville: s.ville, region: s.region ?? '', actif: s.actif }
+  form.value = { type: s.type, nom: s.nom, ville: s.ville, region: s.region ?? '', adresse: s.adresse ?? '', actif: s.actif, lat: s.lat, lng: s.lng, rayonM: s.rayonM ?? null }
+  erreur.value = ''
 }
 watch(() => current.value, loadForm, { immediate: true })
 
 const isDirty = computed(() => isEditMode.value && (
   form.value.nom !== current.value.nom || form.value.ville !== current.value.ville ||
   form.value.region !== (current.value.region ?? '') || form.value.actif !== current.value.actif ||
-  form.value.type !== current.value.type
+  form.value.type !== current.value.type || form.value.adresse !== (current.value.adresse ?? '') ||
+  form.value.lat !== current.value.lat || form.value.lng !== current.value.lng || form.value.rayonM !== (current.value.rayonM ?? null)
 ))
 
 function handleCancel() { isEditMode.value = false; loadForm() }
 
 async function handleSave() {
   saving.value = true
-  store.modifier(current.value.id, {
-    type: form.value.type as TypeSiteReseau, nom: form.value.nom, ville: form.value.ville,
-    region: form.value.region || undefined, actif: form.value.actif,
+  const f = form.value
+  const r = store.modifier(current.value.id, {
+    type: f.type as TypeSiteReseau, nom: f.nom, ville: f.ville, region: f.region || undefined, adresse: f.adresse.trim() || undefined, actif: f.actif,
+    lat: f.lat ?? NaN, lng: f.lng ?? NaN, rayonM: f.rayonM ?? undefined,
   })
   saving.value = false
+  if (!r.ok) { erreur.value = r.motif ?? ''; succes.value = ''; return }
+  erreur.value = ''; succes.value = 'Site enregistré.'
   isEditMode.value = false
 }
 
-const TYPE_BADGE: Record<TypeSiteReseau, string> = {
-  'Dépôt': 'bg-primary/10 text-primary', 'Entrepôt client': 'bg-success-bg text-success',
-  'Zone à risque': 'bg-danger-bg text-danger', 'Point de contrôle': 'bg-info-bg text-info', 'Relais': 'bg-warning-bg text-warning',
-}
-function typeBadge(t: TypeSiteReseau) { return TYPE_BADGE[t] ?? 'bg-background text-muted-foreground' }
-
-const optType: DropdownItem[] = [
-  { id: 'Dépôt', label: 'Dépôt' },
-  { id: 'Entrepôt client', label: 'Entrepôt client' },
-  { id: 'Zone à risque', label: 'Zone à risque' },
-  { id: 'Point de contrôle', label: 'Point de contrôle' },
-  { id: 'Relais', label: 'Relais' },
-]
+function couleurType(t: TypeSiteReseau) { return typesSites.get(t)?.couleur ?? '#6b7280' }
+const optType = computed<DropdownItem[]>(() => typesSites.types.filter(t => t.actif || t.libelle === current.value.type).map(t => ({ id: t.libelle, label: t.libelle })))
 </script>
 
 <template>
   <CardModalShell
     page-title="Fiche site"
     :page-number="current.code"
-    banner-label="Flotte · Sites & géofences"
+    banner-label="Flotte · Sites"
     :sidebar-items="sidebarItems"
     :current-no="current.code"
     :has-prev="hasPrev"
@@ -101,6 +95,8 @@ const optType: DropdownItem[] = [
   >
     <template #form>
       <div class="flex-1 overflow-y-auto px-8 py-6 max-w-2xl mx-auto">
+        <div v-if="erreur" class="flex items-center gap-2 bg-danger-bg text-danger rounded-lg px-3.5 py-2.5 mb-3 text-xs"><TriangleAlert class="w-4 h-4 shrink-0" /> {{ erreur }}</div>
+        <div v-else-if="succes" class="flex items-center gap-2 bg-success-bg text-success rounded-lg px-3.5 py-2.5 mb-3 text-xs"><CircleCheck class="w-4 h-4 shrink-0" /> {{ succes }}</div>
 
         <FormSection title="Informations du site" :recaps="[current.code, current.nom, current.ville]">
           <div class="grid grid-cols-2 gap-x-6 gap-y-4 max-sm:grid-cols-1">
@@ -114,7 +110,7 @@ const optType: DropdownItem[] = [
                 <SearchableDropdown v-model="form.type" :items="optType" />
               </template>
               <span v-else class="text-[13px]">
-                <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full" :class="typeBadge(current.type)">{{ current.type }}</span>
+                <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full" :style="{ background: couleurType(current.type) + '1F', color: couleurType(current.type) }">{{ current.type }}</span>
               </span>
             </div>
             <div class="col-span-2 flex flex-col gap-1">
@@ -132,6 +128,11 @@ const optType: DropdownItem[] = [
               <input v-if="isEditMode" v-model="form.region" :class="cls.fieldInput" />
               <span v-else class="text-[13px] text-foreground">{{ current.region ?? '-' }}</span>
             </div>
+            <div class="col-span-2 flex flex-col gap-1">
+              <label :class="cls.fieldLabel">Adresse</label>
+              <input v-if="isEditMode" v-model="form.adresse" :class="cls.fieldInput" />
+              <span v-else class="text-[13px] text-foreground">{{ current.adresse ?? '-' }}</span>
+            </div>
             <div class="col-span-2 flex items-center gap-3 pt-1">
               <input v-if="isEditMode" id="actifCard" v-model="form.actif" type="checkbox" class="w-4 h-4 rounded" />
               <span v-else class="text-[11px] font-semibold px-2 py-0.5 rounded-full" :class="current.actif ? 'bg-success-bg text-success' : 'bg-background text-muted-foreground'">
@@ -140,6 +141,12 @@ const optType: DropdownItem[] = [
               <label v-if="isEditMode" for="actifCard" class="text-[13px] font-medium text-foreground cursor-pointer">Site actif</label>
             </div>
           </div>
+        </FormSection>
+
+        <FormSection title="Zone de géorepérage" :recaps="[`${current.rayonM ?? '-'} m`]">
+          <ZoneSiteEditeur v-if="isEditMode" v-model:lat="form.lat" v-model:lng="form.lng" v-model:rayon-m="form.rayonM" :couleur="couleurType(form.type)" editable :libelle="form.nom" />
+          <p v-if="!isEditMode" class="text-[13px] mb-2">Rayon : {{ current.rayonM ?? '-' }} m · centre {{ current.lat.toFixed(4) }}, {{ current.lng.toFixed(4) }}</p>
+          <ZoneSiteEditeur v-if="!isEditMode" :key="current.id" :lat="current.lat" :lng="current.lng" :rayon-m="current.rayonM ?? null" :couleur="couleurType(current.type)" :libelle="current.nom" />
         </FormSection>
 
       </div>

@@ -200,6 +200,7 @@ import type { ChampImport, LigneValidee } from '../../components/ui/ImportCsvMod
 import * as L from '../../lib/listClasses'
 import { formatDate } from '../../utils/helpers'
 import { usePersonnelStore } from '../../stores/personnel'
+import { useConfigurationStore } from '../../stores/configuration'
 import { useFonctionStore } from '../../stores/fonctions'
 import { useEntiteStore } from '../../stores/entites'
 import { useParametresStore } from '../../stores/parametres'
@@ -382,7 +383,7 @@ function importerEmployes(lignes: LigneEmploye[]) {
       fonctionId: l.fonctionId, fonctionLibelle: l.fonctionLibelle,
       entiteId: l.entiteId, entiteNom: l.entiteNom,
       site: l.site, telephone: l.telephone || '-', email: l.email,
-      cin: l.cin, dateNaissance: aujourdhui, contrat: 'CDI',
+      cin: l.cin, dateNaissance: aujourdhui, contrat: useConfigurationStore().parametres.typesContrat[0] ?? '',
       dateEntree: aujourdhui, conduit: fonctions.parId(l.fonctionId)?.conduit ?? false,
     })
   })

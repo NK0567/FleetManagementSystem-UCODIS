@@ -22,6 +22,7 @@ import { useFonctionStore } from '../../stores/fonctions'
 import { useEntiteStore } from '../../stores/entites'
 import { useDocumentsStore, LIBELLE_TYPE_DOC } from '../../stores/documentsPersonnel'
 import { useAbsenceStore } from '../../stores/absences'
+import { useConfigurationStore } from '../../stores/configuration'
 import type { Personnel, StatutPersonnel, TypeContrat } from '../../types'
 
 const props = defineProps<{ employes: Personnel[]; employeId: string }>()
@@ -34,9 +35,10 @@ const docs = useDocumentsStore()
 const absences = useAbsenceStore()
 
 const STATUTS: Record<StatutPersonnel, string> = {
-  actif: 'Actif', conge: 'En congé', suspendu: 'Suspendu', archive: 'Archivé',
+  actif: 'Actif', conge: 'En congé', suspendu: 'Suspendu', fin_contrat: 'Fin de contrat', archive: 'Archivé',
 }
-const CONTRATS: TypeContrat[] = ['CDI', 'CDD', 'Journalier', 'Stage']
+/** Types de contrat paramétrés dans la configuration. */
+const CONTRATS = computed<TypeContrat[]>(() => useConfigurationStore().parametres.typesContrat)
 
 /* ── Navigation entre fiches ────────────────────────────────── */
 const idCourant = ref(props.employeId)
@@ -105,7 +107,7 @@ function save() {
 
 /* ── Données liées ──────────────────────────────────────────── */
 const mesDocs = computed(() => (courant.value ? docs.parPersonnel(courant.value.id) : []))
-const manquantes = computed(() => (courant.value ? docs.piecesManquantes(courant.value.id) : []))
+const manquantes = computed(() => (courant.value ? docs.piecesAbsentes(courant.value.id) : []))
 const responsabilites = computed(() =>
   courant.value ? fonctions.parId(courant.value.fonctionId)?.responsabilites ?? [] : [],
 )

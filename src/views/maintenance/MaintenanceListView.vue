@@ -1,7 +1,7 @@
 <template>
   <ListPageLayout
     title="Ordres de travail"
-    :subtitle="`${store.ouverts.length} intervention(s) en cours · ${store.enAttentePiece.length} en attente de pièce`"
+    :subtitle="`${store.ouverts.length} ordre(s) ouvert(s) · ${store.enAttentePiece.length} en attente de pièce`"
     :columns="columns"
     :items="pageItems"
     :total="totalCount"
@@ -68,7 +68,7 @@
     </template>
 
     <template #cell-cout="{ item }">
-      <span class="text-xs">{{ store.coutOT(item) ? store.coutOT(item).toLocaleString('fr-FR') + ' Ar' : '-' }}</span>
+      <span class="text-xs">{{ store.coutOT(item) ? store.coutOT(item).toLocaleString('fr-FR') + ' ' + $devise() : '-' }}</span>
     </template>
 
     <template #cell-declare="{ item }">
@@ -95,10 +95,7 @@
             <span v-else class="text-warning">à établir</span>
           </div>
           <div><div class="text-muted-foreground text-[11px]">Pièces</div>{{ item.pieces.length }}</div>
-          <div><div class="text-muted-foreground text-[11px]">Coût</div>{{ store.coutOT(item) ? store.coutOT(item).toLocaleString('fr-FR') + ' Ar' : '-' }}</div>
-        </div>
-        <div v-if="item.statut === 'attente_piece'" class="bg-warning-bg text-warning rounded-md px-2.5 py-2 text-[11px] leading-snug">
-          Le véhicule reste immobilisé tant que la pièce n'est pas réceptionnée.
+          <div><div class="text-muted-foreground text-[11px]">Coût</div>{{ store.coutOT(item) ? store.coutOT(item).toLocaleString('fr-FR') + ' ' + $devise() : '-' }}</div>
         </div>
         <button :class="L.btnPrimary" class="w-full justify-center" @click="openCard(item.id)">Ouvrir la fiche</button>
       </div>
@@ -112,11 +109,11 @@
   <ImportCsvModal
     v-if="importOuvert"
     titre="Importer l'historique des interventions"
-    :champs="CHAMPS_IMPORT"
+    :champs="CHAMPS_IMPORT" import-id="maintenance"
     :apercu-colonnes="COLONNES_APERCU"
     :modele="MODELE_CSV"
-    description-controles="Contrôles appliqués : véhicule reconnu par sa plaque, date passée (AAAA-MM-JJ ou JJ/MM/AAAA), description obligatoire, sous-système reconnu (colonne du fichier, sinon proposé d'après la description), intervention pas déjà présente."
     :valider="validerLigneImport"
+    :colonnes-choix="CHOIX_IMPORT" exclusion-possible
     @close="importOuvert = false"
     @importer="lignes => importerLignes(lignes as unknown as LigneHistorique[])"
   />
@@ -125,13 +122,16 @@
 </template>
 
 <script setup lang="ts">
+import { maintenantMs } from '../../utils/horloge'
 /**
- * Ordres de travail, repris de la structure du socle FMS
- * (US 3.2.1 à 3.2.5) : déclaration, diagnostic ISO 14224, pièces et
- * main-d'œuvre, clôture. La déclaration ouvre immédiatement une
- * indisponibilité, comme sur le socle FMS.
+ * Ordres de travail : déclaration, diagnostic ISO 14224, pièces et
+ * main-d'œuvre, clôture. La déclaration rend aussitôt le véhicule
+ * indisponible. L'historique ancien s'importe ; le sous-système proposé
+ * d'après la description est signalé dans l'aperçu pour être validé.
  */
+import { devise } from '../../lib/monnaie'
 import { ref, computed, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { Clock, Coins, PackageSearch, Plus, ShieldCheck, Upload, Wrench, X } from '@lucide/vue'
 import ListPageLayout from '../../components/shared/ListPageLayout.vue'
 import type { ListColumn } from '../../components/shared/ListPageLayout.vue'
@@ -139,10 +139,13 @@ import SearchableDropdown from '../../components/ui/SearchableDropdown.vue'
 import type { DropdownItem } from '../../components/ui/SearchableDropdown.vue'
 import OrdreTravailCard from '../../components/maintenance/OrdreTravailCard.vue'
 import OrdreTravailFormModal from '../../components/maintenance/OrdreTravailFormModal.vue'
+import { IMPORTS } from '../../stores/imports'
 import ImportCsvModal from '../../components/ui/ImportCsvModal.vue'
-import type { ChampImport, LigneValidee } from '../../components/ui/ImportCsvModal.vue'
+import type { ChampImport, LigneValidee, ColonneChoix } from '../../components/ui/ImportCsvModal.vue'
 import { useMaintenanceStore } from '../../stores/maintenance'
 import { useVehiculeStore } from '../../stores/vehicules'
+import { useIndicateursStore } from '../../stores/indicateurs'
+import { useNomenclatureStore } from '../../stores/nomenclature'
 import {
   LIB_ORIGINE_OT, LIB_SOUS_SYSTEME, LIB_MODE_DEFAILLANCE, LIB_TYPE_MAINTENANCE, LIB_GRAVITE_OT, LIB_STATUT_OT,
 } from '../../types/maintenance'
@@ -156,6 +159,9 @@ const store = useMaintenanceStore()
 const vehicules = useVehiculeStore()
 
 const ficheId = ref<string | null>(null)
+const routeLien = useRoute()
+if (typeof routeLien.query.ot === 'string') ficheId.value = routeLien.query.ot
+watch(() => routeLien.query.ot, v => { if (typeof v === 'string') ficheId.value = v })
 function openCard(id: string) { ficheId.value = id }
 
 const CLS_STATUT: Record<StatutOT, string> = {
@@ -179,6 +185,7 @@ const scopeOptions = [
   { value: '', label: 'Tous les ordres' },
   { value: 'ouverts', label: 'En cours' },
   { value: 'piece', label: 'En attente de pièce' },
+  { value: 'externe', label: 'Chez un atelier externe' },
   { value: 'cloture', label: 'Clôturés' },
 ]
 
@@ -187,6 +194,7 @@ const filtered = computed(() => {
   return store.ordres.filter(o => {
     if (activeScope.value === 'ouverts' && (o.statut === 'cloture' || o.statut === 'annule')) return false
     if (activeScope.value === 'piece' && o.statut !== 'attente_piece') return false
+    if (activeScope.value === 'externe' && !store.auxAteliersExternes.includes(o)) return false
     if (activeScope.value === 'cloture' && o.statut !== 'cloture') return false
     if (q && !`${o.reference} ${o.vehiculePlaque} ${o.symptome} ${o.sousSysteme ? LIB_SOUS_SYSTEME[o.sousSysteme] : ''}`.toLowerCase().includes(q)) return false
     return true
@@ -202,12 +210,13 @@ const filtered = computed(() => {
 const totalCount = computed(() => filtered.value.length)
 const pageItems = computed(() => { const s = (page.value - 1) * pageSize.value; return filtered.value.slice(s, s + pageSize.value) })
 
+const ind = useIndicateursStore()
 const kpis = computed(() => [
   { label: 'En cours', value: String(store.ouverts.length), icon: Wrench, bg: 'bg-primary/10', iconColor: 'text-primary' },
   { label: 'En attente de pièce', value: String(store.enAttentePiece.length), icon: PackageSearch, bg: 'bg-warning-bg', iconColor: 'text-warning' },
-  { label: 'MTTR (heures)', value: store.mttrHeures != null ? String(store.mttrHeures) : '-', icon: Clock, bg: 'bg-info-bg', iconColor: 'text-info' },
-  { label: 'Préventif', value: store.ratioPreventif != null ? store.ratioPreventif + ' %' : '-', icon: ShieldCheck, bg: 'bg-success-bg', iconColor: 'text-success' },
-  { label: 'Coût pièces', value: store.coutTotal.toLocaleString('fr-FR') + ' Ar', icon: Coins, bg: 'bg-neutral-bg', iconColor: 'text-neutral' },
+  { label: ind.libelle('mttr'), value: store.mttrHeures != null ? store.mttrHeures + ' h' : '-', icon: Clock, bg: 'bg-info-bg', iconColor: 'text-info' },
+  { label: ind.libelle('preventif'), value: store.ratioPreventif != null ? store.ratioPreventif + ' %' : '-', icon: ShieldCheck, bg: 'bg-success-bg', iconColor: 'text-success' },
+  { label: 'Coût des interventions', value: store.coutTotal.toLocaleString('fr-FR') + ' ' + devise(), icon: Coins, bg: 'bg-neutral-bg', iconColor: 'text-neutral' },
 ])
 
 const columns = computed<ListColumn[]>(() => [
@@ -226,20 +235,17 @@ const creationOuverte = ref(false)
 
 /* ── Reprise de l'historique ─────────────────────────────────── */
 const importOuvert = ref(false)
-const CHAMPS_IMPORT: ChampImport[] = [
-  { cle: 'plaque', libelle: 'Immatriculation véhicule', requis: true },
-  { cle: 'date', libelle: 'Date', requis: true },
-  { cle: 'description', libelle: 'Description', requis: true },
-  { cle: 'cout', libelle: 'Coût (Ar)', requis: false },
-  { cle: 'sousSysteme', libelle: 'Sous-système', requis: false },
-]
+const CHAMPS_IMPORT: ChampImport[] = IMPORTS.maintenance.champs
 const COLONNES_APERCU = [
   { cle: 'vehiculePlaque', libelle: 'Véhicule' },
   { cle: 'date', libelle: 'Date' },
   { cle: 'libelle', libelle: 'Description' },
-  { cle: 'sousSystemeLib', libelle: 'Sous-système' },
-  { cle: 'coutAr', libelle: 'Coût (Ar)' },
+  { cle: 'sousSysteme', libelle: 'Sous-système' },
+  { cle: 'coutLib', libelle: "Coût de l'intervention" },
 ]
+/** Le sous-système proposé se confirme ou se change ligne par ligne, parmi la nomenclature active. */
+const CHOIX_IMPORT = computed<ColonneChoix[]>(() => [{ cle: 'sousSysteme',
+  options: nomenclature.listes.sousSystemes.filter(e => e.actif).map(e => ({ valeur: e.code, libelle: e.libelle })) }])
 const MODELE_CSV = ['Immatriculation véhicule', 'Date', 'Description', 'Coût', 'Sous-système']
 interface LigneHistorique { vehiculeId: string; vehiculePlaque: string; date: string; libelle: string; coutAr: number; sousSysteme: SousSysteme }
 
@@ -251,16 +257,19 @@ function normaliserDate(d: string) {
 function dateValide(d: string) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return false
   const t = new Date(d + 'T00:00:00Z')
-  return !isNaN(t.getTime()) && t.toISOString().slice(0, 10) === d && t.getTime() <= Date.now()
+  return !isNaN(t.getTime()) && t.toISOString().slice(0, 10) === d && t.getTime() <= maintenantMs()
 }
 const sansAccent = (t: string) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
-function sousSystemeDe(valeur: string, description: string): SousSysteme | null {
+const nomenclature = useNomenclatureStore()
+/** Sous-système lu dans le fichier (parmi les actifs), sinon proposé d'après la description. */
+function sousSystemeDe(valeur: string, description: string): { code: SousSysteme; propose: boolean } | null {
   if (valeur) {
     const v = sansAccent(valeur)
-    const trouve = (Object.entries(LIB_SOUS_SYSTEME) as [SousSysteme, string][]).find(([k, lib]) => sansAccent(k) === v || sansAccent(lib) === v)
-    if (trouve) return trouve[0]
+    const trouve = nomenclature.listes.sousSystemes.find(e => e.actif && (sansAccent(e.code) === v || sansAccent(e.libelle) === v))
+    if (trouve) return { code: trouve.code, propose: false }
   }
-  return store.proposerSousSysteme(description) as SousSysteme | null
+  const propose = store.proposerSousSysteme(description)
+  return propose ? { code: propose, propose: true } : null
 }
 function validerLigneImport(ligne: Record<string, string>, mapping: Record<string, string>): LigneValidee {
   const val = (cle: string) => (mapping[cle] ? (ligne[mapping[cle]!] ?? '').trim() : '')
@@ -276,10 +285,11 @@ function validerLigneImport(ligne: Record<string, string>, mapping: Record<strin
   const coutAr = coutBrut ? Number(coutBrut) : 0
   if (Number.isNaN(coutAr) || coutAr < 0) return { valide: false, motif: `Coût invalide « ${val('cout')} »` }
   const ss = sousSystemeDe(val('sousSysteme'), libelle)
-  if (!ss) return { valide: false, motif: 'Sous-système non reconnu : renseignez la colonne Sous-système' }
+  if (!ss) return { valide: false, motif: val('sousSysteme') ? `Sous-système inconnu ou inactif « ${val('sousSysteme')} »` : 'Sous-système non reconnu : renseignez la colonne Sous-système' }
   if (store.ordres.some(o => o.vehiculeId === v.id && o.declareLe.slice(0, 10) === date && o.symptome.trim().toLowerCase() === libelle.toLowerCase()))
     return { valide: false, motif: 'Intervention déjà présente dans l\'historique' }
-  return { valide: true, donnees: { vehiculeId: v.id, vehiculePlaque: v.immatriculation, date, libelle, coutAr, sousSysteme: ss, sousSystemeLib: LIB_SOUS_SYSTEME[ss] } }
+  return { valide: true, donnees: { vehiculeId: v.id, vehiculePlaque: v.immatriculation, date, libelle, coutAr, coutLib: `${coutAr.toLocaleString('fr-FR')} ${devise()}`,
+    sousSysteme: ss.code, sousSystemeLib: LIB_SOUS_SYSTEME[ss.code] ?? ss.code }, proposes: ss.propose ? ['sousSysteme'] : [] }
 }
 function importerLignes(lignes: LigneHistorique[]) {
   store.importerHistorique(lignes.map(l => ({ vehiculeId: l.vehiculeId, vehiculePlaque: l.vehiculePlaque, date: l.date, libelle: l.libelle, coutAr: l.coutAr, sousSysteme: l.sousSysteme })))

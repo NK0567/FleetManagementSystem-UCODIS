@@ -1,7 +1,7 @@
 <template>
   <ListPageLayout
     title="Entités organisationnelles"
-    subtitle="Structure hiérarchique d'UCODIS Transport"
+    :subtitle="`Structure hiérarchique de ${params.societe.entite}`"
     :columns="columns"
     :items="pageItems"
     :total="totalCount"

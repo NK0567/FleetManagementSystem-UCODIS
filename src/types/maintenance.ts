@@ -1,28 +1,31 @@
+import { reactive } from 'vue'
 /* ══════════════════════════════════════════════════════════════
-   MODULE 3 - MAINTENANCE & INTERVENTIONS
+   MODULE MAINTENANCE ET INTERVENTIONS
    ══════════════════════════════════════════════════════════════
-   repris de la structure du socle FMS, adapté à UCODIS :
-   UCODIS transporte du fret sec, pas des hydrocarbures en citerne.
-   Le sous-système et la compétence atelier « Citerne » du socle FMS n'ont
-   donc pas d'équivalent ici et ne sont pas repris. Le reste du
-   référentiel (nomenclature ISO 14224, huit modes de défaillance,
-   cinq causes racines RCM) est générique à tout poids lourd et
-   repris à l'identique.
-
-   Le cahier des charges UCODIS (Module 3 - Maintenance &
-   Interventions) fournit un exemple concret de plan d'entretien
-   pour un Sinotruk Howo, repris tel quel dans les données de
-   démonstration du store plutôt qu'ici.
+   Référentiel générique à tout poids lourd : nomenclature ISO 14224
+   (système, sous-système, mode de défaillance), cinq causes racines,
+   codes d'indisponibilité par famille. Chaque liste n'est qu'un point de
+   départ : l'entreprise la tient elle-même dans le paramétrage.
    ══════════════════════════════════════════════════════════════ */
 
-/* ── Nomenclature ISO 14224 - dix sous-systèmes (onze sur le socle FMS,
-      moins la citerne) ─────────────────────────────────────────── */
-export type SousSysteme =
-  | 'moteur' | 'transmission' | 'circuit_air' | 'circuit_carburant'
-  | 'freinage' | 'electricite' | 'direction_suspension'
-  | 'roues_roulements' | 'chassis_tolerie' | 'refroidissement'
+/* ── Nomenclature ISO 14224 : cinq systèmes, onze sous-systèmes, dont
+      la citerne et ses équipements de chargement ───────────────── */
+/** Code de système : niveau le plus haut de la nomenclature. */
+export type Systeme = string
 
-export const LIB_SOUS_SYSTEME: Record<SousSysteme, string> = {
+export const LIB_SYSTEME: Record<Systeme, string> = reactive({
+  groupe_motopropulseur: 'Groupe motopropulseur',
+  liaison_sol:           'Freinage et liaison au sol',
+  electricite:           'Équipement électrique',
+  structure:             'Structure et carrosserie',
+  chargement:            'Équipement de chargement',
+})
+
+/** Code de sous-système : la liste se tient dans le paramétrage,
+ *  celle-ci n'est que la nomenclature proposée au départ. */
+export type SousSysteme = string
+
+export const LIB_SOUS_SYSTEME: Record<SousSysteme, string> = reactive({
   moteur:               'Moteur',
   transmission:         'Transmission',
   circuit_air:          "Circuit d'air",
@@ -32,15 +35,29 @@ export const LIB_SOUS_SYSTEME: Record<SousSysteme, string> = {
   direction_suspension: 'Direction et suspension',
   roues_roulements:     'Roues et roulements',
   chassis_tolerie:      'Châssis et tôlerie',
+  citerne:              'Citerne et équipements de chargement',
   refroidissement:      'Refroidissement',
+})
+
+/** Système de rattachement de chaque sous-système de départ. */
+export const SYSTEME_PAR_SOUS_SYSTEME: Record<SousSysteme, Systeme> = {
+  moteur:               'groupe_motopropulseur',
+  transmission:         'groupe_motopropulseur',
+  circuit_air:          'groupe_motopropulseur',
+  circuit_carburant:    'groupe_motopropulseur',
+  refroidissement:      'groupe_motopropulseur',
+  freinage:             'liaison_sol',
+  direction_suspension: 'liaison_sol',
+  roues_roulements:     'liaison_sol',
+  electricite:          'electricite',
+  chassis_tolerie:      'structure',
+  citerne:              'chargement',
 }
 
 /* ── Les huit modes de défaillance, génériques ───────────────── */
-export type ModeDefaillance =
-  | 'fuite' | 'blocage' | 'rupture' | 'perte_puissance'
-  | 'surchauffe' | 'defaillance_electrique' | 'usure_excessive' | 'non_fonctionnel'
+export type ModeDefaillance = string
 
-export const LIB_MODE_DEFAILLANCE: Record<ModeDefaillance, string> = {
+export const LIB_MODE_DEFAILLANCE: Record<ModeDefaillance, string> = reactive({
   fuite:                  'Fuite',
   blocage:                'Blocage',
   rupture:                'Rupture',
@@ -49,28 +66,22 @@ export const LIB_MODE_DEFAILLANCE: Record<ModeDefaillance, string> = {
   defaillance_electrique: 'Défaillance électrique',
   usure_excessive:        'Usure excessive',
   non_fonctionnel:        'Non fonctionnel',
-}
+})
 
 /* ── Les cinq causes racines (méthode RCM), génériques ───────── */
-export type CauseRacine =
-  | 'conception' | 'fournisseur' | 'erreur_humaine'
-  | 'environnement' | 'maintenance_insuffisante'
+export type CauseRacine = string
 
-export const LIB_CAUSE_RACINE: Record<CauseRacine, string> = {
+export const LIB_CAUSE_RACINE: Record<CauseRacine, string> = reactive({
   conception:               'Défaut de conception',
   fournisseur:              'Défaut fournisseur',
   erreur_humaine:           'Erreur humaine',
   environnement:            'Conditions environnementales',
   maintenance_insuffisante: 'Maintenance insuffisante',
-}
+})
 
 /* ══════════════════════════════════════════════════════════════
-   Codes d'indisponibilité - repris de la structure du socle FMS (quatre
-   familles), mais des organismes réglementaires propres au
-   transport français ou maritime d'hydrocarbures (APAVE, Vetting)
-   retirés, faute d'équivalent connu à Madagascar pour du fret sec.
-   Conservés : les codes techniques, administratifs et humains,
-   génériques à toute exploitation de poids lourds.
+   Codes d'indisponibilité : quatre familles, et une liste de départ
+   générique que chaque entreprise adapte dans le paramétrage.
    ══════════════════════════════════════════════════════════════ */
 export type FamilleIndispo = 'technique' | 'reglementaire' | 'administrative' | 'humaine'
 
@@ -93,20 +104,16 @@ export interface DefinitionIndispo {
 }
 
 export const CODES_INDISPO: DefinitionIndispo[] = [
-  { code: 'MTN', famille: 'technique',      libelle: 'Maintenance planifiée' },
-  { code: 'PNN', famille: 'technique',      libelle: 'Panne en cours' },
-  { code: 'DPN', famille: 'technique',      libelle: 'Dépannage sur site' },
+  { code: 'PNN', famille: 'technique',      libelle: 'Panne' },
+  { code: 'MTN', famille: 'technique',      libelle: 'Entretien planifié' },
+  { code: 'ATP', famille: 'technique',      libelle: 'Attente de pièce' },
+  { code: 'EDP', famille: 'technique',      libelle: 'Entretien dépassé' },
   { code: 'ACC', famille: 'technique',      libelle: 'Accident' },
-  { code: 'CTV', famille: 'reglementaire',  libelle: 'Contre-visite technique' },
   { code: 'VIS', famille: 'reglementaire',  libelle: 'Visite technique' },
-  { code: 'DRG', famille: 'administrative', libelle: 'Dérogation' },
-  { code: 'NDP', famille: 'administrative', libelle: 'Note de protêt' },
-  { code: 'DSC', famille: 'administrative', libelle: 'Dossier chauffeur' },
-  { code: 'CON', famille: 'humaine',        libelle: 'Congé chauffeur' },
-  { code: 'TRH', famille: 'humaine',        libelle: 'Repos chauffeur' },
-  { code: 'MED', famille: 'humaine',        libelle: 'Visite médicale' },
-  { code: 'ABS', famille: 'humaine',        libelle: 'Absence' },
-  { code: 'SAN', famille: 'humaine',        libelle: 'Sanction' },
+  { code: 'CTV', famille: 'reglementaire',  libelle: 'Contre-visite' },
+  { code: 'DOC', famille: 'reglementaire',  libelle: 'Document obligatoire expiré' },
+  { code: 'ADM', famille: 'administrative', libelle: 'Démarche administrative en cours' },
+  { code: 'ABS', famille: 'humaine',        libelle: 'Absence de conducteur' },
 ]
 
 export const familleDuCode = (c: CodeIndispo): FamilleIndispo =>
@@ -125,7 +132,13 @@ export interface Indisponibilite {
   fin?: string
   dureeJours?: number
   ordreTravailId?: string
+  /** Autres ordres ouverts sur le même véhicule pendant cette indisponibilité :
+   *  elle ne se referme qu'à la clôture du dernier. */
+  autresOrdres?: string[]
   commentaire?: string
+  /** Ouverte par le système (entretien dépassé, inspection non conforme
+   *  en attente de contre-visite) : elle se lève seule quand la situation disparaît. */
+  auto?: 'entretienDepasse' | 'inspectionNonConforme'
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -146,7 +159,7 @@ export const LIB_STATUT_OT: Record<StatutOT, string> = {
 }
 
 export type OrigineOT =
-  | 'remontee_chauffeur' | 'checklist' | 'alerte_preventive' | 'constat_garage' | 'equipe_mobile'
+  | 'remontee_chauffeur' | 'checklist' | 'alerte_preventive' | 'constat_garage' | 'equipe_mobile' | 'telematique'
 
 export const LIB_ORIGINE_OT: Record<OrigineOT, string> = {
   remontee_chauffeur: 'Remontée chauffeur',
@@ -154,6 +167,7 @@ export const LIB_ORIGINE_OT: Record<OrigineOT, string> = {
   alerte_preventive:  'Échéance préventive',
   constat_garage:     'Constat au garage',
   equipe_mobile:      'Dépannage sur route',
+  telematique:        'Défaut remonté par le véhicule',
 }
 
 export type TypeMaintenance = 'preventif' | 'correctif' | 'ameliorative'
@@ -186,8 +200,8 @@ export interface PieceConsommee {
 export type StatutAchat = 'demandee' | 'commandee' | 'receptionnee' | 'annulee'
 
 export const LIB_STATUT_ACHAT: Record<StatutAchat, string> = {
-  demandee:     'Demande émise',
-  commandee:    'Bon de commande établi',
+  demandee:     'Demandée',
+  commandee:    'Commandée',
   receptionnee: 'Réceptionnée',
   annulee:      'Annulée',
 }
@@ -208,8 +222,7 @@ export interface DemandeAchat {
   delaiJours?: number
 }
 
-/** Tarif horaire interne non communiqué par UCODIS : la main-d'œuvre
- *  reste non valorisée tant qu'il manque, comme sur le socle FMS. */
+/** Temps passé par un technicien ; valorisé au tarif horaire de l'atelier. */
 export interface TempsPasse {
   id: string
   mecanicienNom: string
@@ -228,11 +241,11 @@ export interface PanneDiagnostiquee {
 
 export const MAX_PANNES_SIMULTANEES = 4
 
-/** Compétences de l'atelier : mécanique, électricité, pneumatique -
- *  la « citerne » du socle FMS retirée, sans équivalent en fret sec. */
-export type CompetenceAtelier = 'mecanique' | 'electricite' | 'pneumatique'
+/** Compétences de l'atelier : une liste de départ, que chaque entreprise
+ *  complète dans Paramètres de l'atelier (FMS-MA-12). */
+export type CompetenceAtelier = string
 
-export const LIB_COMPETENCE: Record<CompetenceAtelier, string> = {
+export const LIB_COMPETENCE: Record<string, string> = {
   mecanique:   'Mécanique',
   electricite: 'Électricité',
   pneumatique: 'Pneumatique',
@@ -281,6 +294,7 @@ export const COMPETENCE_PAR_SOUS_SYSTEME: Record<SousSysteme, CompetenceAtelier>
   roues_roulements:     'pneumatique',
   chassis_tolerie:      'mecanique',
   refroidissement:      'mecanique',
+  citerne:              'mecanique',
 }
 
 export const PRIORITE_PAR_GRAVITE: Record<GraviteOT, number> = {
@@ -319,14 +333,20 @@ export interface OrdreTravail {
   montantDevisAr?: number
   sousGarantie?: boolean
 
-  /** Clôture, avec la triple validation exigée par le cahier des
-   *  charges UCODIS : technicien, responsable, puis directeur. */
+  /** Opérations du plan d'entretien traitées par cet ordre (préventif) :
+   *  leur dernier passage se met à jour à la clôture. */
+  operationsPlan?: string[]
+
+  /** Clôture en deux temps : fin déclarée, puis validation du responsable. */
   clotureLe?: string
   cloturePar?: string
   valideParResponsableLe?: string
   valideParResponsable?: string
-  valideParDirecteurLe?: string
-  valideParDirecteur?: string
+
+  /** Intervention ancienne reprise par import : son coût global est connu,
+   *  sans détail des pièces ni de la main-d'œuvre. */
+  repriseHistorique?: boolean
+  coutRepriseAr?: number
 
   coutPiecesAr?: number
   kilometrage?: number
@@ -335,8 +355,10 @@ export interface OrdreTravail {
   planifieeLe?: string
 
   /** Intervention confiée à un atelier externe : le FMS ne planifie pas son
-   *  travail interne, il en suit l'exécution. */
+   *  travail interne, il en suit l'exécution. Le montant final, connu au
+   *  retour, remplace le devis dans le coût. */
   prestataireId?: string
+  montantFinalAr?: number
   remiseAtelierLe?: string
   retourPrevuLe?: string
   retourLe?: string
@@ -348,9 +370,7 @@ export interface OrdreTravail {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   Plan d'entretien par modèle - le cahier des charges UCODIS fournit
-   un exemple réel pour un Sinotruk Howo, repris dans les données de
-   démonstration du store (voir maintenance.ts).
+   Plan d'entretien par marque et modèle
    ══════════════════════════════════════════════════════════════ */
 export type NatureOperation = 'verifier' | 'lubrifier' | 'remplacer'
 
@@ -366,6 +386,7 @@ export interface OperationEntretien {
   sousSysteme: SousSysteme
   nature: NatureOperation
   intervalleKm?: number
+  intervalleHeures?: number
   intervalleJours?: number
 }
 
@@ -387,10 +408,13 @@ export interface EcheanceEntretien {
   sousSysteme: SousSysteme
   nature: NatureOperation
   kmProchain?: number
+  heuresProchain?: number
   dateProchaine?: string
   kmRestants?: number
+  heuresRestantes?: number
   joursRestants?: number
-  statut: 'a_venir' | 'proche' | 'depassee'
+  /** « a_renseigner » : le dernier passage n'est pas connu, l'échéance ne peut pas se calculer. */
+  statut: 'a_venir' | 'proche' | 'depassee' | 'a_renseigner'
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -434,42 +458,43 @@ export interface MouvementStock {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   Équipe mobile - patrouille conjointe dépannage / sécurisation /
-   contrôles inopinés. La mention d'une fuite de citerne dans
-   « sécurisation » n'a pas d'équivalent en fret sec et devient une
-   sécurisation d'accident générique.
+   Équipe mobile : dépannage d'un camion bloqué sur la route
    ══════════════════════════════════════════════════════════════ */
-export type TypeMissionMobile =
-  | 'depannage_mecanique' | 'depannage_electrique' | 'securisation'
-  | 'controle_alcool_drogue' | 'controle_clandestin' | 'surveillance'
+/** Code d'un type de mission, paramétré dans Paramètres de l'atelier. */
+export type TypeMissionMobile = string
 
-export const LIB_MISSION_MOBILE: Record<TypeMissionMobile, string> = {
-  depannage_mecanique:    'Dépannage mécanique',
-  depannage_electrique:   'Dépannage électrique',
-  securisation:           "Sécurisation d'accident",
-  controle_alcool_drogue: 'Contrôle alcool et drogue',
-  controle_clandestin:    'Détection passagers clandestins',
-  surveillance:           'Surveillance comportementale',
-}
+/** Type de mission de l'équipe mobile ; une mission de contrôle compte les
+ *  contrôles réalisés et les cas positifs. */
+export interface TypeMissionMobileParam { code: string; libelle: string; actif: boolean; controle: boolean }
+
+export const TYPES_MISSION_MOBILE_DEFAUT: TypeMissionMobileParam[] = [
+  { code: 'depannage_mecanique', libelle: 'Dépannage mécanique', actif: true, controle: false },
+  { code: 'depannage_electrique', libelle: 'Dépannage électrique', actif: true, controle: false },
+  { code: 'securisation', libelle: 'Sécurisation', actif: true, controle: false },
+  { code: 'controle_alcool_drogue', libelle: 'Contrôle alcool et drogue', actif: true, controle: true },
+  { code: 'controle_clandestin', libelle: 'Détection de passagers clandestins', actif: true, controle: true },
+  { code: 'surveillance_conduite', libelle: 'Surveillance du comportement de conduite', actif: true, controle: true },
+]
 
 export interface InterventionMobile {
   id: string
   reference: string
   type: TypeMissionMobile
-  vehiculeId?: string
-  vehiculePlaque?: string
+  vehiculeId: string
+  vehiculePlaque: string
   lieu: string
   lat?: number
   lng?: number
+  /** Heure de départ de l'équipe. */
   declencheLe: string
   arriveeLe?: string
   clotureLe?: string
-  /** Composition de l'équipe : responsable de mission, HSE, mécanicien, électricien. */
   equipe: string[]
   resolu: boolean
   ordreTravailId?: string
-  /** Pour les contrôles : nombre de tests réalisés et nombre de positifs. */
-  testsRealises?: number
-  testsPositifs?: number
   observation?: string
+  /** Mission de contrôle : nombre de contrôles réalisés et de cas positifs. */
+  nbControles?: number
+  nbPositifs?: number
+  commentaireControles?: string
 }

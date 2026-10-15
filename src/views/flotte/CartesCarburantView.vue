@@ -24,7 +24,12 @@
     </template>
 
     <template #above-table>
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-3.5">
+      <div v-if="bilanImport" class="flex items-center gap-2 bg-success-bg text-success rounded-lg px-3.5 py-2.5 mb-3 text-xs">
+        <CircleCheck class="w-4 h-4 shrink-0" />
+        <span class="flex-1">{{ bilanImport.importees }} transaction(s) importée(s), {{ bilanImport.rapprochees }} rapprochée(s) d'un plein, {{ bilanImport.ignorees }} ignorée(s) car déjà importée(s).</span>
+        <button class="bg-transparent border-0 p-0 cursor-pointer text-current" title="Fermer" @click="bilanImport = null"><X class="w-4 h-4" /></button>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 mb-3.5">
         <div v-for="k in kpis" :key="k.label" :class="L.kpiItem" class="cursor-pointer" @click="k.action()">
           <div :class="[L.kpiItemIcon, k.bg]"><component :is="k.icon" class="w-[18px] h-[18px]" :class="k.iconColor" /></div>
           <div><div :class="L.kpiItemVal">{{ k.value }}</div><div :class="L.kpiItemLbl">{{ k.label }}</div></div>
@@ -79,7 +84,7 @@
         <div class="grid grid-cols-2 gap-2 text-xs">
           <div><div class="text-muted-foreground text-[11px]">{{ LIB_RATTACHEMENT[item.rattachement as RattachementCarte] }}</div>{{ store.titulaire(item) }}</div>
           <div><div class="text-muted-foreground text-[11px]">Expiration</div>{{ new Date(item.dateExpiration).toLocaleDateString('fr-FR') }}</div>
-          <div><div class="text-muted-foreground text-[11px]">Utilisation</div>{{ store.utilisation(item).tauxPct != null ? store.utilisation(item).tauxPct + ' %' : '-' }}</div>
+          <div><div class="text-muted-foreground text-[11px]">Utilisation du mois</div>{{ store.utilisation(item).tauxPct != null ? store.utilisation(item).tauxPct + ' %' : '-' }}</div>
           <div><div class="text-muted-foreground text-[11px]">Transactions</div>{{ store.transactionsDe(item.id).length }}</div>
         </div>
         <div v-if="item.statut === 'bloquee'" class="bg-danger-bg text-danger rounded-md px-2.5 py-2 text-[11px] leading-snug">Bloquée : {{ item.motifBlocage }}</div>
@@ -107,7 +112,9 @@
   <CarteCarburantCard v-if="ficheCarteId" :key="ficheCarteId" :cartes="store.cartes" :carte-id="ficheCarteId" @close="ficheCarteId = null" @ouvrir-transaction="id => { ficheCarteId = null; ficheTxId = id }" />
   <TransactionCarteCard v-if="ficheTxId" :key="ficheTxId" :transactions="transactionsTriees" :transaction-id="ficheTxId" @close="ficheTxId = null"
     @ouvrir-plein="id => { ficheTxId = null; fichePleinId = id }" @creer-plein="id => { ficheTxId = null; pleinDepuisTx = id }" @ouvrir-carte="id => { ficheTxId = null; ficheCarteId = id }" />
-  <RechargeCard v-if="fichePleinId" :recharges="carburant.recharges" :recharge-id="fichePleinId" @close="fichePleinId = null" />
+  <RechargeCard v-if="fichePleinId" :recharges="carburant.recharges" :recharge-id="fichePleinId" @close="fichePleinId = null"
+    @voir-conducteur="id => router.push({ name: 'flotte-conducteur-dashboard', params: { id } })"
+    @voir-ecart="id => router.push({ name: 'flotte-carburant', query: { ecart: id } })" />
   <RechargeFormModal v-if="pleinDepuisTx" :transaction-id="pleinDepuisTx" @close="pleinDepuisTx = null" @cree="id => { pleinDepuisTx = null; fichePleinId = id }" />
   <CarteCarburantFormModal v-if="creationOuverte" @close="creationOuverte = false" @cree="id => { creationOuverte = false; vue = 'cartes'; ficheCarteId = id }" />
 
@@ -117,7 +124,7 @@
     :champs="CHAMPS"
     :apercu-colonnes="APERCU"
     :modele="MODELE"
-    description-controles="Contrôles appliqués : carte reconnue par son numéro, date valide et passée, volume et montant positifs, transaction pas déjà importée. Les transactions importées se rapprochent automatiquement des pleins enregistrés."
+    description-controles="Carte reconnue par son numéro, date valide et passée, volume et montant positifs, transaction pas déjà importée."
     :valider="validerLigne"
     @close="importOuvert = false"
     @importer="lignes => importer(lignes as unknown as LigneTx[])"
@@ -125,9 +132,12 @@
 </template>
 
 <script setup lang="ts">
+import { maintenantMs, aujourdhuiISO } from '../../utils/horloge'
 /** Cartes carburant et transactions importées du prestataire (FMS-CA-02). */
+import { devise } from '../../lib/monnaie'
 import { ref, computed, watch } from 'vue'
-import { CreditCard, Link2Off, Plus, ShieldOff, TriangleAlert, Upload, CircleCheck } from '@lucide/vue'
+import { useRouter } from 'vue-router'
+import { CalendarX, CreditCard, Link2Off, Plus, ShieldOff, TriangleAlert, Upload, CircleCheck, X } from '@lucide/vue'
 import ListPageLayout from '../../components/shared/ListPageLayout.vue'
 import type { ListColumn } from '../../components/shared/ListPageLayout.vue'
 import SearchableDropdown from '../../components/ui/SearchableDropdown.vue'
@@ -146,6 +156,7 @@ import * as L from '../../lib/listClasses'
 
 const store = useCartesCarburantStore()
 const carburant = useCarburantStore()
+const router = useRouter()
 
 type Vue = 'cartes' | 'transactions'
 const vue = ref<Vue>('cartes')
@@ -167,17 +178,18 @@ const importOuvert = ref(false)
 watch([vue, searchQuery, filtreTx, filtreStatut, pageSize], () => { page.value = 1 })
 watch(vue, () => { sortKey.value = '' })
 function resetFilters() { searchQuery.value = ''; filtreTx.value = ''; filtreStatut.value = ''; page.value = 1 }
-const fmtAr = (n: number) => `${n.toLocaleString('fr-FR')} Ar`
+const fmtAr = (n: number) => `${n.toLocaleString('fr-FR')} ${devise()}`
 
-const expiree = (c: CarteCarburant) => c.dateExpiration < new Date().toISOString().slice(0, 10)
+const expiree = (c: CarteCarburant) => c.dateExpiration < aujourdhuiISO()
 const libCarte = (c: CarteCarburant) => expiree(c) ? 'Expirée' : c.statut === 'active' ? 'Active' : 'Bloquée'
 const classeCarte = (c: CarteCarburant) => c.statut === 'active' && !expiree(c) ? 'bg-success-bg text-success' : 'bg-danger-bg text-danger'
 const optFiltreTx: DropdownItem[] = [{ id: 'non', label: 'Non rapprochées' }, { id: 'oui', label: 'Rapprochées' }, { id: 'depassement', label: 'En dépassement' }]
-const optStatut: DropdownItem[] = [{ id: 'active', label: 'Actives' }, { id: 'bloquee', label: 'Bloquées' }]
+const optStatut: DropdownItem[] = [{ id: 'active', label: 'Actives' }, { id: 'bloquee', label: 'Bloquées' }, { id: 'expiree', label: 'Expirées' }]
 
 const kpis = computed(() => [
   { label: 'Cartes actives', value: String(store.cartes.filter(c => c.statut === 'active' && !expiree(c)).length), icon: CircleCheck, bg: 'bg-success-bg', iconColor: 'text-success', action: () => { vue.value = 'cartes'; filtreStatut.value = 'active' } },
-  { label: 'Cartes bloquées', value: String(store.cartes.filter(c => c.statut === 'bloquee').length), icon: ShieldOff, bg: 'bg-neutral-bg', iconColor: 'text-neutral', action: () => { vue.value = 'cartes'; filtreStatut.value = 'bloquee' } },
+  { label: 'Cartes bloquées', value: String(store.cartes.filter(c => c.statut === 'bloquee' && !expiree(c)).length), icon: ShieldOff, bg: 'bg-neutral-bg', iconColor: 'text-neutral', action: () => { vue.value = 'cartes'; filtreStatut.value = 'bloquee' } },
+  { label: 'Cartes expirées', value: String(store.cartes.filter(expiree).length), icon: CalendarX, bg: 'bg-danger-bg', iconColor: 'text-danger', action: () => { vue.value = 'cartes'; filtreStatut.value = 'expiree' } },
   { label: 'Non rapprochées', value: String(store.nonRapprochees.length), icon: Link2Off, bg: 'bg-warning-bg', iconColor: 'text-warning', action: () => { vue.value = 'transactions'; filtreTx.value = 'non' } },
   { label: 'En dépassement', value: String(store.enDepassement.length), icon: TriangleAlert, bg: 'bg-danger-bg', iconColor: 'text-danger', action: () => { vue.value = 'transactions'; filtreTx.value = 'depassement' } },
 ])
@@ -187,7 +199,7 @@ const COLONNES: Record<Vue, ListColumn[]> = {
     { key: 'numero', label: 'Carte', sortable: true, hideable: false, width: 200 },
     { key: 'titulaire', label: 'Titulaire', width: 170 },
     { key: 'plafond', label: 'Plafond mensuel', width: 150 },
-    { key: 'utilisation', label: 'Utilisation', width: 150 },
+    { key: 'utilisation', label: 'Utilisation du mois', width: 150 },
     { key: 'statutCarte', label: 'Statut', width: 110 },
   ],
   transactions: [
@@ -206,7 +218,8 @@ const donnees = computed<any[]>(() => {
   if (vue.value === 'cartes') {
     const rows = store.cartes.filter(c => {
       if (filtreStatut.value === 'active' && (c.statut !== 'active' || expiree(c))) return false
-      if (filtreStatut.value === 'bloquee' && c.statut !== 'bloquee') return false
+      if (filtreStatut.value === 'bloquee' && (c.statut !== 'bloquee' || expiree(c))) return false
+      if (filtreStatut.value === 'expiree' && !expiree(c)) return false
       return !q || `${c.numero} ${store.titulaire(c)} ${store.fournisseur(c)}`.toLowerCase().includes(q)
     })
     return sortKey.value === 'numero' ? [...rows].sort((a, b) => (sortDir.value === 'asc' ? 1 : -1) * a.numero.localeCompare(b.numero)) : rows
@@ -229,7 +242,7 @@ const CHAMPS: ChampImport[] = [
   { cle: 'station', libelle: 'Station', requis: true },
   { cle: 'ville', libelle: 'Ville', requis: true },
   { cle: 'litres', libelle: 'Litres', requis: true },
-  { cle: 'montant', libelle: 'Montant (Ar)', requis: true },
+  { cle: 'montant', libelle: 'Montant', requis: true },
 ]
 const APERCU = [{ cle: 'numero', libelle: 'Carte' }, { cle: 'date', libelle: 'Date' }, { cle: 'station', libelle: 'Station' }, { cle: 'litres', libelle: 'Litres' }, { cle: 'montantAr', libelle: 'Montant' }]
 const MODELE = CHAMPS.map(c => c.libelle)
@@ -247,7 +260,7 @@ function validerLigne(ligne: Record<string, string>, mapping: Record<string, str
   if (!carte) return { valide: false, motif: `Carte inconnue « ${val('carte')} »` }
   const date = normaliserDateHeure(val('date'))
   if (!date || isNaN(new Date(date).getTime())) return { valide: false, motif: `Date invalide « ${val('date')} »` }
-  if (new Date(date).getTime() > Date.now()) return { valide: false, motif: 'Date dans le futur' }
+  if (new Date(date).getTime() > maintenantMs()) return { valide: false, motif: 'Date dans le futur' }
   if (!val('station') || !val('ville')) return { valide: false, motif: 'Station ou ville manquante' }
   const litres = nombre(val('litres')); const montant = nombre(val('montant'))
   if (!(litres > 0)) return { valide: false, motif: 'Litres invalides' }
@@ -256,8 +269,9 @@ function validerLigne(ligne: Record<string, string>, mapping: Record<string, str
   const l: LigneTx = { carteId: carte.id, numero: carte.numero, date, station: val('station'), ville: val('ville'), litres, montantAr: montant }
   return { valide: true, donnees: l as unknown as Record<string, unknown> }
 }
+const bilanImport = ref<{ importees: number; rapprochees: number; ignorees: number } | null>(null)
 function importer(lignes: LigneTx[]) {
-  store.importer(lignes.map(({ numero: _n, ...l }) => l))
+  bilanImport.value = store.importer(lignes.map(({ numero: _n, ...l }) => l))
   vue.value = 'transactions'
 }
 </script>

@@ -28,3 +28,16 @@ export function dansNJours(jours: number): string {
   d.setDate(d.getDate() + jours)
   return d.toISOString().slice(0, 10)
 }
+
+/**
+ * Instant présent de la maquette : le jour raconté, à l'heure réelle du
+ * poste. Toute date posée par une action (création, clôture, relevé) et
+ * tout calcul de durée « jusqu'à maintenant » passent par ici, pour rester
+ * cohérents avec les données de démonstration.
+ */
+export function maintenant(): Date {
+  const r = new Date()
+  const [a, m, j] = AUJOURDHUI_ISO.split('-').map(Number)
+  return new Date(a!, m! - 1, j!, r.getHours(), r.getMinutes(), r.getSeconds(), r.getMilliseconds())
+}
+export const maintenantMs = (): number => maintenant().getTime()

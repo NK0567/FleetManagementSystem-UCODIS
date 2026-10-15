@@ -2,17 +2,18 @@
 /** Fiche d'une période de consommation plein à plein : comparaison à la
  *  référence, qualification de l'écart et retenue éventuelle (FMS-CA-04, CA-05).
  *  Aucune conséquence n'est tirée tant que l'écart n'est pas qualifié. */
+import { devise } from '../../lib/monnaie'
 import { ref, computed } from 'vue'
-import { CheckCircle2, ShieldAlert, TriangleAlert } from '@lucide/vue'
+import { CheckCircle2, TriangleAlert } from '@lucide/vue'
 import CardModalShell from '../shared/CardModalShell.vue'
 import FormSection from '../ui/form-field/FormSection.vue'
 import SearchableDropdown from '../ui/SearchableDropdown.vue'
 import type { DropdownItem } from '../ui/SearchableDropdown.vue'
 import ChampLecture from '../maintenance/ChampLecture.vue'
-import { useCarburantStore, LIB_QUALIF, LIB_STATUT_ECART, QUALIFS_IMPUTABLES } from '../../stores/carburant'
+import { useCarburantStore, LIB_STATUT_ECART } from '../../stores/carburant'
 import { useAuthStore } from '../../stores/auth'
 import { fmtDateHeure } from '../../utils/voyageUtils'
-import type { PeriodeConso, QualifEcartCarburant } from '../../types'
+import type { PeriodeConso } from '../../types'
 import * as F from '../../lib/formClasses'
 
 const props = defineProps<{ periodes: PeriodeConso[]; periodeId: string }>()
@@ -33,10 +34,12 @@ const statut = computed(() => item.value ? store.statutEcart(item.value) : 'conf
 const dossier = computed(() => item.value?.id ? store.dossiersEcart[item.value.id] : undefined)
 const pleins = computed(() => item.value ? store.recharges.filter(r => r.vehiculeId === item.value!.vehiculeId && r.date >= item.value!.du && r.date <= item.value!.au).sort((a, b) => a.date.localeCompare(b.date)) : [])
 const coutExces = computed(() => item.value ? store.coutExces(item.value) : 0)
-const imputable = computed(() => !!dossier.value && QUALIFS_IMPUTABLES.includes(dossier.value.qualification))
-const LIB_ORIGINE = { vehicule: 'propre à ce véhicule sur ce corridor', corridor: 'du corridor', defaut: 'par défaut (aucune référence pour ce corridor)' }
+const imputable = computed(() => !!dossier.value && store.estImputable(dossier.value.qualification))
+const LIB_ORIGINE: Record<NonNullable<PeriodeConso['origineRef']>, string> = {
+  vehicule_corridor: 'référence du véhicule sur ce corridor', corridor: 'référence du corridor', vehicule: 'référence du véhicule', defaut: 'référence par défaut',
+}
 
-const qualif = ref<QualifEcartCarburant | ''>('')
+const qualif = ref('')
 const commentaire = ref('')
 const montant = ref<number | undefined>(undefined)
 const commentaireDecision = ref('')
@@ -44,7 +47,8 @@ const erreur = ref('')
 const succes = ref('')
 function reinit() { qualif.value = ''; commentaire.value = ''; montant.value = undefined; commentaireDecision.value = ''; erreur.value = ''; succes.value = '' }
 function resultat(r: { ok: boolean; motif?: string }, msg: string) { erreur.value = r.ok ? '' : r.motif ?? ''; succes.value = r.ok ? msg : ''; return r.ok }
-const optQualif = computed<DropdownItem[]>(() => Object.entries(LIB_QUALIF).map(([id, label]) => ({ id, label })))
+const optQualif = computed<DropdownItem[]>(() => store.parametres.causes.map(c => ({ id: c.id, label: c.libelle, sublabel: c.imputable ? 'Imputable au conducteur' : undefined })))
+const plafondRetenue = computed(() => Math.min(coutExces.value, store.parametres.plafondRetenue && store.parametres.plafondRetenue > 0 ? store.parametres.plafondRetenue : Infinity))
 
 function qualifier() {
   if (!item.value?.id || !qualif.value) { erreur.value = "Choisissez la cause de l'écart."; return }
@@ -62,7 +66,7 @@ function classer() {
   if (!item.value?.id) return
   resultat(store.classerEcart(item.value.id, moi.value, commentaire.value), 'Dossier classé sans retenue.')
 }
-const fmtAr = (n: number) => `${n.toLocaleString('fr-FR')} Ar`
+const fmtAr = (n: number) => `${n.toLocaleString('fr-FR')} ${devise()}`
 </script>
 
 <template>
@@ -91,11 +95,11 @@ const fmtAr = (n: number) => `${n.toLocaleString('fr-FR')} Ar`
       <div class="px-6 py-5 max-w-3xl mx-auto">
         <div v-if="erreur" class="flex items-center gap-2 bg-danger-bg text-danger rounded-lg px-3.5 py-2.5 mb-3 text-xs"><TriangleAlert class="w-4 h-4 shrink-0" /> {{ erreur }}</div>
         <div v-if="succes" class="flex items-center gap-2 bg-success-bg text-success rounded-lg px-3.5 py-2.5 mb-3 text-xs"><CheckCircle2 class="w-4 h-4 shrink-0" /> {{ succes }}</div>
-        <FormSection title="Période" :recaps="[item.vehiculePlaque, item.trajetLibelle ?? 'corridor non renseigné']">
+        <FormSection title="Période" :recaps="[item.vehiculePlaque, item.trajetLibelle ?? 'sans voyage']">
           <div class="grid grid-cols-2 gap-x-6 gap-y-4 max-sm:grid-cols-1">
             <ChampLecture libelle="Véhicule" mono>{{ item.vehiculePlaque }}</ChampLecture>
-            <ChampLecture libelle="Chauffeur">{{ item.chauffeurNom ?? '-' }}</ChampLecture>
-            <ChampLecture libelle="Corridor">{{ item.trajetLibelle ?? 'Non renseigné : aucun voyage rattaché au plein' }}</ChampLecture>
+            <ChampLecture libelle="Conducteur">{{ item.chauffeurNom ?? '-' }}</ChampLecture>
+            <ChampLecture libelle="Corridor">{{ item.trajetLibelle ?? 'Aucun voyage rattaché' }}</ChampLecture>
             <ChampLecture libelle="Du plein au plein">{{ fmtDateHeure(item.du) }} → {{ fmtDateHeure(item.au) }}</ChampLecture>
             <ChampLecture libelle="Distance">{{ item.km.toLocaleString('fr-FR') }} km</ChampLecture>
             <ChampLecture libelle="Litres consommés">{{ item.litres.toLocaleString('fr-FR') }} L</ChampLecture>
@@ -111,19 +115,18 @@ const fmtAr = (n: number) => `${n.toLocaleString('fr-FR')} Ar`
           </div>
         </FormSection>
 
-        <FormSection title="Qualification de l'écart" :recaps="[dossier ? LIB_QUALIF[dossier.qualification] : statut === 'conforme' ? 'non requise' : 'à faire']" :default-open="statut !== 'conforme'">
+        <FormSection title="Qualification de l'écart" :recaps="[dossier ? store.libelleCause(dossier.qualification) : statut === 'conforme' ? 'non requise' : 'à faire']" :default-open="statut !== 'conforme'">
           <template v-if="dossier">
             <div class="grid grid-cols-2 gap-x-6 gap-y-4">
-              <ChampLecture libelle="Cause retenue">{{ LIB_QUALIF[dossier.qualification] }}</ChampLecture>
+              <ChampLecture libelle="Cause retenue">{{ store.libelleCause(dossier.qualification) }}</ChampLecture>
               <ChampLecture libelle="Qualifié par">{{ dossier.qualifiePar }}, le {{ fmtDateHeure(dossier.qualifieLe) }}</ChampLecture>
               <ChampLecture libelle="Éléments recueillis" large>{{ dossier.commentaire || '-' }}</ChampLecture>
             </div>
           </template>
           <template v-else>
-            <p v-if="statut === 'conforme'" class="text-xs text-muted-foreground mb-3">Consommation dans la référence. Une qualification reste possible si un élément le justifie.</p>
             <div class="grid grid-cols-2 gap-x-6 gap-y-3 max-sm:grid-cols-1">
               <div :class="F.field"><label :class="F.fieldLabel">Cause de l'écart *</label><SearchableDropdown v-model="qualif" :items="optQualif" placeholder="Choisir…" /></div>
-              <div :class="F.field" class="col-span-2 max-sm:col-span-1"><label :class="F.fieldLabel">Éléments recueillis</label><textarea v-model="commentaire" rows="3" :class="F.fieldTextarea" placeholder="Explication du chauffeur, vérification de l'exploitation…"></textarea></div>
+              <div :class="F.field" class="col-span-2 max-sm:col-span-1"><label :class="F.fieldLabel">Éléments recueillis</label><textarea v-model="commentaire" rows="3" :class="F.fieldTextarea" placeholder="Explication du conducteur, vérification de l'exploitation…"></textarea></div>
             </div>
             <button :class="F.btnPrimary" class="mt-3" @click="qualifier">Enregistrer la qualification</button>
           </template>
@@ -131,16 +134,12 @@ const fmtAr = (n: number) => `${n.toLocaleString('fr-FR')} Ar`
 
         <FormSection v-if="dossier" title="Suite donnée" :recaps="[LIB_STATUT_ECART[statut].label, dossier.montantPropose ? fmtAr(dossier.montantPropose) : null]" :default-open="true">
           <template v-if="!imputable">
-            <p class="text-xs text-muted-foreground">Cause non imputable au chauffeur : aucune retenue ne peut être proposée.</p>
+            <p class="text-xs text-muted-foreground">Cause non imputable au chauffeur.</p>
           </template>
           <template v-else>
-            <div class="flex items-start gap-2.5 bg-warning-bg text-warning rounded-lg px-3.5 py-2.5 mb-3">
-              <ShieldAlert class="w-4 h-4 shrink-0 mt-px" />
-              <p class="text-xs leading-relaxed">Une retenue proposée reste soumise à validation et doit rester conforme au droit du travail applicable avant toute exécution sur la paie. Elle ne peut pas dépasser le coût du carburant consommé en trop.</p>
-            </div>
             <template v-if="statut === 'qualifie'">
               <div class="flex gap-2 items-end flex-wrap">
-                <div :class="F.field" class="w-[220px]"><label :class="F.fieldLabel">Montant proposé (Ar)</label><input v-model.number="montant" type="number" min="0" :class="F.fieldInput" :placeholder="`au plus ${coutExces.toLocaleString('fr-FR')}`" /></div>
+                <div :class="F.field" class="w-[220px]"><label :class="F.fieldLabel">Montant proposé ({{ $devise() }})</label><input v-model.number="montant" type="number" min="0" :class="F.fieldInput" :placeholder="`au plus ${plafondRetenue.toLocaleString('fr-FR')}`" /></div>
                 <button :class="F.btnPrimary" @click="proposer">Soumettre à validation</button>
                 <button :class="F.btnOutline" @click="classer">Classer sans retenue</button>
               </div>
@@ -150,8 +149,11 @@ const fmtAr = (n: number) => `${n.toLocaleString('fr-FR')} Ar`
                 <ChampLecture libelle="Montant proposé">{{ fmtAr(dossier.montantPropose ?? 0) }}</ChampLecture>
                 <ChampLecture libelle="Proposé par">{{ dossier.proposePar }}</ChampLecture>
               </div>
+              <p v-if="dossier.proposePar === moi" class="text-xs text-muted-foreground">En attente de validation par une autre personne.</p>
+              <template v-else>
               <div :class="F.field" class="mb-2.5"><label :class="F.fieldLabel">Commentaire du valideur (obligatoire pour un rejet)</label><textarea v-model="commentaireDecision" rows="2" :class="F.fieldTextarea"></textarea></div>
               <div class="flex gap-2"><button :class="F.btnPrimary" @click="decider('approuve')">Valider la retenue</button><button :class="F.btnOutline" @click="decider('rejete')">Rejeter</button></div>
+              </template>
             </template>
             <p v-else-if="statut === 'refacture'" class="text-xs text-success flex items-center gap-1.5"><CheckCircle2 class="w-4 h-4" /> Retenue de {{ fmtAr(dossier.montantPropose ?? 0) }} validée par {{ dossier.validation?.valideur }}.</p>
           </template>
@@ -163,8 +165,7 @@ const fmtAr = (n: number) => `${n.toLocaleString('fr-FR')} Ar`
             <tbody>
               <tr v-for="r in pleins" :key="r.id" class="border-b border-border/60 last:border-0">
                 <td class="py-1.5"><button class="text-primary hover:underline bg-transparent border-0 p-0 cursor-pointer" @click="emit('ouvrirPlein', r.id)">{{ fmtDateHeure(r.date) }}</button></td>
-                <td class="py-1.5">{{ r.lieu }}</td>
-                <td class="py-1.5 text-right">{{ r.litres }} L</td>
+                <td class="py-1.5">{{ r.lieu }}</td>                <td class="py-1.5 text-right">{{ r.litres }} L</td>
                 <td class="py-1.5 text-right">{{ r.odometre.toLocaleString('fr-FR') }} km</td>
               </tr>
             </tbody>

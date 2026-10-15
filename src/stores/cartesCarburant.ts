@@ -1,6 +1,7 @@
+import { maintenant, aujourdhuiISO } from '../utils/horloge'
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
-import { useCarburantStore } from './carburant'
+import { useCarburantStore, dansPlageHoraire } from './carburant'
 import { useVehiculeStore } from './vehicules'
 import { usePersonnelStore } from './personnel'
 import { usePrestatairesStore } from './prestataires'
@@ -49,7 +50,7 @@ export interface TransactionCarte {
   importeLe: string
 }
 
-export const LIB_RATTACHEMENT: Record<RattachementCarte, string> = { vehicule: 'Véhicule', chauffeur: 'Chauffeur' }
+export const LIB_RATTACHEMENT: Record<RattachementCarte, string> = { vehicule: 'Véhicule', chauffeur: 'Conducteur' }
 
 const CLE_CARTES = 'fms-ucodis-cartes-carburant'
 const CLE_TX = 'fms-ucodis-transactions-cartes'
@@ -71,6 +72,11 @@ const SEED_TX: TransactionCarte[] = [
   { id: 'TX-0004', carteId: 'CC-0004', date: '2026-08-18T18:16:00', station: 'Station Toamasina', ville: 'Toamasina', litres: 165, montantAr: 940_500, importeLe: '2026-08-31T09:00:00' },
   { id: 'TX-0005', carteId: 'CC-0001', date: '2026-08-27T22:40:00', station: 'Station Antsirabe', ville: 'Antsirabe', litres: 120, montantAr: 678_000, importeLe: '2026-08-31T09:00:00' },
   { id: 'TX-0006', carteId: 'CC-0002', date: '2026-08-28T10:05:00', station: 'Station Fianarantsoa', ville: 'Fianarantsoa', litres: 90, montantAr: 508_500, importeLe: '2026-08-31T09:00:00' },
+  /* Début septembre : le mois en cours a déjà ses premières transactions. */
+  { id: 'TX-0007', carteId: 'CC-0003', date: '2026-09-01T06:15:00', station: 'Station Antsirabe', ville: 'Antsirabe', litres: 410, montantAr: 2_316_500, importeLe: '2026-09-04T06:30:00' },
+  { id: 'TX-0008', carteId: 'CC-0004', date: '2026-09-02T07:40:00', station: 'Station Toamasina', ville: 'Toamasina', litres: 380, montantAr: 2_166_000, importeLe: '2026-09-04T06:30:00' },
+  { id: 'TX-0009', carteId: 'CC-0003', date: '2026-09-03T15:20:00', station: 'Station Fianarantsoa', ville: 'Fianarantsoa', litres: 160, montantAr: 904_000, importeLe: '2026-09-04T06:30:00' },
+  { id: 'TX-0010', carteId: 'CC-0004', date: '2026-09-04T05:30:00', station: 'Station Mahajanga', ville: 'Mahajanga', litres: 300, montantAr: 1_710_000, importeLe: '2026-09-04T06:30:00' },
 ]
 
 export const useCartesCarburantStore = defineStore('cartesCarburant', () => {
@@ -80,7 +86,9 @@ export const useCartesCarburantStore = defineStore('cartesCarburant', () => {
   const prestataires = usePrestatairesStore()
 
   const cartes = ref<CarteCarburant[]>(lire<CarteCarburant[]>(CLE_CARTES) ?? SEED_CARTES.map(c => ({ ...c, limites: { ...c.limites, zones: [...c.limites.zones] }, historique: [...c.historique] })))
-  const transactions = ref<TransactionCarte[]>(lire<TransactionCarte[]>(CLE_TX) ?? SEED_TX.map(t => ({ ...t })))
+  const lues = lire<TransactionCarte[]>(CLE_TX)
+  /* Transactions de démonstration ajoutées depuis : complétées dans une liste déjà enregistrée. */
+  const transactions = ref<TransactionCarte[]>(lues ? [...lues, ...SEED_TX.filter(t => !lues.some(x => x.id === t.id)).map(t => ({ ...t }))] : SEED_TX.map(t => ({ ...t })))
   watch(cartes, v => ecrire(CLE_CARTES, v), { deep: true })
   watch(transactions, v => ecrire(CLE_TX, v), { deep: true })
 
@@ -105,7 +113,7 @@ export const useCartesCarburantStore = defineStore('cartesCarburant', () => {
     const L = c.limites
     if (L.zones.length && !L.zones.some(z => z.toLowerCase() === t.ville.trim().toLowerCase())) out.push(`Hors zone autorisée (${t.ville})`)
     const h = new Date(t.date).getHours()
-    if (L.heureDebut != null && L.heureFin != null && (h < L.heureDebut || h > L.heureFin)) out.push(`Hors horaire autorisé (${String(h).padStart(2, '0')} h)`)
+    if (L.heureDebut != null && L.heureFin != null && !dansPlageHoraire(h, L.heureDebut, L.heureFin)) out.push(`Hors horaire autorisé (${String(h).padStart(2, '0')} h)`)
     const memeJour = transactions.value.filter(x => x.carteId === c.id && x.date.slice(0, 10) === t.date.slice(0, 10) && x.date <= t.date)
     if (L.transactionsParJour && memeJour.length > L.transactionsParJour) out.push(`Plus de ${L.transactionsParJour} transaction(s) dans la journée`)
     const memeMois = transactions.value.filter(x => x.carteId === c.id && moisDe(x.date) === moisDe(t.date) && x.date <= t.date)
@@ -114,15 +122,15 @@ export const useCartesCarburantStore = defineStore('cartesCarburant', () => {
     return out
   }
 
-  /** Taux d'utilisation sur le dernier mois d'activité de la carte. */
-  function utilisation(c: CarteCarburant): { mois: string | null; montant: number; litres: number; tauxPct: number | null } {
-    const tx = transactionsDe(c.id)
-    const mois = tx[0] ? moisDe(tx[0].date) : null
-    const duMois = mois ? tx.filter(t => moisDe(t.date) === mois) : []
+  /** Taux d'utilisation sur le mois en cours : rapporté au plafond en montant, à défaut au plafond en volume. */
+  function utilisation(c: CarteCarburant): { mois: string; montant: number; litres: number; tauxPct: number | null; base: 'montant' | 'volume' | null } {
+    const mois = moisDe(aujourdhuiISO())
+    const duMois = transactionsDe(c.id).filter(t => moisDe(t.date) === mois)
     const montant = duMois.reduce((s, t) => s + t.montantAr, 0)
     const litres = duMois.reduce((s, t) => s + t.litres, 0)
-    const tauxPct = c.limites.montantMensuelAr ? Math.round((montant / c.limites.montantMensuelAr) * 100) : null
-    return { mois, montant, litres, tauxPct }
+    if (c.limites.montantMensuelAr) return { mois, montant, litres, tauxPct: Math.round((montant / c.limites.montantMensuelAr) * 100), base: 'montant' }
+    if (c.limites.volumeMensuelL) return { mois, montant, litres, tauxPct: Math.round((litres / c.limites.volumeMensuelL) * 100), base: 'volume' }
+    return { mois, montant, litres, tauxPct: null, base: null }
   }
 
   /* ── Rapprochement avec les pleins ────────────────────────── */
@@ -137,6 +145,15 @@ export const useCartesCarburantStore = defineStore('cartesCarburant', () => {
       const ecartPct = Math.abs(r.litres - t.litres) / t.litres * 100
       return ecartMin <= p.toleranceRapprochementMin && ecartPct <= p.toleranceRapprochementPct
     })
+  }
+  /** Rapprochement manuel : pleins du titulaire dans la tolérance d'heure réglée, sans condition de volume. */
+  function pleinsProches(t: TransactionCarte) {
+    const c = getById(t.carteId); if (!c) return []
+    const lies = new Set(transactions.value.filter(x => x.rechargeId && x.id !== t.id).map(x => x.rechargeId))
+    const toleranceMs = carburant.parametres.toleranceRapprochementMin * 60_000
+    return carburant.recharges.filter(r => !lies.has(r.id)
+      && (c.rattachement === 'vehicule' ? r.vehiculeId === c.vehiculeId : r.chauffeurId === c.chauffeurId)
+      && Math.abs(new Date(r.date).getTime() - new Date(t.date).getTime()) <= toleranceMs)
   }
   function rapprocherTout() {
     let n = 0
@@ -172,15 +189,18 @@ export const useCartesCarburantStore = defineStore('cartesCarburant', () => {
   function estDoublon(carteId: string, date: string, litres: number) {
     return transactions.value.some(t => t.carteId === carteId && t.date.slice(0, 16) === date.slice(0, 16) && t.litres === litres)
   }
-  function importer(lignes: Omit<TransactionCarte, 'id' | 'importeLe'>[]) {
-    const nouvelles = lignes.filter(l => !estDoublon(l.carteId, l.date, l.litres))
+  /** Bilan : transactions importées, rapprochées d'un plein, ignorées car déjà importées. */
+  function importer(lignes: Omit<TransactionCarte, 'id' | 'importeLe'>[]): { importees: number; rapprochees: number; ignorees: number } {
     let seq = transactions.value.length + 1
-    nouvelles.forEach(l => {
+    let importees = 0
+    lignes.forEach(l => {
+      if (estDoublon(l.carteId, l.date, l.litres)) return
       while (transactions.value.some(t => t.id === `TX-${String(seq).padStart(4, '0')}`)) seq++
-      transactions.value.push({ ...l, id: `TX-${String(seq++).padStart(4, '0')}`, importeLe: new Date().toISOString() })
+      transactions.value.push({ ...l, id: `TX-${String(seq++).padStart(4, '0')}`, importeLe: maintenant().toISOString() })
+      importees++
     })
     const rapprochees = rapprocherTout()
-    return { importees: nouvelles.length, ignorees: lignes.length - nouvelles.length, rapprochees }
+    return { importees, rapprochees, ignorees: lignes.length - importees }
   }
 
   /* ── Gestion des cartes ───────────────────────────────────── */
@@ -194,7 +214,8 @@ export const useCartesCarburantStore = defineStore('cartesCarburant', () => {
     const L = c.limites
     if ([L.montantMensuelAr, L.volumeMensuelL, L.transactionsParJour].some(x => x != null && x < 0)) return 'Une limite ne peut pas être négative.'
     if ((L.heureDebut == null) !== (L.heureFin == null)) return "Indiquez les deux bornes de l'horaire, ou aucune."
-    if (L.heureDebut != null && L.heureFin != null && (L.heureDebut < 0 || L.heureFin > 23 || L.heureDebut >= L.heureFin)) return "L'horaire autorisé est incohérent."
+    if (L.heureDebut != null && L.heureFin != null && (L.heureDebut < 0 || L.heureDebut > 23 || L.heureFin < 0 || L.heureFin > 23)) return "Les heures de l'horaire autorisé vont de 0 à 23."
+    if (L.heureDebut != null && L.heureDebut === L.heureFin) return "Le début et la fin de l'horaire autorisé ne peuvent pas être identiques."
     const doublonActif = cartes.value.find(x => x.id !== idExclu && x.statut === 'active' && x.rattachement === c.rattachement
       && (c.rattachement === 'vehicule' ? x.vehiculeId === c.vehiculeId : x.chauffeurId === c.chauffeurId) && x.fournisseurId === c.fournisseurId)
     if (doublonActif) return `Une carte active de ce fournisseur est déjà rattachée à ce titulaire (${doublonActif.numero}).`
@@ -205,29 +226,29 @@ export const useCartesCarburantStore = defineStore('cartesCarburant', () => {
     let seq = cartes.value.length + 1
     while (cartes.value.some(x => x.id === `CC-${String(seq).padStart(4, '0')}`)) seq++
     const id = `CC-${String(seq).padStart(4, '0')}`
-    cartes.value.push({ ...c, numero: c.numero.trim(), id, statut: 'active', historique: [{ le: new Date().toISOString(), par, action: 'Carte enregistrée' }] })
+    cartes.value.push({ ...c, numero: c.numero.trim(), id, statut: 'active', historique: [{ le: maintenant().toISOString(), par, action: 'Carte enregistrée' }] })
     return { ok: true, id }
   }
   function modifierLimites(id: string, limites: LimitesCarte, par: string): { ok: boolean; motif?: string } {
     const c = getById(id); if (!c) return { ok: false, motif: 'Carte introuvable.' }
     const motif = verifier({ ...c, limites }, id); if (motif) return { ok: false, motif }
     c.limites = { ...limites, zones: [...limites.zones] }
-    c.historique.push({ le: new Date().toISOString(), par, action: 'Limites modifiées' })
+    c.historique.push({ le: maintenant().toISOString(), par, action: 'Limites modifiées' })
     return { ok: true }
   }
   function bloquer(id: string, motif: string, par: string): { ok: boolean; motif?: string } {
     const c = getById(id); if (!c) return { ok: false, motif: 'Carte introuvable.' }
     if (!motif.trim()) return { ok: false, motif: 'Indiquez le motif du blocage.' }
     c.statut = 'bloquee'; c.motifBlocage = motif.trim()
-    c.historique.push({ le: new Date().toISOString(), par, action: `Carte bloquée : ${motif.trim()}` })
+    c.historique.push({ le: maintenant().toISOString(), par, action: `Carte bloquée : ${motif.trim()}` })
     return { ok: true }
   }
   function debloquer(id: string, par: string): { ok: boolean; motif?: string } {
     const c = getById(id); if (!c) return { ok: false, motif: 'Carte introuvable.' }
-    if (c.dateExpiration < new Date().toISOString().slice(0, 10)) return { ok: false, motif: 'Carte expirée : enregistrez la nouvelle carte.' }
+    if (c.dateExpiration < aujourdhuiISO()) return { ok: false, motif: 'Carte expirée : enregistrez la nouvelle carte.' }
     const motif = verifier(c, id); if (motif) return { ok: false, motif }
     c.statut = 'active'; c.motifBlocage = undefined
-    c.historique.push({ le: new Date().toISOString(), par, action: 'Carte débloquée' })
+    c.historique.push({ le: maintenant().toISOString(), par, action: 'Carte débloquée' })
     return { ok: true }
   }
 
@@ -236,7 +257,7 @@ export const useCartesCarburantStore = defineStore('cartesCarburant', () => {
 
   return {
     cartes, transactions, getById, transactionParId, transactionsDe, titulaire, fournisseur,
-    depassements, utilisation, candidats, rapprocherTout, rapprocher, annulerRapprochement,
+    depassements, utilisation, candidats, pleinsProches, rapprocherTout, rapprocher, annulerRapprochement,
     carteParNumero, estDoublon, importer, creer, modifierLimites, bloquer, debloquer,
     nonRapprochees, enDepassement,
   }

@@ -34,6 +34,7 @@
         <Section libelle="Tableau de bord">
           <Item :icone="LayoutDashboard" libelle="Vue d'ensemble" :to="{ name: 'flotte-tableau-bord' }" />
           <Item v-if="params.estActif('carte_temps_reel')" :icone="MapPin" libelle="Carte temps réel" :to="{ name: 'flotte-carte' }" />
+          <Item :icone="FileBarChart" libelle="Rapports" :to="{ name: 'flotte-rapports' }" />
         </Section>
 
         <Section v-if="params.estActif('voyages') || params.estActif('conformite') || params.estActif('carburant')" libelle="Exploitation">
@@ -55,16 +56,24 @@
           <Item :icone="UserCheck" libelle="Affectations" :to="{ name: 'flotte-affectations' }" />
         </Section>
 
-        <Section v-if="params.estActif('telemetrie')" libelle="Suivi & télémétrie">
-          <Item :icone="Radio" libelle="Télémétrie" :to="{ name: 'flotte-telemetrie' }" />
+        <Section libelle="Sécurité">
+          <Item :icone="BellRing" libelle="Alertes" :to="{ name: 'flotte-alertes' }" :badge="alertes.enCours.length" />
+          <Item :icone="Gavel" libelle="Infractions" :to="{ name: 'flotte-infractions' }" />
+          <Item :icone="GraduationCap" libelle="Formations" :to="{ name: 'flotte-formations' }" />
         </Section>
 
-        <Section v-if="params.estActif('sites_geofences')" libelle="Sites & géofences">
-          <Item :icone="MapPinned" libelle="Sites" :to="{ name: 'flotte-sites' }" />
+        <Section v-if="params.estActif('telemetrie')" libelle="Suivi & télémétrie">
+          <Item :icone="Radio" libelle="Télémétrie" :to="{ name: 'flotte-telemetrie' }" :badge="telematique.defautsOuverts.length" />
+        </Section>
+
+        <Section libelle="Référentiels">
+          <Item v-if="params.estActif('sites_geofences')" :icone="MapPinned" libelle="Sites" :to="{ name: 'flotte-sites' }" />
+          <Item :icone="Handshake" libelle="Prestataires" :to="{ name: 'flotte-prestataires' }" />
         </Section>
 
         <Section v-if="params.estActif('documents')" libelle="Documents">
-          <Item :icone="FileText" libelle="Documents" :to="{ name: 'flotte-documents-vehicule' }" />
+          <Item :icone="FileText" libelle="Véhicules et personnes" :to="{ name: 'flotte-documents-vehicule' }" />
+          <Item :icone="FolderOpen" libelle="Documents de l'entreprise" :to="{ name: 'flotte-documents-entreprise' }" />
         </Section>
 
         <Section v-if="params.estActif('configuration')" libelle="Paramétrage">
@@ -106,6 +115,7 @@
     <template v-else>
       <Section libelle="Mon espace">
         <Item :icone="LayoutDashboard" libelle="Ma situation" :to="{ name: 'espace-accueil' }" />
+        <Item v-if="auth.role === 'conducteur'" :icone="ClipboardCheck" libelle="Checklist sur route" :to="{ name: 'espace-checklist' }" />
         <Item :icone="CalendarOff"     libelle="Mes absences" :to="{ name: 'espace-absences' }" />
         <Item :icone="CircleUser"      libelle="Mon profil"   :to="{ name: 'mon-profil' }" />
       </Section>
@@ -118,8 +128,8 @@
 import { computed, defineComponent, h, type Component, type PropType } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import {
-  Building, CalendarClock, CalendarDays, CalendarOff, CalendarRange, ChartPie, CircleUser,
-  ClipboardCheck, ClipboardList, CircleDot, CreditCard, Fuel, Gauge, IdCard, LayoutDashboard, Link2, ListChecks, LogOut,
+  Handshake, BellRing, Gavel, GraduationCap, Building, CalendarClock, CalendarDays, CalendarOff, CalendarRange, ChartPie, CircleUser,
+  ClipboardCheck, ClipboardList, FileChartColumn as FileBarChart, CircleDot, CreditCard, FolderOpen, Fuel, Gauge, IdCard, LayoutDashboard, Link2, ListChecks, LogOut,
   MapPin, MapPinned, Network, Package, PackageSearch, Radio, ShieldCheck, FileText, Settings2,
   Tag, TriangleAlert as AlertTriangle, Truck, UserCheck, Users, Wrench,
 } from '@lucide/vue'
@@ -127,11 +137,15 @@ import { useAuthStore } from '../stores/auth'
 import { useNavigationStore } from '../stores/navigation'
 import { useParametresModulesStore } from '../stores/parametresModules'
 import { useAbsenceStore } from '../stores/absences'
+import { useAlertesStore } from '../stores/alertes'
+import { useTelematiqueStore } from '../stores/telematique'
 
 const auth = useAuthStore()
 const nav = useNavigationStore()
 const params = useParametresModulesStore()
 const absences = useAbsenceStore()
+const alertes = useAlertesStore()
+const telematique = useTelematiqueStore()
 const route = useRoute()
 
 const enAttente = computed(() => absences.enAttente.length)

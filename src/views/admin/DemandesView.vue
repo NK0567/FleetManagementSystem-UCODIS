@@ -156,6 +156,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { CalendarOff, Check, Clock, Plus, Undo2, X } from '@lucide/vue'
 import ListPageLayout from '../../components/shared/ListPageLayout.vue'
 import type { ListColumn } from '../../components/shared/ListPageLayout.vue'
@@ -182,6 +183,11 @@ const classification = useClassificationStore()
 const creation = ref(false)
 const openCardId = ref<number | null>(null)
 function openCard(item: Demande) { openCardId.value = item.id }
+/* Une demande ouverte depuis la cloche arrive avec son numéro. */
+const routeLien = useRoute()
+const lireDemande = (v: unknown) => { const n = Number(v); if (typeof v === 'string' && absences.liste.some(d => d.id === n)) openCardId.value = n }
+lireDemande(routeLien.query.demande)
+watch(() => routeLien.query.demande, lireDemande)
 
 const peutValider = computed(() => !auth.lectureSeule)
 const retournees = computed(() => absences.liste.filter(d => d.statut === 'retourne').length)

@@ -68,6 +68,10 @@
                          title="Durée maximale d'arrêt autorisée sur ce site" @change="emettre" />
                   <span class="text-[10px] text-muted-foreground">min</span>
                 </label>
+                <label v-if="e.role === 'livraison'" class="flex items-center gap-1 cursor-pointer">
+                  <input v-model="e.pompeExigee" type="checkbox" class="accent-primary" @change="emettre" />
+                  <span class="text-[10px] text-muted-foreground whitespace-nowrap">Pompe exigée</span>
+                </label>
               </div>
             </div>
 
@@ -119,6 +123,7 @@
 </template>
 
 <script setup lang="ts">
+import { maintenantMs } from '../../utils/horloge'
 /**
  * Sélecteur interactif de trajet, copié à la lettre de SelecteurTrajet de
  * le socle FMS : à gauche les sites et leur ordre, à droite la carte qui trace la
@@ -209,7 +214,7 @@ function chargerTrajet(id: string) {
   if (!id) { emit('trajet-ref', ''); return }
   const t = trajetsStore.getById(id)
   if (!t) return
-  etapes.value = t.etapes.map(e => ({ ...e, id: `${e.id}-c${Date.now()}`, franchi: false }))
+  etapes.value = t.etapes.map(e => ({ ...e, id: `${e.id}-c${maintenantMs()}`, franchi: false }))
   emit('trajet-ref', t.id)
   emettre()
 }

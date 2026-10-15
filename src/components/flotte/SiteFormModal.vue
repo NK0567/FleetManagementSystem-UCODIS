@@ -1,19 +1,24 @@
 <script setup lang="ts">
-import { reactive, ref, watch } from 'vue'
+import { reactive, ref, watch, computed } from 'vue'
 import SearchableDropdown from '../ui/SearchableDropdown.vue'
 import type { DropdownItem } from '../ui/SearchableDropdown.vue'
 import CreateModalShell from '../shared/CreateModalShell.vue'
 import FormSection from '../ui/form-field/FormSection.vue'
 import * as F from '../../lib/formClasses'
 import { useSitesStore } from '../../stores/sites'
+import { useTypesSitesStore } from '../../stores/typesSites'
+import ZoneSiteEditeur from './ZoneSiteEditeur.vue'
 import type { TypeSiteReseau } from '../../types'
 
 const props = defineProps<{ modelValue: boolean; editId?: string }>()
 const emit = defineEmits<{ 'update:modelValue': [boolean]; saved: [] }>()
 
 const store = useSitesStore()
+const typesSites = useTypesSitesStore()
 
-const form = reactive({ code: '', nom: '', ville: '', region: '', type: '' as TypeSiteReseau | '', actif: true })
+const form = reactive({ code: '', nom: '', ville: '', region: '', adresse: '', type: '' as TypeSiteReseau | '', actif: true, lat: null as number | null, lng: null as number | null, rayonM: null as number | null })
+/* Le rayon proposé suit le type choisi, tant qu'il n'a pas été réglé à la main. */
+watch(() => form.type, t => { const d = typesSites.get(t); if (d && (form.rayonM == null || typesSites.types.some(x => x.rayonDefautM === form.rayonM))) form.rayonM = d.rayonDefautM })
 const errors = reactive<Partial<Record<string, string>>>({})
 const submitError = ref('')
 const submitting = ref(false)
@@ -24,9 +29,9 @@ watch(() => props.modelValue, open => {
   submitError.value = ''
   if (props.editId) {
     const s = store.getById(props.editId)
-    if (s) Object.assign(form, { code: s.code, nom: s.nom, ville: s.ville, region: s.region ?? '', type: s.type, actif: s.actif })
+    if (s) Object.assign(form, { code: s.code, nom: s.nom, ville: s.ville, region: s.region ?? '', adresse: s.adresse ?? '', type: s.type, actif: s.actif, lat: s.lat, lng: s.lng, rayonM: s.rayonM ?? null })
   } else {
-    Object.assign(form, { code: '', nom: '', ville: '', region: '', type: '', actif: true })
+    Object.assign(form, { code: '', nom: '', ville: '', region: '', adresse: '', type: '', actif: true, lat: null, lng: null, rayonM: null })
   }
 })
 
@@ -39,6 +44,7 @@ function valider(): boolean {
   if (!props.editId && store.sites.some(s => s.code === form.code.trim().toUpperCase())) {
     errors.code = 'Ce code existe déjà.'; ok = false
   }
+  if (form.lat == null || form.lng == null) { errors.zone = 'Placez le centre de la zone sur la carte.'; ok = false } else delete errors.zone
   return ok
 }
 
@@ -48,30 +54,25 @@ function handleSubmit() {
   submitting.value = true
   const donnees = {
     code: form.code.trim().toUpperCase(), nom: form.nom.trim(), ville: form.ville.trim(),
-    region: form.region.trim() || undefined, type: form.type as TypeSiteReseau,
-    lat: -18.8792, lng: 47.5079, actif: form.actif,
+    region: form.region.trim() || undefined, adresse: form.adresse.trim() || undefined, type: form.type as TypeSiteReseau,
+    lat: form.lat!, lng: form.lng!, rayonM: form.rayonM ?? undefined, actif: form.actif,
   }
-  if (props.editId) store.modifier(props.editId, donnees)
-  else store.creer(donnees)
+  const { code: _c, ...modifs } = donnees
+  const r = props.editId ? store.modifier(props.editId, modifs) : store.creer(donnees)
   submitting.value = false
+  if (!r.ok) { submitError.value = r.motif ?? ''; return }
   emit('saved')
   emit('update:modelValue', false)
 }
 
-const optType: DropdownItem[] = [
-  { id: 'Dépôt', label: 'Dépôt' },
-  { id: 'Entrepôt client', label: 'Entrepôt client' },
-  { id: 'Zone à risque', label: 'Zone à risque' },
-  { id: 'Point de contrôle', label: 'Point de contrôle' },
-  { id: 'Relais', label: 'Relais' },
-]
+const optType = computed<DropdownItem[]>(() => typesSites.types.filter(t => t.actif).map(t => ({ id: t.libelle, label: t.libelle })))
 </script>
 
 <template>
   <CreateModalShell
     v-if="modelValue"
     :title="editId ? 'Modifier le site' : 'Nouveau site'"
-    :banner-label="editId ? 'Sites & géofences · Modification' : 'Sites & géofences · Création'"
+    :banner-label="editId ? 'Sites · Modification' : 'Sites · Création'"
     :create-label="editId ? 'Enregistrer' : 'Créer le site'"
     :is-saving="submitting"
     :save-error="submitError || null"
@@ -106,11 +107,19 @@ const optType: DropdownItem[] = [
               <label :class="F.fieldLabel">Région</label>
               <input v-model="form.region" type="text" placeholder="ex. Analamanga" :class="F.fieldInput" />
             </div>
+            <div :class="[F.field, 'col-span-2']">
+              <label :class="F.fieldLabel">Adresse</label>
+              <input v-model="form.adresse" type="text" :class="F.fieldInput" />
+            </div>
             <div class="col-span-2 flex items-center gap-3 pt-1">
               <input id="actifModal" v-model="form.actif" type="checkbox" class="w-4 h-4 rounded" />
               <label for="actifModal" class="text-[13px] font-medium text-foreground cursor-pointer">Site actif</label>
             </div>
           </div>
+        </FormSection>
+        <FormSection title="Zone de géorepérage">
+          <ZoneSiteEditeur v-model:lat="form.lat" v-model:lng="form.lng" v-model:rayon-m="form.rayonM" :couleur="typesSites.get(form.type)?.couleur" editable :libelle="form.nom || 'Nouveau site'" />
+          <p v-if="errors.zone" class="text-danger text-[11px] mt-1">{{ errors.zone }}</p>
         </FormSection>
       </div>
     </template>

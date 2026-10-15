@@ -1,5 +1,5 @@
 <script setup lang="ts">
-/** Liste des points de contrôle par moment, réglable par l'entreprise (FMS-MA-09). */
+/** Liste des points de contrôle par moment, réglable par l'entreprise. */
 import { ref } from 'vue'
 import { ClipboardCheck, Trash2 } from '@lucide/vue'
 import { useControlesVehiculeStore, LIB_MOMENT_CONTROLE, type MomentControle } from '../../stores/controlesVehicule'
@@ -11,32 +11,30 @@ const momentPoints = ref<MomentControle>('retour_voyage')
 const nouveauPoint = ref({ code: '', libelle: '', bloquant: false })
 const erreurPoint = ref('')
 function ajouterPoint() {
-  erreurPoint.value = controles.ajouterPoint(momentPoints.value, nouveauPoint.value) ? '' : 'Indiquez un code unique pour ce moment et un libellé.'
-  if (!erreurPoint.value) nouveauPoint.value = { code: '', libelle: '', bloquant: false }
+  const r = controles.ajouterPoint(momentPoints.value, nouveauPoint.value)
+  erreurPoint.value = r.ok ? '' : r.motif ?? ''
+  if (r.ok) nouveauPoint.value = { code: '', libelle: '', bloquant: false }
 }
 function majLibellePoint(code: string, champ: HTMLInputElement) {
-  const v = champ.value.trim()
-  if (!v) { champ.value = controles.points[momentPoints.value].find(x => x.code === code)?.libelle ?? ''; erreurPoint.value = 'Le libellé ne peut pas être vide.'; return }
-  erreurPoint.value = ''
-  controles.modifierPoint(momentPoints.value, code, { libelle: v })
+  const r = controles.modifierPoint(momentPoints.value, code, { libelle: champ.value })
+  erreurPoint.value = r.ok ? '' : r.motif ?? ''
+  if (!r.ok) champ.value = controles.points[momentPoints.value].find(x => x.code === code)?.libelle ?? ''
 }
 function retirerPoint(code: string) {
-  if (controles.points[momentPoints.value].length <= 1) { erreurPoint.value = 'Gardez au moins un point pour ce moment.'; return }
-  erreurPoint.value = ''
-  controles.supprimerPoint(momentPoints.value, code)
+  const r = controles.supprimerPoint(momentPoints.value, code)
+  erreurPoint.value = r.ok ? '' : r.motif ?? ''
 }
 </script>
 
 <template>
   <div :class="L.card">
-    <div class="flex items-center justify-between mb-1 flex-wrap gap-2">
+    <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
       <div :class="L.cardTitle" class="!mb-0"><ClipboardCheck class="w-4 h-4 text-primary" /> Points de contrôle du véhicule</div>
       <div class="flex gap-1.5">
         <button v-for="(lib, m) in LIB_MOMENT_CONTROLE" :key="m" class="px-2.5 py-1 rounded-md text-[12px] border-0 cursor-pointer"
           :class="momentPoints === m ? 'bg-primary text-primary-foreground' : 'bg-transparent text-muted-foreground hover:bg-background'" @click="momentPoints = m">{{ lib }}</button>
       </div>
     </div>
-    <p class="text-[11px] text-muted-foreground mb-3">Une anomalie sur un point bloquant ouvre un ordre de travail et rend le véhicule indisponible.</p>
     <div class="grid grid-cols-[90px_1fr_110px_32px] gap-2 items-center text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.03em] pb-1.5 border-b border-border max-sm:hidden">
       <span>Code</span><span>Libellé</span><span>Bloquant</span><span></span>
     </div>

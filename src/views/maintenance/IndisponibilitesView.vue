@@ -1,12 +1,12 @@
 <template>
   <ListPageLayout
-    title="Immobilisations"
+    title="Indisponibilités"
     :subtitle="sousTitre"
     :columns="columns"
     :items="pageItems"
     :total="totalCount"
-    :total-text="`${totalCount} immobilisation(s)`"
-    search-placeholder="Plaque, motif…"
+    :total-text="`${totalCount} indisponibilité(s)`"
+    search-placeholder="Plaque, cause…"
     scope-label="Famille :"
     :scope-options="scopeOptions"
     v-model:scope="activeScope"
@@ -19,11 +19,11 @@
     @open-card="(i: any) => ouvrirFiche(i.id)"
   >
     <template #header-actions>
-      <button :class="L.btnPrimary" @click="declarationOuverte = true"><Plus class="w-4 h-4" /> Déclarer une immobilisation</button>
+      <button :class="L.btnPrimary" @click="declarationOuverte = true"><Plus class="w-4 h-4" /> Déclarer une indisponibilité</button>
     </template>
 
     <template #above-table>
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-3.5">
+      <div class="grid grid-cols-2 sm:grid-cols-6 gap-2.5 mb-3.5">
         <div v-for="k in kpis" :key="k.label" :class="L.kpiCard">
           <p class="text-xl font-bold leading-none" :class="k.cls">{{ k.value }}</p>
           <p class="text-xs text-muted-foreground mt-1">{{ k.label }}</p>
@@ -78,13 +78,14 @@
       </div>
     </template>
 
-    <template #empty><CalendarOff class="w-8 h-8" /><p class="text-sm">Aucune immobilisation</p></template>
+    <template #empty><CalendarOff class="w-8 h-8" /><p class="text-sm">Aucune indisponibilité</p></template>
     <IndispoCard v-if="ficheId" :indisponibilites="filtered" :indispo-id="ficheId" @close="ficheId = null" @creer="ficheId = null; declarationOuverte = true" />
     <IndispoFormModal v-if="declarationOuverte" @close="declarationOuverte = false" @cree="id => { declarationOuverte = false; ficheId = id }" />
   </ListPageLayout>
 </template>
 
 <script setup lang="ts">
+import { devise } from '../../lib/monnaie'
 import { useCodificationIndispoStore } from '../../stores/codificationIndispo'
 const codif = useCodificationIndispoStore()
 const libelleDuCode = (c: string) => codif.libelleDuCode(c)
@@ -92,10 +93,8 @@ import { Plus } from '@lucide/vue'
 import IndispoCard from '../../components/maintenance/IndispoCard.vue'
 import IndispoFormModal from '../../components/maintenance/IndispoFormModal.vue'
 /**
- * Immobilisations et codes d'indisponibilité, repris du socle FMS
- * (US 3.3.1). Les codes réglementaires propres au transport français ou
- * maritime d'hydrocarbures (APAVE, Vetting) ont été retirés en amont,
- * dans types/maintenance.ts.
+ * Indisponibilités du parc, qualifiées par une cause de la codification de
+ * l'entreprise ; les jours perdus se cumulent par famille de cause.
  */
 import { ref, computed, watch } from 'vue'
 import { CalendarOff } from '@lucide/vue'
@@ -111,7 +110,7 @@ const store = useMaintenanceStore()
 const declarationOuverte = ref(false)
 const ficheId = ref<string | null>(null)
 function ouvrirFiche(id: string) { ficheId.value = id }
-function fmtAr(n: number) { return n.toLocaleString('fr-FR') + ' Ar' }
+function fmtAr(n: number) { return n.toLocaleString('fr-FR') + ' ' + devise() }
 
 const searchQuery = ref('')
 const activeScope = ref('')
@@ -136,25 +135,24 @@ const scopeOptions = [
 const totalJours = computed(() => Object.values(store.joursPerdusParFamille).reduce((s, v) => s + v, 0))
 
 const sousTitre = computed(() => {
-  const base = `${store.indisposEnCours.length} véhicule(s) immobilisé(s) · ${totalJours.value} jour(s) perdus sur la période`
+  const base = `${store.indisposEnCours.length} véhicule(s) indisponible(s) · ${totalJours.value} jour(s) perdu(s)`
   return store.coutTotalImmobilisations != null ? `${base} · ${fmtAr(store.coutTotalImmobilisations)} de manque à gagner` : base
 })
 
 const kpis = computed(() => [
   { label: 'En cours', value: String(store.indisposEnCours.length), cls: 'text-danger' },
-  { label: 'Jours techniques', value: String(store.joursPerdusParFamille.technique ?? 0), cls: 'text-foreground' },
-  { label: 'Jours réglementaires', value: String(store.joursPerdusParFamille.reglementaire ?? 0), cls: 'text-foreground' },
-  { label: store.coutImmoRenseigne ? 'Coût des jours perdus' : 'Ratio humain / technique',
-    value: store.coutImmoRenseigne ? fmtAr(store.coutTotalImmobilisations ?? 0) : (store.ratioHumainTechnique != null ? String(store.ratioHumainTechnique) : '-'),
-    cls: store.coutImmoRenseigne ? 'text-danger' : 'text-foreground' },
+  ...(Object.keys(LIB_FAMILLE_INDISPO) as FamilleIndispo[]).map(f => ({
+    label: `Jours perdus, cause ${LIB_FAMILLE_INDISPO[f].toLowerCase()}`, value: String(store.joursPerdusParFamille[f] ?? 0), cls: 'text-foreground' })),
+  { label: 'Coût des jours perdus', value: store.coutTotalImmobilisations != null ? fmtAr(store.coutTotalImmobilisations) : '-',
+    cls: store.coutTotalImmobilisations != null ? 'text-danger' : 'text-muted-foreground' },
 ])
 
 const columns = computed<ListColumn[]>(() => [
   { key: 'vehicule', label: 'Véhicule', sortable: true, width: 140 },
-  { key: 'code', label: 'Motif', width: 220 },
+  { key: 'code', label: 'Cause', width: 220 },
   { key: 'famille', label: 'Famille', sortable: true, width: 130 },
   { key: 'periode', label: 'Période', sortable: true, width: 165 },
-  { key: 'duree', label: 'Durée', width: 90 },
+  { key: 'duree', label: 'Durée', sortable: true, width: 90 },
   { key: 'cout', label: 'Coût', width: 130 },
   { key: 'ot', label: 'Ordre de travail', width: 150 },
 ])
@@ -170,7 +168,14 @@ const filtered = computed(() =>
       if (!`${i.vehiculePlaque} ${i.code} ${libelleDuCode(i.code)}`.toLowerCase().includes(q)) return false
     }
     return true
-  }).sort((a, b) => +new Date(b.debut) - +new Date(a.debut)))
+  }).sort((a, b) => {
+    const dir = sortDir.value === 'asc' ? 1 : -1
+    if (sortKey.value === 'vehicule') return dir * a.vehiculePlaque.localeCompare(b.vehiculePlaque)
+    if (sortKey.value === 'famille') return dir * LIB_FAMILLE_INDISPO[a.famille].localeCompare(LIB_FAMILLE_INDISPO[b.famille])
+    if (sortKey.value === 'duree') return dir * (store.dureeIndispo(a) - store.dureeIndispo(b))
+    if (sortKey.value === 'periode') return dir * (+new Date(a.debut) - +new Date(b.debut))
+    return +new Date(b.debut) - +new Date(a.debut)
+  }))
 
 const totalCount = computed(() => filtered.value.length)
 const pageItems = computed(() => { const s = (page.value - 1) * pageSize.value; return filtered.value.slice(s, s + pageSize.value) })

@@ -1,11 +1,15 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useEcartsStore } from './ecarts'
 import { useDocumentsStore } from './documentsPersonnel'
 import { useVoyagesStore } from './voyages'
 import { usePersonnelStore } from './personnel'
 import { aujourdhuiISO } from '../utils/horloge'
-import { useEcoconduiteStore } from './ecoconduite'
+import { useEcoconduiteStore, type EvenementEco } from './ecoconduite'
+import { useInfractionsStore } from './infractions'
+import { useTelematiqueStore, type EvenementTelematique } from './telematique'
+import { useFormationsStore } from './formations'
+import { useTypesDocumentsStore } from './typesDocuments'
 
 export type FamilleScore = 'securite' | 'itineraire' | 'reglementaire' | 'livraison' | 'discipline' | 'ecoconduite'
 
@@ -20,34 +24,20 @@ export const PONDERATIONS: Record<FamilleScore, { libelle: string; poids: number
   ecoconduite: { libelle: 'Écoconduite', poids: 10, couleur: '#0d9488' },
 }
 
-export interface PalierPrime { min: number; montant: number; libelle: string }
-
-/**
- * Bons carburant chauffeur : avantage personnel remis au conducteur, distinct
- * du carburant du véhicule · n'entre jamais dans le calcul de consommation du
- * camion. Absent des documents UCODIS comme de la version de référence du code
- * dont dispose ce projet (fonctionnalité ajoutée depuis côté socle) ;
- * reconstruit sur la base de la capture d'écran fournie, avec le même seuil
- * (score ≥ 80) et le même volume mensuel (30 L) que la référence.
- */
-export interface BonCarburantChauffeur { date: string; libelle: string; litres: number; remis: boolean }
-export const SEUIL_BON_CARBURANT = 80
-export const LITRES_BON_CARBURANT_MENSUEL = 30
-
-/**
- * Valeurs de départ de la grille de prime · comme sur le socle FMS, aucun montant
- * n'a été communiqué dans les documents UCODIS (contrairement aux poids
- * des familles, une méthodologie de notation générique et reprise telle
- * quelle). Modifiable sans développeur depuis Flotte → Paramétrage, onglet
- * Paramètres → « Grille de prime conducteur », à valider par la Direction
- * et les Ressources humaines avant toute activation réelle.
- */
-export const GRILLE_PRIME_DEFAUT: PalierPrime[] = [
-  { min: 90, montant: 150_000, libelle: 'Excellence' },
-  { min: 80, montant: 100_000, libelle: 'Confirmé' },
-  { min: 70, montant: 50_000, libelle: 'Standard' },
-  { min: 0, montant: 0, libelle: 'Non éligible' },
-]
+/** Barème du score réglable par l'entreprise (FMS-PA-05) : points retirés par
+ *  événement et plafond quand une pièce obligatoire n'est pas en règle. */
+export interface BaremeScore {
+  arretCritique: number; arretAutre: number; ecartItineraire: number; voyageLitige: number
+  plafondPieceManquante: number
+}
+export const BAREME_DEFAUT: BaremeScore = {
+  arretCritique: 25, arretAutre: 10, ecartItineraire: 20, voyageLitige: 20, plafondPieceManquante: 60,
+}
+export const LIB_BAREME: Record<keyof BaremeScore, string> = {
+  arretCritique: 'Points par arrêt non justifié critique', arretAutre: 'Points par autre arrêt ou repos non justifié',
+  ecartItineraire: "Points par écart d'itinéraire non justifié", voyageLitige: 'Points par voyage en litige',
+  plafondPieceManquante: "Note plafond si une pièce obligatoire n'est pas en règle",
+}
 
 export interface DetailFamilleScore { famille: FamilleScore; libelle: string; poids: number; note: number; evenements: number; calcul: string }
 
@@ -57,116 +47,133 @@ export const useScoresConducteursStore = defineStore('scoresConducteurs', () => 
   const voyagesStore = useVoyagesStore()
   const personnelStore = usePersonnelStore()
   const ecoStore = useEcoconduiteStore()
+  const telematique = useTelematiqueStore()
+  const infractions = useInfractionsStore()
+  const formations = useFormationsStore()
+  const typesDocs = useTypesDocumentsStore()
 
-  /** Grille éditable, jamais mutée directement : voir modifierPalier. */
-  const grillePrime = ref<PalierPrime[]>(GRILLE_PRIME_DEFAUT.map(p => ({ ...p })))
-
-  function familles(conducteurId: string): DetailFamilleScore[] {
-    const ecarts = ecartsStore.ecartsDuChauffeur(conducteurId)
-    const critiques = ecarts.filter(e => e.gravite === 'critique').length
-    const majeurs = ecarts.filter(e => e.gravite === 'majeur').length
-    const nonJustifies = ecarts.filter(e => e.nature === 'non_justifiee').length
-    const sortiesTrajet = ecarts.filter(e => e.type === 'sortie_trajet' || e.type === 'point_passage_manque').length
-    const docsOk = docsStore.enRegle(conducteurId)
-    const voyages = voyagesStore.voyages.filter(v => v.chauffeurId === conducteurId)
-    const voyagesEnLitige = voyages.filter(v => v.statut === 'litige').length
-
-    const eco = ecoStore.noteConducteur(conducteurId)
-    const liste: DetailFamilleScore[] = [
-      { famille: 'securite', libelle: PONDERATIONS.securite.libelle, poids: PONDERATIONS.securite.poids,
-        evenements: critiques + majeurs, note: Math.max(0, 100 - critiques * 25 - majeurs * 10),
-        calcul: critiques || majeurs
-          ? `100, moins 25 par écart critique (${critiques}) et 10 par écart majeur (${majeurs}).`
-          : "100 : aucun écart critique ni majeur sur la période." },
-      { famille: 'itineraire', libelle: PONDERATIONS.itineraire.libelle, poids: PONDERATIONS.itineraire.poids,
-        evenements: sortiesTrajet, note: Math.max(0, 100 - sortiesTrajet * 20),
-        calcul: sortiesTrajet
-          ? `100, moins 20 par sortie de trajet ou point de passage manqué (${sortiesTrajet}).`
-          : 'Aucun écart de trajet sur la période.' },
-      { famille: 'reglementaire', libelle: PONDERATIONS.reglementaire.libelle, poids: PONDERATIONS.reglementaire.poids,
-        evenements: docsOk ? 0 : 1, note: docsOk ? 100 : 60,
-        calcul: docsOk ? 'Toutes les pièces obligatoires (permis, visite médicale) sont valides.' : "Une pièce obligatoire est absente ou expirée : note plafonnée à 60." },
-      { famille: 'livraison', libelle: PONDERATIONS.livraison.libelle, poids: PONDERATIONS.livraison.poids,
-        evenements: voyagesEnLitige, note: Math.max(0, 100 - voyagesEnLitige * 20),
-        calcul: voyagesEnLitige
-          ? `100, moins 20 par voyage resté en litige (${voyagesEnLitige}).`
-          : 'Aucun voyage en litige sur la période.' },
-      { famille: 'discipline', libelle: PONDERATIONS.discipline.libelle, poids: PONDERATIONS.discipline.poids,
-        evenements: nonJustifies, note: Math.max(0, 100 - nonJustifies * 30),
-        calcul: nonJustifies
-          ? `100, moins 30 par écart qualifié « non justifié » (${nonJustifies}).`
-          : 'Aucun écart non justifié sur la période.' },
-      { famille: 'ecoconduite', libelle: PONDERATIONS.ecoconduite.libelle, poids: ecoStore.parametres.poidsScore,
-        evenements: eco.acc + eco.ral, note: eco.note, calcul: eco.calcul },
-    ]
-    // Poids ramenés à 100 % pour l'affichage comme pour le calcul.
-    const total = liste.reduce((s, x) => s + x.poids, 0)
-    return total ? liste.map(x => ({ ...x, poids: Math.round((x.poids * 100) / total) })) : liste
+  /** Poids et activation de chaque famille, réglables par entreprise (FMS-SC-07). */
+  const CLE_POIDS = 'fms-ucodis-ponderations-score'
+  const ponderations = ref<Record<FamilleScore, { poids: number; actif: boolean }>>(
+    Object.fromEntries(Object.entries(PONDERATIONS).map(([k, v]) => [k, { poids: v.poids, actif: true }])) as Record<FamilleScore, { poids: number; actif: boolean }>)
+  try { const b = localStorage.getItem(CLE_POIDS); if (b) Object.assign(ponderations.value, JSON.parse(b)) } catch { /* défaut */ }
+  watch(ponderations, v => { try { localStorage.setItem(CLE_POIDS, JSON.stringify(v)) } catch { /* ignoré */ } }, { deep: true })
+  function reinitialiserPonderations() {
+    Object.entries(PONDERATIONS).forEach(([k, v]) => { ponderations.value[k as FamilleScore] = { poids: v.poids, actif: true } })
   }
 
-  function scoreGlobal(conducteurId: string): number {
-    const f = familles(conducteurId)
+  const bareme = ref<BaremeScore>({ ...BAREME_DEFAUT })
+  try {
+    const b = localStorage.getItem('fms-ucodis-bareme-score')
+    if (b) { const lu = JSON.parse(b) as Record<string, number>; (Object.keys(BAREME_DEFAUT) as (keyof BaremeScore)[]).forEach(k => { if (typeof lu[k] === 'number') bareme.value[k] = lu[k]! }) }
+  } catch { /* défaut */ }
+  watch(bareme, v => { try { localStorage.setItem('fms-ucodis-bareme-score', JSON.stringify(v)) } catch { /* ignoré */ } }, { deep: true })
+  function reinitialiserBareme() { bareme.value = { ...BAREME_DEFAUT } }
+
+  /* Seul un écart qualifié « non justifié » alimente le score. Un comportement
+     remonté par la télématique n'a pas de qualification propre : il ne compte
+     qu'une fois confirmé, c'est-à-dire rattaché à une infraction clôturée dont
+     la suite ne la lève pas. */
+  function comportementConfirme(e: EvenementTelematique): boolean {
+    const i = e.infractionId ? infractions.getById(e.infractionId) : undefined
+    return !!i && infractions.retenue(i)
+  }
+
+  /** Écarts d'itinéraire ; les autres écarts (arrêts, repos) relèvent de la sécurité. */
+  const TYPES_ITINERAIRE = ['sortie_trajet', 'point_passage_manque', 'ordre_passage', 'temps_trajet', 'ecart_kilometrique', 'fenetre_horaire']
+  /** Écoconduite : une accélération brusque compte une fois confirmée comme
+   *  un comportement ; un ralenti prolongé compte s'il a eu lieu pendant un
+   *  arrêt qualifié « non justifié » le même jour. Même règle pour le score
+   *  du conducteur et pour le suivi par véhicule. */
+  function evenementEcoCompte(e: EvenementEco): boolean {
+    if (e.type === 'acceleration_brusque') { const t = telematique.getById(e.id); return !!t && comportementConfirme(t) }
+    return ecartsStore.ecartsDuChauffeur(e.conducteurId).some(x => x.nature === 'non_justifiee' && !TYPES_ITINERAIRE.includes(x.type) && x.detecteLe.slice(0, 10) === e.date.slice(0, 10))
+  }
+
+  /** Détail du score. Avec une date (AAAA-MM-JJ), même formule limitée aux
+   *  événements datés de ce jour ou d'avant : le score tel qu'il était alors. */
+  function familles(conducteurId: string, au?: string): DetailFamilleScore[] {
+    const avant = (d?: string) => !au || (!!d && d.slice(0, 10) <= au)
+    const ecarts = ecartsStore.ecartsDuChauffeur(conducteurId).filter(e => e.nature === 'non_justifiee' && avant(e.qualifieLe ?? e.detecteLe))
+    /* Chaque écart compte une seule fois, dans la famille de son type : les
+       écarts d'itinéraire en Itinéraire, les arrêts et repos en Sécurité. */
+    const ITINERAIRE = TYPES_ITINERAIRE
+    const ecartsItineraire = ecarts.filter(e => ITINERAIRE.includes(e.type)).length
+    const ecartsArret = ecarts.filter(e => !ITINERAIRE.includes(e.type))
+    const critiques = ecartsArret.filter(e => e.gravite === 'critique').length
+    const majeurs = ecartsArret.filter(e => e.gravite !== 'critique').length
+    const pieces = docsStore.piecesManquantes(conducteurId).map(c => typesDocs.libelle(c))
+    const docsOk = au ? docsStore.enRegleAu(conducteurId, au) : docsStore.enRegle(conducteurId)
+    const voyages = voyagesStore.voyages.filter(v => v.chauffeurId === conducteurId && avant(v.dateDepartReel ?? v.datePlanifiee))
+    const voyagesEnLitige = voyages.filter(v => v.statut === 'litige').length
+
+    const pen = (x: number) => Number.isFinite(x) ? Math.max(0, x) : 0
+    const tp = telematique.parametres
+    /* Comportements à risque confirmés (famille Sécurité routière). */
+    const comportements = telematique.duConducteur(conducteurId).filter(e => avant(e.date) && telematique.typeDe(e.code)?.score && comportementConfirme(e))
+    const tel = { critique: 0, majeur: 0, mineur: 0 }
+    comportements.forEach(e => { tel[telematique.typeDe(e.code)!.gravite]++ })
+    const pointsTel = tel.critique * pen(tp.penaliteCritique) + tel.majeur * pen(tp.penaliteMajeur) + tel.mineur * pen(tp.penaliteMineur)
+
+    /* Écoconduite : une accélération brusque compte une fois confirmée comme
+       un comportement ; un ralenti prolongé compte s'il a eu lieu pendant un
+       arrêt qualifié « non justifié » le même jour. */
+    const ep = ecoStore.parametres
+    const evEco = ecoStore.evenementsDuConducteur(conducteurId).filter(e => avant(e.date))
+    const accel = evEco.filter(e => e.type === 'acceleration_brusque' && evenementEcoCompte(e)).length
+    const ralentis = evEco.filter(e => e.type === 'ralenti_prolonge' && evenementEcoCompte(e)).length
+    const noteEco = Math.max(0, 100 - accel * pen(ep.penaliteAcceleration) - ralentis * pen(ep.penaliteRalenti))
+
+    /* Infractions saisies (procès-verbal, constat) retenues : celles remontées
+       par la télématique sont déjà comptées par leur événement. */
+    const saisies = infractions.infractions.filter(i => i.conducteurId === conducteurId && i.source === 'saisie' && avant(i.date) && infractions.retenue(i))
+    const inf = { grave: saisies.filter(i => i.gravite === 'grave').length, majeure: saisies.filter(i => i.gravite === 'majeure').length, mineure: saisies.filter(i => i.gravite === 'mineure').length }
+    const b = bareme.value
+    const pointsInf = inf.grave * pen(tp.penaliteCritique) + inf.majeure * pen(tp.penaliteMajeur) + inf.mineure * pen(tp.penaliteMineur)
+    const liste: DetailFamilleScore[] = [
+      { famille: 'securite', libelle: PONDERATIONS.securite.libelle, poids: ponderations.value.securite.poids,
+        evenements: critiques + majeurs + comportements.length, note: Math.max(0, 100 - critiques * pen(b.arretCritique) - majeurs * pen(b.arretAutre) - pointsTel),
+        calcul: `100, moins ${b.arretCritique} par arrêt non justifié critique (${critiques}), moins ${b.arretAutre} par autre arrêt ou repos non justifié (${majeurs}), moins ${tp.penaliteCritique}, ${tp.penaliteMajeur} et ${tp.penaliteMineur} par comportement à risque critique (${tel.critique}), majeur (${tel.majeur}) et mineur (${tel.mineur}) confirmé par une infraction retenue.` },
+      { famille: 'itineraire', libelle: PONDERATIONS.itineraire.libelle, poids: ponderations.value.itineraire.poids,
+        evenements: ecartsItineraire, note: Math.max(0, 100 - ecartsItineraire * pen(b.ecartItineraire)),
+        calcul: `100, moins ${b.ecartItineraire} par écart d'itinéraire qualifié « non justifié » (${ecartsItineraire}).` },
+      { famille: 'reglementaire', libelle: PONDERATIONS.reglementaire.libelle, poids: ponderations.value.reglementaire.poids,
+        evenements: pieces.length, note: docsOk ? 100 : Math.min(100, pen(b.plafondPieceManquante)),
+        calcul: `100 si toutes les pièces obligatoires du conducteur sont valides, sinon ${b.plafondPieceManquante} au plus${pieces.length ? ` (non en règle : ${pieces.join(', ')})` : ''}.` },
+      { famille: 'livraison', libelle: PONDERATIONS.livraison.libelle, poids: ponderations.value.livraison.poids,
+        evenements: voyagesEnLitige, note: Math.max(0, 100 - voyagesEnLitige * pen(b.voyageLitige)),
+        calcul: `100, moins ${b.voyageLitige} par voyage resté en litige (${voyagesEnLitige}).` },
+      { famille: 'discipline', libelle: PONDERATIONS.discipline.libelle, poids: ponderations.value.discipline.poids,
+        evenements: saisies.length, note: Math.max(0, 100 - pointsInf),
+        calcul: `100, moins ${tp.penaliteCritique}, ${tp.penaliteMajeur} et ${tp.penaliteMineur} par infraction saisie et retenue grave (${inf.grave}), majeure (${inf.majeure}) et mineure (${inf.mineure}).` },
+      { famille: 'ecoconduite', libelle: PONDERATIONS.ecoconduite.libelle, poids: ponderations.value.ecoconduite.poids,
+        evenements: accel + ralentis, note: noteEco,
+        calcul: `100, moins ${ep.penaliteAcceleration} par accélération brusque confirmée (${accel}) et ${ep.penaliteRalenti} par ralenti de plus de ${ep.ralentiMinMinutes} min pendant un arrêt non justifié (${ralentis}).` },
+    ]
+    // Familles désactivées retirées ; poids ramenés à 100 % pour l'affichage comme pour le calcul.
+    const actives = liste.filter(x => ponderations.value[x.famille]?.actif !== false)
+    const total = actives.reduce((s, x) => s + x.poids, 0)
+    return total ? actives.map(x => ({ ...x, poids: Math.round((x.poids * 100) / total) })) : actives
+  }
+
+  function scoreGlobal(conducteurId: string, au?: string): number {
+    const f = familles(conducteurId, au)
     const total = f.reduce((s, x) => s + x.poids, 0)
     if (!total) return 100
     return Math.round(f.reduce((s, x) => s + x.note * x.poids, 0) / total)
   }
 
-  /** Score du mois précédent, borné à [0, 100] : un score déjà parfait
-   *  (100) ne peut logiquement pas avoir baissé depuis un score encore
-   *  plus haut le mois dernier · sans ce plafond, un conducteur à 100/100
-   *  pouvait afficher un delta négatif, ce qui supposerait un score
-   *  antérieur supérieur à 100. */
+  /** Score à la fin du mois précédent : même formule, appliquée aux seuls
+   *  événements datés jusqu'au dernier jour de ce mois. */
   function scoreMoisPrecedent(conducteurId: string): number {
-    const score = scoreGlobal(conducteurId)
-    const seed = conducteurId.charCodeAt(conducteurId.length - 1)
-    const variation = (seed % 7) - 3
-    return Math.max(0, Math.min(100, score - variation))
+    const [a, m] = aujourdhuiISO().split('-').map(Number)
+    const fin = new Date(Date.UTC(a!, m! - 1, 0)).toISOString().slice(0, 10)
+    return scoreGlobal(conducteurId, fin)
   }
 
-  /** Delta vs mois précédent, toujours cohérent avec le score actuel. */
+  /** Évolution par rapport à la fin du mois précédent. */
   function delta(conducteurId: string): number {
     return scoreGlobal(conducteurId) - scoreMoisPrecedent(conducteurId)
-  }
-
-  function palier(score: number): PalierPrime {
-    return grillePrime.value.find(p => score >= p.min) ?? grillePrime.value[grillePrime.value.length - 1]!
-  }
-
-  /** Historique des bons, dérivé du score actuel plutôt que stocké à part :
-   *  un conducteur au-dessus du seuil reçoit un bon ce mois-ci et le mois
-   *  précédent s'il l'était déjà, cohérent avec le score du mois précédent
-   *  déjà calculé par ailleurs. */
-  function bonsCarburantChauffeur(conducteurId: string): BonCarburantChauffeur[] {
-    const out: BonCarburantChauffeur[] = []
-    if (scoreGlobal(conducteurId) >= SEUIL_BON_CARBURANT) {
-      out.push({ date: aujourdhuiISO().slice(0, 8) + '01', libelle: `Prime carburant mensuelle · score ≥ ${SEUIL_BON_CARBURANT}`, litres: LITRES_BON_CARBURANT_MENSUEL, remis: true })
-    }
-    if (scoreMoisPrecedent(conducteurId) >= SEUIL_BON_CARBURANT) {
-      const moisPrecedent = new Date(); moisPrecedent.setMonth(moisPrecedent.getMonth() - 1)
-      out.push({ date: moisPrecedent.toISOString().slice(0, 8) + '01', libelle: `Prime carburant mensuelle · score ≥ ${SEUIL_BON_CARBURANT}`, litres: LITRES_BON_CARBURANT_MENSUEL, remis: true })
-    }
-    return out
-  }
-  function litresBonCeMois(conducteurId: string): number {
-    return scoreGlobal(conducteurId) >= SEUIL_BON_CARBURANT ? LITRES_BON_CARBURANT_MENSUEL : 0
-  }
-  function modifierPalier(index: number, data: Partial<PalierPrime>) {
-    const p = grillePrime.value[index]
-    if (!p) return
-    Object.assign(p, data)
-    grillePrime.value.sort((a, b) => b.min - a.min)
-  }
-  function reinitialiserGrillePrime() {
-    grillePrime.value = GRILLE_PRIME_DEFAUT.map(p => ({ ...p }))
-  }
-
-  function primeEligible(conducteurId: string) { return scoreGlobal(conducteurId) >= 70 }
-
-  function motifNonEligibilite(conducteurId: string): string | null {
-    if (primeEligible(conducteurId)) return null
-    const ecarts = ecartsStore.ecartsDuChauffeur(conducteurId).filter(e => e.nature === 'a_qualifier')
-    if (ecarts.length) return `Écart non qualifié en cours (${ecarts[0]!.voyageRef})`
-    return 'Score en-dessous du seuil de 70/100.'
   }
 
   /** Percentile : part des conducteurs dont le score est inférieur ou égal. */
@@ -179,5 +186,21 @@ export const useScoresConducteursStore = defineStore('scoresConducteurs', () => 
 
   const classement = computed(() => [...personnelStore.conducteurs].map(c => ({ id: c.id, score: scoreGlobal(c.id) })).sort((a, b) => b.score - a.score))
 
-  return { familles, scoreGlobal, delta, scoreMoisPrecedent, palier, primeEligible, motifNonEligibilite, percentile, classement, grillePrime, modifierPalier, reinitialiserGrillePrime, bonsCarburantChauffeur, litresBonCeMois }
+  /* Formation selon le score (FMS-SC-07) : dès qu'un conducteur passe sous le
+     seuil, une formation « à planifier » lui est proposée, ce qui fait partir
+     l'alerte « Formations ». Pas de doublon : rien n'est proposé s'il a déjà
+     une formation en cours, ni deux fois dans le même mois. */
+  function proposerFormations() {
+    const seuil = formations.seuilScore
+    const mois = aujourdhuiISO().slice(0, 7)
+    classement.value.forEach(({ id, score }) => {
+      if (score >= seuil || formations.enCours(id)) return
+      const origineRef = `Score ${mois}`
+      if (formations.formations.some(f => f.conducteurId === id && f.motif === 'score' && f.origineRef === origineRef)) return
+      formations.declencher({ conducteurId: id, theme: `Score de conduite de ${score}/100, sous le seuil de ${seuil}`, motif: 'score', origineRef }, 'Score de conduite')
+    })
+  }
+  watch([classement, () => formations.seuilScore], proposerFormations, { immediate: true })
+
+  return { bareme, reinitialiserBareme, ponderations, reinitialiserPonderations, familles, evenementEcoCompte, scoreGlobal, delta, scoreMoisPrecedent, percentile, classement }
 })

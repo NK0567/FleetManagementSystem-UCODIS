@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { aujourdhuiISO } from '../../utils/horloge'
 /** Fiche d'une carte carburant : titulaire, limites, utilisation, transactions et blocage (FMS-CA-02). */
+import { devise } from '../../lib/monnaie'
 import { ref, computed, watch } from 'vue'
 import { CircleCheck, TriangleAlert } from '@lucide/vue'
 import CardModalShell from '../shared/CardModalShell.vue'
@@ -45,8 +47,8 @@ function debloquer() { if (item.value) resultat(store.debloquer(item.value.id, m
 
 const util = computed(() => item.value ? store.utilisation(item.value) : null)
 const transactions = computed(() => item.value ? store.transactionsDe(item.value.id) : [])
-const expiree = computed(() => !!item.value && item.value.dateExpiration < new Date().toISOString().slice(0, 10))
-const fmtAr = (n: number) => `${n.toLocaleString('fr-FR')} Ar`
+const expiree = computed(() => !!item.value && item.value.dateExpiration < aujourdhuiISO())
+const fmtAr = (n: number) => `${n.toLocaleString('fr-FR')} ${devise()}`
 const fmtMois = (m: string) => new Date(m + '-01T00:00:00').toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
 </script>
 
@@ -86,14 +88,12 @@ const fmtMois = (m: string) => new Date(m + '-01T00:00:00').toLocaleDateString('
           </div>
         </FormSection>
 
-        <FormSection title="Utilisation" :recaps="[util?.tauxPct != null ? `${util.tauxPct} % du plafond` : 'sans plafond']">
-          <p v-if="!util?.mois" class="text-xs text-muted-foreground">Aucune transaction importée pour cette carte.</p>
-          <template v-else>
-            <p class="text-[11px] text-muted-foreground mb-2">Dernier mois d'activité : {{ fmtMois(util.mois) }}</p>
+        <FormSection title="Utilisation du mois" :recaps="[util ? fmtMois(util.mois) : '', util?.tauxPct != null ? `${util.tauxPct} % du plafond` : 'sans plafond']">
+          <template v-if="util">
             <div class="grid grid-cols-3 gap-x-6 gap-y-4 max-sm:grid-cols-1">
               <ChampLecture libelle="Montant">{{ fmtAr(util.montant) }}<template v-if="item.limites.montantMensuelAr"> sur {{ fmtAr(item.limites.montantMensuelAr) }}</template></ChampLecture>
               <ChampLecture libelle="Volume">{{ util.litres.toLocaleString('fr-FR') }} L<template v-if="item.limites.volumeMensuelL"> sur {{ item.limites.volumeMensuelL.toLocaleString('fr-FR') }} L</template></ChampLecture>
-              <ChampLecture libelle="Taux d'utilisation"><span class="font-semibold" :class="(util.tauxPct ?? 0) > 100 ? 'text-danger' : (util.tauxPct ?? 0) > 80 ? 'text-warning' : ''">{{ util.tauxPct != null ? util.tauxPct + ' %' : '-' }}</span></ChampLecture>
+              <ChampLecture :libelle="util.base === 'volume' ? 'Taux d\'utilisation (volume)' : 'Taux d\'utilisation'"><span class="font-semibold" :class="(util.tauxPct ?? 0) > 100 ? 'text-danger' : (util.tauxPct ?? 0) > 80 ? 'text-warning' : ''">{{ util.tauxPct != null ? util.tauxPct + ' %' : '-' }}</span></ChampLecture>
             </div>
             <div v-if="util.tauxPct != null" class="h-2 bg-border rounded-full overflow-hidden mt-3"><div class="h-full rounded-full" :class="util.tauxPct > 100 ? 'bg-danger' : util.tauxPct > 80 ? 'bg-warning' : 'bg-primary'" :style="{ width: Math.min(100, util.tauxPct) + '%' }"></div></div>
           </template>
@@ -101,11 +101,11 @@ const fmtMois = (m: string) => new Date(m + '-01T00:00:00').toLocaleDateString('
 
         <FormSection title="Limites" :recaps="[item.limites.zones.length ? item.limites.zones.join(', ') : 'toutes zones']">
           <div class="grid grid-cols-3 gap-x-6 gap-y-4 max-sm:grid-cols-1">
-            <div :class="F.field"><label :class="F.fieldLabel">Montant par mois (Ar)</label><input v-model.number="limites.montantMensuelAr" type="number" min="0" :class="F.fieldInput" /></div>
+            <div :class="F.field"><label :class="F.fieldLabel">Montant par mois ({{ $devise() }})</label><input v-model.number="limites.montantMensuelAr" type="number" min="0" :class="F.fieldInput" /></div>
             <div :class="F.field"><label :class="F.fieldLabel">Volume par mois (L)</label><input v-model.number="limites.volumeMensuelL" type="number" min="0" :class="F.fieldInput" /></div>
             <div :class="F.field"><label :class="F.fieldLabel">Transactions par jour</label><input v-model.number="limites.transactionsParJour" type="number" min="0" :class="F.fieldInput" /></div>
             <div :class="F.field"><label :class="F.fieldLabel">Horaire : début (h)</label><input v-model.number="limites.heureDebut" type="number" min="0" max="23" :class="F.fieldInput" /></div>
-            <div :class="F.field"><label :class="F.fieldLabel">Horaire : fin (h)</label><input v-model.number="limites.heureFin" type="number" min="0" max="23" :class="F.fieldInput" /></div>
+            <div :class="F.field"><label :class="F.fieldLabel">Horaire : fin (h, exclue)</label><input v-model.number="limites.heureFin" type="number" min="0" max="23" :class="F.fieldInput" /></div>
             <div :class="F.field"><label :class="F.fieldLabel">Zone (villes)</label><input v-model="limites.zones" :class="F.fieldInput" placeholder="vide : partout" /></div>
           </div>
           <button :class="F.btnPrimary" class="mt-3" @click="enregistrerLimites">Enregistrer les limites</button>

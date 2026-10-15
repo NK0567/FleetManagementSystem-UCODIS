@@ -2,7 +2,7 @@
   <span class="text-[11px] font-medium px-2 py-0.5 rounded-full inline-flex items-center gap-1"
     :class="simule ? 'bg-warning-bg text-warning' : 'bg-success-bg text-success'">
     <component :is="simule ? FlaskConical : BadgeCheck" class="w-3 h-3" />
-    {{ simule ? 'Valeur de simulation' : 'Donnée UCODIS' }}
+    {{ simule ? 'Valeur de simulation' : 'Donnée de l\'entreprise' }}
   </span>
 </template>
 

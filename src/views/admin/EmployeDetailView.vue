@@ -179,7 +179,7 @@ const docs = useDocumentsStore()
 
 const p = computed(() => personnel.parId(String(route.params.id)))
 const mesDocs = computed(() => (p.value ? docs.parPersonnel(p.value.id) : []))
-const manquantes = computed(() => (p.value ? docs.piecesManquantes(p.value.id) : []))
+const manquantes = computed(() => (p.value ? docs.piecesAbsentes(p.value.id) : []))
 const responsabilites = computed(() =>
   p.value ? fonctions.parId(p.value.fonctionId)?.responsabilites ?? [] : [],
 )

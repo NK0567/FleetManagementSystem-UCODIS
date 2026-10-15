@@ -29,11 +29,7 @@
         <table :class="L.table">
           <thead><tr><th :class="L.th">Indicateur</th><th :class="L.th">Formule</th><th :class="L.th">Valeur</th></tr></thead>
           <tbody>
-            <tr><td :class="L.td"><span class="text-xs font-medium">MTTR</span></td><td :class="L.td"><span class="text-[11px] text-muted-foreground">Durée moyenne ouverture → clôture</span></td><td :class="L.td"><span class="text-xs font-semibold">{{ store.mttrHeures != null ? store.mttrHeures + ' h' : '-' }}</span></td></tr>
-            <tr><td :class="L.td"><span class="text-xs font-medium">MTBF</span></td><td :class="L.td"><span class="text-[11px] text-muted-foreground">Kilomètres moyens entre deux pannes</span></td><td :class="L.td"><span class="text-xs font-semibold">{{ store.mtbfKm != null ? store.mtbfKm.toLocaleString('fr-FR') + ' km' : '-' }}</span></td></tr>
-            <tr><td :class="L.td"><span class="text-xs font-medium">Ratio préventif</span></td><td :class="L.td"><span class="text-[11px] text-muted-foreground">Préventifs ÷ total des ordres</span></td><td :class="L.td"><span class="text-xs font-semibold" :class="(store.ratioPreventif ?? 0) >= 60 ? 'text-success' : 'text-danger'">{{ store.ratioPreventif != null ? store.ratioPreventif + ' %' : '-' }}</span></td></tr>
-            <tr><td :class="L.td"><span class="text-xs font-medium">Taux de disponibilité</span></td><td :class="L.td"><span class="text-[11px] text-muted-foreground">(Jours théoriques − jours perdus) ÷ jours théoriques</span></td><td :class="L.td"><span class="text-xs font-semibold" :class="(tauxDispo ?? 0) >= 80 ? 'text-success' : 'text-danger'">{{ tauxDispo != null ? tauxDispo + ' %' : '-' }}</span></td></tr>
-            <tr><td :class="L.td"><span class="text-xs font-medium">Préventif réalisé dans les délais</span></td><td :class="L.td"><span class="text-[11px] text-muted-foreground">Préventifs clôturés ÷ préventifs planifiés</span></td><td :class="L.td"><span class="text-xs font-semibold">{{ store.tauxRealisationPreventif != null ? store.tauxRealisationPreventif + ' %' : '-' }}</span></td></tr>
+            <tr v-for="l in lignesFiabilite" :key="l.cle"><td :class="L.td"><span class="text-xs font-medium">{{ ind.libelle(l.cle) }}</span></td><td :class="L.td"><span class="text-[11px] text-muted-foreground">{{ ind.get(l.cle).definition }}</span></td><td :class="L.td"><span class="text-xs font-semibold" :class="ind.couleur(l.cle, l.valeur)">{{ l.texte }}</span><div v-if="ind.texteCible(l.cle)" class="text-[10px] text-muted-foreground">{{ ind.texteCible(l.cle) }}</div></td></tr>
             <tr><td :class="L.td"><span class="text-xs font-medium">Ratio humain / technique</span></td><td :class="L.td"><span class="text-[11px] text-muted-foreground">Jours perdus humains ÷ techniques</span></td><td :class="L.td"><span class="text-xs font-semibold">{{ store.ratioHumainTechnique ?? '-' }}</span></td></tr>
           </tbody>
         </table>
@@ -52,12 +48,11 @@
 
       <div :class="L.card">
         <div class="flex items-center justify-between mb-3">
-          <div :class="L.cardTitle" class="!mb-0"><Gauge class="w-4 h-4 text-primary" /> MTBF par sous-système</div>
-          <span class="text-[11px] text-muted-foreground">kilomètres entre deux pannes</span>
+          <div :class="L.cardTitle" class="!mb-0"><Gauge class="w-4 h-4 text-primary" /> {{ ind.libelle('mtbf') }}, par sous-système</div>
         </div>
-        <div v-if="!store.mtbfParSousSysteme.length" class="text-xs text-muted-foreground py-3">Pas assez de pannes enregistrées pour calculer un MTBF par organe.</div>
+        <div v-if="!store.mtbfParSousSysteme.length" class="text-xs text-muted-foreground py-3">Pas assez de pannes enregistrées.</div>
         <table v-else :class="L.table">
-          <thead><tr><th :class="L.th">Sous-système</th><th :class="L.th">Pannes</th><th :class="L.th">MTBF</th></tr></thead>
+          <thead><tr><th :class="L.th">Sous-système</th><th :class="L.th">Pannes</th><th :class="L.th">{{ ind.libelle('mtbf') }}</th></tr></thead>
           <tbody>
             <tr v-for="m in store.mtbfParSousSysteme" :key="m.sousSysteme">
               <td :class="L.td"><span class="text-xs">{{ LIB_SOUS_SYSTEME[m.sousSysteme] }}</span></td>
@@ -98,7 +93,7 @@
         </div>
         <div v-if="!store.topVehiculesProblematiques.length" class="text-xs text-muted-foreground py-3">Aucune intervention enregistrée.</div>
         <table v-else :class="L.table">
-          <thead><tr><th :class="L.th">Véhicule</th><th :class="L.th">Interventions</th><th :class="L.th">dont sur route</th><th :class="L.th">Jours immobilisé</th></tr></thead>
+          <thead><tr><th :class="L.th">Véhicule</th><th :class="L.th">Interventions</th><th :class="L.th">dont sur route</th><th :class="L.th">Jours indisponible</th></tr></thead>
           <tbody>
             <tr v-for="v in store.topVehiculesProblematiques" :key="v.vehiculeId">
               <td :class="L.td"><span class="font-mono text-xs">{{ v.plaque }}</span></td>
@@ -119,15 +114,11 @@
           </div>
           <div class="h-10 w-10 rounded-full flex items-center justify-center bg-warning-bg shrink-0"><Truck class="w-5 h-5 text-warning" /></div>
         </div>
-        <p class="text-[11px] text-muted-foreground mt-3 leading-relaxed">
-          Un dépannage sur route est une panne non anticipée, traitée en urgence, distinct d'une visite
-          programmée à l'atelier. Un taux élevé signale un manque de préventif plutôt qu'un simple aléa.
-        </p>
       </div>
 
       <div :class="L.card">
         <div class="flex items-center justify-between mb-3">
-          <div :class="L.cardTitle" class="!mb-0"><Gauge class="w-4 h-4 text-primary" /> Immobilisation rapportée au kilométrage</div>
+          <div :class="L.cardTitle" class="!mb-0"><Gauge class="w-4 h-4 text-primary" /> Indisponibilité rapportée au kilométrage</div>
           <span class="text-[11px] text-muted-foreground">jours perdus / 10 000 km (12 mois)</span>
         </div>
         <div v-if="!vehiculesAvecRatio.length" class="text-xs text-muted-foreground py-3">Pas assez de relevés carburant sur 12 mois pour estimer un kilométrage annuel.</div>
@@ -141,11 +132,6 @@
             </tr>
           </tbody>
         </table>
-        <p class="text-[11px] text-muted-foreground mt-3 leading-relaxed">
-          Un véhicule qui roule peu accumule mécaniquement moins de jours perdus en valeur absolue : ce ratio
-          le remet à l'échelle de son usage réel plutôt que de le comparer en brut à un véhicule qui parcourt
-          deux fois plus de kilomètres.
-        </p>
       </div>
     </div>
 
@@ -154,11 +140,11 @@
         <div :class="L.cardTitle" class="!mb-0"><Coins class="w-4 h-4 text-primary" /> Coûts par ordre de travail</div>
         <span class="flex items-center gap-2">
           <MentionSimulation groupe="mainOeuvre" texte="tarif horaire simulé" />
-          <span class="text-[11px] text-muted-foreground">{{ store.tarifRenseigne ? "pièces, sous-traitance et main-d'œuvre" : 'pièces et sous-traitance' }}</span>
+          <span class="text-[11px] text-muted-foreground">{{ store.tarifRenseigne ? "pièces, main-d'œuvre et atelier externe" : 'pièces et atelier externe' }}</span>
         </span>
       </div>
       <table :class="L.table">
-        <thead><tr><th :class="L.th">Ordre</th><th :class="L.th">Véhicule</th><th :class="L.th">Sous-système</th><th :class="L.th">Type</th><th :class="L.th">Pièces</th><th :class="L.th">Sous-traitance</th><th :class="L.th">Main-d'œuvre</th><th :class="L.th">Coût complet</th></tr></thead>
+        <thead><tr><th :class="L.th">Ordre</th><th :class="L.th">Véhicule</th><th :class="L.th">Sous-système</th><th :class="L.th">Type</th><th :class="L.th">Pièces</th><th :class="L.th">Main-d'œuvre</th><th :class="L.th">Atelier externe et reprise</th><th :class="L.th">Coût total</th></tr></thead>
         <tbody>
           <tr v-for="o in ordresParCout" :key="o.id">
             <td :class="L.td"><span class="font-mono text-xs">{{ o.reference }}</span></td>
@@ -166,11 +152,11 @@
             <td :class="L.td"><span class="text-xs">{{ o.sousSysteme ? LIB_SOUS_SYSTEME[o.sousSysteme] : '-' }}</span></td>
             <td :class="L.td"><span class="text-[10px] font-medium px-2 py-0.5 rounded-full" :class="o.typeMaintenance === 'preventif' ? 'bg-success-bg text-success' : 'bg-info-bg text-info'">{{ LIB_TYPE_MAINTENANCE[o.typeMaintenance] }}</span></td>
             <td :class="L.td"><span class="text-xs">{{ store.coutPieces(o) ? fmtAr(store.coutPieces(o)) : '-' }}</span></td>
-            <td :class="L.td"><span class="text-xs">{{ store.coutSousTraitance(o) ? fmtAr(store.coutSousTraitance(o)) : '-' }}</span></td>
             <td :class="L.td">
               <span v-if="store.coutMainOeuvre(o) != null" class="text-xs">{{ fmtAr(store.coutMainOeuvre(o)!) }} <span class="text-[10px] text-muted-foreground">({{ store.heuresOT(o) }} h)</span></span>
               <span v-else class="text-[11px] text-warning">{{ store.heuresOT(o) }} h non valorisées</span>
             </td>
+            <td :class="L.td"><span class="text-xs">{{ store.coutSousTraitance(o) ? fmtAr(store.coutSousTraitance(o)) : '-' }}</span></td>
             <td :class="L.td"><span class="text-xs font-semibold">{{ fmtAr(store.coutOT(o)) }}</span></td>
           </tr>
         </tbody>
@@ -178,7 +164,7 @@
 
       <p class="text-[13px] font-semibold text-foreground mt-5 mb-2">Coût cumulé par véhicule</p>
       <table :class="L.table">
-        <thead><tr><th :class="L.th">Véhicule</th><th :class="L.th">Interventions</th><th :class="L.th">Jours immobilisé</th><th :class="L.th">Coût immobilisation</th><th :class="L.th">Coût réparations</th><th :class="L.th">Coût au km</th></tr></thead>
+        <thead><tr><th :class="L.th">Véhicule</th><th :class="L.th">Interventions</th><th :class="L.th">Jours indisponible</th><th :class="L.th">Coût de l'indisponibilité</th><th :class="L.th">Coût des interventions</th><th :class="L.th">Coût au km</th></tr></thead>
         <tbody>
           <tr v-for="v in store.coutCumuleParVehicule" :key="v.vehiculeId">
             <td :class="L.td"><span class="font-mono text-xs">{{ v.plaque }}</span></td>
@@ -205,11 +191,12 @@
 
 <script setup lang="ts">
 /**
- * Fiabilité et coûts, repris du socle FMS (US 3.5.1 et 3.5.2). Le
- * tarif horaire et le coût d'immobilisation journalier se paramètrent
- * dans Paramétrage → Paramètres de l'atelier ; tant qu'ils sont vides,
- * le coût reste partiel et l'écran le dit.
+ * Fiabilité et coûts. Le tarif horaire et le coût d'immobilisation
+ * journalier se paramètrent dans Paramètres de l'atelier ; tant qu'ils
+ * sont vides, le coût reste partiel.
  */
+import { devise } from '../../lib/monnaie'
+import { useIndicateursStore, type CleIndicateur } from '../../stores/indicateurs'
 import { ref, computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { Gauge, AlertTriangle, CalendarOff, Coins, FileQuestion, Wrench, Truck } from '@lucide/vue'
@@ -222,7 +209,7 @@ import * as L from '../../lib/listClasses'
 
 const store = useMaintenanceStore()
 const vehicules = useVehiculeStore()
-function fmtAr(n: number) { return n.toLocaleString('fr-FR') + ' Ar' }
+function fmtAr(n: number) { return n.toLocaleString('fr-FR') + ' ' + devise() }
 
 const onglet = ref<'fiabilite' | 'couts'>('fiabilite')
 
@@ -237,7 +224,7 @@ const partMainOeuvre = computed(() => {
   return Math.round((mo / store.coutTotal) * 100)
 })
 
-const nbVehiculesParc = computed(() => vehicules.liste.length)
+const nbVehiculesParc = computed(() => vehicules.auParc.length)
 const tauxDispo = computed(() => store.tauxDisponibilite(nbVehiculesParc.value))
 function coutKm(vehiculeId: string): number | null { return store.coutParKmObserve(vehiculeId) }
 const maxPannes = computed(() => Math.max(1, ...store.pannesParSousSysteme.map(p => p.nb)))
@@ -260,12 +247,21 @@ const ordresParCout = computed(() => [...store.ordres].sort((a, b) => store.cout
 
 const onglets = computed(() => [{ key: 'fiabilite' as const, label: 'Fiabilité' }, { key: 'couts' as const, label: 'Coûts' }])
 
+const ind = useIndicateursStore()
+const lignesFiabilite = computed(() => ([
+  { cle: 'mttr', valeur: store.mttrHeures, texte: store.mttrHeures != null ? store.mttrHeures + ' h' : '-' },
+  { cle: 'mtbf', valeur: store.mtbfKm, texte: store.mtbfKm != null ? store.mtbfKm.toLocaleString('fr-FR') + ' km' : '-' },
+  { cle: 'preventif', valeur: store.ratioPreventif, texte: store.ratioPreventif != null ? store.ratioPreventif + ' %' : '-' },
+  { cle: 'disponibilite', valeur: tauxDispo.value, texte: tauxDispo.value != null ? tauxDispo.value + ' %' : '-' },
+  { cle: 'realisationPreventif', valeur: store.tauxRealisationPreventif, texte: store.tauxRealisationPreventif != null ? store.tauxRealisationPreventif + ' %' : '-' },
+] as { cle: CleIndicateur; valeur: number | null; texte: string }[]))
+
 const kpis = computed(() => [
-  { label: 'MTTR', value: store.mttrHeures != null ? store.mttrHeures + ' h' : '-', cls: 'text-foreground', cible: '' },
-  { label: 'MTBF', value: store.mtbfKm != null ? Math.round(store.mtbfKm / 1000) + 'k km' : '-', cls: 'text-foreground', cible: '' },
-  { label: 'Préventif', value: store.ratioPreventif != null ? store.ratioPreventif + ' %' : '-', cls: (store.ratioPreventif ?? 0) >= 60 ? 'text-success' : 'text-danger', cible: 'cible ≥ 60 %' },
+  { label: ind.libelle('mttr'), value: store.mttrHeures != null ? store.mttrHeures + ' h' : '-', cls: ind.couleur('mttr', store.mttrHeures), cible: ind.texteCible('mttr') },
+  { label: ind.libelle('mtbf'), value: store.mtbfKm != null ? store.mtbfKm.toLocaleString('fr-FR') + ' km' : '-', cls: ind.couleur('mtbf', store.mtbfKm), cible: ind.texteCible('mtbf') },
+  { label: ind.libelle('preventif'), value: store.ratioPreventif != null ? store.ratioPreventif + ' %' : '-', cls: ind.couleur('preventif', store.ratioPreventif), cible: ind.texteCible('preventif') },
   { label: 'Ordres ouverts', value: String(store.ouverts.length), cls: 'text-foreground', cible: '' },
-  { label: 'Coût pièces', value: fmtAr(store.coutTotal), cls: 'text-foreground', cible: store.tarifRenseigne ? "main-d'œuvre incluse" : "hors main-d'œuvre" },
-  { label: 'Coût immobilisations', value: store.coutTotalImmobilisations != null ? fmtAr(store.coutTotalImmobilisations) : '-', cls: store.coutTotalImmobilisations != null ? 'text-danger' : 'text-muted-foreground', cible: store.coutImmoRenseigne ? '' : 'coût journalier à renseigner' },
+  { label: 'Coût total des interventions', value: fmtAr(store.coutTotal), cls: 'text-foreground', cible: store.tarifRenseigne ? "pièces, main-d'œuvre et atelier externe" : "pièces et atelier externe, hors main-d'œuvre" },
+  { label: "Coût de l'indisponibilité", value: store.coutTotalImmobilisations != null ? fmtAr(store.coutTotalImmobilisations) : '-', cls: store.coutTotalImmobilisations != null ? 'text-danger' : 'text-muted-foreground', cible: store.coutImmoRenseigne ? '' : 'coût journalier à renseigner' },
 ])
 </script>

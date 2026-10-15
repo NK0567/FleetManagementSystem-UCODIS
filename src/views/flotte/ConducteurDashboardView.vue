@@ -17,6 +17,7 @@
             <div>
               <div class="text-lg font-semibold">{{ conducteur.nomComplet }}</div>
               <div class="text-[13px] text-muted-foreground mt-px">{{ voyagesDuConducteur.length }} voyage(s) · {{ kmTotal.toLocaleString('fr-FR') }} km sur la période</div>
+              <RouterLink v-if="configStore.parametres.gestionPersonnelRaccordee" :to="{ name: 'admin-employes', query: { ouvrir: conducteur.id } }" class="text-[12px] text-primary hover:underline">Ouvrir la fiche dans la gestion du personnel</RouterLink>
             </div>
           </div>
         </div>
@@ -59,29 +60,20 @@
         </button>
       </div>
 
-      <!-- ══ SCORE & PRIME ══════════════════════════════════════ -->
+      <!-- ══ SCORE DE CONDUITE ══════════════════════════════════ -->
       <div v-if="tab === 'score'" class="flex flex-col gap-3.5">
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+        <div class="grid grid-cols-2 gap-2.5">
           <div :class="L.kpiCard">
             <div :class="[L.kpiValue, couleurScore(scoreGlobal)]">{{ scoreGlobal }} / 100</div>
             <div :class="L.kpiLabel">
               Score global
-              <span :class="deltaScore >= 0 ? 'text-success' : 'text-danger'">({{ deltaScore >= 0 ? '+' : '' }}{{ deltaScore }} vs mois précédent)</span>
+              <span :class="deltaScore >= 0 ? 'text-success' : 'text-danger'">({{ deltaScore >= 0 ? '+' : '' }}{{ deltaScore }} par rapport au mois précédent)</span>
             </div>
           </div>
           <div :class="L.kpiCard">
             <div :class="L.kpiValue">{{ scoresStore.percentile(conducteur.id) }} %</div>
             <div :class="L.kpiLabel">Mieux classé que ce pourcentage des conducteurs</div>
           </div>
-          <div :class="L.kpiCard">
-            <div :class="[L.kpiValue, primeEligible ? 'text-success' : 'text-muted-foreground']">{{ primeEligible ? fmtAr(palierPrime.montant) : 'Non éligible' }}</div>
-            <div :class="L.kpiLabel">Prime de la période ({{ palierPrime.libelle }})</div>
-          </div>
-        </div>
-
-        <div v-if="!primeEligible && motifNonEligibilite" class="flex items-start gap-2.5 rounded-lg px-3.5 py-2.5 bg-warning-bg text-warning text-xs">
-          <TriangleAlert class="w-4 h-4 shrink-0 mt-px" />
-          <span><strong>Prime non versée :</strong> {{ motifNonEligibilite }}</span>
         </div>
 
         <div :class="L.card">
@@ -98,52 +90,11 @@
           </div>
         </div>
 
-        <!-- Grille de prime : lecture seule ici, modification dans Configuration. -->
-        <div :class="L.card">
-          <div class="flex items-center justify-between mb-3">
-            <div :class="L.cardTitle" class="!mb-0"><Award class="w-4 h-4 text-primary" /> Grille de prime</div>
-            <RouterLink :to="{ name: 'flotte-configuration' }" class="text-[11px] text-primary hover:underline">Modifier dans Paramétrage</RouterLink>
-          </div>
-          <p class="text-[11px] text-warning bg-warning-bg rounded-md px-2.5 py-2 mb-3">
-            Montants indicatifs (UCODIS ne les a pas communiqués) · à valider par la Direction et les Ressources
-            humaines avant activation. Modifiables sans développeur depuis Flotte → Paramétrage, onglet Paramètres.
-          </p>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            <div v-for="pp in scoresStore.grillePrime" :key="pp.libelle" class="rounded-lg border px-3 py-2 text-center" :class="palierPrime.libelle === pp.libelle ? 'border-primary bg-primary/5' : 'border-border'">
-              <p class="text-[11px] text-muted-foreground">{{ pp.libelle }}</p>
-              <p class="text-sm font-semibold text-foreground">{{ pp.montant ? fmtAr(pp.montant) : '-' }}</p>
-              <p class="text-[10px] text-muted-foreground">score ≥ {{ pp.min }}</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Bons carburant chauffeur : avantage personnel, jamais mêlé à la conso du véhicule. -->
-        <div :class="L.card">
-          <div class="flex items-center justify-between mb-3">
-            <div :class="L.cardTitle" class="!mb-0"><Fuel class="w-4 h-4 text-primary" /> Bons carburant chauffeur</div>
-            <span class="text-[11px] text-muted-foreground">{{ litresBonCeMois }} L ce mois-ci</span>
-          </div>
-          <p class="text-[11px] text-muted-foreground mb-3">
-            Avantage remis au chauffeur, séparé du carburant du véhicule · n'entre jamais dans le calcul de
-            consommation du camion.
-          </p>
-          <div v-if="!bonsCarburant.length" class="text-xs text-muted-foreground py-2">Aucun bon remis sur la période.</div>
-          <div v-else class="flex flex-col gap-1.5">
-            <div v-for="(b, i) in bonsCarburant" :key="i" class="flex items-center justify-between text-xs py-1.5 border-b border-border last:border-0">
-              <span class="text-muted-foreground">{{ formatDate(b.date) }} · {{ b.libelle }}</span>
-              <div class="flex items-center gap-2">
-                <span class="font-semibold text-foreground">{{ b.litres }} L</span>
-                <span class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-success-bg text-success">Remis au chauffeur</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <div class="grid grid-cols-2 gap-3 max-lg:grid-cols-1">
           <div :class="L.card">
             <div :class="L.cardTitle"><IdCard class="w-4 h-4 text-primary" /> Identité et habilitation</div>
             <dl class="grid grid-cols-2 gap-x-4 gap-y-2.5 text-[13px]">
-              <div><dt class="text-[11px] text-muted-foreground">CIN</dt><dd>{{ conducteur.cin }}</dd></div>
+              <div><dt class="text-[11px] text-muted-foreground">Pièce d'identité</dt><dd>{{ conducteur.cin }}</dd></div>
               <div><dt class="text-[11px] text-muted-foreground">Téléphone</dt><dd>{{ conducteur.telephone }}</dd></div>
               <div><dt class="text-[11px] text-muted-foreground">Entité</dt><dd>{{ conducteur.entiteNom }}</dd></div>
               <div>
@@ -155,9 +106,6 @@
                 </dd>
               </div>
             </dl>
-            <RouterLink :to="{ name: 'admin-employes', query: { ouvrir: conducteur.id } }" class="text-[12px] text-primary hover:underline mt-3 inline-block">
-              Ouvrir la fiche RH complète →
-            </RouterLink>
           </div>
 
           <div :class="L.card">
@@ -205,17 +153,17 @@
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
           <div :class="L.kpiCard"><div :class="L.kpiValue">{{ consoMoyenneConducteur }}</div><div :class="L.kpiLabel">Conso moyenne (L/100 km)</div></div>
           <div :class="L.kpiCard">
-            <div :class="[L.kpiValue, ecartConsoConducteur > 5 ? 'text-danger' : ecartConsoConducteur > 0 ? 'text-warning' : 'text-success']">
+            <div :class="[L.kpiValue, Math.abs(ecartConsoConducteur) > seuilEcartConso ? 'text-danger' : ecartConsoConducteur > 0 ? 'text-warning' : 'text-success']">
               {{ ecartConsoConducteur > 0 ? '+' : '' }}{{ ecartConsoConducteur }} %
             </div>
             <div :class="L.kpiLabel">Écart à la référence trajet</div>
           </div>
-          <div :class="L.kpiCard"><div :class="L.kpiValue">{{ rechargesDuConducteur.length }}</div><div :class="L.kpiLabel">Recharges sur la période</div></div>
+          <div :class="L.kpiCard"><div :class="L.kpiValue">{{ rechargesDuConducteur.length }}</div><div :class="L.kpiLabel">Pleins sur la période</div></div>
         </div>
 
         <div :class="L.card">
-          <div :class="L.cardTitle"><Fuel class="w-4 h-4 text-primary" /> Recharges</div>
-          <div v-if="!rechargesDuConducteur.length" class="text-xs text-muted-foreground py-3">Aucune recharge sur la période.</div>
+          <div :class="L.cardTitle"><Fuel class="w-4 h-4 text-primary" /> Pleins</div>
+          <div v-if="!rechargesDuConducteur.length" class="text-xs text-muted-foreground py-3">Aucun plein sur la période.</div>
           <table v-else :class="L.table">
             <thead><tr>
               <th :class="L.th">Date</th><th :class="L.th">Véhicule</th><th :class="L.th">Litres</th><th :class="L.th">Lieu</th><th :class="L.th">Contrôles</th>
@@ -248,7 +196,6 @@
         <div :class="L.card">
           <div class="flex items-center justify-between mb-3">
             <div :class="L.cardTitle" class="!mb-0"><FileText class="w-4 h-4 text-primary" /> Pièces du dossier</div>
-            <span class="text-[11px] text-muted-foreground">Alerte automatique {{ configStore.parametres.preavisDocumentaireJours }} jours avant échéance</span>
           </div>
           <div v-if="!documentsConducteur.length" class="text-xs text-muted-foreground py-3">Aucune pièce enregistrée pour ce conducteur.</div>
           <table v-else :class="L.table">
@@ -265,36 +212,31 @@
               </tr>
             </tbody>
           </table>
-          <p class="text-[11px] text-muted-foreground mt-3 leading-relaxed">
-            Une pièce expirée bloque l'affectation du conducteur à un voyage. Le permis et la visite médicale sont
-            les deux pièces obligatoires.
-          </p>
         </div>
       </div>
 
       <!-- ══ FORMATIONS ═════════════════════════════════════════ -->
       <div v-else-if="tab === 'formations'" class="flex flex-col gap-3.5">
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-          <div :class="L.kpiCard"><div :class="L.kpiValue">{{ formationsConducteur.length }}</div><div :class="L.kpiLabel">Formations suivies</div></div>
-          <div :class="L.kpiCard">
-            <div :class="[L.kpiValue, habilitationsOk ? 'text-success' : 'text-danger']">{{ habilitations.filter(h => h.acquise).length }}/{{ habilitations.length }}</div>
-            <div :class="L.kpiLabel">Habilitations acquises</div>
-          </div>
-          <div :class="L.kpiCard"><div :class="[L.kpiValue, formationsProches ? 'text-warning' : '']">{{ formationsProches }}</div><div :class="L.kpiLabel">À renouveler</div></div>
-          <div :class="L.kpiCard"><div :class="[L.kpiValue, formationsExpirees ? 'text-danger' : '']">{{ formationsExpirees }}</div><div :class="L.kpiLabel">Expirées</div></div>
+          <div :class="L.kpiCard"><div :class="L.kpiValue">{{ formationsConducteur.length }}</div><div :class="L.kpiLabel">Formations déclenchées</div></div>
+          <div :class="L.kpiCard"><div :class="[L.kpiValue, formationsAPlanifier ? 'text-warning' : '']">{{ formationsAPlanifier }}</div><div :class="L.kpiLabel">À planifier</div></div>
+          <div :class="L.kpiCard"><div :class="L.kpiValue">{{ formationsConducteur.filter(f => f.statut === 'planifiee').length }}</div><div :class="L.kpiLabel">Planifiées</div></div>
+          <div :class="L.kpiCard"><div :class="[L.kpiValue, 'text-success']">{{ formationsConducteur.filter(f => f.statut === 'suivie').length }}</div><div :class="L.kpiLabel">Suivies</div></div>
         </div>
-
         <div :class="L.card">
-          <div :class="L.cardTitle"><GraduationCap class="w-4 h-4 text-primary" /> Formations suivies</div>
-          <div v-if="!formationsConducteur.length" class="text-xs text-muted-foreground py-3">Aucune formation enregistrée.</div>
+          <div class="flex items-center justify-between mb-3">
+            <div :class="L.cardTitle" class="!mb-0"><GraduationCap class="w-4 h-4 text-primary" /> Formations</div>
+            <RouterLink :to="{ name: 'flotte-formations' }" class="text-[11px] text-primary hover:underline">Toutes les formations</RouterLink>
+          </div>
+          <div v-if="!formationsConducteur.length" class="text-xs text-muted-foreground py-3">Aucune formation.</div>
           <table v-else :class="L.table">
-            <thead><tr><th :class="L.th">Formation</th><th :class="L.th">Suivie le</th><th :class="L.th">Valide jusqu'au</th><th :class="L.th">État</th></tr></thead>
+            <thead><tr><th :class="L.th">Thème</th><th :class="L.th">Motif</th><th :class="L.th">Date</th><th :class="L.th">Statut</th></tr></thead>
             <tbody>
               <tr v-for="f in formationsConducteur" :key="f.id">
-                <td :class="L.td"><span class="text-xs font-medium">{{ f.libelle }}</span></td>
-                <td :class="L.td"><span class="text-xs">{{ formatDate(f.dateDelivrance) }}</span></td>
-                <td :class="L.td"><span class="text-xs">{{ f.dateExpiration ? formatDate(f.dateExpiration) : 'sans échéance' }}</span></td>
-                <td :class="L.td"><span class="text-[11px] font-medium px-2 py-0.5 rounded-full" :class="classeEtatDoc(docsPersonnel.etat(f))">{{ libelleEtatDoc(docsPersonnel.etat(f)) }}</span></td>
+                <td :class="L.td"><span class="text-xs font-medium">{{ f.theme }}</span></td>
+                <td :class="L.td"><span class="text-xs">{{ LIB_MOTIF_FORMATION[f.motif] }}{{ f.origineRef ? ` · ${f.origineRef}` : '' }}</span></td>
+                <td :class="L.td"><span class="text-xs">{{ formatDate(f.suivieLe ?? f.prevueLe ?? f.declencheeLe) }}</span></td>
+                <td :class="L.td"><span class="text-[11px] font-medium px-2 py-0.5 rounded-full" :class="LIB_STATUT_FORMATION[f.statut].cls">{{ LIB_STATUT_FORMATION[f.statut].label }}</span></td>
               </tr>
             </tbody>
           </table>
@@ -302,8 +244,8 @@
 
         <div :class="L.card">
           <div class="flex items-center justify-between mb-3">
-            <div :class="L.cardTitle" class="!mb-0"><ShieldCheck class="w-4 h-4 text-primary" /> Habilitations obligatoires</div>
-            <span class="text-[11px]" :class="habilitationsOk ? 'text-success' : 'text-danger'">{{ habilitations.filter(h => h.acquise).length }}/{{ habilitations.length }} acquises</span>
+            <div :class="L.cardTitle" class="!mb-0"><ShieldCheck class="w-4 h-4 text-primary" /> Pièces obligatoires pour conduire</div>
+            <span class="text-[11px]" :class="habilitationsOk ? 'text-success' : 'text-danger'">{{ habilitations.filter(h => h.acquise).length }}/{{ habilitations.length }} valides</span>
           </div>
           <div class="flex flex-col gap-1.5">
             <div v-for="h in habilitations" :key="h.code" class="flex items-start gap-2.5 rounded-md px-3 py-2" :class="h.acquise ? 'bg-background' : 'bg-danger-bg'">
@@ -314,10 +256,6 @@
               </div>
             </div>
           </div>
-          <p class="text-[11px] text-muted-foreground mt-3 leading-relaxed">
-            Un chauffeur sans permis ou visite médicale valides ne peut pas être affecté à un voyage. L'affectation
-            est bloquée tant que la pièce n'est pas régularisée.
-          </p>
         </div>
       </div>
 
@@ -327,7 +265,7 @@
           <div :class="L.kpiCard"><div :class="L.kpiValue">{{ voyagesEffectues }}</div><div :class="L.kpiLabel">Voyages effectués</div></div>
           <div :class="[L.kpiCard]"><div :class="[L.kpiValue, 'text-primary']">{{ voyagesAVenir }}</div><div :class="L.kpiLabel">À venir</div></div>
           <div :class="L.kpiCard"><div :class="L.kpiValue">{{ absencesConducteur.length }}</div><div :class="L.kpiLabel">Absences</div></div>
-          <div :class="L.kpiCard"><div :class="[L.kpiValue, disponibilite.ok ? 'text-success' : 'text-danger']">{{ disponibilite.ok ? 'Oui' : 'Non' }}</div><div :class="L.kpiLabel">Disponibilité</div></div>
+          <div :class="L.kpiCard"><div :class="[L.kpiValue, disponibilite.ok ? 'text-success' : 'text-danger']">{{ LIB_DISPONIBILITE[disponibilite.etat].label }}</div><div :class="L.kpiLabel">Disponibilité</div></div>
         </div>
 
         <div :class="L.card">
@@ -368,7 +306,6 @@
         <div :class="L.card">
           <div class="flex items-center justify-between mb-3">
             <div :class="L.cardTitle" class="!mb-0"><CalendarOff class="w-4 h-4 text-primary" /> Absences et congés</div>
-            <span class="text-[11px] text-muted-foreground">source : module Administration</span>
           </div>
           <div v-if="!absencesConducteur.length" class="text-xs text-muted-foreground py-3">Aucune absence enregistrée sur la période.</div>
           <table v-else :class="L.table">
@@ -390,8 +327,7 @@
         <div :class="L.card">
           <div :class="L.cardTitle"><IdCard class="w-4 h-4 text-primary" /> Données administratives</div>
           <dl class="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-3 text-xs">
-            <div><dt class="text-muted-foreground text-[11px]">Permis de conduire</dt><dd :class="permisProche ? 'text-danger font-medium' : ''">{{ permisDoc ? 'expire le ' + formatDate(permisDoc.dateExpiration) : 'non renseigné' }}</dd></div>
-            <div><dt class="text-muted-foreground text-[11px]">Visite médicale</dt><dd :class="visiteProche ? 'text-danger font-medium' : ''">{{ visiteDoc ? 'expire le ' + formatDate(visiteDoc.dateExpiration) : 'non renseignée' }}</dd></div>
+            <div v-for="pc in piecesDatees" :key="pc.code"><dt class="text-muted-foreground text-[11px]">{{ pc.libelle }}</dt><dd :class="!pc.valide || pc.etat === 'proche' ? 'text-danger font-medium' : ''">{{ !pc.doc ? 'non renseignée' : pc.etat === 'annule' ? 'annulée' : pc.etat === 'perdu' ? 'perdue' : 'expire le ' + formatDate(pc.doc.dateExpiration) }}</dd></div>
             <div><dt class="text-muted-foreground text-[11px]">Voyages sur la période</dt><dd>{{ voyagesDuConducteur.length }}</dd></div>
             <div><dt class="text-muted-foreground text-[11px]">Kilométrage cumulé</dt><dd>{{ kmTotal.toLocaleString('fr-FR') }} km</dd></div>
             <div><dt class="text-muted-foreground text-[11px]">Écarts non justifiés</dt><dd>{{ ecartsDuConducteur.filter(e => e.nature === 'non_justifiee').length }}</dd></div>
@@ -415,10 +351,29 @@
 
         <div :class="L.card">
           <div class="flex items-center justify-between mb-3">
-            <div :class="L.cardTitle" class="!mb-0"><AlertCircle class="w-4 h-4 text-primary" /> Infractions internes & sanctions</div>
-            <span v-if="sanctionsEnCours.length" class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-warning-bg text-warning">{{ sanctionsEnCours.length }} en cours</span>
+            <div :class="L.cardTitle" class="!mb-0"><Gavel class="w-4 h-4 text-primary" /> Infractions de conduite</div>
+            <RouterLink :to="{ name: 'flotte-infractions' }" class="text-[11px] text-primary hover:underline">Toutes les infractions</RouterLink>
           </div>
-          <div v-if="!sanctionsConducteur.length" class="text-xs text-muted-foreground py-2">Aucune infraction interne enregistrée pour ce conducteur.</div>
+          <div v-if="!infractionsConducteur.length" class="text-xs text-muted-foreground py-3">Aucune infraction sur la période.</div>
+          <table v-else :class="L.table">
+            <thead><tr><th :class="L.th">Infraction</th><th :class="L.th">Type</th><th :class="L.th">Date</th><th :class="L.th">Statut</th><th :class="L.th">Suite</th></tr></thead>
+            <tbody>
+              <tr v-for="i in infractionsConducteur" :key="i.id" class="cursor-pointer hover:bg-background" @click="router.push({ name: 'flotte-infractions', query: { infraction: i.id } })">
+                <td :class="L.td"><span class="font-mono text-xs">{{ i.reference }}</span></td>
+                <td :class="L.td"><span class="text-xs">{{ infractionsStore.libelleType(i.type) }}</span></td>
+                <td :class="L.td"><span class="text-xs">{{ fmtDateHeure(i.date) }}</span></td>
+                <td :class="L.td"><span class="text-[11px] font-medium px-2 py-0.5 rounded-full" :class="LIB_STATUT_INFRACTION[i.statut].cls">{{ LIB_STATUT_INFRACTION[i.statut].label }}</span></td>
+                <td :class="L.td"><span class="text-xs">{{ infractionsStore.libelleSuite(i) || '-' }}</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div :class="L.card">
+          <div class="flex items-center justify-between mb-3">
+            <div :class="L.cardTitle" class="!mb-0"><AlertCircle class="w-4 h-4 text-primary" /> Suites données aux écarts</div>
+          </div>
+          <div v-if="!sanctionsConducteur.length" class="text-xs text-muted-foreground py-2">Aucun avertissement ni signalement à la direction.</div>
           <ul v-else class="flex flex-col gap-2.5">
             <li v-for="s in sanctionsConducteur" :key="s.id" class="rounded-lg border border-border px-3 py-2.5">
               <div class="flex items-start justify-between gap-2">
@@ -445,19 +400,18 @@
 
 <script setup lang="ts">
 /**
- * Tableau de bord personnel du conducteur, copié à la lettre de
- * ConducteurDetailView du socle FMS : sept onglets exactement (Score & prime,
- * Itinéraires, Carburant, Documents, Formations, Planning, Ressources
- * humaines), même structure de KPI et de tableaux, données UCODIS. Les
- * habilitations obligatoires du socle FMS (ADR, APTH · transport
- * d'hydrocarbures) sont remplacées par permis et visite médicale,
- * seules pièces obligatoires du cahier des charges UCODIS.
+ * Tableau de bord du conducteur (FMS-RA-05) : score de conduite, itinéraires,
+ * carburant, documents, formations, planning et ressources humaines.
+ * Formations, infractions et disponibilité viennent des mêmes registres que
+ * les écrans Formations, Infractions et Conducteurs.
  */
+import { useIndicateursStore } from '../../stores/indicateurs'
 import { computed, ref } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
+import { useConfigurationStore } from '../../stores/configuration'
 import {
-  AlertCircle, ArrowLeft, Award, CalendarCheck, CalendarOff, ChevronLeft, ChevronRight,
-  CircleCheck, Fuel, Gauge, GraduationCap, IdCard, Package, ShieldCheck, TriangleAlert, Truck, UserX, XCircle,
+  AlertCircle, ArrowLeft, CalendarCheck, CalendarOff, ChevronLeft, ChevronRight,
+  CircleCheck, FileText, Fuel, Gauge, Gavel, GraduationCap, IdCard, Package, ShieldCheck, TriangleAlert, Truck, UserX, XCircle,
 } from '@lucide/vue'
 import UserAvatar from '../../components/ui/UserAvatar.vue'
 import StatusPill from '../../components/ui/StatusPill.vue'
@@ -471,8 +425,10 @@ import { useCarburantStore } from '../../stores/carburant'
 import { useEcartsStore, LIB_TYPE_ECART, LIB_NATURE } from '../../stores/ecarts'
 import { useDocumentsStore } from '../../stores/documentsPersonnel'
 import { useScoresConducteursStore, PONDERATIONS } from '../../stores/scoresConducteurs'
-import { useConfigurationStore } from '../../stores/configuration'
 import { useAbsenceStore } from '../../stores/absences'
+import { useInfractionsStore, LIB_STATUT_INFRACTION } from '../../stores/infractions'
+import { useFormationsStore, LIB_STATUT_FORMATION, LIB_MOTIF_FORMATION } from '../../stores/formations'
+import { useDisponibilitesStore, LIB_DISPONIBILITE } from '../../stores/disponibilites'
 import { formatDate, etatEcheance } from '../../utils/helpers'
 import { fmtDateHeure } from '../../utils/voyageUtils'
 import * as L from '../../lib/listClasses'
@@ -487,15 +443,21 @@ const carburantStore = useCarburantStore()
 const ecartsStore = useEcartsStore()
 const docsPersonnel = useDocumentsStore()
 const scoresStore = useScoresConducteursStore()
-const configStore = useConfigurationStore()
 const absencesStore = useAbsenceStore()
+const infractionsStore = useInfractionsStore()
+const formationsStore = useFormationsStore()
+const dispos = useDisponibilitesStore()
+const configStore = useConfigurationStore()
 
-function fmtAr(n: number) { return `${n.toLocaleString('fr-FR')} Ar` }
-function couleurScore(s: number) { return s >= 80 ? 'text-success' : s >= 60 ? 'text-warning' : 'text-danger' }
+/** Bandes du score : cible de l'indicateur, puis seuil de formation (paramétrage). */
+const indScore = useIndicateursStore()
+const formationsScore = useFormationsStore()
+function couleurScore(s: number) { return s >= (indScore.cible('score') ?? 80) ? 'text-success' : s >= formationsScore.seuilScore ? 'text-warning' : 'text-danger' }
 
 const conducteurId = computed(() => String(route.params.id))
 const conducteur = computed(() => personnel.parId(conducteurId.value))
-const conducteurs = computed(() => personnel.conducteurs)
+/** Navigation sur les conducteurs et les aides conducteurs, comme la liste. */
+const conducteurs = computed(() => [...personnel.conducteurs, ...personnel.aides])
 const indexCourant = computed(() => conducteurs.value.findIndex(c => c.id === conducteurId.value))
 function naviguer(delta: number) {
   const cible = conducteurs.value[indexCourant.value + delta]
@@ -532,32 +494,30 @@ const tracteurAffecte = computed(() => {
   return af ? vehicules.parId(af.vehiculeId) : null
 })
 
-/** Score & prime */
+/** Score de conduite */
 const scoreGlobal = computed(() => scoresStore.scoreGlobal(conducteurId.value))
 const deltaScore = computed(() => scoresStore.delta(conducteurId.value))
 const famillesScore = computed(() => scoresStore.familles(conducteurId.value))
-const primeEligible = computed(() => scoresStore.primeEligible(conducteurId.value))
-const motifNonEligibilite = computed(() => scoresStore.motifNonEligibilite(conducteurId.value))
-const palierPrime = computed(() => scoresStore.palier(scoreGlobal.value))
-const bonsCarburant = computed(() => scoresStore.bonsCarburantChauffeur(conducteurId.value))
-const litresBonCeMois = computed(() => scoresStore.litresBonCeMois(conducteurId.value))
 
 /** Itinéraires */
 const tauxConformiteItineraire = tauxConformiteConducteur
 const depassementsKm = computed(() => ecartsDuConducteur.value.filter(e => e.type === 'ecart_kilometrique').length)
 const kmMoyenParVoyage = computed(() => (voyagesDuConducteur.value.length ? Math.round(kmTotal.value / voyagesDuConducteur.value.length) : 0))
 
-/** Carburant */
+/** Carburant : seulement les périodes de consommation dont il est le chauffeur. */
+const periodesDuConducteur = computed(() => carburantStore.periodesConso.filter(pc => pc.chauffeurId === conducteurId.value))
 const consoMoyenneConducteur = computed(() => {
-  const p = carburantStore.periodesConso.filter(pc => rechargesDuConducteur.value.some(r => r.vehiculeId === pc.vehiculeId))
+  const p = periodesDuConducteur.value
   if (!p.length) return 0
   return Math.round((p.reduce((s, x) => s + x.litresPour100km, 0) / p.length) * 10) / 10
 })
 const ecartConsoConducteur = computed(() => {
-  const p = carburantStore.periodesConso.filter(pc => rechargesDuConducteur.value.some(r => r.vehiculeId === pc.vehiculeId))
+  const p = periodesDuConducteur.value
   if (!p.length) return 0
   return Math.round((p.reduce((s, x) => s + x.ecartPct, 0) / p.length) * 10) / 10
 })
+/** Seuil d'écart de consommation réglé dans la configuration du carburant. */
+const seuilEcartConso = computed(() => carburantStore.parametres.seuilEcartConsoPct)
 
 /** Documents */
 const documentsConducteur = computed(() => (conducteur.value ? docsPersonnel.parPersonnel(conducteur.value.id) : []))
@@ -574,37 +534,23 @@ const echeances = computed(() => {
     .map(d => ({ type: d.libelle, date: d.dateExpiration, expire: docsPersonnel.etat(d) === 'expire' }))
 })
 
-/** Formations */
-const formationsConducteur = computed(() => documentsConducteur.value.filter(d => d.type === 'formation'))
-const formationsExpirees = computed(() => formationsConducteur.value.filter(f => docsPersonnel.etat(f) === 'expire').length)
-const formationsProches = computed(() => formationsConducteur.value.filter(f => docsPersonnel.etat(f) === 'proche').length)
-const formationsAlerte = computed(() => formationsExpirees.value + formationsProches.value)
+/** Formations : le même registre que le menu Conduite (FMS-SC-07). */
+const formationsConducteur = computed(() => formationsStore.duConducteur(conducteurId.value))
+const formationsAPlanifier = computed(() => formationsConducteur.value.filter(f => f.statut === 'a_planifier').length)
+/** Infractions de conduite du conducteur (FMS-SC-05). */
+const infractionsConducteur = computed(() => infractionsStore.infractions.filter(i => i.conducteurId === conducteurId.value).sort((a, b) => b.date.localeCompare(a.date)))
 
-const permisDoc = computed(() => documentsConducteur.value.find(d => d.type === 'permis'))
-const visiteDoc = computed(() => documentsConducteur.value.find(d => d.type === 'visite_medicale'))
-const permisProche = computed(() => permisDoc.value && ['expire', 'proche'].includes(docsPersonnel.etat(permisDoc.value)))
-const visiteProche = computed(() => visiteDoc.value && ['expire', 'proche'].includes(docsPersonnel.etat(visiteDoc.value)))
+/** Pièces obligatoires datées ou non en règle, lues dans le paramétrage des types de documents. */
+const piecesDatees = computed(() => conducteur.value ? docsPersonnel.piecesObligatoires(conducteur.value.id).filter(pc => !pc.valide || !!pc.doc?.dateExpiration) : [])
 
-/** Habilitations obligatoires UCODIS : permis et visite médicale, les deux
- *  pièces exigées par le cahier des charges (pas d'équivalent ADR/APTH,
- *  UCODIS transportant du fret sec, non des matières dangereuses). */
-const habilitations = computed(() => {
-  const construire = (code: string, libelle: string, doc: typeof permisDoc.value) => {
-    const etat = doc ? docsPersonnel.etat(doc) : 'absent'
-    return {
-      code, libelle,
-      acquise: !!doc && etat !== 'expire' && etat !== 'absent',
-      detail: !doc ? 'Non déposé · affectation bloquée'
-        : etat === 'expire' ? `Expiré le ${formatDate(doc.dateExpiration)}`
-        : doc.dateExpiration ? `Valide jusqu'au ${formatDate(doc.dateExpiration)}`
-        : `Déposé le ${formatDate(doc.dateDelivrance)}`,
-    }
-  }
-  return [
-    construire('PERMIS', 'Permis de conduire valide', permisDoc.value),
-    construire('MEDICAL', 'Visite médicale valide', visiteDoc.value),
-  ]
-})
+/** Pièces obligatoires du profil, du même calcul que l'éligibilité (FMS-SC-01, DB-09). */
+const habilitations = computed(() => docsPersonnel.piecesObligatoires(conducteurId.value).map(p => ({
+  code: p.code, libelle: p.libelle, acquise: p.valide,
+  detail: !p.doc ? 'Non déposée : affectation bloquée'
+    : p.etat === 'expire' ? `Expirée le ${formatDate(p.doc.dateExpiration)}`
+    : !p.valide ? 'Non valide : affectation bloquée'
+    : p.doc.dateExpiration ? `Valide jusqu'au ${formatDate(p.doc.dateExpiration)}` : `Déposée le ${formatDate(p.doc.dateDelivrance)}`,
+})))
 const habilitationsOk = computed(() => habilitations.value.every(h => h.acquise))
 
 /** Planning */
@@ -612,39 +558,27 @@ const voyagesAVenir = computed(() => voyagesDuConducteur.value.filter(v => v.sta
 const voyagesEffectues = computed(() => voyagesDuConducteur.value.filter(v => v.statut === 'cloture' || v.statut === 'livre').length)
 const absencesConducteur = computed(() => (conducteur.value ? absencesStore.mesDemandes(conducteur.value.id) : []))
 
+/** Disponibilité et éligibilité : le même calcul que la liste des conducteurs (FMS-DB-12). */
 const disponibilite = computed(() => {
-  const motifs: string[] = []
-  if (docsExpires.value) motifs.push(`${docsExpires.value} document(s) expiré(s)`)
-  if (!habilitationsOk.value) {
-    const manquantes = habilitations.value.filter(h => !h.acquise).map(h => h.code)
-    motifs.push(`habilitation(s) manquante(s) : ${manquantes.join(', ')}`)
-  }
-  const aujourdhui = new Date().toISOString().slice(0, 10)
-  const enCours = absencesConducteur.value.find(a => a.debut <= aujourdhui && a.fin >= aujourdhui && a.statut === 'approuve')
-  if (enCours) motifs.push(`absence en cours jusqu'au ${formatDate(enCours.fin)}`)
-  return {
-    ok: motifs.length === 0,
-    titre: motifs.length === 0 ? 'Disponible · le conducteur peut être affecté à un voyage' : 'Indisponible · affectation bloquée',
-    motifs,
-  }
+  const d = dispos.disponibilite(conducteurId.value)
+  const e = dispos.eligibilite(conducteurId.value)
+  const motifs = [d.detail, e.ok ? undefined : e.motif].filter((x): x is string => !!x)
+  return { etat: d.etat, ok: d.etat === 'disponible' && e.ok, titre: e.ok ? LIB_DISPONIBILITE[d.etat].label : 'Non affectable', motifs }
 })
 
-/** Ressources humaines : infractions internes dérivées des écarts déjà
- *  qualifiés avec une suite disciplinaire, plutôt qu'un registre séparé
- *  qui dupliquerait la même donnée. */
+/** Suites données aux écarts qualifiés (avertissement, signalement à la direction). */
 const sanctionsConducteur = computed(() => ecartsDuConducteur.value.filter(e => e.decision && e.decision !== 'classe'))
-const sanctionsEnCours = computed(() => sanctionsConducteur.value.filter(e => e.nature === 'a_qualifier'))
 
 type OngletCle = 'score' | 'itineraires' | 'carburant' | 'documents' | 'formations' | 'planning' | 'rh'
 const tab = ref<OngletCle>('score')
 const tabs = computed(() => [
-  { key: 'score' as const, label: 'Score & prime' },
+  { key: 'score' as const, label: 'Score de conduite' },
   { key: 'itineraires' as const, label: 'Itinéraires' },
   { key: 'carburant' as const, label: 'Carburant' },
   { key: 'documents' as const, label: 'Documents', badge: docsAlerte.value || undefined },
-  { key: 'formations' as const, label: 'Formations', badge: formationsAlerte.value || undefined },
+  { key: 'formations' as const, label: 'Formations', badge: formationsAPlanifier.value || undefined },
   { key: 'planning' as const, label: 'Planning' },
-  { key: 'rh' as const, label: 'Ressources humaines' },
+  { key: 'rh' as const, label: 'Ressources humaines', badge: infractionsConducteur.value.filter(i => i.statut !== 'cloturee').length || undefined },
 ])
 
 const ficheVoyageId = ref<string | null>(null)

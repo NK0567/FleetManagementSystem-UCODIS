@@ -17,7 +17,7 @@
       </div>
       <div :class="L.kpiCard">
         <div :class="L.kpiIcon" class="bg-success-bg"><Truck class="w-[18px] h-[18px] text-success" /></div>
-        <div :class="L.kpiLabel">Tracteurs libres</div>
+        <div :class="L.kpiLabel">Tracteurs sans remorque</div>
         <div :class="L.kpiValue">{{ vehicules.tracteursLibres.length }}</div>
       </div>
       <div :class="L.kpiCard">
@@ -36,7 +36,7 @@
     <div :class="L.tableCard" class="mb-4">
       <div :class="L.toolbar">
         <span class="text-sm font-semibold text-foreground flex items-center gap-1.5"><Link2 class="w-4 h-4 text-primary" /> Attelages actifs</span>
-        <button :class="L.btnPrimary" @click="showForm = !showForm"><Plus class="w-4 h-4" /> Nouvel attelage</button>
+        <button :class="L.btnPrimary" @click="showForm = true"><Plus class="w-4 h-4" /> Nouvel attelage</button>
       </div>
       <div class="overflow-x-auto">
         <table :class="L.table">
@@ -45,6 +45,7 @@
               <th :class="L.th">Tracteur</th>
               <th :class="L.th">Semi-remorque</th>
               <th :class="L.th">Type remorque</th>
+              <th :class="L.th">Conducteur</th>
               <th :class="L.th">Début</th>
               <th :class="L.th" class="text-right">Actions</th>
             </tr>
@@ -56,6 +57,7 @@
               <td :class="L.td">
                 <span class="text-[11px] text-info bg-info-bg px-2 py-0.5 rounded-full">{{ typeRemorque(a) }}</span>
               </td>
+              <td :class="L.td" class="text-xs">{{ conducteurDuTracteur(a) ?? 'Non affecté' }}</td>
               <td :class="L.td" class="text-muted-foreground">{{ formatDate(a.dateDebut) }}</td>
               <td :class="L.td" class="text-right">
                 <button class="text-xs text-danger cursor-pointer hover:underline" @click="ouvrirDetelage(a)">Dételer</button>
@@ -69,33 +71,20 @@
       </div>
     </div>
 
-    <!-- Nouvel attelage : panneau en ligne, pas de popup, comme la référence -->
-    <div v-if="showForm" class="bg-card border border-border rounded-lg overflow-hidden mb-4">
-      <div class="bg-primary text-primary-foreground px-5 py-3">
-        <h2 class="font-semibold text-[15px]">Nouvel attelage</h2>
-      </div>
-      <div class="p-5">
-        <div class="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
-          <div>
-            <label :class="L.fpFieldLabel">Tracteur *</label>
-            <SearchableDropdown v-model="form.tracteurId" :items="optTracteurs" placeholder="Sélectionner un tracteur" compact />
-          </div>
-          <div>
-            <label :class="L.fpFieldLabel">Semi-remorque *</label>
-            <SearchableDropdown v-model="form.semiRemorqueId" :items="optSemis" placeholder="Sélectionner une semi-remorque" compact />
-          </div>
-          <div>
-            <label :class="L.fpFieldLabel">Date début *</label>
-            <input v-model="form.dateDebut" type="date" :class="L.fpSelect" class="!h-9 w-full" />
-          </div>
+    <!-- Nouvel attelage : fenêtre de création -->
+    <CreateModalShell v-if="showForm" title="Nouvel attelage" banner-label="Flotte · Attelages" create-label="Atteler" :save-error="erreur || null" @close="fermerForm" @create="submit">
+      <template #form>
+        <div class="px-8 py-6 max-w-3xl mx-auto">
+          <FormSection title="Attelage">
+            <div class="grid grid-cols-2 gap-x-6 gap-y-4 max-sm:grid-cols-1">
+              <div :class="F.field"><label :class="F.fieldLabel">Tracteur *</label><SearchableDropdown v-model="form.tracteurId" :items="optTracteurs" placeholder="Sélectionner un tracteur" /></div>
+              <div :class="F.field"><label :class="F.fieldLabel">Semi-remorque *</label><SearchableDropdown v-model="form.semiRemorqueId" :items="optSemis" placeholder="Sélectionner une semi-remorque" /></div>
+              <div :class="F.field"><label :class="F.fieldLabel">Date début *</label><input v-model="form.dateDebut" type="date" :class="F.fieldInput" /></div>
+            </div>
+          </FormSection>
         </div>
-        <p v-if="erreur" class="text-[12px] text-danger mt-3">{{ erreur }}</p>
-        <div class="flex gap-3 mt-4 justify-end">
-          <button :class="L.btnOutline" @click="showForm = false">Annuler</button>
-          <button :class="L.btnPrimary" :disabled="!canSubmit" @click="submit">Atteler</button>
-        </div>
-      </div>
-    </div>
+      </template>
+    </CreateModalShell>
 
     <!-- Historique -->
     <div :class="L.tableCard">
@@ -139,6 +128,7 @@
         <label :class="F.fieldLabel">Date de fin *</label>
         <input v-model="dateFin" type="date" :class="F.fieldInput" />
       </div>
+      <p v-if="erreurDetelage" class="text-[12px] text-danger mt-2">{{ erreurDetelage }}</p>
       <template #pied>
         <button :class="cls.btnPrimary" :disabled="!dateFin" @click="confirmerDetelage"><Check class="w-4 h-4" /> Confirmer</button>
         <button :class="cls.btnOutline" @click="showDeteler = false">Annuler</button>
@@ -149,14 +139,14 @@
 
 <script setup lang="ts">
 /**
- * US 1.4.2 · atteler un tracteur à une semi-remorque. Le formulaire de
- * création est un panneau qui s'ouvre dans la page, pas une fenêtre en
- * superposition · seul le dételage (destructif) reste une confirmation
- * en superposition, comme sur les projets de référence.
+ * FMS-DB-10 · atteler un tracteur à une semi-remorque. La création se fait
+ * dans une fenêtre de création ; le dételage reste une confirmation.
  */
 import { ref, computed } from 'vue'
 import { Check, Container, History, Link2, Plus, Truck } from '@lucide/vue'
 import ModalShell from '../../components/ui/ModalShell.vue'
+import CreateModalShell from '../../components/shared/CreateModalShell.vue'
+import FormSection from '../../components/ui/form-field/FormSection.vue'
 import SearchableDropdown from '../../components/ui/SearchableDropdown.vue'
 import type { DropdownItem } from '../../components/ui/SearchableDropdown.vue'
 import * as L from '../../lib/listClasses'
@@ -165,20 +155,26 @@ import * as cls from '../../lib/formClasses'
 import { formatDate } from '../../utils/helpers'
 import { aujourdhuiISO } from '../../utils/horloge'
 import { useVehiculeStore } from '../../stores/vehicules'
+import { useTypesVehiculesStore } from '../../stores/typesVehicules'
+import { usePersonnelStore } from '../../stores/personnel'
 import type { Attelage } from '../../types'
 
 const vehicules = useVehiculeStore()
+const typesVeh = useTypesVehiculesStore()
 
 const actifs = computed(() => vehicules.attelages.filter(a => !a.dateFin))
 const historique = computed(() => vehicules.attelages.filter(a => !!a.dateFin))
 
 function tracteurDe(a: Attelage) { return vehicules.parId(a.tracteurId) }
 function semiDe(a: Attelage) { return vehicules.parId(a.semiRemorqueId) }
+/** Conducteur affecté au tracteur de l'attelage (FMS-DB-11). */
+const personnel = usePersonnelStore()
+function conducteurDuTracteur(a: Attelage) { const af = vehicules.affectationActive(a.tracteurId); return af ? personnel.parId(af.conducteurId)?.nomComplet ?? null : null }
 
-/** Le type de remorque n'est pas un champ dédié : on le lit dans le modèle
-    (« Fourgon 3 essieux » → « Fourgon »), comme UCODIS les distingue déjà. */
+/** Type de remorque : type paramétré, précisé par le modèle. */
 function typeRemorque(a: Attelage) {
-  return semiDe(a)?.modele.split(' ')[0] ?? '-'
+  const r = semiDe(a); if (!r) return '-'
+  return `${typesVeh.libelle(r.type)} · ${r.modele}`
 }
 
 function duree(debut: string, fin?: string) {
@@ -187,7 +183,7 @@ function duree(debut: string, fin?: string) {
   return `${j} j`
 }
 
-/* ── Nouvel attelage : panneau en ligne ───────────────────────── */
+/* ── Nouvel attelage : fenêtre de création ───────────────────── */
 const showForm = ref(false)
 const form = ref({ tracteurId: '', semiRemorqueId: '', dateDebut: aujourdhuiISO() })
 const erreur = ref('')
@@ -197,21 +193,22 @@ const optTracteurs = computed<DropdownItem[]>(() =>
 const optSemis = computed<DropdownItem[]>(() =>
   vehicules.semiRemorquesLibres.map(s => ({ id: s.id, label: s.immatriculation, sublabel: `${s.marque} ${s.modele}` })))
 
-const canSubmit = computed(() => !!form.value.tracteurId && !!form.value.semiRemorqueId && !!form.value.dateDebut)
-
-function submit() {
-  if (!canSubmit.value) return
-  const ok = vehicules.atteler(form.value.tracteurId, form.value.semiRemorqueId, form.value.dateDebut)
-  if (!ok) { erreur.value = "Le tracteur ou la semi-remorque n'est plus libre."; return }
+function fermerForm() {
   form.value = { tracteurId: '', semiRemorqueId: '', dateDebut: aujourdhuiISO() }
   erreur.value = ''
   showForm.value = false
+}
+function submit() {
+  const r = vehicules.atteler(form.value.tracteurId, form.value.semiRemorqueId, form.value.dateDebut)
+  if (!r.ok) { erreur.value = r.motif ?? ''; return }
+  fermerForm()
 }
 
 /* ── Dételer ──────────────────────────────────────────────────── */
 const showDeteler = ref(false)
 const detelerCible = ref<Attelage | null>(null)
 const dateFin = ref('')
+const erreurDetelage = ref('')
 
 function ouvrirDetelage(a: Attelage) {
   detelerCible.value = a
@@ -220,7 +217,9 @@ function ouvrirDetelage(a: Attelage) {
 }
 function confirmerDetelage() {
   if (!detelerCible.value || !dateFin.value) return
-  vehicules.dételer(detelerCible.value.id, dateFin.value)
+  const r = vehicules.dételer(detelerCible.value.id, dateFin.value)
+  if (!r.ok) { erreurDetelage.value = r.motif ?? ''; return }
+  erreurDetelage.value = ''
   showDeteler.value = false
   detelerCible.value = null
 }

@@ -49,8 +49,8 @@ const COMPTES: Record<RoleUtilisateur, Utilisateur> = {
     personnelId: 'p-007', entiteId: 'e1', entiteNom: 'UCODIS Transport', actif: true,
   },
   conducteur: {
-    id: 'u-008', nom: 'Solofo Rakotomanga', role: 'conducteur', identifiant: 'CND001',
-    personnelId: 'p-010', entiteId: 'e4', entiteNom: 'Équipe conduite', actif: true,
+    id: 'u-008', nom: 'Tiana Rasolofoson', role: 'conducteur', identifiant: 'CND001',
+    personnelId: 'p-012', entiteId: 'e4', entiteNom: 'Équipe conduite', actif: true,
   },
   aide_conducteur: {
     id: 'u-009', nom: 'Fidy Ramanantsoa', role: 'aide_conducteur', identifiant: 'AID001',

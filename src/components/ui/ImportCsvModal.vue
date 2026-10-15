@@ -32,6 +32,7 @@
             <!-- Étape 2 · correspondance des colonnes -->
             <div>
               <p class="text-[13px] font-semibold text-foreground mb-1">2. Faire correspondre les colonnes</p>
+              <p v-if="importId" class="text-[11px] text-muted-foreground mb-2">Les colonnes dont l'intitulé est réglé dans Configuration, Imports et indicateurs, sont reconnues d'office.</p>
               <div class="grid grid-cols-3 gap-x-5 gap-y-3 max-sm:grid-cols-1">
                 <div v-for="ch in champs" :key="ch.cle" class="flex flex-col gap-1">
                   <label class="text-xs font-medium text-foreground">
@@ -44,12 +45,16 @@
               </div>
             </div>
 
+            <label v-if="importId" class="flex items-center gap-2 text-[12px] text-foreground cursor-pointer -mt-2">
+              <input v-model="memoriser" type="checkbox" class="accent-primary" /> Mémoriser cette correspondance pour les prochains imports
+            </label>
+
             <!-- Étape 3 · contrôles et aperçu -->
             <div>
               <p class="text-[13px] font-semibold text-foreground mb-2">
                 3. Vérifier les contrôles
                 <span class="font-normal text-muted-foreground">
-                  · {{ lignesValides.length }} ligne(s) importable(s), {{ lignesRejetees.length }} rejetée(s)
+                  · {{ lignesValides.length }} ligne(s) importable(s), {{ lignesRejetees.length }} rejetée(s)<template v-if="exclues.length">, {{ exclues.length }} exclue(s)</template>
                 </span>
               </p>
 
@@ -64,6 +69,7 @@
                 <table class="w-full border-collapse text-[13px]">
                   <thead>
                     <tr>
+                      <th v-if="exclusionPossible" class="px-3 py-2 text-left text-xs font-semibold text-foreground bg-background border-b border-border whitespace-nowrap">Importer</th>
                       <th v-for="c in apercuColonnes" :key="c.cle" class="px-3 py-2 text-left text-xs font-semibold text-foreground bg-background border-b border-border whitespace-nowrap">
                         {{ c.libelle }}
                       </th>
@@ -71,12 +77,22 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="(l, i) in apercu" :key="i" class="hover:bg-background">
+                    <tr v-for="(l, i) in apercu" :key="i" class="hover:bg-background" :class="exclues.includes(i) ? 'opacity-50' : ''">
+                      <td v-if="exclusionPossible" class="px-3 py-2 border-b border-border">
+                        <input v-if="l.valide" type="checkbox" class="accent-primary" :checked="!exclues.includes(i)" @change="basculerExclusion(i)" />
+                      </td>
                       <td v-for="c in apercuColonnes" :key="c.cle" class="px-3 py-2 border-b border-border text-xs">
-                        {{ (l.donnees as Record<string, unknown>)?.[c.cle] ?? '-' }}
+                        <template v-if="choixDe(c.cle) && l.valide && !exclues.includes(i)">
+                          <select :value="valeurLigne(i, l, c.cle)" class="h-[28px] rounded-md border border-border bg-card px-1.5 text-xs text-foreground" @change="choisir(i, c.cle, ($event.target as HTMLSelectElement).value)">
+                            <option v-for="o in choixDe(c.cle)!.options" :key="o.valeur" :value="o.valeur">{{ o.libelle }}</option>
+                          </select>
+                          <span v-if="l.proposes?.includes(c.cle) && choixLigne[i]?.[c.cle] === undefined" class="ml-1 text-[10px] text-muted-foreground">proposé</span>
+                        </template>
+                        <template v-else>{{ choixDe(c.cle) ? libelleChoix(c.cle, valeurLigne(i, l, c.cle)) : (l.donnees as Record<string, unknown>)?.[c.cle] ?? '-' }}</template>
                       </td>
                       <td class="px-3 py-2 border-b border-border">
-                        <span v-if="l.valide" class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-success-bg text-success">Importable</span>
+                        <span v-if="l.valide && exclues.includes(i)" class="text-[11px] text-muted-foreground">Exclue</span>
+                        <span v-else-if="l.valide" class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-success-bg text-success">Importable</span>
                         <span v-else class="text-[11px] text-danger">{{ l.motif }}</span>
                       </td>
                     </tr>
@@ -84,7 +100,7 @@
                 </table>
               </div>
 
-              <p class="text-[11px] text-muted-foreground mt-2 leading-relaxed">{{ descriptionControles }}</p>
+              <p v-if="descriptionControles" class="text-[11px] text-muted-foreground mt-2 leading-relaxed">{{ descriptionControles }}</p>
             </div>
           </template>
 
@@ -140,18 +156,29 @@ import { ref, reactive, computed } from 'vue'
 import Papa from 'papaparse'
 import { CircleAlert, CircleCheck, Upload, X } from '@lucide/vue'
 import SearchableDropdown from './SearchableDropdown.vue'
+import { useImportsStore, type ImportId } from '../../stores/imports'
 import type { DropdownItem } from './SearchableDropdown.vue'
 
-export interface ChampImport { cle: string; libelle: string; requis: boolean }
-export interface LigneValidee { valide: boolean; motif?: string; donnees?: Record<string, unknown> }
+/** `autres` : autres intitulés reconnus pour la même colonne. */
+export interface ChampImport { cle: string; libelle: string; requis: boolean; autres?: string[] }
+/** `proposes` : clés dont la valeur est une proposition du système, à confirmer ou changer dans l'aperçu. */
+export interface LigneValidee { valide: boolean; motif?: string; donnees?: Record<string, unknown>; proposes?: string[] }
+/** Colonne de l'aperçu modifiable ligne par ligne, par une liste de valeurs. */
+export interface ColonneChoix { cle: string; options: { valeur: string; libelle: string }[] }
 
 const props = defineProps<{
   titre: string
+  /** Import paramétré (FMS-PA-07) : reconnaissance des colonnes par les intitulés réglés. */
+  importId?: ImportId
   champs: ChampImport[]
   apercuColonnes: { cle: string; libelle: string }[]
-  descriptionControles: string
+  descriptionControles?: string
   modele: string[]
   valider: (ligneBrute: Record<string, string>, mapping: Record<string, string>) => LigneValidee
+  /** Facultatif : colonnes dont la valeur se change ligne par ligne avant l'import. */
+  colonnesChoix?: ColonneChoix[]
+  /** Facultatif : chaque ligne importable peut être exclue avant l'import. */
+  exclusionPossible?: boolean
 }>()
 
 const emit = defineEmits<{ close: []; importer: [lignes: Record<string, unknown>[]] }>()
@@ -161,7 +188,20 @@ const erreurFichier = ref('')
 const entetes = ref<string[]>([])
 const lignesBrutes = ref<Record<string, string>[]>([])
 const mapping = reactive<Record<string, string>>({})
+const imports = useImportsStore()
+const memoriser = ref(false)
 const rapport = ref<{ importees: number; rejets: { ligne: number; motif: string }[] } | null>(null)
+/** Valeurs changées dans l'aperçu et lignes exclues, par rang de ligne. */
+const choixLigne = reactive<Record<number, Record<string, string>>>({})
+const exclues = ref<number[]>([])
+const choixDe = (cle: string) => props.colonnesChoix?.find(c => c.cle === cle)
+const libelleChoix = (cle: string, v: unknown) => v == null || v === '' ? '-' : choixDe(cle)?.options.find(o => o.valeur === v)?.libelle ?? String(v)
+const valeurLigne = (i: number, l: LigneValidee, cle: string) => choixLigne[i]?.[cle] ?? (l.donnees?.[cle] as string | undefined) ?? ''
+function choisir(i: number, cle: string, v: string) { choixLigne[i] = { ...(choixLigne[i] ?? {}), [cle]: v } }
+function basculerExclusion(i: number) {
+  exclues.value = exclues.value.includes(i) ? exclues.value.filter(x => x !== i) : [...exclues.value, i]
+}
+function reinitialiserChoix() { Object.keys(choixLigne).forEach(k => delete choixLigne[Number(k)]); exclues.value = [] }
 
 function chargerFichier(e: Event) {
   const fichier = (e.target as HTMLInputElement).files?.[0]
@@ -181,6 +221,9 @@ function chargerFichier(e: Event) {
       }
       entetes.value = res.meta.fields
       lignesBrutes.value = res.data
+      reinitialiserChoix()
+      Object.keys(mapping).forEach(k => delete mapping[k])
+      if (props.importId) { Object.assign(mapping, imports.reconnaitre(props.importId, res.meta.fields)); return }
       // Correspondance automatique quand le nom de colonne correspond au libellé du champ
       props.champs.forEach(ch => {
         const trouve = res.meta.fields!.find(h => h.trim().toLowerCase() === ch.libelle.trim().toLowerCase())
@@ -196,13 +239,18 @@ const optEntetes = computed<DropdownItem[]>(() => entetes.value.map(h => ({ id: 
 const lignesEvaluees = computed<LigneValidee[]>(() =>
   lignesBrutes.value.map(l => props.valider(l, mapping)),
 )
-const lignesValides = computed(() => lignesEvaluees.value.filter(l => l.valide))
+/** Lignes importables : valides, non exclues, avec les valeurs changées dans l'aperçu. */
+const lignesValides = computed(() => lignesEvaluees.value
+  .map((l, i) => ({ l, i }))
+  .filter(({ l, i }) => l.valide && !exclues.value.includes(i))
+  .map(({ l, i }) => ({ ...l, donnees: l.donnees ? { ...l.donnees, ...(choixLigne[i] ?? {}) } : l.donnees })))
 const lignesRejetees = computed(() =>
   lignesEvaluees.value
     .map((l, index) => ({ ...l, numeroLigne: index + 2 })) // +2 : ligne 1 = en-tête
     .filter(l => !l.valide),
 )
-const apercu = computed(() => lignesEvaluees.value.slice(0, 50))
+/* Quand les lignes se corrigent une à une, toutes s'affichent. */
+const apercu = computed(() => props.colonnesChoix?.length || props.exclusionPossible ? lignesEvaluees.value : lignesEvaluees.value.slice(0, 50))
 
 const bilan = computed(() => [
   { label: 'Lignes lues', nb: lignesBrutes.value.length },
@@ -219,14 +267,16 @@ function importer() {
   const rejetsSnapshot = lignesRejetees.value.map(l => ({ ligne: l.numeroLigne, motif: l.motif ?? 'Ligne invalide' }))
 
   emit('importer', valides)
+  if (props.importId && memoriser.value) imports.memoriser(props.importId, { ...mapping })
 
   rapport.value = { importees: valides.length, rejets: rejetsSnapshot }
   entetes.value = []
   lignesBrutes.value = []
+  reinitialiserChoix()
 }
 
 function telechargerModele() {
-  const csv = props.modele.join(';') + '\n'
+  const csv = (props.importId ? imports.modele(props.importId) : props.modele).join(';') + '\n'
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')

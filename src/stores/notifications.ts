@@ -1,11 +1,9 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { useAbsenceStore } from './absences'
-import { aujourdhuiISO } from '../utils/horloge'
+import { aujourdhuiISO, maintenantMs } from '../utils/horloge'
 import { useCalendrierStore } from './calendrier'
-import { usePneusStore } from './pneus'
-import { useCarburantStore } from './carburant'
-import { useCartesCarburantStore } from './cartesCarburant'
+import { useAlertesStore } from './alertes'
 
 export interface Notification {
   id: string
@@ -13,6 +11,11 @@ export interface Notification {
   titre: string
   message: string
   lu: boolean
+  /** Clé de l'alerte, pour l'ouvrir dans l'écran Alertes. */
+  alerte?: string
+  /** Écran où se traite l'élément (demande d'absence), et l'élément à y ouvrir. */
+  route?: string
+  query?: Record<string, string>
 }
 
 /**
@@ -23,9 +26,7 @@ export interface Notification {
 export const useNotificationStore = defineStore('notifications', () => {
   const absences = useAbsenceStore()
   const calendrier = useCalendrierStore()
-  const pneus = usePneusStore()
-  const carburant = useCarburantStore()
-  const cartes = useCartesCarburantStore()
+  const alertes = useAlertesStore()
   const lus = ref(new Set<string>())
 
   const liste = computed<Notification[]>(() => {
@@ -38,6 +39,7 @@ export const useNotificationStore = defineStore('notifications', () => {
         titre: 'Demande à traiter',
         message: `${d.nom} · ${d.type}, ${d.debut} → ${d.fin}`,
         lu: lus.value.has(`att-${d.id}`),
+        route: 'admin-demandes', query: { demande: String(d.id) },
       })
     })
 
@@ -50,11 +52,12 @@ export const useNotificationStore = defineStore('notifications', () => {
           titre: 'Demande retournée',
           message: `${d.nom} · en attente de correction`,
           lu: lus.value.has(`ret-${d.id}`),
+          route: 'admin-demandes', query: { demande: String(d.id) },
         })
       })
 
     const aujourdhui = aujourdhuiISO()
-    const dans30 = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10)
+    const dans30 = new Date(maintenantMs() + 30 * 86400000).toISOString().slice(0, 10)
     calendrier.feries
       .filter(f => f.date >= aujourdhui && f.date <= dans30)
       .forEach(f => {
@@ -67,28 +70,9 @@ export const useNotificationStore = defineStore('notifications', () => {
         })
       })
 
-    /* Pneus hors seuil (pression, sculpture) ou à faire pivoter. */
-    carburant.anomalies.forEach(r => {
-      const id = `plein-${r.id}`
-      out.push({ id, type: 'systeme', titre: 'Plein à qualifier', message: `${r.vehiculePlaque} · ${r.litres} L à ${r.lieu} : ${r.controles.filter(c => !c.ok).map(c => c.libelle.toLowerCase()).join(', ')}`, lu: lus.value.has(id) })
-    })
-    carburant.ecartsAQualifier.forEach(p => {
-      const id = `ecart-${p.id}`
-      out.push({ id, type: 'systeme', titre: 'Écart de consommation à qualifier', message: `${p.vehiculePlaque} · ${p.ecartPct > 0 ? '+' : ''}${p.ecartPct} % sur la référence`, lu: lus.value.has(id) })
-    })
-    cartes.enDepassement.forEach(t => {
-      const id = `tx-${t.id}`
-      out.push({ id, type: 'systeme', titre: 'Carte carburant : limite dépassée', message: `${t.station}, ${t.litres} L : ${cartes.depassements(t).join(', ')}`, lu: lus.value.has(id) })
-    })
-
-    pneus.alertes.forEach(({ pneu, motifs }) => {
-      out.push({
-        id: `pneu-${pneu.id}-${motifs.join('|')}`,
-        type: 'systeme',
-        titre: 'Alerte pneumatique',
-        message: `${pneu.vehiculePlaque ?? ''} · ${pneu.numeroSerie} : ${motifs.join(', ')}`,
-        lu: lus.value.has(`pneu-${pneu.id}-${motifs.join('|')}`),
-      })
+    /* Alertes en cours des sous-modules : traitées dans l'écran Alertes. */
+    alertes.enCours.forEach(e => {
+      out.push({ id: e.cle, type: 'systeme', titre: e.escaladeeLe ? `${e.titre} (escaladée)` : e.titre, message: e.message, lu: lus.value.has(e.cle), alerte: e.cle })
     })
 
     return out

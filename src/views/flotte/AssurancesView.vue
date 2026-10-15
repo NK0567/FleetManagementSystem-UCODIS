@@ -1,12 +1,12 @@
 <template>
   <ListPageLayout
-    title="Assurances & sinistres"
-    :subtitle="`${store.nbSinistres} sinistre(s) · reste à charge ${store.resteACharge.toLocaleString('fr-FR')} Ar`"
+    title="Assurances, accidents et incidents"
+    :subtitle="`${store.nbSinistres} accident(s) et incident(s) · ${ouverts} dossier(s) ouvert(s) · reste à charge ${store.resteACharge.toLocaleString('fr-FR')} ${$devise()}`"
     :columns="columns"
     :items="pageItems"
     :total="totalCount"
     :total-text="totalText"
-    :search-placeholder="vue === 'sinistres' ? 'Référence, plaque, lieu…' : 'Police, compagnie, plaque…'"
+    :search-placeholder="vue === 'sinistres' ? 'Référence, plaque, lieu, conducteur…' : 'Police, compagnie, plaque…'"
     scope-label="Vue :"
     :scope-options="scopeOptions"
     v-model:scope="vue"
@@ -18,11 +18,25 @@
     @reset-filters="resetFilters"
     @open-card="(s: any) => { if (vue === 'sinistres') ouvrirFiche(s.id) }"
   >
+    <template #header-actions>
+      <button :class="L.btnPrimary" @click="declarationOuverte = true"><Plus class="w-4 h-4" /> Déclarer un accident ou un incident</button>
+    </template>
+    <template v-if="vue === 'sinistres'" #filters>
+      <div :class="L.fpField">
+        <label :class="L.fpFieldLabel">Dossier</label>
+        <SearchableDropdown v-model="filtreDossier" :items="optDossier" placeholder="Tous" compact />
+      </div>
+      <div :class="L.fpField">
+        <label :class="L.fpFieldLabel">Nature</label>
+        <SearchableDropdown v-model="filtreNature" :items="optNature" placeholder="Toutes" compact />
+      </div>
+      <button class="mt-auto py-[7px] bg-transparent border-0 text-xs text-muted-foreground cursor-pointer text-left hover:text-primary" @click="resetFilters">Réinitialiser</button>
+    </template>
     <template #above-table>
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-3.5">
         <div :class="L.kpiItem">
           <div :class="[L.kpiItemIcon, 'bg-primary/10']"><ShieldAlert class="w-[18px] h-[18px] text-primary" /></div>
-          <div><div :class="L.kpiItemVal">{{ store.nbSinistres }}</div><div :class="L.kpiItemLbl">Sinistres</div></div>
+          <div><div :class="L.kpiItemVal">{{ store.nbSinistres }}</div><div :class="L.kpiItemLbl">Accidents et incidents</div></div>
         </div>
         <div :class="L.kpiItem">
           <div :class="[L.kpiItemIcon, 'bg-info-bg']"><Gauge class="w-[18px] h-[18px] text-info" /></div>
@@ -30,11 +44,11 @@
         </div>
         <div :class="L.kpiItem">
           <div :class="[L.kpiItemIcon, 'bg-warning-bg']"><Coins class="w-[18px] h-[18px] text-warning" /></div>
-          <div><div :class="L.kpiItemVal">{{ store.dommagesTotaux.toLocaleString('fr-FR') }} Ar</div><div :class="L.kpiItemLbl">Dommages</div></div>
+          <div><div :class="L.kpiItemVal">{{ store.dommagesTotaux.toLocaleString('fr-FR') }} {{ $devise() }}</div><div :class="L.kpiItemLbl">Dommages</div></div>
         </div>
         <div :class="L.kpiItem">
           <div :class="[L.kpiItemIcon, 'bg-danger-bg']"><TriangleAlert class="w-[18px] h-[18px] text-danger" /></div>
-          <div><div :class="L.kpiItemVal">{{ store.resteACharge.toLocaleString('fr-FR') }} Ar</div><div :class="L.kpiItemLbl">Reste à charge</div></div>
+          <div><div :class="L.kpiItemVal">{{ store.resteACharge.toLocaleString('fr-FR') }} {{ $devise() }}</div><div :class="L.kpiItemLbl">Reste à charge</div></div>
         </div>
       </div>
     </template>
@@ -42,7 +56,7 @@
     <!-- ══ VUE 1 - SINISTRES ══ -->
     <template #cell-reference="{ item }">
       <button class="font-mono font-semibold text-foreground hover:text-primary hover:underline bg-transparent border-0 p-0 cursor-pointer" @click.stop="ouvrirFiche(item.id)">{{ item.reference }}</button>
-      <div class="text-[11px] text-muted-foreground">{{ item.lieu }}</div>
+      <div class="text-[11px] text-muted-foreground">{{ item.nature === 'incident' ? 'Incident' : 'Accident' }} · {{ item.lieu }}</div>
     </template>
     <template #cell-vehicule="{ item }">
       <span class="font-mono text-xs">{{ item.vehiculePlaque }}</span>
@@ -50,15 +64,17 @@
     </template>
     <template #cell-gravite="{ item }">
       <span class="text-xs font-medium px-2 py-0.5 rounded-full" :class="graviteCls(item.gravite)">{{ graviteLabel(item.gravite) }}</span>
-      <div class="text-[11px] text-muted-foreground mt-0.5">{{ item.responsabiliteUcodis ? 'responsabilité UCODIS' : 'tiers responsable' }}</div>
+      <div class="text-[11px] text-muted-foreground mt-0.5">{{ item.responsabiliteEntreprise ? 'responsabilité de l\'entreprise' : 'tiers responsable' }}</div>
     </template>
-    <template #cell-dommages="{ item }"><span class="text-xs">{{ (item.montantDommagesAr ?? 0).toLocaleString('fr-FR') }} Ar</span></template>
+    <template #cell-dommages="{ item }"><span class="text-xs">{{ (item.montantDommagesAr ?? 0).toLocaleString('fr-FR') }} {{ $devise() }}</span></template>
     <template #cell-indemnisation="{ item }">
       <span class="text-xs font-medium px-2 py-0.5 rounded-full" :class="classeIndemnisation(item.statutIndemnisation)">{{ indemnisationLabel(item.statutIndemnisation) }}</span>
-      <div v-if="item.montantIndemniseAr" class="text-[11px] text-success mt-0.5">{{ item.montantIndemniseAr.toLocaleString('fr-FR') }} Ar</div>
+      <div v-if="item.montantIndemniseAr" class="text-[11px] text-success mt-0.5">{{ item.montantIndemniseAr.toLocaleString('fr-FR') }} {{ $devise() }}</div>
     </template>
-    <template #cell-reste="{ item }"><span class="text-xs font-semibold" :class="resteACharge(item) > 0 ? 'text-danger' : 'text-success'">{{ resteACharge(item).toLocaleString('fr-FR') }} Ar</span></template>
+    <template #cell-reste="{ item }"><span class="text-xs font-semibold" :class="resteACharge(item) > 0 ? 'text-danger' : 'text-success'">{{ resteACharge(item).toLocaleString('fr-FR') }} {{ $devise() }}</span></template>
     <template #cell-date="{ item }"><span class="text-xs">{{ fmtDateHeure(item.date) }}</span></template>
+    <template #cell-suites="{ item }"><span class="text-xs">{{ item.ordreTravailRef ?? 'sans réparation' }}</span></template>
+    <template #cell-dossier="{ item }"><span class="text-[11px] font-medium px-2 py-0.5 rounded-full" :class="item.statutDossier === 'clos' ? 'bg-neutral-bg text-neutral' : 'bg-info-bg text-info'">{{ item.statutDossier === 'clos' ? 'Clos' : 'Ouvert' }}</span></template>
 
     <!-- ══ VUE 2 - POLICES D'ASSURANCE ══ -->
     <template #cell-police="{ item }">
@@ -72,8 +88,8 @@
       <div class="text-[11px] mt-0.5" :class="classeEcheancePolice(item.dateEcheance)">{{ libelleEcheancePolice(item.dateEcheance) }}</div>
     </template>
     <template #cell-prime="{ item }">
-      <span class="text-xs">{{ item.primeAnnuelleAr ? item.primeAnnuelleAr.toLocaleString('fr-FR') + ' Ar' : '-' }}</span>
-      <div v-if="item.franchiseAr" class="text-[11px] text-muted-foreground">franchise {{ item.franchiseAr.toLocaleString('fr-FR') }} Ar</div>
+      <span class="text-xs">{{ item.primeAnnuelleAr ? item.primeAnnuelleAr.toLocaleString('fr-FR') + ' ' + $devise() : '-' }}</span>
+      <div v-if="item.franchiseAr" class="text-[11px] text-muted-foreground">franchise {{ item.franchiseAr.toLocaleString('fr-FR') }} {{ $devise() }}</div>
     </template>
     <template #cell-statutPolice="{ item }"><span class="text-[11px] font-medium px-2 py-0.5 rounded-full" :class="statutPoliceCls(item.statut)">{{ statutPoliceLabel(item.statut) }}</span></template>
 
@@ -87,15 +103,21 @@
         <p class="text-[12px] text-foreground leading-relaxed">{{ item.circonstances }}</p>
         <div class="grid grid-cols-2 gap-2 text-xs">
           <div><div class="text-muted-foreground text-[11px]">Véhicule</div><span class="font-mono">{{ item.vehiculePlaque }}</span></div>
-          <div><div class="text-muted-foreground text-[11px]">Chauffeur</div>{{ item.chauffeurNom ?? '-' }}</div>
-          <div><div class="text-muted-foreground text-[11px]">Dommages</div>{{ (item.montantDommagesAr ?? 0).toLocaleString('fr-FR') }} Ar</div>
-          <div><div class="text-muted-foreground text-[11px]">Reste à charge</div>{{ resteACharge(item).toLocaleString('fr-FR') }} Ar</div>
+          <div><div class="text-muted-foreground text-[11px]">Conducteur</div>{{ item.chauffeurNom ?? '-' }}</div>
+          <div><div class="text-muted-foreground text-[11px]">Dommages</div>{{ (item.montantDommagesAr ?? 0).toLocaleString('fr-FR') }} {{ $devise() }}</div>
+          <div><div class="text-muted-foreground text-[11px]">Reste à charge</div>{{ resteACharge(item).toLocaleString('fr-FR') }} {{ $devise() }}</div>
+          <div><div class="text-muted-foreground text-[11px]">Réparation</div>{{ item.ordreTravailRef ?? '-' }}</div>
+          <div><div class="text-muted-foreground text-[11px]">Photos</div>{{ item.photos?.length ?? 0 }}</div>
         </div>
         <button :class="L.btnPrimary" class="w-full justify-center" @click="ouvrirFiche(item.id)">Ouvrir la fiche</button>
       </div>
       <div v-else class="flex flex-col gap-2 text-xs">
         <div class="font-mono font-semibold text-foreground">{{ item.numeroPolice }}</div>
-        <div class="text-muted-foreground">{{ item.compagnie }}</div>
+        <div>
+          <div class="text-muted-foreground text-[11px] mb-1">Compagnie</div>
+          <SearchableDropdown :model-value="item.assureurId ?? ''" :items="optAssureurs" :placeholder="item.compagnie || 'Choisir…'" compact @update:model-value="(v: string) => changerAssureur(item.id, v)" />
+          <p v-if="erreurPolice && erreurPolice.id === item.id" class="text-[11px] text-danger mt-1">{{ erreurPolice.motif }}</p>
+        </div>
         <div><div class="text-muted-foreground text-[11px]">Véhicule</div><span class="font-mono">{{ item.vehiculePlaque }}</span></div>
         <div><div class="text-muted-foreground text-[11px]">Couverture</div>{{ item.couverture }}</div>
         <div><div class="text-muted-foreground text-[11px]">Échéance</div>{{ formatDate(item.dateEcheance) }}</div>
@@ -104,16 +126,21 @@
 
     <template #empty>
       <ShieldAlert class="w-8 h-8" />
-      <p class="text-sm">{{ vue === 'sinistres' ? 'Aucun sinistre trouvé' : 'Aucune police trouvée' }}</p>
+      <p class="text-sm">{{ vue === 'sinistres' ? 'Aucun accident ni incident trouvé' : 'Aucune police trouvée' }}</p>
     </template>
 
-    <SinistreCard v-if="ficheId" :sinistres="store.sinistres" :sinistre-id="ficheId" @close="ficheId = null" />
+    <SinistreCard v-if="ficheId" :key="ficheId" :sinistres="sinistresFiltres.some(x => x.id === ficheId) ? sinistresFiltres : store.sinistres" :sinistre-id="ficheId" @close="ficheId = null" />
   </ListPageLayout>
+  <IncidentFormModal v-if="declarationOuverte" @close="declarationOuverte = false" @cree="id => { declarationOuverte = false; vue = 'sinistres'; ficheId = id }" />
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { Coins, Gauge, ShieldAlert, TriangleAlert } from '@lucide/vue'
+import { useRoute } from 'vue-router'
+import { Coins, Gauge, Plus, ShieldAlert, TriangleAlert } from '@lucide/vue'
+import SearchableDropdown from '../../components/ui/SearchableDropdown.vue'
+import type { DropdownItem } from '../../components/ui/SearchableDropdown.vue'
+import IncidentFormModal from '../../components/flotte/IncidentFormModal.vue'
 import ListPageLayout from '../../components/shared/ListPageLayout.vue'
 import type { ListColumn } from '../../components/shared/ListPageLayout.vue'
 import SinistreCard from '../../components/flotte/SinistreCard.vue'
@@ -130,6 +157,15 @@ const vue = ref<Vue>('sinistres')
 
 const searchQuery = ref('')
 const ficheId = ref<string | null>(null)
+/* Déclaration et suivi des dossiers d'accident ou d'incident (FMS-SC-06). */
+const declarationOuverte = ref(false)
+const filtreDossier = ref(''); const filtreNature = ref('')
+const optDossier: DropdownItem[] = [{ id: 'ouvert', label: 'Ouverts' }, { id: 'clos', label: 'Clos' }]
+const optNature: DropdownItem[] = [{ id: 'accident', label: 'Accidents' }, { id: 'incident', label: 'Incidents' }]
+const ouverts = computed(() => store.sinistres.filter(s => s.statutDossier !== 'clos').length)
+const routeLien = useRoute()
+if (typeof routeLien.query.sinistre === 'string') ficheId.value = routeLien.query.sinistre
+watch(() => routeLien.query.sinistre, v => { if (typeof v === 'string') { vue.value = 'sinistres'; ficheId.value = v } })
 const sortKey = ref('')
 const sortDir = ref<'asc' | 'desc'>('desc')
 const page = ref(1)
@@ -154,7 +190,7 @@ function libelleEcheancePolice(date: string) {
 }
 
 const scopeOptions = [
-  { value: 'sinistres', label: 'Sinistres' },
+  { value: 'sinistres', label: 'Accidents et incidents' },
   { value: 'polices', label: "Polices d'assurance" },
 ]
 const totalText = computed(() => vue.value === 'sinistres' ? `${totalCount.value} sinistre(s)` : `${totalCount.value} police(s)`)
@@ -168,6 +204,8 @@ const COLONNES: Record<Vue, ListColumn[]> = {
     { key: 'indemnisation', label: 'Indemnisation', width: 150 },
     { key: 'reste', label: 'Reste à charge', width: 120 },
     { key: 'date', label: 'Date', sortable: true, width: 110 },
+    { key: 'suites', label: 'Réparation', width: 130 },
+    { key: 'dossier', label: 'Dossier', width: 90 },
   ],
   polices: [
     { key: 'police', label: 'Police', sortable: true, hideable: false, width: 170 },
@@ -180,13 +218,13 @@ const COLONNES: Record<Vue, ListColumn[]> = {
 }
 const columns = computed(() => COLONNES[vue.value])
 
-watch([vue, searchQuery, pageSize], () => { page.value = 1 })
-function resetFilters() { searchQuery.value = ''; page.value = 1 }
+watch([vue, searchQuery, pageSize, filtreDossier, filtreNature], () => { page.value = 1 })
+function resetFilters() { searchQuery.value = ''; filtreDossier.value = ''; filtreNature.value = ''; page.value = 1 }
 
 const donnees = computed<any[]>(() => {
   const q = searchQuery.value.toLowerCase()
   if (vue.value === 'sinistres') {
-    let rows = store.sinistres.filter(s => !q || `${s.reference} ${s.vehiculePlaque} ${s.lieu}`.toLowerCase().includes(q))
+    const rows = sinistresFiltres.value
     return sortKey.value ? tri(rows) : [...rows].sort((a, b) => +new Date(b.date) - +new Date(a.date))
   }
   let rows = store.polices.filter(p => !q || `${p.numeroPolice} ${p.compagnie} ${p.vehiculePlaque}`.toLowerCase().includes(q))
@@ -199,8 +237,25 @@ function tri(rows: any[]) {
   })
 }
 
+const sinistresFiltres = computed(() => {
+  const q = searchQuery.value.toLowerCase()
+  return store.sinistres.filter(s => {
+    if (filtreDossier.value === 'ouvert' && s.statutDossier === 'clos') return false
+    if (filtreDossier.value === 'clos' && s.statutDossier !== 'clos') return false
+    if (filtreNature.value && (s.nature ?? 'accident') !== filtreNature.value) return false
+    return !q || `${s.reference} ${s.vehiculePlaque} ${s.lieu} ${s.chauffeurNom ?? ''}`.toLowerCase().includes(q)
+  })
+})
 const totalCount = computed(() => donnees.value.length)
 const pageItems = computed(() => { const s = (page.value - 1) * pageSize.value; return donnees.value.slice(s, s + pageSize.value) })
 
 function ouvrirFiche(id: string) { ficheId.value = id }
+
+/* Compagnie d'une police : un prestataire assureur autorisé. */
+const optAssureurs = computed<DropdownItem[]>(() => store.assureursAutorises.map(a => ({ id: a.id, label: a.nom })))
+const erreurPolice = ref<{ id: string; motif: string } | null>(null)
+function changerAssureur(policeId: string, assureurId: string) {
+  const r = store.changerAssureur(policeId, assureurId)
+  erreurPolice.value = r.ok ? null : { id: policeId, motif: r.motif ?? '' }
+}
 </script>

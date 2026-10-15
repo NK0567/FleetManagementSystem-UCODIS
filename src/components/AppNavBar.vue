@@ -48,6 +48,7 @@
 </template>
 
 <script setup lang="ts">
+import { useParametresStore } from '../stores/parametres'
 import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { Menu, X } from '@lucide/vue'
@@ -91,7 +92,7 @@ function aller(item: OngletModule) {
   router.push({ name: item.route })
 }
 
-const contexte = computed(() => `${auth.libelleRole.toUpperCase()} · UCODIS`)
+const contexte = computed(() => `${auth.libelleRole.toUpperCase()} · ${useParametresStore().societe.raisonSociale.toUpperCase()}`)
 
 const menuMobile = ref(false)
 

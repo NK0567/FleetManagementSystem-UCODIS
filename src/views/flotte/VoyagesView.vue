@@ -6,7 +6,7 @@
     :items="pageItems"
     :total="totalCount"
     :total-text="`${totalCount} voyage(s)`"
-    search-placeholder="Référence, OT, plaque, chauffeur…"
+    search-placeholder="Référence, ordre de transport, plaque, conducteur…"
     scope-label="Statut :"
     :scope-options="scopeOptions"
     v-model:scope="activeScope"
@@ -51,7 +51,7 @@
     <template #cell-reference="{ item }">
       <button class="font-mono font-semibold text-foreground hover:text-primary hover:underline bg-transparent border-0 p-0 cursor-pointer"
               @click.stop="ouvrirFiche(item.id)">{{ item.reference }}</button>
-      <div v-if="item.numeroOT" class="text-[11px] text-muted-foreground">OT {{ item.numeroOT }}</div>
+      <div v-if="item.numeroOT" class="text-[11px] text-muted-foreground">{{ item.numeroOT }}</div>
     </template>
     <template #cell-statut="{ item }">
       <span :class="STATUT[item.statut].cls" class="text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap">{{ STATUT[item.statut].label }}</span>
@@ -94,9 +94,9 @@
     </template>
     <template #cell-conformite="{ item }">
       <div class="flex items-center gap-1.5 flex-wrap">
-        <span v-if="item.nbEcarts > 0" class="text-[11px] font-medium px-1.5 py-0.5 rounded bg-danger-bg text-danger">{{ item.nbEcarts }} écart{{ item.nbEcarts > 1 ? 's' : '' }}</span>
-        <span v-if="item.nbArretsNonJustifies > 0" class="text-[11px] font-medium px-1.5 py-0.5 rounded bg-warning-bg text-warning">{{ item.nbArretsNonJustifies }} arrêt{{ item.nbArretsNonJustifies > 1 ? 's' : '' }}</span>
-        <span v-if="item.nbEcarts === 0 && item.nbArretsNonJustifies === 0" class="text-[11px] text-success">Conforme</span>
+        <span v-if="ecarts.compteDuVoyage(item.id).nonJustifies" class="text-[11px] font-medium px-1.5 py-0.5 rounded bg-danger-bg text-danger">{{ ecarts.compteDuVoyage(item.id).nonJustifies }} non justifié(s)</span>
+        <span v-if="ecarts.compteDuVoyage(item.id).aQualifier" class="text-[11px] font-medium px-1.5 py-0.5 rounded bg-warning-bg text-warning">{{ ecarts.compteDuVoyage(item.id).aQualifier }} à qualifier</span>
+        <span v-if="ecarts.compteDuVoyage(item.id).conforme" class="text-[11px] text-success">Conforme</span>
       </div>
     </template>
     <template #cell-dossier="{ item }">
@@ -119,7 +119,7 @@
           <div><div class="text-muted-foreground text-[11px]">Client</div>{{ item.clientNom }}</div>
           <div><div class="text-muted-foreground text-[11px]">Marchandise</div>{{ item.marchandise.typeProduit }}</div>
           <div><div class="text-muted-foreground text-[11px]">Véhicule</div><span class="font-mono">{{ item.vehiculePlaque ?? '-' }}</span></div>
-          <div><div class="text-muted-foreground text-[11px]">Chauffeur</div>{{ item.chauffeurNom ?? '-' }}</div>
+          <div><div class="text-muted-foreground text-[11px]">Conducteur</div>{{ item.chauffeurNom ?? '-' }}</div>
           <div><div class="text-muted-foreground text-[11px]">Km référence</div>{{ item.kmReference }} km</div>
           <div><div class="text-muted-foreground text-[11px]">Départ</div>{{ fmtDateHeure(item.datePlanifiee) }}</div>
         </div>
@@ -139,6 +139,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { AlertTriangle, MapPinned, Package, Plus, Weight } from '@lucide/vue'
 import SearchableDropdown from '../../components/ui/SearchableDropdown.vue'
 import type { DropdownItem } from '../../components/ui/SearchableDropdown.vue'
@@ -148,12 +149,14 @@ import VoyageFormModal from '../../components/flotte/VoyageFormModal.vue'
 import VoyageCard from '../../components/flotte/VoyageCard.vue'
 import { useVoyagesStore } from '../../stores/voyages'
 import { useTrajetsStore } from '../../stores/trajets'
+import { useEcartsStore } from '../../stores/ecarts'
 import type { Voyage, StatutVoyage } from '../../types'
 import { avancementEtapes, fmtKg, fmtDateHeure } from '../../utils/voyageUtils'
 import * as L from '../../lib/listClasses'
 
 const voyages = useVoyagesStore()
 const trajets = useTrajetsStore()
+const ecarts = useEcartsStore()
 
 const searchQuery = ref('')
 const activeScope = ref('')
@@ -162,6 +165,9 @@ const filterClient = ref('')
 const filterDossier = ref('')
 const creationOuverte = ref(false)
 const ficheId = ref<string | null>(null)
+const routeLien = useRoute()
+if (typeof routeLien.query.voyage === 'string') ficheId.value = routeLien.query.voyage
+watch(() => routeLien.query.voyage, v => { if (typeof v === 'string') ficheId.value = v })
 const sortKey = ref('')
 const sortDir = ref<'asc' | 'desc'>('asc')
 const page = ref(1)

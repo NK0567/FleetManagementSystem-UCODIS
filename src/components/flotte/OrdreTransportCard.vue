@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { maintenantMs } from '../../utils/horloge'
 /**
  * Fiche d'un ordre de transport - à la fois l'écran de création et
  * celui de consultation/édition, en une seule fiche en superposition,
@@ -40,6 +41,7 @@ import { usePersonnelStore } from '../../stores/personnel'
 import { useTrajetsStore } from '../../stores/trajets'
 import { useSitesStore } from '../../stores/sites'
 import { useDocumentsVehiculeStore } from '../../stores/documentsVehicule'
+import { useDocumentsStore } from '../../stores/documentsPersonnel'
 import { fmtDateHeure, horsTournee, chargeOrdre } from '../../utils/voyageUtils'
 import type { StatutVoyage, EtapeVoyage, Voyage } from '../../types'
 
@@ -52,6 +54,7 @@ const personnel = usePersonnelStore()
 const trajets = useTrajetsStore()
 const sitesStore = useSitesStore()
 const docsVehicule = useDocumentsVehiculeStore()
+const docsPersonnel = useDocumentsStore()
 
 /** Chaîne vide = fiche en création : aucun enregistrement n'existe
  *  encore. Dès la création validée, idCourant prend l'identifiant du
@@ -158,7 +161,7 @@ const semiRemorque = computed(() => {
 const infobulle = ref<'destinataires' | null>(null)
 const optVehicules = computed<DropdownItem[]>(() =>
   vehicules.tracteurs
-    .filter(t => docsVehicule.enRegle(t.id) && !store.vehiculeOccupe(t.id, courant.value?.id))
+    .filter(t => docsVehicule.enRegle(t.id) && vehicules.estUtilisable(t) && !store.vehiculeOccupe(t.id, courant.value?.id))
     .map(t => ({ id: t.id, label: t.immatriculation, sublabel: `${t.marque} ${t.modele}` })))
 const optProduits: DropdownItem[] = [
   { id: 'Produits alimentaires secs', label: 'Produits alimentaires secs' },
@@ -172,6 +175,7 @@ const blocages = computed(() => {
   const out: string[] = []
   if (form.value.vehiculeId && !chauffeur.value) out.push("Ce véhicule n'a aucun conducteur affecté : affectez un conducteur avant de continuer, ou choisissez-en un à la main.")
   if (chauffeurIndispo.value) out.push(`${chauffeur.value} n'est pas disponible (${chauffeurIndispo.value}) : choisissez un autre chauffeur.`)
+  if (chauffeurEffectifId.value && !docsPersonnel.enRegle(chauffeurEffectifId.value)) out.push(`${chauffeur.value} n'est pas en règle : une pièce obligatoire est expirée ou manquante.`)
   return out
 })
 
@@ -187,6 +191,7 @@ function save() {
   if (!form.value.datePlanifiee) { erreur.value = 'Renseignez la date prévue.'; return }
   if (!chauffeur.value) { erreur.value = 'Ce véhicule doit avoir un conducteur affecté, ou choisissez-en un à la main.'; return }
   if (chauffeurIndispo.value) { erreur.value = `${chauffeur.value} n'est pas disponible (${chauffeurIndispo.value}) : choisissez un autre chauffeur.`; return }
+  if (!docsPersonnel.enRegle(chauffeurEffectifId.value!)) { erreur.value = `${chauffeur.value} n'est pas en règle : une pièce obligatoire est expirée ou manquante.`; return }
 
   const vehicule = vehicules.parId(form.value.vehiculeId)
   const at = vehicules.attelageActif(form.value.vehiculeId)
@@ -293,7 +298,7 @@ function ajouterCommandesSelectionnees() {
   const nouvelles: EtapeVoyage[] = ids.map((id, i) => {
     const c = commandesStore.getById(id)!
     return {
-      id: `${courant.value!.id}-L${Date.now()}-${i}`, ordre: lignesLocales.value.length + i + 1,
+      id: `${courant.value!.id}-L${maintenantMs()}-${i}`, ordre: lignesLocales.value.length + i + 1,
       siteId: c.siteId, siteNom: c.adresseLivraison, destinataire: c.siteId ? undefined : c.destinataire,
       adresseLivraison: c.adresseLivraison, lat: c.lat, lng: c.lng, role: 'livraison', intervalleMin: 0, franchi: false,
       poidsKg: c.poidsKg, volumeM3: c.volumeM3, canalNotification: c.canalNotification,
@@ -342,7 +347,7 @@ function ajouterLigne() {
     if (!nouvelleLigne.value.destinataire.trim() || !nouvelleLigne.value.adresse.trim()) return
     const { lat, lng } = positionSimulee()
     ligne = {
-      id: `${courant.value.id}-L${Date.now()}`, ordre: lignesLocales.value.length + 1,
+      id: `${courant.value.id}-L${maintenantMs()}`, ordre: lignesLocales.value.length + 1,
       siteNom: nouvelleLigne.value.adresse.trim(), destinataire: nouvelleLigne.value.destinataire.trim(),
       adresseLivraison: nouvelleLigne.value.adresse.trim(), lat, lng, role: 'livraison', intervalleMin: 0, franchi: false,
       emailDestinataire: emailSimule(nouvelleLigne.value.destinataire.trim()),
@@ -353,7 +358,7 @@ function ajouterLigne() {
     const site = sitesStore.getById(nouvelleLigne.value.siteId)
     if (!site) return
     ligne = {
-      id: `${courant.value.id}-L${Date.now()}`, ordre: lignesLocales.value.length + 1,
+      id: `${courant.value.id}-L${maintenantMs()}`, ordre: lignesLocales.value.length + 1,
       siteId: site.id, siteNom: site.nom, lat: site.lat, lng: site.lng, role: 'livraison', intervalleMin: 0, franchi: false,
       poidsKg: nouvelleLigne.value.poidsKg, volumeM3: nouvelleLigne.value.volumeM3,
     }
@@ -660,7 +665,7 @@ function annuler() {
               <div v-else class="h-[38px] px-2.5 rounded-md border border-border bg-background flex items-center text-[13px] text-foreground font-mono">{{ courant?.vehiculePlaque ?? '-' }}</div>
             </div>
             <div class="flex flex-col gap-1.5">
-              <label class="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.03em]">Chauffeur</label>
+              <label class="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.03em]">Conducteur</label>
               <SearchableDropdown v-if="enEdition && modifiable" v-model="form.chauffeurIdManuel" :items="optConducteurs" placeholder="Choisir un chauffeur…" />
               <div v-else class="h-[38px] px-2.5 rounded-md border flex items-center text-[13px]"
                    :class="chauffeurIndispo ? 'bg-danger-bg border-danger/30 text-danger font-medium' : (enEdition && modifiable ? chauffeur : courant?.chauffeurNom) ? 'bg-primary/5 border-primary/20 text-primary font-medium' : 'bg-background border-border text-muted-foreground'">
@@ -1003,7 +1008,7 @@ function annuler() {
         <!-- CHARGEMENT : l'entrepôt déclare ce qu'il a chargé, ligne par ligne ;
              le chauffeur le contrôle ensuite depuis son propre espace. -->
         <FormSection v-if="courant && (courant.statut === 'confirme' || courant.statut === 'pret' || courant.statut === 'en_cours' || courant.statut === 'livre' || courant.statut === 'cloture')" title="Chargement"
-                     :recaps="[courant.chargementEntrepotLe ? 'Entrepôt : fait' : 'Entrepôt : à faire', courant.chargementChauffeurLe ? 'Chauffeur : fait' : 'Chauffeur : à faire']" :default-open="courant.statut === 'confirme'">
+                     :recaps="[courant.chargementEntrepotLe ? 'Entrepôt : fait' : 'Entrepôt : à faire', courant.chargementChauffeurLe ? 'Conducteur : fait' : 'Conducteur : à faire']" :default-open="courant.statut === 'confirme'">
           <div class="flex items-center gap-3 mb-3.5">
             <button v-if="!courant.chargementEntrepotLe" class="text-[11px] text-primary underline bg-transparent border-0 cursor-pointer p-0 inline-flex items-center gap-1" @click="simulationOuverte = !simulationOuverte">
               <ListOrdered class="w-3.5 h-3.5" /> Simuler le chargement

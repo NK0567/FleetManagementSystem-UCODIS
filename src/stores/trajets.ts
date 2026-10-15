@@ -1,3 +1,4 @@
+import { maintenantMs } from '../utils/horloge'
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { Trajet, RoleEtape } from '../types'
@@ -18,7 +19,7 @@ export const useTrajetsStore = defineStore('trajets', () => {
       recurrent: true, clientNom: 'Jumbo Score Tanjombato', statut: 'actif',
       distanceEstimeeKm: 352, dureeEstimeeMin: 450,
       etapes: [
-        { id: 'ET-001', siteNom: 'Dépôt UCODIS Tanjombato', ordre: 1, lat: -18.8792, lng: 47.5079, role: 'depart', intervalleMin: 0 },
+        { id: 'ET-001', siteNom: 'Dépôt Tanjombato', ordre: 1, lat: -18.8792, lng: 47.5079, role: 'depart', intervalleMin: 0 },
         { id: 'ET-002', siteNom: 'Entrepôt Tanjombato',     ordre: 2, lat: -18.9167, lng: 47.5300, role: 'chargement', intervalleMin: 25 },
         { id: 'ET-003', siteNom: 'Relais Moramanga',        ordre: 3, lat: -18.9333, lng: 47.9333, role: 'repos', intervalleMin: 110, pausePrevueMin: 45 },
         { id: 'ET-004', siteNom: 'Contrôle Brickaville',    ordre: 4, lat: -18.6667, lng: 48.9833, role: 'controle', intervalleMin: 55 },
@@ -30,7 +31,7 @@ export const useTrajetsStore = defineStore('trajets', () => {
       recurrent: true, clientNom: 'Leader Price Antsirabe', statut: 'actif',
       distanceEstimeeKm: 168, dureeEstimeeMin: 210,
       etapes: [
-        { id: 'ET-010', siteNom: 'Dépôt UCODIS Tanjombato', ordre: 1, lat: -18.8792, lng: 47.5079, role: 'depart', intervalleMin: 0 },
+        { id: 'ET-010', siteNom: 'Dépôt Tanjombato', ordre: 1, lat: -18.8792, lng: 47.5079, role: 'depart', intervalleMin: 0 },
         { id: 'ET-011', siteNom: 'Station Ambatolampy',     ordre: 2, lat: -19.3833, lng: 47.4167, role: 'controle', intervalleMin: 95 },
         { id: 'ET-012', siteNom: 'Entrepôt Antsirabe centre', ordre: 3, lat: -19.8667, lng: 47.0333, role: 'livraison', intervalleMin: 75 },
       ],
@@ -40,7 +41,7 @@ export const useTrajetsStore = defineStore('trajets', () => {
       recurrent: true, clientNom: 'Shoprite Mahajanga', statut: 'actif',
       distanceEstimeeKm: 570, dureeEstimeeMin: 720,
       etapes: [
-        { id: 'ET-020', siteNom: 'Dépôt UCODIS Tanjombato', ordre: 1, lat: -18.8792, lng: 47.5079, role: 'depart', intervalleMin: 0 },
+        { id: 'ET-020', siteNom: 'Dépôt Tanjombato', ordre: 1, lat: -18.8792, lng: 47.5079, role: 'depart', intervalleMin: 0 },
         { id: 'ET-021', siteNom: 'Contrôle Ankazobe',       ordre: 2, lat: -18.3167, lng: 47.1167, role: 'controle', intervalleMin: 130 },
         { id: 'ET-022', siteNom: 'Contrôle Maevatanana',    ordre: 3, lat: -16.9500, lng: 46.8333, role: 'controle', intervalleMin: 240, pausePrevueMin: 45 },
         { id: 'ET-023', siteNom: 'Entrepôt Mahajanga',      ordre: 4, lat: -15.7167, lng: 46.3167, role: 'livraison', intervalleMin: 260 },
@@ -106,7 +107,7 @@ export const useTrajetsStore = defineStore('trajets', () => {
   }
   function nouvelleEtape(site: { id: string; nom: string; lat: number; lng: number }, ordre: number, role: RoleEtape = 'livraison') {
     return {
-      id: `ET-${Date.now()}-${ordre}`, siteId: site.id, siteNom: site.nom,
+      id: `ET-${maintenantMs()}-${ordre}`, siteId: site.id, siteNom: site.nom,
       ordre, lat: site.lat, lng: site.lng, role, volet: 'aller' as const, intervalleMin: 0,
     }
   }

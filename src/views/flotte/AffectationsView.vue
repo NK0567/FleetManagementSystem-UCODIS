@@ -3,7 +3,7 @@
 
     <div :class="L.pageHeader">
       <div>
-        <div :class="L.pageTitle">Affectations chauffeurs</div>
+        <div :class="L.pageTitle">Affectations</div>
         <div :class="L.pageSub">Gestion des affectations conducteur ↔ tracteur</div>
       </div>
     </div>
@@ -17,7 +17,7 @@
       </div>
       <div :class="L.kpiCard">
         <div :class="L.kpiIcon" class="bg-success-bg"><Truck class="w-[18px] h-[18px] text-success" /></div>
-        <div :class="L.kpiLabel">Tracteurs libres</div>
+        <div :class="L.kpiLabel">Tracteurs sans conducteur</div>
         <div :class="L.kpiValue">{{ vehicules.tracteursSansConducteur.length }}</div>
       </div>
       <div :class="L.kpiCard">
@@ -36,14 +36,16 @@
     <div :class="L.tableCard" class="mb-4">
       <div :class="L.toolbar">
         <span class="text-sm font-semibold text-foreground flex items-center gap-1.5"><UserCheck class="w-4 h-4 text-primary" /> Affectations actives</span>
-        <button :class="L.btnPrimary" @click="showForm = !showForm"><Plus class="w-4 h-4" /> Nouvelle affectation</button>
+        <button :class="L.btnPrimary" @click="showForm = true"><Plus class="w-4 h-4" /> Nouvelle affectation</button>
       </div>
       <div class="overflow-x-auto">
         <table :class="L.table">
           <thead>
             <tr>
-              <th :class="L.th">Chauffeur</th>
+              <th :class="L.th">Conducteur</th>
               <th :class="L.th">Tracteur</th>
+              <th :class="L.th">Remorque attelée</th>
+              <th :class="L.th">Base</th>
               <th :class="L.th">Début</th>
               <th :class="L.th">Alerte pièces</th>
               <th :class="L.th" class="text-right">Actions</th>
@@ -58,6 +60,8 @@
                 </div>
               </td>
               <td :class="L.td" class="font-mono text-xs font-semibold text-primary">{{ tracteurDe(a)?.immatriculation }}</td>
+              <td :class="L.td" class="font-mono text-xs">{{ remorqueDe(a.vehiculeId) ?? 'non attelé' }}</td>
+              <td :class="L.td" class="text-xs">{{ tracteurDe(a)?.site }}</td>
               <td :class="L.td" class="text-muted-foreground">{{ formatDate(a.dateDebut) }}</td>
               <td :class="L.td">
                 <span v-if="alertePieces(a.conducteurId)" class="flex items-center gap-1 text-xs text-danger font-medium">
@@ -77,37 +81,24 @@
       </div>
     </div>
 
-    <!-- Nouvelle affectation : panneau en ligne, pas de popup -->
-    <div v-if="showForm" class="bg-card border border-border rounded-lg overflow-hidden mb-4">
-      <div class="bg-primary text-primary-foreground px-5 py-3">
-        <h2 class="font-semibold text-[15px]">Nouvelle affectation</h2>
-      </div>
-      <div class="p-5">
-        <div v-if="alerteBlocage" class="flex items-start gap-2 p-3 mb-4 bg-danger-bg text-danger rounded-md text-[12px] border border-danger/20">
-          <TriangleAlert class="w-4 h-4 mt-0.5 shrink-0" />
-          <span>{{ alerteBlocage }}</span>
+    <!-- Nouvelle affectation : fenêtre de création -->
+    <CreateModalShell v-if="showForm" title="Nouvelle affectation" banner-label="Flotte · Affectations" create-label="Affecter" :save-error="alerteBlocage || null" @close="fermerForm" @create="submit">
+      <template #form>
+        <div class="px-8 py-6 max-w-3xl mx-auto">
+          <FormSection title="Affectation">
+            <div class="grid grid-cols-2 gap-x-6 gap-y-4 max-sm:grid-cols-1">
+              <div :class="F.field"><label :class="F.fieldLabel">Conducteur *</label>
+                <SearchableDropdown v-model="form.conducteurId" :items="optConducteurs" placeholder="Sélectionner un conducteur" @update:model-value="verifierBlocage" /></div>
+              <div :class="F.field"><label :class="F.fieldLabel">Tracteur *</label>
+                <SearchableDropdown v-model="form.tracteurId" :items="optTracteurs" placeholder="Sélectionner un tracteur"
+                  @update:model-value="v => { form.tracteurId = v; form.base = vehicules.parId(v)?.site ?? form.base; verifierBlocage(form.conducteurId) }" /></div>
+              <div :class="F.field"><label :class="F.fieldLabel">Base *</label><SearchableDropdown v-model="form.base" :items="optBases" placeholder="Base du tracteur" /></div>
+              <div :class="F.field"><label :class="F.fieldLabel">Date début *</label><input v-model="form.dateDebut" type="date" :class="F.fieldInput" /></div>
+            </div>
+          </FormSection>
         </div>
-        <div class="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
-          <div>
-            <label :class="L.fpFieldLabel">Chauffeur *</label>
-            <SearchableDropdown v-model="form.conducteurId" :items="optConducteurs" placeholder="Sélectionner un chauffeur" compact
-                                 @update:model-value="verifierBlocage" />
-          </div>
-          <div>
-            <label :class="L.fpFieldLabel">Tracteur *</label>
-            <SearchableDropdown v-model="form.tracteurId" :items="optTracteurs" placeholder="Sélectionner un tracteur" compact />
-          </div>
-          <div>
-            <label :class="L.fpFieldLabel">Date début *</label>
-            <input v-model="form.dateDebut" type="date" :class="L.fpSelect" class="!h-9 w-full" />
-          </div>
-        </div>
-        <div class="flex gap-3 mt-4 justify-end">
-          <button :class="L.btnOutline" @click="showForm = false">Annuler</button>
-          <button :class="L.btnPrimary" :disabled="!canSubmit || !!alerteBlocage" @click="submit">Affecter</button>
-        </div>
-      </div>
-    </div>
+      </template>
+    </CreateModalShell>
 
     <!-- Historique -->
     <div :class="L.tableCard">
@@ -118,7 +109,7 @@
         <table :class="L.table">
           <thead>
             <tr>
-              <th :class="L.th">Chauffeur</th>
+              <th :class="L.th">Conducteur</th>
               <th :class="L.th">Tracteur</th>
               <th :class="L.th">Début</th>
               <th :class="L.th">Fin</th>
@@ -143,12 +134,13 @@
 
     <ModalShell :ouvert="showRetrait" titre="Terminer l'affectation" @fermer="showRetrait = false">
       <p class="text-[13px] text-foreground mb-3">
-        Chauffeur : <strong>{{ retraitCible ? conducteurDe(retraitCible)?.nomComplet : '' }}</strong>
+        Conducteur : <strong>{{ retraitCible ? conducteurDe(retraitCible)?.nomComplet : '' }}</strong>
       </p>
       <div :class="F.field">
         <label :class="F.fieldLabel">Date de fin *</label>
         <input v-model="dateFin" type="date" :class="F.fieldInput" />
       </div>
+      <p v-if="erreurRetrait" class="text-[12px] text-danger mt-2">{{ erreurRetrait }}</p>
       <template #pied>
         <button :class="cls.btnPrimary" :disabled="!dateFin" @click="confirmerRetrait"><Check class="w-4 h-4" /> Confirmer</button>
         <button :class="cls.btnOutline" @click="showRetrait = false">Annuler</button>
@@ -159,14 +151,17 @@
 
 <script setup lang="ts">
 /**
- * US 1.4.1 · affecter un camion à un conducteur : seul un conducteur actif,
- * habilité, dont les pièces sont en règle, peut être proposé. Le formulaire
+ * FMS-DB-11 · affecter un conducteur et une base à un tracteur : l'affectation
+ * est refusée, avec la raison, si le conducteur n'est pas actif, pas habilité,
+ * indisponible, ou si une pièce du conducteur ou du véhicule est expirée. Le formulaire
  * de création est un panneau en ligne, pas une fenêtre en superposition ·
  * seul le retrait (destructif) garde une confirmation en superposition.
  */
 import { ref, computed } from 'vue'
 import { Check, CircleAlert, History, Plus, TriangleAlert, Truck, UserCheck } from '@lucide/vue'
 import ModalShell from '../../components/ui/ModalShell.vue'
+import CreateModalShell from '../../components/shared/CreateModalShell.vue'
+import FormSection from '../../components/ui/form-field/FormSection.vue'
 import SearchableDropdown from '../../components/ui/SearchableDropdown.vue'
 import type { DropdownItem } from '../../components/ui/SearchableDropdown.vue'
 import UserAvatar from '../../components/ui/UserAvatar.vue'
@@ -178,11 +173,19 @@ import { aujourdhuiISO } from '../../utils/horloge'
 import { useVehiculeStore } from '../../stores/vehicules'
 import { usePersonnelStore } from '../../stores/personnel'
 import { useDocumentsStore } from '../../stores/documentsPersonnel'
+import { useDocumentsVehiculeStore } from '../../stores/documentsVehicule'
+import { useDisponibilitesStore, LIB_DISPONIBILITE } from '../../stores/disponibilites'
+import { useSitesStore } from '../../stores/sites'
 import type { AffectationVehicule } from '../../types'
 
 const vehicules = useVehiculeStore()
 const personnel = usePersonnelStore()
 const docs = useDocumentsStore()
+const docsVehicule = useDocumentsVehiculeStore()
+const dispos = useDisponibilitesStore()
+const sites = useSitesStore()
+const optBases = computed<DropdownItem[]>(() => sites.actifs.map(x => ({ id: x.nom, label: x.nom, sublabel: x.type })))
+function remorqueDe(tracteurId: string) { const at = vehicules.attelageActif(tracteurId); return at ? vehicules.parId(at.semiRemorqueId)?.immatriculation : null }
 
 const actives = computed(() => vehicules.affectations.filter(a => !a.dateFin))
 const historique = computed(() => vehicules.affectations.filter(a => !!a.dateFin))
@@ -199,43 +202,55 @@ function duree(debut: string, fin?: string) {
   return `${j} j`
 }
 
-/* ── Nouvelle affectation : panneau en ligne ─────────────────── */
+/* ── Nouvelle affectation : fenêtre de création ──────────────── */
 const showForm = ref(false)
-const form = ref({ conducteurId: '', tracteurId: '', dateDebut: aujourdhuiISO() })
+const form = ref({ conducteurId: '', tracteurId: '', dateDebut: aujourdhuiISO(), base: '' })
 const alerteBlocage = ref('')
 
-const conducteursEligibles = computed(() => {
+/** Tous les conducteurs et aides sans affectation ; ceux qui ne sont pas éligibles portent la raison. */
+const conducteursLibres = computed(() => {
   const affectesIds = new Set(actives.value.map(a => a.conducteurId))
-  return personnel.conducteurs.filter(c => c.habilite && c.statut === 'actif' && !affectesIds.has(c.id))
+  return [...personnel.conducteurs, ...personnel.aides].filter(c => c.statut !== 'archive' && !affectesIds.has(c.id))
 })
-
 const optConducteurs = computed<DropdownItem[]>(() =>
-  conducteursEligibles.value.map(c => ({ id: c.id, label: c.nomComplet, sublabel: c.matricule })))
+  conducteursLibres.value.map(c => {
+    const e = dispos.eligibilite(c.id, undefined, form.value.dateDebut)
+    const d = dispos.disponibilite(c.id, form.value.dateDebut)
+    return { id: c.id, label: c.nomComplet, sublabel: e.ok ? `${c.matricule} · ${LIB_DISPONIBILITE[d.etat].label}` : `Non éligible : ${e.motif}` }
+  }))
 const optTracteurs = computed<DropdownItem[]>(() =>
-  vehicules.tracteursSansConducteur.map(t => ({ id: t.id, label: t.immatriculation, sublabel: `${t.marque} ${t.modele}` })))
+  vehicules.tracteursSansConducteur.map(t => ({ id: t.id, label: t.immatriculation, sublabel: docsVehicule.enRegle(t.id) ? `${t.marque} ${t.modele}` : `Non en règle : ${docsVehicule.manquants(t.id).map(d => d.libelle).join(', ')}` })))
 
+/** L'affectation est refusée, avec la raison, dès que le conducteur ou le véhicule ne le permet pas (FMS-DB-11). */
 function verifierBlocage(conducteurId: string) {
   form.value.conducteurId = conducteurId
   alerteBlocage.value = ''
-  if (conducteurId && !docs.enRegle(conducteurId)) {
-    const nom = personnel.parId(conducteurId)?.nomComplet ?? 'ce conducteur'
-    alerteBlocage.value = `Blocage : une pièce de ${nom} est expirée ou manquante (permis ou visite médicale).`
-  }
+  if (!conducteurId) return
+  const e = dispos.eligibilite(conducteurId, form.value.tracteurId || undefined, form.value.dateDebut)
+  if (!e.ok) alerteBlocage.value = `Affectation refusée : ${e.motif}`
 }
 
-const canSubmit = computed(() => !!form.value.conducteurId && !!form.value.tracteurId && !!form.value.dateDebut)
+const canSubmit = computed(() => !!form.value.conducteurId && !!form.value.tracteurId && !!form.value.dateDebut && !!form.value.base)
 
-function submit() {
-  if (!canSubmit.value || alerteBlocage.value) return
-  vehicules.affecterConducteur(form.value.tracteurId, form.value.conducteurId, form.value.dateDebut)
-  form.value = { conducteurId: '', tracteurId: '', dateDebut: aujourdhuiISO() }
+function fermerForm() {
+  form.value = { conducteurId: '', tracteurId: '', dateDebut: aujourdhuiISO(), base: '' }
+  alerteBlocage.value = ''
   showForm.value = false
+}
+function submit() {
+  if (!canSubmit.value) { alerteBlocage.value = 'Choisissez le conducteur, le tracteur, la base et la date de début.'; return }
+  verifierBlocage(form.value.conducteurId)
+  if (alerteBlocage.value) return
+  const r = vehicules.affecterConducteur(form.value.tracteurId, form.value.conducteurId, form.value.dateDebut, form.value.base)
+  if (!r.ok) { alerteBlocage.value = `Affectation refusée : ${r.motif}`; return }
+  fermerForm()
 }
 
 /* ── Terminer ─────────────────────────────────────────────────── */
 const showRetrait = ref(false)
 const retraitCible = ref<AffectationVehicule | null>(null)
 const dateFin = ref('')
+const erreurRetrait = ref('')
 
 function ouvrirRetrait(a: AffectationVehicule) {
   retraitCible.value = a
@@ -244,7 +259,9 @@ function ouvrirRetrait(a: AffectationVehicule) {
 }
 function confirmerRetrait() {
   if (!retraitCible.value || !dateFin.value) return
-  vehicules.retirerAffectation(retraitCible.value.id, dateFin.value)
+  const r = vehicules.retirerAffectation(retraitCible.value.id, dateFin.value)
+  if (!r.ok) { erreurRetrait.value = r.motif ?? ''; return }
+  erreurRetrait.value = ''
   showRetrait.value = false
   retraitCible.value = null
 }

@@ -1,13 +1,15 @@
 import { defineStore } from 'pinia'
+import { useDepartsStore } from './departs'
 import { ref, computed, watch } from 'vue'
-import type { Voyage, StatutVoyage, ArretReleve, DocumentVoyage, TypeDocVoyage, EtapeVoyage, NotificationClient } from '../types'
+import type { Voyage, StatutVoyage, DocumentVoyage, TypeDocVoyage, EtapeVoyage, NotificationClient } from '../types'
 import { calculerEcartPoids, calculerEcartKm, horsTournee, chargeOrdre } from '../utils/voyageUtils'
 import { useVehiculeStore } from './vehicules'
 import { useClientsStore } from './clients'
 import { useCommandesStore } from './commandes'
 import { useTrajetsStore } from './trajets'
 import { useAbsenceStore } from './absences'
-import { aujourdhuiISO } from '../utils/horloge'
+import { useConfigTypesEcartStore } from './ecarts'
+import { aujourdhuiISO, maintenantMs, maintenant } from '../utils/horloge'
 
 /** Pièces obligatoires au dossier de voyage · conditionnent la clôture,
  *  le bon de livraison étant explicitement cité par la SOP. */
@@ -43,7 +45,7 @@ export const useVoyagesStore = defineStore('voyages', () => {
       dateArriveeReelle: '2026-08-24T18:12:00',
       kmReference: 352, kmDepart: 182_100, kmArrivee: 182_478,
       marchandise: { typeProduit: 'Produits alimentaires secs', nombreCartons: 480, poidsChargeKg: 9600, poidsDechargeKg: 9550 },
-      nbEcarts: 1, nbArretsNonJustifies: 1, createdAt: '2026-08-23T14:00:00',
+      createdAt: '2026-08-23T14:00:00',
     },
     {
       id: 'VOY-002', reference: 'VOY-2026-0149', numeroOT: 'OT-2026-04418',
@@ -58,7 +60,7 @@ export const useVoyagesStore = defineStore('voyages', () => {
       dateDepartReel: '2026-09-03T06:05:00',
       kmReference: 352, kmDepart: 98_450,
       marchandise: { typeProduit: 'Produits ménagers', nombreCartons: 520, poidsChargeKg: 8200 },
-      nbEcarts: 0, nbArretsNonJustifies: 0, createdAt: '2026-09-02T16:30:00',
+      createdAt: '2026-09-02T16:30:00',
     },
     {
       id: 'VOY-003', reference: 'VOY-2026-0147', numeroOT: 'OT-2026-04405',
@@ -74,7 +76,7 @@ export const useVoyagesStore = defineStore('voyages', () => {
       dateArriveeReelle: '2026-08-20T17:40:00',
       kmReference: 570, kmDepart: 165_780, kmArrivee: 166_352,
       marchandise: { typeProduit: 'Boissons', nombreCartons: 610, poidsChargeKg: 12_200, poidsDechargeKg: 12_180 },
-      nbEcarts: 0, nbArretsNonJustifies: 0, createdAt: '2026-08-19T11:00:00',
+      createdAt: '2026-08-19T11:00:00',
     },
     {
       id: 'VOY-004', reference: 'VOY-2026-0150',
@@ -88,7 +90,7 @@ export const useVoyagesStore = defineStore('voyages', () => {
       datePlanifiee: '2026-09-10T06:30:00',
       kmReference: 168,
       marchandise: { typeProduit: 'Produits alimentaires secs', nombreCartons: 300, poidsChargeKg: 6000 },
-      nbEcarts: 0, nbArretsNonJustifies: 0, createdAt: '2026-09-04T09:15:00',
+      createdAt: '2026-09-04T09:15:00',
     },
     {
       id: 'VOY-005', reference: 'VOY-2026-0146', numeroOT: 'OT-2026-04390',
@@ -104,7 +106,7 @@ export const useVoyagesStore = defineStore('voyages', () => {
       dateArriveeReelle: '2026-08-26T14:05:00',
       kmReference: 352, kmDepart: 120_100, kmArrivee: 120_461,
       marchandise: { typeProduit: 'Produits ménagers', nombreCartons: 450, poidsChargeKg: 8800, poidsDechargeKg: 8760 },
-      nbEcarts: 1, nbArretsNonJustifies: 0, createdAt: '2026-08-25T15:00:00',
+      createdAt: '2026-08-25T15:00:00',
     },
     {
       id: 'VOY-006', reference: 'VOY-2026-0145', numeroOT: 'OT-2026-04380',
@@ -120,7 +122,7 @@ export const useVoyagesStore = defineStore('voyages', () => {
       dateArriveeReelle: '2026-08-10T09:45:00',
       kmReference: 168, kmDepart: 243_400, kmArrivee: 243_568,
       marchandise: { typeProduit: 'Produits alimentaires secs', nombreCartons: 280, poidsChargeKg: 5600, poidsDechargeKg: 5590 },
-      nbEcarts: 0, nbArretsNonJustifies: 0, createdAt: '2026-08-09T14:00:00',
+      createdAt: '2026-08-09T14:00:00',
     },
     {
       id: 'VOY-007', reference: 'VOY-2026-0144', numeroOT: 'OT-2026-04370',
@@ -136,7 +138,7 @@ export const useVoyagesStore = defineStore('voyages', () => {
       dateArriveeReelle: '2026-08-18T18:30:00',
       kmReference: 352, kmDepart: 176_100, kmArrivee: 176_452,
       marchandise: { typeProduit: 'Boissons', nombreCartons: 590, poidsChargeKg: 11_800, poidsDechargeKg: 11_800 },
-      nbEcarts: 0, nbArretsNonJustifies: 0, createdAt: '2026-08-17T10:00:00',
+      createdAt: '2026-08-17T10:00:00',
     },
     {
       id: 'VOY-008', reference: 'VOY-2026-0143', numeroOT: 'OT-2026-04360',
@@ -147,11 +149,11 @@ export const useVoyagesStore = defineStore('voyages', () => {
       vehiculeId: 'v-tr-7', vehiculePlaque: '4027 TBA',
       semiRemorqueId: 'v-sr-7', semiRemorquePlaque: 'RM 4107',
       chauffeurId: 'p-016', chauffeurNom: 'Nomena Andriantsoa',
-      datePlanifiee: '2026-09-08T05:30:00',
-      dateDepartReel: '2026-09-08T05:40:00',
+      datePlanifiee: '2026-09-04T05:30:00',
+      dateDepartReel: '2026-09-04T05:40:00',
       kmReference: 570, kmDepart: 54_100,
       marchandise: { typeProduit: 'Matériaux de construction', nombreCartons: 210, poidsChargeKg: 9200 },
-      nbEcarts: 0, nbArretsNonJustifies: 0, createdAt: '2026-09-07T16:00:00',
+      createdAt: '2026-09-03T16:00:00',
     },
     {
       id: 'VOY-009', reference: 'VOY-2026-0142', numeroOT: 'OT-2026-04350',
@@ -167,7 +169,7 @@ export const useVoyagesStore = defineStore('voyages', () => {
       dateArriveeReelle: '2026-08-05T09:50:00',
       kmReference: 168, kmDepart: 132_500, kmArrivee: 132_668,
       marchandise: { typeProduit: 'Produits ménagers', nombreCartons: 320, poidsChargeKg: 6400, poidsDechargeKg: 6400 },
-      nbEcarts: 0, nbArretsNonJustifies: 0, createdAt: '2026-08-04T11:00:00',
+      createdAt: '2026-08-04T11:00:00',
     },
     {
       id: 'VOY-010', reference: 'VOY-2026-0141', numeroOT: 'OT-2026-04340',
@@ -183,7 +185,7 @@ export const useVoyagesStore = defineStore('voyages', () => {
       dateArriveeReelle: '2026-07-28T18:20:00',
       kmReference: 352, kmDepart: 288_700, kmArrivee: 289_052,
       marchandise: { typeProduit: 'Produits alimentaires secs', nombreCartons: 470, poidsChargeKg: 9400, poidsDechargeKg: 9350 },
-      nbEcarts: 1, nbArretsNonJustifies: 0, createdAt: '2026-07-27T09:00:00',
+      createdAt: '2026-07-27T09:00:00',
     },
     {
       id: 'VOY-011', reference: 'VOY-2026-0140', numeroOT: 'OT-2026-04330',
@@ -199,7 +201,7 @@ export const useVoyagesStore = defineStore('voyages', () => {
       dateArriveeReelle: '2026-08-22T17:50:00',
       kmReference: 570, kmDepart: 112_000, kmArrivee: 112_570,
       marchandise: { typeProduit: 'Textile', nombreCartons: 380, poidsChargeKg: 7600, poidsDechargeKg: 7600 },
-      nbEcarts: 0, nbArretsNonJustifies: 0, createdAt: '2026-08-21T13:00:00',
+      createdAt: '2026-08-21T13:00:00',
     },
     /* Exemple de tournée multi-destinataires déjà terminée, telle que
        produite par le module Planification : deux lignes signées, l'une
@@ -244,7 +246,7 @@ export const useVoyagesStore = defineStore('voyages', () => {
       dateArriveeReelle: '2026-09-01T10:25:00',
       kmReference: 30,
       marchandise: { typeProduit: 'Produits alimentaires secs', nombreCartons: 0, poidsChargeKg: 1400 },
-      nbEcarts: 0, nbArretsNonJustifies: 0, createdAt: '2026-09-01T05:30:00',
+      createdAt: '2026-09-01T05:30:00',
     },
     /* Exemple prêt à confirmer côté client : le chauffeur est déjà
        arrivé sur place, il ne manque plus que la confirmation du
@@ -266,7 +268,7 @@ export const useVoyagesStore = defineStore('voyages', () => {
           ],
         },
       ],
-      origine: 'Dépôt UCODIS Toamasina', destination: 'Boulevard Joffre, Toamasina',
+      origine: 'Dépôt Toamasina', destination: 'Boulevard Joffre, Toamasina',
       vehiculeId: 'v-tr-6', vehiculePlaque: '4026 TBA',
       semiRemorqueId: 'v-sr-6', semiRemorquePlaque: 'RM 4106',
       chauffeurId: 'p-015', chauffeurNom: 'Herizo Rakotondrabe',
@@ -274,7 +276,7 @@ export const useVoyagesStore = defineStore('voyages', () => {
       dateDepartReel: '2026-09-24T08:50:00',
       kmReference: 15,
       marchandise: { typeProduit: 'Boissons', nombreCartons: 0, poidsChargeKg: 2200 },
-      nbEcarts: 0, nbArretsNonJustifies: 0, createdAt: '2026-09-24T05:30:00',
+      createdAt: '2026-09-24T05:30:00',
     },
   ]
 
@@ -338,13 +340,6 @@ export const useVoyagesStore = defineStore('voyages', () => {
       }
     })
   }
-
-  const arrets = ref<ArretReleve[]>([
-    { id: 'ARR-001', voyageId: 'VOY-001', debut: '2026-08-24T11:42:00', fin: '2026-08-24T12:27:00', dureeMin: 45,
-      lat: -18.7500, lng: 48.7000, lieu: 'Piste secondaire, 14 km au sud de Moramanga', dansSiteDeclare: false, justifie: false },
-    { id: 'ARR-002', voyageId: 'VOY-001', debut: '2026-08-24T09:05:00', fin: '2026-08-24T09:38:00', dureeMin: 33,
-      lat: -18.9333, lng: 47.9333, lieu: 'Relais Moramanga', dansSiteDeclare: true, justifie: true, motif: 'Pause réglementaire' },
-  ])
 
   const documents = ref<DocumentVoyage[]>([
     { id: 'DOC-001', voyageId: 'VOY-001', type: 'ordre_transport', numero: 'OT-2026-04412', emetteur: 'Responsable Flotte', date: '2026-08-23', obligatoire: true, present: true },
@@ -413,7 +408,6 @@ export const useVoyagesStore = defineStore('voyages', () => {
   const enCours = computed(() => voyages.value.filter(v => v.statut === 'en_cours'))
   const aCloturer = computed(() => voyages.value.filter(v => v.statut === 'livre'))
 
-  const arretsDuVoyage = (voyageId: string) => arrets.value.filter(a => a.voyageId === voyageId)
   const documentsDuVoyage = (voyageId: string) => documents.value.filter(d => d.voyageId === voyageId)
 
   /** Complétude du dossier documentaire · conditionne la clôture. */
@@ -430,10 +424,10 @@ export const useVoyagesStore = defineStore('voyages', () => {
   }
 
   const ecartPoids = (voyageId: string) => { const v = getById(voyageId); return v ? calculerEcartPoids(v) : null }
-  const ecartKm = (voyageId: string) => { const v = getById(voyageId); return v ? calculerEcartKm(v) : null }
+  const ecartKm = (voyageId: string) => { const v = getById(voyageId); return v ? calculerEcartKm(v, useConfigTypesEcartStore().reglage('ecart_kilometrique')?.seuilValeur ?? Infinity) : null }
 
   let prochainId = voyages.value.length + 1
-  function creer(saisie: Omit<Voyage, 'id' | 'reference' | 'createdAt' | 'etapes' | 'nbEcarts' | 'nbArretsNonJustifies'> & { etapesPersonnalisees?: EtapeVoyage[] }) {
+  function creer(saisie: Omit<Voyage, 'id' | 'reference' | 'createdAt' | 'etapes'> & { etapesPersonnalisees?: EtapeVoyage[] }) {
     const trajetsStore = useTrajetsStore()
     const { etapesPersonnalisees, ...donneesVoyage } = saisie
     const t = donneesVoyage.trajetId ? trajetsStore.getById(donneesVoyage.trajetId) : null
@@ -444,11 +438,33 @@ export const useVoyagesStore = defineStore('voyages', () => {
     const numero = 150 + prochainId
     prochainId++
     voyages.value.unshift({
-      ...donneesVoyage, id, etapes, nbEcarts: 0, nbArretsNonJustifies: 0,
+      ...donneesVoyage, id, etapes,
       reference: `VOY-2026-${String(numero).padStart(4, '0')}`,
       createdAt: aujourdhuiISO(),
     })
     return id
+  }
+
+  /** Une livraison qui exige une pompe ne part qu'avec un véhicule (tracteur
+   *  ou semi-remorque attelée) équipé d'une pompe opérationnelle. */
+  function controlePompe(vehiculeId: string | undefined, etapes: EtapeVoyage[]): { ok: boolean; motif?: string } {
+    const exigees = etapes.filter(e => e.role === 'livraison' && e.pompeExigee)
+    if (!exigees.length || !vehiculeId) return { ok: true }
+    const vehicules = useVehiculeStore()
+    const at = vehicules.attelageActif(vehiculeId)
+    if (vehicules.aPompe(vehiculeId) || (at && vehicules.aPompe(at.semiRemorqueId))) return { ok: true }
+    const plaque = vehicules.parId(vehiculeId)?.immatriculation ?? 'Ce véhicule'
+    return { ok: false, motif: `${plaque} n'a pas de pompe opérationnelle, exigée pour la livraison à ${exigees.map(e => e.siteNom).join(', ')}.` }
+  }
+
+  /** Création d'un voyage depuis la fenêtre de création : le véhicule doit
+   *  répondre aux exigences des livraisons (pompe). */
+  function creerVoyage(saisie: Parameters<typeof creer>[0]): { ok: boolean; motif?: string; id?: string } {
+    const trajet = saisie.trajetId ? useTrajetsStore().getById(saisie.trajetId) : null
+    const etapes = saisie.etapesPersonnalisees?.length ? saisie.etapesPersonnalisees : (trajet?.etapes.map(e => ({ ...e, franchi: false })) ?? [])
+    const pompe = controlePompe(saisie.vehiculeId, etapes)
+    if (!pompe.ok) return pompe
+    return { ok: true, id: creer(saisie) }
   }
 
   function changerStatut(id: string, statut: StatutVoyage) {
@@ -546,7 +562,7 @@ export const useVoyagesStore = defineStore('voyages', () => {
   /** Le chauffeur est prévenu (SMS simulé) quand une tournée lui est confiée
    *  ou annulée ; il n'a rien à accepter ni refuser. */
   function notifierChauffeur(v: Voyage, message: string) {
-    v.notificationsChauffeur = [...(v.notificationsChauffeur ?? []), { le: new Date().toISOString(), message }]
+    v.notificationsChauffeur = [...(v.notificationsChauffeur ?? []), { le: maintenant().toISOString(), message }]
   }
 
   function notifier(v: Voyage, e: EtapeVoyage, type: 'planification' | 'demarrage' | 'livraison') {
@@ -561,9 +577,9 @@ export const useVoyagesStore = defineStore('voyages', () => {
     /* Le canal vient de la ligne (commande), sinon de la fiche client. */
     const canal = e.canalNotification ?? useClientsStore().canalPour(e.destinataire)
     const canaux: ('sms' | 'email')[] = canal === 'sms_email' ? ['sms', 'email'] : [canal]
-    const envoyeeLe = new Date().toISOString()
+    const envoyeeLe = maintenant().toISOString()
     e.notifications = [...(e.notifications ?? []), ...canaux.map((c, i) => ({
-      id: `NOTIF-${Date.now()}-${i}-${Math.round(Math.random() * 999)}`, type, canal: c, envoyeeLe, contenu,
+      id: `NOTIF-${maintenantMs()}-${i}-${Math.round(Math.random() * 999)}`, type, canal: c, envoyeeLe, contenu,
     } as NotificationClient))]
   }
 
@@ -637,7 +653,7 @@ export const useVoyagesStore = defineStore('voyages', () => {
     if (!v || v.statut !== 'planifie') return { ok: false, motif: "Cet ordre n'est pas en attente de confirmation." }
     const etape = v.etapes.find(e => e.id === etapeId)
     if (!etape || !etape.destinataire) return { ok: false, motif: 'Ligne introuvable ou sans destinataire à confirmer.' }
-    etape.confirmeLe = new Date().toISOString()
+    etape.confirmeLe = maintenant().toISOString()
     etape.reponseViaAgent = viaAgent
     etape.indisponibleLe = undefined
     etape.motifIndisponibilite = undefined
@@ -659,7 +675,7 @@ export const useVoyagesStore = defineStore('voyages', () => {
     if (!motif.trim()) return { ok: false, motif: 'Un motif est obligatoire.' }
     const etape = v.etapes.find(e => e.id === etapeId)
     if (!etape || !etape.destinataire) return { ok: false, motif: 'Ligne introuvable ou sans destinataire à confirmer.' }
-    etape.indisponibleLe = new Date().toISOString()
+    etape.indisponibleLe = maintenant().toISOString()
     etape.reponseViaAgent = viaAgent
     etape.motifIndisponibilite = motif.trim()
     etape.dateDisponibleClient = dateDisponible || undefined
@@ -676,9 +692,9 @@ export const useVoyagesStore = defineStore('voyages', () => {
    *  affecter, comme pour toute commande nouvellement entrée. */
   function reprendreLigneReplanifiee(v: Voyage, etape: EtapeVoyage, dateISO: string) {
     etape.dateProposeePlanif = dateISO
-    etape.dateConfirmeeLe = new Date().toISOString()
+    etape.dateConfirmeeLe = maintenant().toISOString()
     const nouvelleLigne = (ordre: number): EtapeVoyage => ({
-      id: `RPL-${Date.now()}-${Math.floor(Math.random() * 1000)}`, ordre, siteId: etape.siteId, siteNom: etape.siteNom,
+      id: `RPL-${maintenantMs()}-${Math.floor(Math.random() * 1000)}`, ordre, siteId: etape.siteId, siteNom: etape.siteNom,
       destinataire: etape.destinataire, adresseLivraison: etape.adresseLivraison, lat: etape.lat, lng: etape.lng,
       role: 'livraison', intervalleMin: 0, franchi: false, emailDestinataire: etape.emailDestinataire,
       poidsKg: etape.poidsKg, volumeM3: etape.volumeM3, canalNotification: etape.canalNotification,
@@ -727,9 +743,9 @@ export const useVoyagesStore = defineStore('voyages', () => {
     const total = etape.articles?.length || nonLivres.length
     const poids = etape.poidsKg != null ? Math.round(etape.poidsKg * nonLivres.length / total) : undefined
     etape.reliquatDate = dateISO
-    etape.reliquatReprisLe = new Date().toISOString()
+    etape.reliquatReprisLe = maintenant().toISOString()
     etape.reliquatRepriseDansVoyageId = rattacherAOrdreDuJour(v, dateISO, ordre => ({
-      id: `RLQ-${Date.now()}-${Math.floor(Math.random() * 1000)}`, ordre, siteId: etape.siteId, siteNom: etape.siteNom,
+      id: `RLQ-${maintenantMs()}-${Math.floor(Math.random() * 1000)}`, ordre, siteId: etape.siteId, siteNom: etape.siteNom,
       destinataire: etape.destinataire, adresseLivraison: etape.adresseLivraison, lat: etape.lat, lng: etape.lng,
       role: 'livraison', intervalleMin: 0, franchi: false, emailDestinataire: etape.emailDestinataire,
       canalNotification: etape.canalNotification, poidsKg: poids,
@@ -817,7 +833,7 @@ export const useVoyagesStore = defineStore('voyages', () => {
       e.articles = e.contenuCharge.split(/[,;\n]+/).map(x => x.trim()).filter(Boolean)
         .map((libelle, i) => ({ id: `${e.id}-A${i + 1}`, libelle }))
     })
-    v.chargementEntrepotLe = new Date().toISOString()
+    v.chargementEntrepotLe = maintenant().toISOString()
     return { ok: true }
   }
 
@@ -828,7 +844,7 @@ export const useVoyagesStore = defineStore('voyages', () => {
   function finaliserControle(v: Voyage) {
     const restantes = v.etapes.filter(e => !horsTournee(e))
     if (restantes.length && restantes.every(e => e.chargementConformeLe)) {
-      v.chargementChauffeurLe = new Date().toISOString()
+      v.chargementChauffeurLe = maintenant().toISOString()
       v.statut = 'pret'
     }
   }
@@ -842,10 +858,10 @@ export const useVoyagesStore = defineStore('voyages', () => {
     const e = v.etapes.find(x => x.id === etapeId)
     if (!e || horsTournee(e)) return { ok: false, motif: 'Ligne introuvable ou sortie de la tournée.' }
     if (conforme) {
-      e.chargementConformeLe = new Date().toISOString()
+      e.chargementConformeLe = maintenant().toISOString()
     } else {
       if (!motif?.trim()) return { ok: false, motif: 'Précisez ce qui ne correspond pas.' }
-      e.chargementNonConformeLe = new Date().toISOString()
+      e.chargementNonConformeLe = maintenant().toISOString()
       e.motifNonConformite = motif.trim()
       e.chargementConformeLe = undefined
     }
@@ -858,7 +874,7 @@ export const useVoyagesStore = defineStore('voyages', () => {
   function validerChargementChauffeur(voyageId: string): { ok: boolean; motif?: string } {
     const v = getById(voyageId)
     if (!v || v.statut !== 'confirme' || !v.chargementEntrepotLe) return { ok: false, motif: "L'entrepôt n'a pas encore déclaré le chargement terminé." }
-    v.etapes.filter(e => !horsTournee(e) && !e.chargementConformeLe).forEach(e => { e.chargementConformeLe = new Date().toISOString() })
+    v.etapes.filter(e => !horsTournee(e) && !e.chargementConformeLe).forEach(e => { e.chargementConformeLe = maintenant().toISOString() })
     finaliserControle(v)
     return { ok: true }
   }
@@ -879,7 +895,7 @@ export const useVoyagesStore = defineStore('voyages', () => {
       v.etapes.forEach(e => { if (e.commandeId && !e.franchi) commandes.remettreEnAttente(e.commandeId) })
     }
     v.statut = 'annule'
-    v.annuleLe = new Date().toISOString()
+    v.annuleLe = maintenant().toISOString()
     v.motifAnnulation = motif.trim()
     if (v.chauffeurId) notifierChauffeur(v, `La tournée ${v.numeroOT || v.reference} du ${new Date(v.datePlanifiee).toLocaleDateString('fr-FR')} est annulée : ${v.motifAnnulation}.`)
     return { ok: true }
@@ -936,13 +952,16 @@ export const useVoyagesStore = defineStore('voyages', () => {
     if (tries[index]!.arriveeLe) return { ok: false, motif: 'Arrivée déjà enregistrée pour ce point.' }
     if (tries.slice(0, index).some(e => !neBloquePlusLaSuite(e))) return { ok: false, motif: 'Le point précédent doit être résolu (signé, reporté ou annulé) avant celui-ci.' }
 
+    /* Aucun camion ne part sans autorisation de départ accordée (FMS-SC-04). */
+    if (v.statut === 'pret' && !useDepartsStore().autorisations.some(a => a.voyageId === v.id && a.accordee))
+      return { ok: false, motif: "Le départ n'est pas autorisé : l'autorisation de départ de ce voyage doit être accordée." }
     if (v.statut === 'pret') {
       v.statut = 'en_cours'
-      v.dateDepartReel = new Date().toISOString()
+      v.dateDepartReel = maintenant().toISOString()
       v.etapes.filter(e => !e.franchi).forEach(e => notifier(v, e, 'demarrage'))
     }
     const etape = v.etapes.find(e => e.id === etapeId)
-    if (etape) etape.arriveeLe = new Date().toISOString()
+    if (etape) etape.arriveeLe = maintenant().toISOString()
     return { ok: true }
   }
 
@@ -957,7 +976,7 @@ export const useVoyagesStore = defineStore('voyages', () => {
     if (!motif.trim()) return { ok: false, motif: 'Un motif de report est obligatoire.' }
     const etape = v.etapes.find(e => e.id === etapeId)
     if (!etape || etape.franchi) return { ok: false, motif: 'Ligne introuvable ou déjà signée.' }
-    etape.reporteLe = new Date().toISOString()
+    etape.reporteLe = maintenant().toISOString()
     etape.motifReport = motif.trim()
     return { ok: true }
   }
@@ -982,13 +1001,13 @@ export const useVoyagesStore = defineStore('voyages', () => {
     if (!motif.trim()) return { ok: false, motif: "Un motif d'annulation est obligatoire." }
     const etape = v.etapes.find(e => e.id === etapeId)
     if (!etape || etape.franchi) return { ok: false, motif: 'Ligne introuvable ou déjà signée.' }
-    etape.ligneAnnuleeLe = new Date().toISOString()
+    etape.ligneAnnuleeLe = maintenant().toISOString()
     etape.motifAnnulationLigne = motif.trim()
     etape.reporteLe = undefined
     etape.motifReport = undefined
     if (v.etapes.every(definitivementResolue)) {
       v.statut = 'livre'
-      v.dateArriveeReelle = new Date().toISOString()
+      v.dateArriveeReelle = maintenant().toISOString()
     }
     return { ok: true }
   }
@@ -1029,7 +1048,7 @@ export const useVoyagesStore = defineStore('voyages', () => {
       const nonLivres = etape.articles?.filter(a => a.statut === 'non_livre') ?? []
 
       etape.franchi = true
-      etape.livreParChauffeurLe = new Date().toISOString()
+      etape.livreParChauffeurLe = maintenant().toISOString()
       if (etape.destinataire) {
         notifier(v, etape, 'livraison')
         etape.eBL = {
@@ -1042,7 +1061,7 @@ export const useVoyagesStore = defineStore('voyages', () => {
     }
     if (v.etapes.every(definitivementResolue)) {
       v.statut = 'livre'
-      v.dateArriveeReelle = new Date().toISOString()
+      v.dateArriveeReelle = maintenant().toISOString()
     }
     return { ok: true }
   }
@@ -1059,7 +1078,7 @@ export const useVoyagesStore = defineStore('voyages', () => {
     if (!v || !etape || !etape.livreParChauffeurLe) return { ok: false, motif: "Le chauffeur n'a pas encore déclaré cette livraison." }
     if (etape.receptionConfirmeeClientLe) return { ok: false, motif: 'Cette réception est déjà confirmée.' }
     if (!motif.trim()) return { ok: false, motif: 'Expliquez ce qui ne va pas.' }
-    etape.receptionContesteeLe = new Date().toISOString()
+    etape.receptionContesteeLe = maintenant().toISOString()
     etape.motifContestation = motif.trim()
     return { ok: true }
   }
@@ -1070,7 +1089,7 @@ export const useVoyagesStore = defineStore('voyages', () => {
     const etape = v?.etapes.find(e => e.id === etapeId)
     if (!v || !etape || !etape.receptionContesteeLe) return { ok: false, motif: "Cette livraison n'est pas contestée." }
     if (!note.trim()) return { ok: false, motif: 'Indiquez comment la contestation a été traitée.' }
-    etape.contestationTraiteeLe = new Date().toISOString()
+    etape.contestationTraiteeLe = maintenant().toISOString()
     etape.noteTraitementContestation = note.trim()
     return { ok: true }
   }
@@ -1082,7 +1101,7 @@ export const useVoyagesStore = defineStore('voyages', () => {
     if (etape.receptionConfirmeeClientLe) return { ok: false, motif: 'Cette réception est déjà confirmée.' }
     if (etape.receptionContesteeLe) return { ok: false, motif: 'Cette livraison est contestée : le planificateur doit la traiter.' }
     if (!nomSignataire.trim()) return { ok: false, motif: 'Indiquez votre nom.' }
-    etape.receptionConfirmeeClientLe = new Date().toISOString()
+    etape.receptionConfirmeeClientLe = maintenant().toISOString()
     if (etape.eBL) etape.eBL.signePar = nomSignataire.trim()
     etape.satisfactionEnvoyeeLe = etape.receptionConfirmeeClientLe
     return { ok: true }
@@ -1099,14 +1118,14 @@ export const useVoyagesStore = defineStore('voyages', () => {
     if (!motif.trim()) return { ok: false, motif: 'Un motif est obligatoire.' }
     const etape = v.etapes.find(e => e.id === etapeId)
     if (!etape || etape.franchi || !etape.destinataire) return { ok: false, motif: 'Ligne introuvable ou déjà signée.' }
-    etape.retourEntrepotLe = new Date().toISOString()
+    etape.retourEntrepotLe = maintenant().toISOString()
     etape.motifRetour = motif.trim()
     etape.dateDisponibleClient = dateDemandee || undefined
     etape.reporteLe = undefined
     etape.motifReport = undefined
     if (v.etapes.every(definitivementResolue)) {
       v.statut = 'livre'
-      v.dateArriveeReelle = new Date().toISOString()
+      v.dateArriveeReelle = maintenant().toISOString()
     }
     return { ok: true }
   }
@@ -1123,7 +1142,7 @@ export const useVoyagesStore = defineStore('voyages', () => {
     const etape = v?.etapes.find(e => e.id === etapeId)
     if (!v || !etape || !etape.retourEntrepotLe) return { ok: false, motif: "Cette ligne n'a pas de retour à réceptionner." }
     if (!conforme && !motif?.trim()) return { ok: false, motif: "Précisez ce qui ne va pas sur la marchandise revenue." }
-    etape.retourRecuLe = new Date().toISOString()
+    etape.retourRecuLe = maintenant().toISOString()
     if (conforme) { etape.retourConformeLe = etape.retourRecuLe } else { etape.retourNonConformeLe = etape.retourRecuLe; etape.motifRetourNonConforme = motif!.trim() }
     return { ok: true }
   }
@@ -1136,7 +1155,7 @@ export const useVoyagesStore = defineStore('voyages', () => {
     const v = getById(voyageId)
     const etape = v?.etapes.find(e => e.id === etapeId)
     if (!v || !etape || !etape.eBL?.articlesNonLivres?.length) return { ok: false, motif: 'Aucun article à rapporter pour cette ligne.' }
-    etape.articlesRapportesLe = new Date().toISOString()
+    etape.articlesRapportesLe = maintenant().toISOString()
     return { ok: true }
   }
 
@@ -1170,22 +1189,29 @@ export const useVoyagesStore = defineStore('voyages', () => {
     const c = completudeDossier(id)
     if (!c.complet) return { ok: false, motif: `Dossier incomplet : ${c.manquants.map(m => LIB_DOC[m]).join(', ')}` }
     v.kmArrivee = kmArrivee
-    const kmReel = v.kmDepart != null ? kmArrivee - v.kmDepart : null
-    let alerteEcart: string | undefined
-    if (kmReel != null && v.kmReference > 0) {
-      const ecartPct = Math.abs(kmReel - v.kmReference) / v.kmReference * 100
-      if (ecartPct > 20) alerteEcart = `Kilométrage réel (${kmReel} km) très éloigné du kilométrage de référence (${v.kmReference} km), écart de ${ecartPct.toFixed(0)} %.`
+    /* Le relevé au retour met à jour le kilométrage du véhicule (FMS-DB-03). */
+    const veh = v.vehiculeId ? useVehiculeStore().parId(v.vehiculeId) : null
+    if (veh) {
+      ;(veh.relevesKm ??= []).push({ le: maintenant().toISOString(), km: kmArrivee, source: 'Retour de voyage', voyageRef: v.reference })
+      if (kmArrivee > veh.kilometrage) veh.kilometrage = kmArrivee
     }
+    /* Au-delà de la tolérance du type d'écart « Écart kilométrique », un écart
+       est ouvert à la clôture (détection télématique) ; l'appelant le signale. */
+    const tolerance = useConfigTypesEcartStore().reglage('ecart_kilometrique')?.seuilValeur
+    const km = calculerEcartKm({ ...v, kmArrivee }, tolerance ?? Infinity)
+    let alerteEcart: string | undefined
+    if (tolerance != null && km.horsTolerance && km.ecartKm != null)
+      alerteEcart = `Kilométrage réel (${kmArrivee - (v.kmDepart ?? 0)} km) éloigné du kilométrage de référence (${v.kmReference} km), écart de ${km.ecartPourcent} % : un écart kilométrique est ouvert, à qualifier.`
     changerStatut(id, 'cloture')
     return { ok: true, alerteEcart }
   }
 
   return {
-    voyages, arrets, documents,
+    voyages, documents,
     enCours, aCloturer,
-    getById, arretsDuVoyage, documentsDuVoyage,
+    getById, documentsDuVoyage,
     completudeDossier, ecartPoids, ecartKm,
-    creer, changerStatut, cloturer,
+    creer, creerVoyage, controlePompe, changerStatut, cloturer,
     enAttente, planifies, confirmes, prets, enCoursKanban, enAttenteCloture, clotures, annules,
     creerRapide, definirLignes, planifier, annuler, marquerArrivee, declarerLivraisonChauffeur, capaciteOrdre, replanifierReliquat, confirmerReceptionClient, contesterReceptionClient, traiterContestation,
     trouverLigne, repondreSatisfaction, lienSuivi, reinitialiser, reporterAvecRetour, recevoirRetour, clientProposeDate, accepterDateClient,

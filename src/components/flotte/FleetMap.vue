@@ -14,20 +14,21 @@
 
 <script setup lang="ts">
 /**
- * Carte réutilisable basée sur Leaflet + fond OpenStreetMap (libre, sans
- * clé d'API), reprise du composant FleetMap des projets de référence.
- * Aucun boîtier de géolocalisation n'est nommé dans les documents
- * UCODIS : les marqueurs affichés proviennent d'une position simulée,
- * jamais d'un flux GPS réel.
+ * Carte réutilisable basée sur Leaflet et le fond OpenStreetMap (libre, sans
+ * clé d'API). Elle affiche des marqueurs, un tracé prévu (pointillé), un
+ * tracé parcouru (trait plein) et des zones de géorepérage.
  */
 import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import 'leaflet/dist/leaflet.css'
+import { useSitesStore } from '../../stores/sites'
 
 export interface CarteMarqueur { id: string; lat: number; lng: number; couleur: string; libelle: string; sousTitre?: string; enMouvement?: boolean; numero?: number; popupHtml?: string }
 
 const props = withDefaults(defineProps<{
   marqueurs?: CarteMarqueur[]
   tracePrevu?: { lat: number; lng: number }[]
+  traceReelle?: { lat: number; lng: number }[]
+  zones?: { id: string; lat: number; lng: number; rayonM: number; couleur?: string; libelle?: string }[]
   centre?: { lat: number; lng: number }
   zoom?: number
   height?: string
@@ -38,7 +39,9 @@ const props = withDefaults(defineProps<{
 }>(), {
   marqueurs: () => [],
   tracePrevu: () => [],
-  centre: () => ({ lat: -18.8792, lng: 47.5079 }), // Antananarivo
+  traceReelle: () => [],
+  zones: () => [],
+  centre: undefined,
   zoom: 7,
   height: '460px',
   ajusterVue: true,
@@ -47,13 +50,21 @@ const props = withDefaults(defineProps<{
   selectedId: null,
 })
 
-const emit = defineEmits<{ select: [id: string] }>()
+const emit = defineEmits<{ select: [id: string]; 'clic-carte': [p: { lat: number; lng: number }] }>()
 
 const mapEl = ref<HTMLDivElement | null>(null)
 let L: typeof import('leaflet') | null = null
 let map: import('leaflet').Map | null = null
 const markerRefs: Record<string, import('leaflet').Marker> = {}
 let ligneTrace: import('leaflet').Polyline | null = null
+let ligneReelle: import('leaflet').Polyline | null = null
+let cercles: import('leaflet').Circle[] = []
+const sites = useSitesStore()
+/** Centre par défaut : le premier site actif du référentiel, à défaut l'origine. */
+function centreParDefaut() {
+  const s = sites.actifs[0]
+  return props.centre ?? (s ? { lat: s.lat, lng: s.lng } : { lat: 0, lng: 0 })
+}
 
 function pinIcon(color: string, enMouvement = false, numero?: number) {
   const pulse = enMouvement
@@ -80,15 +91,31 @@ function pinIcon(color: string, enMouvement = false, numero?: number) {
   })
 }
 
+function dessinerZones() {
+  if (!map || !L) return
+  cercles.forEach(c => c.remove()); cercles = []
+  props.zones.forEach(z => {
+    const c = L!.circle([z.lat, z.lng], { radius: z.rayonM, color: z.couleur ?? '#0B4480', weight: 1, fillOpacity: 0.08 }).addTo(map!)
+    if (z.libelle) c.bindTooltip(z.libelle)
+    cercles.push(c)
+  })
+}
+
 function dessinerTrace() {
   if (!map || !L) return
   if (ligneTrace) { ligneTrace.remove(); ligneTrace = null }
+  if (ligneReelle) { ligneReelle.remove(); ligneReelle = null }
+  if (props.traceReelle.length > 1) {
+    ligneReelle = L.polyline(props.traceReelle.map(p => [p.lat, p.lng]), { color: '#16a34a', weight: 4, opacity: 0.9 }).addTo(map)
+  }
   if (props.tracePrevu.length > 1) {
     ligneTrace = L.polyline(props.tracePrevu.map(p => [p.lat, p.lng]), {
       color: '#1D4ED8', weight: 3, dashArray: '6 6', opacity: 0.85,
     }).addTo(map)
   }
 }
+
+const bulle = (m: CarteMarqueur) => `<strong>${m.libelle}</strong>${m.sousTitre ? '<br/>' + m.sousTitre : ''}`
 
 function dessinerMarqueurs() {
   if (!map || !L) return
@@ -98,10 +125,11 @@ function dessinerMarqueurs() {
     if (markerRefs[m.id]) {
       markerRefs[m.id]!.setLatLng([m.lat, m.lng])
       markerRefs[m.id]!.setIcon(pinIcon(m.couleur, m.enMouvement, m.numero))
+      markerRefs[m.id]!.setTooltipContent(bulle(m))
       if (m.popupHtml) markerRefs[m.id]!.setPopupContent(m.popupHtml)
     } else {
       const marker = L!.marker([m.lat, m.lng], { icon: pinIcon(m.couleur, m.enMouvement, m.numero) }).addTo(map!)
-      marker.bindTooltip(`<strong>${m.libelle}</strong>${m.sousTitre ? '<br/>' + m.sousTitre : ''}`)
+      marker.bindTooltip(bulle(m))
       if (m.popupHtml) marker.bindPopup(m.popupHtml)
       marker.on('click', () => emit('select', m.id))
       markerRefs[m.id] = marker
@@ -111,11 +139,14 @@ function dessinerMarqueurs() {
     if (!idsVus.has(id)) { markerRefs[id]!.remove(); delete markerRefs[id] }
   })
   dessinerTrace()
-  if (props.ajusterVue && (props.marqueurs.length || props.tracePrevu.length > 1)) {
-    const pts = [...props.marqueurs.map(m => [m.lat, m.lng] as [number, number]), ...props.tracePrevu.map(p => [p.lat, p.lng] as [number, number])]
+  if (props.ajusterVue && (props.marqueurs.length || props.tracePrevu.length > 1 || props.traceReelle.length > 1)) {
+    const pts = [...props.marqueurs.map(m => [m.lat, m.lng] as [number, number]), ...props.tracePrevu.map(p => [p.lat, p.lng] as [number, number]), ...props.traceReelle.map(p => [p.lat, p.lng] as [number, number])]
     if (pts.length) {
       const bounds = L.latLngBounds(pts)
-      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 9 })
+      /* Une zone isolée (fiche d'un site) se montre en entier, au plus près. */
+      const zoneSeule = props.zones.length === 1 && props.marqueurs.length <= 1 && props.tracePrevu.length < 2 && props.traceReelle.length < 2
+      if (zoneSeule && cercles[0]) bounds.extend(cercles[0].getBounds())
+      map.fitBounds(bounds, { padding: [40, 40], maxZoom: zoneSeule ? 15 : 9, animate: false })
     }
   }
 }
@@ -124,15 +155,20 @@ onMounted(async () => {
   L = await import('leaflet')
   await nextTick()
   if (!mapEl.value) return
-  map = L.map(mapEl.value, { zoomControl: true }).setView([props.centre.lat, props.centre.lng], props.zoom)
+  const c = centreParDefaut()
+  map = L.map(mapEl.value, { zoomControl: true }).setView([c.lat, c.lng], props.zoom)
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap',
     maxZoom: 18,
   }).addTo(map)
+  map.on('click', e => emit('clic-carte', { lat: Number(e.latlng.lat.toFixed(6)), lng: Number(e.latlng.lng.toFixed(6)) }))
+  dessinerZones()
   dessinerMarqueurs()
 })
-onBeforeUnmount(() => { map?.remove(); map = null })
+onBeforeUnmount(() => { map?.stop(); map?.off(); map?.remove(); map = null })
 
 watch(() => props.marqueurs, () => dessinerMarqueurs(), { deep: true })
 watch(() => props.tracePrevu, () => dessinerMarqueurs(), { deep: true })
+watch(() => props.traceReelle, () => dessinerMarqueurs(), { deep: true })
+watch(() => props.zones, () => { dessinerZones(); dessinerMarqueurs() }, { deep: true })
 </script>

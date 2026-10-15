@@ -1,7 +1,9 @@
+import { useConfigurationStore } from './configuration'
 import { defineStore } from 'pinia'
+import { useParametresStore } from './parametres'
 import { ref, computed } from 'vue'
 import type { Personnel, StatutPersonnel } from '../types'
-import { aujourdhuiISO } from '../utils/horloge'
+import { aujourdhuiISO, maintenantMs } from '../utils/horloge'
 
 /**
  * Effectif d'UCODIS Transport.
@@ -65,7 +67,7 @@ const GRAINE: Graine[] = [
   {
     id: 'p-006', matricule: 'UCT-006', nom: 'Rakotobe', prenom: 'Naina',
     fonctionId: 'f-depot', fonctionLibelle: 'Agent de dépôt',
-    entiteId: 'e7', entiteNom: 'Équipe dépôt', site: 'Dépôt UCODIS Tanjombato',
+    entiteId: 'e7', entiteNom: 'Équipe dépôt', site: 'Dépôt Tanjombato',
     telephone: '034 12 345 06',
     cin: '101 234 567 006', dateNaissance: '1993-04-08',
     contrat: 'CDI', dateEntree: '2024-10-14', statut: 'actif',
@@ -92,7 +94,7 @@ const GRAINE: Graine[] = [
   {
     id: 'p-009', matricule: 'UCT-009', nom: 'Razafindrakoto', prenom: 'Haja',
     fonctionId: 'f-depot', fonctionLibelle: 'Agent de dépôt',
-    entiteId: 'e7', entiteNom: 'Équipe dépôt', site: 'Dépôt UCODIS Tanjombato',
+    entiteId: 'e7', entiteNom: 'Équipe dépôt', site: 'Dépôt Tanjombato',
     telephone: '034 12 345 09',
     cin: '101 234 567 009', dateNaissance: '1995-12-03',
     contrat: 'CDD', dateEntree: '2025-02-03', statut: 'actif',
@@ -121,7 +123,7 @@ CONDUCTEURS.forEach(([nom, prenom, naissance, habilite, statut], i) => {
     matricule: `UCT-0${n}`,
     nom, prenom,
     fonctionId: 'f-cond', fonctionLibelle: 'Conducteur',
-    entiteId: 'e4', entiteNom: 'Équipe conduite', site: 'Dépôt UCODIS Tanjombato',
+    entiteId: 'e4', entiteNom: 'Équipe conduite', site: 'Dépôt Tanjombato',
     telephone: `034 12 346 ${String(i + 1).padStart(2, '0')}`,
     cin: `101 234 568 0${String(i + 1).padStart(2, '0')}`,
     dateNaissance: naissance,
@@ -154,7 +156,7 @@ AIDES.forEach(([nom, prenom, naissance, habilite], i) => {
     matricule: `UCT-0${n}`,
     nom, prenom,
     fonctionId: 'f-aide', fonctionLibelle: 'Aide conducteur',
-    entiteId: 'e4', entiteNom: 'Équipe conduite', site: 'Dépôt UCODIS Tanjombato',
+    entiteId: 'e4', entiteNom: 'Équipe conduite', site: 'Dépôt Tanjombato',
     telephone: `034 12 347 ${String(i + 1).padStart(2, '0')}`,
     cin: `101 234 569 0${String(i + 1).padStart(2, '0')}`,
     dateNaissance: naissance,
@@ -175,8 +177,11 @@ export const usePersonnelStore = defineStore('personnel', () => {
   )
 
   const actifs = computed(() => liste.value.filter(p => p.statut !== 'archive'))
-  const conducteurs = computed(() => actifs.value.filter(p => p.fonctionId === 'f-cond'))
-  const aides = computed(() => actifs.value.filter(p => p.fonctionId === 'f-aide'))
+  /** Fonctions qui désignent un conducteur ou un aide conducteur : réglées dans la configuration, jamais en dur. */
+  const estConducteur = (p: { fonctionId: string }) => useConfigurationStore().parametres.fonctionsConducteur.includes(p.fonctionId)
+  const estAide = (p: { fonctionId: string }) => useConfigurationStore().parametres.fonctionsAide.includes(p.fonctionId)
+  const conducteurs = computed(() => actifs.value.filter(estConducteur))
+  const aides = computed(() => actifs.value.filter(estAide))
   const roulants = computed(() => actifs.value.filter(p => p.conduit))
   const effectif = computed(() => actifs.value.length)
 
@@ -212,6 +217,47 @@ export const usePersonnelStore = defineStore('personnel', () => {
     }
   }
 
+  /** Indisponibilité déclarée dans le FMS (arrêt, formation, mission externe…). */
+  function ajouterIndisponibilite(id: string, d: { du: string; au: string; motif: string }, par: string): { ok: boolean; motif?: string } {
+    const p = parId(id); if (!p) return { ok: false, motif: 'Personne introuvable.' }
+    if (!d.du || !d.au) return { ok: false, motif: 'Indiquez les deux dates.' }
+    if (d.au < d.du) return { ok: false, motif: 'La date de fin précède la date de début.' }
+    if (!d.motif.trim()) return { ok: false, motif: 'Indiquez le motif.' }
+    const l = p.indisponibilitesManuelles ?? []
+    if (l.some(x => x.du <= d.au && x.au >= d.du)) return { ok: false, motif: 'Une indisponibilité couvre déjà une partie de cette période.' }
+    p.indisponibilitesManuelles = [...l, { id: `IN-${maintenantMs()}`, du: d.du, au: d.au, motif: d.motif.trim(), par }]
+    return { ok: true }
+  }
+  function retirerIndisponibilite(id: string, indId: string) {
+    const p = parId(id); if (p?.indisponibilitesManuelles) p.indisponibilitesManuelles = p.indisponibilitesManuelles.filter(x => x.id !== indId)
+  }
+  /** Statut de la personne dans le FMS : actif, en congé, suspendu ou fin de contrat ; le retour à actif reste possible. */
+  function changerStatut(id: string, statut: 'actif' | 'conge' | 'suspendu' | 'fin_contrat', motif?: string): { ok: boolean; motif?: string } {
+    const p = parId(id); if (!p) return { ok: false, motif: 'Personne introuvable.' }
+    if (p.statut === 'archive') return { ok: false, motif: 'Cette personne a quitté les effectifs.' }
+    if (p.statut === statut) return { ok: false, motif: 'La personne a déjà ce statut.' }
+    if (statut === 'suspendu' && !motif?.trim()) return { ok: false, motif: 'Indiquez le motif de la suspension.' }
+    p.statut = statut
+    return { ok: true }
+  }
+
+  /** Modification de l'identité, de la fonction, de l'entité et du téléphone. */
+  function modifier(id: string, d: { prenom: string; nom: string; cin: string; telephone: string; fonctionId: string; fonctionLibelle: string; entiteId: string; entiteNom: string; conduit: boolean }): { ok: boolean; motif?: string } {
+    const p = parId(id); if (!p) return { ok: false, motif: 'Personne introuvable.' }
+    if (!d.prenom.trim() || !d.nom.trim()) return { ok: false, motif: 'Indiquez le prénom et le nom.' }
+    if (!d.fonctionId) return { ok: false, motif: 'Choisissez la fonction.' }
+    if (!d.entiteId) return { ok: false, motif: "Choisissez l'entité." }
+    if (!d.telephone.trim()) return { ok: false, motif: 'Indiquez le téléphone.' }
+    if (!d.cin.trim()) return { ok: false, motif: "Indiquez le numéro de la pièce d'identité." }
+    if (liste.value.some(x => x.id !== id && x.cin === d.cin.trim())) return { ok: false, motif: "Cette pièce d'identité est déjà enregistrée pour une autre personne." }
+    Object.assign(p, {
+      prenom: d.prenom.trim(), nom: d.nom.trim(), nomComplet: `${d.prenom.trim()} ${d.nom.trim()}`,
+      cin: d.cin.trim(), telephone: d.telephone.trim(),
+      fonctionId: d.fonctionId, fonctionLibelle: d.fonctionLibelle, entiteId: d.entiteId, entiteNom: d.entiteNom, conduit: d.conduit,
+    })
+    return { ok: true }
+  }
+
   /** On archive, on ne supprime jamais : l'historique reste rattaché. */
   function archiver(id: string) {
     const p = parId(id)
@@ -221,10 +267,13 @@ export const usePersonnelStore = defineStore('personnel', () => {
     p.habilite = false
   }
 
-  let prochainSeq = 25
-  function prochainMatricule() { return `UCT-0${prochainSeq++}` }
-  /** Aperçu du prochain matricule, sans le consommer · pour l'affichage dans le formulaire. */
-  function apercuProchainMatricule() { return `UCT-0${prochainSeq}` }
+  /** Matricule suivant : préfixe paramétré dans la fiche société, numéro après le plus grand existant. */
+  function apercuProchainMatricule() {
+    const prefixe = useParametresStore().societe.prefixeMatricule || 'EMP-'
+    const n = Math.max(0, ...liste.value.filter(p => p.matricule.startsWith(prefixe)).map(p => Number(p.matricule.slice(prefixe.length)) || 0)) + 1
+    return `${prefixe}${String(n).padStart(3, '0')}`
+  }
+  function prochainMatricule() { return apercuProchainMatricule() }
 
   function creer(saisie: {
     prenom: string; nom: string; fonctionId: string; fonctionLibelle: string
@@ -238,7 +287,9 @@ export const usePersonnelStore = defineStore('personnel', () => {
     statut?: StatutPersonnel
     matricule?: string
   }) {
-    const id = `p-perso-${prochainSeq}`
+    let n = liste.value.length + 1
+    while (liste.value.some(p => p.id === `p-perso-${n}`)) n++
+    const id = `p-perso-${n}`
     const matricule = saisie.matricule?.trim() || prochainMatricule()
     liste.value.push({
       id,
@@ -253,7 +304,8 @@ export const usePersonnelStore = defineStore('personnel', () => {
   }
 
   return {
-    liste, actifs, conducteurs, aides, roulants, effectif, roulantsNonHabilites,
+    ajouterIndisponibilite, retirerIndisponibilite, changerStatut, modifier,
+    liste, actifs, conducteurs, aides, estConducteur, estAide, roulants, effectif, roulantsNonHabilites,
     parId, parEntite, basculerHabilitation, archiver, creer, apercuProchainMatricule,
   }
 })

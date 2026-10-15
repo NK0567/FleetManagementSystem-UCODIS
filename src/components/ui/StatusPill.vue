@@ -19,16 +19,21 @@ const CONFIG: Record<string, { libelle: string; classe: string }> = {
   proche:    { libelle: 'À renouveler', classe: 'bg-warning-bg text-warning' },
   expire:    { libelle: 'Expiré',     classe: 'bg-danger-bg text-danger' },
   absent:    { libelle: 'Manquant',   classe: 'bg-neutral-bg text-neutral' },
+  annule:    { libelle: 'Annulé',     classe: 'bg-danger-bg text-danger' },
+  perdu:     { libelle: 'Perdu',      classe: 'bg-danger-bg text-danger' },
   habilite:  { libelle: 'Habilité',   classe: 'bg-success-bg text-success' },
   non_habilite: { libelle: 'Non habilité', classe: 'bg-danger-bg text-danger' },
   sans_objet: { libelle: 'Sans objet', classe: 'bg-neutral-bg text-neutral' },
   ouvert:    { libelle: 'Ouvert',     classe: 'bg-success-bg text-success' },
   ferme:     { libelle: 'Désactivé',  classe: 'bg-neutral-bg text-neutral' },
   // Statuts véhicule (module 1)
-  affecte:      { libelle: 'Affecté',      classe: 'bg-info-bg text-info' },
-  reparation:   { libelle: 'En réparation', classe: 'bg-warning-bg text-warning' },
-  hors_service: { libelle: 'Hors service', classe: 'bg-danger-bg text-danger' },
-  vendu:        { libelle: 'Vendu',        classe: 'bg-neutral-bg text-neutral' },
+  disponible:     { libelle: 'Disponible',     classe: 'bg-success-bg text-success' },
+  affecte:        { libelle: 'Affecté',        classe: 'bg-info-bg text-info' },
+  en_mission:     { libelle: 'En mission',     classe: 'bg-primary/10 text-primary' },
+  en_maintenance: { libelle: 'En maintenance', classe: 'bg-warning-bg text-warning' },
+  immobilise:     { libelle: 'Immobilisé',     classe: 'bg-danger-bg text-danger' },
+  hors_service:   { libelle: 'Hors service',   classe: 'bg-danger-bg text-danger' },
+  sorti:          { libelle: 'Sorti du parc',  classe: 'bg-neutral-bg text-neutral' },
 }
 
 const cfg = computed(() => {

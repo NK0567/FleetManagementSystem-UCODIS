@@ -1,5 +1,6 @@
 <script setup lang="ts">
 /** Fiche d'une transaction de carte : contrôle des limites et rapprochement avec un plein (FMS-CA-02). */
+import { devise } from '../../lib/monnaie'
 import { ref, computed, watch } from 'vue'
 import { CircleCheck, TriangleAlert, XCircle } from '@lucide/vue'
 import CardModalShell from '../shared/CardModalShell.vue'
@@ -29,16 +30,14 @@ watch(idCourant, () => { erreur.value = ''; succes.value = ''; choix.value = '' 
 const depassements = computed(() => item.value ? store.depassements(item.value) : [])
 const plein = computed(() => item.value?.rechargeId ? carburant.getById(item.value.rechargeId) : undefined)
 
-/** Pleins du même titulaire à deux jours près, non rapprochés d'une autre transaction. */
+/** Pleins du même titulaire dans la tolérance d'heure réglée, non rapprochés d'une autre transaction. */
 const choix = ref('')
-const optPleins = computed<DropdownItem[]>(() => {
-  const t = item.value; const c = carte.value
-  if (!t || !c) return []
-  const lies = new Set(store.transactions.filter(x => x.rechargeId && x.id !== t.id).map(x => x.rechargeId))
-  return carburant.recharges
-    .filter(r => !lies.has(r.id) && (c.rattachement === 'vehicule' ? r.vehiculeId === c.vehiculeId : r.chauffeurId === c.chauffeurId)
-      && Math.abs(new Date(r.date).getTime() - new Date(t.date).getTime()) <= 2 * 86_400_000)
-    .map(r => ({ id: r.id, label: `${fmtDateHeure(r.date)} · ${r.litres} L`, sublabel: `${r.vehiculePlaque} · ${r.lieu}` }))
+const optPleins = computed<DropdownItem[]>(() => item.value
+  ? store.pleinsProches(item.value).map(r => ({ id: r.id, label: `${fmtDateHeure(r.date)} · ${r.litres} L`, sublabel: `${r.vehiculePlaque} · ${r.lieu}` }))
+  : [])
+const tolerance = computed(() => {
+  const m = carburant.parametres.toleranceRapprochementMin
+  return m >= 60 && m % 60 === 0 ? `${m / 60} h` : `${m} min`
 })
 function rapprocher() {
   if (!item.value || !choix.value) { erreur.value = 'Choisissez le plein à rapprocher.'; succes.value = ''; return }
@@ -47,7 +46,7 @@ function rapprocher() {
 }
 function annuler() { if (item.value) { store.annulerRapprochement(item.value.id); succes.value = 'Rapprochement annulé.'; erreur.value = '' } }
 const ecartLitres = computed(() => plein.value && item.value ? Math.round((plein.value.litres - item.value.litres) * 10) / 10 : 0)
-const fmtAr = (n: number) => `${n.toLocaleString('fr-FR')} Ar`
+const fmtAr = (n: number) => `${n.toLocaleString('fr-FR')} ${devise()}`
 </script>
 
 <template>
@@ -106,9 +105,8 @@ const fmtAr = (n: number) => `${n.toLocaleString('fr-FR')} Ar`
             <button :class="F.btnOutline" class="mt-3" @click="annuler">Annuler le rapprochement</button>
           </template>
           <template v-else>
-            <p class="text-xs text-muted-foreground mb-3">Aucun plein enregistré ne correspond à cette transaction. Rapprochez-la d'un plein du même titulaire, ou créez le plein à partir de la transaction.</p>
             <div class="flex gap-2 items-end flex-wrap">
-              <div :class="F.field" class="flex-1 min-w-[240px]"><label :class="F.fieldLabel">Plein du titulaire (deux jours autour)</label><SearchableDropdown v-model="choix" :items="optPleins" :placeholder="optPleins.length ? 'Choisir…' : 'Aucun plein proche'" /></div>
+              <div :class="F.field" class="flex-1 min-w-[240px]"><label :class="F.fieldLabel">Plein du titulaire (à {{ tolerance }} près)</label><SearchableDropdown v-model="choix" :items="optPleins" :placeholder="optPleins.length ? 'Choisir…' : 'Aucun plein proche'" /></div>
               <button :class="F.btnOutline" @click="rapprocher">Rapprocher</button>
               <button :class="F.btnPrimary" @click="emit('creerPlein', item.id)">Créer le plein</button>
             </div>

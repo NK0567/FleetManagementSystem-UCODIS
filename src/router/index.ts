@@ -81,6 +81,8 @@ const router = createRouter({
       component: () => import('../views/flotte/TableauBordView.vue'), meta: dashboard },
     { path: '/flotte/carte', name: 'flotte-carte',
       component: () => import('../views/flotte/CarteTempsReelView.vue'), meta: dashboard },
+    { path: '/flotte/rapports', name: 'flotte-rapports',
+      component: () => import('../views/flotte/RapportsView.vue'), meta: dashboard },
     { path: '/flotte/vehicules', name: 'flotte-vehicules',
       component: () => import('../views/flotte/VehiculeListView.vue'), meta: dashboard },
     { path: '/flotte/attelages', name: 'flotte-attelages',
@@ -95,6 +97,14 @@ const router = createRouter({
       component: () => import('../views/flotte/AssurancesView.vue'), meta: dashboard },
     { path: '/flotte/documents-vehicule', name: 'flotte-documents-vehicule',
       component: () => import('../views/flotte/DocumentsVehiculeView.vue'), meta: dashboard },
+    { path: '/flotte/documents-entreprise', name: 'flotte-documents-entreprise',
+      component: () => import('../views/flotte/DocumentsEntrepriseView.vue'), meta: dashboard },
+    { path: '/flotte/infractions', name: 'flotte-infractions',
+      component: () => import('../views/flotte/InfractionsView.vue'), meta: dashboard },
+    { path: '/flotte/formations', name: 'flotte-formations',
+      component: () => import('../views/flotte/FormationsView.vue'), meta: dashboard },
+    { path: '/flotte/alertes', name: 'flotte-alertes',
+      component: () => import('../views/flotte/AlertesView.vue'), meta: dashboard },
     { path: '/flotte/conducteurs', name: 'flotte-conducteurs',
       component: () => import('../views/flotte/ConducteursFlotteView.vue'), meta: dashboard },
     { path: '/flotte/conducteurs/:id', name: 'flotte-conducteur-dashboard',
@@ -111,6 +121,8 @@ const router = createRouter({
       component: () => import('../views/flotte/ControlesView.vue'), meta: dashboard },
     { path: '/flotte/departs', name: 'flotte-departs',
       component: () => import('../views/flotte/DepartsView.vue'), meta: dashboard },
+    { path: '/flotte/prestataires', name: 'flotte-prestataires',
+      component: () => import('../views/flotte/PrestatairesView.vue'), meta: dashboard },
     { path: '/flotte/sites', name: 'flotte-sites',
       component: () => import('../views/flotte/SitesView.vue'), meta: dashboard },
     { path: '/flotte/configuration', name: 'flotte-configuration',
@@ -150,6 +162,8 @@ const router = createRouter({
       component: () => import('../views/espace/EspaceAccueilView.vue'), meta: dashboard },
     { path: '/mon-espace/absences', name: 'espace-absences',
       component: () => import('../views/espace/MesAbsencesView.vue'), meta: dashboard },
+    { path: '/mon-espace/checklist', name: 'espace-checklist',
+      component: () => import('../views/espace/MaChecklistView.vue'), meta: dashboard },
     { path: '/mon-profil', name: 'mon-profil',
       component: () => import('../views/espace/MonProfilView.vue'), meta: dashboard },
 
@@ -168,7 +182,7 @@ router.beforeEach(to => {
 
   /* Le personnel roulant ne voit que son espace. */
   if (auth.connecte && auth.cotéTerrain) {
-    const autorise = ['espace-accueil', 'espace-absences', 'mon-profil']
+    const autorise = ['espace-accueil', 'espace-absences', 'espace-checklist', 'mon-profil']
     if (!autorise.includes(String(to.name))) return { name: 'espace-accueil' }
   }
 

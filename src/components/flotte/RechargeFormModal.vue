@@ -1,6 +1,8 @@
 <script setup lang="ts">
-/** Enregistrement d'un plein (FMS-CA-01) : au bureau, depuis le téléphone
- *  avec la photo du reçu, ou à partir d'une transaction de carte carburant. */
+import { maintenant } from '../../utils/horloge'
+/** Enregistrement d'un plein (FMS-CA-01) : au bureau, depuis l'espace du
+ *  chauffeur avec la photo du reçu, ou à partir d'une transaction de carte.
+ *  Le mode de saisie se déduit de ce contexte, il ne se choisit pas. */
 import { ref, computed, watch } from 'vue'
 import { Paperclip, X } from '@lucide/vue'
 import CreateModalShell from '../shared/CreateModalShell.vue'
@@ -16,7 +18,8 @@ import { useAuthStore } from '../../stores/auth'
 import type { CanalRecharge } from '../../types'
 import * as F from '../../lib/formClasses'
 
-const props = defineProps<{ transactionId?: string }>()
+/** pourChauffeurId : saisie depuis l'espace du chauffeur, avec la photo du reçu (FMS-CA-01). */
+const props = defineProps<{ transactionId?: string; pourChauffeurId?: string }>()
 const emit = defineEmits<{ close: []; cree: [id: string] }>()
 
 const store = useCarburantStore()
@@ -26,15 +29,17 @@ const personnel = usePersonnelStore()
 const voyages = useVoyagesStore()
 const auth = useAuthStore()
 
-const maintenantLocal = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16) }
+const maintenantLocal = () => { const d = maintenant(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16) }
 const transaction = computed(() => props.transactionId ? cartes.transactionParId(props.transactionId) : undefined)
 const carte = computed(() => transaction.value ? cartes.getById(transaction.value.carteId) : undefined)
 
+const tourneeDuChauffeur = props.pourChauffeurId ? voyages.voyages.find(v => v.chauffeurId === props.pourChauffeurId && v.statut === 'en_cours') : undefined
+const vehiculeDuChauffeur = props.pourChauffeurId ? (tourneeDuChauffeur?.vehiculeId ?? vehicules.affectations.find(a => a.conducteurId === props.pourChauffeurId && !a.dateFin)?.vehiculeId ?? '') : ''
+const canal: CanalRecharge = transaction.value ? 'carte' : props.pourChauffeurId ? 'mobile' : 'manuelle'
 const form = ref({
-  canal: (transaction.value ? 'carte' : 'manuelle') as CanalRecharge,
-  vehiculeId: carte.value?.vehiculeId ?? '',
-  chauffeurId: carte.value?.chauffeurId ?? '',
-  voyageId: '',
+  vehiculeId: carte.value?.vehiculeId ?? vehiculeDuChauffeur,
+  chauffeurId: carte.value?.chauffeurId ?? props.pourChauffeurId ?? '',
+  voyageId: tourneeDuChauffeur?.id ?? '',
   date: transaction.value ? transaction.value.date.slice(0, 16) : maintenantLocal(),
   lieu: transaction.value?.station ?? '',
   litres: transaction.value?.litres as number | undefined,
@@ -45,9 +50,8 @@ const form = ref({
 const recu = ref<{ nom: string; dataUrl?: string } | null>(null)
 const erreur = ref('')
 
-const optCanal = computed<DropdownItem[]>(() => (['manuelle', 'mobile', 'carte'] as CanalRecharge[]).map(c => ({ id: c, label: LIB_CANAL[c] })))
-const optVehicules = computed<DropdownItem[]>(() => vehicules.tracteurs.filter(v => v.statut !== 'vendu').map(v => ({ id: v.id, label: v.immatriculation, sublabel: `${v.marque} ${v.modele}` })))
-const optChauffeurs = computed<DropdownItem[]>(() => personnel.liste.filter(p => p.fonctionId === 'f-cond').map(p => ({ id: p.id, label: p.nomComplet })))
+const optVehicules = computed<DropdownItem[]>(() => vehicules.tracteurs.filter(v => v.statut !== 'sorti').map(v => ({ id: v.id, label: v.immatriculation, sublabel: `${v.marque} ${v.modele}` })))
+const optChauffeurs = computed<DropdownItem[]>(() => personnel.liste.filter(p => personnel.estConducteur(p)).map(p => ({ id: p.id, label: p.nomComplet })))
 const optVoyages = computed<DropdownItem[]>(() => voyages.voyages
   .filter(v => v.vehiculeId === form.value.vehiculeId && v.statut !== 'annule')
   .map(v => ({ id: v.id, label: v.reference, sublabel: v.trajetLibelle ?? `${v.origine} → ${v.destination}` })))
@@ -87,15 +91,15 @@ function enregistrer() {
   if (!v) { erreur.value = 'Choisissez le véhicule.'; return }
   if (!f.lieu.trim()) { erreur.value = 'Indiquez la station.'; return }
   if (!f.litres || !f.prixLitre) { erreur.value = 'Indiquez le volume et le prix au litre.'; return }
-  if (f.canal === 'mobile' && !recu.value) { erreur.value = 'Une saisie depuis le téléphone se fait avec la photo du reçu.'; return }
+  if (canal === 'mobile' && !recu.value) { erreur.value = 'Une saisie depuis le téléphone se fait avec la photo du reçu.'; return }
   const ch = personnel.liste.find(p => p.id === f.chauffeurId)
   const voy = voyages.voyages.find(x => x.id === f.voyageId)
   const r = store.creer({
     date: f.date, vehiculeId: v.id, vehiculePlaque: v.immatriculation,
     chauffeurId: ch?.id, chauffeurNom: ch?.nomComplet, voyageId: voy?.id, voyageRef: voy?.reference,
     litres: f.litres, prixLitre: f.prixLitre, montant: montant.value, odometre: f.odometre ?? 0,
-    pleinComplet: f.pleinComplet, lieu: f.lieu.trim(), lat: -18.8792, lng: 47.5079, canal: f.canal,
-    recu: recu.value ?? undefined, saisiPar: auth.user?.nom, saisiLe: new Date().toISOString(),
+    pleinComplet: f.pleinComplet, lieu: f.lieu.trim(), ...store.coordonneesDuLieu(f.lieu), canal,
+    recu: recu.value ?? undefined, saisiPar: auth.user?.nom, saisiLe: maintenant().toISOString(),
   })
   if (!r.ok) { erreur.value = r.motif ?? ''; return }
   if (props.transactionId) cartes.rapprocher(props.transactionId, r.id!)
@@ -106,7 +110,7 @@ function enregistrer() {
 <template>
   <CreateModalShell
     title="Nouveau plein"
-    banner-label="Flotte · Carburant"
+    :banner-label="pourChauffeurId ? 'Mon espace · Plein' : 'Flotte · Carburant'"
     create-label="Enregistrer le plein"
     :save-error="erreur || null"
     @close="emit('close')"
@@ -116,19 +120,19 @@ function enregistrer() {
       <div class="px-8 py-6 max-w-3xl mx-auto">
         <FormSection title="Le plein">
           <div class="grid grid-cols-2 gap-x-6 gap-y-4 max-sm:grid-cols-1">
-            <div :class="F.field"><label :class="F.fieldLabel">Saisie *</label><SearchableDropdown v-model="form.canal" :items="optCanal" placeholder="Sélectionner…" /></div>
+            <div :class="F.field"><label :class="F.fieldLabel">Mode de saisie</label><span class="text-sm text-foreground py-2">{{ LIB_CANAL[canal] }}</span></div>
             <div :class="F.field"><label :class="F.fieldLabel">Date et heure *</label><input v-model="form.date" type="datetime-local" :class="F.fieldInput" /></div>
             <div :class="F.field"><label :class="F.fieldLabel">Véhicule *</label><SearchableDropdown v-model="form.vehiculeId" :items="optVehicules" placeholder="Choisir…" /></div>
-            <div :class="F.field"><label :class="F.fieldLabel">Chauffeur</label><SearchableDropdown v-model="form.chauffeurId" :items="optChauffeurs" placeholder="Choisir…" /></div>
+            <div v-if="!pourChauffeurId" :class="F.field"><label :class="F.fieldLabel">Conducteur</label><SearchableDropdown v-model="form.chauffeurId" :items="optChauffeurs" placeholder="Choisir…" /></div>
             <div :class="F.field"><label :class="F.fieldLabel">Voyage</label><SearchableDropdown v-model="form.voyageId" :items="optVoyages" :placeholder="form.vehiculeId ? (optVoyages.length ? 'Choisir…' : 'Aucun voyage pour ce véhicule') : 'Choisir d\'abord le véhicule'" /></div>
             <div :class="F.field"><label :class="F.fieldLabel">Station *</label><input v-model="form.lieu" :class="F.fieldInput" placeholder="ex. Station Toamasina" /></div>
           </div>
         </FormSection>
-        <FormSection title="Quantités">
+        <FormSection title="Quantité et montant">
           <div class="grid grid-cols-3 gap-x-6 gap-y-4 max-sm:grid-cols-1">
             <div :class="F.field"><label :class="F.fieldLabel">Volume (L) *</label><input v-model.number="form.litres" type="number" min="0" step="0.1" :class="F.fieldInput" /></div>
-            <div :class="F.field"><label :class="F.fieldLabel">Prix au litre (Ar) *</label><input v-model.number="form.prixLitre" type="number" min="0" :class="F.fieldInput" /></div>
-            <div :class="F.field"><label :class="F.fieldLabel">Montant</label><span class="text-sm font-semibold text-foreground py-2">{{ montant ? montant.toLocaleString('fr-FR') + ' Ar' : '-' }}</span></div>
+            <div :class="F.field"><label :class="F.fieldLabel">Prix au litre ({{ $devise() }}) *</label><input v-model.number="form.prixLitre" type="number" min="0" :class="F.fieldInput" /></div>
+            <div :class="F.field"><label :class="F.fieldLabel">Montant</label><span class="text-sm font-semibold text-foreground py-2">{{ montant ? montant.toLocaleString('fr-FR') + ' ' + $devise() : '-' }}</span></div>
             <div :class="F.field"><label :class="F.fieldLabel">Kilométrage au compteur *</label><input v-model.number="form.odometre" type="number" min="0" :class="F.fieldInput" :placeholder="dernierKm ? `dernier plein : ${dernierKm.toLocaleString('fr-FR')}` : ''" /></div>
             <label class="flex items-center gap-2 text-[13px] text-foreground cursor-pointer col-span-2 max-sm:col-span-1 self-end pb-2"><input v-model="form.pleinComplet" type="checkbox" class="accent-primary" /> Plein complet (réservoir rempli jusqu'au bouchon)</label>
           </div>
@@ -141,7 +145,7 @@ function enregistrer() {
           </div>
           <label v-else class="flex items-center justify-center gap-2 border-2 border-dashed border-border rounded-lg py-6 cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors">
             <Paperclip class="w-4 h-4 text-muted-foreground" />
-            <span class="text-xs text-muted-foreground">Photo ou PDF du reçu{{ form.canal === 'mobile' ? ' *' : '' }}</span>
+            <span class="text-xs text-muted-foreground">Photo ou PDF du reçu{{ canal === 'mobile' ? ' *' : '' }}</span>
             <input type="file" accept="image/*,application/pdf" capture="environment" class="hidden" @change="chargerRecu" />
           </label>
         </FormSection>

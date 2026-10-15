@@ -1,7 +1,7 @@
 <template>
   <ListPageLayout
     title="Contrôles du véhicule"
-    :subtitle="`Avant le chargement, au retour de voyage et à la réception d'un camion neuf · ${anomaliesOuvertes} contrôle(s) avec anomalie bloquante`"
+    :subtitle="`${anomaliesOuvertes} contrôle(s) avec anomalie bloquante`"
     :columns="columns"
     :items="pageItems"
     :total="totalCount"
@@ -19,12 +19,10 @@
     @open-card="(c: any) => ouvrirFiche(c.id)"
   >
     <template #header-actions>
-      <button :class="L.btnOutline" @click="reglageOuvert = !reglageOuvert"><Settings2 class="w-4 h-4" /> Points de contrôle</button>
       <button :class="L.btnPrimary" @click="saisieOuverte = true"><Plus class="w-4 h-4" /> Nouveau contrôle</button>
     </template>
 
     <template #above-table>
-      <ReglagePointsControle v-if="reglageOuvert" class="mb-3.5" />
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-3.5">
         <div v-for="k in kpis" :key="k.label" :class="L.kpiItem">
           <div :class="[L.kpiItemIcon, k.bg]"><component :is="k.icon" class="w-4.5 h-4.5" :class="k.iconColor" /></div>
@@ -73,10 +71,9 @@
 </template>
 
 <script setup lang="ts">
-/** Contrôles du véhicule par le maintenancier (FMS-MA-09). */
+/** Contrôles du véhicule par le maintenancier : avant le chargement, au retour de voyage, à la réception d'un camion neuf. */
 import { ref, computed, watch } from 'vue'
-import { Plus, ClipboardCheck, CircleCheck, TriangleAlert, Wrench, Settings2 } from '@lucide/vue'
-import ReglagePointsControle from '../../components/maintenance/ReglagePointsControle.vue'
+import { Plus, ClipboardCheck, CircleCheck, TriangleAlert, Wrench } from '@lucide/vue'
 import ListPageLayout from '../../components/shared/ListPageLayout.vue'
 import type { ListColumn } from '../../components/shared/ListPageLayout.vue'
 import ControleVehiculeCard from '../../components/maintenance/ControleVehiculeCard.vue'
@@ -86,7 +83,6 @@ import { fmtDateHeure } from '../../utils/voyageUtils'
 import * as L from '../../lib/listClasses'
 
 const store = useControlesVehiculeStore()
-const reglageOuvert = ref(false)
 const saisieOuverte = ref(false)
 const ficheId = ref<string | null>(null)
 function ouvrirFiche(id: string) { ficheId.value = id }

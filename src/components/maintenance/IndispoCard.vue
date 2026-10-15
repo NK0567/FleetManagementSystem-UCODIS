@@ -1,5 +1,6 @@
 <script setup lang="ts">
-/** Fiche d'une immobilisation : cause, durée, coût et levée (FMS-MA-07). */
+/** Fiche d'une indisponibilité : cause, durée, coût et levée. */
+import { devise } from '../../lib/monnaie'
 import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { Wrench, TriangleAlert, CircleCheck } from '@lucide/vue'
@@ -35,7 +36,7 @@ const CLS_FAMILLE: Record<FamilleIndispo, string> = {
   technique: 'bg-danger-bg text-danger', reglementaire: 'bg-warning-bg text-warning',
   administrative: 'bg-info-bg text-info', humaine: 'bg-primary/10 text-primary',
 }
-const fmtAr = (n: number) => n.toLocaleString('fr-FR') + ' Ar'
+const fmtAr = (n: number) => n.toLocaleString('fr-FR') + ' ' + devise()
 const optCodes = computed<DropdownItem[]>(() => codif.codes.map(c => ({ id: c.code, label: `${c.code} · ${c.libelle}`, sublabel: LIB_FAMILLE_INDISPO[c.famille] })))
 const ot = computed(() => item.value?.ordreTravailId ? store.getById(item.value.ordreTravailId) : null)
 function voirOT() { if (ot.value) router.push({ name: 'maintenance-ordres', query: { ot: ot.value.id } }) }
@@ -48,23 +49,24 @@ function qualifier() {
   if (!item.value) return
   if (!code.value) { message.value = { ok: false, texte: 'Choisissez une cause.' }; return }
   if (code.value === item.value.code) { message.value = null; return }
-  store.qualifierIndispo(item.value.id, code.value)
-  message.value = { ok: true, texte: 'Cause mise à jour.' }
+  const r = store.qualifierIndispo(item.value.id, code.value)
+  message.value = r.ok ? { ok: true, texte: 'Cause mise à jour.' } : { ok: false, texte: r.motif ?? '' }
 }
 function lever() {
-  if (!item.value || item.value.fin || item.value.ordreTravailId) return
-  if (!confirm(`Lever l'immobilisation de ${item.value.vehiculePlaque} ? Le véhicule redevient disponible.`)) return
-  store.leverIndispo(item.value.id)
-  message.value = { ok: true, texte: 'Immobilisation levée, véhicule disponible.' }
+  if (!item.value) return
+  if (!item.value.fin && !item.value.ordreTravailId && !confirm(`Lever l'indisponibilité de ${item.value.vehiculePlaque} ? Le véhicule redevient disponible.`)) return
+  const r = store.leverIndispo(item.value.id)
+  message.value = r.ok ? { ok: true, texte: 'Indisponibilité levée, véhicule disponible.' } : { ok: false, texte: r.motif ?? '' }
 }
+const ordresLies = computed(() => item.value ? store.ordresDeLIndispo(item.value).map(r => store.getById(r)).filter((o): o is NonNullable<typeof o> => !!o) : [])
 </script>
 
 <template>
   <CardModalShell
     v-if="item"
-    :page-title="`Immobilisation · ${item.vehiculePlaque}`"
+    :page-title="`Indisponibilité · ${item.vehiculePlaque}`"
     :page-number="item.id"
-    banner-label="Maintenance · Immobilisations"
+    banner-label="Maintenance · Indisponibilités"
     :is-edit-mode="false"
     :sidebar-items="sidebarItems"
     :current-no="item.id"
@@ -88,8 +90,8 @@ function lever() {
           <CircleCheck v-if="message.ok" class="w-4 h-4 shrink-0" /><TriangleAlert v-else class="w-4 h-4 shrink-0" /> {{ message.texte }}
         </div>
 
-        <!-- 1. IMMOBILISATION -->
-        <FormSection title="Immobilisation" :recaps="[item.vehiculePlaque, `${store.dureeIndispo(item)} jour(s)`]">
+        <!-- 1. INDISPONIBILITÉ -->
+        <FormSection title="Indisponibilité" :recaps="[item.vehiculePlaque, `${store.dureeIndispo(item)} jour(s)`]">
           <div class="grid grid-cols-2 gap-x-6 gap-y-4 max-sm:grid-cols-1">
             <ChampLecture libelle="Véhicule" mono>{{ item.vehiculePlaque }}</ChampLecture>
             <ChampLecture libelle="Durée">{{ store.dureeIndispo(item) }} jour(s)</ChampLecture>
@@ -102,7 +104,7 @@ function lever() {
         <!-- 2. CAUSE -->
         <FormSection title="Cause" :recaps="[`${item.code} · ${codif.libelleDuCode(item.code)}`, LIB_FAMILLE_INDISPO[item.famille]]" :default-open="true">
           <div class="grid grid-cols-[1fr_auto] gap-3 items-end max-sm:grid-cols-1">
-            <div :class="F.field"><label :class="F.fieldLabel">Cause de l'immobilisation</label><SearchableDropdown v-model="code" :items="optCodes" placeholder="Choisir…" /></div>
+            <div :class="F.field"><label :class="F.fieldLabel">Cause de l'indisponibilité</label><SearchableDropdown v-model="code" :items="optCodes" placeholder="Choisir…" /></div>
             <button :class="F.btnPrimary" @click="qualifier">Qualifier</button>
           </div>
           <p class="text-xs text-muted-foreground mt-2">Famille : {{ LIB_FAMILLE_INDISPO[item.famille] }}</p>
@@ -115,7 +117,7 @@ function lever() {
             <p class="text-lg font-bold leading-none text-danger">{{ fmtAr(store.coutIndispo(item)!) }}</p>
             <p class="text-xs text-danger/80 mt-1">{{ store.dureeIndispo(item) }} jour(s) × {{ fmtAr(store.coutJournalierDe(item)!) }} de manque à gagner.</p>
           </div>
-          <p v-else class="text-xs text-muted-foreground">Coût journalier d'immobilisation non renseigné dans Paramètres de l'atelier.</p>
+          <p v-else class="text-xs text-muted-foreground">Non valorisé.</p>
         </FormSection>
 
         <!-- 4. LEVÉE -->
@@ -124,11 +126,11 @@ function lever() {
           <template v-else-if="ot">
             <div class="flex items-start gap-2.5 bg-info-bg text-info rounded-lg px-3.5 py-2.5 mb-3">
               <Wrench class="w-4 h-4 shrink-0 mt-px" />
-              <p class="text-xs leading-relaxed">Liée à l'ordre de travail <strong class="font-mono">{{ ot.reference }}</strong> ({{ LIB_STATUT_OT[ot.statut] }}) : elle se lève à sa clôture.</p>
+              <p class="text-xs leading-relaxed">Levée à la clôture de : <template v-for="(o, k) in ordresLies" :key="o.id"><span v-if="k">, </span><strong class="font-mono">{{ o.reference }}</strong> ({{ LIB_STATUT_OT[o.statut] }})</template>.</p>
             </div>
             <button :class="F.btnOutline" @click="voirOT">Voir l'ordre de travail</button>
           </template>
-          <button v-else :class="F.btnPrimary" @click="lever">Lever l'immobilisation</button>
+          <button v-else :class="F.btnPrimary" @click="lever">Lever l'indisponibilité</button>
           <p v-if="item.fin && ot" class="text-xs text-muted-foreground mt-2">Ordre de travail <span class="font-mono">{{ ot.reference }}</span></p>
         </FormSection>
       </div>

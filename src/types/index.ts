@@ -72,8 +72,9 @@ export interface Fonction {
 
 /* ── Personnel ────────────────────────────────────────────────── */
 
-export type StatutPersonnel = 'actif' | 'conge' | 'suspendu' | 'archive'
-export type TypeContrat = 'CDI' | 'CDD' | 'Journalier' | 'Stage'
+export type StatutPersonnel = 'actif' | 'conge' | 'suspendu' | 'fin_contrat' | 'archive'
+/** Type de contrat, paramétré dans la configuration (typesContrat). */
+export type TypeContrat = string
 
 export interface Personnel {
   id: string
@@ -110,17 +111,20 @@ export interface Personnel {
   habiliteLe?: string
   motifRetraitHabilitation?: string
   compteSysteme: boolean
+  /** Indisponibilités saisies dans le FMS, sans dépendre d'un module du personnel (FMS-DB-12). */
+  indisponibilitesManuelles?: { id: string; du: string; au: string; motif: string; par: string }[]
 }
 
 /* ── Documents du personnel ───────────────────────────────────── */
 
-export type TypeDocument =
-  | 'permis'
-  | 'visite_medicale'
-  | 'cin'
-  | 'contrat'
-  | 'formation'
-  | 'certification'
+/** Code d'un type de document du référentiel (store typesDocuments) : les
+ *  types se paramètrent, ils ne sont plus figés dans le code. */
+export type TypeDocument = string
+/** Pièce jointe : le scan du document, conservé avec lui. */
+export interface PieceJointe { nom: string; dataUrl?: string }
+/** États qui ne se déduisent pas d'une date et se saisissent. */
+export type StatutSaisiDocument = 'annule' | 'perdu'
+export type EtatDocument = 'valide' | 'proche' | 'expire' | 'absent' | 'annule' | 'perdu'
 
 export interface DocumentPersonnel {
   id: string
@@ -134,6 +138,12 @@ export interface DocumentPersonnel {
   fichier?: string
   version: number
   archive: boolean
+  scan?: PieceJointe
+  delaiNotificationJours?: number
+  statutSaisi?: StatutSaisiDocument
+  motifStatut?: string
+  /** Remplacé par un document plus récent du même type. */
+  remplacePar?: string
 }
 
 /* ── Journal ──────────────────────────────────────────────────── */
@@ -166,6 +176,8 @@ export interface Societe {
   nifStat: string
   parcTracteurs: number
   parcSemiRemorques: number
+  /** Préfixe des matricules générés pour le personnel. */
+  prefixeMatricule: string
 }
 
 export interface Parametres {
@@ -184,8 +196,12 @@ export interface Parametres {
 
 /* ── Véhicules (module 1) ─────────────────────────────────────── */
 
-export type TypeVehicule = 'tracteur' | 'semi_remorque'
-export type StatutVehicule = 'actif' | 'affecte' | 'reparation' | 'hors_service' | 'vendu'
+/** Code d'un type de véhicule du référentiel paramétrable (store typesVehicules). */
+export type TypeVehicule = string
+/** Statut opérationnel (FMS-DB-02), déduit des faits enregistrés. « sorti » est le statut administratif de sortie du parc. */
+export type StatutVehicule = 'disponible' | 'affecte' | 'en_mission' | 'en_maintenance' | 'immobilise' | 'hors_service' | 'sorti'
+/** Compartiment d'une citerne : son volume est saisi à sa définition et suit la citerne. */
+export interface Compartiment { numero: number; volumeL: number; produit?: string }
 
 export interface Vehicule {
   id: string
@@ -205,20 +221,30 @@ export interface Vehicule {
   statut: StatutVehicule
   motifIndisponibilite?: string
   kilometrage: number
+  /** Compteur d'heures moteur, pour les entretiens dont le seuil est en heures. */
+  heuresMoteur?: number
   annee?: number
   dateMiseEnCirculation?: string
   modeAcquisition?: 'achat' | 'location' | 'leasing'
   coutAcquisitionAr?: number
   valeurResiduelleAr?: number
   sortie?: { motif: string; date: string; par: string; kilometrageSortie?: number; commentaire?: string }
+  /** Statut choisi à la main, quand aucun fait ne le porte (hors service). */
+  statutManuel?: { statut: 'hors_service'; motif: string; par: string; le: string }
+  /** Immatriculations précédentes, avec la date du changement (FMS-DB-04). */
+  historiqueImmatriculations?: { ancienne: string; nouvelle: string; le: string; par: string; motif?: string }[]
+  photos?: PieceJointe[]
+  compartiments?: Compartiment[]
+  /** Tiers associé à l'acquisition : vendeur, loueur, banque ou constructeur. */
+  prestataireAcquisitionId?: string
+  mensualiteAr?: number
+  dateAcquisition?: string
+  /** Relevés de kilométrage, dont celui demandé au retour de voyage. */
+  relevesKm?: { le: string; km: number; source: string; voyageRef?: string }[]
 }
 
-/** Équipements embarqués repris du référentiel du socle FMS, en retenant
- *  seulement ce qui s'applique à un transport de fret sec : le boîtier
- *  embarqué, la balise GPS et le détecteur de fatigue. Les caméras dôme
- *  et vanne du référentiel surveillent une citerne d'hydrocarbures ; elles
- *  n'ont pas d'équivalent chez UCODIS. */
-export type TypeEquipement = 'obc' | 'gps' | 'dms'
+/** Code d'un type d'équipement embarqué du référentiel paramétrable (store typesEquipements). */
+export type TypeEquipement = string
 export type EtatEquipement = 'operationnel' | 'hors_service' | 'desinstalle'
 export interface EquipementEmbarque {
   id: string
@@ -226,6 +252,9 @@ export interface EquipementEmbarque {
   type: TypeEquipement
   numeroSerie?: string
   etat: EtatEquipement
+  /** Échéance de vérification ou de remplacement, pour les équipements qui en ont une. */
+  echeance?: string
+  installeLe?: string
 }
 
 export interface Attelage {
@@ -266,6 +295,8 @@ export interface EtapeVoyage {
   volet?: VoletTrajet
   intervalleMin: number
   pausePrevueMin?: number
+  /** Livraison qui exige un véhicule équipé d'une pompe opérationnelle. */
+  pompeExigee?: boolean
   franchi: boolean
   /** Propre au module Planification : chaque ligne porte son propre
    *  destinataire plutôt que l'ordre entier. Absent = transfert entre
@@ -459,20 +490,6 @@ export interface DocumentVoyage {
   present: boolean
 }
 
-export interface ArretReleve {
-  id: string
-  voyageId: string
-  debut: string
-  fin: string
-  dureeMin: number
-  lat: number
-  lng: number
-  lieu: string
-  dansSiteDeclare: boolean
-  justifie: boolean
-  motif?: string
-}
-
 export interface Marchandise {
   typeProduit: string
   nombreCartons: number
@@ -550,8 +567,6 @@ export interface Voyage {
   kmDepart?: number
   kmArrivee?: number
   marchandise: Marchandise
-  nbEcarts: number
-  nbArretsNonJustifies: number
   createdAt: string
   /** Renseigné quand le planificateur ou le responsable annule la
    *  tournée : jamais une action du chauffeur, à aucun moment. */
@@ -583,6 +598,8 @@ export interface Voyage {
  * jamais d'une intention. */
 
 export type TypeEcart = 'sortie_trajet' | 'arret_non_planifie' | 'point_passage_manque' | 'ecart_kilometrique' | 'fenetre_horaire'
+  | 'ordre_passage' | 'temps_trajet' | 'repos_hors_parking'
+  | 'conduite_continue' | 'conduite_journaliere' | 'travail_journalier' | 'repos_hebdomadaire' | 'conduite_nuit'
 export type GraviteEcart = 'mineur' | 'majeur' | 'critique'
 export type NatureEcart = 'a_qualifier' | 'autorisee' | 'subie' | 'non_justifiee'
 export type DecisionEcart = 'classe' | 'avertissement' | 'sanction'
@@ -591,6 +608,7 @@ export interface EcartItineraire {
   id: string
   voyageId: string
   voyageRef: string
+  vehiculeId?: string
   vehiculePlaque: string
   chauffeurId?: string
   chauffeurNom?: string
@@ -605,6 +623,11 @@ export interface EcartItineraire {
   lat: number
   lng: number
   lieu?: string
+  /** Étapes du voyage concernées (point manqué, ordre de passage). */
+  etapeIds?: string[]
+  /** Écart constaté par la télématique, encore en cours tant que finLe est vide. */
+  source?: 'telematique' | 'saisie'
+  finLe?: string
   justificationChauffeur?: string
   justifieLe?: string
   qualifiePar?: string
@@ -614,14 +637,14 @@ export interface EcartItineraire {
 }
 
 /* ── Carburant (Flotte · Exploitation) ────────────────────────
- * Repris du module Carburant du socle FMS : méthode plein-à-plein, sans
- * capteur · exactement la situation d'UCODIS. Le recoupement par position
- * GPS est retiré : aucun prestataire de ce type n'est nommé dans les
- * documents UCODIS. */
+ * Méthode plein à plein, sans capteur de niveau. */
 
-export type CanalRecharge = 'manuelle' | 'mobile' | 'import' | 'carte' | 'regularisation'
-export type StatutRecharge = 'valide' | 'anomalie' | 'en_qualification' | 'qualifie' | 'en_validation' | 'refacture' | 'classe'
-export type QualifEcartCarburant = 'technique' | 'conduite' | 'prelevement' | 'saisie'
+/** Mode de saisie, déduit du contexte : bureau, espace du chauffeur, import d'un fichier, transaction de carte. */
+export type CanalRecharge = 'manuelle' | 'mobile' | 'import' | 'carte'
+/** Un plein se qualifie seulement : la retenue passe par l'écart de consommation. */
+export type StatutRecharge = 'valide' | 'anomalie' | 'qualifie'
+/** Identifiant d'une cause d'écart, définie dans Configuration, onglet Carburant. */
+export type QualifEcartCarburant = string
 
 export interface ControleVraisemblance {
   code: string
@@ -639,8 +662,6 @@ export interface RechargeCarburant {
   chauffeurNom?: string
   voyageId?: string
   voyageRef?: string
-  nombreBons?: number
-  litresParBon?: number
   litres: number
   prixLitre: number
   montant: number
@@ -655,8 +676,6 @@ export interface RechargeCarburant {
   statut: StatutRecharge
   qualification?: QualifEcartCarburant
   commentaire?: string
-  montantRefacture?: number
-  validation?: { valideur: string; role: string; decision: 'approuve' | 'rejete'; date: string; commentaire?: string }
   /** Reçu de la station, photographié depuis le téléphone ou joint au bureau. */
   recu?: { nom: string; dataUrl?: string }
   /** Transaction de carte carburant rapprochée de ce plein. */
@@ -681,15 +700,16 @@ export interface PeriodeConso {
   chauffeurId?: string
   trajetId?: string
   trajetLibelle?: string
-  /** Origine de la référence retenue : véhicule et corridor, corridor, ou défaut. */
-  origineRef?: 'vehicule' | 'corridor' | 'defaut'
+  /** Origine de la référence retenue : véhicule sur le corridor, corridor, véhicule seul, ou défaut. */
+  origineRef?: 'vehicule_corridor' | 'corridor' | 'vehicule' | 'defaut'
 }
 
 /* ── Sites (Flotte · référentiel géographique) ────────────────
  * Repris du store sites du socle FMS, adapté au réseau réel d'UCODIS déjà
  * établi (dépôt Tanjombato, corridor RN2, RN7, RN4). */
 
-export type TypeSiteReseau = 'Dépôt' | 'Entrepôt client' | 'Zone à risque' | 'Point de contrôle' | 'Relais'
+/** Libellé d'un type de site du référentiel paramétrable (store typesSites). */
+export type TypeSiteReseau = string
 export type VoletTrajet = 'aller' | 'retour'
 
 export interface SiteReseau {
@@ -701,6 +721,9 @@ export interface SiteReseau {
   lng: number
   ville: string
   region?: string
+  adresse?: string
+  /** Rayon de la zone de géorepérage ; à défaut, le rayon de validation des passages. */
+  rayonM?: number
   actif: boolean
 }
 
@@ -713,11 +736,11 @@ export interface SiteReseau {
  * rien n'empêche de les reprendre pour UCODIS en attendant que ses
  * propres formulaires soient fournis. */
 
-export type GroupeEtatFlotte = 'operationnel' | 'transit' | 'attente'
+export type GroupeEtatFlotte = 'operationnel' | 'transit' | 'attente' | 'immobilise'
 export type CodeEtatFlotte =
   | 'DEP-PRV' | 'DEP-REA' | 'RET-VID' | 'RET-CHG' | 'ANN-VYG'
   | 'TR-LIV' | 'TR-CHG' | 'TR-VID' | 'TR-RET'
-  | 'ATT-CHG' | 'ATT-LIV' | 'ATT-DEP' | 'ATT-ADM'
+  | 'ATT-CHG' | 'ATT-LIV' | 'ATT-DEP' | 'ATT-ADM' | 'IMMO' | 'DISP'
 
 export interface LigneEtatFlotte {
   vehiculeId: string
@@ -730,9 +753,13 @@ export interface LigneEtatFlotte {
   remiseEnServicePrevue?: string
   voyageRef?: string
   observation?: string
+  /** Lieu lisible : dernière position du boîtier, ou site de rattachement sans boîtier. */
+  position?: string
+  /** Produit transporté ou mission en cours. */
+  mission?: string
 }
 
-export interface PointChecklistRoute { code: string; libelle: string }
+export interface PointChecklistRoute { code: string; libelle: string; actif?: boolean }
 export type ResultatPoint = 'conforme' | 'anomalie' | 'non_verifie'
 
 export interface ReleveChecklist {
@@ -741,6 +768,14 @@ export interface ReleveChecklist {
   lieu?: string
   resultats: Record<string, ResultatPoint>
   commentaire?: string
+  /** Commentaire par point, obligatoire sur une anomalie. */
+  commentaires?: Record<string, string>
+  /** Libellés des points au moment du relevé, pour un historique lisible. */
+  libelles?: Record<string, string>
+  /** Ordres de travail ouverts sur une anomalie, par point. */
+  ordresTravail?: Record<string, string>
+  /** Saisi sans réseau puis synchronisé. */
+  saisiHorsLigneLe?: string
 }
 
 export interface ChecklistRoute {
@@ -757,6 +792,8 @@ export interface ChecklistRoute {
   dateFin?: string
   releves: ReleveChecklist[]
   signeParChauffeur: boolean
+  /** Date et heure de la dernière signature (enregistrement depuis l'espace du conducteur). */
+  signeLe?: string
   synchroniseLe?: string
 }
 
@@ -765,7 +802,7 @@ export interface ChecklistRoute {
  * FMS, postes codés. Les points propres aux matières dangereuses
  * (panneaux orange, plaques-étiquettes) sont retirés : UCODIS
  * transporte du fret sec, pas de produits réglementés ADR. */
-export interface PosteAudit { code: string; categorie: string; libelle: string }
+export interface PosteAudit { code: string; categorie: string; libelle: string; actif?: boolean }
 
 export type VerdictPoste = 'conforme' | 'conforme_observation' | 'non_conforme'
 
@@ -783,11 +820,37 @@ export interface AuditConformite {
   contreVisiteLe?: string
   conforme: boolean
   commentaire?: string
+  /** Rapport daté et signé (FMS-MA-10). */
+  signataire?: string
+  signeLe?: string
+  /** Libellés de la grille au moment de l'inspection. */
+  libelles?: Record<string, { categorie: string; libelle: string }>
+  /** Inspection dont celle-ci est la contre-visite. */
+  contreVisiteDe?: string
+  /** Contre-visite qui a levé la non-conformité. */
+  leveeParId?: string
+  ordreTravailId?: string
 }
 
-export type ControleDepart = 'checklist' | 'alcool_drogue' | 'documents_chauffeur' | 'documents_vehicule'
+export type ControleDepart = 'checklist' | 'documents_chauffeur' | 'documents_vehicule' | 'repos' | 'vehicule' | 'conducteur'
 
-export interface ResultatControleDepart { controle: ControleDepart; conforme: boolean; detail?: string }
+export interface ResultatControleDepart {
+  controle: ControleDepart
+  conforme: boolean
+  detail?: string
+  /** Contrôle du conducteur paramétré : code, libellé et caractère bloquant
+   *  figés au moment de la décision. */
+  code?: string
+  libelle?: string
+  bloquant?: boolean
+  /** Faux tant que la personne qui délivre n'a pas coché le contrôle. */
+  renseigne?: boolean
+}
+
+/** Contrôle du conducteur avant départ, paramétré dans Configuration > Sécurité. */
+export interface ControleConducteurDepart { code: string; libelle: string; bloquant: boolean; actif: boolean }
+/** Résultat coché sur la fiche d'autorisation pour un contrôle du conducteur. */
+export interface SaisieControleConducteur { conforme: boolean; commentaire?: string; par?: string; le?: string }
 
 export interface AutorisationDepart {
   id: string
@@ -809,9 +872,12 @@ export interface AutorisationDepart {
   decidePar?: string
   decideLe?: string
   motifRefus?: string
-  briefingSecuriteFait?: boolean
-  reposHebdoVerifie?: boolean
   suiviActiveLe?: string
+  /** Caméra du véhicule activée à la délivrance, quand il en est équipé. */
+  cameraActiveeLe?: string
+  demandeePar?: string
+  /** Contrôles du conducteur cochés par la personne qui délivre, par code. */
+  saisiesConducteur?: Record<string, SaisieControleConducteur>
 }
 
 export type StatutPolice = 'active' | 'expiree' | 'resiliee'
@@ -820,6 +886,8 @@ export interface PoliceAssurance {
   id: string
   vehiculeId: string
   vehiculePlaque: string
+  /** Assureur, choisi parmi les prestataires assureurs autorisés. */
+  assureurId?: string
   compagnie: string
   numeroPolice: string
   couverture: string
@@ -850,6 +918,16 @@ export interface Sinistre {
   montantIndemniseAr?: number
   policeId?: string
   kilometrage?: number
-  responsabiliteUcodis?: boolean
+  responsabiliteEntreprise?: boolean
   ordreTravailRef?: string
+  /** Accident (avec dommages) ou incident (sans dommage, mais à analyser). */
+  nature?: 'accident' | 'incident'
+  photos?: PieceJointe[]
+  /** Suite disciplinaire décidée pour le conducteur, le cas échéant. */
+  sanction?: string
+  analyse?: string
+  statutDossier?: 'ouvert' | 'clos'
+  clotureLe?: string
+  declarePar?: string
+  historique?: { le: string; par: string; action: string }[]
 }

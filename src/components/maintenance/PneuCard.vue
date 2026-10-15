@@ -1,5 +1,7 @@
 <script setup lang="ts">
-/** Fiche d'un pneu : identité, coût, montage, relevés, rotation et sortie (FMS-MA-14 à MA-17). */
+import { devise } from '../../lib/monnaie'
+import { useTypesVehiculesStore } from '../../stores/typesVehicules'
+/** Fiche d'un pneu : identité, coût, montage, relevés, rotation et sortie. */
 import { ref, computed, watch } from 'vue'
 import { TriangleAlert, CircleCheck } from '@lucide/vue'
 import CardModalShell from '../shared/CardModalShell.vue'
@@ -10,6 +12,7 @@ import ChampLecture from './ChampLecture.vue'
 import { usePneusStore, LIB_STATUT_PNEU, type Pneu, type StatutPneu } from '../../stores/pneus'
 import { useVehiculeStore } from '../../stores/vehicules'
 import { useAuthStore } from '../../stores/auth'
+import { useMaintenanceStore } from '../../stores/maintenance'
 import * as F from '../../lib/formClasses'
 
 const props = defineProps<{ pneus: Pneu[]; pneuId: string }>()
@@ -30,7 +33,7 @@ function selectSidebar(no: string) { const p = props.pneus.find(x => x.numeroSer
 
 const CLS_STATUT: Record<StatutPneu, string> = { stock: 'bg-info-bg text-info', monte: 'bg-success-bg text-success', rechapage: 'bg-warning-bg text-warning', rebut: 'bg-neutral-bg text-neutral' }
 const fmtDate = (d: string) => new Date(d).toLocaleDateString('fr-FR')
-const fmtAr = (n: number) => n.toLocaleString('fr-FR') + ' Ar'
+const fmtAr = (n: number) => n.toLocaleString('fr-FR') + ' ' + devise()
 const libellePosition = computed(() => item.value ? store.planDuVehicule(item.value.vehiculeId ?? '').find(x => x.code === item.value!.positionCode)?.libelle ?? `position ${item.value.positionCode}` : '')
 const alertes = computed(() => item.value ? store.alertesDe(item.value) : [])
 
@@ -41,7 +44,7 @@ watch(idCourant, () => { erreur.value = ''; succes.value = '' })
 function resultat(res: { ok: boolean; motif?: string }, ok: string) { erreur.value = res.ok ? '' : (res.motif ?? ''); succes.value = res.ok ? ok : ''; return res.ok }
 
 const montage = ref({ vehiculeId: '', position: '' })
-const optVehicules = computed<DropdownItem[]>(() => vehiculesStore.liste.map(v => ({ id: v.id, label: v.immatriculation, sublabel: v.type === 'tracteur' ? 'Tracteur' : 'Semi-remorque' })))
+const optVehicules = computed<DropdownItem[]>(() => vehiculesStore.auParc.filter(v => store.planDuType(v.type).length).map(v => ({ id: v.id, label: v.immatriculation, sublabel: useTypesVehiculesStore().libelle(v.type) })))
 const positionsLibres = computed<DropdownItem[]>(() => {
   if (!montage.value.vehiculeId) return []
   const occupees = new Set(store.pneusDuVehicule(montage.value.vehiculeId).map(p => p.positionCode))
@@ -62,6 +65,8 @@ function relever() {
 }
 
 const rotation = ref({ position: '', technicien: '' })
+const maintenance = useMaintenanceStore()
+const optTechniciens = computed<DropdownItem[]>(() => maintenance.techniciens.filter(t => t.actif).map(t => ({ id: t.nom, label: t.nom })))
 const optRotation = computed<DropdownItem[]>(() => item.value?.vehiculeId
   ? store.planDuVehicule(item.value.vehiculeId).filter(x => x.code !== item.value!.positionCode).map(x => {
       const occupant = store.pneusDuVehicule(item.value!.vehiculeId!).find(p => p.positionCode === x.code)
@@ -135,14 +140,14 @@ function retourRechapage() {
         </FormSection>
 
         <!-- 2. ACHAT ET COÛT -->
-        <FormSection title="Achat et coût" :recaps="[fmtAr(store.coutTotal(item)), store.coutParKm(item) != null ? store.coutParKm(item)!.toFixed(1) + ' Ar/km' : null]">
+        <FormSection title="Achat et coût" :recaps="[fmtAr(store.coutTotal(item)), store.coutParKm(item) != null ? store.coutParKm(item)!.toFixed(1) + ' ' + $devise() + '/km' : null]">
           <div class="grid grid-cols-3 gap-x-6 gap-y-4 max-sm:grid-cols-1">
             <ChampLecture libelle="Fournisseur">{{ item.fournisseur ?? '-' }}</ChampLecture>
             <ChampLecture libelle="Date d'achat">{{ fmtDate(item.dateAchat) }}</ChampLecture>
             <ChampLecture libelle="Prix d'achat">{{ fmtAr(item.prixAr) }}</ChampLecture>
             <ChampLecture libelle="Rechapages">{{ item.nbRechapages }} · {{ fmtAr(item.coutRechapagesAr) }}</ChampLecture>
             <ChampLecture libelle="Kilomètres parcourus">{{ store.kmParcourus(item).toLocaleString('fr-FR') }} km</ChampLecture>
-            <ChampLecture libelle="Coût au kilomètre">{{ store.coutParKm(item) != null ? store.coutParKm(item)!.toFixed(1) + ' Ar/km' : '-' }}</ChampLecture>
+            <ChampLecture libelle="Coût au kilomètre">{{ store.coutParKm(item) != null ? store.coutParKm(item)!.toFixed(1) + ' ' + $devise() + '/km' : '-' }}</ChampLecture>
           </div>
         </FormSection>
 
@@ -159,7 +164,7 @@ function retourRechapage() {
               <p class="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.04em] mb-2">Rotation</p>
               <div class="grid grid-cols-[1fr_1fr_auto] gap-3 items-end max-sm:grid-cols-1">
                 <div :class="F.field"><label :class="F.fieldLabel">Nouvelle position *</label><SearchableDropdown v-model="rotation.position" :items="optRotation" placeholder="Choisir…" /></div>
-                <div :class="F.field"><label :class="F.fieldLabel">Validée par *</label><input v-model="rotation.technicien" :class="F.fieldInput" placeholder="Technicien" /></div>
+                <div :class="F.field"><label :class="F.fieldLabel">Validée par *</label><SearchableDropdown v-model="rotation.technicien" :items="optTechniciens" placeholder="Technicien…" /></div>
                 <button :class="F.btnPrimary" @click="pivoter">Valider la rotation</button>
               </div>
             </div>
@@ -173,7 +178,7 @@ function retourRechapage() {
           </template>
           <template v-else-if="item.statut === 'rechapage'">
             <div class="grid grid-cols-[1fr_auto] gap-3 items-end max-sm:grid-cols-1">
-              <div :class="F.field"><label :class="F.fieldLabel">Coût du rechapage (Ar)</label><input v-model.number="coutRechapage" type="number" min="0" :class="F.fieldInput" /></div>
+              <div :class="F.field"><label :class="F.fieldLabel">Coût du rechapage ({{ $devise() }})</label><input v-model.number="coutRechapage" type="number" min="0" :class="F.fieldInput" /></div>
               <button :class="F.btnPrimary" @click="retourRechapage">Retour de rechapage</button>
             </div>
           </template>
@@ -192,8 +197,8 @@ function retourRechapage() {
             <tbody>
               <tr v-for="(r, i) in [...item.releves].reverse()" :key="i" class="border-t border-border/60">
                 <td class="py-1.5">{{ fmtDate(r.date) }}</td>
-                <td class="py-1.5" :class="r.pressionBar < store.seuils.pressionMinBar ? 'text-danger font-semibold' : ''">{{ r.pressionBar }} bar</td>
-                <td class="py-1.5" :class="r.sculptureMm < store.seuils.sculptureMinMm ? 'text-danger font-semibold' : ''">{{ r.sculptureMm }} mm</td>
+                <td class="py-1.5" :class="store.pressionHorsSeuil(r) ? 'text-danger font-semibold' : ''">{{ r.pressionBar }} bar</td>
+                <td class="py-1.5" :class="store.sculptureHorsSeuil(r) ? 'text-danger font-semibold' : ''">{{ r.sculptureMm }} mm</td>
                 <td class="py-1.5 text-muted-foreground">{{ r.par }}</td>
               </tr>
             </tbody>

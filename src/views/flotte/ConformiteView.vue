@@ -6,7 +6,7 @@
     :items="pageItems"
     :total="totalCount"
     :total-text="`${totalCount} écart(s)`"
-    search-placeholder="Voyage, plaque, chauffeur…"
+    search-placeholder="Voyage, plaque, conducteur…"
     scope-label="Nature :"
     :scope-options="scopeOptions"
     v-model:scope="activeScope"
@@ -55,13 +55,16 @@
     <template #cell-nature="{ item }">
       <span :class="LIB_NATURE[item.nature].cls" class="text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap">{{ LIB_NATURE[item.nature].label }}</span>
     </template>
-    <template #cell-chauffeur="{ item }">
+    <template #cell-conducteur="{ item }">
       <span class="text-xs text-foreground">{{ item.chauffeurNom ?? '-' }}</span>
       <div class="text-[11px] text-muted-foreground font-mono">{{ item.vehiculePlaque }}</div>
     </template>
     <template #cell-mesure="{ item }">
-      <span class="text-xs">{{ fmtDuree(item.dureeMin) }}</span>
-      <div v-if="item.distanceKm" class="text-[11px] text-muted-foreground">écart {{ item.distanceKm }} km</div>
+      <template v-if="mesuresEcart(item).length">
+        <span class="text-xs">{{ mesuresEcart(item)[0]!.value }}</span>
+        <div class="text-[11px] text-muted-foreground">{{ mesuresEcart(item)[0]!.label }}</div>
+      </template>
+      <span v-else class="text-muted-foreground">-</span>
     </template>
     <template #cell-detecte="{ item }">
       <span class="text-xs">{{ fmtDateHeure(item.detecteLe) }}</span>
@@ -80,13 +83,10 @@
         <div class="grid grid-cols-2 gap-2 text-xs">
           <div><div class="text-muted-foreground text-[11px]">Voyage</div><span class="font-mono">{{ item.voyageRef }}</span></div>
           <div><div class="text-muted-foreground text-[11px]">Véhicule</div><span class="font-mono">{{ item.vehiculePlaque }}</span></div>
-          <div class="col-span-2"><div class="text-muted-foreground text-[11px]">Chauffeur</div>{{ item.chauffeurNom ?? '-' }}</div>
-          <div><div class="text-muted-foreground text-[11px]">Durée</div>{{ fmtDuree(item.dureeMin) }}</div>
+          <div class="col-span-2"><div class="text-muted-foreground text-[11px]">Conducteur</div>{{ item.chauffeurNom ?? '-' }}</div>
+          <div v-for="m in mesuresEcart(item)" :key="m.label"><div class="text-muted-foreground text-[11px]">{{ m.label }}</div>{{ m.value }}</div>
           <div><div class="text-muted-foreground text-[11px]">Détecté le</div>{{ fmtDateHeure(item.detecteLe) }}</div>
           <div v-if="item.lieu" class="col-span-2"><div class="text-muted-foreground text-[11px]">Lieu</div>{{ item.lieu }}</div>
-        </div>
-        <div v-if="item.nature === 'a_qualifier'" class="bg-warning-bg text-warning rounded-md px-2.5 py-2 text-[11px] leading-snug">
-          Écart en attente de qualification. Tant qu'un responsable ne l'a pas qualifié, il n'a aucune conséquence pour le conducteur.
         </div>
         <button :class="L.btnPrimary" class="w-full justify-center" @click="ouvrirFiche(item.id)">Ouvrir la fiche</button>
       </div>
@@ -112,7 +112,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { AlertTriangle, Ban, Clock, ShieldCheck } from '@lucide/vue'
 import SearchableDropdown from '../../components/ui/SearchableDropdown.vue'
 import type { DropdownItem } from '../../components/ui/SearchableDropdown.vue'
@@ -120,7 +120,7 @@ import ListPageLayout from '../../components/shared/ListPageLayout.vue'
 import type { ListColumn } from '../../components/shared/ListPageLayout.vue'
 import EcartCard from '../../components/flotte/EcartCard.vue'
 import VoyageCard from '../../components/flotte/VoyageCard.vue'
-import { useEcartsStore, LIB_TYPE_ECART, LIB_NATURE, LIB_GRAVITE } from '../../stores/ecarts'
+import { useEcartsStore, LIB_TYPE_ECART, LIB_NATURE, LIB_GRAVITE, mesuresEcart } from '../../stores/ecarts'
 import { useVoyagesStore } from '../../stores/voyages'
 import type { EcartItineraire } from '../../types'
 import { fmtDateHeure } from '../../utils/voyageUtils'
@@ -131,6 +131,9 @@ const voyages = useVoyagesStore()
 
 const searchQuery = ref('')
 const ficheId = ref<string | null>(null)
+const routeLien = useRoute()
+if (typeof routeLien.query.ecart === 'string') ficheId.value = routeLien.query.ecart
+watch(() => routeLien.query.ecart, v => { if (typeof v === 'string') ficheId.value = v })
 const activeScope = ref('')
 const filterType = ref('')
 const filterGravite = ref('')
@@ -139,22 +142,17 @@ const sortDir = ref<'asc' | 'desc'>('desc')
 const page = ref(1)
 const pageSize = ref(15)
 
-function fmtDuree(min?: number) {
-  if (!min) return '-'
-  return min >= 60 ? `${Math.floor(min / 60)} h ${min % 60 ? (min % 60) + ' min' : ''}`.trim() : `${min} min`
-}
-
 const scopeOptions = [
   { value: '', label: 'Tous les écarts' },
   { value: 'a_qualifier', label: 'À qualifier' },
-  { value: 'non_justifiee', label: 'Infractions' },
+  { value: 'non_justifiee', label: 'Non justifiés' },
   { value: 'subie', label: 'Déviations subies' },
   { value: 'autorisee', label: 'Autorisées' },
 ]
 
 const kpis = computed(() => [
   { label: 'À qualifier', value: store.aQualifier.length, icon: Clock, bg: 'bg-warning-bg', iconColor: 'text-warning' },
-  { label: 'Infractions', value: store.infractions.length, icon: Ban, bg: 'bg-danger-bg', iconColor: 'text-danger' },
+  { label: 'Non justifiés', value: store.nonJustifies.length, icon: Ban, bg: 'bg-danger-bg', iconColor: 'text-danger' },
   { label: 'Critiques', value: store.ecarts.filter(e => e.gravite === 'critique').length, icon: AlertTriangle, bg: 'bg-danger-bg', iconColor: 'text-danger' },
   { label: 'Conformité', value: store.tauxConformite + ' %', icon: ShieldCheck, bg: 'bg-success-bg', iconColor: 'text-success' },
 ])
@@ -164,7 +162,7 @@ const columns = computed<ListColumn[]>(() => [
   { key: 'type', label: 'Type', width: 200 },
   { key: 'gravite', label: 'Gravité', sortable: true, width: 100 },
   { key: 'nature', label: 'Nature', sortable: true, width: 150 },
-  { key: 'chauffeur', label: 'Chauffeur', width: 150 },
+  { key: 'conducteur', label: 'Conducteur', width: 150 },
   { key: 'mesure', label: 'Mesure', width: 110 },
   { key: 'detecte', label: 'Détecté le', sortable: true, width: 140 },
 ])

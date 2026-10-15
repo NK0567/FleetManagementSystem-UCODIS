@@ -1,5 +1,6 @@
 <script setup lang="ts">
-/** Déclaration d'une panne : ouvre un ordre de travail (FMS-MA-03). */
+import { maintenant } from '../../utils/horloge'
+/** Déclaration d'une panne : ouvre un ordre de travail correctif. */
 import { ref, computed } from 'vue'
 import CreateModalShell from '../shared/CreateModalShell.vue'
 import FormSection from '../ui/form-field/FormSection.vue'
@@ -20,21 +21,24 @@ const auth = useAuthStore()
 
 const form = ref({ vehiculeId: '', symptome: '', gravite: 'mineure' as GraviteOT, origine: 'remontee_chauffeur' as OrigineOT })
 const erreur = ref('')
-const optVehicules = computed<DropdownItem[]>(() => vehicules.liste.map(v => ({ id: v.id, label: v.immatriculation, sublabel: `${v.marque} ${v.modele}` })))
+const optVehicules = computed<DropdownItem[]>(() => vehicules.auParc.map(v => ({ id: v.id, label: v.immatriculation, sublabel: `${v.marque} ${v.modele}` })))
 const optGravite: DropdownItem[] = Object.entries(LIB_GRAVITE_OT).map(([id, v]) => ({ id, label: v.label }))
-const optOrigine: DropdownItem[] = Object.entries(LIB_ORIGINE_OT).map(([id, label]) => ({ id, label }))
+/* Une panne déclarée est un correctif : l'échéance préventive n'est pas une origine possible ici. */
+const optOrigine: DropdownItem[] = Object.entries(LIB_ORIGINE_OT).filter(([id]) => id !== 'alerte_preventive').map(([id, label]) => ({ id, label }))
 
 /** Un véhicule qui a déjà un ordre ouvert pour le même symptôme n'en reçoit pas un second. */
 function declarer() {
   const v = vehicules.parId(form.value.vehiculeId)
   const symptome = form.value.symptome.trim()
   if (!v || !symptome) { erreur.value = 'Indiquez le véhicule et le symptôme constaté.'; return }
+  if (v.statut === 'sorti') { erreur.value = 'Ce véhicule est sorti du parc.'; return }
+  if (!form.value.origine || form.value.origine === 'alerte_preventive') { erreur.value = "Choisissez l'origine de la panne."; return }
   const doublon = store.ordres.find(o => o.vehiculeId === v.id && o.statut !== 'cloture' && o.statut !== 'annule'
     && o.symptome.trim().toLowerCase() === symptome.toLowerCase())
   if (doublon) { erreur.value = `Un ordre ouvert existe déjà pour ce symptôme sur ${v.immatriculation} : ${doublon.reference}.`; return }
   const id = store.creerOT({
     vehiculeId: v.id, vehiculePlaque: v.immatriculation,
-    origine: form.value.origine, declarePar: auth.user?.nom ?? 'Responsable flotte', declareLe: new Date().toISOString(),
+    origine: form.value.origine, declarePar: auth.user?.nom ?? 'Responsable flotte', declareLe: maintenant().toISOString(),
     symptome, gravite: form.value.gravite, typeMaintenance: 'correctif', kilometrage: v.kilometrage,
   })
   emit('cree', id)

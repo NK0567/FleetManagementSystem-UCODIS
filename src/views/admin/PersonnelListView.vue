@@ -5,7 +5,7 @@
       <div>
         <div :class="L.pageTitle">Effectif</div>
         <div :class="L.pageSub">
-          {{ filtres.length }} personne(s) sur {{ personnel.effectif }} · UCODIS Transport
+          {{ filtres.length }} personne(s) sur {{ personnel.effectif }} · {{ useParametresStore().societe.entite }}
         </div>
       </div>
       <div class="flex gap-2">
@@ -114,6 +114,7 @@
 </template>
 
 <script setup lang="ts">
+import { useParametresStore } from '../../stores/parametres'
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ChevronRight, Download, Inbox, Search, UserPlus, X } from '@lucide/vue'
