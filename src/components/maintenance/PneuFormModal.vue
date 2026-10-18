@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { maintenant } from '../../utils/horloge'
+import { maintenant, isoJour } from '../../utils/horloge'
 /** Enregistrement d'un pneu à l'achat (FMS-MA-14). */
 import { ref, computed } from 'vue'
 import CreateModalShell from '../shared/CreateModalShell.vue'
@@ -15,7 +15,7 @@ const emit = defineEmits<{ close: []; cree: [id: string] }>()
 const store = usePneusStore()
 const prestataires = usePrestatairesStore()
 
-const form = ref({ numeroSerie: '', marque: '', taille: '', profil: '', indiceChargeVitesse: '', dateFabrication: '', fournisseurId: '', prixAr: undefined as number | undefined, dateAchat: maintenant().toISOString().slice(0, 10), etat: 'neuf' })
+const form = ref({ numeroSerie: '', marque: '', taille: '', profil: '', indiceChargeVitesse: '', dateFabrication: '', fournisseurId: '', prixAr: undefined as number | undefined, dateAchat: isoJour(maintenant()), etat: 'neuf' })
 const erreur = ref('')
 const optFournisseurs = computed<DropdownItem[]>(() => prestataires.autorisesDeType('fournisseur_pneus').map(p => ({ id: p.id, label: p.nom })))
 const optEtat: DropdownItem[] = [{ id: 'neuf', label: 'Neuf' }, { id: 'rechape', label: 'Rechapé' }]

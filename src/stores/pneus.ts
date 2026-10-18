@@ -1,4 +1,4 @@
-import { maintenantMs, maintenant } from '../utils/horloge'
+import { maintenantMs, maintenant, isoJour } from '../utils/horloge'
 import { devise } from '../lib/monnaie'
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
@@ -244,7 +244,7 @@ export const usePneusStore = defineStore('pneus', () => {
   function creer(d: Omit<Pneu, 'id' | 'statut' | 'kmCumules' | 'nbRechapages' | 'coutRechapagesAr' | 'releves' | 'historique'>): { ok: boolean; motif?: string; id?: string } {
     if (!d.numeroSerie.trim() || !d.marque.trim() || !d.taille.trim()) return { ok: false, motif: 'Indiquez le numéro de série, la marque et la taille.' }
     if (!(d.prixAr > 0)) return { ok: false, motif: "Indiquez le prix d'achat." }
-    if (!d.dateAchat || d.dateAchat > maintenant().toISOString().slice(0, 10)) return { ok: false, motif: "La date d'achat est obligatoire et ne peut pas être dans le futur." }
+    if (!d.dateAchat || d.dateAchat > isoJour(maintenant())) return { ok: false, motif: "La date d'achat est obligatoire et ne peut pas être dans le futur." }
     if (pneus.value.some(p => p.numeroSerie.toLowerCase() === d.numeroSerie.trim().toLowerCase())) return { ok: false, motif: 'Ce numéro de série est déjà enregistré : chaque pneu a un identifiant unique.' }
     const id = `PN-${maintenantMs().toString(36).toUpperCase()}`
     pneus.value.unshift({ ...d, numeroSerie: d.numeroSerie.trim(), id, statut: 'stock', kmCumules: 0, nbRechapages: 0, coutRechapagesAr: 0, releves: [],

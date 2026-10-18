@@ -20,7 +20,7 @@ import { usePersonnelStore } from '../../stores/personnel'
 import { useMaintenanceStore } from '../../stores/maintenance'
 import { useTelematiqueStore, LIB_FAMILLE_EVENEMENT } from '../../stores/telematique'
 import { LIB_GRAVITE, LIB_NATURE } from '../../stores/ecarts'
-import { aujourdhuiISO, dansNJours, maintenant } from '../../utils/horloge'
+import { aujourdhuiISO, dansNJours, maintenant, isoJour } from '../../utils/horloge'
 import { useDocumentsVehiculeStore } from '../../stores/documentsVehicule'
 import { useTypesVehiculesStore } from '../../stores/typesVehicules'
 import { useTypesEquipementsStore } from '../../stores/typesEquipements'
@@ -106,7 +106,7 @@ const nouvelEq = ref({ type: '', numeroSerie: '', echeance: '' })
 const optTypesEq = computed<DropdownItem[]>(() => typesEq.types.filter(t => t.actif).map(t => ({ id: t.code, label: t.libelle, sublabel: t.avecEcheance ? 'avec échéance' : undefined })))
 function ajouterEquipement() {
   if (!courant.value) return
-  if (resultat(store.ajouterEquipement({ vehiculeId: courant.value.id, type: nouvelEq.value.type, numeroSerie: nouvelEq.value.numeroSerie || undefined, echeance: nouvelEq.value.echeance || undefined, installeLe: maintenant().toISOString().slice(0, 10) }), 'Équipement ajouté.'))
+  if (resultat(store.ajouterEquipement({ vehiculeId: courant.value.id, type: nouvelEq.value.type, numeroSerie: nouvelEq.value.numeroSerie || undefined, echeance: nouvelEq.value.echeance || undefined, installeLe: isoJour(maintenant()) }), 'Équipement ajouté.'))
     nouvelEq.value = { type: '', numeroSerie: '', echeance: '' }
 }
 function etatEcheanceEq(e: { echeance?: string }) { return e.echeance ? etatEcheance(e.echeance, 30) : null }

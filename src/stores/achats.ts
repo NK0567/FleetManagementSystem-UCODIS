@@ -1,4 +1,4 @@
-import { maintenantMs, maintenant } from '../utils/horloge'
+import { maintenantMs, maintenant, isoJour } from '../utils/horloge'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import type { Fournisseur, ProduitStock, MouvementStock } from '../types/maintenance'
@@ -79,7 +79,7 @@ export const useAchatsStore = defineStore('achats', () => {
     if (!produit) return null
     produit.stockActuel = Math.max(0, produit.stockActuel - quantite)
     const m: MouvementStock = {
-      id: `MVT-${maintenantMs()}`, produitId: produit.id, type: 'sortie', quantite, date: maintenant().toISOString().slice(0, 10),
+      id: `MVT-${maintenantMs()}`, produitId: produit.id, type: 'sortie', quantite, date: isoJour(maintenant()),
       motif, ordreTravailId, vehiculePlaque, kilometrage, stockApres: produit.stockActuel,
     }
     mouvements.value.push(m)
@@ -92,7 +92,7 @@ export const useAchatsStore = defineStore('achats', () => {
     if (!produit) return null
     produit.stockActuel += quantite
     const m: MouvementStock = {
-      id: `MVT-${maintenantMs()}`, produitId, type: 'entree', quantite, date: maintenant().toISOString().slice(0, 10),
+      id: `MVT-${maintenantMs()}`, produitId, type: 'entree', quantite, date: isoJour(maintenant()),
       motif: 'Réception commande', fournisseurId, numeroBonCommande, stockApres: produit.stockActuel,
     }
     mouvements.value.push(m)

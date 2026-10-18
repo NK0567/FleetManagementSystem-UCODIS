@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { maintenant } from '../../utils/horloge'
+import { maintenant, isoJour } from '../../utils/horloge'
 import { devise } from '../../lib/monnaie'
 /**
  * Fiche d'ordre de travail : déclaration, diagnostic ISO 14224, pièces et
@@ -119,7 +119,7 @@ function suivre(daId: string, etape: 'commandee' | 'receptionnee') {
 }
 
 /* ── Main-d'œuvre (FMS-MA-03) ─────────────────────────────────── */
-const tempsLocal = ref({ mecanicienNom: '', heures: undefined as number | undefined, date: maintenant().toISOString().slice(0, 10) })
+const tempsLocal = ref({ mecanicienNom: '', heures: undefined as number | undefined, date: isoJour(maintenant()) })
 const erreurTemps = ref('')
 const optTechniciens = computed<DropdownItem[]>(() => item.value ? store.techniciensPour(item.value).map(t => ({ id: t.nom, label: t.nom, sublabel: t.competences.map(store.libelleCompetence).join(', ') })) : [])
 function ajouterTemps() {

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { useAbsenceStore } from './absences'
-import { aujourdhuiISO, maintenantMs } from '../utils/horloge'
+import { aujourdhuiISO, maintenantMs, isoJour } from '../utils/horloge'
 import { useCalendrierStore } from './calendrier'
 import { useAlertesStore } from './alertes'
 
@@ -57,7 +57,7 @@ export const useNotificationStore = defineStore('notifications', () => {
       })
 
     const aujourdhui = aujourdhuiISO()
-    const dans30 = new Date(maintenantMs() + 30 * 86400000).toISOString().slice(0, 10)
+    const dans30 = isoJour(new Date(maintenantMs() + 30 * 86400000))
     calendrier.feries
       .filter(f => f.date >= aujourdhui && f.date <= dans30)
       .forEach(f => {

@@ -26,7 +26,13 @@ export function aujourdhuiISO(): string {
 export function dansNJours(jours: number): string {
   const d = aujourdhuiDate()
   d.setDate(d.getDate() + jours)
-  return d.toISOString().slice(0, 10)
+  return isoJour(d)
+}
+
+/** Date au format AAAA-MM-JJ selon le calendrier local (pas en UTC : à
+ *  Douala, minuit local tombe la veille en UTC et décalerait d'un jour). */
+export function isoJour(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
 /**

@@ -77,7 +77,7 @@ import { usePersonnelStore } from '../stores/personnel'
 import { useClassificationStore } from '../stores/classification'
 import { useCalendrierStore } from '../stores/calendrier'
 import { useAbsenceStore } from '../stores/absences'
-import { aujourdhuiISO } from '../utils/horloge'
+import { aujourdhuiISO, isoJour } from '../utils/horloge'
 
 const props = defineProps<{ ouvert: boolean; personnelIdFixe?: string }>()
 const emit = defineEmits<{ fermer: []; cree: [] }>()
@@ -113,7 +113,7 @@ function joursOuvresEntre(debut: string, fin: string): { jours: number; feries: 
   const d = new Date(debut + 'T00:00:00')
   const f = new Date(fin + 'T00:00:00')
   for (let cur = new Date(d); cur <= f; cur.setDate(cur.getDate() + 1)) {
-    const iso = cur.toISOString().slice(0, 10)
+    const iso = isoJour(cur)
     const jourSemaine = (cur.getDay() + 6) % 7
     if (!cal.joursOuvres[jourSemaine]) continue
     if (cal.estFerie(iso)) { feries++; continue }

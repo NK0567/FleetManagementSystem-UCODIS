@@ -151,7 +151,7 @@ import NouvelleDemandeModal from '../../components/NouvelleDemandeModal.vue'
 import { useAuthStore } from '../../stores/auth'
 import { useAbsenceStore, type Demande } from '../../stores/absences'
 import { useCalendrierStore } from '../../stores/calendrier'
-import { aujourdhuiISO, aujourdhuiDate } from '../../utils/horloge'
+import { aujourdhuiISO, aujourdhuiDate, isoJour } from '../../utils/horloge'
 
 const auth = useAuthStore()
 const demandeOuverte = ref(false)
@@ -198,7 +198,7 @@ const semaine = computed<JourPlanning[]>(() => {
   for (let i = 0; i < 7; i++) {
     const d = new Date(lundi.value)
     d.setDate(d.getDate() + i)
-    const date = d.toISOString().slice(0, 10)
+    const date = isoJour(d)
     const f = cal.estFerie(date)
     out.push({
       date,

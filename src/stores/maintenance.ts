@@ -13,7 +13,7 @@ import type {
 import type { Vehicule } from '../types'
 import { useNomenclatureStore } from './nomenclature'
 import { useConfigurationStore } from './configuration'
-import { aujourdhuiISO, maintenantMs, maintenant } from '../utils/horloge'
+import { aujourdhuiISO, maintenantMs, maintenant, isoJour } from '../utils/horloge'
 import { useCarburantStore } from './carburant'
 import { useAchatsStore } from './achats'
 import { useVehiculeStore } from './vehicules'
@@ -458,7 +458,7 @@ export const useMaintenanceStore = defineStore('maintenance', () => {
       if (op.intervalleJours && derniereDate) {
         const echeance = new Date(derniereDate)
         echeance.setDate(echeance.getDate() + op.intervalleJours)
-        dateProchaine = echeance.toISOString().slice(0, 10)
+        dateProchaine = isoJour(echeance)
         joursRestants = Math.ceil((+echeance - instant) / 86_400_000)
       }
       const depassee = [kmRestants, heuresRestantes, joursRestants].some(r => r != null && r < 0)
@@ -874,7 +874,7 @@ export const useMaintenanceStore = defineStore('maintenance', () => {
     if (o.prestataire) return { ok: false, motif: "Intervention confiée à un atelier externe : son temps n'est pas saisi ici." }
     if (!d.mecanicienNom.trim()) return { ok: false, motif: 'Choisissez le technicien.' }
     if (!(d.heures > 0) || d.heures > 24) return { ok: false, motif: 'Indiquez un nombre d’heures entre 0 et 24.' }
-    if (!d.date || d.date > maintenant().toISOString().slice(0, 10)) return { ok: false, motif: 'Indiquez une date passée ou du jour.' }
+    if (!d.date || d.date > isoJour(maintenant())) return { ok: false, motif: 'Indiquez une date passée ou du jour.' }
     if (d.date < o.declareLe.slice(0, 10)) return { ok: false, motif: "La date précède l'ouverture de l'ordre." }
     o.temps.push({ id: `TP-${maintenantMs()}`, mecanicienNom: d.mecanicienNom.trim(), heures: d.heures, date: d.date })
     if (!o.mecaniciens.includes(d.mecanicienNom.trim())) o.mecaniciens.push(d.mecanicienNom.trim())

@@ -19,7 +19,7 @@ import { usePersonnelStore } from './personnel'
 import { useTypesDocumentsStore } from './typesDocuments'
 import { useEcartsStore, LIB_TYPE_ECART } from './ecarts'
 import { useTelematiqueStore } from './telematique'
-import { dansNJours, maintenantMs, maintenant } from '../utils/horloge'
+import { dansNJours, maintenantMs, maintenant, isoJour } from '../utils/horloge'
 import { etatEcheance } from '../utils/helpers'
 import { useTypesEquipementsStore } from './typesEquipements'
 import { useScoresConducteursStore } from './scoresConducteurs'
@@ -231,7 +231,7 @@ export const useAlertesStore = defineStore('alertes', () => {
       out.push({ cle: `ent-${v.id}-${e.operationId}-${e.statut}`, categorie: 'entretien', gravite: e.statut === 'depassee' ? 'critique' : 'avertissement',
         titre: e.statut === 'depassee' ? 'Entretien dépassé' : 'Entretien à prévoir',
         message: `${v.immatriculation} · ${e.operationLibelle}${e.kmRestants != null ? ` (${e.kmRestants < 0 ? 'dépassé de ' + Math.abs(e.kmRestants).toLocaleString('fr-FR') : 'dans ' + e.kmRestants.toLocaleString('fr-FR')} km)` : ''}`,
-        depuis: maintenant().toISOString().slice(0, 10), route: 'maintenance-echeances', vehiculeId: v.id })
+        depuis: isoJour(maintenant()), route: 'maintenance-echeances', vehiculeId: v.id })
     }))
     /* Inspection périodique non conforme : contre-visite à réaliser (FMS-MA-10). */
     inspections.enAttenteContreVisite.forEach(a => out.push({ cle: `ins-${a.id}`, categorie: 'inspection', gravite: 'critique', titre: 'Contre-visite à réaliser',
