@@ -10,6 +10,10 @@ import { ref, watch } from 'vue'
 export type CleIndicateur =
   | 'disponibilite' | 'preventif' | 'realisationPreventif' | 'mttr' | 'mtbf'
   | 'consommation' | 'coutKm' | 'score' | 'ageMoyen'
+  /* Transport (rapports du transport, onglets de Flotte > Rapports). */
+  | 'alHeure' | 'coutOrdre' | 'confirmees' | 'partielles' | 'refusees' | 'reportees' | 'contestees' | 'retoursDepot'
+  | 'satisfactionDestinataire' | 'satisfactionOrdonnateur' | 'remplissagePoids' | 'remplissageVolume'
+  | 'livraisonsParOrdre' | 'distance' | 'ecartFactureTarif'
 
 export interface Indicateur {
   cle: CleIndicateur
@@ -41,6 +45,37 @@ const DEPART: Indicateur[] = [
     definition: 'Note sur 100 calculée à partir des familles du score de conduite et de leurs poids.' },
   { cle: 'ageMoyen', code: 'AGE', libelle: 'Âge moyen de la flotte', unite: 'ans', sens: 'bas', cible: null,
     definition: 'Moyenne des âges des véhicules en service, depuis leur mise en circulation.' },
+  /* Transport */
+  { cle: 'alHeure', code: 'PONCT', libelle: "Taux de livraisons à l'heure", unite: '%', sens: 'haut', cible: null,
+    definition: "Livraisons arrivées au plus tard à l'heure prévue plus la marge de retard réglée, divisées par les livraisons arrivées dont l'heure prévue est connue." },
+  { cle: 'coutOrdre', code: 'CORD', libelle: 'Coût moyen par ordre de transport', unite: 'par ordre', sens: 'bas', cible: null,
+    definition: "Nos moyens : carburant des pleins rattachés à l'ordre plus coût de maintenance au kilomètre du véhicule multiplié par la distance. Transporteur externe : montant de sa facture. Moyenne des ordres dont le coût est complet." },
+  { cle: 'confirmees', code: 'CONF', libelle: 'Livraisons confirmées par le client', unite: '%', sens: 'haut', cible: null,
+    definition: 'Livraisons dont le destinataire a confirmé la réception, divisées par les livraisons déclarées par le conducteur.' },
+  { cle: 'partielles', code: 'PART', libelle: 'Livraisons partielles', unite: '%', sens: 'bas', cible: null,
+    definition: 'Livraisons déclarées avec au moins un article non livré, divisées par les livraisons déclarées.' },
+  { cle: 'refusees', code: 'REFUS', libelle: 'Livraisons refusées', unite: '%', sens: 'bas', cible: null,
+    definition: 'Livraisons refusées sur place par le destinataire, divisées par les livraisons présentées (conducteur arrivé, livraison déclarée, refusée ou reportée).' },
+  { cle: 'reportees', code: 'REPORT', libelle: 'Livraisons reportées', unite: '%', sens: 'bas', cible: null,
+    definition: 'Livraisons reportées en cours de tournée ou à la demande du client sur place, divisées par les livraisons présentées.' },
+  { cle: 'contestees', code: 'CONTEST', libelle: 'Livraisons contestées', unite: '%', sens: 'bas', cible: null,
+    definition: 'Livraisons dont le destinataire a contesté la réception, divisées par les livraisons déclarées.' },
+  { cle: 'retoursDepot', code: 'RETOUR', libelle: 'Retours au dépôt', unite: '%', sens: 'bas', cible: null,
+    definition: 'Livraisons dont tout ou partie de la marchandise revient au dépôt (report sur place, refus, articles non livrés), divisées par les livraisons présentées.' },
+  { cle: 'satisfactionDestinataire', code: 'SATD', libelle: 'Note de satisfaction des destinataires', unite: 'sur 5', sens: 'haut', cible: null,
+    definition: "Moyenne des notes données par les destinataires à l'enquête de satisfaction." },
+  { cle: 'satisfactionOrdonnateur', code: 'SATO', libelle: 'Note de satisfaction des ordonnateurs', unite: 'sur 5', sens: 'haut', cible: null,
+    definition: "Moyenne des trois notes de l'enquête des ordonnateurs (respect de l'ordre, délais, qualité)." },
+  { cle: 'remplissagePoids', code: 'REMPP', libelle: 'Taux de remplissage en poids', unite: '%', sens: 'haut', cible: null,
+    definition: "Poids des livraisons de l'ordre divisé par la charge maximale du véhicule (semi-remorque attelée ou véhicule du transporteur), en moyenne sur les ordres dont la capacité est connue." },
+  { cle: 'remplissageVolume', code: 'REMPV', libelle: 'Taux de remplissage en volume', unite: '%', sens: 'haut', cible: null,
+    definition: "Volume des livraisons de l'ordre divisé par le volume utile du véhicule, en moyenne sur les ordres dont le volume utile et le volume chargé sont connus." },
+  { cle: 'livraisonsParOrdre', code: 'LIVORD', libelle: 'Livraisons par ordre de transport', unite: 'livraisons', sens: 'haut', cible: null,
+    definition: 'Nombre moyen de livraisons portées par un ordre de transport exécuté.' },
+  { cle: 'distance', code: 'DIST', libelle: 'Distance parcourue', unite: 'km', sens: 'bas', cible: null,
+    definition: "Kilomètres relevés au compteur entre le départ et l'arrivée, à défaut distance de référence du trajet, cumulés sur les ordres exécutés." },
+  { cle: 'ecartFactureTarif', code: 'ECFAC', libelle: 'Écart moyen entre facture et tarif', unite: 'par ordre', sens: 'bas', cible: null,
+    definition: 'Montant facturé par le transporteur externe moins le montant convenu selon sa grille tarifaire (retenues déduites), en moyenne sur les ordres facturés dont le tarif est connu.' },
 ]
 const CLE = 'fms-ucodis-indicateurs'
 

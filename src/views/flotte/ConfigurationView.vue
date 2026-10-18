@@ -197,35 +197,47 @@
     <!-- ══ CLIENTS ═══════════════════════════════════════════ -->
     <div v-else-if="onglet === 'clients'" class="flex flex-col gap-3.5">
       <div :class="L.card">
-        <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center justify-between gap-2 mb-3 flex-wrap">
           <h2 :class="L.cardTitle" class="!mb-0">Clients</h2>
-          <button :class="L.btnPrimary" @click="ouvrirNouveauClient"><Plus class="w-4 h-4" /> Nouveau client</button>
+          <div class="flex items-center gap-2">
+            <button :class="L.btnOutline" @click="clientsStore.reinitialiser(); erreurClients = ''"><Undo2 class="w-4 h-4" /> Revenir aux valeurs de départ</button>
+            <button :class="L.btnPrimary" @click="ouvrirNouveauClient"><Plus class="w-4 h-4" /> Nouveau client</button>
+          </div>
         </div>
+        <p v-if="erreurClients" class="text-[12px] text-danger mb-2">{{ erreurClients }}</p>
+        <div class="overflow-x-auto">
         <table :class="L.table">
           <thead><tr>
             <th :class="L.th">Nom</th>
-            <th :class="L.th">Ville</th>
+            <th :class="L.th">Rôle</th>
+            <th :class="L.th">Nature</th>
+            <th :class="L.th">Adresse</th>
             <th :class="L.th">Contact</th>
             <th :class="L.th">Téléphone</th>
+            <th :class="L.th">E-mail</th>
             <th :class="L.th">Notifications</th>
             <th :class="L.th"></th>
           </tr></thead>
           <tbody>
             <tr v-for="c in clientsStore.clients" :key="c.id">
               <td :class="L.td" class="font-medium">{{ c.nom }}</td>
-              <td :class="L.td" class="text-muted-foreground">{{ c.ville ?? '-' }}</td>
+              <td :class="L.td" class="text-muted-foreground whitespace-nowrap">{{ libelleRoles(c) }}</td>
+              <td :class="L.td" class="text-muted-foreground whitespace-nowrap">{{ LIB_NATURE_TIERS[c.nature ?? 'externe'] }}</td>
+              <td :class="L.td" class="text-muted-foreground">{{ [c.adresse, c.ville].filter(Boolean).join(', ') || '-' }}</td>
               <td :class="L.td" class="text-muted-foreground">{{ c.contact ?? '-' }}</td>
-              <td :class="L.td" class="text-muted-foreground">{{ c.telephone ?? '-' }}</td>
-              <td :class="L.td" class="text-muted-foreground">{{ LIB_CANAL[c.canalPrefere ?? 'sms'] }}</td>
+              <td :class="L.td" class="text-muted-foreground whitespace-nowrap">{{ c.telephone ?? '-' }}</td>
+              <td :class="L.td" class="text-muted-foreground">{{ c.email ?? '-' }}</td>
+              <td :class="L.td" class="text-muted-foreground whitespace-nowrap">{{ LIB_CANAL[c.canalPrefere ?? 'sms'] }}</td>
               <td :class="L.td">
                 <div class="flex items-center gap-2">
                   <button class="text-[11px] text-primary hover:underline bg-transparent border-0 cursor-pointer" @click="ouvrirEditionClient(c)">Modifier</button>
-                  <button class="text-[11px] text-danger hover:underline bg-transparent border-0 cursor-pointer" @click="clientsStore.supprimer(c.id)">Supprimer</button>
+                  <button class="text-[11px] text-danger hover:underline bg-transparent border-0 cursor-pointer" @click="supprimerClient(c.id)">Supprimer</button>
                 </div>
               </td>
             </tr>
           </tbody>
         </table>
+        </div>
       </div>
     </div>
 
@@ -401,18 +413,27 @@
 
     <!-- Formulaire client -->
     <div v-if="showClientForm" class="fixed inset-0 z-[1000] flex items-center justify-center bg-black/40 p-4" @click.self="showClientForm = false">
-      <div class="bg-card rounded-xl shadow-xl w-full max-w-sm p-5">
+      <div class="bg-card rounded-xl shadow-xl w-full max-w-lg p-5 max-h-[90vh] overflow-y-auto">
         <h2 class="text-[15px] font-semibold text-foreground mb-3">{{ clientEnEdition ? 'Modifier le client' : 'Nouveau client' }}</h2>
-        <div class="flex flex-col gap-3">
-          <div :class="F.field"><label :class="F.fieldLabel">Nom *</label><input v-model="formClient.nom" :class="F.fieldInput" /></div>
+        <div class="grid grid-cols-2 gap-3 max-sm:grid-cols-1">
+          <div :class="F.field" class="col-span-2 max-sm:col-span-1"><label :class="F.fieldLabel">Nom *</label><input v-model="formClient.nom" :class="F.fieldInput" /></div>
+          <div :class="F.field"><label :class="F.fieldLabel">Rôle *</label>
+            <label class="flex items-center gap-2 text-[13px]"><input v-model="formClient.ordonnateur" type="checkbox" class="accent-primary" /> Ordonnateur</label>
+            <label class="flex items-center gap-2 text-[13px]"><input v-model="formClient.destinataire" type="checkbox" class="accent-primary" /> Destinataire</label>
+          </div>
+          <div :class="F.field"><label :class="F.fieldLabel">Nature</label>
+            <select v-model="formClient.nature" :class="F.fieldInput"><option v-for="(lib, k) in LIB_NATURE_TIERS" :key="k" :value="k">{{ lib }}</option></select>
+          </div>
+          <div :class="F.field" class="col-span-2 max-sm:col-span-1"><label :class="F.fieldLabel">Adresse</label><input v-model="formClient.adresse" :class="F.fieldInput" /></div>
           <div :class="F.field"><label :class="F.fieldLabel">Ville</label><input v-model="formClient.ville" :class="F.fieldInput" /></div>
           <div :class="F.field"><label :class="F.fieldLabel">Contact</label><input v-model="formClient.contact" :class="F.fieldInput" /></div>
           <div :class="F.field"><label :class="F.fieldLabel">Téléphone</label><input v-model="formClient.telephone" :class="F.fieldInput" /></div>
-          <div :class="F.field"><label :class="F.fieldLabel">E-mail</label><input v-model="formClient.email" :class="F.fieldInput" /></div>
-          <div :class="F.field"><label :class="F.fieldLabel">Canal des notifications de livraison</label>
+          <div :class="F.field"><label :class="F.fieldLabel">E-mail</label><input v-model="formClient.email" type="email" :class="F.fieldInput" /></div>
+          <div :class="F.field" class="col-span-2 max-sm:col-span-1"><label :class="F.fieldLabel">Canal de notification préféré</label>
             <select v-model="formClient.canalPrefere" :class="F.fieldInput"><option v-for="(lib, k) in LIB_CANAL" :key="k" :value="k">{{ lib }}</option></select>
           </div>
         </div>
+        <p v-if="erreurClientForm" class="text-[12px] text-danger mt-3">{{ erreurClientForm }}</p>
         <div class="flex items-center justify-end gap-2 mt-4">
           <button :class="cls.btnOutline" @click="showClientForm = false">Annuler</button>
           <button :class="cls.btnPrimary" @click="enregistrerClient">{{ clientEnEdition ? 'Enregistrer' : 'Créer' }}</button>
@@ -443,7 +464,7 @@ import ConfigTelematiqueOnglet from '../../components/flotte/ConfigTelematiqueOn
 import ConfigReferentielsOnglet from '../../components/flotte/ConfigReferentielsOnglet.vue'
 import ConfigImportsIndicateursOnglet from '../../components/flotte/ConfigImportsIndicateursOnglet.vue'
 import { useTrajetsStore } from '../../stores/trajets'
-import { useClientsStore, LIB_CANAL, type Client, type CanalNotification } from '../../stores/clients'
+import { useClientsStore, LIB_CANAL, LIB_NATURE_TIERS, type Client, type CanalNotification, type NatureTiers } from '../../stores/clients'
 import { useConfigTypesEcartStore, LIB_CATEGORIE_ECART, type CategorieEcart, type ConfigTypeEcart } from '../../stores/ecarts'
 import { useConfigurationStore } from '../../stores/configuration'
 import { useSitesStore } from '../../stores/sites'
@@ -657,16 +678,25 @@ function deplacerEtape(index: number, sens: -1 | 1) {
   trajetsStore.update(t.id, { etapes })
 }
 
-/* ── Clients ──────────────────────────────────────────────── */
+/* ── Clients : ordonnateurs et destinataires ─────────────── */
 const showClientForm = ref(false)
 const clientEnEdition = ref<Client | null>(null)
-const formClient = ref({ nom: '', ville: '', contact: '', telephone: '', email: '', canalPrefere: 'sms' as CanalNotification })
-function ouvrirNouveauClient() { clientEnEdition.value = null; formClient.value = { nom: '', ville: '', contact: '', telephone: '', email: '', canalPrefere: 'sms' }; showClientForm.value = true }
-function ouvrirEditionClient(c: Client) { clientEnEdition.value = c; formClient.value = { nom: c.nom, ville: c.ville ?? '', contact: c.contact ?? '', telephone: c.telephone ?? '', email: c.email ?? '', canalPrefere: c.canalPrefere ?? 'sms' }; showClientForm.value = true }
+const erreurClientForm = ref('')
+const erreurClients = ref('')
+const clientVide = () => ({ nom: '', ordonnateur: false, destinataire: true, nature: 'externe' as NatureTiers, adresse: '', ville: '', contact: '', telephone: '', email: '', canalPrefere: 'sms' as CanalNotification })
+const formClient = ref(clientVide())
+const libelleRoles = (c: Client) => c.ordonnateur && c.destinataire ? 'Ordonnateur et destinataire' : c.ordonnateur ? 'Ordonnateur' : 'Destinataire'
+function ouvrirNouveauClient() { clientEnEdition.value = null; formClient.value = clientVide(); erreurClientForm.value = ''; showClientForm.value = true }
+function ouvrirEditionClient(c: Client) {
+  clientEnEdition.value = c; erreurClientForm.value = ''
+  formClient.value = { nom: c.nom, ordonnateur: !!c.ordonnateur, destinataire: !!c.destinataire, nature: c.nature ?? 'externe', adresse: c.adresse ?? '', ville: c.ville ?? '',
+    contact: c.contact ?? '', telephone: c.telephone ?? '', email: c.email ?? '', canalPrefere: c.canalPrefere ?? 'sms' }
+  showClientForm.value = true
+}
 function enregistrerClient() {
-  if (!formClient.value.nom.trim()) return
-  if (clientEnEdition.value) clientsStore.modifier(clientEnEdition.value.id, formClient.value)
-  else clientsStore.creer(formClient.value)
+  const r = clientEnEdition.value ? clientsStore.modifier(clientEnEdition.value.id, formClient.value) : clientsStore.creer(formClient.value)
+  if (!r.ok) { erreurClientForm.value = r.motif ?? ''; return }
   showClientForm.value = false
 }
+function supprimerClient(id: string) { const r = clientsStore.supprimer(id); erreurClients.value = r.ok ? '' : r.motif ?? '' }
 </script>

@@ -178,20 +178,22 @@ const STATUT: Record<StatutVoyage, { label: string; cls: string }> = {
   planifie: { label: 'Planifié', cls: 'bg-neutral-bg text-neutral' },
   confirme: { label: 'Confirmé', cls: 'bg-neutral-bg text-neutral' },
   pret: { label: 'Prêt pour exécution', cls: 'bg-neutral-bg text-neutral' },
-  affecte: { label: 'Affecté', cls: 'bg-primary/10 text-primary' },
   en_cours: { label: 'En cours', cls: 'bg-info-bg text-info' },
-  livre: { label: 'Livré', cls: 'bg-success-bg text-success' },
+  livre: { label: 'Terminé, en attente de clôture', cls: 'bg-success-bg text-success' },
   cloture: { label: 'Clôturé', cls: 'bg-neutral-bg text-neutral' },
-  litige: { label: 'En litige', cls: 'bg-danger-bg text-danger' },
   annule: { label: 'Annulé', cls: 'bg-neutral-bg text-neutral' },
 }
 
 const scopeOptions = [
   { value: '', label: 'Tous les voyages' },
+  { value: 'en_attente', label: 'En attente' },
+  { value: 'planifie', label: 'Planifiés' },
+  { value: 'confirme', label: 'Confirmés' },
+  { value: 'pret', label: 'Prêts pour exécution' },
   { value: 'en_cours', label: 'En cours' },
-  { value: 'livre', label: 'À clôturer' },
-  { value: 'litige', label: 'En litige' },
+  { value: 'livre', label: 'Terminés, en attente de clôture' },
   { value: 'cloture', label: 'Clôturés' },
+  { value: 'annule', label: 'Annulés' },
 ]
 
 const clients = computed(() => [...new Set(voyages.voyages.map(v => v.clientNom))].sort())
@@ -204,7 +206,7 @@ const optFilterDossier: DropdownItem[] = [
 
 const sitesRestants = computed(() => voyages.enCours.reduce((n, v) => n + v.etapes.filter(e => !e.franchi).length, 0))
 const sitesManques = computed(() =>
-  voyages.voyages.filter(v => v.statut === 'livre' || v.statut === 'cloture' || v.statut === 'litige')
+  voyages.voyages.filter(v => v.statut === 'livre' || v.statut === 'cloture')
     .reduce((n, v) => n + v.etapes.filter(e => !e.franchi).length, 0))
 const horsTolerance = computed(() => voyages.voyages.filter(v => voyages.ecartPoids(v.id)?.verdict.startsWith('hors')).length)
 

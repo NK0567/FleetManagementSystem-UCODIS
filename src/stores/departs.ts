@@ -34,6 +34,27 @@ const CLE_AUTORISATIONS = 'fms-ucodis-autorisations-depart'
 const conformesDemo = (par: string, le: string) => Object.fromEntries(CONTROLES_CONDUCTEUR_DEFAUT.map(c => [c.code, { conforme: true, par, le }]))
 const resultatsDemo = (): ResultatControleDepart[] => CONTROLES_CONDUCTEUR_DEFAUT.map(c => ({ controle: 'conducteur', code: c.code, libelle: c.libelle, bloquant: c.bloquant, conforme: true, renseigne: true }))
 
+/** Tournée de carburant en cours de démonstration (OT-2026-04452) : partie avec son départ accordé, comme tout voyage en cours. */
+const AUTORISATION_CARBURANT_DEMO = (): AutorisationDepart => ({
+  id: 'AUT-004', reference: 'AUT-2026-0214', voyageId: 'VOY-017', voyageRef: 'VOY-2026-0163',
+  vehiculeId: 'v-tr-1', vehiculePlaque: '4021 TBA', chauffeurId: 'p-010', chauffeurNom: 'Solofo Rakotomanga',
+  demandeeLe: '2026-09-04T06:32:00',
+  /* Contrôles relevés au moment de la décision, comme pour tout départ accordé. */
+  controles: [
+    { controle: 'checklist', conforme: true },
+    { controle: 'vehicule', conforme: true },
+    { controle: 'documents_vehicule', conforme: true },
+    { controle: 'documents_chauffeur', conforme: true },
+    { controle: 'repos', conforme: true, detail: 'Aucun voyage récent avant ce départ.' },
+    ...resultatsDemo(),
+  ],
+  saisiesConducteur: conformesDemo('Hery Andriamalala', '2026-09-04T06:33:00'),
+  accordee: true, decidePar: 'Hery Andriamalala', decideLe: '2026-09-04T06:40:00',
+  suiviActiveLe: '2026-09-04T06:41:00',
+  checklistDepart: Object.fromEntries(POINTS_CHECKLIST_ROUTE.map(p => [p.code, true])),
+  checklistValideeLe: '2026-09-04T06:34:00',
+})
+
 /**
  * Autorisations de départ (FMS-SC-04) : contrôle avant départ, véhicule
  * disponible, pièces du véhicule et du chauffeur, temps de repos. Tous doivent
@@ -84,9 +105,12 @@ export const useDepartsStore = defineStore('departs', () => {
       accordee: false, decidePar: 'Hery Andriamalala', decideLe: '2026-08-24T05:48:00',
       motifRefus: 'Deux contrôles non conformes : régularisation requise avant tout nouveau départ.',
     },
+    AUTORISATION_CARBURANT_DEMO(),
   ])
 
   try { const b = localStorage.getItem(CLE_AUTORISATIONS); if (b) autorisations.value = JSON.parse(b) } catch { /* démonstration */ }
+  /* Autorisations enregistrées avant la tournée de carburant en cours de démonstration. */
+  if (!autorisations.value.some(a => a.id === 'AUT-004')) autorisations.value.push(AUTORISATION_CARBURANT_DEMO())
   watch(autorisations, v => { try { localStorage.setItem(CLE_AUTORISATIONS, JSON.stringify(v)) } catch { /* ignoré */ } }, { deep: true })
 
   /** Contrôles du conducteur paramétrés (libellé, bloquant, actif). */

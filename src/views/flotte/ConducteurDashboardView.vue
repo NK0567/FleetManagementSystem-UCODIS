@@ -554,7 +554,7 @@ const habilitations = computed(() => docsPersonnel.piecesObligatoires(conducteur
 const habilitationsOk = computed(() => habilitations.value.every(h => h.acquise))
 
 /** Planning */
-const voyagesAVenir = computed(() => voyagesDuConducteur.value.filter(v => v.statut === 'planifie' || v.statut === 'affecte').length)
+const voyagesAVenir = computed(() => voyagesDuConducteur.value.filter(v => ['planifie', 'confirme', 'pret'].includes(v.statut)).length)
 const voyagesEffectues = computed(() => voyagesDuConducteur.value.filter(v => v.statut === 'cloture' || v.statut === 'livre').length)
 const absencesConducteur = computed(() => (conducteur.value ? absencesStore.mesDemandes(conducteur.value.id) : []))
 

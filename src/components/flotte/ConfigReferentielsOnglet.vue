@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /** Onglet Référentiels de la configuration : types de véhicules, d'équipements embarqués, de sites et de prestataires (FMS-PA-01, PA-03). */
 import { ref } from 'vue'
-import { Building2, ClipboardList, MapPinned, Truck, Undo2, Wrench } from '@lucide/vue'
+import { Building2, ClipboardList, MapPinned, Package, Truck, Undo2, Wrench } from '@lucide/vue'
 import { useFlotteEtatStore, ETATS_FLOTTE, LIB_GROUPE_ETAT } from '../../stores/flotteEtat'
 import type { CodeEtatFlotte } from '../../types'
 import { useTypesVehiculesStore, LIB_ROLE_ATTELAGE, type RoleAttelage, type TypeVehiculeDef } from '../../stores/typesVehicules'
@@ -9,6 +9,7 @@ import { useTypesEquipementsStore } from '../../stores/typesEquipements'
 import { useTypesSitesStore } from '../../stores/typesSites'
 import { usePrestatairesStore } from '../../stores/prestataires'
 import { useVehiculeStore } from '../../stores/vehicules'
+import { useProduitsStore, UNITES_PRODUIT, type Produit } from '../../stores/produits'
 import * as L from '../../lib/listClasses'
 import * as F from '../../lib/formClasses'
 
@@ -33,8 +34,9 @@ function enregistrerVeh() {
 }
 const nvEq = ref({ libelle: '', avecEcheance: false, camera: false }); const errEq = ref('')
 function ajouterEq() { const r = typesEq.ajouter(nvEq.value.libelle, nvEq.value.avecEcheance, nvEq.value.camera); errEq.value = r.ok ? '' : r.motif ?? ''; if (r.ok) nvEq.value = { libelle: '', avecEcheance: false, camera: false } }
-const nvSite = ref({ libelle: '', rayon: 500 }); const errSite = ref('')
-function ajouterSite() { const r = typesSites.ajouter(nvSite.value.libelle, nvSite.value.rayon); errSite.value = r.ok ? '' : r.motif ?? ''; if (r.ok) nvSite.value = { libelle: '', rayon: 500 } }
+const nvSite = ref({ libelle: '', rayon: 500, depot: false }); const errSite = ref('')
+function ajouterSite() { const r = typesSites.ajouter(nvSite.value.libelle, nvSite.value.rayon, nvSite.value.depot); errSite.value = r.ok ? '' : r.motif ?? ''; if (r.ok) nvSite.value = { libelle: '', rayon: 500, depot: false } }
+function basculerDepot(libelle: string, e: Event) { const c = e.target as HTMLInputElement; const r = typesSites.definirDepot(libelle, c.checked); errSite.value = r.ok ? '' : r.motif ?? ''; if (!r.ok) c.checked = !c.checked }
 const nvPrest = ref(''); const errPrest = ref('')
 /* États de la flotte : code et libellé affichés dans l'état de flotte quotidien. */
 const flotteEtat = useFlotteEtatStore()
@@ -46,6 +48,21 @@ function majEtat(cle: CodeEtatFlotte, champ: 'code' | 'libelle', e: Event) {
   errEtat.value = r.ok ? '' : r.motif ?? ''
   if (!r.ok) zone.value = actuel[champ]
 }
+/* Produits transportés : famille, unité, densité de référence et coefficient de dilatation pour le carburant ; un produit utilisé ne se supprime pas. */
+const produits = useProduitsStore()
+const produitVide = () => ({ nom: '', famille: '', unite: '', carburant: false, densiteReference: undefined as number | undefined, coefficientDilatation: undefined as number | undefined })
+const nvProd = ref(produitVide()); const errProd = ref('')
+function ajouterProd() { const r = produits.creer(nvProd.value); errProd.value = r.ok ? '' : r.motif ?? ''; if (r.ok) nvProd.value = produitVide() }
+const edProd = ref<(ReturnType<typeof produitVide> & { id: string }) | null>(null)
+function modifierProd(p: Produit) { errProd.value = ''; edProd.value = { id: p.id, nom: p.nom, famille: p.famille, unite: p.unite, carburant: p.carburant, densiteReference: p.densiteReference, coefficientDilatation: p.coefficientDilatation } }
+function enregistrerProd() {
+  if (!edProd.value) return
+  const { id, ...d } = edProd.value
+  const r = produits.modifier(id, d); errProd.value = r.ok ? '' : r.motif ?? ''
+  if (r.ok) edProd.value = null
+}
+function basculerProd(p: Produit, e: Event) { const r = produits.changerActif(p.id, (e.target as HTMLInputElement).checked); errProd.value = r.ok ? '' : r.motif ?? ''; if (!r.ok) (e.target as HTMLInputElement).checked = p.actif }
+function supprimerProd(p: Produit) { const r = produits.supprimer(p.id); errProd.value = r.ok ? '' : r.motif ?? '' }
 function ajouterPrest() { const r = prestataires.ajouterType(nvPrest.value); errPrest.value = r.ok ? '' : r.motif ?? ''; if (r.ok) nvPrest.value = '' }
 </script>
 
@@ -124,16 +141,18 @@ function ajouterPrest() { const r = prestataires.ajouterType(nvPrest.value); err
     <div class="flex flex-col gap-3.5">
       <div :class="L.card">
         <div class="flex items-center gap-2 mb-3"><MapPinned class="w-4 h-4 text-primary" /><h2 :class="L.cardTitle" class="!mb-0">Types de sites</h2></div>
-        <div v-for="t in typesSites.types" :key="t.libelle" class="flex items-center gap-2 py-1.5 border-b border-border/60">
+        <div v-for="t in typesSites.types" :key="t.libelle" class="flex flex-wrap items-center gap-2 py-1.5 border-b border-border/60">
           <span class="w-3 h-3 rounded-full shrink-0" :style="{ background: t.couleur }"></span>
           <span class="text-[12px] flex-1">{{ t.libelle }}</span>
           <input v-model.number="t.rayonDefautM" type="number" min="50" :class="F.fieldInput" class="!h-[30px] !text-[12px] !w-[90px]" />
           <span class="text-[11px] text-muted-foreground">m</span>
+          <label class="flex items-center gap-1.5 text-[12px]"><input :checked="!!t.depotChargement" type="checkbox" class="accent-primary" @change="basculerDepot(t.libelle, $event)" /> Dépôt de chargement</label>
           <label class="flex items-center gap-1.5 text-[12px]"><input v-model="t.actif" type="checkbox" class="accent-primary" /> Actif</label>
         </div>
-        <div class="flex gap-2 mt-2 items-center">
+        <div class="flex flex-wrap gap-2 mt-2 items-center">
           <input v-model="nvSite.libelle" :class="F.fieldInput" class="!h-[32px] flex-1" placeholder="Nouveau type de site" />
           <input v-model.number="nvSite.rayon" type="number" min="50" :class="F.fieldInput" class="!h-[32px] !w-[90px]" />
+          <label class="flex items-center gap-1.5 text-[12px] whitespace-nowrap"><input v-model="nvSite.depot" type="checkbox" class="accent-primary" /> Dépôt de chargement</label>
           <button :class="F.btnPrimary" class="!py-1.5 !text-[12px]" @click="ajouterSite">Ajouter</button>
         </div>
         <p v-if="errSite" class="text-[12px] text-danger mt-2">{{ errSite }}</p>
@@ -150,6 +169,59 @@ function ajouterPrest() { const r = prestataires.ajouterType(nvPrest.value); err
         </div>
         <p v-if="errPrest" class="text-[12px] text-danger mt-2">{{ errPrest }}</p>
       </div>
+    </div>
+    <div :class="L.card" class="lg:col-span-2">
+      <div class="flex items-center justify-between gap-2 mb-3">
+        <div class="flex items-center gap-2"><Package class="w-4 h-4 text-primary" /><h2 :class="L.cardTitle" class="!mb-0">Produits transportés</h2></div>
+        <button :class="F.btnOutline" class="!text-[12px]" @click="produits.reinitialiser(); errProd = ''; edProd = null"><Undo2 class="w-3.5 h-3.5" /> Revenir aux valeurs de départ</button>
+      </div>
+      <datalist id="unites-produit"><option v-for="u in UNITES_PRODUIT" :key="u" :value="u" /></datalist>
+      <datalist id="familles-produit"><option v-for="f in produits.familles" :key="f" :value="f" /></datalist>
+      <div class="overflow-x-auto">
+        <table :class="L.table">
+          <thead><tr><th :class="L.th">Nom</th><th :class="L.th">Famille</th><th :class="L.th">Unité</th><th :class="L.th">Carburant</th><th :class="L.th">Densité de référence (kg/L)</th><th :class="L.th">Coefficient de dilatation (par °C)</th><th :class="L.th">Actif</th><th :class="L.th"></th></tr></thead>
+          <tbody>
+            <tr v-for="p in produits.produits" :key="p.id">
+              <template v-if="edProd?.id === p.id">
+                <td :class="L.td"><input v-model="edProd.nom" :class="F.fieldInput" class="!h-[28px] !text-[12px] min-w-[160px]" /></td>
+                <td :class="L.td"><input v-model="edProd.famille" list="familles-produit" :class="F.fieldInput" class="!h-[28px] !text-[12px] min-w-[120px]" /></td>
+                <td :class="L.td"><input v-model="edProd.unite" list="unites-produit" :class="F.fieldInput" class="!h-[28px] !text-[12px] min-w-[110px]" /></td>
+                <td :class="L.td"><input v-model="edProd.carburant" type="checkbox" class="accent-primary" /></td>
+                <td :class="L.td"><input v-model.number="edProd.densiteReference" type="number" min="0" step="0.001" :disabled="!edProd.carburant" :class="F.fieldInput" class="!h-[28px] !text-[12px] !w-[100px]" /></td>
+                <td :class="L.td"><input v-model.number="edProd.coefficientDilatation" type="number" min="0" step="0.0001" :disabled="!edProd.carburant" :class="F.fieldInput" class="!h-[28px] !text-[12px] !w-[100px]" /></td>
+                <td :class="L.td"><input :checked="p.actif" type="checkbox" class="accent-primary" @change="basculerProd(p, $event)" /></td>
+                <td :class="L.td" class="whitespace-nowrap">
+                  <button class="text-[11px] text-primary hover:underline bg-transparent border-0 cursor-pointer mr-2" @click="enregistrerProd">Enregistrer</button>
+                  <button class="text-[11px] text-muted-foreground hover:underline bg-transparent border-0 cursor-pointer" @click="edProd = null; errProd = ''">Annuler</button>
+                </td>
+              </template>
+              <template v-else>
+                <td :class="L.td" class="text-xs font-medium">{{ p.nom }}</td>
+                <td :class="L.td" class="text-xs">{{ p.famille }}</td>
+                <td :class="L.td" class="text-xs">{{ p.unite }}</td>
+                <td :class="L.td" class="text-xs">{{ p.carburant ? 'Oui' : 'Non' }}</td>
+                <td :class="L.td" class="text-xs">{{ p.densiteReference != null ? p.densiteReference.toLocaleString('fr-FR') : '-' }}</td>
+                <td :class="L.td" class="text-xs">{{ p.carburant ? (p.coefficientDilatation != null ? p.coefficientDilatation.toLocaleString('fr-FR', { maximumFractionDigits: 6 }) : 'Non renseigné') : '-' }}</td>
+                <td :class="L.td"><input :checked="p.actif" type="checkbox" class="accent-primary" @change="basculerProd(p, $event)" /></td>
+                <td :class="L.td" class="whitespace-nowrap">
+                  <button class="text-[11px] text-primary hover:underline bg-transparent border-0 cursor-pointer mr-2" @click="modifierProd(p)">Modifier</button>
+                  <button class="text-[11px] text-danger hover:underline bg-transparent border-0 cursor-pointer" @click="supprimerProd(p)">Supprimer</button>
+                </td>
+              </template>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="flex flex-wrap gap-2 mt-3 items-center">
+        <input v-model="nvProd.nom" :class="F.fieldInput" class="!h-[32px] flex-1 min-w-[180px]" placeholder="Nouveau produit" />
+        <input v-model="nvProd.famille" list="familles-produit" :class="F.fieldInput" class="!h-[32px] !w-[150px]" placeholder="Famille" />
+        <input v-model="nvProd.unite" list="unites-produit" :class="F.fieldInput" class="!h-[32px] !w-[130px]" placeholder="Unité" />
+        <label class="flex items-center gap-1.5 text-[12px]"><input v-model="nvProd.carburant" type="checkbox" class="accent-primary" /> Carburant</label>
+        <input v-if="nvProd.carburant" v-model.number="nvProd.densiteReference" type="number" min="0" step="0.001" :class="F.fieldInput" class="!h-[32px] !w-[150px]" placeholder="Densité (kg/L)" />
+        <input v-if="nvProd.carburant" v-model.number="nvProd.coefficientDilatation" type="number" min="0" step="0.0001" :class="F.fieldInput" class="!h-[32px] !w-[190px]" placeholder="Coefficient de dilatation" />
+        <button :class="F.btnPrimary" class="!py-1.5 !text-[12px]" @click="ajouterProd">Ajouter</button>
+      </div>
+      <p v-if="errProd" class="text-[12px] text-danger mt-2">{{ errProd }}</p>
     </div>
     <div :class="L.card" class="lg:col-span-2">
       <div class="flex items-center justify-between gap-2 mb-3">

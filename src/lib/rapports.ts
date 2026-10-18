@@ -6,12 +6,12 @@
  */
 export type ValeurRapport = string | number | null | undefined
 export interface SectionRapport { titre: string; colonnes: string[]; lignes: ValeurRapport[][]; note?: string }
-export interface Rapport { titre: string; sousTitre?: string; sections: SectionRapport[] }
+export interface Rapport { titre: string; sousTitre?: string; /** Période couverte, reprise dans le nom du fichier. */ periode?: string; sections: SectionRapport[] }
 
 /** Espaces insécables de toLocaleString remplacés : la police standard des PDF ne les connaît pas. */
 const texte = (v: ValeurRapport) => v == null ? '' : String(v).replace(/[  ]/g, ' ')
-const nomFichier = (titre: string, ext: string) =>
-  `${titre.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-|-$/g, '').toLowerCase()}.${ext}`
+const nomFichier = (r: Pick<Rapport, 'titre' | 'periode'>, ext: string) =>
+  `${[r.titre, r.periode].filter(Boolean).join(' ').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-|-$/g, '').toLowerCase()}.${ext}`
 
 export async function exporterPdf(r: Rapport): Promise<void> {
   const { jsPDF } = await import('jspdf')
@@ -33,20 +33,27 @@ export async function exporterPdf(r: Rapport): Promise<void> {
   })
   const n = doc.getNumberOfPages()
   for (let i = 1; i <= n; i++) { doc.setPage(i); doc.setFontSize(8); doc.setTextColor(120); doc.text(`${texte(r.titre)} · page ${i} sur ${n}`, 14, 203) }
-  doc.save(nomFichier(r.titre, 'pdf'))
+  doc.save(nomFichier(r, 'pdf'))
 }
 
 export async function exporterExcel(r: Rapport): Promise<void> {
   const { default: writeXlsxFile } = await import('write-excel-file/browser')
   const noms = new Set<string>()
-  const feuilles = r.sections.map(s => {
+  /* Chaque feuille rappelle le titre du rapport et sa période ; une section vide porte la ligne « Aucune donnée ». */
+  const sections: SectionRapport[] = r.sections.length ? r.sections : [{ titre: 'Rapport', colonnes: [''], lignes: [] }]
+  const feuilles = sections.map(s => {
     // Nom de feuille : 31 caractères au plus, sans caractère interdit, unique.
     let nom = s.titre.replace(/[\\/?*[\]:]/g, ' ').slice(0, 31).trim() || 'Feuille'
     let k = 2; while (noms.has(nom)) nom = `${nom.slice(0, 28)} ${k++}`
     noms.add(nom)
+    const largeur = Math.max(1, s.colonnes.length)
+    const ligneTexte = (v: string, gras = false) => [{ value: texte(v), type: String, ...(gras ? { fontWeight: 'bold' as const } : {}) }, ...Array(largeur - 1).fill(null)]
+    const tete = [ligneTexte(r.titre, true), ...(r.sousTitre ? [ligneTexte(r.sousTitre)] : []), ligneTexte(s.titre, true), Array(largeur).fill(null)]
     const entete = s.colonnes.map(c => ({ value: c, fontWeight: 'bold' as const }))
-    const corps = s.lignes.map(l => l.map(v => v == null || v === '' ? null : typeof v === 'number' ? { value: v, type: Number } : { value: texte(v), type: String }))
-    return { sheet: nom, data: [entete, ...corps], columns: s.colonnes.map(() => ({ width: 22 })) }
+    const corps = s.lignes.length
+      ? s.lignes.map(l => l.map(v => v == null || v === '' ? null : typeof v === 'number' ? { value: v, type: Number } : { value: texte(v), type: String }))
+      : [ligneTexte('Aucune donnée')]
+    return { sheet: nom, data: [...tete, entete, ...corps], columns: s.colonnes.map(() => ({ width: 22 })) }
   })
-  await writeXlsxFile(feuilles as never).toFile(nomFichier(r.titre, 'xlsx'))
+  await writeXlsxFile(feuilles as never).toFile(nomFichier(r, 'xlsx'))
 }

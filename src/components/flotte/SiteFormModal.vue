@@ -7,6 +7,7 @@ import FormSection from '../ui/form-field/FormSection.vue'
 import * as F from '../../lib/formClasses'
 import { useSitesStore } from '../../stores/sites'
 import { useTypesSitesStore } from '../../stores/typesSites'
+import { useClientsStore } from '../../stores/clients'
 import ZoneSiteEditeur from './ZoneSiteEditeur.vue'
 import type { TypeSiteReseau } from '../../types'
 
@@ -15,8 +16,11 @@ const emit = defineEmits<{ 'update:modelValue': [boolean]; saved: [] }>()
 
 const store = useSitesStore()
 const typesSites = useTypesSitesStore()
+const clients = useClientsStore()
+/** Site de livraison d'un client : facultatif, choisi parmi les destinataires du référentiel. */
+const optClients = computed<DropdownItem[]>(() => [{ id: '', label: 'Aucun' }, ...clients.destinataires().map(c => ({ id: c.id, label: c.nom, sublabel: c.ville }))])
 
-const form = reactive({ code: '', nom: '', ville: '', region: '', adresse: '', type: '' as TypeSiteReseau | '', actif: true, lat: null as number | null, lng: null as number | null, rayonM: null as number | null })
+const form = reactive({ code: '', nom: '', ville: '', region: '', adresse: '', type: '' as TypeSiteReseau | '', actif: true, lat: null as number | null, lng: null as number | null, rayonM: null as number | null, tiers: false, proprietaireTiers: '', email: '', clientId: '' })
 /* Le rayon proposé suit le type choisi, tant qu'il n'a pas été réglé à la main. */
 watch(() => form.type, t => { const d = typesSites.get(t); if (d && (form.rayonM == null || typesSites.types.some(x => x.rayonDefautM === form.rayonM))) form.rayonM = d.rayonDefautM })
 const errors = reactive<Partial<Record<string, string>>>({})
@@ -29,9 +33,9 @@ watch(() => props.modelValue, open => {
   submitError.value = ''
   if (props.editId) {
     const s = store.getById(props.editId)
-    if (s) Object.assign(form, { code: s.code, nom: s.nom, ville: s.ville, region: s.region ?? '', adresse: s.adresse ?? '', type: s.type, actif: s.actif, lat: s.lat, lng: s.lng, rayonM: s.rayonM ?? null })
+    if (s) Object.assign(form, { code: s.code, nom: s.nom, ville: s.ville, region: s.region ?? '', adresse: s.adresse ?? '', type: s.type, actif: s.actif, lat: s.lat, lng: s.lng, rayonM: s.rayonM ?? null, tiers: !!s.proprietaireTiers, proprietaireTiers: s.proprietaireTiers ?? '', email: s.email ?? '', clientId: s.clientId ?? '' })
   } else {
-    Object.assign(form, { code: '', nom: '', ville: '', region: '', adresse: '', type: '', actif: true, lat: null, lng: null, rayonM: null })
+    Object.assign(form, { code: '', nom: '', ville: '', region: '', adresse: '', type: '', actif: true, lat: null, lng: null, rayonM: null, tiers: false, proprietaireTiers: '', email: '', clientId: '' })
   }
 })
 
@@ -44,6 +48,7 @@ function valider(): boolean {
   if (!props.editId && store.sites.some(s => s.code === form.code.trim().toUpperCase())) {
     errors.code = 'Ce code existe déjà.'; ok = false
   }
+  if (form.tiers && !form.proprietaireTiers.trim()) { errors.tiers = 'Indiquez le tiers à qui appartient le site.'; ok = false } else delete errors.tiers
   if (form.lat == null || form.lng == null) { errors.zone = 'Placez le centre de la zone sur la carte.'; ok = false } else delete errors.zone
   return ok
 }
@@ -56,6 +61,9 @@ function handleSubmit() {
     code: form.code.trim().toUpperCase(), nom: form.nom.trim(), ville: form.ville.trim(),
     region: form.region.trim() || undefined, adresse: form.adresse.trim() || undefined, type: form.type as TypeSiteReseau,
     lat: form.lat!, lng: form.lng!, rayonM: form.rayonM ?? undefined, actif: form.actif,
+    proprietaireTiers: form.tiers ? form.proprietaireTiers.trim() : undefined,
+    email: form.email.trim() || undefined,
+    clientId: form.clientId || undefined,
   }
   const { code: _c, ...modifs } = donnees
   const r = props.editId ? store.modifier(props.editId, modifs) : store.creer(donnees)
@@ -111,9 +119,26 @@ const optType = computed<DropdownItem[]>(() => typesSites.types.filter(t => t.ac
               <label :class="F.fieldLabel">Adresse</label>
               <input v-model="form.adresse" type="text" :class="F.fieldInput" />
             </div>
+            <div :class="[F.field, 'col-span-2']">
+              <label :class="F.fieldLabel">Adresse e-mail</label>
+              <input v-model="form.email" type="email" placeholder="ex. chargement@depot.mg" :class="F.fieldInput" />
+            </div>
+            <div :class="[F.field, 'col-span-2']">
+              <label :class="F.fieldLabel">Client</label>
+              <SearchableDropdown v-model="form.clientId" :items="optClients" placeholder="Facultatif : site de livraison d'un client" />
+            </div>
             <div class="col-span-2 flex items-center gap-3 pt-1">
               <input id="actifModal" v-model="form.actif" type="checkbox" class="w-4 h-4 rounded" />
               <label for="actifModal" class="text-[13px] font-medium text-foreground cursor-pointer">Site actif</label>
+            </div>
+            <div class="col-span-2 flex items-center gap-3">
+              <input id="tiersModal" v-model="form.tiers" type="checkbox" class="w-4 h-4 rounded" />
+              <label for="tiersModal" class="text-[13px] font-medium text-foreground cursor-pointer">Appartient à un tiers</label>
+            </div>
+            <div v-if="form.tiers" :class="[F.field, 'col-span-2']">
+              <label :class="F.fieldLabel">Tiers propriétaire *</label>
+              <input v-model="form.proprietaireTiers" type="text" placeholder="ex. Société de stockage pétrolier" :class="F.fieldInput" />
+              <p v-if="errors.tiers" class="text-danger text-[11px]">{{ errors.tiers }}</p>
             </div>
           </div>
         </FormSection>

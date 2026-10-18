@@ -17,7 +17,7 @@ const auth = useAuthStore()
 const voyageId = ref('')
 const erreur = ref('')
 const optVoyages = computed<DropdownItem[]>(() => voyages.voyages
-  .filter(v => ['planifie', 'confirme', 'pret', 'affecte'].includes(v.statut) && v.vehiculeId && v.chauffeurId)
+  .filter(v => ['planifie', 'confirme', 'pret'].includes(v.statut) && v.vehiculeId && v.chauffeurId)
   .filter(v => !store.autorisations.some(a => a.voyageId === v.id && (!a.decideLe || a.accordee)))
   .map(v => ({ id: v.id, label: `${v.reference} · ${v.vehiculePlaque}`, sublabel: `${v.chauffeurNom ?? ''} · ${v.trajetLibelle ?? `${v.origine} → ${v.destination}`}` })))
 function demander() {

@@ -8,6 +8,7 @@ import FormSection from '../ui/form-field/FormSection.vue'
 import * as cls from '../../lib/formClasses'
 import { useSitesStore } from '../../stores/sites'
 import { useTypesSitesStore } from '../../stores/typesSites'
+import { useClientsStore } from '../../stores/clients'
 import ZoneSiteEditeur from './ZoneSiteEditeur.vue'
 import { CircleCheck, TriangleAlert } from '@lucide/vue'
 import type { SiteReseau, TypeSiteReseau } from '../../types'
@@ -17,6 +18,8 @@ const emit = defineEmits<{ close: [] }>()
 
 const store = useSitesStore()
 const typesSites = useTypesSitesStore()
+const clients = useClientsStore()
+const optClients = computed<DropdownItem[]>(() => [{ id: '', label: 'Aucun' }, ...clients.destinataires().map(c => ({ id: c.id, label: c.nom, sublabel: c.ville }))])
 const erreur = ref(''); const succes = ref('')
 
 const localIndex = ref(props.sites.findIndex(s => s.id === props.siteId))
@@ -36,11 +39,11 @@ function selectSidebar(no: string) {
 
 const isEditMode = ref(false)
 const saving = ref(false)
-const form = ref({ type: '' as TypeSiteReseau | '', nom: '', ville: '', region: '', adresse: '', actif: true, lat: null as number | null, lng: null as number | null, rayonM: null as number | null })
+const form = ref({ type: '' as TypeSiteReseau | '', nom: '', ville: '', region: '', adresse: '', actif: true, lat: null as number | null, lng: null as number | null, rayonM: null as number | null, proprietaireTiers: '', email: '', clientId: '' })
 
 function loadForm() {
   const s = current.value
-  form.value = { type: s.type, nom: s.nom, ville: s.ville, region: s.region ?? '', adresse: s.adresse ?? '', actif: s.actif, lat: s.lat, lng: s.lng, rayonM: s.rayonM ?? null }
+  form.value = { type: s.type, nom: s.nom, ville: s.ville, region: s.region ?? '', adresse: s.adresse ?? '', actif: s.actif, lat: s.lat, lng: s.lng, rayonM: s.rayonM ?? null, proprietaireTiers: s.proprietaireTiers ?? '', email: s.email ?? '', clientId: s.clientId ?? '' }
   erreur.value = ''
 }
 watch(() => current.value, loadForm, { immediate: true })
@@ -49,7 +52,8 @@ const isDirty = computed(() => isEditMode.value && (
   form.value.nom !== current.value.nom || form.value.ville !== current.value.ville ||
   form.value.region !== (current.value.region ?? '') || form.value.actif !== current.value.actif ||
   form.value.type !== current.value.type || form.value.adresse !== (current.value.adresse ?? '') ||
-  form.value.lat !== current.value.lat || form.value.lng !== current.value.lng || form.value.rayonM !== (current.value.rayonM ?? null)
+  form.value.lat !== current.value.lat || form.value.lng !== current.value.lng || form.value.rayonM !== (current.value.rayonM ?? null) ||
+  form.value.proprietaireTiers !== (current.value.proprietaireTiers ?? '') || form.value.email !== (current.value.email ?? '') || form.value.clientId !== (current.value.clientId ?? '')
 ))
 
 function handleCancel() { isEditMode.value = false; loadForm() }
@@ -59,7 +63,7 @@ async function handleSave() {
   const f = form.value
   const r = store.modifier(current.value.id, {
     type: f.type as TypeSiteReseau, nom: f.nom, ville: f.ville, region: f.region || undefined, adresse: f.adresse.trim() || undefined, actif: f.actif,
-    lat: f.lat ?? NaN, lng: f.lng ?? NaN, rayonM: f.rayonM ?? undefined,
+    lat: f.lat ?? NaN, lng: f.lng ?? NaN, rayonM: f.rayonM ?? undefined, proprietaireTiers: f.proprietaireTiers.trim() || undefined, email: f.email.trim() || undefined, clientId: f.clientId || undefined,
   })
   saving.value = false
   if (!r.ok) { erreur.value = r.motif ?? ''; succes.value = ''; return }
@@ -132,6 +136,21 @@ const optType = computed<DropdownItem[]>(() => typesSites.types.filter(t => t.ac
               <label :class="cls.fieldLabel">Adresse</label>
               <input v-if="isEditMode" v-model="form.adresse" :class="cls.fieldInput" />
               <span v-else class="text-[13px] text-foreground">{{ current.adresse ?? '-' }}</span>
+            </div>
+            <div class="col-span-2 flex flex-col gap-1">
+              <label :class="cls.fieldLabel">Adresse e-mail</label>
+              <input v-if="isEditMode" v-model="form.email" type="email" :class="cls.fieldInput" />
+              <span v-else class="text-[13px] text-foreground">{{ current.email ?? '-' }}</span>
+            </div>
+            <div class="col-span-2 flex flex-col gap-1">
+              <label :class="cls.fieldLabel">Client</label>
+              <SearchableDropdown v-if="isEditMode" v-model="form.clientId" :items="optClients" placeholder="Facultatif : site de livraison d'un client" />
+              <span v-else class="text-[13px] text-foreground">{{ current.clientId ? clients.getById(current.clientId)?.nom ?? '-' : '-' }}</span>
+            </div>
+            <div class="col-span-2 flex flex-col gap-1">
+              <label :class="cls.fieldLabel">Appartient à un tiers</label>
+              <input v-if="isEditMode" v-model="form.proprietaireTiers" :class="cls.fieldInput" placeholder="Vide : site de l'entreprise" />
+              <span v-else class="text-[13px] text-foreground">{{ current.proprietaireTiers ?? 'Non, site de l’entreprise' }}</span>
             </div>
             <div class="col-span-2 flex items-center gap-3 pt-1">
               <input v-if="isEditMode" id="actifCard" v-model="form.actif" type="checkbox" class="w-4 h-4 rounded" />

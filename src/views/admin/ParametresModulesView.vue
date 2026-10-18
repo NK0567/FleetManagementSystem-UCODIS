@@ -3,7 +3,7 @@
     <div :class="L.pageHeader">
       <div>
         <div :class="L.pageTitle">Paramètres · Modules</div>
-        <div :class="L.pageSub">Activation des fonctionnalités de la base commune FMS</div>
+        <div :class="L.pageSub">Activation des modules et réglages du transport</div>
       </div>
     </div>
     <ParametresModulesContent />

@@ -30,7 +30,7 @@ function majInd(cle: CleIndicateur, champ: 'code' | 'libelle' | 'cible', ev: Eve
   erreurInd.value = r.ok ? '' : r.motif ?? ''
   if (!r.ok) { const i = indicateurs.get(cle); el.value = String(champ === 'cible' ? (i.cible ?? '') : i[champ]) }
 }
-const unite = (u: string) => u === 'par km' ? `${config.devise()} par km` : u
+const unite = (u: string) => u === 'par km' || u === 'par ordre' ? `${config.devise()} ${u}` : u
 </script>
 
 <template>

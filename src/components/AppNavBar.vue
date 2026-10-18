@@ -80,8 +80,8 @@ const ongletsModules = computed<OngletModule[]>(() => {
   ]
   /* L'agent doit toujours pouvoir revenir à ses confirmations après être
    *  passé sur un autre module. Onglet visible pour ce seul rôle. */
-  if (auth.role === 'charge_clientele') base.unshift({ cle: 'confirmations', libelle: 'Confirmations clients', route: 'confirmations-clients' })
-  /* L'émetteur des demandes de livraison (rôle réglé dans les paramètres de la
+  if (paramsPlanif.estAgentAppels(auth.role)) base.unshift({ cle: 'confirmations', libelle: 'Confirmations clients', route: 'confirmations-clients' })
+  /* L'ordonnateur des demandes de livraison (rôle réglé dans les paramètres de la
    *  planification) retrouve toujours son espace. */
   if (paramsPlanif.peutEmettre(auth.role)) base.unshift({ cle: 'demandes', libelle: 'Demandes de livraison', route: 'demandes-livraison' })
   return base

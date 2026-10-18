@@ -9,11 +9,12 @@ import { useTypesEquipementsStore } from './typesEquipements'
 import { usePersonnelStore } from './personnel'
 import { useVoyagesStore } from './voyages'
 import { useTrajetsStore } from './trajets'
+import { CITERNES_DEMO, EQUIPEMENTS_DEMO } from './donneesCarburant'
 
 export type StatutOperationnel = 'en_mouvement' | 'arrete' | 'allume_immobile' | 'signal_perdu'
 
 /**
- * Parc de démonstration : dix tracteurs, dix semi-remorques et une citerne.
+ * Parc de démonstration : dix tracteurs, dix semi-remorques et quatre citernes.
  * Un seul objet Véhicule porte tous les types, distingués par le champ
  * « type », dont le rôle (motorisé, tracté, compartiments) vient du
  * référentiel paramétrable des types de véhicules.
@@ -79,8 +80,10 @@ function seedVehicules(): Vehicule[] {
     id: 'v-ct-1', immatriculation: 'CT 4201', vin: 'LZGJCT2024000', type: 'citerne', marque: 'Schmitz', modele: 'Citerne 3 compartiments',
     categorie: 'Citerne', carburant: 'Sans objet', chargeMaxKg: 30_000, site: 'Dépôt Tanjombato', statut: 'disponible', kilometrage: 0,
     annee: 2023, dateMiseEnCirculation: '2023-03-01', modeAcquisition: 'achat', coutAcquisitionAr: 96_000_000, valeurResiduelleAr: 80_000_000,
-    compartiments: [{ numero: 1, volumeL: 12_000 }, { numero: 2, volumeL: 10_000 }, { numero: 3, volumeL: 8_000 }],
+    compartiments: [{ numero: 1, volumeL: 12_000 }, { numero: 2, volumeL: 10_000 }, { numero: 3, volumeL: 8_000, produit: 'Essence sans plomb' }],
   })
+  /* Citernes de la livraison de carburant. */
+  CITERNES_DEMO.forEach(c => out.push(JSON.parse(JSON.stringify(c)) as Vehicule))
   return out
 }
 
@@ -107,7 +110,7 @@ export const useVehiculeStore = defineStore('vehicules', () => {
       out.push({ id: `eq-ext-${i + 1}`, vehiculeId: v.id, type: 'extincteur', numeroSerie: `EXT-${5024000 + i}`, etat: 'operationnel', echeance: i === 3 ? '2026-08-31' : i === 6 ? '2026-09-20' : echeance(i) })
       out.push({ id: `eq-kap-${i + 1}`, vehiculeId: v.id, type: 'kit_antipollution', etat: 'operationnel', echeance: echeance(i + 3) })
       return out
-    }),
+    }).concat(EQUIPEMENTS_DEMO.map(e => ({ ...e }))),
   )
 
   const equipementsDe = (vehiculeId: string) => equipements.value.filter(e => e.vehiculeId === vehiculeId)
@@ -184,6 +187,9 @@ export const useVehiculeStore = defineStore('vehicules', () => {
     }
   } catch { /* défaut */ }
   if (!charge) initialiserDemonstration()
+  /* Parc enregistré avant l'ajout des citernes de démonstration : elles le complètent. */
+  CITERNES_DEMO.filter(c => !liste.value.some(v => v.id === c.id)).forEach(c => liste.value.push(JSON.parse(JSON.stringify(c)) as Vehicule))
+  EQUIPEMENTS_DEMO.filter(e => !equipements.value.some(x => x.id === e.id)).forEach(e => equipements.value.push({ ...e }))
   watch([liste, attelages, affectations, equipements], () => {
     try { localStorage.setItem(CLE_PARC, JSON.stringify({ liste: liste.value, attelages: attelages.value, affectations: affectations.value, equipements: equipements.value })) } catch { /* stockage plein */ }
   }, { deep: true })
@@ -248,12 +254,9 @@ export const useVehiculeStore = defineStore('vehicules', () => {
   function creer(saisie: Omit<Vehicule, 'id'>) {
     const id = nouvelId('v-perso', liste.value)
     liste.value.push({ ...saisie, id })
-    /* Un véhicule motorisé ajouté apparaît sur la carte, à l'arrêt sur sa base. */
-    if (typesVeh.estMotorise(saisie.type)) {
-      const base = useSitesStore().sites.find(x => x.nom === saisie.site)
-      const depart = base ? { lat: base.lat, lng: base.lng } : traceDe(id)[0]
-      if (depart) { positions.value[id] = { lat: depart.lat, lng: depart.lng, vitesse: 0, waypoint: 0, progres: 0 }; statutsOp.value[id] = 'arrete' }
-    }
+    /* Un véhicule motorisé ajouté est à l'arrêt ; il n'a pas encore de boîtier,
+     * donc pas de position : elle apparaît dès qu'un boîtier opérationnel lui est déclaré. */
+    if (typesVeh.estMotorise(saisie.type)) statutsOp.value[id] = 'arrete'
     return id
   }
   /** FMS-DB-04 · nouvelle immatriculation, l'ancienne reste dans l'historique avec la date du changement. */
@@ -286,12 +289,14 @@ export const useVehiculeStore = defineStore('vehicules', () => {
     if (def.avecEcheance && !d.echeance) return { ok: false, motif: `${def.libelle} : indiquez son échéance.` }
     if (d.numeroSerie && equipements.value.some(e => e.numeroSerie === d.numeroSerie!.trim() && e.etat !== 'desinstalle')) return { ok: false, motif: 'Ce numéro de série est déjà installé sur un véhicule.' }
     equipements.value.push({ ...d, numeroSerie: d.numeroSerie?.trim() || undefined, id: nouvelId('eq-perso', equipements.value), etat: 'operationnel' })
+    synchroniserPosition(d.vehiculeId)
     return { ok: true }
   }
   function modifierEquipement(id: string, d: Partial<Pick<EquipementEmbarque, 'etat' | 'echeance' | 'numeroSerie'>>): { ok: boolean; motif?: string } {
     const e = equipements.value.find(x => x.id === id); if (!e) return { ok: false, motif: 'Équipement introuvable.' }
     if (typesEq.get(e.type)?.avecEcheance && d.echeance === '') return { ok: false, motif: "Cet équipement doit garder une échéance." }
     Object.assign(e, d)
+    synchroniserPosition(e.vehiculeId)
     return { ok: true }
   }
   const aPompe = (vehiculeId: string) => equipementsDe(vehiculeId).some(e => e.type === 'pompe' && e.etat === 'operationnel')
@@ -362,8 +367,21 @@ export const useVehiculeStore = defineStore('vehicules', () => {
     return trajet ? trajet.etapes.map(e => ({ lat: e.lat, lng: e.lng })) : CORRIDOR_RN2
   }
 
+  /** Seul un véhicule équipé d'un boîtier opérationnel a une position : aucune n'est inventée pour les autres. */
+  /** Boîtier déclaré : le véhicule remonte sa première position, sur sa base ;
+   *  boîtier retiré ou hors service : sa position disparaît. */
+  function synchroniserPosition(id: string) {
+    const v = parId(id)
+    if (!v || !typesVeh.estMotorise(v.type)) return
+    if (!aBoitier(id)) { delete positions.value[id]; return }
+    if (positions.value[id]) return
+    const base = useSitesStore().sites.find(x => x.nom === v.site)
+    const depart = base ? { lat: base.lat, lng: base.lng } : traceDe(id)[0]
+    if (depart) positions.value[id] = { lat: depart.lat, lng: depart.lng, vitesse: 0, waypoint: 0, progres: 0 }
+  }
   function initPositions() {
     tracteurs.value.forEach((t, i) => {
+      if (!aBoitier(t.id)) { statutsOp.value[t.id] = 'arrete'; return }
       const trace = traceDe(t.id)
       /* En voyage, le véhicule reprend après sa dernière étape franchie. */
       const voyage = useVoyagesStore().voyages.find(v => v.vehiculeId === t.id && v.statut === 'en_cours')
@@ -387,6 +405,8 @@ export const useVehiculeStore = defineStore('vehicules', () => {
     const pos = positions.value[id]
     /* Un véhicule devenu indisponible en cours de route s'arrête. */
     const v = parId(id)
+    /* Boîtier retiré ou hors service : plus aucune position remontée. */
+    if (!aBoitier(id)) { delete positions.value[id]; return }
     if (pos && v && !estUtilisable(v) && statut !== 'arrete') { statutsOp.value[id] = 'arrete'; pos.vitesse = 0; return }
     if (!pos || (statut !== 'en_mouvement' && !(statut === 'allume_immobile' && pos.arretRestant))) return
     const sc = SCENARIO[id] ?? {}
@@ -433,6 +453,7 @@ export const useVehiculeStore = defineStore('vehicules', () => {
       signauxBoitier.value = []
       /* Un véhicule parti en mission depuis le chargement se met en route. */
       tracteurs.value.forEach(t => { if (t.statut === 'en_mission' && statutsOp.value[t.id] === 'arrete' && aBoitier(t.id)) statutsOp.value[t.id] = 'en_mouvement' })
+      tracteurs.value.forEach(t => synchroniserPosition(t.id))
       tracteurs.value.forEach((t, i) => avancerVehicule(t.id, i))
       pas.value++
     }, 1500)

@@ -7,10 +7,16 @@ import FormSection from '../ui/form-field/FormSection.vue'
 import ChampLecture from '../maintenance/ChampLecture.vue'
 import SearchableDropdown from '../ui/SearchableDropdown.vue'
 import type { DropdownItem } from '../ui/SearchableDropdown.vue'
-import { usePrestatairesStore } from '../../stores/prestataires'
+import { usePrestatairesStore, TYPE_TRANSPORTEUR } from '../../stores/prestataires'
+import { useTypesVehiculesStore } from '../../stores/typesVehicules'
 import { formatDate } from '../../utils/helpers'
 import { aujourdhuiISO } from '../../utils/horloge'
 import * as F from '../../lib/formClasses'
+import { useVoyagesStore } from '../../stores/voyages'
+import { useAuthStore } from '../../stores/auth'
+import { useParametresPlanificationStore } from '../../stores/parametresPlanification'
+import { STATUTS_VOYAGE, fmtDateHeure } from '../../utils/voyageUtils'
+import { fmtMontant } from '../../lib/monnaie'
 
 const props = defineProps<{ ids: string[]; prestataireId: string }>()
 const emit = defineEmits<{ close: [] }>()
@@ -51,7 +57,51 @@ function ajouterContrat() {
     nouveauContrat.value = { objet: '', debut: aujourdhuiISO(), fin: '', montantAr: undefined }
 }
 const etatContrat = (c: { debut: string; fin?: string }) => c.debut > aujourdhuiISO() ? 'À venir' : c.fin && c.fin < aujourdhuiISO() ? 'Terminé' : 'En cours'
-watch(idCourant, () => { erreur.value = ''; succes.value = ''; enEdition.value = false; motifRetrait.value = '' })
+/* Transporteur externe : ses véhicules et ses conducteurs. */
+const estTransporteur = computed(() => item.value?.type === TYPE_TRANSPORTEUR)
+const typesVeh = useTypesVehiculesStore()
+const nvVehicule = ref({ immatriculation: '', typeVehicule: '', chargeUtileKg: undefined as number | undefined, volumeM3: undefined as number | undefined, pompe: false })
+function ajouterVehicule() {
+  if (!item.value) return
+  const v = nvVehicule.value
+  if (resultat(store.ajouterVehicule(item.value.id, { immatriculation: v.immatriculation, typeVehicule: v.typeVehicule, chargeUtileKg: v.chargeUtileKg || undefined, volumeM3: v.volumeM3 || undefined, pompe: v.pompe || undefined }), 'Véhicule ajouté.'))
+    nvVehicule.value = { immatriculation: '', typeVehicule: '', chargeUtileKg: undefined, volumeM3: undefined, pompe: false }
+}
+const nvConducteur = ref({ nom: '', telephone: '' })
+function ajouterConducteur() {
+  if (item.value && resultat(store.ajouterConducteur(item.value.id, nvConducteur.value), 'Conducteur ajouté.')) nvConducteur.value = { nom: '', telephone: '' }
+}
+/* Factures du transporteur : une facture couvre une ou plusieurs expéditions qui lui ont été confiées,
+   rapprochées de leur statut de livraison et du montant convenu ; l'écart est signalé. */
+const voyagesStore = useVoyagesStore()
+const auth = useAuthStore()
+const paramsPlanif = useParametresPlanificationStore()
+const peutControler = computed(() => !auth.lectureSeule && paramsPlanif.peutPiloter(auth.role))
+const sansTarifPermis = computed(() => paramsPlanif.peutValiderSansTarif(auth.role))
+const expeditions = computed(() => item.value ? voyagesStore.expeditionsDuTransporteur(item.value.id) : [])
+const factures = computed(() => item.value ? voyagesStore.facturesGroupees.filter(f => f.transporteurId === item.value!.id).slice().reverse() : [])
+const LIB_FACTURE = { a_controler: 'À contrôler', validee: 'Validée', refusee: 'Refusée' } as const
+const saisieFacture = ref<{ numero: string; date: string; montant: number | null; voyageIds: string[] } | null>(null)
+/* Une expédition déjà facturée (facture groupée ou propre facture non refusée) ne peut pas être cochée. */
+function dejaFacturee(v: { id: string; factureTransporteur?: { reference: string; statut: string } }): string | null {
+  const g = voyagesStore.factureGroupeeDe(v.id)
+  if (g) return g.numero
+  return v.factureTransporteur && v.factureTransporteur.statut !== 'refusee' ? v.factureTransporteur.reference : null
+}
+const rapprochementSaisie = computed(() => saisieFacture.value ? voyagesStore.rapprochementFacture(saisieFacture.value.voyageIds, saisieFacture.value.montant) : null)
+function ouvrirSaisieFacture() { saisieFacture.value = { numero: '', date: aujourdhuiISO(), montant: null, voyageIds: [] } }
+function enregistrerFacture() {
+  const f = saisieFacture.value
+  if (!f || !item.value) return
+  if (resultat(voyagesStore.saisirFactureGroupee({ transporteurId: item.value.id, numero: f.numero, date: f.date, montantTotal: Number(f.montant), voyageIds: f.voyageIds }), 'Facture enregistrée, à contrôler.'))
+    saisieFacture.value = null
+}
+const motifsRefus = ref<Record<string, string>>({})
+const motifsSansTarif = ref<Record<string, string>>({})
+function validerFacture(id: string) { resultat(voyagesStore.validerFactureGroupee(id, motifsSansTarif.value[id] ?? ''), 'Facture validée.') }
+function refuserFacture(id: string) { if (resultat(voyagesStore.refuserFactureGroupee(id, motifsRefus.value[id] ?? ''), 'Facture refusée.')) motifsRefus.value[id] = '' }
+const ecartTexte = (e: number | null) => e == null ? '' : `${e > 0 ? '+' : ''}${fmtMontant(e)}`
+watch(idCourant, () => { erreur.value = ''; succes.value = ''; enEdition.value = false; motifRetrait.value = ''; saisieFacture.value = null })
 </script>
 
 <template>
@@ -86,6 +136,105 @@ watch(idCourant, () => { erreur.value = ''; succes.value = ''; enEdition.value =
             <ChampLecture libelle="E-mail">{{ item.email ?? '-' }}</ChampLecture>
             <ChampLecture libelle="Origine">{{ item.source === 'import' ? 'Repris par import' : 'Saisi dans le FMS' }}</ChampLecture>
             <ChampLecture libelle="Adresse" large>{{ item.adresse ?? '-' }}</ChampLecture>
+          </div>
+        </FormSection>
+
+        <FormSection v-if="estTransporteur" title="Véhicules" :recaps="[`${item.vehicules?.length ?? 0} véhicule(s)`]" :default-open="true">
+          <div v-if="!item.vehicules?.length" class="text-xs text-muted-foreground mb-2">Aucun véhicule.</div>
+          <div v-for="v in item.vehicules ?? []" :key="v.id" class="flex items-center justify-between gap-2 py-1.5 border-b border-border/60 text-xs">
+            <span class="min-w-0"><span class="font-mono font-semibold mr-1.5">{{ v.immatriculation }}</span>{{ v.typeVehicule ?? '' }}</span>
+            <span class="flex items-center gap-2 shrink-0 text-muted-foreground">
+              <template v-if="v.chargeUtileKg">{{ v.chargeUtileKg.toLocaleString('fr-FR') }} kg</template>
+              <template v-if="v.volumeM3"> · {{ v.volumeM3.toLocaleString('fr-FR') }} m³</template>
+              <template v-if="v.pompe"> · Pompe</template>
+              <button class="text-[11px] text-danger hover:underline bg-transparent border-0 cursor-pointer" @click="resultat(store.retirerVehicule(item.id, v.id), 'Véhicule retiré.')">Retirer</button>
+            </span>
+          </div>
+          <div class="grid grid-cols-[1fr_1fr_1fr_1fr_auto_auto] gap-2 items-end mt-3 max-sm:grid-cols-1">
+            <div :class="F.field"><label :class="F.fieldLabel">Immatriculation *</label><input v-model="nvVehicule.immatriculation" :class="F.fieldInput" /></div>
+            <div :class="F.field"><label :class="F.fieldLabel">Type de véhicule</label><input v-model="nvVehicule.typeVehicule" list="types-vehicules-transporteur" :class="F.fieldInput" />
+              <datalist id="types-vehicules-transporteur"><option v-for="t in typesVeh.types" :key="t.code" :value="t.libelle" /></datalist></div>
+            <div :class="F.field"><label :class="F.fieldLabel">Charge utile (kg)</label><input v-model.number="nvVehicule.chargeUtileKg" type="number" min="0" :class="F.fieldInput" /></div>
+            <div :class="F.field"><label :class="F.fieldLabel">Volume (m³)</label><input v-model.number="nvVehicule.volumeM3" type="number" min="0" :class="F.fieldInput" /></div>
+            <label class="flex items-center gap-1.5 text-[12px] pb-2"><input v-model="nvVehicule.pompe" type="checkbox" class="accent-primary" /> Pompe</label>
+            <button :class="F.btnOutline" @click="ajouterVehicule">Ajouter</button>
+          </div>
+        </FormSection>
+
+        <FormSection v-if="estTransporteur" title="Conducteurs" :recaps="[`${item.conducteurs?.length ?? 0} conducteur(s)`]" :default-open="true">
+          <div v-if="!item.conducteurs?.length" class="text-xs text-muted-foreground mb-2">Aucun conducteur.</div>
+          <div v-for="c in item.conducteurs ?? []" :key="c.id" class="flex items-center justify-between gap-2 py-1.5 border-b border-border/60 text-xs">
+            <span>{{ c.nom }}</span>
+            <span class="flex items-center gap-2 shrink-0 text-muted-foreground">
+              {{ c.telephone ?? '' }}
+              <button class="text-[11px] text-danger hover:underline bg-transparent border-0 cursor-pointer" @click="resultat(store.retirerConducteur(item.id, c.id), 'Conducteur retiré.')">Retirer</button>
+            </span>
+          </div>
+          <div class="grid grid-cols-[2fr_1fr_auto] gap-2 items-end mt-3 max-sm:grid-cols-1">
+            <div :class="F.field"><label :class="F.fieldLabel">Nom *</label><input v-model="nvConducteur.nom" :class="F.fieldInput" /></div>
+            <div :class="F.field"><label :class="F.fieldLabel">Téléphone</label><input v-model="nvConducteur.telephone" :class="F.fieldInput" /></div>
+            <button :class="F.btnOutline" @click="ajouterConducteur">Ajouter</button>
+          </div>
+        </FormSection>
+
+        <FormSection v-if="estTransporteur" title="Factures" :recaps="[`${factures.length} facture(s)`]" :default-open="true">
+          <div v-if="!factures.length && !saisieFacture" class="text-xs text-muted-foreground mb-2">Aucune facture.</div>
+          <div v-for="f in factures" :key="f.id" class="rounded-md border px-3 py-2 mb-2 text-xs" :class="voyagesStore.rapprochementFacture(f.voyageIds, f.montantTotal).horsTolerance && f.statut === 'a_controler' ? 'border-danger/40 bg-danger-bg/40' : 'border-border'" data-facture-transporteur>
+            <template v-for="r in [voyagesStore.rapprochementFacture(f.voyageIds, f.montantTotal)]" :key="f.id + '-r'">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-mono font-semibold">{{ f.numero }}</span>
+                <span class="text-muted-foreground">{{ formatDate(f.date) }}</span>
+                <span>{{ fmtMontant(f.montantTotal) }}</span>
+                <span class="text-[10px] font-medium px-2 py-0.5 rounded-full" :class="f.statut === 'validee' ? 'bg-success-bg text-success' : f.statut === 'refusee' ? 'bg-danger-bg text-danger' : 'bg-warning-bg text-warning'">{{ LIB_FACTURE[f.statut] }}</span>
+              </div>
+              <table class="w-full mt-1.5">
+                <thead><tr class="text-[10px] text-muted-foreground uppercase text-left"><th class="font-semibold py-0.5">Expédition</th><th class="font-semibold">Statut de livraison</th><th class="font-semibold text-right">Montant convenu</th></tr></thead>
+                <tbody>
+                  <tr v-for="l in r.lignes" :key="l.voyage.id" class="border-t border-border/60">
+                    <td class="py-0.5 font-mono">{{ l.voyage.id }}</td>
+                    <td :class="l.terminee ? '' : 'text-warning'">{{ STATUTS_VOYAGE[l.voyage.statut].label }}<template v-if="!l.terminee"> · non terminée</template></td>
+                    <td class="text-right">{{ l.convenu != null ? fmtMontant(l.convenu) : 'Aucune grille tarifaire' }}</td>
+                  </tr>
+                  <tr class="border-t border-border font-semibold"><td class="py-0.5" colspan="2">Total convenu</td><td class="text-right">{{ fmtMontant(r.totalConvenu) }}</td></tr>
+                </tbody>
+              </table>
+              <p v-if="r.ecart" class="mt-1" :class="r.horsTolerance ? 'text-danger' : 'text-muted-foreground'">Écart avec le total convenu : {{ ecartTexte(r.ecart) }}<template v-if="!r.horsTolerance && !r.sansTarif">, dans l'écart toléré</template></p>
+              <p v-if="f.motifValidationSansTarif" class="text-muted-foreground">Validée sans grille tarifaire : {{ f.motifValidationSansTarif }}</p>
+              <p v-if="f.motifRefus" class="text-danger">Refusée : {{ f.motifRefus }}</p>
+              <p v-if="f.decideeLe" class="text-[11px] text-muted-foreground">{{ f.statut === 'validee' ? 'Validée' : 'Refusée' }} le {{ fmtDateHeure(f.decideeLe) }} par {{ f.decideePar }}</p>
+              <div v-if="peutControler && f.statut === 'a_controler'" class="flex items-center gap-2 mt-2 flex-wrap">
+                <input v-if="r.sansTarif && sansTarifPermis" v-model="motifsSansTarif[f.id]" :class="F.fieldInput" class="!h-[30px] !text-[12px] w-full" placeholder="Motif de la validation sans grille tarifaire (obligatoire)…" />
+                <button :class="F.btnPrimary" class="!py-1 !px-2.5 !text-[11px]" @click="validerFacture(f.id)">Valider la facture</button>
+                <input v-model="motifsRefus[f.id]" :class="F.fieldInput" class="!h-[30px] !text-[12px] flex-1 min-w-[200px]" placeholder="Motif du refus…" />
+                <button :class="F.btnOutline" class="!py-1 !px-2.5 !text-[11px] !text-danger" :disabled="!motifsRefus[f.id]?.trim()" @click="refuserFacture(f.id)">Refuser</button>
+              </div>
+            </template>
+          </div>
+          <button v-if="peutControler && !saisieFacture" :class="F.btnOutline" class="mt-1" @click="ouvrirSaisieFacture">Saisir une facture</button>
+          <div v-if="saisieFacture && rapprochementSaisie" class="rounded-md border border-border px-3 py-2 mt-1 text-xs" data-saisie-facture-transporteur>
+            <div class="grid grid-cols-3 gap-2 items-end max-sm:grid-cols-1">
+              <div :class="F.field"><label :class="F.fieldLabel">Numéro *</label><input v-model="saisieFacture.numero" :class="F.fieldInput" /></div>
+              <div :class="F.field"><label :class="F.fieldLabel">Date *</label><input v-model="saisieFacture.date" type="date" :max="aujourdhuiISO()" :class="F.fieldInput" /></div>
+              <div :class="F.field"><label :class="F.fieldLabel">Montant total ({{ $devise() }}) *</label><input v-model.number="saisieFacture.montant" type="number" min="0" :class="F.fieldInput" /></div>
+            </div>
+            <p class="text-[11px] font-semibold text-muted-foreground uppercase mt-3 mb-1">Expéditions couvertes</p>
+            <div v-if="!expeditions.length" class="text-muted-foreground">Aucune expédition confiée à ce transporteur.</div>
+            <label v-for="v in expeditions" :key="v.id" class="flex items-center gap-2 py-1 border-b border-border/60" :class="dejaFacturee(v) ? 'opacity-60' : 'cursor-pointer'">
+              <input v-model="saisieFacture.voyageIds" type="checkbox" :value="v.id" :disabled="!!dejaFacturee(v)" class="accent-primary" />
+              <span class="font-mono">{{ v.id }}</span>
+              <span class="flex-1 min-w-0 truncate">{{ v.clientNom }}</span>
+              <span :class="dejaFacturee(v) || ['livre', 'cloture'].includes(v.statut) || (v.statut === 'annule' && v.etapes.some(e => e.livreParChauffeurLe)) ? '' : 'text-warning'">{{ STATUTS_VOYAGE[v.statut].label }}</span>
+              <span class="w-[130px] text-right">{{ dejaFacturee(v) ? `Facture ${dejaFacturee(v)}` : (voyagesStore.montantAttenduTransporteur(v) ? fmtMontant(voyagesStore.montantAttenduTransporteur(v)!.montant) : 'Aucune grille tarifaire') }}</span>
+            </label>
+            <div v-if="rapprochementSaisie.lignes.length" class="mt-2">
+              <p>Total convenu : <span class="font-semibold">{{ fmtMontant(rapprochementSaisie.totalConvenu) }}</span><template v-if="rapprochementSaisie.sansTarif"> ({{ rapprochementSaisie.sansTarif }} expédition(s) sans grille tarifaire)</template></p>
+              <p v-if="rapprochementSaisie.ecart" :class="rapprochementSaisie.horsTolerance ? 'text-danger' : 'text-muted-foreground'">Écart avec le total convenu : {{ ecartTexte(rapprochementSaisie.ecart) }}<template v-if="!rapprochementSaisie.horsTolerance && !rapprochementSaisie.sansTarif">, dans l'écart toléré</template></p>
+              <p v-if="rapprochementSaisie.nonTerminees" class="text-warning">{{ rapprochementSaisie.nonTerminees }} expédition(s) non terminée(s)</p>
+            </div>
+            <div class="flex justify-end gap-2 mt-3">
+              <button :class="F.btnOutline" @click="saisieFacture = null">Renoncer</button>
+              <button :class="F.btnPrimary" @click="enregistrerFacture">Enregistrer</button>
+            </div>
           </div>
         </FormSection>
 

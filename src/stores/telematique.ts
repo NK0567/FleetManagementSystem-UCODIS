@@ -226,7 +226,7 @@ export const useTelematiqueStore = defineStore('telematique', () => {
   const tracesPassees = computed(() => {
     const acc: Record<string, PointTrace[]> = {}
     voyagesStore.voyages.forEach(v => {
-      if (!v.vehiculeId || !['en_cours', 'livre', 'cloture', 'litige'].includes(v.statut)) return
+      if (!v.vehiculeId || !['en_cours', 'livre', 'cloture'].includes(v.statut)) return
       ;(acc[v.vehiculeId] ??= []).push(...traceDuVoyage(v))
     })
     Object.values(acc).forEach(l => l.sort((a, b) => a.t.localeCompare(b.t)))
@@ -370,7 +370,8 @@ export const useTelematiqueStore = defineStore('telematique', () => {
 
   /* ── Lien voyage ────────────────────────────────────────────────────── */
   const voyageEnCoursDe = (vehiculeId: string) => voyagesStore.voyages.find(v => v.vehiculeId === vehiculeId && v.statut === 'en_cours') ?? null
-  const traceVoyage = (v: Voyage): PointGeo[] => [...v.etapes].sort((a, b) => a.ordre - b.ordre).map(e => ({ lat: e.lat, lng: e.lng }))
+  /** Corridor contrôlé : le plan de trajet de l'ordre quand il en a un, sinon ses étapes. */
+  const traceVoyage = (v: Voyage): PointGeo[] => (v.planTrajet && v.planTrajet.length >= 2 ? [...v.planTrajet] : [...v.etapes]).sort((a, b) => a.ordre - b.ordre).map(e => ({ lat: e.lat, lng: e.lng }))
   /** Étapes à desservir : une ligne annulée ou sortie de la tournée ne se contrôle plus. */
   function etapesControlees(v: Voyage): EtapeControlee[] {
     return v.etapes.filter(e => !e.ligneAnnuleeLe && !horsTournee(e)).map(e => ({ id: e.id, ordre: e.ordre, siteNom: e.siteNom, siteId: e.siteId, lat: e.lat, lng: e.lng, franchi: e.franchi }))
@@ -380,8 +381,9 @@ export const useTelematiqueStore = defineStore('telematique', () => {
   /** Distance au tracé prévu du voyage en cours, en mètres ; null sans voyage. */
   function distanceAuTrace(vehiculeId: string): number | null {
     const v = voyageEnCoursDe(vehiculeId); const pos = vehicules.positions[vehiculeId]
-    if (!v || !pos || v.etapes.length < 2) return null
-    return distanceTraceM(pos, traceVoyage(v))
+    const trace = v ? traceVoyage(v) : []
+    if (!v || !pos || trace.length < 2) return null
+    return distanceTraceM(pos, trace)
   }
   /** Hors zone : en mission, hors du corridor ; sans mission, hors de tout site. */
   function horsZone(vehiculeId: string): boolean {
@@ -546,7 +548,7 @@ export const useTelematiqueStore = defineStore('telematique', () => {
     }
     e.siteId = siteId
 
-    if (voyage && voyage.etapes.length >= 2) {
+    if (voyage && traceVoyage(voyage).length >= 2) {
       /* Sortie du corridor. */
       const reglageSortie = typesEcart.reglage('sortie_trajet')
       const d = distanceTraceM(pos, traceVoyage(voyage))
@@ -677,7 +679,7 @@ export const useTelematiqueStore = defineStore('telematique', () => {
   }
 
   return {
-    types, parametres, typeDe, libelleType, evenements, actifs, getById, duVehicule, duConducteur, defautsOuverts, signauxPerdus, defautOuvertDe,
+    types, parametres, traceVoyage, typeDe, libelleType, evenements, actifs, getById, duVehicule, duConducteur, defautsOuverts, signauxPerdus, defautOuvertDe,
     enregistrer, ouvrirOrdreTravail, acquitter, creerInfraction, penalitesConducteur, trace, voyageEnCoursDe, distanceAuTrace, horsZone, lieuDe,
     journal, ajouterType, majType, reinitialiser, traiterRemontee, traiterSignal,
   }

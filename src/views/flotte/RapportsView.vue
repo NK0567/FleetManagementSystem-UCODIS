@@ -3,7 +3,7 @@
     <div :class="L.pageHeader">
       <div>
         <div :class="L.pageTitle">Rapports</div>
-        <div :class="L.pageSub">Indicateurs calculés à partir des autres écrans · {{ libellePeriode(periode) }}{{ site ? ` · ${site}` : '' }}</div>
+        <div :class="L.pageSub">Indicateurs calculés à partir des autres écrans · {{ libellePeriode(periode) }}{{ perimetreLisible ? ` · ${perimetreLisible}` : '' }}</div>
       </div>
       <BoutonsExport :rapport="rapport" />
     </div>
@@ -19,9 +19,20 @@
       <div class="flex flex-wrap items-end gap-3">
         <div :class="F.field"><label :class="F.fieldLabel">Du</label><input v-model="periode.du" type="date" :max="periode.au" :class="F.fieldInput" class="!w-[160px]" /></div>
         <div :class="F.field"><label :class="F.fieldLabel">Au</label><input v-model="periode.au" type="date" :min="periode.du" :class="F.fieldInput" class="!w-[160px]" /></div>
-        <div :class="F.field"><label :class="F.fieldLabel">Site</label>
+        <div v-if="!transport" :class="F.field"><label :class="F.fieldLabel">Site</label>
           <select v-model="site" :class="F.fieldSelect" class="!w-[200px]"><option value="">Tous les sites</option><option v-for="s in sites" :key="s" :value="s">{{ s }}</option></select>
         </div>
+        <template v-else>
+          <div :class="F.field"><label :class="F.fieldLabel">Dépôt</label>
+            <select v-model="filtresTr.depot" :class="F.fieldSelect" class="!w-[190px]"><option value="">Tous les dépôts</option><option v-for="d in rt.depots" :key="d.id" :value="d.nom">{{ d.nom }}</option></select>
+          </div>
+          <div :class="F.field"><label :class="F.fieldLabel">Région</label>
+            <select v-model="filtresTr.region" :class="F.fieldSelect" class="!w-[170px]"><option value="">Toutes les régions</option><option v-for="r in rt.regions" :key="r" :value="r">{{ r }}</option></select>
+          </div>
+          <div :class="F.field"><label :class="F.fieldLabel">Client</label>
+            <select v-model="filtresTr.client" :class="F.fieldSelect" class="!w-[210px]"><option value="">Tous les clients</option><option v-for="c in rt.clients" :key="c" :value="c">{{ c }}</option></select>
+          </div>
+        </template>
         <template v-if="onglet === 'synthese'">
           <div :class="F.field"><label :class="F.fieldLabel">Comparer avec</label>
             <select v-model="comparaison" :class="F.fieldSelect" class="!w-[210px]">
@@ -37,7 +48,7 @@
             <select v-model="siteB" :class="F.fieldSelect" class="!w-[200px]"><option value="">Tous les sites</option><option v-for="s in sites" :key="s" :value="s">{{ s }}</option></select>
           </div>
         </template>
-        <div v-if="onglet === 'conducteurs'" :class="F.field"><label :class="F.fieldLabel">Performance par</label>
+        <div v-if="onglet === 'conducteurs' || onglet === 'tr_ponctualite'" :class="F.field"><label :class="F.fieldLabel">{{ onglet === 'conducteurs' ? 'Performance par' : 'Ponctualité par' }}</label>
           <select v-model="granularite" :class="F.fieldSelect" class="!w-[140px]"><option value="jour">Jour</option><option value="semaine">Semaine</option></select>
         </div>
       </div>
@@ -92,6 +103,11 @@ import { useDepartsStore } from '../../stores/departs'
 import { useAlertesStore, LIB_CATEGORIE_ALERTE } from '../../stores/alertes'
 import { useScoresConducteursStore } from '../../stores/scoresConducteurs'
 import { useDisponibilitesStore } from '../../stores/disponibilites'
+import { useReportingTransportStore, NOS_MOYENS, estRefusee, estReportee, estPartielle, qualiteDe, cleTemps as cleTempsTr, grouper, moyenne, somme, type FiltresTransport, type LignePonctualite } from '../../stores/reportingTransport'
+import { voyageEnRetard, fmtJourHeure, fmtRetard } from '../../lib/horairesLivraison'
+import { STATUTS_VOYAGE } from '../../utils/voyageUtils'
+import { useControlesTransportStore } from '../../stores/controlesTransport'
+import type { Voyage } from '../../types'
 import type { Rapport, SectionRapport, ValeurRapport } from '../../lib/rapports'
 import * as L from '../../lib/listClasses'
 import * as F from '../../lib/formClasses'
@@ -102,12 +118,16 @@ const config = useConfigurationStore()
 const vehicules = useVehiculeStore()
 const personnel = usePersonnelStore()
 
-type Onglet = 'synthese' | 'carburant' | 'conducteurs' | 'audit'
+type Onglet = 'synthese' | 'carburant' | 'conducteurs' | 'audit' | 'tr_activite' | 'tr_ponctualite' | 'tr_qualite' | 'tr_moyens'
 const ONGLETS: { key: Onglet; label: string }[] = [
   { key: 'synthese', label: 'Synthèse de la direction' },
   { key: 'carburant', label: 'Carburant et pneumatiques' },
   { key: 'conducteurs', label: 'Conducteurs' },
   { key: 'audit', label: 'Audit de conformité' },
+  { key: 'tr_activite', label: 'Transport : activité' },
+  { key: 'tr_ponctualite', label: 'Ponctualité et coûts' },
+  { key: 'tr_qualite', label: 'Qualité de livraison' },
+  { key: 'tr_moyens', label: 'Moyens et transporteurs' },
 ]
 const onglet = ref<Onglet>('synthese')
 const periode = ref<Periode>(periodeParDefaut())
@@ -117,6 +137,14 @@ const periodeB = ref<Periode>(periodePrecedente(periodeParDefaut()))
 const siteB = ref('')
 const granularite = ref<'jour' | 'semaine'>('semaine')
 const sites = computed(() => reporting.sitesDuParc())
+/* Onglets du transport : filtres de dépôt, de région et de client, comme le tableau de la planification. */
+const rt = useReportingTransportStore()
+const transport = computed(() => onglet.value.startsWith('tr_'))
+const filtresTr = ref({ depot: '', region: '', client: '' })
+const ft = (): FiltresTransport => ({ periode: periode.value, ...filtresTr.value })
+const perimetreLisible = computed(() => transport.value
+  ? [filtresTr.value.depot, filtresTr.value.region, filtresTr.value.client].filter(Boolean).join(' · ')
+  : site.value)
 watch(comparaison, c => { if (c === 'periode') periodeB.value = periodePrecedente(periode.value) })
 
 const erreurFiltres = computed(() => {
@@ -133,7 +161,14 @@ const fmtDate = (iso?: string) => iso ? new Date(iso).toLocaleDateString('fr-FR'
 function affiche(v: ValeurRapport) { return v == null || v === '' ? '-' : typeof v === 'number' ? v.toLocaleString('fr-FR') : v }
 /** Écart de la synthèse coloré selon le sens de l'indicateur. */
 let sensLignes: ('haut' | 'bas' | '')[] = []
+/** Indicateurs du transport : la colonne Valeur se colore face à la cible réglée. */
+const clesTr = new Map<string, { col: number; cles: (CleIndicateur | undefined)[] }>()
 function classeCellule(titre: string, i: number, j: number) {
+  const tr = clesTr.get(titre)
+  if (tr) {
+    const cle = tr.cles[i]; const v = sections.value.find(s => s.titre === titre)?.lignes[i]?.[j]
+    return j === tr.col && cle && typeof v === 'number' ? `!${ind.couleur(cle, v)} font-semibold` : ''
+  }
   if (titre !== SECTION_SYNTHESE || j !== 3) return ''
   const v = sections.value[0]?.lignes[i]?.[3]; const sens = sensLignes[i]
   if (typeof v !== 'number' || !v || !sens) return ''
@@ -311,19 +346,154 @@ function sectionsAudit(): SectionRapport[] {
   ]
 }
 
+/* ── Rapports du transport ──────────────────────────────────────── */
+const numOrdre = (v: Voyage) => v.numeroOT || v.reference
+const destinatairesDe = (v: Voyage) => [...new Set(v.etapes.map(e => e.destinataire).filter(Boolean))].join(', ') || v.clientNom
+const vehiculeDe = (v: Voyage) => v.moyen === 'externe' ? v.vehiculeTransporteurPlaque : [v.vehiculePlaque, v.semiRemorquePlaque].filter(Boolean).join(' + ')
+const fmtJour = (iso?: string) => iso ? new Date(`${iso.slice(0, 10)}T00:00:00`).toLocaleDateString('fr-FR') : ''
+const ouiNon = (b: boolean | null) => b == null ? null : b ? 'Oui' : 'Non'
+/** Section d'indicateurs : libellé suivi du code, valeur colorée face à la cible. */
+type LigneInd = { lib: string; cle?: CleIndicateur; valeur: number | null; nombre?: number | null; base?: number | null }
+function sectionIndicateurs(titre: string, lignes: LigneInd[], avecNombres = false): SectionRapport {
+  clesTr.set(titre, { col: avecNombres ? 3 : 1, cles: lignes.map(l => l.cle) })
+  const cible = (cle?: CleIndicateur) => cle ? ind.texteCible(cle) : ''
+  return {
+    titre,
+    colonnes: avecNombres ? ['Indicateur', 'Nombre', 'Sur', 'Valeur', 'Cible'] : ['Indicateur', 'Valeur', 'Cible'],
+    lignes: lignes.map(l => avecNombres ? [l.lib, l.nombre ?? null, l.base ?? null, l.valeur, cible(l.cle)] : [l.lib, l.valeur, cible(l.cle)]),
+  }
+}
+const ligneHeures = (lib: string, l: LignePonctualite[]) => { const h = rt.syntheseHeures(l); return [lib, h.arrivees, h.alHeure, h.enRetard, h.taux] }
+const COLONNES_HEURES = () => ['Livraisons arrivées', "À l'heure", 'En retard', `${ind.libelle('alHeure')} (%)`]
+
+function sectionsActivite(): SectionRapport[] {
+  const a = rt.activite(ft())
+  const controles = useControlesTransportStore()
+  const situation = (v: Voyage) => [voyageEnRetard(v) ? 'Livraison en retard' : '', controles.etatDepassement(v).motif ?? ''].filter(Boolean).join(' ; ')
+  const aSuivre = [...new Set([...a.enRetard, ...a.enAlerte])]
+  return [
+    { titre: "Indicateurs d'activité", colonnes: ['Indicateur', 'Valeur'], lignes: [
+      ['Ordres de transport de la période', a.total],
+      ['Ordres en retard', a.enRetard.length],
+      ['Ordres à la date dépassée', a.enAlerte.length],
+      ["Commandes à livrer en attente d'un ordre", a.commandes.length],
+    ] },
+    { titre: 'Ordres par statut', colonnes: ['Statut', 'Ordres'], lignes: a.parStatut.map(s => [STATUTS_VOYAGE[s.statut].label, s.nb]) },
+    { titre: 'Ordres en retard ou à la date dépassée', colonnes: ['Ordre', 'Statut', 'Destinataires', 'Date prévue', 'Situation'],
+      lignes: aSuivre.map(v => [numOrdre(v), STATUTS_VOYAGE[v.statut].label, destinatairesDe(v), fmtJour(v.datePlanifiee), situation(v)]) },
+    { titre: "Commandes à livrer en attente d'un ordre", colonnes: ['Destinataire', 'Contenu', 'Date souhaitée', 'Poids (kg)', 'Date dépassée'],
+      lignes: a.commandes.map(c => [c.destinataire, c.contenu, fmtJour(c.dateSouhaitee), c.poidsKg || null, controles.estExpiree(c) ? 'Oui' : 'Non']) },
+  ]
+}
+
+function sectionsPonctualite(): SectionRapport[] {
+  const f = ft()
+  const heures = rt.ponctualite(f)
+  const h = rt.syntheseHeures(heures)
+  const couts = rt.couts(f)
+  const complets = couts.filter(c => c.total != null)
+  const jourLocal = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  const parTemps = [...grouper(heures.filter(l => l.alHeure != null), l => cleTempsTr(jourLocal(l.reelle!), granularite.value).cle).entries()].sort((x, y) => x[0].localeCompare(y[0]))
+  return [
+    sectionIndicateurs('Indicateurs de ponctualité et de coût', [
+      { lib: libInd('alHeure', '%'), cle: 'alHeure', valeur: h.taux },
+      { lib: 'Livraisons arrivées comparées à leur heure prévue', valeur: h.arrivees },
+      { lib: 'Livraisons arrivées en retard', valeur: h.enRetard },
+      { lib: 'Retard moyen des livraisons en retard (min)', valeur: h.retardMoyen },
+      { lib: libInd('coutOrdre', dev()), cle: 'coutOrdre', valeur: n(moyenne(complets.map(c => c.total))) },
+      { lib: `Coût des ordres au coût complet (${dev()})`, valeur: n(somme(complets.map(c => c.total))) },
+      { lib: 'Ordres exécutés au coût complet', valeur: complets.length },
+    ]),
+    { titre: `Ponctualité par ${granularite.value}`, colonnes: [granularite.value === 'jour' ? 'Jour' : 'Semaine', ...COLONNES_HEURES()],
+      lignes: parTemps.map(([, l]) => ligneHeures(cleTempsTr(jourLocal(l[0]!.reelle!), granularite.value).lib, l)) },
+    { titre: 'Ponctualité par client', colonnes: ['Client', ...COLONNES_HEURES()],
+      lignes: [...grouper(heures, l => l.etape.destinataire ?? l.etape.siteNom).entries()].sort((x, y) => x[0].localeCompare(y[0], 'fr')).map(([k, l]) => ligneHeures(k, l)) },
+    { titre: 'Ponctualité par transporteur', colonnes: ['Transporteur', ...COLONNES_HEURES()],
+      lignes: [...grouper(heures, l => rt.transporteurDe(l.voyage)).entries()].sort((x, y) => (x[0] === NOS_MOYENS ? -1 : y[0] === NOS_MOYENS ? 1 : x[0].localeCompare(y[0], 'fr'))).map(([k, l]) => ligneHeures(k, l)) },
+    { titre: 'Heure d\'arrivée de chaque livraison', colonnes: ['Ordre', 'Destinataire', 'Transporteur', 'Heure prévue', 'Arrivée réelle', 'Écart', "À l'heure"],
+      lignes: heures.map(l => [numOrdre(l.voyage), l.etape.destinataire ?? l.etape.siteNom, rt.transporteurDe(l.voyage), l.prevue ? fmtJourHeure(l.prevue) : null, l.reelle ? fmtJourHeure(l.reelle) : null, l.ecartMin != null ? fmtRetard(l.ecartMin) : null, ouiNon(l.alHeure)]) },
+    { titre: 'Coût de chaque ordre de transport', colonnes: ['Ordre', 'Transporteur', 'Distance (km)', `Carburant (${dev()})`, `Véhicule (${dev()})`, `Facture du transporteur (${dev()})`, `Coût total (${dev()})`],
+      lignes: couts.map(c => [numOrdre(c.voyage), rt.transporteurDe(c.voyage), c.distance, n(c.carburant), n(c.vehicule), n(c.facture), n(c.total)]) },
+  ]
+}
+
+function sectionsQualite(): SectionRapport[] {
+  const f = ft()
+  const q = rt.qualite(f)
+  const ordres = rt.executes(f)
+  const ordreDe = (id: string) => ordres.find(v => v.etapes.some(e => e.id === id))
+  const evenements = q.lignes.flatMap(e => {
+    const o = ordreDe(e.id); const num = o ? numOrdre(o) : ''; const dest = e.destinataire ?? e.siteNom
+    const l: ValeurRapport[][] = []
+    if (e.receptionContesteeLe) l.push([num, dest, e.contestationTraiteeLe ? 'Contestée, traitée' : 'Contestée, à traiter', e.motifContestation, fmtJour(e.receptionContesteeLe)])
+    if (estRefusee(e)) l.push([num, dest, 'Refusée', e.motifAnnulationLigne, fmtJour(e.ligneAnnuleeLe)])
+    if (estReportee(e)) l.push([num, dest, e.retourEntrepotLe ? 'Reportée, retour au dépôt' : 'Reportée dans la tournée', e.motifRetour ?? e.motifReport, fmtJour(e.retourEntrepotLe ?? e.reporteLe)])
+    if (e.franchi && estPartielle(e)) l.push([num, dest, 'Partielle', (e.eBL?.articlesNonLivres ?? []).map(a => `${a.libelle} (${a.motif})`).join(', '), fmtJour(e.livreParChauffeurLe)])
+    return l
+  })
+  return [
+    sectionIndicateurs('Indicateurs de qualité de livraison', [
+      { lib: libInd('confirmees', '%'), cle: 'confirmees', nombre: q.confirmees, base: q.declarees, valeur: q.tauxConfirmees },
+      { lib: libInd('partielles', '%'), cle: 'partielles', nombre: q.partielles, base: q.declarees, valeur: q.tauxPartielles },
+      { lib: libInd('contestees', '%'), cle: 'contestees', nombre: q.contestees, base: q.declarees, valeur: q.tauxContestees },
+      { lib: libInd('refusees', '%'), cle: 'refusees', nombre: q.refusees, base: q.presentees, valeur: q.tauxRefusees },
+      { lib: libInd('reportees', '%'), cle: 'reportees', nombre: q.reportees, base: q.presentees, valeur: q.tauxReportees },
+      { lib: libInd('retoursDepot', '%'), cle: 'retoursDepot', nombre: q.retours, base: q.presentees, valeur: q.tauxRetours },
+      { lib: libInd('satisfactionDestinataire', 'sur 5'), cle: 'satisfactionDestinataire', nombre: q.reponsesSatisfaction, base: q.confirmees, valeur: q.noteSatisfaction },
+      { lib: libInd('satisfactionOrdonnateur', 'sur 5'), cle: 'satisfactionOrdonnateur', nombre: q.reponsesOrdonnateur, base: null, valeur: q.noteOrdonnateur },
+    ], true),
+    /* Écarts séparés par unité : le carburant en litres à 15 °C, les autres marchandises dans leur unité, jamais additionnés. */
+    { titre: 'Écarts de quantité qualifiés', colonnes: ['Unité', 'Qualification', 'Livraisons', 'Écart cumulé'], lignes: q.ecarts.flatMap(x => [
+      [x.unite, 'Gain', x.gain.nb, x.gain.nb ? x.gain.quantite : null],
+      [x.unite, 'Coulage', x.coulage.nb, x.coulage.nb ? x.coulage.quantite : null],
+      [x.unite, 'À qualifier', x.aQualifier, null],
+    ] as ValeurRapport[][]) },
+    { titre: 'Qualité par client', colonnes: ['Client', 'Livraisons déclarées', `${ind.libelle('confirmees')} (%)`, `${ind.libelle('partielles')} (%)`, `${ind.libelle('contestees')} (%)`, `${ind.libelle('refusees')} (%)`, `${ind.libelle('reportees')} (%)`, `${ind.libelle('satisfactionDestinataire')} (sur 5)`],
+      lignes: [...grouper(q.lignes, e => e.destinataire ?? e.siteNom).entries()].sort((x, y) => x[0].localeCompare(y[0], 'fr')).map(([k, l]) => {
+        const c = qualiteDe(l); return [k, c.declarees, c.tauxConfirmees, c.tauxPartielles, c.tauxContestees, c.tauxRefusees, c.tauxReportees, c.noteSatisfaction]
+      }) },
+    { titre: 'Livraisons contestées, refusées, reportées ou partielles', colonnes: ['Ordre', 'Destinataire', 'Situation', 'Motif', 'Date'], lignes: evenements },
+  ]
+}
+
+function sectionsMoyens(): SectionRapport[] {
+  const f = ft()
+  const m = rt.moyens(f)
+  const tr = rt.transporteurs(f)
+  return [
+    sectionIndicateurs("Indicateurs d'utilisation des moyens", [
+      { lib: libInd('remplissagePoids', '%'), cle: 'remplissagePoids', valeur: moyenne(m.map(x => x.remplissagePoids)) },
+      { lib: libInd('remplissageVolume', '%'), cle: 'remplissageVolume', valeur: moyenne(m.map(x => x.remplissageVolume)) },
+      { lib: libInd('livraisonsParOrdre'), cle: 'livraisonsParOrdre', valeur: moyenne(m.map(x => x.livraisons)) },
+      { lib: libInd('distance', 'km'), cle: 'distance', valeur: somme(m.map(x => x.distance)) },
+      { lib: 'Ordres exécutés', valeur: m.length },
+    ]),
+    { titre: 'Utilisation de chaque ordre de transport', colonnes: ['Ordre', 'Transporteur', 'Véhicule', 'Poids (kg)', 'Charge maximale (kg)', 'Remplissage en poids (%)', 'Volume (m³)', 'Volume utile (m³)', 'Remplissage en volume (%)', 'Livraisons', 'Distance (km)'],
+      lignes: m.map(x => [numOrdre(x.voyage), rt.transporteurDe(x.voyage), vehiculeDe(x.voyage), x.poidsKg, x.capaciteKg, x.remplissagePoids, x.volumeM3, x.capaciteM3, x.remplissageVolume, x.livraisons, x.distance]) },
+    { titre: 'Performance des transporteurs externes', colonnes: ['Transporteur', 'Ordres confiés', `${ind.libelle('alHeure')} (%)`, `${ind.libelle('confirmees')} (%)`, `${ind.libelle('contestees')} (%)`, `${ind.libelle('refusees')} (%)`, 'Factures reçues', 'Factures en écart', 'Factures sans tarif', `${ind.libelle('ecartFactureTarif')} (${dev()})`],
+      lignes: tr.map(t => [t.nom, t.ordres, t.ponctualite, t.confirmees, t.contestees, t.refusees, t.factures, t.facturesEnEcart, t.facturesSansTarif, n(t.ecartMoyen)]) },
+  ]
+}
+
 const sections = computed<SectionRapport[]>(() => {
   if (erreurFiltres.value) return []
+  clesTr.clear()
   switch (onglet.value) {
     case 'synthese': return sectionsSynthese()
     case 'carburant': return sectionsCarburant()
     case 'conducteurs': return sectionsConducteurs()
     case 'audit': return sectionsAudit()
+    case 'tr_activite': return sectionsActivite()
+    case 'tr_ponctualite': return sectionsPonctualite()
+    case 'tr_qualite': return sectionsQualite()
+    case 'tr_moyens': return sectionsMoyens()
   }
   return []
 })
 
 function rapport(): Rapport {
   const titre = onglet.value === 'audit' ? "Rapport d'audit de conformité" : `Rapport · ${ONGLETS.find(t => t.key === onglet.value)!.label}`
-  return { titre, sousTitre: `${libellePeriode(periode.value)} · ${site.value || 'tous les sites'} · édité le ${maintenant().toLocaleDateString('fr-FR')}`, sections: sections.value }
+  const lieu = transport.value ? (perimetreLisible.value || 'tous les dépôts, régions et clients') : (site.value || 'tous les sites')
+  return { titre, periode: libellePeriode(periode.value), sousTitre: `${libellePeriode(periode.value)} · ${lieu} · édité le ${maintenant().toLocaleDateString('fr-FR')}`, sections: sections.value }
 }
 </script>

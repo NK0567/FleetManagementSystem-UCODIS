@@ -61,7 +61,7 @@ const store = useControlesStore()
 const voyages = useVoyagesStore()
 const auth = useAuthStore()
 
-const mesVoyages = computed(() => voyages.voyages.filter(v => v.chauffeurId === auth.user?.personnelId && ['affecte', 'pret', 'en_cours'].includes(v.statut)))
+const mesVoyages = computed(() => voyages.voyages.filter(v => v.chauffeurId === auth.user?.personnelId && ['planifie', 'confirme', 'pret', 'en_cours'].includes(v.statut)))
 const voyageId = ref(mesVoyages.value.find(v => v.statut === 'en_cours')?.id ?? mesVoyages.value[0]?.id ?? '')
 const voyage = computed(() => voyages.voyages.find(v => v.id === voyageId.value))
 const enAttenteDuVoyage = computed(() => store.fileAttente.filter(s => s.voyageId === voyageId.value).length)

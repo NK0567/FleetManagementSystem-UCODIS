@@ -1,4 +1,4 @@
-import type { EtapeVoyage, Voyage } from '../types'
+import type { EtapeVoyage, Voyage, StatutVoyage } from '../types'
 
 /**
  * Écart de poids entre le chargement et la livraison, repris du calcul de
@@ -64,27 +64,45 @@ export function horsTournee(e: { indisponibleLe?: string; chargementNonConformeL
   return !!e.indisponibleLe || !!e.chargementNonConformeLe || !!e.retourEntrepotLe
 }
 
-/** Libellé et couleur de chaque statut de tournée, partagés entre les vues. */
-export const STATUTS_VOYAGE: Record<string, { label: string; cls: string }> = {
+/** Libellé et couleur des huit statuts d'un ordre de transport, partagés entre les vues. */
+export const STATUTS_VOYAGE: Record<StatutVoyage, { label: string; cls: string }> = {
   en_attente: { label: 'En attente', cls: 'bg-warning-bg text-warning' },
   planifie: { label: 'Planifié', cls: 'bg-info-bg text-info' },
   confirme: { label: 'Confirmé', cls: 'bg-info-bg text-info' },
   pret: { label: 'Prêt pour exécution', cls: 'bg-info-bg text-info' },
-  affecte: { label: 'Affecté', cls: 'bg-primary/10 text-primary' },
   en_cours: { label: 'En cours', cls: 'bg-primary/10 text-primary' },
-  livre: { label: 'En attente de clôture', cls: 'bg-success-bg text-success' },
+  livre: { label: 'Terminé, en attente de clôture', cls: 'bg-success-bg text-success' },
   cloture: { label: 'Clôturé', cls: 'bg-neutral-bg text-neutral' },
-  litige: { label: 'En litige', cls: 'bg-danger-bg text-danger' },
   annule: { label: 'Annulé', cls: 'bg-danger-bg text-danger' },
 }
 
+/** Une ligne encore dans la tournée : ni sortie (indisponible, non conforme,
+ *  report demandé sur place), ni annulée ou refusée par le destinataire. */
+export function dansLaTournee(e: { indisponibleLe?: string; chargementNonConformeLe?: string; retourEntrepotLe?: string; ligneAnnuleeLe?: string }) {
+  return !horsTournee(e) && !e.ligneAnnuleeLe
+}
+
+/** Marchandise qui revient de tournée et que l'entrepôt contrôle à son
+ *  retour : report demandé sur place, refus sur place, ou articles non
+ *  livrés d'une livraison partielle. */
+export function retourAControler(e: EtapeVoyage) {
+  return !!e.retourEntrepotLe || !!e.retourAttenduLe || !!e.eBL?.articlesNonLivres?.length
+}
+
 /** Poids et volume réellement transportés par un ordre : la somme de ses
- *  lignes encore dans la tournée. Pour une ligne ancienne sans poids connu,
- *  on retombe sur le poids saisi pour l'ordre entier. */
-export function chargeOrdre(v: { etapes: { poidsKg?: number; volumeM3?: number; indisponibleLe?: string; chargementNonConformeLe?: string; retourEntrepotLe?: string; ligneAnnuleeLe?: string }[]; marchandise: { poidsChargeKg: number } }) {
-  const lignes = v.etapes.filter(e => !horsTournee(e) && !e.ligneAnnuleeLe)
-  const avecPoids = lignes.filter(e => e.poidsKg != null)
-  const poidsKg = avecPoids.length ? avecPoids.reduce((s, e) => s + (e.poidsKg ?? 0), 0) : v.marchandise.poidsChargeKg
+ *  lignes encore dans la tournée, jamais une saisie à la main. */
+export function chargeOrdre(v: { etapes: { poidsKg?: number; volumeM3?: number; indisponibleLe?: string; chargementNonConformeLe?: string; retourEntrepotLe?: string; ligneAnnuleeLe?: string }[] }) {
+  const lignes = v.etapes.filter(dansLaTournee)
+  const poidsKg = lignes.reduce((s, e) => s + (e.poidsKg ?? 0), 0)
   const volumeM3 = lignes.reduce((s, e) => s + (e.volumeM3 ?? 0), 0)
-  return { poidsKg, volumeM3, calculeDesLignes: avecPoids.length > 0 }
+  return { poidsKg, volumeM3 }
+}
+
+/** Sort d'une livraison qui ne sera pas livrée par cette tournée, avec le même libellé partout
+ *  (fiche, espace du conducteur, dossier, page de suivi) : déviée, annulée ou refusée. */
+export function libelleFinLigne(e: { ligneAnnuleeLe?: string; devieeVers?: string; incidentBon?: unknown; annuleeAvantDepart?: boolean }): 'Déviée' | 'Annulée' | 'Refusée' | null {
+  if (!e.ligneAnnuleeLe) return null
+  if (e.devieeVers) return 'Déviée'
+  if (e.incidentBon || e.annuleeAvantDepart) return 'Annulée'
+  return 'Refusée'
 }

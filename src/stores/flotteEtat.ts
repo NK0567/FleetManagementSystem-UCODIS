@@ -96,7 +96,7 @@ export const useFlotteEtatStore = defineStore('flotteEtat', () => {
     const st = useStatutsVehiculesStore().calculer(v)
     const af = veh.affectationActive(v.id); const at = veh.attelageActif(v.id)
     const voyages = vo.voyages.filter(x => x.vehiculeId === v.id)
-    const voyage = voyages.find(x => x.statut === 'en_cours') ?? voyages.filter(x => ['planifie', 'confirme', 'pret', 'affecte'].includes(x.statut)).sort((a, b) => a.datePlanifiee.localeCompare(b.datePlanifiee))[0]
+    const voyage = voyages.find(x => x.statut === 'en_cours') ?? voyages.filter(x => ['planifie', 'confirme', 'pret'].includes(x.statut)).sort((a, b) => a.datePlanifiee.localeCompare(b.datePlanifiee))[0]
     const immobilise = ['en_maintenance', 'immobilise', 'hors_service'].includes(st.statut)
     const pos = veh.positions[v.id]
     const note = notes.value[dateDuJour.value]?.[v.id]

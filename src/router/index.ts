@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { useParametresPlanificationStore } from '../stores/parametresPlanification'
 import LoginView from '../views/LoginView.vue'
 import TableauBordView from '../views/admin/TableauBordView.vue'
 
@@ -23,10 +24,9 @@ const router = createRouter({
     { path: '/chargement/:voyageId', name: 'liste-chargement',
       component: () => import('../views/public/ListeChargementView.vue') },
 
-    /* Page dédiée de l'agent qui appelle les clients : atteinte comme
-       destination de connexion pour ce rôle précis, jamais comme un onglet
-       du module Planification que d'autres rôles verraient. */
-    /* Espace de l'émetteur des demandes de livraison (rôle paramétrable). */
+    /* Espace de l'ordonnateur (rôles réglés dans les paramètres de la
+       planification) et page de l'agent qui appelle les clients : chacun
+       n'est ouvert qu'à son rôle (voir la garde plus bas). */
     { path: '/demandes-livraison', name: 'demandes-livraison',
       component: () => import('../views/planification/DemandesLivraisonView.vue'), meta: dashboard },
     { path: '/confirmations-clients', name: 'confirmations-clients',
@@ -63,11 +63,8 @@ const router = createRouter({
       component: () => import('../views/admin/ParametresModulesView.vue'), meta: dashboard },
 
     /* ══ MODULE PLANIFICATION ════════════════════════════════════
-       Groupe des livraisons du futur TMS, étudié comme référence pour cette
-       intégration : tableau kanban des ordres de transport, de leur création
-       à leur clôture. Adapté à la logique d'UCODIS - des sites desservis sur
-       un trajet plutôt que des lignes de commande et des colis, propres à un
-       entrepôt de dispatching. */
+       Écran unique : tableau des ordres de transport, de leur création à
+       leur clôture. */
     { path: '/planification', name: 'planification-kanban',
       component: () => import('../views/planification/PlanificationView.vue'), meta: dashboard },
 
@@ -171,14 +168,21 @@ const router = createRouter({
   ],
 })
 
+/** Écran d'arrivée de chaque rôle à la connexion. */
+function accueil(): { name: string } {
+  const auth = useAuthStore()
+  if (!auth.cotéGestion) return { name: 'espace-accueil' }
+  if (useParametresPlanificationStore().estAgentAppels(auth.role)) return { name: 'confirmations-clients' }
+  if (useParametresPlanificationStore().peutEmettre(auth.role)) return { name: 'demandes-livraison' }
+  return { name: 'admin-tableau-bord' }
+}
+
 router.beforeEach(to => {
   const auth = useAuthStore()
 
   if (to.meta.requiresAuth && !auth.connecte) return { name: 'login' }
 
-  if (to.name === 'login' && auth.connecte) {
-    return auth.cotéGestion ? { name: auth.role === 'charge_clientele' ? 'confirmations-clients' : auth.role === 'commercial' ? 'demandes-livraison' : 'admin-tableau-bord' } : { name: 'espace-accueil' }
-  }
+  if (to.name === 'login' && auth.connecte) return accueil()
 
   /* Le personnel roulant ne voit que son espace. */
   if (auth.connecte && auth.cotéTerrain) {
@@ -187,9 +191,13 @@ router.beforeEach(to => {
   }
 
   /* À l'inverse, le côté gestion n'a rien à faire dans l'espace terrain. */
-  if (auth.connecte && auth.cotéGestion && String(to.name).startsWith('espace-')) {
-    return { name: 'admin-tableau-bord' }
-  }
+  if (auth.connecte && auth.cotéGestion && String(to.name).startsWith('espace-')) return accueil()
+
+  /* Demandes de livraison : rôles ordonnateurs seulement. */
+  if (auth.connecte && to.name === 'demandes-livraison' && !useParametresPlanificationStore().peutEmettre(auth.role)) return accueil()
+
+  /* Confirmations clients : l'agent qui appelle les clients seulement. */
+  if (auth.connecte && to.name === 'confirmations-clients' && !useParametresPlanificationStore().estAgentAppels(auth.role)) return accueil()
 })
 
 export default router

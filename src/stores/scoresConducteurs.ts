@@ -105,7 +105,7 @@ export const useScoresConducteursStore = defineStore('scoresConducteurs', () => 
     const pieces = docsStore.piecesManquantes(conducteurId).map(c => typesDocs.libelle(c))
     const docsOk = au ? docsStore.enRegleAu(conducteurId, au) : docsStore.enRegle(conducteurId)
     const voyages = voyagesStore.voyages.filter(v => v.chauffeurId === conducteurId && avant(v.dateDepartReel ?? v.datePlanifiee))
-    const voyagesEnLitige = voyages.filter(v => v.statut === 'litige').length
+    const voyagesEnLitige = voyages.filter(v => v.etapes.some(e => e.receptionContesteeLe && !e.contestationTraiteeLe)).length
 
     const pen = (x: number) => Number.isFinite(x) ? Math.max(0, x) : 0
     const tp = telematique.parametres

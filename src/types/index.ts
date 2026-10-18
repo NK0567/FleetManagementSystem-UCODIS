@@ -281,7 +281,7 @@ export interface AffectationVehicule {
  * (fiche de voyage, bon de livraison, carnet de bord) sous une forme
  * activable, comme convenu. */
 
-export type StatutVoyage = 'en_attente' | 'planifie' | 'confirme' | 'pret' | 'affecte' | 'en_cours' | 'livre' | 'cloture' | 'litige' | 'annule'
+export type StatutVoyage = 'en_attente' | 'planifie' | 'confirme' | 'pret' | 'en_cours' | 'livre' | 'cloture' | 'annule'
 export type RoleEtape = 'depart' | 'chargement' | 'repos' | 'controle' | 'livraison' | 'arrivee'
 
 export interface EtapeVoyage {
@@ -390,6 +390,11 @@ export interface EtapeVoyage {
   /** Le planificateur a traité la contestation (enquête, avoir, relivraison...). */
   contestationTraiteeLe?: string
   noteTraitementContestation?: string
+  /** Code du motif de traitement choisi dans la liste réglable. */
+  codeTraitementContestation?: string
+  contestationTraiteePar?: string
+  /** Retour non conforme constaté sur la ligne d'origine, repris sur la ligne replanifiée. */
+  nonConformiteReprise?: string
   /** Historique des notifications automatiques envoyées au destinataire
    *  de cette ligne, simulées puisqu'aucun canal SMS ou e-mail réel
    *  n'est branché dans cette maquette. */
@@ -402,10 +407,6 @@ export interface EtapeVoyage {
   satisfactionEnvoyeeLe?: string
   satisfactionNote?: number
   satisfactionCommentaire?: string
-  /** Adresse e-mail simulée du destinataire, pour montrer clairement à
-   *  qui la notification serait envoyée - aucun envoi réel n'est
-   *  branché dans cette maquette. */
-  emailDestinataire?: string
   /** Canal des notifications pour cette ligne : repris de la commande, ou du
    *  canal préféré du client par défaut. */
   canalNotification?: 'sms' | 'email' | 'sms_email'
@@ -429,9 +430,255 @@ export interface EtapeVoyage {
    *  au planificateur. */
   ligneAnnuleeLe?: string
   motifAnnulationLigne?: string
+  /** Annulation demandée par le client avant le départ, enregistrée par le
+   *  planificateur (et non un refus sur place). */
+  annuleeAvantDepart?: boolean
+  /** Marchandise qui revient à l'entrepôt (refus sur place) : contrôlée à
+   *  son retour comme toute marchandise revenue de tournée. */
+  retourAttenduLe?: string
+  /** Nombre d'unités commandées et chargées (unité de comptage paramétrée). */
+  nombreUnites?: number
+  /** Produit transporté pour cette livraison (référentiel des produits). */
+  produit?: string
+  /** Heure d'arrivée prévue, fixée à la planification. */
+  heurePrevue?: string
+  /** Quantité reçue, saisie à la déclaration de la livraison. */
+  quantiteRecue?: number
+  /** Justification d'une quantité hors tolérance quand le réglage bloque la saisie. */
+  justificationQuantite?: string
+  /** La quantité reçue a été confirmée par le destinataire avec sa réception. */
+  quantiteConfirmeeClientLe?: string
+  ecartQuantite?: EcartQuantite
+  notesProtet?: NoteProtet[]
+  responsabilite?: ResponsabiliteLivraison
+  facturation?: FacturationLivraison
+  /** Carburant : bon de livraison généré à la validation de la tournée. */
+  bonLivraison?: { numero: string; emisLe: string; statut: 'emis' | 'annule' | 'devie' }
+  /** Carburant : volumes dépotés chez le client, compartiment par compartiment. */
+  mesuresDepotees?: MesureCompartiment[]
+  /** Carburant : incident qui a annulé ou dévié ce bon de livraison. */
+  incidentBon?: IncidentBon
+  /** Carburant : livraison déviée vers un autre client, ou reçue d'une déviation. */
+  devieeVers?: string
+  devieeDe?: string
+  /** Carburant : l'écart n'a pas pu être contrôlé (volumes non saisis à l'enlèvement), avec la raison. */
+  ecartNonControle?: string
+  /** Fret : quantité chargée déclarée par l'entrepôt ; elle sert de référence au contrôle d'écart. */
+  quantiteChargee?: number
+  /** Qui a enregistré le refus : le conducteur (ou le planificateur pour un transporteur externe), ou le destinataire lui-même depuis son lien. */
+  refusSaisiPar?: 'conducteur' | 'destinataire'
+  /** Report avec retour décidé parce que le client est absent ou fermé (et non à sa demande). */
+  retourClientAbsent?: boolean
+  /** Carburant : la commande de la ligne sortie de la tournée est remise parmi les commandes à planifier. */
+  commandeRemiseLe?: string
+  /** Erreurs de saisie corrigées sur cette livraison : qui, quand, quoi, et pourquoi. */
+  corrections?: { le: string; par: string; action: string; motif?: string }[]
 }
 
-export type TypeNotificationClient = 'planification' | 'demarrage' | 'livraison'
+/* ── Livraison de carburant (TMS) ─────────────────────────────── */
+
+/** Mesure d'un compartiment : au chargement (BSL) ou au dépotage chez le client. */
+export interface MesureCompartiment {
+  numero: number
+  /** Chaque mesure est facultative à l'enlèvement : seules les mesures saisies sont gardées. */
+  volumeL?: number
+  temperature?: number
+  densite?: number
+  volume15?: number
+  /** Volume à 15 °C calculé avec la méthode réglée (aucune valeur saisie du BSL ou du relevé). */
+  volume15Calcule?: boolean
+  /** Livraison : compartiment non dépoté (0 L), avec son motif. */
+  motifNonDepote?: string
+}
+
+/** Un compartiment d'une citerne dans le plan de chargement d'une tournée de carburant. */
+export interface CompartimentPlan {
+  /** Camion (véhicule motorisé) de la tournée qui porte la citerne. */
+  vehiculeId: string
+  citerneId: string
+  numero: number
+  capaciteL: number
+  produit?: string
+  volumeL?: number
+  commandeId?: string
+  client?: string
+  /** Bon de livraison annulé avant le chargement : ce compartiment n'est pas chargé. */
+  nonCharge?: boolean
+  /** Déviation : commande et client d'origine du compartiment, pour garder le bon d'origine lisible. */
+  commandeOrigineId?: string
+  clientOrigine?: string
+  /** Contrôle du conducteur, compartiment par compartiment. */
+  conformeLe?: string
+  nonConformeLe?: string
+  motifNonConformite?: string
+}
+
+/** Camion d'une tournée de carburant : le véhicule motorisé et sa citerne. */
+export interface CamionTournee { vehiculeId: string; plaque: string; citerneId: string; citernePlaque: string; chauffeurId?: string; chauffeurNom?: string }
+
+/** Opération tracée sur un bon (changement de camion ou de dépôt, transmission, annulation, déviation). */
+export interface OperationBon { le: string; par: string; action: string; motif?: string }
+
+/** Bon d'enlèvement : ce que le dépôt doit charger dans un camion, compartiment par compartiment. */
+export interface BonEnlevement {
+  numero: string
+  statut: 'emis' | 'confirme' | 'annule'
+  emisLe: string
+  transmisLe?: string
+  transmisA?: string
+  /** Données du BSL remis par le dépôt à la sortie du carburant. */
+  bsl?: { numero: string; saisiLe: string; saisiPar: string; parDepot: boolean; mesures: MesureCompartiment[] }
+  historique: OperationBon[]
+}
+
+/** Incident qui annule ou dévie un bon : type d'incident, type de motif et code motif paramétrés. */
+export interface IncidentBon { typeIncident: string; typeMotif: string; codeMotif: string; commentaire?: string; le: string; par: string }
+
+/** Tournée de carburant, portée par l'ordre de transport. */
+export interface TourneeCarburant {
+  /** Référence commune à tous les ordres nés de la même tournée. */
+  reference: string
+  depotId: string
+  depotNom: string
+  dateValidite: string
+  region: string
+  camions: CamionTournee[]
+  commandeIds: string[]
+  plan: CompartimentPlan[]
+  planEnregistreLe?: string
+  /** Tournée à plusieurs camions : rang de ce camion et nombre de camions retenus à la validation. */
+  rangCamion?: number
+  nbCamions?: number
+  valideeLe?: string
+  valideePar?: string
+  bonEnlevement?: BonEnlevement
+}
+
+/** Écart entre la quantité chargée et la quantité reçue, à qualifier. */
+export type QualificationEcart = 'gain' | 'coulage'
+export interface EcartQuantite {
+  quantiteChargee: number
+  quantiteRecue: number
+  /** Reçue moins chargée : positif = gain, négatif = manque. */
+  ecart: number
+  horsTolerance: boolean
+  motif?: string
+  /** Unité de l'écart : « L à 15 °C » ou « L » pour le carburant, l'unité de comptage sinon. */
+  unite?: string
+  detecteLe: string
+  /** Aucune conséquence n'est tirée tant que l'écart n'est pas qualifié. */
+  qualification?: QualificationEcart
+  imputableConducteur?: boolean
+  commentaire?: string
+  qualifieLe?: string
+  qualifiePar?: string
+}
+
+/** Note de protêt : réserve formalisée sur une livraison. */
+export type StatutNoteProtet = 'en_preparation' | 'emise' | 'cloturee'
+export interface NoteProtet {
+  id: string
+  numero: string
+  motif: string
+  quantiteEnCause: number
+  piecesJointes: PieceJointe[]
+  statut: StatutNoteProtet
+  prepareeLe: string
+  prepareePar: string
+  emiseLe?: string
+  clotureeLe?: string
+  issue?: string
+}
+
+/** Établissement de la responsabilité en cas d'insatisfaction, de perte ou de dommage. */
+export type OrigineProbleme = 'depart' | 'transport' | 'commande'
+export type ActeurResponsable = 'ordonnateur' | 'logistique' | 'transporteur_interne' | 'transporteur_externe'
+export type TypeImpactFinancier = 'retenue_transporteur' | 'avoir_client'
+export interface ResponsabiliteLivraison {
+  origine: OrigineProbleme
+  /** Acteur qui porte la plus grande part. */
+  acteur: ActeurResponsable
+  /** Responsabilité partagée : part de chaque acteur, en pourcentage (total 100). */
+  repartition?: { acteur: ActeurResponsable; part: number }[]
+  /** Motif choisi dans la liste réglable, complété du commentaire. */
+  motif?: string
+  commentaire: string
+  impacts: { type: TypeImpactFinancier; montant: number }[]
+  etablieLe: string
+  etabliePar: string
+}
+
+/** Facturation de la prestation faite pour le compte d'un client. */
+export interface FacturationLivraison {
+  statut: 'a_facturer' | 'facturee'
+  /** Client facturé (référentiel des clients). */
+  clientId: string
+  montant: number
+  detail: string
+  reference?: string
+  factureeLe?: string
+  factureePar?: string
+  /** Forfait au trajet : part du forfait de l'expédition portée par cette livraison. */
+  partForfait?: number
+  /** Avoir établi après la facturation, à émettre puis émis. */
+  avoirAEmettre?: { montant: number; depuisLe: string; reference?: string; emisLe?: string; emisPar?: string }
+}
+
+/** Point du plan de trajet prévisionnel, repris d'un trajet de référence. */
+export interface PointPlanTrajet {
+  id: string
+  siteNom: string
+  ordre: number
+  lat: number
+  lng: number
+  role: RoleEtape
+  /** Temps de trajet maximal depuis le point précédent, en minutes. */
+  intervalleMin: number
+  /** Durée d'arrêt maximale, en minutes. */
+  pausePrevueMin?: number
+}
+
+/** Modification de l'itinéraire en cours de voyage : l'ancien trajet reste dans l'historique. */
+export interface ModificationItineraire {
+  le: string
+  par: string
+  motif: string
+  ancienTrajetId?: string
+  ancienLibelle: string
+  ancienPlan: PointPlanTrajet[]
+  nouveauTrajetId?: string
+  nouveauLibelle: string
+}
+
+/** Fiche de débriefing d'un voyage. */
+export interface FicheDebriefing {
+  numeroBon: string
+  dateChargement: string
+  dateDechargement: string
+  lieu: string
+  vehicule: string
+  citerne: string
+  gainOuCoulage: string
+  observations: string
+  enregistreeLe: string
+  enregistreePar: string
+}
+
+/** Facture d'un transporteur externe, contrôlée face au tarif convenu. */
+export interface FactureTransporteur {
+  reference: string
+  montantFacture: number
+  saisieLe: string
+  saisiePar: string
+  statut: 'a_controler' | 'validee' | 'refusee'
+  motifRefus?: string
+  decideeLe?: string
+  decideePar?: string
+  /** Validée sans grille tarifaire applicable, par un rôle habilité : le motif. */
+  motifValidationSansTarif?: string
+}
+
+export type TypeNotificationClient = 'planification' | 'demarrage' | 'livraison' | 'annulation' | 'hors_tournee' | 'date_proposee'
 
 export interface NotificationClient {
   id: string
@@ -439,6 +686,10 @@ export interface NotificationClient {
   canal: 'sms' | 'email'
   envoyeeLe: string
   contenu: string
+  /** Numéro ou adresse e-mail utilisé, repris de la commande ou de la fiche client. */
+  a?: string
+  /** Non envoyée : aucune coordonnée pour ce canal ; le planificateur le voit dans la fiche de l'ordre. */
+  nonEnvoyee?: boolean
 }
 
 /** Un article d'une ligne de livraison : une ligne peut en compter plusieurs,
@@ -463,6 +714,10 @@ export interface BonLivraisonElectronique {
   /** Articles de la ligne qui n'ont pas pu être livrés, avec le motif : la
    *  livraison est alors partielle. */
   articlesNonLivres?: { libelle: string; motif: string }[]
+  /** Quantité reçue déclarée, que la confirmation du client atteste. */
+  quantiteRecue?: number
+  /** Carburant : volumes dépotés, compartiment par compartiment. */
+  volumes?: MesureCompartiment[]
 }
 
 export interface Trajet {
@@ -513,9 +768,20 @@ export interface Commande {
   poidsKg: number
   volumeM3?: number
   dateSouhaitee: string
+  /** Date au-delà de laquelle la commande, non exécutée, est expirée ;
+   *  à défaut, la date souhaitée. Le comportement (alerte ou blocage) se règle. */
+  dateValidite?: string
   /** Canal des notifications pour cette commande ; par défaut celui de la
    *  fiche client, précisable ici (livraison chez un tiers, par exemple). */
   canalNotification?: 'sms' | 'email' | 'sms_email'
+  /** Téléphone et e-mail du destinataire pour cette commande (livraison chez
+   *  un tiers, par exemple) ; à défaut, ceux de la fiche client. */
+  telephoneDestinataire?: string
+  emailDestinataire?: string
+  /** Commande répartie en parts : contenu, nombre d'unités et poids de la commande entière, d'où se recalcule le contenu de chaque part. */
+  contenuInitial?: string
+  unitesInitiales?: number
+  poidsInitial?: number
   /** Nombre d'unités à livrer (cartons, colis, palettes... selon le
    *  paramétrage de l'entreprise). */
   nombreUnites?: number
@@ -528,6 +794,11 @@ export interface Commande {
   emisPar?: string
   emisParRole?: string
   origine?: 'demande' | 'systeme_externe' | 'planificateur'
+  /** Client qui confie ses marchandises à l'entreprise pour cette expédition ;
+   *  vide : marchandises de l'entreprise elle-même. */
+  ordonnateurExterne?: string
+  /** Qui paie le fret : l'ordonnateur ou le destinataire (par défaut, le réglage de la planification). */
+  fretALaCharge?: 'ordonnateur' | 'destinataire'
   /** en_attente : attend un ordre ; affectee : dans un ordre ;
    *  rejetee : renvoyée à l'émetteur avec un motif, modifiable puis
    *  renvoyable ; annulee : retirée par son émetteur. */
@@ -540,6 +811,33 @@ export interface Commande {
   /** Renseigné une fois la commande affectée à un ordre de transport. */
   voyageId?: string
   createdAt: string
+  /** Réponse de l'ordonnateur à l'enquête sur l'exécution de sa demande,
+   *  distincte de celle du destinataire. */
+  enqueteOrdonnateur?: EnqueteOrdonnateur
+  /** Produit transporté (référentiel des produits). */
+  produit?: string
+  /** Carburant : volume commandé en litres, dépôt de chargement, pompe exigée et mode de livraison. */
+  volumeL?: number
+  depotId?: string
+  pompeExigee?: boolean
+  /** Livrée par camion (passe par la planification) ou enlevée directement par le client (n'y passe pas). */
+  modeLivraison?: 'camion' | 'enlevement_client'
+  /** Région du lieu de livraison ; à défaut, celle du site le plus proche. */
+  region?: string
+  /** Commande répartie en plusieurs parts (plusieurs camions) : identifiant de la
+   *  commande d'origine. Chaque part garde la même référence et a sa propre
+   *  livraison ; absent pour une commande entière ou pour la commande d'origine. */
+  partDe?: string
+}
+
+/** Notes de 1 à 5 données par l'ordonnateur une fois l'expédition terminée. */
+export interface EnqueteOrdonnateur {
+  respectOrdre: number
+  delais: number
+  qualite: number
+  commentaire?: string
+  reponduLe: string
+  reponduPar: string
 }
 
 export interface Voyage {
@@ -587,8 +885,31 @@ export interface Voyage {
    *  même date : les lignes replanifiées au même jour s'y ajoutent au lieu de
    *  créer chacune un ordre d'une seule ligne. */
   creeParReplanification?: boolean
+  /** Ordres d'origine des lignes reprises dans cet ordre de replanification. */
+  replanifieDepuis?: string[]
   /** Notifications envoyées au chauffeur affecté (tournée confiée, annulée). */
-  notificationsChauffeur?: { le: string; message: string }[]
+  notificationsChauffeur?: { le: string; message: string; /** Conducteur visé quand ce n'est pas celui de l'ordre (conducteur retiré). */ chauffeurId?: string }[]
+  /** Moyens de l'expédition : nos véhicules, ou un transporteur externe. */
+  moyen?: 'propres' | 'externe'
+  transporteurId?: string
+  transporteurNom?: string
+  vehiculeTransporteurId?: string
+  vehiculeTransporteurPlaque?: string
+  conducteurTransporteurId?: string
+  conducteurTransporteurNom?: string
+  /** Mode de transport (liste paramétrée). */
+  modeTransport?: string
+  /** Plan de trajet prévisionnel repris du trajet de référence rattaché. */
+  planTrajet?: PointPlanTrajet[]
+  historiqueItineraire?: ModificationItineraire[]
+  planifieLe?: string
+  confirmeLe?: string
+  clotureLe?: string
+  codeMotifAnnulation?: string
+  debriefing?: FicheDebriefing
+  factureTransporteur?: FactureTransporteur
+  /** Tournée de carburant : dépôt, validité, région, camions, plan de chargement et bons. */
+  carburant?: TourneeCarburant
 }
 
 /* ── Écarts d'itinéraire (Flotte · Conformité) ────────────────
@@ -725,6 +1046,12 @@ export interface SiteReseau {
   /** Rayon de la zone de géorepérage ; à défaut, le rayon de validation des passages. */
   rayonM?: number
   actif: boolean
+  /** Dépôt ou site qui appartient à un tiers : son nom. Vide, le site est à l'entreprise. */
+  proprietaireTiers?: string
+  /** Adresse e-mail du site (un dépôt y reçoit ses bons d'enlèvement). */
+  email?: string
+  /** Client à qui appartient ce site de livraison (référentiel des clients) ; vide, le site n'est pas celui d'un client. */
+  clientId?: string
 }
 
 /* ── État de flotte, Contrôles, Départs, Assurances (Flotte) ──

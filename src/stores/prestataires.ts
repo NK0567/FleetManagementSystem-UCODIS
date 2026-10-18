@@ -17,10 +17,16 @@ export const TYPES_PRESTATAIRES_DEFAUT: { code: string; libelle: string }[] = [
   { code: 'atelier', libelle: 'Atelier' }, { code: 'fournisseur_pieces', libelle: 'Fournisseur de pièces' },
   { code: 'fournisseur_pneus', libelle: 'Fournisseur de pneus' }, { code: 'fournisseur_carburant', libelle: 'Fournisseur de carburant' },
   { code: 'assureur', libelle: 'Assureur' }, { code: 'constructeur', libelle: 'Constructeur' }, { code: 'banque', libelle: 'Banque' },
+  { code: 'transporteur', libelle: 'Transporteur' },
 ]
 /** Libellés des types, tenus à jour avec le référentiel paramétrable. */
 export const LIB_TYPE_PRESTATAIRE: Record<string, string> = Object.fromEntries(TYPES_PRESTATAIRES_DEFAUT.map(t => [t.code, t.libelle]))
 
+/** Code du type des transporteurs externes, à qui l'on confie des expéditions. */
+export const TYPE_TRANSPORTEUR = 'transporteur'
+/** Véhicule d'un transporteur externe : il n'entre pas dans le parc de l'entreprise. */
+export interface VehiculeTransporteur { id: string; immatriculation: string; typeVehicule?: string; chargeUtileKg?: number; volumeM3?: number; pompe?: boolean }
+export interface ConducteurTransporteur { id: string; nom: string; telephone?: string }
 export interface ContratPrestataire { id: string; objet: string; debut: string; fin?: string; montantAr?: number; document?: PieceJointe }
 export interface Prestataire {
   id: string
@@ -34,6 +40,9 @@ export interface Prestataire {
   autorise: boolean
   motifNonAutorise?: string
   contrats?: ContratPrestataire[]
+  /** Transporteur externe : ses propres véhicules et conducteurs. Ses tarifs se règlent dans les paramètres de la planification. */
+  vehicules?: VehiculeTransporteur[]
+  conducteurs?: ConducteurTransporteur[]
   /** Repris du système de gestion de l'entreprise plutôt que saisi. */
   source?: 'saisie' | 'import'
 }
@@ -56,6 +65,12 @@ const DEFAUT: Prestataire[] = [
   { id: 'PRS-013', nom: 'Filtres & Lubrifiants Océan Indien', type: 'fournisseur_pieces', contact: 'Nirina Ravalison', telephone: '033 98 765 43', autorise: true },
   { id: 'PRS-014', nom: 'Freinage Pro Antananarivo', type: 'fournisseur_pieces', contact: 'Tiana Rakotoson', telephone: '032 55 112 20', autorise: true },
   { id: 'PRS-015', nom: 'Électricité Poids Lourds SARL', type: 'fournisseur_pieces', contact: 'Herimanana Rasolofo', telephone: '034 77 220 10', autorise: true },
+  { id: 'PRS-016', nom: 'Transports Rapides Analamanga', type: 'transporteur', contact: 'Andry Rakotomalala', telephone: '034 60 210 33', email: 'exploitation@tra.mg', adresse: 'Zone industrielle Forello, Tanjombato', autorise: true,
+    vehicules: [{ id: 'VTR-001', immatriculation: '5120 TBB', typeVehicule: 'Porteur', chargeUtileKg: 12_000, volumeM3: 45 }, { id: 'VTR-002', immatriculation: '5121 TBB', typeVehicule: 'Semi-remorque', chargeUtileKg: 25_000, volumeM3: 80 }],
+    conducteurs: [{ id: 'CTR-T-001', nom: 'Solofo Randrianarisoa', telephone: '034 60 210 40' }, { id: 'CTR-T-002', nom: 'Hasina Rabe', telephone: '033 12 450 78' }] },
+  { id: 'PRS-017', nom: 'Citernes du Grand Sud', type: 'transporteur', contact: 'Service affrètement', telephone: '020 22 330 15', adresse: 'Route des Hydrocarbures, Toamasina', autorise: true,
+    vehicules: [{ id: 'VTR-003', immatriculation: '7340 TBE', typeVehicule: 'Citerne', volumeM3: 36, pompe: true }],
+    conducteurs: [{ id: 'CTR-T-003', nom: 'Rado Andriantsoa', telephone: '034 88 101 22' }] },
 ]
 const CLE = 'fms-ucodis-prestataires'
 const CLE_TYPES = 'fms-ucodis-types-prestataires'
@@ -130,5 +145,45 @@ export const usePrestatairesStore = defineStore('prestataires', () => {
     types.value.push({ code, libelle: l })
     return { ok: true }
   }
-  return { prestataires, types, getById, autorisesDeType, ateliersAutorises, creer, modifier, changerAutorisation, ajouterContrat, ajouterType }
+  /** Transporteurs externes autorisés, seuls proposés pour confier une expédition. */
+  const transporteursAutorises = () => autorisesDeType(TYPE_TRANSPORTEUR)
+  const estTransporteur = (id?: string) => getById(id)?.type === TYPE_TRANSPORTEUR
+
+  const idSuivant = (prefixe: string, ids: string[]) => { let n = ids.length + 1; while (ids.includes(`${prefixe}-${String(n).padStart(3, '0')}`)) n++; return `${prefixe}-${String(n).padStart(3, '0')}` }
+  function ajouterVehicule(id: string, v: Omit<VehiculeTransporteur, 'id'>): { ok: boolean; motif?: string } {
+    const p = getById(id); if (!p) return { ok: false, motif: 'Prestataire introuvable.' }
+    if (p.type !== TYPE_TRANSPORTEUR) return { ok: false, motif: 'Seul un transporteur a des véhicules.' }
+    const immat = v.immatriculation.trim().toUpperCase()
+    if (!immat) return { ok: false, motif: "Indiquez l'immatriculation du véhicule." }
+    if (prestataires.value.some(x => x.vehicules?.some(y => y.immatriculation.toUpperCase() === immat))) return { ok: false, motif: 'Ce véhicule est déjà enregistré chez un transporteur.' }
+    if (v.chargeUtileKg != null && (!Number.isFinite(v.chargeUtileKg) || v.chargeUtileKg <= 0)) return { ok: false, motif: 'La charge utile doit être positive.' }
+    if (v.volumeM3 != null && (!Number.isFinite(v.volumeM3) || v.volumeM3 <= 0)) return { ok: false, motif: 'Le volume doit être positif.' }
+    const vid = idSuivant('VTR', prestataires.value.flatMap(x => x.vehicules ?? []).map(x => x.id))
+    ;(p.vehicules ??= []).push({ ...v, id: vid, immatriculation: immat, typeVehicule: v.typeVehicule?.trim() || undefined })
+    return { ok: true }
+  }
+  function retirerVehicule(id: string, vehiculeId: string): { ok: boolean; motif?: string } {
+    const p = getById(id); if (!p?.vehicules?.some(v => v.id === vehiculeId)) return { ok: false, motif: 'Véhicule introuvable.' }
+    p.vehicules = p.vehicules.filter(v => v.id !== vehiculeId)
+    return { ok: true }
+  }
+  function ajouterConducteur(id: string, c: Omit<ConducteurTransporteur, 'id'>): { ok: boolean; motif?: string } {
+    const p = getById(id); if (!p) return { ok: false, motif: 'Prestataire introuvable.' }
+    if (p.type !== TYPE_TRANSPORTEUR) return { ok: false, motif: 'Seul un transporteur a des conducteurs.' }
+    const nom = c.nom.trim()
+    if (!nom) return { ok: false, motif: 'Indiquez le nom du conducteur.' }
+    if (p.conducteurs?.some(x => x.nom.trim().toLowerCase() === nom.toLowerCase())) return { ok: false, motif: 'Ce conducteur est déjà enregistré chez ce transporteur.' }
+    if (c.telephone?.trim() && !/^[+\d][\d\s.-]{5,}$/.test(c.telephone.trim())) return { ok: false, motif: "Le numéro de téléphone n'est pas valide." }
+    const cid = idSuivant('CTR-T', prestataires.value.flatMap(x => x.conducteurs ?? []).map(x => x.id))
+    ;(p.conducteurs ??= []).push({ id: cid, nom, telephone: c.telephone?.trim() || undefined })
+    return { ok: true }
+  }
+  function retirerConducteur(id: string, conducteurId: string): { ok: boolean; motif?: string } {
+    const p = getById(id); if (!p?.conducteurs?.some(c => c.id === conducteurId)) return { ok: false, motif: 'Conducteur introuvable.' }
+    p.conducteurs = p.conducteurs.filter(c => c.id !== conducteurId)
+    return { ok: true }
+  }
+
+  return { prestataires, types, getById, autorisesDeType, ateliersAutorises, transporteursAutorises, estTransporteur, creer, modifier, changerAutorisation, ajouterContrat, ajouterType,
+    ajouterVehicule, retirerVehicule, ajouterConducteur, retirerConducteur }
 })

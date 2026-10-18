@@ -26,7 +26,7 @@ export const LIB_DISPONIBILITE: Record<EtatDisponibilite, { label: string; cls: 
   mission_planifiee: { label: 'Mission planifiée', cls: 'bg-warning-bg text-warning' },
   indisponible: { label: 'Indisponible', cls: 'bg-danger-bg text-danger' },
 }
-const ENGAGE_PLANIFIE = ['planifie', 'confirme', 'pret', 'affecte']
+const ENGAGE_PLANIFIE = ['planifie', 'confirme', 'pret']
 /** Motif d'indisponibilité saisi à la main qui vaut congé. */
 export const MOTIF_CONGE = 'Congé'
 export const estMotifConge = (m: string) => m.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') === 'conge'

@@ -143,13 +143,22 @@ const vehiculesEcartes = computed(() =>
       motif: !vehicules.estUtilisable(t) ? `${vehicules.LIBELLES_STATUT[t.statut].toLowerCase()}${t.motifIndisponibilite ? ` : ${t.motifIndisponibilite}` : ''}` : docsVehicule.manquants(t.id).map(d => d.libelle).join(', ') || 'document non valide',
     })))
 
+/** Un véhicule déjà engagé sur un autre ordre non terminé (lui ou sa semi-remorque attelée) n'est pas proposé. */
 const optVehicules = computed<DropdownItem[]>(() =>
-  vehicules.tracteurs.filter(t => docsVehicule.enRegle(t.id) && vehicules.estUtilisable(t)).map(t => ({ id: t.id, label: t.immatriculation, sublabel: `${t.marque} ${t.modele}` })))
+  vehicules.tracteurs.filter(t => {
+    const sr = vehicules.attelageActif(t.id)?.semiRemorqueId
+    return docsVehicule.enRegle(t.id) && vehicules.estUtilisable(t) && !voyages.vehiculeOccupe(t.id) && !(sr && voyages.remorqueOccupee(sr))
+  }).map(t => ({ id: t.id, label: t.immatriculation, sublabel: `${t.marque} ${t.modele}` })))
 
 const chauffeur = computed(() => {
   if (!form.value.vehiculeId) return null
   const af = vehicules.affectationActive(form.value.vehiculeId)
   return af ? personnel.parId(af.conducteurId)?.nomComplet ?? null : null
+})
+/** Conducteur indisponible (absence approuvée à la date prévue, ou déjà engagé sur un autre ordre) : motif. */
+const chauffeurIndispo = computed(() => {
+  const id = form.value.vehiculeId ? vehicules.affectationActive(form.value.vehiculeId)?.conducteurId : undefined
+  return id ? voyages.chauffeurIndisponible(id, form.value.datePlanifiee || undefined) : null
 })
 const semiRemorque = computed(() => {
   if (!form.value.vehiculeId) return null
@@ -172,6 +181,7 @@ const blocages = computed(() => {
   const out: string[] = []
   if (form.value.vehiculeId && !chauffeur.value) out.push("Ce véhicule n'a aucun conducteur affecté : affectez un conducteur avant de créer le voyage.")
   if (form.value.vehiculeId && !semiRemorque.value) out.push("Ce véhicule n'est attelé à aucune semi-remorque.")
+  if (chauffeur.value && chauffeurIndispo.value) out.push(`${chauffeur.value} n'est pas disponible (${chauffeurIndispo.value}) : affectez un autre conducteur au véhicule.`)
   const pompe = voyages.controlePompe(form.value.vehiculeId || undefined, etapes.value)
   if (!pompe.ok && pompe.motif) out.push(pompe.motif)
   return out
@@ -182,6 +192,10 @@ function enregistrer() {
   if (!form.value.vehiculeId) { erreur.value = 'Choisissez un véhicule.'; return }
   if (!form.value.datePlanifiee) { erreur.value = 'Renseignez la date prévue.'; return }
   if (!chauffeur.value) { erreur.value = 'Ce véhicule doit avoir un conducteur affecté.'; return }
+  if (chauffeurIndispo.value) { erreur.value = `${chauffeur.value} n'est pas disponible (${chauffeurIndispo.value}) : affectez un autre conducteur au véhicule.`; return }
+  /* Même règle que la Planification : le conducteur retenu a ses pièces en règle. */
+  const conducteurId = vehicules.affectationActive(form.value.vehiculeId)?.conducteurId
+  if (conducteurId) { const r = voyages.controleConducteur(conducteurId, form.value.datePlanifiee, undefined, chauffeur.value); if (!r.ok) { erreur.value = r.motif ?? ''; return } }
   if (!etapes.value.length) { erreur.value = 'Ajoutez au moins un site à la séquence.'; return }
 
   const t = form.value.trajetId ? trajets.getById(form.value.trajetId) : null
@@ -193,7 +207,8 @@ function enregistrer() {
   const r = voyages.creerVoyage({
     statut: 'planifie',
     clientNom: form.value.clientNom || (t?.clientNom ?? 'Client non précisé'),
-    toleranceEcartPoidsPourcent: 1,
+    toleranceEcartPoidsPourcent: voyages.tolerancePoids(form.value.clientNom || t?.clientNom, form.value.typeProduit),
+    confirmationRequise: false,
     trajetId: form.value.trajetId || undefined,
     trajetLibelle: t?.libelle,
     origine: tries[0]?.siteNom ?? 'Dépôt Tanjombato',

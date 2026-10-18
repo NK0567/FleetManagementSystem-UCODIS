@@ -36,7 +36,7 @@
     <div :class="L.tableCard" class="mb-4">
       <div :class="L.toolbar">
         <span class="text-sm font-semibold text-foreground flex items-center gap-1.5"><UserCheck class="w-4 h-4 text-primary" /> Affectations actives</span>
-        <button :class="L.btnPrimary" @click="showForm = true"><Plus class="w-4 h-4" /> Nouvelle affectation</button>
+        <button :class="L.btnPrimary" @click="showForm = !showForm"><Plus class="w-4 h-4" /> Nouvelle affectation</button>
       </div>
       <div class="overflow-x-auto">
         <table :class="L.table">
@@ -81,24 +81,42 @@
       </div>
     </div>
 
-    <!-- Nouvelle affectation : fenêtre de création -->
-    <CreateModalShell v-if="showForm" title="Nouvelle affectation" banner-label="Flotte · Affectations" create-label="Affecter" :save-error="alerteBlocage || null" @close="fermerForm" @create="submit">
-      <template #form>
-        <div class="px-8 py-6 max-w-3xl mx-auto">
-          <FormSection title="Affectation">
-            <div class="grid grid-cols-2 gap-x-6 gap-y-4 max-sm:grid-cols-1">
-              <div :class="F.field"><label :class="F.fieldLabel">Conducteur *</label>
-                <SearchableDropdown v-model="form.conducteurId" :items="optConducteurs" placeholder="Sélectionner un conducteur" @update:model-value="verifierBlocage" /></div>
-              <div :class="F.field"><label :class="F.fieldLabel">Tracteur *</label>
-                <SearchableDropdown v-model="form.tracteurId" :items="optTracteurs" placeholder="Sélectionner un tracteur"
-                  @update:model-value="v => { form.tracteurId = v; form.base = vehicules.parId(v)?.site ?? form.base; verifierBlocage(form.conducteurId) }" /></div>
-              <div :class="F.field"><label :class="F.fieldLabel">Base *</label><SearchableDropdown v-model="form.base" :items="optBases" placeholder="Base du tracteur" /></div>
-              <div :class="F.field"><label :class="F.fieldLabel">Date début *</label><input v-model="form.dateDebut" type="date" :class="F.fieldInput" /></div>
-            </div>
-          </FormSection>
+    <!-- Nouvelle affectation : panneau en ligne, pas de popup -->
+    <div v-if="showForm" class="bg-card border border-border rounded-lg overflow-hidden mb-4">
+      <div class="bg-primary text-primary-foreground px-5 py-3">
+        <h2 class="font-semibold text-[15px]">Nouvelle affectation</h2>
+      </div>
+      <div class="p-5">
+        <div v-if="alerteBlocage" class="flex items-start gap-2 p-3 mb-4 bg-danger-bg text-danger rounded-md text-[12px] border border-danger/20">
+          <TriangleAlert class="w-4 h-4 mt-0.5 shrink-0" />
+          <span>{{ alerteBlocage }}</span>
         </div>
-      </template>
-    </CreateModalShell>
+        <div class="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
+          <div>
+            <label :class="L.fpFieldLabel">Conducteur *</label>
+            <SearchableDropdown v-model="form.conducteurId" :items="optConducteurs" placeholder="Sélectionner un conducteur" compact
+                                 @update:model-value="verifierBlocage" />
+          </div>
+          <div>
+            <label :class="L.fpFieldLabel">Tracteur *</label>
+            <SearchableDropdown v-model="form.tracteurId" :items="optTracteurs" placeholder="Sélectionner un tracteur" compact
+                                 @update:model-value="v => { form.tracteurId = v; form.base = vehicules.parId(v)?.site ?? form.base; verifierBlocage(form.conducteurId) }" />
+          </div>
+          <div>
+            <label :class="L.fpFieldLabel">Base *</label>
+            <SearchableDropdown v-model="form.base" :items="optBases" placeholder="Base du tracteur" compact />
+          </div>
+          <div>
+            <label :class="L.fpFieldLabel">Date début *</label>
+            <input v-model="form.dateDebut" type="date" :class="L.fpSelect" class="!h-9 w-full" />
+          </div>
+        </div>
+        <div class="flex gap-3 mt-4 justify-end">
+          <button :class="L.btnOutline" @click="showForm = false">Annuler</button>
+          <button :class="L.btnPrimary" :disabled="!canSubmit || !!alerteBlocage" @click="submit">Affecter</button>
+        </div>
+      </div>
+    </div>
 
     <!-- Historique -->
     <div :class="L.tableCard">
@@ -160,8 +178,6 @@
 import { ref, computed } from 'vue'
 import { Check, CircleAlert, History, Plus, TriangleAlert, Truck, UserCheck } from '@lucide/vue'
 import ModalShell from '../../components/ui/ModalShell.vue'
-import CreateModalShell from '../../components/shared/CreateModalShell.vue'
-import FormSection from '../../components/ui/form-field/FormSection.vue'
 import SearchableDropdown from '../../components/ui/SearchableDropdown.vue'
 import type { DropdownItem } from '../../components/ui/SearchableDropdown.vue'
 import UserAvatar from '../../components/ui/UserAvatar.vue'
@@ -202,7 +218,7 @@ function duree(debut: string, fin?: string) {
   return `${j} j`
 }
 
-/* ── Nouvelle affectation : fenêtre de création ──────────────── */
+/* ── Nouvelle affectation : panneau en ligne ─────────────────── */
 const showForm = ref(false)
 const form = ref({ conducteurId: '', tracteurId: '', dateDebut: aujourdhuiISO(), base: '' })
 const alerteBlocage = ref('')
@@ -232,18 +248,14 @@ function verifierBlocage(conducteurId: string) {
 
 const canSubmit = computed(() => !!form.value.conducteurId && !!form.value.tracteurId && !!form.value.dateDebut && !!form.value.base)
 
-function fermerForm() {
-  form.value = { conducteurId: '', tracteurId: '', dateDebut: aujourdhuiISO(), base: '' }
-  alerteBlocage.value = ''
-  showForm.value = false
-}
 function submit() {
-  if (!canSubmit.value) { alerteBlocage.value = 'Choisissez le conducteur, le tracteur, la base et la date de début.'; return }
+  if (!canSubmit.value) return
   verifierBlocage(form.value.conducteurId)
   if (alerteBlocage.value) return
   const r = vehicules.affecterConducteur(form.value.tracteurId, form.value.conducteurId, form.value.dateDebut, form.value.base)
   if (!r.ok) { alerteBlocage.value = `Affectation refusée : ${r.motif}`; return }
-  fermerForm()
+  form.value = { conducteurId: '', tracteurId: '', dateDebut: aujourdhuiISO(), base: '' }
+  showForm.value = false
 }
 
 /* ── Terminer ─────────────────────────────────────────────────── */

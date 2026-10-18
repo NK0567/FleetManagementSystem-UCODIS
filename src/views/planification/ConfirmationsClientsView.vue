@@ -2,7 +2,6 @@
   <div class="h-full overflow-y-auto">
     <div class="w-full max-w-4xl mx-auto px-6 py-6 max-[640px]:px-4">
       <div :class="L.pageTitle">Confirmations clients</div>
-      <div :class="L.pageSub">J'appelle les destinataires qui n'ont pas encore répondu depuis leur lien de suivi, et j'enregistre leur réponse.</div>
 
       <!-- Compteurs -->
       <div class="grid grid-cols-3 gap-3 mt-5 max-[640px]:grid-cols-1">
@@ -31,13 +30,18 @@
           <div class="flex-1 min-w-[200px]">
             <p class="text-[13px] font-medium text-foreground break-words">{{ l.etape.destinataire }}</p>
             <p class="text-[11px] text-muted-foreground break-words">{{ l.etape.adresseLivraison }}</p>
+            <p class="text-[12px] mt-0.5" data-telephone>
+              <a v-if="store.coordonneesDe(l.etape).telephone" :href="`tel:${store.coordonneesDe(l.etape).telephone}`" class="font-mono text-primary no-underline hover:underline">{{ store.coordonneesDe(l.etape).telephone }}</a>
+              <span v-else class="text-warning">Téléphone non renseigné</span>
+            </p>
           </div>
           <div class="text-right shrink-0">
             <p class="text-[11px] font-mono text-foreground">{{ l.voyage.numeroOT || l.voyage.reference }}</p>
-            <p class="text-[11px] text-muted-foreground">livraison prévue le {{ fmtJour(l.voyage.datePlanifiee) }}</p>
+            <p class="text-[11px] text-muted-foreground">livraison prévue le {{ store.jourLivraison(l.voyage, l.etape) }}</p>
           </div>
         </div>
 
+        <p v-if="erreurId === l.etape.id && erreur" class="text-[12px] text-danger mt-2 pl-[26px]">{{ erreur }}</p>
         <div v-if="ouvert !== l.etape.id" class="flex items-center gap-3 mt-3 pl-[26px] flex-wrap">
           <button :class="cls.btnPrimary" class="!py-1 !px-2.5 !text-[11px]" @click="confirmer(l)">Il confirme être disponible</button>
           <button class="text-[11px] text-muted-foreground underline bg-transparent border-0 cursor-pointer p-0" @click="ouvrir(l.etape.id)">Il n'est pas disponible</button>
@@ -90,7 +94,7 @@
 import { computed, ref } from 'vue'
 import { AlertTriangle, CheckCircle2, Phone } from '@lucide/vue'
 import { useVoyagesStore } from '../../stores/voyages'
-import { STATUTS_VOYAGE } from '../../utils/voyageUtils'
+import { STATUTS_VOYAGE, dansLaTournee } from '../../utils/voyageUtils'
 import * as L from '../../lib/listClasses'
 import * as cls from '../../lib/formClasses'
 import type { EtapeVoyage, Voyage } from '../../types'
@@ -98,10 +102,11 @@ import type { EtapeVoyage, Voyage } from '../../types'
 const store = useVoyagesStore()
 function fmtJour(iso?: string) { return iso ? new Date(iso).toLocaleDateString('fr-FR') : '' }
 
-/** À appeler : seules les tournées encore en Planifié posent la question. */
+/** À appeler : seules les tournées encore en Planifié posent la question, et
+ *  seulement pour les livraisons encore dans la tournée (pas une ligne annulée). */
 const aAppeler = computed(() => store.planifies
   .filter(v => v.confirmationRequise !== false)
-  .flatMap(v => v.etapes.filter(e => e.destinataire && !e.confirmeLe && !e.indisponibleLe).map(etape => ({ voyage: v, etape }))))
+  .flatMap(v => v.etapes.filter(e => e.destinataire && dansLaTournee(e) && !e.confirmeLe && !e.indisponibleLe).map(etape => ({ voyage: v, etape }))))
 
 /** Déjà répondu : historique conservé quel que soit le statut actuel de la
  *  tournée (sauf clôturée ou annulée), pour ne pas se vider au moment où
@@ -113,7 +118,14 @@ const dejaRepondu = computed(() => store.voyages
 
 function confirmer(l: { voyage: Voyage; etape: EtapeVoyage }) {
   const res = store.confirmerClient(l.voyage.id, l.etape.id, true)
-  if (!res.ok) alert(res.motif)
+  montrer(l.etape.id, res)
+}
+/** Motif d'un refus, affiché sous la ligne concernée. */
+const erreur = ref('')
+const erreurId = ref<string | null>(null)
+function montrer(id: string, res: { ok: boolean; motif?: string }) {
+  erreurId.value = res.ok ? null : id
+  erreur.value = res.ok ? '' : (res.motif ?? '')
 }
 
 const ouvert = ref<string | null>(null)
@@ -124,7 +136,8 @@ function fermer() { ouvert.value = null; motif.value = ''; date.value = '' }
 function declarerIndispo(l: { voyage: Voyage; etape: EtapeVoyage }) {
   if (!motif.value.trim()) return
   const res = store.declarerIndisponible(l.voyage.id, l.etape.id, motif.value.trim(), date.value || undefined, true)
-  if (!res.ok) { alert(res.motif); return }
+  montrer(l.etape.id, res)
+  if (!res.ok) return
   fermer()
 }
 </script>

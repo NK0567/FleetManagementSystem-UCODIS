@@ -86,6 +86,7 @@ import {
 } from '@lucide/vue'
 import logo from '../assets/logo-ucodis.png'
 import { useAuthStore } from '../stores/auth'
+import { useParametresPlanificationStore } from '../stores/parametresPlanification'
 import type { RoleUtilisateur } from '../types'
 
 const router = useRouter()
@@ -109,8 +110,8 @@ const ROLES: Role[] = [
   { valeur: 'admin', icone: ShieldCheck, libelle: 'Administrateur', detail: 'Accès complet', code: 'ADM001' },
   { valeur: 'responsable_flotte', icone: Truck, libelle: 'Responsable flotte', detail: 'Personnel + Flotte', code: 'FLT001' },
   { valeur: 'maintenancier', icone: Wrench, libelle: 'Maintenancier', detail: 'Flotte : lecture', code: 'MNT001' },
-  { valeur: 'charge_clientele', icone: Headset, libelle: 'Chargé clientèle', detail: 'Confirmations clients', code: 'CLI001' },
-  { valeur: 'commercial', icone: Briefcase, libelle: 'Commercial', detail: 'Demandes de livraison', code: 'COM001' },
+  { valeur: 'charge_clientele', icone: Headset, libelle: 'Chargé de clientèle', detail: 'Confirmations clients', code: 'CLI001' },
+  { valeur: 'commercial', icone: Briefcase, libelle: 'Équipe commerciale', detail: 'Demandes de livraison', code: 'COM001' },
   { valeur: 'depot', icone: Warehouse, libelle: 'Équipe dépôt', detail: 'Consultation', code: 'DEP001' },
   { valeur: 'direction', icone: ChartNoAxesColumn, libelle: 'Direction', detail: 'Lecture seule', code: 'DIR001' },
   { valeur: 'conducteur', icone: IdCard, libelle: 'Conducteur', detail: 'Espace personnel', code: 'CND001' },
@@ -129,6 +130,9 @@ function connexion() {
   }
   erreur.value = ''
   auth.login(roleChoisi.value)
-  router.push(auth.cotéGestion ? { name: auth.role === 'charge_clientele' ? 'confirmations-clients' : auth.role === 'commercial' ? 'demandes-livraison' : 'admin-tableau-bord' } : { name: 'espace-accueil' })
+  /* Écran d'arrivée : l'ordonnateur (rôles réglés dans les paramètres de la
+   * planification) arrive sur ses demandes de livraison. */
+  const ordonnateur = useParametresPlanificationStore().peutEmettre(auth.role)
+  router.push(auth.cotéGestion ? { name: useParametresPlanificationStore().estAgentAppels(auth.role) ? 'confirmations-clients' : ordonnateur ? 'demandes-livraison' : 'admin-tableau-bord' } : { name: 'espace-accueil' })
 }
 </script>

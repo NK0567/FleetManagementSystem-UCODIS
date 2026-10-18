@@ -145,10 +145,11 @@
         <Transition name="slide-left">
           <div v-if="voyageDuVehicule && !ficheVoyageId && !historiqueOuvert"
                class="absolute top-3 left-3 z-[600] w-[300px] max-h-[calc(100%-24px)] overflow-y-auto bg-card border border-border rounded-xl shadow-lg">
-            <div class="px-3.5 py-2.5 border-b border-border">
+            <div class="px-3.5 py-2.5 border-b border-border" data-ordre-en-cours>
               <div class="flex items-center gap-1.5">
                 <Route class="w-3.5 h-3.5 text-primary shrink-0" />
-                <span class="font-mono text-[12px] font-semibold text-foreground">{{ voyageDuVehicule.reference }}</span>
+                <span class="font-mono text-[12px] font-semibold text-foreground">{{ voyageDuVehicule.numeroOT || voyageDuVehicule.reference }}</span>
+                <span class="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full" :class="STATUTS_VOYAGE[voyageDuVehicule.statut].cls">{{ STATUTS_VOYAGE[voyageDuVehicule.statut].label }}</span>
               </div>
               <p class="text-[11px] text-muted-foreground truncate mt-0.5">{{ voyageDuVehicule.trajetLibelle ?? 'Trajet ponctuel' }}</p>
             </div>
@@ -161,25 +162,27 @@
                 <div><dt class="text-muted-foreground text-[10px]">Semi-remorque</dt><dd class="font-mono text-foreground">{{ voyageDuVehicule.semiRemorquePlaque ?? '-' }}</dd></div>
               </dl>
 
-              <div v-if="voyageDuVehicule.etapes.length">
+              <div v-if="pointsVoyage.length">
                 <p class="text-[11px] font-semibold text-foreground mb-1.5">
                   Points de passage
-                  <span class="font-normal text-muted-foreground">({{ voyageDuVehicule.etapes.filter(e => e.franchi).length }}/{{ voyageDuVehicule.etapes.length }})</span>
+                  <span class="font-normal text-muted-foreground">({{ pointsVoyage.filter(x => x.e.franchi).length }}/{{ pointsVoyage.length }})</span>
                 </p>
-                <ol class="relative pl-4 border-l-2 border-border flex flex-col gap-2">
-                  <li v-for="e in voyageDuVehicule.etapes" :key="e.id" class="relative">
-                    <span class="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full border-2 border-card" :class="e.franchi ? 'bg-success' : 'bg-border'"></span>
-                    <p class="text-[11px] font-medium text-foreground leading-tight">{{ e.siteNom }}</p>
+                <ol class="relative pl-4 border-l-2 border-border flex flex-col gap-2" data-points-passage>
+                  <li v-for="x in pointsVoyage" :key="x.e.id" class="relative">
+                    <span class="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full border-2 border-card" :class="x.e.franchi ? 'bg-success' : 'bg-border'"></span>
+                    <p class="text-[11px] font-medium text-foreground leading-tight">{{ x.e.destinataire ?? x.e.siteNom }}</p>
                     <p class="text-[10px] text-muted-foreground">
-                      {{ LIB_ROLE_ETAPE[e.role] }}<span v-if="e.pausePrevueMin"> · +{{ e.pausePrevueMin }} min</span>
+                      {{ LIB_ROLE_ETAPE[x.e.role] }}<span v-if="x.heure"> · {{ x.heure }}</span>
+                      <span v-if="x.retard" :class="x.enRetard ? 'text-danger font-medium' : 'text-success'"> · {{ x.retard }}</span>
                     </p>
                   </li>
                 </ol>
+                <p v-if="positionInconnue(voyageDuVehicule)" class="text-[10px] text-warning mt-1.5">Position inconnue : heures estimées depuis le dernier point réglé</p>
               </div>
 
               <button class="w-full py-1.5 rounded-lg text-[12px] font-semibold bg-primary/10 text-primary hover:bg-primary/20 transition-colors border-0 cursor-pointer"
                       @click="ficheVoyageId = voyageDuVehicule.id">
-                Ouvrir le dossier de voyage
+                Dossier complet
               </button>
             </div>
           </div>
@@ -285,7 +288,8 @@ import { useAlertesStore } from '../../stores/alertes'
 import { useSitesStore } from '../../stores/sites'
 import { useTypesSitesStore } from '../../stores/typesSites'
 import { useConfigurationStore } from '../../stores/configuration'
-import { fmtDateHeure } from '../../utils/voyageUtils'
+import { fmtDateHeure, dansLaTournee, STATUTS_VOYAGE } from '../../utils/voyageUtils'
+import { heureEstimee, retardMinutes, estEnRetard, positionInconnue, fmtHeure, fmtArrivee, fmtRetard } from '../../lib/horairesLivraison'
 import * as L from '../../lib/listClasses'
 import { useVehiculeStore } from '../../stores/vehicules'
 import { usePersonnelStore } from '../../stores/personnel'
@@ -353,11 +357,18 @@ function aAlerte(vehiculeId: string) { return alertes.enCoursDuVehicule(vehicule
 
 const vehiculeSelectionne = computed(() => (selectionId.value ? vehicules.parId(selectionId.value) : null))
 
-/** Le voyage en cours (ou le plus récent à défaut) pour le véhicule sélectionné. */
-const voyageDuVehicule = computed(() => {
-  if (!selectionId.value) return null
-  const tousDuVehicule = voyages.voyages.filter(v => v.vehiculeId === selectionId.value)
-  return tousDuVehicule.find(v => v.statut === 'en_cours') ?? tousDuVehicule[0] ?? null
+/** L'ordre en cours du véhicule sélectionné, et lui seul. */
+const voyageDuVehicule = computed(() => selectionId.value ? telematique.voyageEnCoursDe(selectionId.value) : null)
+/** Points de l'ordre par rang, sans les lignes sorties de la tournée, avec l'heure (réelle ou estimée) et le retard. */
+const pointsVoyage = computed(() => {
+  const v = voyageDuVehicule.value
+  if (!v) return []
+  return [...v.etapes].filter(dansLaTournee).sort((a, b) => a.ordre - b.ordre).map(e => {
+    const estimee = heureEstimee(v, e)
+    const r = e.role === 'livraison' ? retardMinutes(v, e) : null
+    const heure = e.arriveeLe ? `arrivé à ${fmtHeure(new Date(e.arriveeLe))}` : e.franchi ? '' : estimee ? `arrivée estimée ${fmtArrivee(estimee)}` : ''
+    return { e, heure, retard: r != null && r !== 0 ? fmtRetard(r) : '', enRetard: e.role === 'livraison' && estEnRetard(v, e) }
+  })
 })
 
 const marqueurs = computed(() => tracteursFiltres.value.map(t => {

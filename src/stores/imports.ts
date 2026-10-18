@@ -9,7 +9,7 @@ import type { ChampImport } from '../components/ui/ImportCsvModal.vue'
  * chaque champ l'intitulé de colonne de son fichier source ; à l'import, la
  * colonne qui porte cet intitulé est reconnue sans manipulation.
  */
-export type ImportId = 'vehicules' | 'personnes' | 'pleins' | 'maintenance'
+export type ImportId = 'vehicules' | 'personnes' | 'pleins' | 'maintenance' | 'commandes'
 
 export const IMPORTS: Record<ImportId, { libelle: string; ecran: string; champs: ChampImport[] }> = {
   vehicules: {
@@ -61,6 +61,26 @@ export const IMPORTS: Record<ImportId, { libelle: string; ecran: string; champs:
       { cle: 'sousSysteme', libelle: 'Sous-système', requis: false },
     ],
   },
+  commandes: {
+    libelle: 'Commandes à livrer', ecran: 'Planification, Commandes à livrer',
+    champs: [
+      { cle: 'referenceExterne', libelle: 'Référence de commande', requis: false },
+      { cle: 'destinataire', libelle: 'Destinataire', requis: true, autres: ['Client'] },
+      { cle: 'site', libelle: 'Site destinataire (transfert)', requis: false },
+      { cle: 'adresse', libelle: 'Adresse de livraison', requis: true },
+      { cle: 'dateSouhaitee', libelle: 'Date souhaitée (AAAA-MM-JJ)', requis: true },
+      { cle: 'contenu', libelle: 'Contenu', requis: true },
+      { cle: 'nombreUnites', libelle: "Nombre d'unités", requis: false },
+      { cle: 'poidsKg', libelle: 'Poids (kg)', requis: true },
+      { cle: 'volumeM3', libelle: 'Volume (m³)', requis: false },
+      { cle: 'ordonnateur', libelle: 'Client qui confie les marchandises', requis: false },
+      { cle: 'fretALaCharge', libelle: 'Fret à la charge de (ordonnateur ou destinataire)', requis: false, autres: ['Fret à la charge de'] },
+      { cle: 'canal', libelle: 'Notifications (SMS, e-mail, les deux)', requis: false },
+      { cle: 'telephone', libelle: 'Téléphone du destinataire', requis: false },
+      { cle: 'email', libelle: 'E-mail du destinataire', requis: false },
+      { cle: 'commentaire', libelle: 'Commentaire', requis: false },
+    ],
+  },
 }
 
 const CLE = 'fms-ucodis-correspondances-import'
@@ -68,7 +88,7 @@ export const normaliserIntitule = (s: string) => s.trim().toLowerCase().normaliz
 
 export const useImportsStore = defineStore('imports', () => {
   /** Intitulé de la colonne source, par import et par champ. Vide : l'intitulé attendu est le libellé du champ. */
-  const correspondances = ref<Record<ImportId, Record<string, string>>>({ vehicules: {}, personnes: {}, pleins: {}, maintenance: {} })
+  const correspondances = ref<Record<ImportId, Record<string, string>>>({ vehicules: {}, personnes: {}, pleins: {}, maintenance: {}, commandes: {} })
   try { const b = localStorage.getItem(CLE); if (b) Object.assign(correspondances.value, JSON.parse(b)) } catch { /* vide */ }
   watch(correspondances, v => { try { localStorage.setItem(CLE, JSON.stringify(v)) } catch { /* ignoré */ } }, { deep: true })
 

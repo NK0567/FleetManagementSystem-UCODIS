@@ -49,7 +49,8 @@
           <Check v-if="modelValue === item.id" class="w-3.5 h-3.5 text-primary shrink-0" />
         </button>
         <div v-if="filtres.length === 0" class="p-3.5 text-center text-[13px] text-muted-foreground">
-          Aucun résultat{{ requete ? ` pour « ${requete} »` : '' }}
+          <template v-if="!items.length">{{ vide || 'Aucun élément à proposer.' }}</template>
+          <template v-else>Aucun résultat{{ requete ? ` pour « ${requete} »` : '' }}</template>
         </div>
       </div>
     </div>
@@ -68,6 +69,8 @@ const props = withDefaults(
     items: DropdownItem[]
     placeholder?: string
     compact?: boolean
+    /** Message affiché quand la liste est vide (rien à proposer). */
+    vide?: string
   }>(),
   { placeholder: 'Sélectionner…', compact: false },
 )

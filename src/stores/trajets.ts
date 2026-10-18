@@ -1,6 +1,6 @@
 import { maintenantMs } from '../utils/horloge'
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import type { Trajet, RoleEtape } from '../types'
 
 /**
@@ -12,6 +12,8 @@ import type { Trajet, RoleEtape } from '../types'
  * Les noms de clients sont une hypothèse illustrative : aucun document
  * UCODIS ne nomme de client précis (point à trancher).
  */
+const CLE = 'fms-ucodis-trajets'
+
 export const useTrajetsStore = defineStore('trajets', () => {
   const trajets = ref<Trajet[]>([
     {
@@ -49,6 +51,12 @@ export const useTrajetsStore = defineStore('trajets', () => {
     },
   ])
 
+  try {
+    const b = localStorage.getItem(CLE)
+    if (b) { const lus = JSON.parse(b); if (Array.isArray(lus)) trajets.value = lus as Trajet[] }
+  } catch { /* trajets de départ */ }
+  watch(trajets, v => { try { localStorage.setItem(CLE, JSON.stringify(v)) } catch { /* tant pis */ } }, { deep: true })
+
   const getById = (id: string) => trajets.value.find(t => t.id === id)
   const actifs = computed(() => trajets.value.filter(t => t.statut === 'actif'))
   const recurrents = computed(() => trajets.value.filter(t => t.recurrent && t.statut === 'actif'))
@@ -57,9 +65,13 @@ export const useTrajetsStore = defineStore('trajets', () => {
     return [...etapes].sort((a, b) => a.ordre - b.ordre).map(e => ({ lat: e.lat, lng: e.lng }))
   }
 
-  let prochainNumero = trajets.value.length + 1
+  /** Identifiant suivant : un de plus que le plus grand numéro existant, jamais le nombre de trajets (un trajet retiré laisserait un doublon). */
+  function prochainId() {
+    const max = trajets.value.reduce((m, t) => Math.max(m, Number(/(\d+)$/.exec(t.id)?.[1] ?? 0) || 0), 0)
+    return `TRJ-${String(max + 1).padStart(3, '0')}`
+  }
   function creer(saisie: Omit<Trajet, 'id'>) {
-    const id = `TRJ-perso-${prochainNumero++}`
+    const id = prochainId()
     trajets.value.push({ ...saisie, id })
     return id
   }
