@@ -229,10 +229,10 @@
         </div>
 
         <!-- Bouton flottant d'alertes -->
-        <div v-if="!ficheVoyageId" class="absolute bottom-5 right-5 z-[700] flex flex-col items-end gap-2">
+        <div v-if="!ficheVoyageId" class="absolute top-3 bottom-5 right-5 z-[1000] flex flex-col items-end justify-end gap-2 pointer-events-none">
           <Transition name="fade">
-            <div v-if="alertesOuvertes" class="w-[320px] max-h-[380px] overflow-y-auto bg-card border border-border rounded-xl shadow-xl">
-              <div class="flex items-center justify-between px-3.5 py-2.5 border-b border-border sticky top-0 bg-card">
+            <div v-if="alertesOuvertes" class="w-[320px] max-h-[380px] min-h-0 shrink overflow-y-auto bg-card border border-border rounded-xl shadow-xl pointer-events-auto">
+              <div class="flex items-center justify-between px-3.5 py-2.5 border-b border-border sticky top-0 z-10 bg-card">
                 <span class="text-[12px] font-semibold text-foreground">Alertes en cours</span>
                 <span class="text-[11px] text-muted-foreground">{{ alertes.enCours.length }}</span>
               </div>
@@ -254,7 +254,7 @@
             </div>
           </Transition>
 
-          <button class="w-14 h-14 rounded-full border-0 cursor-pointer shadow-lg flex items-center justify-center relative transition-transform hover:scale-105"
+          <button class="w-14 h-14 shrink-0 rounded-full border-0 cursor-pointer shadow-lg flex items-center justify-center relative transition-transform hover:scale-105 pointer-events-auto"
                   :class="alertes.enCours.length ? 'bg-danger' : 'bg-primary'"
                   :title="`${alertes.enCours.length} alerte(s) en cours`"
                   @click="alertesOuvertes = !alertesOuvertes">
