@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 import type { PieceJointe } from '../types'
+import { decaler } from '../utils/horloge'
 
 /**
  * Référentiel des prestataires (tiers) de la flotte : ateliers externes,
@@ -57,9 +58,9 @@ const DEFAUT: Prestataire[] = [
   { id: 'PRS-007', nom: 'Réseau Stations Hautes Terres', type: 'fournisseur_carburant', contact: 'Service cartes', telephone: '020 22 400 10', autorise: true },
   { id: 'PRS-008', nom: "Carburants de l'Île", type: 'fournisseur_carburant', telephone: '020 22 515 30', autorise: true },
   { id: 'PRS-009', nom: 'Banque de financement Poids Lourds', type: 'banque', contact: 'Service leasing', telephone: '020 22 610 00', autorise: true,
-    contrats: [{ id: 'CTR-001', objet: 'Leasing tracteurs 2021-2026', debut: '2021-01-10', fin: '2026-12-31', montantAr: 610_000_000 }] },
+    contrats: [{ id: 'CTR-001', objet: 'Leasing tracteurs 2021-2026', debut: decaler('2021-01-10'), fin: decaler('2026-12-31'), montantAr: 610_000_000 }] },
   { id: 'PRS-010', nom: 'ARO Madagascar', type: 'assureur', contact: 'Service flottes', telephone: '020 22 201 54', autorise: true,
-    contrats: [{ id: 'CTR-002', objet: 'Assurance flotte, responsabilité civile et dommages', debut: '2025-01-01', fin: '2026-12-31' }] },
+    contrats: [{ id: 'CTR-002', objet: 'Assurance flotte, responsabilité civile et dommages', debut: decaler('2025-01-01'), fin: decaler('2026-12-31') }] },
   { id: 'PRS-011', nom: 'NY HAVANA Assurances', type: 'assureur', telephone: '020 22 268 20', autorise: true },
   { id: 'PRS-012', nom: 'Distributeur Poids Lourds Antananarivo', type: 'constructeur', contact: 'Service après-vente', autorise: true },
   { id: 'PRS-013', nom: 'Filtres & Lubrifiants Océan Indien', type: 'fournisseur_pieces', contact: 'Nirina Ravalison', telephone: '033 98 765 43', autorise: true },

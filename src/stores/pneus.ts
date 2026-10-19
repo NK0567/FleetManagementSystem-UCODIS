@@ -1,4 +1,4 @@
-import { maintenantMs, maintenant, isoJour } from '../utils/horloge'
+import { maintenantMs, maintenant, isoJour, decaler } from '../utils/horloge'
 import { devise } from '../lib/monnaie'
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
@@ -98,42 +98,42 @@ function seed(): Pneu[] {
   ] as const
   tr.forEach(([serie, sculpt, press], i) => out.push({
     id: `PN-${String(i + 1).padStart(4, '0')}`, numeroSerie: serie, marque: 'Triangle', taille: '315/80R22,5', profil: 'Pneu traction',
-    indiceChargeVitesse: '154/151M', dateFabrication: '3324', neuf: true, fournisseur: 'Pneus Océan Indien', prixAr: 1_450_000, dateAchat: '2025-01-20',
+    indiceChargeVitesse: '154/151M', dateFabrication: '3324', neuf: true, fournisseur: 'Pneus Océan Indien', prixAr: 1_450_000, dateAchat: decaler('2025-01-20'),
     statut: 'monte', vehiculeId: 'v-tr-1', vehiculePlaque: '4021 TBA', positionCode: i === 6 ? 'S1' : String(i + 1), kmVehiculeAuMontage: 152_000, kmCumules: 0,
-    kmDerniereRotation: i === 2 ? 152_000 : 171_000, derniereRotationLe: i === 2 ? '2025-01-30' : '2026-06-12', nbRechapages: 0, coutRechapagesAr: 0,
-    releves: [{ date: '2026-08-26T08:00:00', pressionBar: press, sculptureMm: sculpt, par: 'Rakoto Andrianina' }],
-    historique: [evAchat('2025-01-20', 'Pneus Océan Indien'), { date: '2025-01-30', type: 'montage', detail: `Monté sur 4021 TBA, position ${i === 6 ? 'S1' : i + 1}` }],
+    kmDerniereRotation: i === 2 ? 152_000 : 171_000, derniereRotationLe: i === 2 ? decaler('2025-01-30') : decaler('2026-06-12'), nbRechapages: 0, coutRechapagesAr: 0,
+    releves: [{ date: decaler('2026-08-26T08:00:00'), pressionBar: press, sculptureMm: sculpt, par: 'Rakoto Andrianina' }],
+    historique: [evAchat(decaler('2025-01-20'), 'Pneus Océan Indien'), { date: decaler('2025-01-30'), type: 'montage', detail: `Monté sur 4021 TBA, position ${i === 6 ? 'S1' : i + 1}` }],
   }))
   // Semi-remorque RM 4101 : 6 positions
   for (let i = 0; i < 6; i++) out.push({
     id: `PN-${String(i + 8).padStart(4, '0')}`, numeroSerie: `RE0702${i}R40${i}`, marque: 'Triangle', taille: '385/65R22,5', profil: 'Pneu traction',
-    indiceChargeVitesse: '156/L', dateFabrication: '2624', neuf: i !== 2, fournisseur: 'Pneus Océan Indien', prixAr: 1_250_000, dateAchat: '2025-03-04',
+    indiceChargeVitesse: '156/L', dateFabrication: '2624', neuf: i !== 2, fournisseur: 'Pneus Océan Indien', prixAr: 1_250_000, dateAchat: decaler('2025-03-04'),
     statut: 'monte', vehiculeId: 'v-sr-1', vehiculePlaque: 'RM 4101', positionCode: String(i + 1), kmVehiculeAuMontage: 0, kmCumules: i === 2 ? 64_000 : 0,
-    nbRechapages: i === 2 ? 1 : 0, coutRechapagesAr: i === 2 ? 380_000 : 0, kmDerniereRotation: 0, derniereRotationLe: '2026-06-12',
-    releves: [{ date: '2026-08-26T08:30:00', pressionBar: 8.5, sculptureMm: i === 2 ? 6 : 12, par: 'Rakoto Andrianina' }],
-    historique: [evAchat('2025-03-04', 'Pneus Océan Indien'), { date: '2025-03-10', type: 'montage', detail: `Monté sur RM 4101, position ${i + 1}` }],
+    nbRechapages: i === 2 ? 1 : 0, coutRechapagesAr: i === 2 ? 380_000 : 0, kmDerniereRotation: 0, derniereRotationLe: decaler('2026-06-12'),
+    releves: [{ date: decaler('2026-08-26T08:30:00'), pressionBar: 8.5, sculptureMm: i === 2 ? 6 : 12, par: 'Rakoto Andrianina' }],
+    historique: [evAchat(decaler('2025-03-04'), 'Pneus Océan Indien'), { date: decaler('2025-03-10'), type: 'montage', detail: `Monté sur RM 4101, position ${i + 1}` }],
   })
   // Stock, rechapage, rebut
   out.push(
     { id: 'PN-0014', numeroSerie: 'EP09114T120/551', marque: 'Triangle', taille: '315/80R22,5', profil: 'Pneu direction', indiceChargeVitesse: '154/151M', dateFabrication: '1226',
-      neuf: true, fournisseur: 'Pneus Océan Indien', prixAr: 1_480_000, dateAchat: '2026-07-15', statut: 'stock', kmCumules: 0, nbRechapages: 0, coutRechapagesAr: 0,
-      releves: [], historique: [evAchat('2026-07-15', 'Pneus Océan Indien')] },
+      neuf: true, fournisseur: 'Pneus Océan Indien', prixAr: 1_480_000, dateAchat: decaler('2026-07-15'), statut: 'stock', kmCumules: 0, nbRechapages: 0, coutRechapagesAr: 0,
+      releves: [], historique: [evAchat(decaler('2026-07-15'), 'Pneus Océan Indien')] },
     { id: 'PN-0015', numeroSerie: 'EP09114T120/552', marque: 'Triangle', taille: '315/80R22,5', profil: 'Pneu direction', indiceChargeVitesse: '154/151M', dateFabrication: '1226',
-      neuf: true, fournisseur: 'Pneus Océan Indien', prixAr: 1_480_000, dateAchat: '2026-07-15', statut: 'stock', kmCumules: 0, nbRechapages: 0, coutRechapagesAr: 0,
-      releves: [], historique: [evAchat('2026-07-15', 'Pneus Océan Indien')] },
+      neuf: true, fournisseur: 'Pneus Océan Indien', prixAr: 1_480_000, dateAchat: decaler('2026-07-15'), statut: 'stock', kmCumules: 0, nbRechapages: 0, coutRechapagesAr: 0,
+      releves: [], historique: [evAchat(decaler('2026-07-15'), 'Pneus Océan Indien')] },
     { id: 'PN-0016', numeroSerie: 'DC07733A221/090', marque: 'Double Coin', taille: '315/80R22,5', profil: 'Pneu traction', neuf: true, fournisseur: 'Pneus Océan Indien',
-      prixAr: 1_200_000, dateAchat: '2024-02-01', statut: 'rechapage', kmCumules: 118_000, nbRechapages: 0, coutRechapagesAr: 0, motifRetrait: 'Sculpture à 2 mm, carcasse saine',
+      prixAr: 1_200_000, dateAchat: decaler('2024-02-01'), statut: 'rechapage', kmCumules: 118_000, nbRechapages: 0, coutRechapagesAr: 0, motifRetrait: 'Sculpture à 2 mm, carcasse saine',
       montages: [{ vehiculeId: 'v-tr-2', vehiculePlaque: '4022 TBA', km: 118_000 }],
-      releves: [{ date: '2026-08-02T08:00:00', pressionBar: 8, sculptureMm: 2, par: 'Rakoto Andrianina' }],
-      historique: [evAchat('2024-02-01', 'Pneus Océan Indien'), { date: '2024-02-10', type: 'montage', detail: 'Monté sur 4022 TBA, position 3' },
-        { date: '2026-08-05', type: 'rechapage', detail: 'Envoyé au rechapage : sculpture à 2 mm, carcasse saine (retiré de 4022 TBA, position 3)' }] },
+      releves: [{ date: decaler('2026-08-02T08:00:00'), pressionBar: 8, sculptureMm: 2, par: 'Rakoto Andrianina' }],
+      historique: [evAchat(decaler('2024-02-01'), 'Pneus Océan Indien'), { date: decaler('2024-02-10'), type: 'montage', detail: 'Monté sur 4022 TBA, position 3' },
+        { date: decaler('2026-08-05'), type: 'rechapage', detail: 'Envoyé au rechapage : sculpture à 2 mm, carcasse saine (retiré de 4022 TBA, position 3)' }] },
     { id: 'PN-0017', numeroSerie: 'DC07733A221/091', marque: 'Double Coin', taille: '315/80R22,5', profil: 'Pneu traction', neuf: false, fournisseur: 'Pneus Océan Indien',
-      prixAr: 1_200_000, dateAchat: '2024-02-01', statut: 'rebut', kmCumules: 171_000, nbRechapages: 1, coutRechapagesAr: 390_000, motifRetrait: 'Éclatement, carcasse endommagée',
+      prixAr: 1_200_000, dateAchat: decaler('2024-02-01'), statut: 'rebut', kmCumules: 171_000, nbRechapages: 1, coutRechapagesAr: 390_000, motifRetrait: 'Éclatement, carcasse endommagée',
       montages: [{ vehiculeId: 'v-tr-3', vehiculePlaque: '4023 TBA', km: 104_000 }, { vehiculeId: 'v-tr-5', vehiculePlaque: '4025 TBA', km: 67_000 }],
-      releves: [], historique: [evAchat('2024-02-01', 'Pneus Océan Indien'), { date: '2024-02-10', type: 'montage', detail: 'Monté sur 4023 TBA, position 4' },
-        { date: '2025-05-12', type: 'demontage', detail: 'Démonté de 4023 TBA, position 4 : envoi au rechapage' },
-        { date: '2025-06-20', type: 'montage', detail: 'Monté sur 4025 TBA, position 5' },
-        { date: '2026-06-18', type: 'rebut', detail: 'Mis au rebut : éclatement, carcasse endommagée (retiré de 4025 TBA, position 5)' }] },
+      releves: [], historique: [evAchat(decaler('2024-02-01'), 'Pneus Océan Indien'), { date: decaler('2024-02-10'), type: 'montage', detail: 'Monté sur 4023 TBA, position 4' },
+        { date: decaler('2025-05-12'), type: 'demontage', detail: 'Démonté de 4023 TBA, position 4 : envoi au rechapage' },
+        { date: decaler('2025-06-20'), type: 'montage', detail: 'Monté sur 4025 TBA, position 5' },
+        { date: decaler('2026-06-18'), type: 'rebut', detail: 'Mis au rebut : éclatement, carcasse endommagée (retiré de 4025 TBA, position 5)' }] },
   )
   return out
 }

@@ -198,9 +198,14 @@ export const useReportingTransportStore = defineStore('reportingTransport', () =
       || sites.sitesDuClient(c.destinataire).some(s => p.voitLieu(id, { siteId: s.id }))
   }
 
-  /** Ordres de la période (date prévue) qui passent les filtres. */
+  /** Ordres de la période (date prévue) qui passent les filtres. Un ordre
+   *  encore ouvert prévu après la fin de la période compte aussi : c'est
+   *  l'activité en cours, celle que montre le tableau de la planification. */
+  const OUVERTS = ['en_attente', 'planifie', 'confirme', 'pret', 'en_cours']
+  const dansLaPeriode = (v: Voyage, f: FiltresTransport) =>
+    dansPeriode(v.datePlanifiee, f.periode) || (OUVERTS.includes(v.statut) && (v.datePlanifiee ?? '').slice(0, 10) > f.periode.au)
   function ordres(f: FiltresTransport): Voyage[] {
-    return voyagesStore.voyages.filter(v => visible(v) && dansPeriode(v.datePlanifiee, f.periode)
+    return voyagesStore.voyages.filter(v => visible(v) && dansLaPeriode(v, f)
       && (!f.depot || depotDe(v) === f.depot)
       && (!f.region || regionsDe(v).includes(f.region))
       && (!f.client || v.etapes.some(e => e.destinataire === f.client)))

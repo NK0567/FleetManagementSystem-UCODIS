@@ -1,4 +1,4 @@
-import { maintenantMs } from '../utils/horloge'
+import { maintenantMs, decaler } from '../utils/horloge'
 import { useVehiculeStore } from './vehicules'
 import { defineStore } from 'pinia'
 import { ref, watch } from 'vue'
@@ -62,10 +62,10 @@ export const useControlesVehiculeStore = defineStore('controlesVehicule', () => 
   watch(points, v => { try { localStorage.setItem(CLE_POINTS, JSON.stringify(v)) } catch { /* tant pis */ } }, { deep: true })
 
   const controles = ref<ControleVehicule[]>([
-    { id: 'CVH-001', moment: 'retour_voyage', vehiculeId: 'v-tr-1', vehiculePlaque: '4021 TBA', date: '2026-08-26T17:10:00', controlePar: 'Rakoto Andrianina', kilometrage: 182_350,
+    { id: 'CVH-001', moment: 'retour_voyage', vehiculeId: 'v-tr-1', vehiculePlaque: '4021 TBA', date: decaler('2026-08-26T17:10:00'), controlePar: 'Rakoto Andrianina', kilometrage: 182_350,
       resultats: { CAR: 'conforme', PNE: 'conforme', FRN: 'conforme', FUI: 'conforme', TAB: 'anomalie', EQP: 'conforme' },
       bloquants: { CAR: false, PNE: true, FRN: true, FUI: true, TAB: false, EQP: false }, commentaire: 'Voyant ABS allumé par intermittence, à surveiller.' },
-    { id: 'CVH-002', moment: 'reception_neuf', vehiculeId: 'v-tr-5', vehiculePlaque: '4025 TBA', date: '2026-02-10T09:00:00', controlePar: 'Rakoto Andrianina', kilometrage: 12,
+    { id: 'CVH-002', moment: 'reception_neuf', vehiculeId: 'v-tr-5', vehiculePlaque: '4025 TBA', date: decaler('2026-02-10T09:00:00'), controlePar: 'Rakoto Andrianina', kilometrage: 12,
       resultats: { DOC: 'conforme', VIN: 'conforme', EQP: 'conforme', ESS: 'conforme', CAR: 'conforme' },
       bloquants: { DOC: true, VIN: true, EQP: false, ESS: true, CAR: false } },
   ])

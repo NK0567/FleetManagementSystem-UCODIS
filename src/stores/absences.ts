@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { usePersonnelStore } from './personnel'
-import { aujourdhuiISO } from '../utils/horloge'
+import { aujourdhuiISO, decaler } from '../utils/horloge'
 
 export type StatutDemande = 'brouillon' | 'attente' | 'approuve' | 'refuse' | 'retourne'
 
@@ -31,14 +31,14 @@ export interface Solde {
 }
 
 const DEMANDES: Demande[] = [
-  { id: 1, personnelId: 'p-010', nom: 'Solofo Rakotomanga', type: 'Congé annuel', debut: '2026-09-14', fin: '2026-09-21', jours: 6, statut: 'attente', soumisLe: '2026-08-28' },
-  { id: 2, personnelId: 'p-017', nom: 'Tsiory Rabearison', type: 'Congé maladie', debut: '2026-09-02', fin: '2026-09-05', jours: 4, statut: 'attente', soumisLe: '2026-09-01' },
-  { id: 3, personnelId: 'p-008', nom: 'Nirina Ravelojaona', type: 'Récupération', debut: '2026-09-11', fin: '2026-09-11', jours: 1, statut: 'attente', soumisLe: '2026-09-03' },
-  { id: 4, personnelId: 'p-012', nom: 'Tiana Rasolofoson', type: 'Congé annuel', debut: '2026-09-07', fin: '2026-09-18', jours: 10, statut: 'approuve', soumisLe: '2026-08-12' },
-  { id: 5, personnelId: 'p-004', nom: 'Miora Randrianasolo', type: 'Permission exceptionnelle', debut: '2026-09-04', fin: '2026-09-04', jours: 1, statut: 'approuve', soumisLe: '2026-08-30' },
-  { id: 6, personnelId: 'p-021', nom: 'Toky Razafimahatratra', type: 'Congé annuel', debut: '2026-08-17', fin: '2026-08-28', jours: 10, statut: 'approuve', soumisLe: '2026-07-20' },
-  { id: 7, personnelId: 'p-015', nom: 'Herizo Rakotondrabe', type: 'Congé maladie', debut: '2026-08-03', fin: '2026-08-04', jours: 2, statut: 'refuse', soumisLe: '2026-08-03', motifRefus: 'Justificatif médical non fourni dans les délais.' },
-  { id: 8, personnelId: 'p-011', nom: 'Mamy Andrianaivo', type: 'Récupération', debut: '2026-09-25', fin: '2026-09-25', jours: 1, statut: 'retourne', soumisLe: '2026-09-01', commentaireRetour: 'Merci de préciser le voyage qui ouvre droit à cette récupération.' },
+  { id: 1, personnelId: 'p-010', nom: 'Solofo Rakotomanga', type: 'Congé annuel', debut: decaler('2026-09-14'), fin: decaler('2026-09-21'), jours: 6, statut: 'attente', soumisLe: decaler('2026-08-28') },
+  { id: 2, personnelId: 'p-017', nom: 'Tsiory Rabearison', type: 'Congé maladie', debut: decaler('2026-09-02'), fin: decaler('2026-09-05'), jours: 4, statut: 'attente', soumisLe: decaler('2026-09-01') },
+  { id: 3, personnelId: 'p-008', nom: 'Nirina Ravelojaona', type: 'Récupération', debut: decaler('2026-09-11'), fin: decaler('2026-09-11'), jours: 1, statut: 'attente', soumisLe: decaler('2026-09-03') },
+  { id: 4, personnelId: 'p-012', nom: 'Tiana Rasolofoson', type: 'Congé annuel', debut: decaler('2026-09-07'), fin: decaler('2026-09-18'), jours: 10, statut: 'approuve', soumisLe: decaler('2026-08-12') },
+  { id: 5, personnelId: 'p-004', nom: 'Miora Randrianasolo', type: 'Permission exceptionnelle', debut: decaler('2026-09-04'), fin: decaler('2026-09-04'), jours: 1, statut: 'approuve', soumisLe: decaler('2026-08-30') },
+  { id: 6, personnelId: 'p-021', nom: 'Toky Razafimahatratra', type: 'Congé annuel', debut: decaler('2026-08-17'), fin: decaler('2026-08-28'), jours: 10, statut: 'approuve', soumisLe: decaler('2026-07-20') },
+  { id: 7, personnelId: 'p-015', nom: 'Herizo Rakotondrabe', type: 'Congé maladie', debut: decaler('2026-08-03'), fin: decaler('2026-08-04'), jours: 2, statut: 'refuse', soumisLe: decaler('2026-08-03'), motifRefus: 'Justificatif médical non fourni dans les délais.' },
+  { id: 8, personnelId: 'p-011', nom: 'Mamy Andrianaivo', type: 'Récupération', debut: decaler('2026-09-25'), fin: decaler('2026-09-25'), jours: 1, statut: 'retourne', soumisLe: decaler('2026-09-01'), commentaireRetour: 'Merci de préciser le voyage qui ouvre droit à cette récupération.' },
 ]
 
 const SOLDES: Solde[] = [

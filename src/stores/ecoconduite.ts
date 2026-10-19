@@ -3,6 +3,7 @@ import { ref, computed, watch } from 'vue'
 import { useVehiculeStore } from './vehicules'
 import { useTelematiqueStore } from './telematique'
 import { useTypesVehiculesStore } from './typesVehicules'
+import { decaler } from '../utils/horloge'
 
 /**
  * Écoconduite (FMS-CA-06) : les comportements qui augmentent la
@@ -39,11 +40,11 @@ const CLE = 'fms-ucodis-parametres-ecoconduite'
 
 /** Répartition de démonstration : quelques événements par conducteur, sur août 2026. */
 const SEED: EvenementEco[] = [
-  ['p-010', 'v-tr-1', 'ralenti_prolonge', '2026-08-24T11:40:00', 22, 'Relais Moramanga'],
-  ['p-011', 'v-tr-2', 'ralenti_prolonge', '2026-08-20T13:10:00', 35, 'Contrôle Maevatanana'],
-  ['p-012', 'v-tr-3', 'ralenti_prolonge', '2026-09-03T03:00:00', 6, 'Dépôt Tanjombato'],
-  ['p-015', 'v-tr-6', 'ralenti_prolonge', '2026-08-18T12:00:00', 18, 'Relais Moramanga'],
-  ['p-019', 'v-tr-10', 'ralenti_prolonge', '2026-08-22T14:05:00', 14, 'Entrepôt Mahajanga'],
+  ['p-010', 'v-tr-1', 'ralenti_prolonge', decaler('2026-08-24T11:40:00'), 22, 'Relais Moramanga'],
+  ['p-011', 'v-tr-2', 'ralenti_prolonge', decaler('2026-08-20T13:10:00'), 35, 'Contrôle Maevatanana'],
+  ['p-012', 'v-tr-3', 'ralenti_prolonge', decaler('2026-09-03T03:00:00'), 6, 'Dépôt Tanjombato'],
+  ['p-015', 'v-tr-6', 'ralenti_prolonge', decaler('2026-08-18T12:00:00'), 18, 'Relais Moramanga'],
+  ['p-019', 'v-tr-10', 'ralenti_prolonge', decaler('2026-08-22T14:05:00'), 14, 'Entrepôt Mahajanga'],
 ].map(([conducteurId, vehiculeId, type, date, dureeMin, lieu], i) => ({
   id: `ECO-${String(i + 1).padStart(3, '0')}`, conducteurId: conducteurId as string, vehiculeId: vehiculeId as string,
   type: type as TypeEvenementEco, date: date as string, dureeMin: dureeMin as number | undefined, lieu: lieu as string,

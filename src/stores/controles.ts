@@ -1,4 +1,4 @@
-import { maintenantMs, maintenant } from '../utils/horloge'
+import { maintenantMs, maintenant, decaler } from '../utils/horloge'
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 import { useMaintenanceStore } from './maintenance'
@@ -37,9 +37,9 @@ export const useControlesStore = defineStore('controles', () => {
       id: 'CKL-001', reference: 'CKL-2026-0151', voyageId: 'VOY-002', voyageRef: 'VOY-2026-0149',
       vehiculeId: 'v-tr-3', tracteurPlaque: '4023 TBA', semiRemorquePlaque: 'RM 4103',
       chauffeurId: 'p-012', chauffeurNom: 'Tiana Rasolofoson',
-      dateDebut: '2026-08-29T06:20:00',
+      dateDebut: decaler('2026-08-29T06:20:00'),
       releves: [
-        { pause: 1, horodatage: '2026-08-29T06:20:00', lieu: 'Dépôt Tanjombato',
+        { pause: 1, horodatage: decaler('2026-08-29T06:20:00'), lieu: 'Dépôt Tanjombato',
           resultats: {
             FRS: 'conforme', FST: 'conforme', FLX: 'conforme', DIR: 'conforme', KLX: 'conforme',
             ESG: 'conforme', RET: 'conforme', SEC: 'conforme', ECL: 'conforme', PNE: 'conforme',
@@ -48,15 +48,15 @@ export const useControlesStore = defineStore('controles', () => {
           },
           commentaires: { BAC: 'Sangle avant détendue, resserrée avant départ.', PNE: 'Pression vérifiée au manomètre.' } },
       ],
-      signeParChauffeur: true, signeLe: '2026-08-29T06:20:00', synchroniseLe: '2026-08-29T06:35:00',
+      signeParChauffeur: true, signeLe: decaler('2026-08-29T06:20:00'), synchroniseLe: decaler('2026-08-29T06:35:00'),
     },
     {
       id: 'CKL-002', reference: 'CKL-2026-0148', voyageId: 'VOY-001', voyageRef: 'VOY-2026-0148',
       vehiculeId: 'v-tr-1', tracteurPlaque: '4021 TBA', semiRemorquePlaque: 'RM 4101',
       chauffeurId: 'p-010', chauffeurNom: 'Solofo Rakotomanga',
-      dateDebut: '2026-08-24T05:40:00',
+      dateDebut: decaler('2026-08-24T05:40:00'),
       releves: [
-        { pause: 1, horodatage: '2026-08-24T05:40:00', lieu: 'Dépôt Tanjombato',
+        { pause: 1, horodatage: decaler('2026-08-24T05:40:00'), lieu: 'Dépôt Tanjombato',
           resultats: {
             FRS: 'conforme', FST: 'conforme', FLX: 'conforme', DIR: 'conforme', KLX: 'conforme',
             ESG: 'anomalie', RET: 'conforme', SEC: 'conforme', ECL: 'conforme', PNE: 'conforme',
@@ -64,7 +64,7 @@ export const useControlesStore = defineStore('controles', () => {
             BAC: 'conforme',
           },
           commentaires: { ESG: 'Essuie-glace côté passager usé, à remplacer au retour.' } },
-        { pause: 2, horodatage: '2026-08-24T09:05:00', lieu: 'Relais Moramanga',
+        { pause: 2, horodatage: decaler('2026-08-24T09:05:00'), lieu: 'Relais Moramanga',
           resultats: {
             FRS: 'conforme', FST: 'conforme', FLX: 'conforme', DIR: 'conforme', KLX: 'conforme',
             ESG: 'anomalie', RET: 'conforme', SEC: 'conforme', ECL: 'conforme', PNE: 'conforme',
@@ -73,7 +73,7 @@ export const useControlesStore = defineStore('controles', () => {
           },
           commentaires: { ESG: 'Toujours usé, pas de pluie sur le trajet.' } },
       ],
-      signeParChauffeur: true, signeLe: '2026-08-24T09:05:00', synchroniseLe: '2026-08-24T18:20:00',
+      signeParChauffeur: true, signeLe: decaler('2026-08-24T09:05:00'), synchroniseLe: decaler('2026-08-24T18:20:00'),
     },
   ])
 

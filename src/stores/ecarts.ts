@@ -1,4 +1,4 @@
-import { maintenant } from '../utils/horloge'
+import { maintenant, decaler } from '../utils/horloge'
 import { defineStore } from 'pinia'
 import { ref, computed, watch, reactive } from 'vue'
 import type { EcartItineraire, NatureEcart, TypeEcart, GraviteEcart, DecisionEcart } from '../types'
@@ -74,7 +74,7 @@ export const useEcartsStore = defineStore('ecarts', () => {
       chauffeurId: 'p-010', chauffeurNom: 'Solofo Rakotomanga',
       trajetLibelle: 'Antananarivo → Toamasina (RN2 standard)',
       type: 'sortie_trajet', gravite: 'majeur', nature: 'a_qualifier',
-      detecteLe: '2026-08-24T11:18:00', dureeMin: 96, distanceKm: 41, ecartLateralMaxM: 6200,
+      detecteLe: decaler('2026-08-24T11:18:00'), dureeMin: 96, distanceKm: 41, ecartLateralMaxM: 6200,
       lat: -19.1520, lng: 48.3480, lieu: 'Piste secondaire, 14 km au sud de Moramanga',
     },
     {
@@ -82,7 +82,7 @@ export const useEcartsStore = defineStore('ecarts', () => {
       chauffeurId: 'p-010', chauffeurNom: 'Solofo Rakotomanga',
       trajetLibelle: 'Antananarivo → Toamasina (RN2 standard)',
       type: 'arret_non_planifie', gravite: 'critique', nature: 'a_qualifier',
-      detecteLe: '2026-08-24T11:42:00', dureeMin: 45,
+      detecteLe: decaler('2026-08-24T11:42:00'), dureeMin: 45,
       lat: -19.1520, lng: 48.3480, lieu: 'Piste secondaire, 14 km au sud de Moramanga',
     },
     {
@@ -90,11 +90,11 @@ export const useEcartsStore = defineStore('ecarts', () => {
       chauffeurId: 'p-013', chauffeurNom: 'Jaona Ratsimbazafy',
       trajetLibelle: 'Antananarivo → Toamasina (RN2 standard)',
       type: 'sortie_trajet', gravite: 'mineur', nature: 'subie',
-      detecteLe: '2026-08-26T09:48:00', dureeMin: 26, distanceKm: 8, ecartLateralMaxM: 1400,
+      detecteLe: decaler('2026-08-26T09:48:00'), dureeMin: 26, distanceKm: 8, ecartLateralMaxM: 1400,
       lat: -18.6800, lng: 48.9200, lieu: 'Déviation chantier RN2, PK 62',
       justificationChauffeur: 'Route barrée par des travaux, déviation imposée sur place.',
-      justifieLe: '2026-08-26T15:10:00',
-      qualifiePar: 'Responsable Flotte', qualifieLe: '2026-08-27T08:30:00',
+      justifieLe: decaler('2026-08-26T15:10:00'),
+      qualifiePar: 'Responsable Flotte', qualifieLe: decaler('2026-08-27T08:30:00'),
       motifQualification: 'Déviation de chantier confirmée.', decision: 'classe',
     },
     {
@@ -102,9 +102,9 @@ export const useEcartsStore = defineStore('ecarts', () => {
       chauffeurId: 'p-011', chauffeurNom: 'Mamy Andrianaivo',
       trajetLibelle: 'Antananarivo → Mahajanga (RN4)',
       type: 'fenetre_horaire', gravite: 'mineur', nature: 'autorisee',
-      detecteLe: '2026-08-20T19:05:00', dureeMin: 70,
+      detecteLe: decaler('2026-08-20T19:05:00'), dureeMin: 70,
       lat: -16.9500, lng: 46.8333, lieu: 'Maevatanana',
-      qualifiePar: 'Responsable Flotte', qualifieLe: '2026-08-21T07:45:00',
+      qualifiePar: 'Responsable Flotte', qualifieLe: decaler('2026-08-21T07:45:00'),
       motifQualification: 'Départ décalé sur instruction du client, accord tracé au dossier.', decision: 'classe',
     },
   ])

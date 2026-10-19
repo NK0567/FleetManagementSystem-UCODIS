@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 import type { Commande, EnqueteOrdonnateur } from '../types'
-import { aujourdhuiISO, maintenant } from '../utils/horloge'
+import { aujourdhuiISO, maintenant, decaler } from '../utils/horloge'
 import { useVoyagesStore } from './voyages'
 import { useControlesTransportStore } from './controlesTransport'
 import { useProduitsStore } from './produits'
@@ -19,28 +19,28 @@ export const useCommandesStore = defineStore('commandes', () => {
     {
       id: 'CMD-001', destinataire: 'Jumbo Score Antananarivo', adresseLivraison: 'Ankorondrano, Antananarivo',
       lat: -18.8792, lng: 47.5079, contenu: 'Produits alimentaires secs', poidsKg: 4200, volumeM3: 18,
-      dateSouhaitee: '2026-10-02', statut: 'en_attente', createdAt: '2026-09-27T08:00:00',
+      dateSouhaitee: decaler('2026-10-02'), statut: 'en_attente', createdAt: decaler('2026-09-27T08:00:00'),
       nombreUnites: 350, referenceExterne: 'BL-26-10421', emisPar: 'Lova Rabemananjara', emisParRole: 'commercial', origine: 'demande',
     },
     {
       id: 'CMD-002', destinataire: 'Shoprite Antsirabe', adresseLivraison: 'Route Circulaire, Antsirabe',
       lat: -19.8659, lng: 47.0333, contenu: 'Boissons', poidsKg: 6100, volumeM3: 22,
-      dateSouhaitee: '2026-10-02', statut: 'en_attente', createdAt: '2026-09-27T09:15:00',
+      dateSouhaitee: decaler('2026-10-02'), statut: 'en_attente', createdAt: decaler('2026-09-27T09:15:00'),
       nombreUnites: 510, referenceExterne: 'BL-26-10422', emisPar: 'Lova Rabemananjara', emisParRole: 'commercial', origine: 'demande',
     },
     {
       id: 'CMD-003', destinataire: 'Leader Price Toamasina', adresseLivraison: 'Boulevard Joffre, Toamasina',
       lat: -18.1492, lng: 49.4023, contenu: 'Produits ménagers', poidsKg: 3400, volumeM3: 14,
-      dateSouhaitee: '2026-10-03', statut: 'en_attente', createdAt: '2026-09-27T10:30:00',
+      dateSouhaitee: decaler('2026-10-03'), statut: 'en_attente', createdAt: decaler('2026-09-27T10:30:00'),
       nombreUnites: 280, referenceExterne: 'BL-26-10427', emisPar: 'Lova Rabemananjara', emisParRole: 'commercial', origine: 'demande',
     },
     /* Demande déjà livrée (ordre OT-2026-04430), avec la réponse de son ordonnateur à l'enquête. */
     {
       id: 'CMD-012', destinataire: 'Leader Price Antsirabe', adresseLivraison: 'Lot II M 12, Antsirabe',
       lat: -19.8667, lng: 47.0333, contenu: '40 cartons de produits alimentaires secs', produit: 'Produits alimentaires secs', poidsKg: 800,
-      dateSouhaitee: '2026-09-01', statut: 'affectee', voyageId: 'VOY-012', createdAt: '2026-08-30T09:00:00',
+      dateSouhaitee: decaler('2026-09-01'), statut: 'affectee', voyageId: 'VOY-012', createdAt: decaler('2026-08-30T09:00:00'),
       nombreUnites: 40, referenceExterne: 'BL-26-10388', emisPar: 'Lova Rabemananjara', emisParRole: 'commercial', origine: 'demande',
-      enqueteOrdonnateur: { respectOrdre: 5, delais: 3, qualite: 4, commentaire: 'Livré complet, mais avec plus de trois heures de retard.', reponduLe: '2026-09-02T09:00:00', reponduPar: 'Lova Rabemananjara' },
+      enqueteOrdonnateur: { respectOrdre: 5, delais: 3, qualite: 4, commentaire: 'Livré complet, mais avec plus de trois heures de retard.', reponduLe: decaler('2026-09-02T09:00:00'), reponduPar: 'Lova Rabemananjara' },
     },
     ...COMMANDES_CARBURANT_DEMO.map(c => ({ ...c })),
   ]

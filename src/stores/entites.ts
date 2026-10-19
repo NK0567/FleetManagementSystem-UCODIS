@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { Entite } from '../types'
+import { decaler } from '../utils/horloge'
 
 /**
  * Structure d'UCODIS Transport.
@@ -61,7 +62,7 @@ const SEED: Entite[] = [
     // qu'elle n'est pas confirmée.
     id: 'e8', code: 'OPV', nom: 'Opérations et voyages', type: 'service', parentId: 'e1',
     responsableNom: undefined, responsableId: undefined,
-    effectif: 0, site: 'Siège Antananarivo', statut: 'a_valider', soumiseLe: '2026-09-02',
+    effectif: 0, site: 'Siège Antananarivo', statut: 'a_valider', soumiseLe: decaler('2026-09-02'),
     description: "Entité proposée pour porter le planning de voyage, la fiche de voyage et le carnet de bord, aujourd'hui rattachés provisoirement aux modules 1 et 2. Statut à confirmer avec UCODIS.",
   },
 ]

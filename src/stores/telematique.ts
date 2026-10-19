@@ -12,7 +12,7 @@ import { useInfractionsStore } from './infractions'
 import { useDisponibilitesStore, type RegleTemps } from './disponibilites'
 import { distanceM, distanceTraceM, siteContenant, lieuLisible, type PointGeo } from '../utils/geo'
 import { etapeDuSite, controlerPassage, pointsManques, decalageFenetre, qualifierArret, depassementTemps, type EtapeControlee } from '../utils/detectionTrajet'
-import { dansNJours, maintenant } from '../utils/horloge'
+import { dansNJours, maintenant, decaler } from '../utils/horloge'
 import { calculerEcartKm, horsTournee } from '../utils/voyageUtils'
 import type { GraviteEcart, Voyage, TypeEcart, NatureEcart, EcartItineraire } from '../types'
 
@@ -137,12 +137,12 @@ const GRAINES: Graine[] = [
   ['v-tr-2', 'VITESSE', '-3', '14:05', 'RN4, Ankazobe', 97, undefined, undefined],
   ['v-tr-4', 'FREINAGE', '-12', '15:10', 'RN7, Ambatolampy', 0.6, undefined, undefined],
   ['v-tr-1', 'FREINAGE', '-6', '08:20', 'RN2, Moramanga', 0.48, undefined, undefined],
-  ['v-tr-1', 'ACCEL', '2026-08-24', '07:12', 'RN2, sortie de Tanjombato', 0.42, undefined, undefined],
-  ['v-tr-2', 'ACCEL', '2026-08-20', '06:05', 'RN4, Ankazobe', 0.39, undefined, undefined],
-  ['v-tr-2', 'ACCEL', '2026-08-20', '09:30', 'RN4, Maevatanana', 0.44, undefined, undefined],
-  ['v-tr-4', 'ACCEL', '2026-08-26', '08:15', 'RN2, Brickaville', 0.37, undefined, undefined],
-  ['v-tr-7', 'ACCEL', '2026-09-03', '07:45', 'RN4, Ankazobe', 0.4, undefined, undefined],
-  ['v-tr-10', 'ACCEL', '2026-08-22', '10:20', 'RN4, Maevatanana', 0.38, undefined, undefined],
+  ['v-tr-1', 'ACCEL', decaler('2026-08-24'), '07:12', 'RN2, sortie de Tanjombato', 0.42, undefined, undefined],
+  ['v-tr-2', 'ACCEL', decaler('2026-08-20'), '06:05', 'RN4, Ankazobe', 0.39, undefined, undefined],
+  ['v-tr-2', 'ACCEL', decaler('2026-08-20'), '09:30', 'RN4, Maevatanana', 0.44, undefined, undefined],
+  ['v-tr-4', 'ACCEL', decaler('2026-08-26'), '08:15', 'RN2, Brickaville', 0.37, undefined, undefined],
+  ['v-tr-7', 'ACCEL', decaler('2026-09-03'), '07:45', 'RN4, Ankazobe', 0.4, undefined, undefined],
+  ['v-tr-10', 'ACCEL', decaler('2026-08-22'), '10:20', 'RN4, Maevatanana', 0.38, undefined, undefined],
   ['v-tr-10', 'SOMNOLENCE', '-2', '02:40', 'RN4, Maevatanana', undefined, undefined, 'Paupières fermées plus de 2 s, à deux reprises'],
   ['v-tr-7', 'TELEPHONE', '-5', '09:12', 'RN4, Ankazobe', undefined, undefined, undefined],
   ['v-tr-4', 'CEINTURE', '-1', '07:05', 'RN7, Ambatolampy', undefined, undefined, undefined],

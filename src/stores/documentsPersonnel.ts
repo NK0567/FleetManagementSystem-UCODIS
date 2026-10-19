@@ -4,7 +4,7 @@ import { ref, computed, reactive, watch } from 'vue'
 import type { DocumentPersonnel, TypeDocument, EtatDocument, StatutSaisiDocument } from '../types'
 import { useTypesDocumentsStore, LIBELLES_TYPES_DOCUMENTS } from './typesDocuments'
 import { useReglesDocumentsStore } from './reglesDocuments'
-import { aujourdhuiISO } from '../utils/horloge'
+import { aujourdhuiISO, decaler } from '../utils/horloge'
 import { etatEcheance } from '../utils/helpers'
 import { dansNJours } from '../utils/horloge'
 import { usePersonnelStore } from './personnel'
@@ -63,7 +63,7 @@ const ECHEANCES_CONDUCTEURS: Array<[string, number, number, string]> = [
 ]
 
 ECHEANCES_CONDUCTEURS.forEach(([id, jPermis, jVisite, cat], i) => {
-  ajouter(id, 'permis', '2019-05-14', dans(jPermis), {
+  ajouter(id, 'permis', decaler('2019-05-14'), dans(jPermis), {
     reference: `PC-${20190000 + i}`,
     categorie: cat,
     fichier: `permis_${id}.pdf`,
@@ -72,10 +72,10 @@ ECHEANCES_CONDUCTEURS.forEach(([id, jPermis, jVisite, cat], i) => {
     reference: `VM-2025-${String(i + 1).padStart(3, '0')}`,
     fichier: `visite_${id}.pdf`,
   })
-  ajouter(id, 'cin', '2010-06-02', null, { reference: `CIN-${id}` })
-  ajouter(id, 'contrat', '2024-11-04', null, { fichier: `contrat_${id}.pdf` })
+  ajouter(id, 'cin', decaler('2010-06-02'), null, { reference: `CIN-${id}` })
+  ajouter(id, 'contrat', decaler('2024-11-04'), null, { fichier: `contrat_${id}.pdf` })
   if (i < 6) {
-    ajouter(id, 'formation', '2024-11-12', null, {
+    ajouter(id, 'formation', decaler('2024-11-12'), null, {
       reference: 'Conduite préventive poids lourd',
       fichier: `formation_${id}.pdf`,
     })
@@ -92,19 +92,19 @@ const ECHEANCES_AIDES: Array<[string, number, number]> = [
 ]
 
 ECHEANCES_AIDES.forEach(([id, jPermis, jVisite], i) => {
-  ajouter(id, 'permis', '2021-03-08', dans(jPermis), {
+  ajouter(id, 'permis', decaler('2021-03-08'), dans(jPermis), {
     reference: `PC-${20210000 + i}`,
     categorie: 'B',
   })
   ajouter(id, 'visite_medicale', dans(jVisite - 365), dans(jVisite))
-  ajouter(id, 'cin', '2015-09-18', null, { reference: `CIN-${id}` })
-  ajouter(id, 'contrat', '2025-01-13', null)
+  ajouter(id, 'cin', decaler('2015-09-18'), null, { reference: `CIN-${id}` })
+  ajouter(id, 'contrat', decaler('2025-01-13'), null)
 })
 
 /* Sédentaires : pièces d'identité et contrat. */
 ;['p-001', 'p-002', 'p-003', 'p-004', 'p-005', 'p-006', 'p-007', 'p-008', 'p-009'].forEach(id => {
-  ajouter(id, 'cin', '2012-04-11', null, { reference: `CIN-${id}` })
-  ajouter(id, 'contrat', '2024-09-02', null, { fichier: `contrat_${id}.pdf` })
+  ajouter(id, 'cin', decaler('2012-04-11'), null, { reference: `CIN-${id}` })
+  ajouter(id, 'contrat', decaler('2024-09-02'), null, { fichier: `contrat_${id}.pdf` })
 })
 
 export const useDocumentsStore = defineStore('documentsPersonnel', () => {

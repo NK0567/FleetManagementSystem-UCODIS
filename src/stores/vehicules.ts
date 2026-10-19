@@ -1,4 +1,4 @@
-import { aujourdhuiISO, maintenant } from '../utils/horloge'
+import { aujourdhuiISO, maintenant, decaler } from '../utils/horloge'
 import { defineStore } from 'pinia'
 import { useDisponibilitesStore } from './disponibilites'
 import { useSitesStore } from './sites'
@@ -61,7 +61,7 @@ function seedVehicules(): Vehicule[] {
       valeurResiduelleAr: Math.max(20_000_000, 185_000_000 + i * 4_000_000 - km * 350),
       mensualiteAr: i % 3 === 0 ? 4_200_000 : undefined, prestataireAcquisitionId: i % 3 === 0 ? 'PRS-009' : undefined,
       dateAcquisition: `${2021 + (i % 4)}-0${(i % 9) + 1}-10`,
-      statutManuel: statut === 'hors_service' ? { statut: 'hors_service', motif: motif ?? '', par: 'Hery Andriamalala', le: '2026-08-29T10:00:00' } : undefined,
+      statutManuel: statut === 'hors_service' ? { statut: 'hors_service', motif: motif ?? '', par: 'Hery Andriamalala', le: decaler('2026-08-29T10:00:00') } : undefined,
     })
   })
   SEMI_REMORQUES.forEach(([immat, marque, modele, statut, km], i) => {
@@ -79,7 +79,7 @@ function seedVehicules(): Vehicule[] {
   out.push({
     id: 'v-ct-1', immatriculation: 'CT 4201', vin: 'LZGJCT2024000', type: 'citerne', marque: 'Schmitz', modele: 'Citerne 3 compartiments',
     categorie: 'Citerne', carburant: 'Sans objet', chargeMaxKg: 30_000, site: 'Dépôt Tanjombato', statut: 'disponible', kilometrage: 0,
-    annee: 2023, dateMiseEnCirculation: '2023-03-01', modeAcquisition: 'achat', coutAcquisitionAr: 96_000_000, valeurResiduelleAr: 80_000_000,
+    annee: 2023, dateMiseEnCirculation: decaler('2023-03-01'), modeAcquisition: 'achat', coutAcquisitionAr: 96_000_000, valeurResiduelleAr: 80_000_000,
     compartiments: [{ numero: 1, volumeL: 12_000 }, { numero: 2, volumeL: 10_000 }, { numero: 3, volumeL: 8_000, produit: 'Essence sans plomb' }],
   })
   /* Citernes de la livraison de carburant. */
@@ -107,7 +107,7 @@ export const useVehiculeStore = defineStore('vehicules', () => {
         { id: `eq-gps-${i + 1}`, vehiculeId: v.id, type: 'gps', numeroSerie: `GPS-${2024000 + i}`, etat: v.statut === 'hors_service' ? 'hors_service' : 'operationnel' },
       ]
       if (i % 3 !== 1) out.push({ id: `eq-dms-${i + 1}`, vehiculeId: v.id, type: 'dms', numeroSerie: `DMS-${3024000 + i}`, etat: 'operationnel' })
-      out.push({ id: `eq-ext-${i + 1}`, vehiculeId: v.id, type: 'extincteur', numeroSerie: `EXT-${5024000 + i}`, etat: 'operationnel', echeance: i === 3 ? '2026-08-31' : i === 6 ? '2026-09-20' : echeance(i) })
+      out.push({ id: `eq-ext-${i + 1}`, vehiculeId: v.id, type: 'extincteur', numeroSerie: `EXT-${5024000 + i}`, etat: 'operationnel', echeance: i === 3 ? decaler('2026-08-31') : i === 6 ? decaler('2026-09-20') : echeance(i) })
       out.push({ id: `eq-kap-${i + 1}`, vehiculeId: v.id, type: 'kit_antipollution', etat: 'operationnel', echeance: echeance(i + 3) })
       return out
     }).concat(EQUIPEMENTS_DEMO.map(e => ({ ...e }))),
@@ -168,11 +168,11 @@ export const useVehiculeStore = defineStore('vehicules', () => {
     tracteurs.value.forEach((tr, i) => {
       const sr = semiRemorques.value[i]
       if (sr && tr.statut !== 'hors_service') {
-        attelages.value.push({ id: `at-${i + 1}`, tracteurId: tr.id, semiRemorqueId: sr.id, dateDebut: '2025-01-10' })
+        attelages.value.push({ id: `at-${i + 1}`, tracteurId: tr.id, semiRemorqueId: sr.id, dateDebut: decaler('2025-01-10') })
       }
       const cond = conducteurs[i]
       if (cond && (tr.statut === 'affecte' || tr.statut === 'disponible')) {
-        affectations.value.push({ id: `af-${i + 1}`, vehiculeId: tr.id, conducteurId: cond.id, dateDebut: '2025-01-10' })
+        affectations.value.push({ id: `af-${i + 1}`, vehiculeId: tr.id, conducteurId: cond.id, dateDebut: decaler('2025-01-10') })
       }
     })
   }

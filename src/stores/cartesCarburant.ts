@@ -1,4 +1,4 @@
-import { maintenant, aujourdhuiISO } from '../utils/horloge'
+import { maintenant, aujourdhuiISO, decaler } from '../utils/horloge'
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 import { useCarburantStore, dansPlageHoraire } from './carburant'
@@ -59,24 +59,24 @@ function ecrire(cle: string, v: unknown) { try { localStorage.setItem(cle, JSON.
 
 const LIMITES_STD: LimitesCarte = { montantMensuelAr: 12_000_000, volumeMensuelL: 2_000, transactionsParJour: 3, zones: [], heureDebut: 4, heureFin: 21 }
 const SEED_CARTES: CarteCarburant[] = [
-  { id: 'CC-0001', numero: '7089 1200 0001 4021', fournisseurId: 'PRS-007', rattachement: 'vehicule', vehiculeId: 'v-tr-1', limites: { ...LIMITES_STD }, statut: 'active', dateExpiration: '2027-06-30', historique: [] },
-  { id: 'CC-0002', numero: '7089 1200 0002 4022', fournisseurId: 'PRS-007', rattachement: 'vehicule', vehiculeId: 'v-tr-2', limites: { ...LIMITES_STD, zones: ['Antananarivo', 'Mahajanga', 'Toamasina'] }, statut: 'active', dateExpiration: '2027-06-30', historique: [] },
-  { id: 'CC-0003', numero: '7089 1200 0003 4024', fournisseurId: 'PRS-007', rattachement: 'vehicule', vehiculeId: 'v-tr-4', limites: { ...LIMITES_STD }, statut: 'active', dateExpiration: '2027-06-30', historique: [] },
-  { id: 'CC-0004', numero: '6120 8800 0004 0015', fournisseurId: 'PRS-008', rattachement: 'chauffeur', chauffeurId: 'p-015', limites: { ...LIMITES_STD, montantMensuelAr: 8_000_000, volumeMensuelL: 1_400 }, statut: 'active', dateExpiration: '2027-03-31', historique: [] },
-  { id: 'CC-0005', numero: '7089 1200 0005 4029', fournisseurId: 'PRS-007', rattachement: 'vehicule', vehiculeId: 'v-tr-9', limites: { ...LIMITES_STD }, statut: 'bloquee', motifBlocage: 'Véhicule hors service après accident', dateExpiration: '2027-06-30', historique: [{ le: '2026-08-29T12:00:00', par: 'Hery Andriamalala', action: 'Carte bloquée : véhicule hors service après accident' }] },
+  { id: 'CC-0001', numero: '7089 1200 0001 4021', fournisseurId: 'PRS-007', rattachement: 'vehicule', vehiculeId: 'v-tr-1', limites: { ...LIMITES_STD }, statut: 'active', dateExpiration: decaler('2027-06-30'), historique: [] },
+  { id: 'CC-0002', numero: '7089 1200 0002 4022', fournisseurId: 'PRS-007', rattachement: 'vehicule', vehiculeId: 'v-tr-2', limites: { ...LIMITES_STD, zones: ['Antananarivo', 'Mahajanga', 'Toamasina'] }, statut: 'active', dateExpiration: decaler('2027-06-30'), historique: [] },
+  { id: 'CC-0003', numero: '7089 1200 0003 4024', fournisseurId: 'PRS-007', rattachement: 'vehicule', vehiculeId: 'v-tr-4', limites: { ...LIMITES_STD }, statut: 'active', dateExpiration: decaler('2027-06-30'), historique: [] },
+  { id: 'CC-0004', numero: '6120 8800 0004 0015', fournisseurId: 'PRS-008', rattachement: 'chauffeur', chauffeurId: 'p-015', limites: { ...LIMITES_STD, montantMensuelAr: 8_000_000, volumeMensuelL: 1_400 }, statut: 'active', dateExpiration: decaler('2027-03-31'), historique: [] },
+  { id: 'CC-0005', numero: '7089 1200 0005 4029', fournisseurId: 'PRS-007', rattachement: 'vehicule', vehiculeId: 'v-tr-9', limites: { ...LIMITES_STD }, statut: 'bloquee', motifBlocage: 'Véhicule hors service après accident', dateExpiration: decaler('2027-06-30'), historique: [{ le: decaler('2026-08-29T12:00:00'), par: 'Hery Andriamalala', action: 'Carte bloquée : véhicule hors service après accident' }] },
 ]
 const SEED_TX: TransactionCarte[] = [
-  { id: 'TX-0001', carteId: 'CC-0001', date: '2026-08-24T14:35:00', station: 'Station Toamasina', ville: 'Toamasina', litres: 140, montantAr: 791_000, importeLe: '2026-08-31T09:00:00' },
-  { id: 'TX-0002', carteId: 'CC-0002', date: '2026-08-20T18:12:00', station: 'Station Mahajanga', ville: 'Mahajanga', litres: 545, montantAr: 3_106_500, importeLe: '2026-08-31T09:00:00' },
-  { id: 'TX-0003', carteId: 'CC-0003', date: '2026-08-26T13:07:00', station: 'Station Toamasina', ville: 'Toamasina', litres: 132, montantAr: 752_400, importeLe: '2026-08-31T09:00:00' },
-  { id: 'TX-0004', carteId: 'CC-0004', date: '2026-08-18T18:16:00', station: 'Station Toamasina', ville: 'Toamasina', litres: 165, montantAr: 940_500, importeLe: '2026-08-31T09:00:00' },
-  { id: 'TX-0005', carteId: 'CC-0001', date: '2026-08-27T22:40:00', station: 'Station Antsirabe', ville: 'Antsirabe', litres: 120, montantAr: 678_000, importeLe: '2026-08-31T09:00:00' },
-  { id: 'TX-0006', carteId: 'CC-0002', date: '2026-08-28T10:05:00', station: 'Station Fianarantsoa', ville: 'Fianarantsoa', litres: 90, montantAr: 508_500, importeLe: '2026-08-31T09:00:00' },
+  { id: 'TX-0001', carteId: 'CC-0001', date: decaler('2026-08-24T14:35:00'), station: 'Station Toamasina', ville: 'Toamasina', litres: 140, montantAr: 791_000, importeLe: decaler('2026-08-31T09:00:00') },
+  { id: 'TX-0002', carteId: 'CC-0002', date: decaler('2026-08-20T18:12:00'), station: 'Station Mahajanga', ville: 'Mahajanga', litres: 545, montantAr: 3_106_500, importeLe: decaler('2026-08-31T09:00:00') },
+  { id: 'TX-0003', carteId: 'CC-0003', date: decaler('2026-08-26T13:07:00'), station: 'Station Toamasina', ville: 'Toamasina', litres: 132, montantAr: 752_400, importeLe: decaler('2026-08-31T09:00:00') },
+  { id: 'TX-0004', carteId: 'CC-0004', date: decaler('2026-08-18T18:16:00'), station: 'Station Toamasina', ville: 'Toamasina', litres: 165, montantAr: 940_500, importeLe: decaler('2026-08-31T09:00:00') },
+  { id: 'TX-0005', carteId: 'CC-0001', date: decaler('2026-08-27T22:40:00'), station: 'Station Antsirabe', ville: 'Antsirabe', litres: 120, montantAr: 678_000, importeLe: decaler('2026-08-31T09:00:00') },
+  { id: 'TX-0006', carteId: 'CC-0002', date: decaler('2026-08-28T10:05:00'), station: 'Station Fianarantsoa', ville: 'Fianarantsoa', litres: 90, montantAr: 508_500, importeLe: decaler('2026-08-31T09:00:00') },
   /* Début septembre : le mois en cours a déjà ses premières transactions. */
-  { id: 'TX-0007', carteId: 'CC-0003', date: '2026-09-01T06:15:00', station: 'Station Antsirabe', ville: 'Antsirabe', litres: 410, montantAr: 2_316_500, importeLe: '2026-09-04T06:30:00' },
-  { id: 'TX-0008', carteId: 'CC-0004', date: '2026-09-02T07:40:00', station: 'Station Toamasina', ville: 'Toamasina', litres: 380, montantAr: 2_166_000, importeLe: '2026-09-04T06:30:00' },
-  { id: 'TX-0009', carteId: 'CC-0003', date: '2026-09-03T15:20:00', station: 'Station Fianarantsoa', ville: 'Fianarantsoa', litres: 160, montantAr: 904_000, importeLe: '2026-09-04T06:30:00' },
-  { id: 'TX-0010', carteId: 'CC-0004', date: '2026-09-04T05:30:00', station: 'Station Mahajanga', ville: 'Mahajanga', litres: 300, montantAr: 1_710_000, importeLe: '2026-09-04T06:30:00' },
+  { id: 'TX-0007', carteId: 'CC-0003', date: decaler('2026-09-01T06:15:00'), station: 'Station Antsirabe', ville: 'Antsirabe', litres: 410, montantAr: 2_316_500, importeLe: decaler('2026-09-04T06:30:00') },
+  { id: 'TX-0008', carteId: 'CC-0004', date: decaler('2026-09-02T07:40:00'), station: 'Station Toamasina', ville: 'Toamasina', litres: 380, montantAr: 2_166_000, importeLe: decaler('2026-09-04T06:30:00') },
+  { id: 'TX-0009', carteId: 'CC-0003', date: decaler('2026-09-03T15:20:00'), station: 'Station Fianarantsoa', ville: 'Fianarantsoa', litres: 160, montantAr: 904_000, importeLe: decaler('2026-09-04T06:30:00') },
+  { id: 'TX-0010', carteId: 'CC-0004', date: decaler('2026-09-04T05:30:00'), station: 'Station Mahajanga', ville: 'Mahajanga', litres: 300, montantAr: 1_710_000, importeLe: decaler('2026-09-04T06:30:00') },
 ]
 
 export const useCartesCarburantStore = defineStore('cartesCarburant', () => {

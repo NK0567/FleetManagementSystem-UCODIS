@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 import { useTypesDocumentsStore } from './typesDocuments'
 import { etatEcheance } from '../utils/helpers'
-import { aujourdhuiISO, dansNJours, maintenant } from '../utils/horloge'
+import { aujourdhuiISO, dansNJours, maintenant, decaler } from '../utils/horloge'
 import type { PieceJointe, EtatDocument } from '../types'
 
 /**
@@ -39,8 +39,8 @@ const CLE = 'fms-ucodis-documents-entreprise'
 const CLE_REGLE = 'fms-ucodis-validation-documents'
 
 const SEED: DocumentEntreprise[] = [
-  { id: 'DE-001', reference: 'DOC-2024-001', nom: 'Statuts de la société', type: 'statuts', entiteId: 'e1', motsCles: ['statuts', 'juridique'], dateDocument: '2024-03-12', scan: { nom: 'statuts.pdf' }, statut: 'valide', deposePar: 'Rivo Andrianjafy', deposeLe: '2024-03-15T10:00:00', decision: { par: 'Faniry Rakotoarisoa', le: '2024-03-16T09:00:00' } },
-  { id: 'DE-002', reference: 'DOC-2025-014', nom: 'Licence de transport de marchandises', type: 'licence_transport', entiteId: 'e2', motsCles: ['licence', 'transport', 'ministère'], dateDocument: dansNJours(-330), dateFin: dansNJours(35), scan: { nom: 'licence_transport.pdf' }, statut: 'valide', deposePar: 'Hery Andriamalala', deposeLe: '2025-10-01T08:30:00', decision: { par: 'Rivo Andrianjafy', le: '2025-10-02T11:00:00' } },
+  { id: 'DE-001', reference: 'DOC-2024-001', nom: 'Statuts de la société', type: 'statuts', entiteId: 'e1', motsCles: ['statuts', 'juridique'], dateDocument: decaler('2024-03-12'), scan: { nom: 'statuts.pdf' }, statut: 'valide', deposePar: 'Rivo Andrianjafy', deposeLe: decaler('2024-03-15T10:00:00'), decision: { par: 'Faniry Rakotoarisoa', le: decaler('2024-03-16T09:00:00') } },
+  { id: 'DE-002', reference: 'DOC-2025-014', nom: 'Licence de transport de marchandises', type: 'licence_transport', entiteId: 'e2', motsCles: ['licence', 'transport', 'ministère'], dateDocument: dansNJours(-330), dateFin: dansNJours(35), scan: { nom: 'licence_transport.pdf' }, statut: 'valide', deposePar: 'Hery Andriamalala', deposeLe: decaler('2025-10-01T08:30:00'), decision: { par: 'Rivo Andrianjafy', le: decaler('2025-10-02T11:00:00') } },
   { id: 'DE-003', reference: 'DOC-2026-021', nom: 'Attestation de régularité fiscale 2026', type: 'attestation_fiscale', entiteId: 'e1', motsCles: ['impôts', 'fiscal'], dateDocument: dansNJours(-5), dateFin: dansNJours(360), scan: { nom: 'attestation_fiscale_2026.pdf' }, statut: 'en_attente', deposePar: 'Faniry Rakotoarisoa', deposeLe: dansNJours(-4) + 'T15:20:00' },
   { id: 'DE-004', reference: 'DOC-2026-018', nom: 'Procédure de contrôle avant départ', type: 'procedure', entiteId: 'e2', motsCles: ['procédure', 'départ', 'sécurité', 'checklist'], dateDocument: dansNJours(-40), scan: { nom: 'procedure_depart_v2.pdf' }, statut: 'rejete', deposePar: 'Tojo Rasoanaivo', deposeLe: dansNJours(-38) + 'T09:00:00', decision: { par: 'Hery Andriamalala', le: dansNJours(-37) + 'T10:00:00', motif: 'Version non signée par la direction.' } },
 ]

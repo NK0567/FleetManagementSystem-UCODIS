@@ -1,4 +1,4 @@
-import { maintenantMs, maintenant } from '../utils/horloge'
+import { maintenantMs, maintenant, decaler } from '../utils/horloge'
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 import { useMaintenanceStore } from './maintenance'
@@ -46,17 +46,17 @@ const libellesGrille = () => Object.fromEntries(GRILLE_DEFAUT.map(p => [p.code, 
 
 const SEED: AuditConformite[] = [
   { id: 'INS-001', reference: 'INS-2026-004', vehiculeId: 'v-tr-1', tracteurPlaque: '4021 TBA', semiRemorquePlaque: 'RM 4101',
-    date: '2026-08-15T09:00:00', auditeur: 'Tojo Rasoanaivo', resultats: tous(() => 'conforme'), conforme: true,
-    signataire: 'Tojo Rasoanaivo', signeLe: '2026-08-15T11:40:00', libelles: libellesGrille() },
+    date: decaler('2026-08-15T09:00:00'), auditeur: 'Tojo Rasoanaivo', resultats: tous(() => 'conforme'), conforme: true,
+    signataire: 'Tojo Rasoanaivo', signeLe: decaler('2026-08-15T11:40:00'), libelles: libellesGrille() },
   { id: 'INS-002', reference: 'INS-2026-003', vehiculeId: 'v-tr-2', tracteurPlaque: '4022 TBA', semiRemorquePlaque: 'RM 4102',
-    date: '2026-07-20T10:30:00', auditeur: 'Tojo Rasoanaivo',
+    date: decaler('2026-07-20T10:30:00'), auditeur: 'Tojo Rasoanaivo',
     resultats: tous((_, i) => i === 11 ? 'non_conforme' : i === 4 ? 'conforme_observation' : 'conforme',
       i => i === 11 ? 'Frein de service en limite basse d’efficacité, réglage requis.' : i === 4 ? 'Plaque légèrement décollée, à recoller.' : undefined),
-    conforme: false, contreVisiteLe: '2026-08-05T09:00:00', signataire: 'Tojo Rasoanaivo', signeLe: '2026-07-20T12:15:00',
+    conforme: false, contreVisiteLe: decaler('2026-08-05T09:00:00'), signataire: 'Tojo Rasoanaivo', signeLe: decaler('2026-07-20T12:15:00'),
     libelles: libellesGrille(), leveeParId: 'INS-003' },
   { id: 'INS-003', reference: 'INS-2026-005', vehiculeId: 'v-tr-2', tracteurPlaque: '4022 TBA', semiRemorquePlaque: 'RM 4102',
-    date: '2026-08-05T09:00:00', auditeur: 'Tojo Rasoanaivo', resultats: tous(() => 'conforme'), conforme: true,
-    contreVisiteDe: 'INS-002', signataire: 'Tojo Rasoanaivo', signeLe: '2026-08-05T10:20:00', libelles: libellesGrille(),
+    date: decaler('2026-08-05T09:00:00'), auditeur: 'Tojo Rasoanaivo', resultats: tous(() => 'conforme'), conforme: true,
+    contreVisiteDe: 'INS-002', signataire: 'Tojo Rasoanaivo', signeLe: decaler('2026-08-05T10:20:00'), libelles: libellesGrille(),
     commentaire: 'Contre-visite : frein de service réglé, efficacité conforme.' },
 ]
 

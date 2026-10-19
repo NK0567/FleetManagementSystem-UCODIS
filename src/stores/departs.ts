@@ -1,4 +1,4 @@
-import { maintenant } from '../utils/horloge'
+import { maintenant, decaler } from '../utils/horloge'
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 import type { AutorisationDepart, ControleConducteurDepart, ControleDepart, ResultatControleDepart } from '../types'
@@ -38,7 +38,7 @@ const resultatsDemo = (): ResultatControleDepart[] => CONTROLES_CONDUCTEUR_DEFAU
 const AUTORISATION_CARBURANT_DEMO = (): AutorisationDepart => ({
   id: 'AUT-004', reference: 'AUT-2026-0214', voyageId: 'VOY-017', voyageRef: 'VOY-2026-0163',
   vehiculeId: 'v-tr-1', vehiculePlaque: '4021 TBA', chauffeurId: 'p-010', chauffeurNom: 'Solofo Rakotomanga',
-  demandeeLe: '2026-09-04T06:32:00',
+  demandeeLe: decaler('2026-09-04T06:32:00'),
   /* Contrôles relevés au moment de la décision, comme pour tout départ accordé. */
   controles: [
     { controle: 'checklist', conforme: true },
@@ -48,11 +48,11 @@ const AUTORISATION_CARBURANT_DEMO = (): AutorisationDepart => ({
     { controle: 'repos', conforme: true, detail: 'Aucun voyage récent avant ce départ.' },
     ...resultatsDemo(),
   ],
-  saisiesConducteur: conformesDemo('Hery Andriamalala', '2026-09-04T06:33:00'),
-  accordee: true, decidePar: 'Hery Andriamalala', decideLe: '2026-09-04T06:40:00',
-  suiviActiveLe: '2026-09-04T06:41:00',
+  saisiesConducteur: conformesDemo('Hery Andriamalala', decaler('2026-09-04T06:33:00')),
+  accordee: true, decidePar: 'Hery Andriamalala', decideLe: decaler('2026-09-04T06:40:00'),
+  suiviActiveLe: decaler('2026-09-04T06:41:00'),
   checklistDepart: Object.fromEntries(POINTS_CHECKLIST_ROUTE.map(p => [p.code, true])),
-  checklistValideeLe: '2026-09-04T06:34:00',
+  checklistValideeLe: decaler('2026-09-04T06:34:00'),
 })
 
 /**
@@ -66,43 +66,43 @@ export const useDepartsStore = defineStore('departs', () => {
     {
       id: 'AUT-001', reference: 'AUT-2026-0213', voyageId: 'VOY-004', voyageRef: 'VOY-2026-0150',
       vehiculeId: 'v-tr-3', vehiculePlaque: '4023 TBA', chauffeurId: 'p-012', chauffeurNom: 'Tiana Rasolofoson',
-      demandeeLe: '2026-09-04T06:02:00',
+      demandeeLe: decaler('2026-09-04T06:02:00'),
       controles: [
         { controle: 'checklist', conforme: true },
         { controle: 'documents_chauffeur', conforme: true },
         { controle: 'documents_vehicule', conforme: true },
       ],
-      saisiesConducteur: conformesDemo('Hery Andriamalala', '2026-09-04T06:00:00'),
+      saisiesConducteur: conformesDemo('Hery Andriamalala', decaler('2026-09-04T06:00:00')),
       accordee: false,
     },
     {
       id: 'AUT-002', reference: 'AUT-2026-0212', voyageId: 'VOY-002', voyageRef: 'VOY-2026-0149',
       vehiculeId: 'v-tr-3', vehiculePlaque: '4023 TBA', chauffeurId: 'p-012', chauffeurNom: 'Tiana Rasolofoson',
-      demandeeLe: '2026-09-03T06:05:00',
+      demandeeLe: decaler('2026-09-03T06:05:00'),
       controles: [
         { controle: 'checklist', conforme: true },
         { controle: 'documents_chauffeur', conforme: true },
         { controle: 'documents_vehicule', conforme: true },
         ...resultatsDemo(),
       ],
-      saisiesConducteur: conformesDemo('Hery Andriamalala', '2026-09-03T06:03:00'),
-      accordee: true, decidePar: 'Hery Andriamalala', decideLe: '2026-09-03T06:08:00',
-      suiviActiveLe: '2026-09-03T06:10:00',
+      saisiesConducteur: conformesDemo('Hery Andriamalala', decaler('2026-09-03T06:03:00')),
+      accordee: true, decidePar: 'Hery Andriamalala', decideLe: decaler('2026-09-03T06:08:00'),
+      suiviActiveLe: decaler('2026-09-03T06:10:00'),
       checklistDepart: Object.fromEntries(POINTS_CHECKLIST_ROUTE.map(p => [p.code, true])),
-      checklistValideeLe: '2026-09-03T06:04:00',
+      checklistValideeLe: decaler('2026-09-03T06:04:00'),
     },
     {
       id: 'AUT-003', reference: 'AUT-2026-0211', voyageId: 'VOY-001', voyageRef: 'VOY-2026-0148',
       vehiculeId: 'v-tr-1', vehiculePlaque: '4021 TBA', chauffeurId: 'p-010', chauffeurNom: 'Solofo Rakotomanga',
-      demandeeLe: '2026-08-24T05:45:00',
+      demandeeLe: decaler('2026-08-24T05:45:00'),
       controles: [
         { controle: 'checklist', conforme: false, detail: "Essuie-glace côté passager usé - poursuite acceptée avec réserve." },
         { controle: 'documents_chauffeur', conforme: false, detail: "Absence du duplicata de la visite médicale sur place." },
         { controle: 'documents_vehicule', conforme: true },
         ...resultatsDemo(),
       ],
-      saisiesConducteur: conformesDemo('Hery Andriamalala', '2026-08-24T05:46:00'),
-      accordee: false, decidePar: 'Hery Andriamalala', decideLe: '2026-08-24T05:48:00',
+      saisiesConducteur: conformesDemo('Hery Andriamalala', decaler('2026-08-24T05:46:00')),
+      accordee: false, decidePar: 'Hery Andriamalala', decideLe: decaler('2026-08-24T05:48:00'),
       motifRefus: 'Deux contrôles non conformes : régularisation requise avant tout nouveau départ.',
     },
     AUTORISATION_CARBURANT_DEMO(),

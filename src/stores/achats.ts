@@ -1,4 +1,4 @@
-import { maintenantMs, maintenant, isoJour } from '../utils/horloge'
+import { maintenantMs, maintenant, isoJour, decaler } from '../utils/horloge'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import type { Fournisseur, ProduitStock, MouvementStock } from '../types/maintenance'
@@ -40,13 +40,13 @@ export const useAchatsStore = defineStore('achats', () => {
      La boîte de vitesses commandée pour OT-2026-0029 n'est pas encore reçue :
      aucune sortie n'est donc tracée pour elle. */
   const mouvements = ref<MouvementStock[]>([
-    { id: 'MVT-001', produitId: 'PRD-001', type: 'entree', quantite: 20, date: '2026-07-01', motif: 'Réception commande initiale',
+    { id: 'MVT-001', produitId: 'PRD-001', type: 'entree', quantite: 20, date: decaler('2026-07-01'), motif: 'Réception commande initiale',
       fournisseurId: 'PRS-013', numeroBonCommande: 'BC-2026-014', stockApres: 20 },
-    { id: 'MVT-002', produitId: 'PRD-001', type: 'sortie', quantite: 1, date: '2026-08-28', motif: 'Vidange moteur',
+    { id: 'MVT-002', produitId: 'PRD-001', type: 'sortie', quantite: 1, date: decaler('2026-08-28'), motif: 'Vidange moteur',
       ordreTravailId: 'OT-2026-0031', vehiculePlaque: '4022 TBA', kilometrage: 165_900, stockApres: 19 },
-    { id: 'MVT-003', produitId: 'PRD-007', type: 'sortie', quantite: 20, date: '2026-08-28', motif: 'Vidange moteur',
+    { id: 'MVT-003', produitId: 'PRD-007', type: 'sortie', quantite: 20, date: decaler('2026-08-28'), motif: 'Vidange moteur',
       ordreTravailId: 'OT-2026-0031', vehiculePlaque: '4022 TBA', kilometrage: 165_900, stockApres: 22 },
-    { id: 'MVT-004', produitId: 'PRD-005', type: 'sortie', quantite: 4, date: '2026-08-24', motif: 'Garnitures usées, remplacement',
+    { id: 'MVT-004', produitId: 'PRD-005', type: 'sortie', quantite: 4, date: decaler('2026-08-24'), motif: 'Garnitures usées, remplacement',
       ordreTravailId: 'OT-2026-0032', vehiculePlaque: 'RM 4109', kilometrage: 0, stockApres: 8 },
   ])
 
