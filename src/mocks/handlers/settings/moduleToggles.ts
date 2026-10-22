@@ -23,7 +23,7 @@ export function registerModuleToggleHandlers(router: MockRouter, db: MockDatabas
     basePath: '/settings/module-toggles',
     feature: 'MODULETOGGLE',
     collection: db.moduleToggles,
-    toApi,
+    list: () => db.moduleToggles.all().map(toApi),
     update: (_existing, input) => {
       if (typeof input.active !== 'boolean') throw requiredField('active')
       return { active: input.active }

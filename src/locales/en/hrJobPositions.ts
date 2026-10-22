@@ -1,0 +1,39 @@
+export default {
+  'hr.jobPositions.title': 'Job positions',
+  'hr.jobPositions.card': 'Job position card',
+  'hr.jobPositions.new': 'New job position',
+  'hr.jobPositions.loadingList': 'Loading job positions…',
+  'hr.jobPositions.noResults': 'No job position.',
+  'hr.jobPositions.noSearchResults': 'No job position matches "{query}".',
+  'hr.jobPositions.saveSuccess': 'Job position saved.',
+  'hr.jobPositions.saveError': 'The job position could not be saved.',
+  'hr.jobPositions.createError': 'The job position could not be created.',
+  'hr.jobPositions.deleteError': 'The job position could not be deleted.',
+  'hr.jobPositions.confirmDelete': 'Delete the job position',
+  'hr.jobPositions.confirmDeleteMsg': 'The job position "{name}" will be permanently deleted.',
+
+  'hr.jobPositions.search.all': 'Code or title',
+
+  'hr.jobPositions.col.no': 'Code',
+  'hr.jobPositions.col.name': 'Title',
+  'hr.jobPositions.col.orgUnitName': 'Unit',
+  'hr.jobPositions.col.plannedHeadcount': 'Planned headcount',
+  'hr.jobPositions.col.actualHeadcount': 'Actual headcount',
+  'hr.jobPositions.col.headcountGap': 'Gap',
+  'hr.jobPositions.col.drives': 'Drives',
+  'hr.jobPositions.col.defaultCategoryNo': 'Default category',
+
+  'hr.jobPositions.form.general': 'General',
+  'hr.jobPositions.form.no': 'Code',
+  'hr.jobPositions.form.name': 'Title',
+  'hr.jobPositions.form.orgUnitNo': 'Unit',
+  'hr.jobPositions.form.defaultCategoryNo': 'Category suggested when hiring',
+  'hr.jobPositions.form.drives': 'Drives a vehicle',
+  'hr.jobPositions.form.plannedHeadcount': 'Planned headcount',
+  'hr.jobPositions.form.actualHeadcount': 'Actual headcount',
+  'hr.jobPositions.form.headcountGap': 'Open positions',
+  'hr.jobPositions.form.responsibilities': 'Responsibilities',
+  'hr.jobPositions.form.responsibilityCount':
+    'No responsibility | {count} responsibility | {count} responsibilities',
+  'hr.jobPositions.form.responsibilitiesHint': 'One responsibility per line.'
+}

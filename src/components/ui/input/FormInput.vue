@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 
 export interface FormInputProps {
   type?: 'text' | 'number' | 'email' | 'tel' | 'url' | 'search'
-  modelValue?: string | number
+  modelValue?: string | number | null
   placeholder?: string
   disabled?: boolean
   invalid?: boolean
@@ -120,7 +120,7 @@ function handleInput(event: Event) {
     <input
       :class="inputClass"
       :type="type"
-      :value="modelValue"
+      :value="modelValue ?? ''"
       :placeholder="placeholder"
       :disabled="disabled"
       :id="id"

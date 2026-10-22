@@ -2,7 +2,7 @@ import { nowIso } from '../clock'
 import type { AuditFields, Collection, MockRow } from '../db/collection'
 import { optionLabel } from '../fixtures/options'
 import { COMMON_MESSAGES, localize } from '../i18n'
-import { badRequest, conflict } from './errors'
+import { badRequest, conflict, notFound } from './errors'
 import { buildWorkbook, readExportColumns, type ExportCell } from './exportXlsx'
 import { applyListQuery, filterAndSort } from './listQuery'
 import { created, file, ok, paginated } from './responses'
@@ -21,8 +21,8 @@ export interface CrudResourceOptions<Row extends MockRow, Api extends { no: stri
   basePath: string
   feature: string
   collection: Collection<Row>
-  /** Adds the derived and joined fields; runs before search, filters and sort. */
-  toApi: (row: Row) => Api
+  /** Every record as served by the API, joined and derived fields included. */
+  list: () => Api[]
   searchColumns?: string[]
   /** Option set per field, so exports write labels instead of codes. */
   optionFields?: Record<string, string>
@@ -73,13 +73,21 @@ function exportCell(
   return Array.isArray(value) ? value.join(', ') : JSON.stringify(value)
 }
 
-/** Standard list, card, create, update, delete and export endpoints of an entity. */
-export function registerCrudResource<Row extends MockRow, Api extends { no: string }>(
+export interface ListResourceOptions<Api extends { no: string }> {
+  basePath: string
+  feature: string
+  /** Every record as served by the API, derived fields included. */
+  rows: () => Api[]
+  searchColumns?: string[]
+  optionFields?: Record<string, string>
+}
+
+/** List, card and export endpoints of an entity, including computed ones without storage. */
+export function registerListResource<Api extends { no: string }>(
   router: MockRouter,
-  options: CrudResourceOptions<Row, Api>
+  options: ListResourceOptions<Api>
 ): void {
-  const { basePath, feature, collection, toApi, searchColumns, optionFields = {} } = options
-  const apiRows = () => collection.all().map(toApi)
+  const { basePath, feature, rows: apiRows, searchColumns, optionFields = {} } = options
 
   router.get(basePath, { feature, action: 'read' }, (request) =>
     paginated(applyListQuery(apiRows(), request.query, { searchColumns }))
@@ -105,11 +113,41 @@ export function registerCrudResource<Row extends MockRow, Api extends { no: stri
     return file(await buildWorkbook(columns, rows), `${baseName}.xlsx`)
   })
 
-  router.get(`${basePath}/:no`, { feature, action: 'read' }, (request) =>
-    ok(toApi(collection.findOrFail(routeParam(request, 'no'))))
-  )
+  router.get(`${basePath}/:no`, { feature, action: 'read' }, (request) => {
+    const record = apiRows().find((row) => row.no === routeParam(request, 'no'))
+    if (!record) throw notFound()
+    return ok(record)
+  })
+}
 
-  const { create, update, remove } = options
+/** Standard list, card, create, update, delete and export endpoints of an entity. */
+export function registerCrudResource<Row extends MockRow, Api extends { no: string }>(
+  router: MockRouter,
+  options: CrudResourceOptions<Row, Api>
+): void {
+  const {
+    basePath,
+    feature,
+    collection,
+    list,
+    searchColumns,
+    optionFields,
+    create,
+    update,
+    remove
+  } = options
+  const apiRecord = (no: string): Api => {
+    const record = list().find((row) => row.no === no)
+    if (!record) throw notFound()
+    return record
+  }
+  registerListResource(router, {
+    basePath,
+    feature,
+    rows: list,
+    searchColumns,
+    optionFields
+  })
 
   if (create) {
     router.post(basePath, { feature, action: 'insert' }, (request) => {
@@ -121,7 +159,8 @@ export function registerCrudResource<Row extends MockRow, Api extends { no: stri
           { duplicateField: 'no', duplicateValue: row.no }
         )
       }
-      return created(toApi(collection.insert(row)))
+      collection.insert(row)
+      return created(apiRecord(row.no))
     })
   }
 
@@ -130,11 +169,11 @@ export function registerCrudResource<Row extends MockRow, Api extends { no: stri
       const existing = collection.findOrFail(routeParam(request, 'no'))
       const patch = update(existing, readBody(request), request)
       // A patch is a subset of the row, completed with the audit fields.
-      const next = collection.update(existing.no, {
+      collection.update(existing.no, {
         ...patch,
         ...stampModified(request)
       } as Partial<Row>)
-      return ok(toApi(next))
+      return ok(apiRecord(existing.no))
     })
   }
 

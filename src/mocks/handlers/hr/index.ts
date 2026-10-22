@@ -1,0 +1,15 @@
+import type { MockDatabase } from '../../db/database'
+import type { MockRouter } from '../../http/router'
+import {
+  registerEmployeeCategoryHandlers,
+  registerJobPositionHandlers,
+  registerLeaveTypeHandlers,
+  registerPublicHolidayHandlers
+} from './referenceEntities'
+
+export function registerHrHandlers(router: MockRouter, db: MockDatabase): void {
+  registerEmployeeCategoryHandlers(router, db)
+  registerLeaveTypeHandlers(router, db)
+  registerJobPositionHandlers(router, db)
+  registerPublicHolidayHandlers(router, db)
+}

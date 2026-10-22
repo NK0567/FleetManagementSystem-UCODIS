@@ -31,7 +31,7 @@ function setup() {
     basePath: '/things',
     feature: 'THING',
     collection,
-    toApi: (row) => ({ ...row, label: `${row.no} ${row.name}` }),
+    list: () => collection.all().map((row) => ({ ...row, label: `${row.no} ${row.name}` })),
     searchColumns: ['name'],
     create: (input) => {
       if (typeof input.name !== 'string' || !input.name) throw requiredField('name')

@@ -64,6 +64,42 @@ Règle de placement d'un composant :
 - utilisé par au moins deux modules → `components/shared/` ;
 - sinon → `modules/<domaine>/<entité>/components/`.
 
+## 3. Flux de données : api → service → store → page
+
+Chaque entité est un dossier `src/modules/<domaine>/<entités>/` organisé en couches. Chaque couche ne connaît que celle du dessous :
+
+```
+pages/        EmployeeCategoriesList · EmployeeCategoryCard · EmployeeCategoryCreateModal
+   │          (useListPage · useEntityCard · useEntityCreate)
+components/   EmployeeCategoryForm (useEntityForm)
+   │
+stores/       useEmployeeCategoryStore = useCrudState(...) + actions propres
+   │
+services/     employeeCategoryService = createCrudService(api) : déballe l'enveloppe HTTP
+   │
+api/          employeeCategoryApi = createCrudApi({ basePath }) : appels httpClient
+types/        EmployeeCategoryApi, EmployeeCategorySearchColumn
+domain/       règles métier pures, partagées avec le serveur simulé (optionnel)
+index.ts      API publique du module
+```
+
+| Couche | Responsabilité | Ne fait jamais |
+|---|---|---|
+| `api/` | Une fonction par endpoint ; renvoie la réponse axios | Transformer les données, gérer un état |
+| `services/` | Renvoie les données utiles (`data.data`, `{ items, meta }`) ; ajoute les actions métier (`approve`, `validate`…) en étendant le service CRUD | Toucher à Vue ou à Pinia |
+| `stores/` | État de liste (recherche, filtres, tri, pagination), fiche courante, actions qui combinent plusieurs appels | Construire des URL, lire le DOM |
+| `components/` | Le formulaire de l'entité : brouillon, champs, contrôles de saisie ; expose `buildFullPayload`, `buildDiffPayload`, `validateForCreation`… | Appeler l'API |
+| `pages/` | La liste, la fiche (modale ouverte par `?no=&cardMode=`) et la modale de création | Recopier une logique déjà dans un composable |
+
+Les trois composables de page évitent de réécrire la même mécanique dans chaque écran :
+- `useListPage` : droits, préférences de colonnes, filtres avancés, export Excel, fiche ouverte par l'URL, création et suppression ;
+- `useEntityCard` : chargement depuis la liste ou l'API, mode édition, enregistrement des seuls champs modifiés, enregistrement précédent et suivant, garde des modifications non enregistrées ;
+- `useEntityForm` et `useEntityCreate` : brouillon, champs obligatoires, règles de saisie, envoi de la création.
+
+Le `[id].vue` de chaque entité ne fait que rediriger vers la liste avec `?no=` : une fiche s'ouvre toujours par-dessus sa liste, comme sur P247.
+
+Les listes de référence (entités, catégories, types de congé, sites, employés…) sont chargées une fois par `GET /reference/all` dans `referenceStore`, puis lues par `ReferenceLookup` dans les formulaires et par `referenceLabel(...)` dans les colonnes.
+
 ## 4. Backend simulé
 
 Tant que l'API du FMS n'existe pas, `src/mocks/` joue le rôle du serveur. Il est installé comme **adaptateur** du client HTTP partagé : les modules appellent `httpClient` exactement comme avec un vrai serveur, et reçoivent les mêmes enveloppes, codes HTTP et erreurs.
@@ -197,6 +233,26 @@ Le menu affiché (`menuPermissionsStore.navMenus`) ne contient que les entrées 
 - Les libellés des énumérations (statuts, types, profils) viennent de l'API (`GET /options/all?language=fr`) et se lisent avec `optionsStore.getOptionLabel('leaveRequestStatus', valeur)`.
 - Les messages d'erreur du serveur arrivent déjà traduits selon l'en-tête `x-lang` : `apiErrorMessage(error, repli)`.
 - Changer de langue recharge l'application derrière un écran d'attente (`reloadApplicationForLocale`), pour ne jamais afficher un écran à moitié traduit.
+
+## 9. Ajouter une entité
+
+Le modèle à copier est `src/modules/hr/employee-categories/`. Pour une entité `widgets` du domaine `fleet` :
+
+1. **Serveur simulé**
+   - Ajouter la fixture et sa collection (`src/mocks/fixtures/fleet/widgets.ts`), la déclarer dans `src/mocks/db/database.ts` et augmenter `MOCK_SEED_VERSION`.
+   - Écrire le handler avec `registerCrudResource` (`src/mocks/handlers/fleet/widgets.ts`) : lecture des champs avec `readAll` et `readPatch`, contrôles de référence, gardes de suppression. Les champs calculés se calculent dans `list()`.
+   - Ajouter la fonctionnalité `WIDGET` à la matrice `src/mocks/fixtures/auth/rolePermissions.ts`.
+   - Écrire la spec du handler (création, doublon, garde de suppression, 403).
+2. **Module**
+   - `types/widget.types.ts` : `WidgetApi`, `WidgetSearchColumn`.
+   - `api/widgetApi.ts`, `services/widgetService.ts`, `stores/widgetStore.ts` (id du store et `persistKey` : `'fleet-widget'`), `index.ts`.
+   - `components/WidgetForm.vue` avec `useEntityForm`.
+   - `pages/WidgetsList.vue` (`useListPage`), `pages/WidgetCard.vue` (`useEntityCard`), `pages/WidgetCreateModal.vue` (`useEntityCreate`).
+3. **Routes et navigation**
+   - `src/pages/fleet/widgets/index.vue` (`<DashboardLayout><WidgetsList /></DashboardLayout>`) et `[id].vue` (`redirectToListCard`).
+   - Dans `fleet.module.ts` : `registerFeatureRoutes({ WIDGET: { to: '/fleet/widgets', menuKey: 'widget' } })` et l'entrée de menu correspondante.
+4. **Traductions** : `src/locales/{fr,en}/fleetWidgets.ts`, importés dans les deux `index.ts`, et les clés de menu dans `nav.ts`.
+5. **Vérification** : `pnpm type-check && pnpm lint && pnpm test && pnpm i18n:check && pnpm build`, puis un passage à l'écran avec un profil qui a tous les droits et un profil en lecture seule.
 
 ## 10. Outillage et scripts
 

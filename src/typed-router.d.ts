@@ -45,6 +45,62 @@ declare module 'vue-router/auto-routes' {
       { path: ParamValue<false> },
       | never
     >,
+    '/hr/employee-categories/': RouteRecordInfo<
+      '/hr/employee-categories/',
+      '/hr/employee-categories',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/hr/employee-categories/[id]': RouteRecordInfo<
+      '/hr/employee-categories/[id]',
+      '/hr/employee-categories/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/hr/job-positions/': RouteRecordInfo<
+      '/hr/job-positions/',
+      '/hr/job-positions',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/hr/job-positions/[id]': RouteRecordInfo<
+      '/hr/job-positions/[id]',
+      '/hr/job-positions/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/hr/leave-types/': RouteRecordInfo<
+      '/hr/leave-types/',
+      '/hr/leave-types',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/hr/leave-types/[id]': RouteRecordInfo<
+      '/hr/leave-types/[id]',
+      '/hr/leave-types/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/hr/public-holidays/': RouteRecordInfo<
+      '/hr/public-holidays/',
+      '/hr/public-holidays',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/hr/public-holidays/[id]': RouteRecordInfo<
+      '/hr/public-holidays/[id]',
+      '/hr/public-holidays/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/login': RouteRecordInfo<
       '/login',
       '/login',
@@ -87,6 +143,70 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | 'path'
+    }
+    'src/pages/hr/employee-categories/index.vue': {
+      routes:
+        | '/hr/employee-categories/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/hr/employee-categories/[id].vue': {
+      routes:
+        | '/hr/employee-categories/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/hr/job-positions/index.vue': {
+      routes:
+        | '/hr/job-positions/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/hr/job-positions/[id].vue': {
+      routes:
+        | '/hr/job-positions/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/hr/leave-types/index.vue': {
+      routes:
+        | '/hr/leave-types/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/hr/leave-types/[id].vue': {
+      routes:
+        | '/hr/leave-types/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/hr/public-holidays/index.vue': {
+      routes:
+        | '/hr/public-holidays/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/hr/public-holidays/[id].vue': {
+      routes:
+        | '/hr/public-holidays/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
     }
     'src/pages/login.vue': {
       routes:
