@@ -7,5 +7,6 @@ export default {
   'nav.leaveTypes': 'Types de congé',
   'nav.publicHolidays': 'Jours fériés',
   'nav.orgUnits': 'Entités',
-  'nav.employees': 'Employés'
+  'nav.employees': 'Employés',
+  'nav.workingCalendar': 'Calendrier de travail'
 }

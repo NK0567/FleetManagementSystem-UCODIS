@@ -7,5 +7,6 @@ export default {
   'nav.leaveTypes': 'Leave types',
   'nav.publicHolidays': 'Public holidays',
   'nav.orgUnits': 'Units',
-  'nav.employees': 'Employees'
+  'nav.employees': 'Employees',
+  'nav.workingCalendar': 'Working calendar'
 }

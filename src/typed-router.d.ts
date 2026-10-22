@@ -129,6 +129,13 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/hr/working-calendar': RouteRecordInfo<
+      '/hr/working-calendar',
+      '/hr/working-calendar',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/login': RouteRecordInfo<
       '/login',
       '/login',
@@ -267,6 +274,14 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | 'id'
+    }
+    'src/pages/hr/working-calendar.vue': {
+      routes:
+        | '/hr/working-calendar'
+      views:
+        | never
+      pathParamNames:
+        | never
     }
     'src/pages/login.vue': {
       routes:

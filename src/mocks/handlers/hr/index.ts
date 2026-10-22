@@ -8,6 +8,7 @@ import {
 } from './referenceEntities'
 import { registerOrgUnitHandlers } from './orgUnits'
 import { registerEmployeeHandlers } from './employees'
+import { registerWorkingCalendarHandlers } from './workingCalendar'
 
 export function registerHrHandlers(router: MockRouter, db: MockDatabase): void {
   registerEmployeeCategoryHandlers(router, db)
@@ -16,4 +17,5 @@ export function registerHrHandlers(router: MockRouter, db: MockDatabase): void {
   registerPublicHolidayHandlers(router, db)
   registerOrgUnitHandlers(router, db)
   registerEmployeeHandlers(router, db)
+  registerWorkingCalendarHandlers(router, db)
 }

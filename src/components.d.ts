@@ -89,5 +89,6 @@ declare module 'vue' {
     TableLookupModal: typeof import('./components/ui/table-lookup/TableLookupModal.vue')['default']
     ToggleSwitch: typeof import('./components/ui/toggle-switch/ToggleSwitch.vue')['default']
     TopBar: typeof import('./components/layout/TopBar.vue')['default']
+    WorkingCalendarPage: typeof import('./modules/hr/working-calendar/pages/WorkingCalendarPage.vue')['default']
   }
 }

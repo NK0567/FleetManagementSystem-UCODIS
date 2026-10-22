@@ -62,3 +62,29 @@ export function countWorkingDays(
   }
   return count
 }
+
+export type WorkingDayIssue = 'invalidTime' | 'endBeforeStart' | 'breakOutsideHours'
+
+const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/
+
+/** Problems that make a working day unusable; a day off has none. */
+export function workingDayIssues(day: WorkingDay): WorkingDayIssue[] {
+  if (!day.working) return []
+  const times = day.hasBreak
+    ? [day.start, day.end, day.breakStart, day.breakEnd]
+    : [day.start, day.end]
+  if (!times.every((time) => TIME_PATTERN.test(time))) return ['invalidTime']
+  if (toMinutes(day.end) <= toMinutes(day.start)) return ['endBeforeStart']
+  const breakFits =
+    !day.hasBreak ||
+    (toMinutes(day.breakStart) >= toMinutes(day.start) &&
+      toMinutes(day.breakEnd) <= toMinutes(day.end) &&
+      toMinutes(day.breakEnd) > toMinutes(day.breakStart))
+  return breakFits ? [] : ['breakOutsideHours']
+}
+
+/** A week lists each ISO weekday exactly once. */
+export function isCompleteWeek(days: readonly WorkingDay[]): boolean {
+  const weekdays = days.map((day) => day.dayOfWeek).sort()
+  return weekdays.length === 7 && weekdays.every((weekday, index) => weekday === index + 1)
+}

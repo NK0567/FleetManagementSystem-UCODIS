@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest'
 import {
   countWorkingDays,
   dailyWorkingMinutes,
+  isCompleteWeek,
   isPublicHoliday,
   weeklyWorkingMinutes,
+  workingDayIssues,
   type WorkingDay
 } from './workingDays'
 
@@ -53,5 +55,21 @@ describe('working day rules', () => {
     expect(countWorkingDays('2026-09-21', '2026-09-14', mondayToSaturday, [])).toBe(0)
     expect(countWorkingDays('2026-09-14', '2026-09-14', mondayToSaturday, [])).toBe(1)
     expect(countWorkingDays('2026-09-20', '2026-09-20', mondayToSaturday, [])).toBe(0)
+  })
+
+  it('reports unusable hours and accepts a day off as it is', () => {
+    expect(workingDayIssues(day(1))).toEqual([])
+    expect(workingDayIssues({ ...day(1), end: '07:00' })).toEqual(['endBeforeStart'])
+    expect(workingDayIssues({ ...day(1), breakStart: '06:00' })).toEqual(['breakOutsideHours'])
+    expect(workingDayIssues({ ...day(1), breakEnd: '11:00' })).toEqual(['breakOutsideHours'])
+    expect(workingDayIssues({ ...day(1), start: '25:00' })).toEqual(['invalidTime'])
+    expect(workingDayIssues({ ...day(1), hasBreak: false, breakStart: 'x' })).toEqual([])
+    expect(workingDayIssues({ ...day(7, false), end: '00:00' })).toEqual([])
+  })
+
+  it('expects each weekday exactly once', () => {
+    expect(isCompleteWeek(mondayToSaturday)).toBe(true)
+    expect(isCompleteWeek(mondayToSaturday.slice(1))).toBe(false)
+    expect(isCompleteWeek([...mondayToSaturday.slice(1), day(2)])).toBe(false)
   })
 })

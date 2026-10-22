@@ -34,3 +34,17 @@ export function formatNumber(value: number | null | undefined, fractionDigits = 
 export function isIsoDateValue(value: unknown): value is string {
   return typeof value === 'string' && isIsoDay(value) && /^\d{4}-\d{2}-\d{2}($|[T ])/.test(value)
 }
+
+/** Weekday name from an ISO weekday (1 = Monday … 7 = Sunday). */
+export function formatWeekday(isoWeekday: number): string {
+  // 2024-01-01 was a Monday.
+  const date = new Date(Date.UTC(2024, 0, isoWeekday))
+  return date.toLocaleDateString(intlLocale(), { weekday: 'long', timeZone: 'UTC' })
+}
+
+/** Duration in minutes as "8 h" or "7 h 30". */
+export function formatMinutes(total: number): string {
+  const hours = Math.floor(total / 60)
+  const minutes = total % 60
+  return minutes === 0 ? `${hours} h` : `${hours} h ${String(minutes).padStart(2, '0')}`
+}

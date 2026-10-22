@@ -61,6 +61,14 @@ export const HR_MESSAGES = {
     fr: 'Indiquez le motif de ce changement de statut.',
     en: 'Give the reason for this status change.'
   },
+  incompleteWorkingWeek: {
+    fr: 'Le calendrier doit décrire chacun des sept jours de la semaine, une seule fois.',
+    en: 'The calendar must describe each of the seven weekdays, once.'
+  },
+  invalidWorkingDay: {
+    fr: 'Les horaires du jour {day} sont incohérents : vérifiez le début, la fin et la pause.',
+    en: 'The hours of day {day} are inconsistent: check the start, the end and the break.'
+  },
   invalidPeriod: {
     fr: 'La date de fin précède la date de début.',
     en: 'The end date is before the start date.'

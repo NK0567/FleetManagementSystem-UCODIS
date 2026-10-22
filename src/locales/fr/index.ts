@@ -8,6 +8,7 @@ import hrJobPositions from './hrJobPositions'
 import hrLeaveTypes from './hrLeaveTypes'
 import hrOrgUnits from './hrOrgUnits'
 import hrPublicHolidays from './hrPublicHolidays'
+import hrWorkingCalendar from './hrWorkingCalendar'
 import settingsModuleToggles from './settingsModuleToggles'
 
 export default {
@@ -21,5 +22,6 @@ export default {
   ...hrLeaveTypes,
   ...hrOrgUnits,
   ...hrPublicHolidays,
+  ...hrWorkingCalendar,
   ...settingsModuleToggles
 }

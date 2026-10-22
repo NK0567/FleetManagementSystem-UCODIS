@@ -4,7 +4,7 @@ import { Lock } from '@lucide/vue'
 import { cn } from '@/lib/utils'
 
 export interface FormInputProps {
-  type?: 'text' | 'number' | 'email' | 'tel' | 'url' | 'search'
+  type?: 'text' | 'number' | 'email' | 'tel' | 'url' | 'search' | 'time'
   modelValue?: string | number | null
   placeholder?: string
   disabled?: boolean

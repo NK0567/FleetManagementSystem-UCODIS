@@ -10,6 +10,7 @@ export function registerHrModule(): void {
     JOBPOSITION: { to: '/hr/job-positions', menuKey: 'jobPosition' },
     EMPLOYEECATEGORY: { to: '/hr/employee-categories', menuKey: 'employeeCategory' },
     LEAVETYPE: { to: '/hr/leave-types', menuKey: 'leaveType' },
+    WORKINGCALENDAR: { to: '/hr/working-calendar', menuKey: 'workingCalendar' },
     PUBLICHOLIDAY: { to: '/hr/public-holidays', menuKey: 'publicHoliday' }
   })
 
@@ -26,6 +27,11 @@ export function registerHrModule(): void {
         menuKey: 'employeeCategory'
       },
       { labelKey: 'nav.leaveTypes', to: '/hr/leave-types', menuKey: 'leaveType' },
+      {
+        labelKey: 'nav.workingCalendar',
+        to: '/hr/working-calendar',
+        menuKey: 'workingCalendar'
+      },
       { labelKey: 'nav.publicHolidays', to: '/hr/public-holidays', menuKey: 'publicHoliday' }
     ]
   })
