@@ -35,6 +35,7 @@ export default {
   'common.resize': 'Resize',
   'common.changeLanguage': 'Change language',
   'common.fieldRequired': 'Required field',
+  'common.notSpecified': 'Not specified',
   'common.validationRequired': 'Required fields are missing',
   'common.validation.codeFormat':
     'The code may only contain letters, digits and dashes (12 characters at most).',

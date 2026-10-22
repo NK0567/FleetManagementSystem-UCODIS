@@ -5,6 +5,7 @@ const HR_MENU_ORDER = 10
 
 export function registerHrModule(): void {
   registerFeatureRoutes({
+    EMPLOYEE: { to: '/hr/employees', menuKey: 'employee' },
     ORGUNIT: { to: '/hr/org-units', menuKey: 'orgUnit' },
     JOBPOSITION: { to: '/hr/job-positions', menuKey: 'jobPosition' },
     EMPLOYEECATEGORY: { to: '/hr/employee-categories', menuKey: 'employeeCategory' },
@@ -16,6 +17,7 @@ export function registerHrModule(): void {
     labelKey: 'nav.hr',
     order: HR_MENU_ORDER,
     subItems: [
+      { labelKey: 'nav.employees', to: '/hr/employees', menuKey: 'employee' },
       { labelKey: 'nav.orgUnits', to: '/hr/org-units', menuKey: 'orgUnit' },
       { labelKey: 'nav.jobPositions', to: '/hr/job-positions', menuKey: 'jobPosition' },
       {

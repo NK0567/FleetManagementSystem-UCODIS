@@ -49,6 +49,14 @@ export const HR_MESSAGES = {
     fr: 'Cet employé a quitté les effectifs : sa fiche ne peut plus être modifiée.',
     en: 'This employee has left: the record can no longer be changed.'
   },
+  sameEmployeeStatus: {
+    fr: "L'employé a déjà ce statut.",
+    en: 'The employee already has this status.'
+  },
+  positionDoesNotDrive: {
+    fr: "La fonction de cet employé ne comporte pas de conduite : aucune habilitation n'est nécessaire.",
+    en: "This employee's position involves no driving: no authorization is needed."
+  },
   statusReasonRequired: {
     fr: 'Indiquez le motif de ce changement de statut.',
     en: 'Give the reason for this status change.'

@@ -1,4 +1,4 @@
-import { computed, onMounted, ref, type ComputedRef, type Ref } from 'vue'
+import { computed, onMounted, ref, watch, type ComputedRef, type Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { apiErrorMessage } from '@/core/api/apiError'
 import { applyCardInitialOpenMode, type CardOpenMode } from '@/composables/cardOpenMode'
@@ -88,6 +88,14 @@ export function useEntityCard<T extends { no: string }>(options: UseEntityCardOp
     clearFeedback()
     isEditMode.value = false
   }
+
+  // A record can become read-only while open, e.g. an employee archived from the card.
+  watch(options.canUpdate, (canUpdate) => {
+    if (!canUpdate && isEditMode.value) {
+      form.value?.populateFromData(item.value ?? {})
+      isEditMode.value = false
+    }
+  })
 
   async function saveItem() {
     if (!item.value || !form.value) return

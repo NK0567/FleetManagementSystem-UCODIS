@@ -59,6 +59,20 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/hr/employees/': RouteRecordInfo<
+      '/hr/employees/',
+      '/hr/employees',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/hr/employees/[id]': RouteRecordInfo<
+      '/hr/employees/[id]',
+      '/hr/employees/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/hr/job-positions/': RouteRecordInfo<
       '/hr/job-positions/',
       '/hr/job-positions',
@@ -169,6 +183,22 @@ declare module 'vue-router/auto-routes' {
     'src/pages/hr/employee-categories/[id].vue': {
       routes:
         | '/hr/employee-categories/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/hr/employees/index.vue': {
+      routes:
+        | '/hr/employees/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/hr/employees/[id].vue': {
+      routes:
+        | '/hr/employees/[id]'
       views:
         | never
       pathParamNames:
