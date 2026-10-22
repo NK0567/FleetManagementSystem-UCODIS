@@ -1,3 +1,3 @@
 <template>
-  <main>FMS UCODIS</main>
+  <RouterView />
 </template>
