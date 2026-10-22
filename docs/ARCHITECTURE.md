@@ -17,6 +17,53 @@
 
 *(Les sections sont complétées au fil de la refonte.)*
 
+## 1. Vue d'ensemble
+
+FMS UCODIS est une application Vue 3 + TypeScript qui couvre les ressources humaines, la flotte, la maintenance et la planification des transports d'UCODIS Transport.
+
+| Couche | Technologie |
+|---|---|
+| Interface | Vue 3 (Composition API, `<script setup>`), Tailwind CSS 4, icônes `@lucide/vue` |
+| État | Pinia (stores *setup*) |
+| Routage | vue-router 5, routes générées depuis `src/pages/`, historique à dièse |
+| HTTP | Client axios partagé (`src/core/api/httpClient.ts`) |
+| Traductions | vue-i18n, français et anglais |
+| Serveur | API REST au contrat de P247 ; en attendant, backend simulé dans le navigateur (`src/mocks/`) |
+
+## 2. Arborescence
+
+```
+src/
+├── main.ts                 Démarrage : backend simulé (si activé), modules, Pinia, i18n, routeur
+├── App.vue                 Initialisation de la session, chargement des options et références
+├── router/index.ts         Routeur, garde d'authentification et de permissions, page d'atterrissage
+├── pages/                  Une page = une route (routage par fichiers) ; pages minces
+├── layouts/                DashboardLayout : TopBar + NavBar + contenu + palette de commandes
+├── components/
+│   ├── layout/             TopBar, NavBar, DemoAccountPicker
+│   ├── shared/             Composants utilisés par plusieurs modules (listes, fiches, filtres, dialogues)
+│   └── ui/                 Primitives sans logique métier (Button, Input, OptionsSelect, TableLookup…)
+├── composables/            Logique réutilisable liée à Vue (permissions, routes de fiche, export…)
+├── core/
+│   ├── api/                httpClient, authApi, lecture des erreurs d'API
+│   ├── factories/          createCrudApi → createCrudService → useCrudState
+│   ├── navigation/         Registre des menus, routes par fonctionnalité, page d'atterrissage
+│   ├── search/             Registre des entités de la palette de commandes (Ctrl+K)
+│   ├── i18n/ · bootstrap/ · theme/ · app/ · types/ · utils/
+├── stores/                 Stores globaux : user, menuPermissions, options, références, démarrage
+├── modules/<domaine>/<entité>/   Code métier (voir § 3)
+├── mocks/                  Backend simulé (voir § 4)
+├── locales/{fr,en}/        Traductions, un fichier par domaine
+├── types/                  Types partagés (réponses d'API, authentification, options, références)
+└── utils/                  Fonctions pures (dates, formats, colonnes…)
+```
+
+Règle de placement d'un composant :
+- utilisable dans n'importe quelle application → `components/ui/` ;
+- structure globale de l'écran → `components/layout/` ;
+- utilisé par au moins deux modules → `components/shared/` ;
+- sinon → `modules/<domaine>/<entité>/components/`.
+
 ## 4. Backend simulé
 
 Tant que l'API du FMS n'existe pas, `src/mocks/` joue le rôle du serveur. Il est installé comme **adaptateur** du client HTTP partagé : les modules appellent `httpClient` exactement comme avec un vrai serveur, et reçoivent les mêmes enveloppes, codes HTTP et erreurs.
@@ -82,6 +129,74 @@ Une entité standard expose :
 - Le mock joue le serveur : il ne peut importer que des types, des utilitaires purs (`@/utils`, `@/core/utils`) et les règles métier pures des modules (`modules/*/*/domain`). Il n'importe ni Vue, ni Pinia, ni composants, ni stores (règle ESLint `app/mock-backend-isolation`).
 - Aucun fichier de l'application, hormis `src/main.ts`, n'importe le mock (règle `app/mock-backend-entry`).
 - Les règles qui relèvent de l'autorité du serveur (transitions de statut, unicité, numérotation, champs calculés, droits) sont appliquées dans les handlers, même quand l'écran les vérifie aussi pour le confort de l'utilisateur.
+
+## 5. Authentification et permissions
+
+### Connexion et session
+
+1. `POST /auth/login { userCode, userPassword }` renvoie `{ accessToken, user }`.
+2. Le jeton est rangé dans `localStorage.auth_token` et ajouté par `httpClient` à chaque requête (`Authorization: Bearer …`), avec la langue (`x-lang`).
+3. `useAuth().initAuth()` restaure la session au démarrage : profil rechargé (`GET /auth/profile`), permissions chargées (`GET /auth/permissions`).
+4. Une réponse 401 hors connexion efface le jeton et renvoie vers `/login`.
+
+La langue du compte s'applique à la connexion. Sur une session restaurée, le choix manuel de l'utilisateur l'emporte.
+
+### Fonctionnalités et actions
+
+Les droits sont exprimés comme sur P247 : une **fonctionnalité** (`EMPLOYEE`, `LEAVEREQUEST`, `MODULETOGGLE`…) et six **actions** :
+
+| Action | Sens |
+|---|---|
+| `read` | Voir la liste et les fiches |
+| `insert` | Créer |
+| `update` | Modifier |
+| `delete` | Supprimer |
+| `execute` | Actions métier (approuver, valider, archiver…) |
+| `export` | Exporter vers Excel |
+
+`GET /auth/permissions` renvoie une ligne par fonctionnalité : `{ feature, read, insert, update, delete, execute, export, myOnly?, myTeam? }`. `myOnly` et `myTeam` restreignent automatiquement les listes aux données de l'utilisateur ou de son unité (`src/core/listAccessScope.ts`).
+
+Côté écran :
+
+```ts
+const { canInsert, canUpdate, canExecute } = usePermissions('LEAVEREQUEST')
+```
+
+Le serveur revérifie chaque requête (403). Les droits par profil de démonstration sont définis dans `src/mocks/fixtures/auth/rolePermissions.ts`.
+
+### Garde du routeur
+
+Pour chaque navigation, `src/router/index.ts` applique ces règles dans l'ordre :
+1. Pas de jeton : seule `/login` est accessible.
+2. Les permissions sont chargées une fois par session.
+3. `/login` et `/` mènent à la **page d'atterrissage** : la page préférée du compte si elle est accessible, sinon la première page accessible du menu, sinon l'accueil « aucun module ».
+4. Une page dont la fonctionnalité n'est pas lisible renvoie vers `/`.
+
+Aucun nom de profil n'apparaît dans le routeur ni dans les composants : tout passe par les fonctionnalités.
+
+## 6. Navigation et registres
+
+Le socle ne connaît aucun module. Chaque module s'enregistre au démarrage (`src/modules/index.ts` → `register<Domaine>Module()`) auprès de trois registres :
+
+| Registre | Fichier | Rôle |
+|---|---|---|
+| Menus | `core/navigation/moduleRegistry.ts` | `registerNavMenu({ labelKey, order, subItems: [{ labelKey, to, menuKey }] })` |
+| Routes protégées | `core/navigation/featureRoutes.ts` | `registerFeatureRoutes({ EMPLOYEE: { to: '/hr/employees', menuKey: 'employee' } })` : quelle fonctionnalité protège quelle page |
+| Recherche | `core/search/searchRegistry.ts` | `registerSearchableEntity({ key, labelKey, icon, basePath, searchColumns, service, toHit })` pour la palette Ctrl+K |
+
+Le menu affiché (`menuPermissionsStore.navMenus`) ne contient que les entrées dont la fonctionnalité est lisible. Tant que les permissions ne sont pas chargées, aucun menu n'est affiché.
+
+## 7. Internationalisation
+
+- Toutes les chaînes affichées passent par `t('clé')`. Aucun texte en dur dans les templates ni dans les stores.
+- Les clés sont **plates** et préfixées par domaine : `'hr.employees.col.no'`, `'common.save'`.
+- Il y a un fichier par domaine dans `src/locales/fr/` et `src/locales/en/`, importé dans le `index.ts` de chaque langue.
+- `pnpm i18n:check` compare les deux langues clé par clé et échoue s'il en manque une.
+- Pluriels : `'Aucun élément | {count} élément | {count} éléments'`, puis `t(clé, { count }, count)`.
+- Dates et nombres : `formatDate`, `formatDateTime` et `formatNumber` (`src/utils/format.ts`) suivent la langue active.
+- Les libellés des énumérations (statuts, types, profils) viennent de l'API (`GET /options/all?language=fr`) et se lisent avec `optionsStore.getOptionLabel('leaveRequestStatus', valeur)`.
+- Les messages d'erreur du serveur arrivent déjà traduits selon l'en-tête `x-lang` : `apiErrorMessage(error, repli)`.
+- Changer de langue recharge l'application derrière un écran d'attente (`reloadApplicationForLocale`), pour ne jamais afficher un écran à moitié traduit.
 
 ## 10. Outillage et scripts
 

@@ -1,0 +1,60 @@
+@import 'tailwindcss';
+
+@source not "../legacy";
+
+@theme {
+  --color-background: oklch(97.5% 0.003 30);
+  --color-foreground: oklch(18% 0.012 260);
+
+  --color-card: oklch(100% 0 0);
+  --color-card-foreground: oklch(18% 0.012 260);
+
+  --color-popover: oklch(100% 0 0);
+  --color-popover-foreground: oklch(18% 0.012 260);
+
+  --color-primary: #e8453c;
+  --color-primary-foreground: oklch(100% 0 0);
+
+  --color-secondary: oklch(93% 0.006 260);
+  --color-secondary-foreground: oklch(18% 0.012 260);
+
+  --color-muted: oklch(94% 0.004 260);
+  --color-muted-foreground: oklch(50% 0.012 260);
+
+  --color-accent: oklch(94% 0.004 260);
+  --color-accent-foreground: oklch(18% 0.012 260);
+
+  --color-destructive: #d63028;
+  --color-destructive-foreground: oklch(100% 0 0);
+
+  --color-border: oklch(89% 0.005 260);
+  --color-input: oklch(89% 0.005 260);
+  --color-ring: #e8453c;
+
+  --color-success: #15803d;
+  --color-success-bg: #dcfce7;
+  --color-warning: #92400e;
+  --color-warning-bg: #fef3c7;
+  --color-info: #1d4ed8;
+  --color-info-bg: #dbeafe;
+  --color-neutral: #6b7280;
+  --color-neutral-bg: #f3f4f6;
+
+  --radius-sm: 0.125rem;
+  --radius-md: 0.25rem;
+  --radius-lg: 0.5rem;
+
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --color-header: #1e252e;
+  --color-header-foreground: oklch(100% 0 0);
+}
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    background: var(--color-background);
+    color: var(--color-foreground);
+  }
+}

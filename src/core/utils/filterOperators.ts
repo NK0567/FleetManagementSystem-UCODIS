@@ -7,7 +7,6 @@ export type FilterOperatorFieldKind =
   | 'boolean'
   | 'option'
   | 'reference'
-  | 'lookup'
 
 export interface FilterOperatorOption {
   value: ListFilterOperator

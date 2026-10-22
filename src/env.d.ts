@@ -5,6 +5,7 @@ interface ImportMetaEnv {
   readonly VITE_USE_MOCK_API: string
   readonly VITE_MOCK_LATENCY_MS: string
   readonly VITE_APP_NAME: string
+  readonly VITE_COMPANY_NAME: string
   readonly VITE_APP_VERSION: string
 }
 

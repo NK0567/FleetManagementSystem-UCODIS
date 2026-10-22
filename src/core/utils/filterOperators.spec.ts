@@ -27,7 +27,7 @@ describe('filterOperators', () => {
   it('adds contains, starts with and ends with for text-like fields', () => {
     const operators = operatorsForKind('text').map((option) => option.value)
     expect(operators).toEqual(expect.arrayContaining(['LIKE', 'STARTS', 'ENDS']))
-    expect(operatorsForKind('lookup').map((option) => option.value)).toContain('LIKE')
+    expect(operatorsForKind('reference').map((option) => option.value)).toContain('LIKE')
   })
 
   it('limits boolean fields to equality operators', () => {

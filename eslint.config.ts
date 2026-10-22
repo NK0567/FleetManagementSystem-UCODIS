@@ -30,7 +30,7 @@ export default defineConfigWithVueTs(
   {
     name: 'app/mock-backend-entry',
     files: ['src/**/*.{ts,vue}'],
-    ignores: ['src/main.ts', 'src/mocks/**'],
+    ignores: ['src/main.ts', 'src/mocks/**', 'src/**/*.spec.ts', 'src/test/**'],
     rules: {
       'no-restricted-imports': [
         'error',
