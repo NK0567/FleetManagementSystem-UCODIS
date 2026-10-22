@@ -39,6 +39,8 @@ export interface DemoAccount {
   code: string
   name: string
   profile: UserProfileCode
+  /** Demo accounts only, served by the mock backend: their password is public. */
+  password: string
 }
 
 export interface UserPermissionRow {

@@ -7,6 +7,7 @@ import { useAuth } from '@/composables/useAuth'
 import { appConfig } from '@/core/app/appConfig'
 import { HOME_PATH } from '@/core/navigation/landing'
 import logo from '@/assets/logo-ucodis.png'
+import type { DemoAccount } from '@/types/auth.types'
 
 const { t } = useI18n()
 const { login } = useAuth()
@@ -17,6 +18,12 @@ const password = ref('')
 const showPassword = ref(false)
 const error = ref('')
 const isLoading = ref(false)
+
+function fillDemoAccount(account: DemoAccount) {
+  userCode.value = account.code
+  password.value = account.password
+  error.value = ''
+}
 
 async function handleSubmit() {
   error.value = ''
@@ -97,7 +104,7 @@ async function handleSubmit() {
         <DemoAccountPicker
           v-if="appConfig.useMockApi"
           :selected-code="userCode"
-          @select="(code) => (userCode = code)"
+          @select="fillDemoAccount"
         />
       </CardContent>
     </Card>

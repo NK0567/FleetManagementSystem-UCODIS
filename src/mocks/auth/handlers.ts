@@ -65,7 +65,7 @@ export function registerAuthHandlers(router: MockRouter, db: MockDatabase) {
 
   router.get('/auth/demo-accounts', { public: true }, () => {
     const accounts: DemoAccount[] = MOCK_ACCOUNTS.filter((account) => account.active).map(
-      ({ code, name, profile }) => ({ code, name, profile })
+      ({ code, name, profile, password }) => ({ code, name, profile, password })
     )
     return ok(accounts)
   })

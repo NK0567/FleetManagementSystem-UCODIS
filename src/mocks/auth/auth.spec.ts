@@ -58,6 +58,9 @@ describe('auth endpoints', () => {
 
     expect(codes).toContain('ADM001')
     expect(codes).not.toContain('CND009')
+    expect(response.data.data).toContainEqual(
+      expect.objectContaining({ code: 'ADM001', password: 'demo' })
+    )
   })
 })
 

@@ -13,7 +13,7 @@ export default {
   'auth.showPassword': 'Show password',
   'auth.hidePassword': 'Hide password',
   'auth.demo.title': 'Demo accounts',
-  'auth.demo.hint': 'Pick an account: the demo password is "demo".',
+  'auth.demo.hint': 'Pick an account: its code and password are filled in for you.',
   'auth.error.invalidCredentials': 'Incorrect user code or password.',
   'auth.error.network': 'The server cannot be reached. Check your connection.'
 }

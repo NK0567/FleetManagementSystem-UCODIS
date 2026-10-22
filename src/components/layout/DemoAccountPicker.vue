@@ -10,7 +10,7 @@ defineProps<{
 }>()
 
 const emit = defineEmits<{
-  select: [code: string]
+  select: [account: DemoAccount]
 }>()
 
 const { t } = useI18n()
@@ -38,7 +38,7 @@ onMounted(async () => {
         type="button"
         class="text-left rounded border px-3 py-2 transition hover:border-primary"
         :class="selectedCode === account.code ? 'border-primary bg-primary/5' : 'border-border'"
-        @click="emit('select', account.code)"
+        @click="emit('select', account)"
       >
         <span class="block text-sm font-medium text-card-foreground">
           {{ optionsStore.getOptionLabel('userProfile', account.profile) }}

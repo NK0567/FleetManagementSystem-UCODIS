@@ -13,7 +13,8 @@ export default {
   'auth.showPassword': 'Afficher le mot de passe',
   'auth.hidePassword': 'Masquer le mot de passe',
   'auth.demo.title': 'Comptes de démonstration',
-  'auth.demo.hint': 'Choisissez un compte : le mot de passe de démonstration est « demo ».',
+  'auth.demo.hint':
+    'Choisissez un compte : son code et son mot de passe sont remplis automatiquement.',
   'auth.error.invalidCredentials': 'Code utilisateur ou mot de passe incorrect.',
   'auth.error.network': 'Le serveur est injoignable. Vérifiez votre connexion.'
 }
