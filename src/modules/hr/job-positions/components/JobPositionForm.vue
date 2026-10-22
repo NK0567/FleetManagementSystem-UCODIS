@@ -104,6 +104,8 @@ defineExpose(expose)
           <ReferenceLookup
             v-model="draft.orgUnitNo"
             reference-key="orgUnits"
+            :modal-title="t('hr.jobPositions.form.orgUnitNo')"
+            detail-path="/hr/org-units"
             :disabled="disabled"
             :invalid="hasValidationError('orgUnitNo')"
           />
@@ -116,6 +118,8 @@ defineExpose(expose)
           <ReferenceLookup
             v-model="draft.defaultCategoryNo"
             reference-key="employeeCategories"
+            :modal-title="t('hr.jobPositions.form.defaultCategoryNo')"
+            detail-path="/hr/employee-categories"
             :disabled="disabled"
             :invalid="hasValidationError('defaultCategoryNo')"
           />

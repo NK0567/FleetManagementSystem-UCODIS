@@ -120,8 +120,9 @@ defineExpose(expose)
           <ReferenceLookup
             v-model="draft.employeeNo"
             reference-key="employees"
+            :modal-title="t('hr.leaveRequests.form.employeeNo')"
+            detail-path="/hr/employees"
             :disabled="disabled || !isNew || myOnly"
-            :show-lock-icon="!isNew || myOnly"
             :invalid="hasValidationError('employeeNo')"
           />
         </BaseFormField>
@@ -133,6 +134,8 @@ defineExpose(expose)
           <ReferenceLookup
             v-model="draft.leaveTypeNo"
             reference-key="leaveTypes"
+            :modal-title="t('hr.leaveRequests.form.leaveTypeNo')"
+            detail-path="/hr/leave-types"
             :disabled="disabled || !isNew"
             :invalid="hasValidationError('leaveTypeNo')"
           />

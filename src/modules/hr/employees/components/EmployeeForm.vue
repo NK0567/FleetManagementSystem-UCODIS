@@ -208,6 +208,8 @@ defineExpose(expose)
           <ReferenceLookup
             v-model="draft.jobPositionNo"
             reference-key="jobPositions"
+            :modal-title="t('hr.employees.form.jobPositionNo')"
+            detail-path="/hr/job-positions"
             :disabled="disabled"
             :invalid="hasValidationError('jobPositionNo')"
           />
@@ -220,6 +222,8 @@ defineExpose(expose)
           <ReferenceLookup
             v-model="draft.orgUnitNo"
             reference-key="orgUnits"
+            :modal-title="t('hr.employees.form.orgUnitNo')"
+            detail-path="/hr/org-units"
             :disabled="disabled"
             :invalid="hasValidationError('orgUnitNo')"
           />
@@ -232,6 +236,8 @@ defineExpose(expose)
           <ReferenceLookup
             v-model="draft.categoryNo"
             reference-key="employeeCategories"
+            :modal-title="t('hr.employees.form.categoryNo')"
+            detail-path="/hr/employee-categories"
             :disabled="disabled"
             :invalid="hasValidationError('categoryNo')"
           />
@@ -246,6 +252,7 @@ defineExpose(expose)
           <ReferenceLookup
             v-model="draft.siteCode"
             reference-key="sites"
+            :modal-title="t('hr.employees.form.siteCode')"
             :disabled="disabled"
             :invalid="hasValidationError('siteCode')"
           />

@@ -51,6 +51,7 @@ export default {
   'common.searchBy': 'Search by {column}…',
   'common.clearSearch': 'Clear search',
   'common.noResults': 'No results',
+  'common.noSearchResults': 'No results for "{query}"',
   'common.filters': 'Filters',
   'common.filterBy': 'Filter list by:',
   'common.filterAction': 'Filter…',
@@ -89,6 +90,8 @@ export default {
   'common.lookup.searchPlaceholder': 'Search…',
   'common.lookup.noItems': 'No items',
   'common.lookup.noItemsFound': 'No items found',
+  'common.lookup.searchMinLengthHint':
+    'Type at least {min} character to search. | Type at least {min} characters to search.',
   'common.lookup.resultCount': 'No results | {count} result | {count} results',
   'common.lookup.displayedCount': '{shown} / {total} shown | {shown} / {total} shown',
   'common.lookup.selectFromFullList': 'Select from the full list',

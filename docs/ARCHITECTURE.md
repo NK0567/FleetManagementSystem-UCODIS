@@ -42,7 +42,7 @@ src/
 ├── components/
 │   ├── layout/             TopBar, NavBar, DemoAccountPicker
 │   ├── shared/             Composants utilisés par plusieurs modules (listes, fiches, filtres, dialogues)
-│   └── ui/                 Primitives sans logique métier (Button, Input, OptionsSelect, TableLookup…)
+│   └── ui/                 Primitives sans logique métier (Button, Input, OptionsSelect, TableLookupField…)
 ├── composables/            Logique réutilisable liée à Vue : pages de liste (useListPage), fiches (useEntityCard),
 │                           formulaires (useEntityForm, useEntityCreate), permissions, export, colonnes…
 ├── core/
@@ -99,7 +99,7 @@ Les trois composables de page évitent de réécrire la même mécanique dans ch
 
 Le `[id].vue` de chaque entité ne fait que rediriger vers la liste avec `?no=` : une fiche s'ouvre toujours par-dessus sa liste, comme sur P247.
 
-Les listes de référence (entités, catégories, types de congé, sites, employés…) sont chargées une fois par `GET /reference/all` dans `referenceStore`, puis lues par `ReferenceLookup` dans les formulaires et par `referenceLabel(...)` dans les colonnes.
+Les listes de référence (entités, catégories, types de congé, sites, employés…) sont chargées une fois par `GET /reference/all` dans `referenceStore`, puis lues par `ReferenceLookup` dans les formulaires. Ce champ repose sur `TableLookupField`, le champ en deux parties de P247 : le code à gauche, le libellé du choix à droite, une liste déroulante et la liste complète (`SublistModal`) et par `referenceLabel(...)` dans les colonnes.
 
 ## 4. Backend simulé
 

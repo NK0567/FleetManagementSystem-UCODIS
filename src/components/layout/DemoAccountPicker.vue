@@ -20,7 +20,8 @@ const accounts = ref<DemoAccount[]>([])
 onMounted(async () => {
   void optionsStore.fetchOptions()
   try {
-    accounts.value = (await authApi.getDemoAccounts()).data.data
+    const data: unknown = (await authApi.getDemoAccounts()).data?.data
+    accounts.value = Array.isArray(data) ? (data as DemoAccount[]) : []
   } catch {
     accounts.value = []
   }

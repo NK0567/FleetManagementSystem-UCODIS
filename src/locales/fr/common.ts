@@ -51,6 +51,7 @@ export default {
   'common.searchBy': 'Rechercher par {column}…',
   'common.clearSearch': 'Effacer la recherche',
   'common.noResults': 'Aucun résultat',
+  'common.noSearchResults': 'Aucun résultat pour « {query} »',
   'common.filters': 'Filtres',
   'common.filterBy': 'Filtrer la liste par :',
   'common.filterAction': 'Filtre…',
@@ -89,6 +90,8 @@ export default {
   'common.lookup.searchPlaceholder': 'Rechercher…',
   'common.lookup.noItems': 'Aucun élément',
   'common.lookup.noItemsFound': 'Aucun élément trouvé',
+  'common.lookup.searchMinLengthHint':
+    'Saisissez au moins {min} caractère pour lancer la recherche. | Saisissez au moins {min} caractères pour lancer la recherche.',
   'common.lookup.resultCount': 'Aucun résultat | {count} résultat | {count} résultats',
   'common.lookup.displayedCount': '{shown} / {total} affiché | {shown} / {total} affichés',
   'common.lookup.selectFromFullList': 'Sélectionner dans la liste complète',

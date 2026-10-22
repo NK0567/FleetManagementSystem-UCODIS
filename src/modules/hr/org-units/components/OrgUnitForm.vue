@@ -137,6 +137,8 @@ defineExpose(expose)
             v-else
             v-model="draft.parentNo"
             reference-key="orgUnits"
+            :modal-title="t('hr.orgUnits.form.parentNo')"
+            detail-path="/hr/org-units"
             :exclude-codes="excludedParents"
             :disabled="disabled"
             :invalid="hasValidationError('parentNo')"
@@ -148,6 +150,8 @@ defineExpose(expose)
           <ReferenceLookup
             v-model="draft.managerNo"
             reference-key="employees"
+            :modal-title="t('hr.orgUnits.form.managerNo')"
+            detail-path="/hr/employees"
             :disabled="disabled"
           />
         </BaseFormField>
@@ -159,6 +163,7 @@ defineExpose(expose)
           <ReferenceLookup
             v-model="draft.siteCode"
             reference-key="sites"
+            :modal-title="t('hr.orgUnits.form.siteCode')"
             :disabled="disabled"
             :invalid="hasValidationError('siteCode')"
           />
