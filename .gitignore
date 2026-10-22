@@ -40,3 +40,5 @@ __screenshots__/
 # Vite
 *.timestamp-*-*.mjs
  
+# Code review notes
+docs/CODE_REVIEW_NOTES.md
