@@ -2,12 +2,14 @@ import common from './common'
 import auth from './auth'
 import nav from './nav'
 import home from './home'
+import hrDashboard from './hrDashboard'
 import hrEmployeeCategories from './hrEmployeeCategories'
 import hrEmployees from './hrEmployees'
 import hrJobPositions from './hrJobPositions'
 import hrLeaveBalances from './hrLeaveBalances'
 import hrLeaveRequests from './hrLeaveRequests'
 import hrLeaveTypes from './hrLeaveTypes'
+import hrMyPlanning from './hrMyPlanning'
 import hrOrgUnits from './hrOrgUnits'
 import hrPublicHolidays from './hrPublicHolidays'
 import hrWorkingCalendar from './hrWorkingCalendar'
@@ -18,12 +20,14 @@ export default {
   ...auth,
   ...nav,
   ...home,
+  ...hrDashboard,
   ...hrEmployeeCategories,
   ...hrEmployees,
   ...hrJobPositions,
   ...hrLeaveBalances,
   ...hrLeaveRequests,
   ...hrLeaveTypes,
+  ...hrMyPlanning,
   ...hrOrgUnits,
   ...hrPublicHolidays,
   ...hrWorkingCalendar,

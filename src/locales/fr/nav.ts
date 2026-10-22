@@ -10,5 +10,7 @@ export default {
   'nav.employees': 'Employés',
   'nav.workingCalendar': 'Calendrier de travail',
   'nav.leaveRequests': "Demandes d'absence",
-  'nav.leaveBalances': 'Soldes de congés'
+  'nav.leaveBalances': 'Soldes de congés',
+  'nav.hrDashboard': 'Tableau de bord',
+  'nav.myPlanning': 'Mon planning'
 }

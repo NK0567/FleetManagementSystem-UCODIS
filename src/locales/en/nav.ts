@@ -10,5 +10,7 @@ export default {
   'nav.employees': 'Employees',
   'nav.workingCalendar': 'Working calendar',
   'nav.leaveRequests': 'Leave requests',
-  'nav.leaveBalances': 'Leave balances'
+  'nav.leaveBalances': 'Leave balances',
+  'nav.hrDashboard': 'Dashboard',
+  'nav.myPlanning': 'My schedule'
 }

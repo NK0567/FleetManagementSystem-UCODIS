@@ -5,6 +5,8 @@ const HR_MENU_ORDER = 10
 
 export function registerHrModule(): void {
   registerFeatureRoutes({
+    HRDASHBOARD: { to: '/hr/dashboard', menuKey: 'hrDashboard' },
+    MYPLANNING: { to: '/hr/my-planning', menuKey: 'myPlanning' },
     LEAVEREQUEST: { to: '/hr/leave-requests', menuKey: 'leaveRequest' },
     LEAVEBALANCE: { to: '/hr/leave-balances', menuKey: 'leaveBalance' },
     EMPLOYEE: { to: '/hr/employees', menuKey: 'employee' },
@@ -20,6 +22,8 @@ export function registerHrModule(): void {
     labelKey: 'nav.hr',
     order: HR_MENU_ORDER,
     subItems: [
+      { labelKey: 'nav.hrDashboard', to: '/hr/dashboard', menuKey: 'hrDashboard' },
+      { labelKey: 'nav.myPlanning', to: '/hr/my-planning', menuKey: 'myPlanning' },
       { labelKey: 'nav.employees', to: '/hr/employees', menuKey: 'employee' },
       { labelKey: 'nav.leaveRequests', to: '/hr/leave-requests', menuKey: 'leaveRequest' },
       { labelKey: 'nav.leaveBalances', to: '/hr/leave-balances', menuKey: 'leaveBalance' },

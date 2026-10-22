@@ -23,13 +23,16 @@ const HR_SETTINGS = [
   'PUBLICHOLIDAY',
   'WORKINGCALENDAR'
 ]
-const HR_READ_FEATURES = ['HRDASHBOARD', 'EMPLOYEE', 'ORGUNIT', 'LEAVEBALANCE', ...HR_SETTINGS]
+const HR_READ_FEATURES = ['EMPLOYEE', 'ORGUNIT', 'LEAVEBALANCE', ...HR_SETTINGS]
 
 function grant(features: readonly string[], access: Grant): Record<string, Grant> {
   return Object.fromEntries(features.map((feature) => [feature, access]))
 }
 
-/** Back-office staff read HR data, plan their week, and see and submit their own leave. */
+/**
+ * Back-office staff read HR reference data, plan their week, and see and submit their own leave.
+ * The HR dashboard names absent colleagues: it stays with the people who manage them.
+ */
 const backOffice: Record<string, Grant> = {
   ...grant(HR_READ_FEATURES, READ),
   MYPLANNING: READ,
@@ -62,7 +65,7 @@ export const ROLE_PERMISSIONS: Record<UserProfileCode, Record<string, Grant>> = 
     LEAVEBALANCE: READ_EXPORT
   },
   MANAGEMENT: {
-    ...grant([...HR_READ_FEATURES, 'LEAVEREQUEST'], READ_EXPORT),
+    ...grant([...HR_READ_FEATURES, 'HRDASHBOARD', 'LEAVEREQUEST'], READ_EXPORT),
     MYPLANNING: READ
   },
   MAINTENANCE_TECHNICIAN: backOffice,

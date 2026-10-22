@@ -45,6 +45,13 @@ declare module 'vue-router/auto-routes' {
       { path: ParamValue<false> },
       | never
     >,
+    '/hr/dashboard': RouteRecordInfo<
+      '/hr/dashboard',
+      '/hr/dashboard',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/hr/employee-categories/': RouteRecordInfo<
       '/hr/employee-categories/',
       '/hr/employee-categories',
@@ -120,6 +127,13 @@ declare module 'vue-router/auto-routes' {
       '/hr/leave-types/:id',
       { id: ParamValue<true> },
       { id: ParamValue<false> },
+      | never
+    >,
+    '/hr/my-planning': RouteRecordInfo<
+      '/hr/my-planning',
+      '/hr/my-planning',
+      Record<never, never>,
+      Record<never, never>,
       | never
     >,
     '/hr/org-units/': RouteRecordInfo<
@@ -199,6 +213,14 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | 'path'
+    }
+    'src/pages/hr/dashboard.vue': {
+      routes:
+        | '/hr/dashboard'
+      views:
+        | never
+      pathParamNames:
+        | never
     }
     'src/pages/hr/employee-categories/index.vue': {
       routes:
@@ -287,6 +309,14 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | 'id'
+    }
+    'src/pages/hr/my-planning.vue': {
+      routes:
+        | '/hr/my-planning'
+      views:
+        | never
+      pathParamNames:
+        | never
     }
     'src/pages/hr/org-units/index.vue': {
       routes:
