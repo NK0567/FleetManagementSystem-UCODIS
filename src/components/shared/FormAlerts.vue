@@ -17,7 +17,7 @@ const emit = defineEmits<{
   <div :class="['space-y-2', props.class]">
     <div
       v-if="error"
-      class="px-4 py-2 bg-red-500 border border-destructive/30 rounded text-sm text-white flex items-center gap-2 justify-between"
+      class="px-4 py-2 bg-destructive border border-destructive/30 rounded text-sm text-white flex items-center gap-2 justify-between"
     >
       <div class="flex items-center gap-2">
         <CircleAlert class="w-4 h-4 shrink-0" />

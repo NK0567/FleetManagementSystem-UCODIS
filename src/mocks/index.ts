@@ -5,6 +5,7 @@ import { resolveToken } from './auth/session'
 import { createDatabase } from './db/database'
 import type { CollectionContext } from './db/collection'
 import { registerSharedHandlers } from './handlers/shared'
+import { registerModuleToggleHandlers } from './handlers/settings/moduleToggles'
 import { createMockAdapter } from './http/adapter'
 import { createMockRouter } from './http/router'
 
@@ -22,6 +23,7 @@ export function createMockServer(context?: CollectionContext) {
 
   registerAuthHandlers(router, db)
   registerSharedHandlers(router, db)
+  registerModuleToggleHandlers(router, db)
 
   return { db, router }
 }

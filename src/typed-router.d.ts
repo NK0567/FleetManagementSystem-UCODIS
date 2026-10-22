@@ -52,6 +52,13 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/settings/module-toggles': RouteRecordInfo<
+      '/settings/module-toggles',
+      '/settings/module-toggles',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
   }
 
   /**
@@ -84,6 +91,14 @@ declare module 'vue-router/auto-routes' {
     'src/pages/login.vue': {
       routes:
         | '/login'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/settings/module-toggles.vue': {
+      routes:
+        | '/settings/module-toggles'
       views:
         | never
       pathParamNames:
