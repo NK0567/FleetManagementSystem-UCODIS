@@ -1,17 +1,7 @@
 <script lang="ts" setup>
-import { ref, computed, watch, useSlots, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, useSlots, onMounted, onUnmounted, type Component } from 'vue'
 import { useI18n } from 'vue-i18n'
-import {
-  Search,
-  Funnel,
-  Info,
-  ChevronDown,
-  LayoutList,
-  LayoutGrid,
-  Download,
-  Eye,
-  Pencil
-} from '@lucide/vue'
+import { Search, Funnel, Info, ChevronDown, LayoutList, Download, Eye, Pencil } from '@lucide/vue'
 import SearchBar from './SearchBar.vue'
 
 const { t } = useI18n()
@@ -67,8 +57,9 @@ const props = withDefaults(
     columnOptions?: { value: string; label: string }[]
     searchLoading?: boolean
     searchQuery?: string
-    showViewToggle?: boolean
-    view?: 'list' | 'kanban'
+    /** Alternative displays of the list (tree, chart...); the export only applies to 'list'. */
+    viewOptions?: { value: string; label: string; icon: Component }[]
+    view?: string
     listViewOptions?: { value: string; label: string }[]
     listView?: string
     showListView?: boolean
@@ -89,7 +80,7 @@ const props = withDefaults(
     columnOptions: () => [],
     searchLoading: false,
     searchQuery: '',
-    showViewToggle: false,
+    viewOptions: () => [],
     view: 'list',
     listViewOptions: () => [],
     listView: 'all',
@@ -113,7 +104,7 @@ const emit = defineEmits<{
   search: [query: string]
   clear: []
   'update:searchColumn': [column: string]
-  'update:view': [view: 'list' | 'kanban']
+  'update:view': [view: string]
   'update:listView': [value: string]
   view: []
   edit: []
@@ -133,10 +124,6 @@ watch(hasAppliedSearch, (applied) => {
 
 const toggleSearch = () => {
   searchExpanded.value = !searchExpanded.value
-}
-
-const toggleView = () => {
-  emit('update:view', props.view === 'list' ? 'kanban' : 'list')
 }
 </script>
 
@@ -319,21 +306,25 @@ const toggleView = () => {
           <Download class="w-4 h-4" :class="{ 'animate-pulse': exporting }" />
         </button>
 
-        <button
-          v-if="showViewToggle"
-          type="button"
-          :class="[
-            'p-2 rounded transition',
-            view === 'kanban'
-              ? 'bg-primary text-primary-foreground'
-              : 'text-muted-foreground hover:bg-accent'
-          ]"
-          :title="view === 'kanban' ? t('common.listView') : t('common.kanbanView')"
-          :aria-label="view === 'kanban' ? t('common.listView') : t('common.kanbanView')"
-          @click="toggleView"
-        >
-          <LayoutGrid class="w-4 h-4" />
-        </button>
+        <div v-if="viewOptions.length > 1" class="flex items-center gap-0.5" role="group">
+          <button
+            v-for="option in viewOptions"
+            :key="option.value"
+            type="button"
+            :class="[
+              'p-2 rounded transition',
+              view === option.value
+                ? 'bg-primary text-primary-foreground'
+                : 'text-muted-foreground hover:bg-accent'
+            ]"
+            :title="option.label"
+            :aria-label="option.label"
+            :aria-pressed="view === option.value"
+            @click="emit('update:view', option.value)"
+          >
+            <component :is="option.icon" class="w-4 h-4" />
+          </button>
+        </div>
 
         <div v-if="showCreate" class="border-l border-border h-6 mx-1"></div>
 

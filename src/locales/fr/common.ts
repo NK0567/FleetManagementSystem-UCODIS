@@ -66,8 +66,6 @@ export default {
   'common.resizeColumn': 'Redimensionner la colonne {column}',
   'common.sortAsc': 'Croissant',
   'common.sortDesc': 'Décroissant',
-  'common.listView': 'Vue liste',
-  'common.kanbanView': 'Vue kanban',
   'common.itemsPerPage': 'Par page',
   'common.totalItems': 'Aucun élément | {count} élément | {count} éléments',
   'common.exportExcel': 'Exporter vers Excel',

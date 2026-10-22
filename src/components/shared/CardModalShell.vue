@@ -324,7 +324,7 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
               </div>
 
               <div
-                v-if="!hideActionBar"
+                v-if="!hideActionBar && $slots['action-buttons']"
                 class="bg-card border-b border-border px-6 py-2 flex items-center gap-2 flex-wrap shrink-0"
               >
                 <slot name="action-buttons" />

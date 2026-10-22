@@ -1,5 +1,6 @@
 import type { PaginationMeta } from '@/types/api-response.types'
 import type { ApiListFilter } from '@/core/utils/listFilters'
+import { normalizeSearchText as normalizeText } from '@/utils/search'
 import { COMMON_MESSAGES } from '../i18n'
 import { badRequest } from './errors'
 
@@ -7,14 +8,6 @@ const DEFAULT_PAGE_SIZE = 25
 const MAX_PAGE_SIZE = 500
 
 type Row = Record<string, unknown>
-
-export function normalizeText(value: unknown): string {
-  return String(value ?? '')
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .toLowerCase()
-    .trim()
-}
 
 function isListFilter(value: unknown): value is ApiListFilter {
   if (!value || typeof value !== 'object') return false

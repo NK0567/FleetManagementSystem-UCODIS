@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildOrgTree, descendantNos, wouldCreateCycle } from './orgTree'
+import { buildOrgTree, descendantNos, filterOrgTree, wouldCreateCycle } from './orgTree'
 
 const units = [
   { no: 'UCT', parentNo: null },
@@ -27,5 +27,13 @@ describe('orgTree', () => {
     expect(wouldCreateCycle(units, 'FLT', 'FLT')).toBe(true)
     expect(wouldCreateCycle(units, 'CND', 'MNT')).toBe(false)
     expect(wouldCreateCycle(units, 'UCT', null)).toBe(false)
+  })
+
+  it('keeps the path to matching units when filtering the tree', () => {
+    const tree = filterOrgTree(buildOrgTree(units), (unit) => unit.no === 'CND')
+    expect(tree.map((node) => node.unit.no)).toEqual(['UCT'])
+    expect(tree[0]?.children.map((node) => node.unit.no)).toEqual(['FLT'])
+    expect(tree[0]?.children[0]?.children.map((node) => node.unit.no)).toEqual(['CND'])
+    expect(filterOrgTree(buildOrgTree(units), () => false)).toEqual([])
   })
 })

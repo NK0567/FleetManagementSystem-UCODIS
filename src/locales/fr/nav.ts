@@ -5,5 +5,6 @@ export default {
   'nav.employeeCategories': "Catégories d'employés",
   'nav.jobPositions': 'Fonctions',
   'nav.leaveTypes': 'Types de congé',
-  'nav.publicHolidays': 'Jours fériés'
+  'nav.publicHolidays': 'Jours fériés',
+  'nav.orgUnits': 'Entités'
 }

@@ -87,6 +87,20 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/hr/org-units/': RouteRecordInfo<
+      '/hr/org-units/',
+      '/hr/org-units',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/hr/org-units/[id]': RouteRecordInfo<
+      '/hr/org-units/[id]',
+      '/hr/org-units/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/hr/public-holidays/': RouteRecordInfo<
       '/hr/public-holidays/',
       '/hr/public-holidays',
@@ -187,6 +201,22 @@ declare module 'vue-router/auto-routes' {
     'src/pages/hr/leave-types/[id].vue': {
       routes:
         | '/hr/leave-types/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/hr/org-units/index.vue': {
+      routes:
+        | '/hr/org-units/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/hr/org-units/[id].vue': {
+      routes:
+        | '/hr/org-units/[id]'
       views:
         | never
       pathParamNames:

@@ -5,5 +5,6 @@ export default {
   'nav.employeeCategories': 'Employee categories',
   'nav.jobPositions': 'Job positions',
   'nav.leaveTypes': 'Leave types',
-  'nav.publicHolidays': 'Public holidays'
+  'nav.publicHolidays': 'Public holidays',
+  'nav.orgUnits': 'Units'
 }

@@ -29,6 +29,10 @@ export const HR_MESSAGES = {
     fr: 'Des employés sont rattachés à cette entité : elle ne peut pas être supprimée.',
     en: 'Employees belong to this unit: it cannot be deleted.'
   },
+  orgUnitHasPositions: {
+    fr: 'Des fonctions sont rattachées à cette entité : rattachez-les ailleurs avant de la supprimer.',
+    en: 'Job positions belong to this unit: move them elsewhere before deleting it.'
+  },
   orgUnitCycle: {
     fr: "Une entité ne peut pas être rattachée à elle-même ni à l'une de ses sous-entités.",
     en: 'A unit cannot be attached to itself or to one of its sub-units.'

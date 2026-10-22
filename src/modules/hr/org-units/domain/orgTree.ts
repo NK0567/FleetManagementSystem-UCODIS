@@ -34,3 +34,15 @@ export function wouldCreateCycle(
   if (!newParentNo) return false
   return newParentNo === no || descendantNos(units, no).includes(newParentNo)
 }
+
+/** Keeps the matching units and the path leading to them, so a search still reads as a tree. */
+export function filterOrgTree<T extends { no: string; parentNo: string | null }>(
+  nodes: readonly OrgUnitNode<T>[],
+  matches: (unit: T) => boolean
+): OrgUnitNode<T>[] {
+  return nodes.flatMap((node) => {
+    if (matches(node.unit)) return [node]
+    const children = filterOrgTree(node.children, matches)
+    return children.length ? [{ unit: node.unit, children }] : []
+  })
+}

@@ -14,12 +14,15 @@ const props = withDefaults(
     invalid?: boolean
     showLockIcon?: boolean
     placeholder?: string
+    /** Codes that cannot be picked, such as a unit and its sub-units for its own parent. */
+    excludeCodes?: string[]
   }>(),
   {
     disabled: false,
     invalid: false,
     showLockIcon: false,
-    placeholder: ''
+    placeholder: '',
+    excludeCodes: () => []
   }
 )
 
@@ -38,6 +41,7 @@ const items = computed<LookupItem[]>(() =>
   referenceStore
     .getItems(props.referenceKey)
     .filter((item) => item.active !== false || item.code === props.modelValue)
+    .filter((item) => !props.excludeCodes.includes(item.code))
 )
 
 const displayFormat = (item: LookupItem) => `${String(item.code)} · ${String(item.description)}`

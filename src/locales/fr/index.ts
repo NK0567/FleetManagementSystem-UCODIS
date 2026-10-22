@@ -5,6 +5,7 @@ import home from './home'
 import hrEmployeeCategories from './hrEmployeeCategories'
 import hrJobPositions from './hrJobPositions'
 import hrLeaveTypes from './hrLeaveTypes'
+import hrOrgUnits from './hrOrgUnits'
 import hrPublicHolidays from './hrPublicHolidays'
 import settingsModuleToggles from './settingsModuleToggles'
 
@@ -16,6 +17,7 @@ export default {
   ...hrEmployeeCategories,
   ...hrJobPositions,
   ...hrLeaveTypes,
+  ...hrOrgUnits,
   ...hrPublicHolidays,
   ...settingsModuleToggles
 }
