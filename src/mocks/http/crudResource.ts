@@ -21,8 +21,8 @@ export interface CrudResourceOptions<Row extends MockRow, Api extends { no: stri
   basePath: string
   feature: string
   collection: Collection<Row>
-  /** Every record as served by the API, joined and derived fields included. */
-  list: () => Api[]
+  /** Every record the user may see, as served by the API, joined and derived fields included. */
+  list: (request: MockRequest) => Api[]
   searchColumns?: string[]
   /** Option set per field, so exports write labels instead of codes. */
   optionFields?: Record<string, string>
@@ -76,8 +76,8 @@ function exportCell(
 export interface ListResourceOptions<Api extends { no: string }> {
   basePath: string
   feature: string
-  /** Every record as served by the API, derived fields included. */
-  rows: () => Api[]
+  /** Every record the user may see, derived fields included. */
+  rows: (request: MockRequest) => Api[]
   searchColumns?: string[]
   optionFields?: Record<string, string>
 }
@@ -90,13 +90,13 @@ export function registerListResource<Api extends { no: string }>(
   const { basePath, feature, rows: apiRows, searchColumns, optionFields = {} } = options
 
   router.get(basePath, { feature, action: 'read' }, (request) =>
-    paginated(applyListQuery(apiRows(), request.query, { searchColumns }))
+    paginated(applyListQuery(apiRows(request), request.query, { searchColumns }))
   )
 
   router.post(`${basePath}/export`, { feature, action: 'export' }, async (request) => {
     const body = readBody(request)
     const columns = readExportColumns(body.columns)
-    const rows = filterAndSort(apiRows(), body, { searchColumns }).map((row) =>
+    const rows = filterAndSort(apiRows(request), body, { searchColumns }).map((row) =>
       columns.map((column) =>
         exportCell(
           (row as Record<string, unknown>)[column.field],
@@ -114,7 +114,7 @@ export function registerListResource<Api extends { no: string }>(
   })
 
   router.get(`${basePath}/:no`, { feature, action: 'read' }, (request) => {
-    const record = apiRows().find((row) => row.no === routeParam(request, 'no'))
+    const record = apiRows(request).find((row) => row.no === routeParam(request, 'no'))
     if (!record) throw notFound()
     return ok(record)
   })
@@ -136,8 +136,8 @@ export function registerCrudResource<Row extends MockRow, Api extends { no: stri
     update,
     remove
   } = options
-  const apiRecord = (no: string): Api => {
-    const record = list().find((row) => row.no === no)
+  const apiRecord = (no: string, request: MockRequest): Api => {
+    const record = list(request).find((row) => row.no === no)
     if (!record) throw notFound()
     return record
   }
@@ -160,7 +160,7 @@ export function registerCrudResource<Row extends MockRow, Api extends { no: stri
         )
       }
       collection.insert(row)
-      return created(apiRecord(row.no))
+      return created(apiRecord(row.no, request))
     })
   }
 
@@ -173,7 +173,7 @@ export function registerCrudResource<Row extends MockRow, Api extends { no: stri
         ...patch,
         ...stampModified(request)
       } as Partial<Row>)
-      return ok(apiRecord(existing.no))
+      return ok(apiRecord(existing.no, request))
     })
   }
 

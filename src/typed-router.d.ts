@@ -87,6 +87,27 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/hr/leave-balances': RouteRecordInfo<
+      '/hr/leave-balances',
+      '/hr/leave-balances',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/hr/leave-requests/': RouteRecordInfo<
+      '/hr/leave-requests/',
+      '/hr/leave-requests',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/hr/leave-requests/[id]': RouteRecordInfo<
+      '/hr/leave-requests/[id]',
+      '/hr/leave-requests/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/hr/leave-types/': RouteRecordInfo<
       '/hr/leave-types/',
       '/hr/leave-types',
@@ -222,6 +243,30 @@ declare module 'vue-router/auto-routes' {
     'src/pages/hr/job-positions/[id].vue': {
       routes:
         | '/hr/job-positions/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/hr/leave-balances.vue': {
+      routes:
+        | '/hr/leave-balances'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/hr/leave-requests/index.vue': {
+      routes:
+        | '/hr/leave-requests/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/hr/leave-requests/[id].vue': {
+      routes:
+        | '/hr/leave-requests/[id]'
       views:
         | never
       pathParamNames:

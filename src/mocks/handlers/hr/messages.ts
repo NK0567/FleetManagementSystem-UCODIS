@@ -89,6 +89,22 @@ export const HR_MESSAGES = {
     fr: "Ce type de congé n'est plus proposé.",
     en: 'This leave type is no longer offered.'
   },
+  insufficientBalance: {
+    fr: 'Le solde ne couvre pas cette demande : disponible {available} j, demandes en attente comprises.',
+    en: 'The balance does not cover this request: {available} d available, pending requests included.'
+  },
+  noticeTooShort: {
+    fr: 'Ce type de congé se demande avec un préavis de {days} j au moins.',
+    en: 'This leave type requires at least {days} d of notice.'
+  },
+  foreignEmployeeRequest: {
+    fr: 'Vous ne pouvez déposer une demande que pour vous-même.',
+    en: 'You can only submit a request for yourself.'
+  },
+  ownRequestDecision: {
+    fr: 'Vous ne pouvez pas décider de votre propre demande : une autre personne doit la traiter.',
+    en: 'You cannot decide on your own request: someone else must handle it.'
+  },
   leaveNotPending: {
     fr: "Cette demande a déjà été traitée : seule une demande en attente peut l'être.",
     en: 'This request has already been decided: only a pending request can be.'

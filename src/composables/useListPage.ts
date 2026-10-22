@@ -45,6 +45,8 @@ export interface UseListPageOptions<T extends { no: string }, SearchCol extends 
   exportApi: (body: Record<string, unknown>) => Promise<AxiosResponse<Blob>>
   remove?: (no: string) => Promise<void>
   deleteErrorFallback?: string
+  /** Lists of computed records (balances…) have no card to open. */
+  hasCard?: boolean
 }
 
 /**
@@ -72,6 +74,7 @@ export function useListPage<T extends { no: string }, SearchCol extends string>(
     getItemNo: (item) => (item as T).no,
     canRead: permissions.canRead,
     canUpdate: permissions.canUpdate,
+    hasCardForm: options.hasCard ?? true,
     openCard: cardRoute.openCard
   })
 
@@ -170,7 +173,7 @@ export function useListPage<T extends { no: string }, SearchCol extends string>(
 
   onMounted(async () => {
     await store.fetchItems(1, store.pagination.limit)
-    const queryNo = initCardBootstrapFromQuery()
+    const queryNo = options.hasCard === false ? '' : initCardBootstrapFromQuery()
     if (queryNo) {
       cardRoute.cardNo.value = queryNo
       cardRoute.cardOpenMode.value = cardRoute.getQueryOpenMode() ?? 'view'

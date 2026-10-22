@@ -8,5 +8,7 @@ export default {
   'nav.publicHolidays': 'Public holidays',
   'nav.orgUnits': 'Units',
   'nav.employees': 'Employees',
-  'nav.workingCalendar': 'Working calendar'
+  'nav.workingCalendar': 'Working calendar',
+  'nav.leaveRequests': 'Leave requests',
+  'nav.leaveBalances': 'Leave balances'
 }

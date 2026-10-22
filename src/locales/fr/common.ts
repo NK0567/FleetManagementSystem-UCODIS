@@ -36,6 +36,7 @@ export default {
   'common.changeLanguage': 'Changer de langue',
   'common.fieldRequired': 'Champ obligatoire',
   'common.notSpecified': 'Non renseigné',
+  'common.minLength': '{count} / {min} caractères minimum',
   'common.validationRequired': 'Champs obligatoires manquants',
   'common.validation.codeFormat':
     'Le code ne peut contenir que des lettres, des chiffres et des tirets (12 caractères au plus).',

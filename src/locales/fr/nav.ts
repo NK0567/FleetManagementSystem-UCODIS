@@ -8,5 +8,7 @@ export default {
   'nav.publicHolidays': 'Jours fériés',
   'nav.orgUnits': 'Entités',
   'nav.employees': 'Employés',
-  'nav.workingCalendar': 'Calendrier de travail'
+  'nav.workingCalendar': 'Calendrier de travail',
+  'nav.leaveRequests': "Demandes d'absence",
+  'nav.leaveBalances': 'Soldes de congés'
 }

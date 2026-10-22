@@ -190,7 +190,7 @@ Les droits sont exprimés comme sur P247 : une **fonctionnalité** (`EMPLOYEE`, 
 | `execute` | Actions métier (approuver, valider, archiver…) |
 | `export` | Exporter vers Excel |
 
-`GET /auth/permissions` renvoie une ligne par fonctionnalité : `{ feature, read, insert, update, delete, execute, export, myOnly?, myTeam? }`. `myOnly` et `myTeam` restreignent automatiquement les listes aux données de l'utilisateur ou de son unité (`src/core/listAccessScope.ts`).
+`GET /auth/permissions` renvoie une ligne par fonctionnalité : `{ feature, read, insert, update, delete, execute, export, myOnly?, myTeam? }`. `myOnly` et `myTeam` restreignent automatiquement les listes aux données de l'utilisateur ou de son unité (`src/core/listAccessScope.ts`). Le serveur applique la même restriction à toutes ses réponses (listes, fiches, exports) : le filtre de l'écran n'est qu'un confort. Exemple : le personnel de bureau ne voit que ses propres demandes d'absence et ses propres soldes.
 
 Côté écran :
 

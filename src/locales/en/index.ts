@@ -5,6 +5,8 @@ import home from './home'
 import hrEmployeeCategories from './hrEmployeeCategories'
 import hrEmployees from './hrEmployees'
 import hrJobPositions from './hrJobPositions'
+import hrLeaveBalances from './hrLeaveBalances'
+import hrLeaveRequests from './hrLeaveRequests'
 import hrLeaveTypes from './hrLeaveTypes'
 import hrOrgUnits from './hrOrgUnits'
 import hrPublicHolidays from './hrPublicHolidays'
@@ -19,6 +21,8 @@ export default {
   ...hrEmployeeCategories,
   ...hrEmployees,
   ...hrJobPositions,
+  ...hrLeaveBalances,
+  ...hrLeaveRequests,
   ...hrLeaveTypes,
   ...hrOrgUnits,
   ...hrPublicHolidays,
