@@ -95,7 +95,9 @@ export function useCommandPalette() {
     )
   })
 
-  const searchableEntities = computed(() => getSearchableEntities())
+  const searchableEntities = computed(() =>
+    getSearchableEntities().filter((entity) => menuPermissionsStore.can(entity.feature))
+  )
 
   const activeEntity = computed<SearchableEntity | undefined>(() =>
     searchableEntities.value.find((entity) => entity.key === selectedEntityKey.value)

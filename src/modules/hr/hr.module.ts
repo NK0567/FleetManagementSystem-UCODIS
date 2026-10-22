@@ -1,5 +1,11 @@
+import { CalendarDays, Network, Users } from '@lucide/vue'
 import { registerFeatureRoutes } from '@/core/navigation/featureRoutes'
 import { registerNavMenu } from '@/core/navigation/moduleRegistry'
+import { registerSearchableEntity } from '@/core/search/searchRegistry'
+import { formatDate } from '@/utils/format'
+import { employeeService, type EmployeeApi } from './employees'
+import { leaveRequestService, type LeaveRequestApi } from './leave-requests'
+import { orgUnitService, type OrgUnitApi } from './org-units'
 
 const HR_MENU_ORDER = 10
 
@@ -42,5 +48,46 @@ export function registerHrModule(): void {
       },
       { labelKey: 'nav.publicHolidays', to: '/hr/public-holidays', menuKey: 'publicHoliday' }
     ]
+  })
+
+  registerSearchableEntity({
+    key: 'employee',
+    feature: 'EMPLOYEE',
+    labelKey: 'hr.employees.title',
+    icon: Users,
+    basePath: '/hr/employees',
+    searchColumns: 'no,fullName,nationalId,phone',
+    service: employeeService,
+    toHit: (employee: EmployeeApi) => ({
+      id: employee.no,
+      title: employee.fullName,
+      subtitle: `${employee.no} · ${employee.jobPositionName}`
+    })
+  })
+
+  registerSearchableEntity({
+    key: 'orgUnit',
+    feature: 'ORGUNIT',
+    labelKey: 'hr.orgUnits.title',
+    icon: Network,
+    basePath: '/hr/org-units',
+    searchColumns: 'no,name',
+    service: orgUnitService,
+    toHit: (unit: OrgUnitApi) => ({ id: unit.no, title: unit.name, subtitle: unit.no })
+  })
+
+  registerSearchableEntity({
+    key: 'leaveRequest',
+    feature: 'LEAVEREQUEST',
+    labelKey: 'hr.leaveRequests.title',
+    icon: CalendarDays,
+    basePath: '/hr/leave-requests',
+    searchColumns: 'no,employeeName',
+    service: leaveRequestService,
+    toHit: (request: LeaveRequestApi) => ({
+      id: request.no,
+      title: `${request.no} · ${request.employeeName}`,
+      subtitle: `${request.leaveTypeName} · ${formatDate(request.startDate)}`
+    })
   })
 }

@@ -9,6 +9,8 @@ export interface SearchHit {
 
 export interface SearchableEntityDefinition<T, SearchCol extends string> {
   key: string
+  /** Feature the user must be able to read for the entity to be offered. */
+  feature: string
   labelKey: string
   icon: Component
   basePath: string
@@ -19,6 +21,7 @@ export interface SearchableEntityDefinition<T, SearchCol extends string> {
 
 export interface SearchableEntity {
   key: string
+  feature: string
   labelKey: string
   icon: Component
   search: (query: string, limit: number) => Promise<SearchHit[]>
@@ -35,6 +38,7 @@ export function registerSearchableEntity<T, SearchCol extends string>(
   if (searchableEntities.some((entity) => entity.key === definition.key)) return
   searchableEntities.push({
     key: definition.key,
+    feature: definition.feature,
     labelKey: definition.labelKey,
     icon: definition.icon,
     async search(query, limit) {
