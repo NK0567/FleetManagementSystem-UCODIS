@@ -15,7 +15,7 @@
 9. Ajouter une entité
 10. Outillage et scripts
 
-*(Les sections sont complétées au fil de la refonte.)*
+*(Le module RH est migré ; les autres domaines suivront le même modèle.)*
 
 ## 1. Vue d'ensemble
 
@@ -43,7 +43,8 @@ src/
 │   ├── layout/             TopBar, NavBar, DemoAccountPicker
 │   ├── shared/             Composants utilisés par plusieurs modules (listes, fiches, filtres, dialogues)
 │   └── ui/                 Primitives sans logique métier (Button, Input, OptionsSelect, TableLookup…)
-├── composables/            Logique réutilisable liée à Vue (permissions, routes de fiche, export…)
+├── composables/            Logique réutilisable liée à Vue : pages de liste (useListPage), fiches (useEntityCard),
+│                           formulaires (useEntityForm, useEntityCreate), permissions, export, colonnes…
 ├── core/
 │   ├── api/                httpClient, authApi, lecture des erreurs d'API
 │   ├── factories/          createCrudApi → createCrudService → useCrudState
@@ -233,6 +234,60 @@ Le menu affiché (`menuPermissionsStore.navMenus`) ne contient que les entrées 
 - Les libellés des énumérations (statuts, types, profils) viennent de l'API (`GET /options/all?language=fr`) et se lisent avec `optionsStore.getOptionLabel('leaveRequestStatus', valeur)`.
 - Les messages d'erreur du serveur arrivent déjà traduits selon l'en-tête `x-lang` : `apiErrorMessage(error, repli)`.
 - Changer de langue recharge l'application derrière un écran d'attente (`reloadApplicationForLocale`), pour ne jamais afficher un écran à moitié traduit.
+
+## 8. Conventions de code
+
+### Langue et nommage
+
+- Tout le code est en anglais : fichiers, dossiers, routes, types, variables, clés de traduction. Le français n'apparaît que dans `src/locales/fr/` et dans les données de démonstration.
+- Dossiers en kebab-case (`leave-requests/`), fichiers `.ts` en camelCase (`leaveRequestStore.ts`), composants `.vue` en PascalCase (`LeaveRequestCard.vue`).
+
+| Élément | Convention | Exemple |
+|---|---|---|
+| Type renvoyé par l'API | `<Entity>Api` | `EmployeeApi` |
+| Colonnes de recherche | `<Entity>SearchColumn` | `EmployeeSearchColumn` |
+| API | `<entity>Api` | `employeeApi` |
+| Service | `<entity>Service` | `employeeService` |
+| Store | `use<Entity>Store`, id et `persistKey` `'<domaine>-<entité>'` | `useEmployeeStore`, `'hr-employee'` |
+| Pages | `<Entities>List`, `<Entity>Card`, `<Entity>CreateModal` | `EmployeesList` |
+| Formulaire | `<Entity>Form` | `EmployeeForm` |
+| Route | `/<domaine>/<entités-kebab>` | `/hr/leave-requests` |
+| Fonctionnalité (droits) | majuscules, sans séparateur | `LEAVEREQUEST` |
+| Clé de traduction | plate, `domaine.entités.zone.clé` | `'hr.employees.col.no'` |
+
+- Les valeurs permises sont des constantes `as const` dont on déduit le type (`EMPLOYEE_STATUSES` → `EmployeeStatus`), jamais des `enum`. Les valeurs stockées sont des codes anglais ; leurs libellés viennent des options de l'API.
+- L'identifiant d'un enregistrement est son code métier, le champ `no`. Il n'existe pas d'identifiant technique à côté.
+
+### Imports et dépendances
+
+- Dans un module : imports relatifs (`../services/employeeService`).
+- Vers un autre module : uniquement par son `index.ts` (`@/modules/hr/job-positions`).
+- Le socle (`core/`, `components/`, `composables/`, `stores/`) ne connaît aucun module : les modules s'enregistrent auprès de lui (§ 6).
+- Les règles pures d'un module (`domain/`) n'importent ni Vue ni Pinia : elles sont partagées avec le serveur simulé et testées sans navigateur.
+
+### Composants et formulaires
+
+- Placement selon le § 2 : `ui/` (générique), `layout/`, `shared/` (au moins deux modules), sinon le `components/` du module.
+- Un formulaire édite une copie (`useEntityForm`). Il n'envoie que les champs modifiés et expose `buildFullPayload`, `buildDiffPayload`, `validateForCreation` et `validateForEdit`.
+- Une action métier (approuver, valider, archiver) n'a qu'un point d'entrée dans l'interface : la fiche. Les autres écrans y renvoient par un lien `?no=`.
+- Pas de `v-html`, pas de `confirm()` natif, pas de clé de liste par index, pas de délai arbitraire pour attendre le rendu.
+
+### Règles et serveur
+
+- Toute règle d'intégrité (unicité, transitions de statut, gardes de suppression, droits, calculs) est appliquée par le serveur, même quand l'écran la vérifie aussi par confort.
+- Une valeur calculable (effectif, solde, jours ouvrés) n'est pas stockée : le serveur la calcule à la lecture.
+- L'auteur d'une action est l'utilisateur de la session, enregistré par le serveur (`createdBy`, `modifiedBy`, `decidedBy`…).
+
+### Commentaires et tests
+
+- Un commentaire explique un **pourquoi** non évident : une règle métier, un piège, une décision. Pas de bannières, pas d'historique (il est dans git), pas de JSDoc systématique.
+- Un `catch` vide est interdit. Une erreur ignorée volontairement porte sa raison en une ligne.
+- Les specs `*.spec.ts` sont rangées à côté du code testé. Chaque règle de `domain/` et chaque endpoint du serveur simulé a la sienne.
+
+### Git
+
+- Un commit par étape cohérente, au format Conventional Commits, en anglais (`feat(hr): …`, `fix(core): …`, `docs: …`).
+- La chaîne `pnpm type-check && pnpm lint && pnpm test && pnpm i18n:check && pnpm build` passe avant chaque commit.
 
 ## 9. Ajouter une entité
 
