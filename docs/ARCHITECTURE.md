@@ -17,6 +17,72 @@
 
 *(Les sections sont complétées au fil de la refonte.)*
 
+## 4. Backend simulé
+
+Tant que l'API du FMS n'existe pas, `src/mocks/` joue le rôle du serveur. Il est installé comme **adaptateur** du client HTTP partagé : les modules appellent `httpClient` exactement comme avec un vrai serveur, et reçoivent les mêmes enveloppes, codes HTTP et erreurs.
+
+```
+module api/ ──► httpClient (axios) ──► adaptateur mock ──► routeur ──► handler ──► collection (localStorage)
+                                   └─► (VITE_USE_MOCK_API=false) vrai serveur VITE_API_BASE_URL
+```
+
+### Activation et bascule vers un vrai serveur
+
+| Variable | Rôle |
+|---|---|
+| `VITE_USE_MOCK_API` | `true` : le mock est installé au démarrage (`src/main.ts`) ; `false` : les requêtes partent vers le serveur |
+| `VITE_API_BASE_URL` | URL de l'API réelle (ignorée par le mock) |
+| `VITE_MOCK_LATENCY_MS` | Latence simulée de chaque requête, pour voir les états de chargement |
+
+Avec `VITE_USE_MOCK_API=false`, le code du mock n'est même pas inclus dans le build. Basculer vers le vrai serveur ne demande donc aucune modification de code, à condition que le serveur respecte le même contrat d'API.
+
+### Organisation
+
+| Dossier | Rôle |
+|---|---|
+| `http/` | Adaptateur axios (latence, annulation, erreurs), routeur (`get/post/patch/delete`, paramètres `:no`, contrôle de session et de permission), réponses standard, moteur de liste (recherche, filtres, tri, pagination), ressource CRUD générique, export Excel |
+| `db/` | Collections persistées dans le `localStorage` (préfixe `fms-mock:v1:`), version de seed, recalage des dates, numérotation |
+| `auth/` | Jetons de démonstration, calcul des permissions par profil, endpoints `/auth/*` |
+| `fixtures/` | Données de démonstration et référentiels (comptes, matrice de permissions, options, modules activables) |
+| `handlers/` | Endpoints par domaine (`options`, `reference`, `hr/*`, `settings/*`) |
+| `i18n.ts` | Messages du serveur en français et en anglais, choisis selon l'en-tête `x-lang` |
+| `clock.ts` | Date de référence des données de démonstration (`2026-09-04`) |
+
+### Contrat d'API
+
+Le contrat est celui de P247 :
+- réponse : `{ success, statusCode, message, data, timestamp }` ;
+- liste : `data = { items, meta: { total, page, limit, totalPages } }` ;
+- erreur : `{ success: false, statusCode, message, errorCode?, duplicateField?, errors? }`.
+
+Les paramètres de liste sont aussi ceux de P247 : `page`, `pageSize`, `searchQuery`, `searchColumns` (liste séparée par des virgules), `sortBy`, `sortDirection` (`ASC`/`DESC`), `filters` (tableau JSON `{ field, valueType, value, operator }` ; une valeur tableau signifie `IN`, et `LIKE` accepte le joker `%`).
+
+Une entité standard expose :
+
+| Méthode | Chemin | Permission |
+|---|---|---|
+| GET | `/<domaine>/<entités>` | read |
+| GET | `/<domaine>/<entités>/:no` | read |
+| POST | `/<domaine>/<entités>` | insert |
+| PATCH | `/<domaine>/<entités>/:no` | update |
+| DELETE | `/<domaine>/<entités>/:no` | delete |
+| POST | `/<domaine>/<entités>/export` | export (fichier `.xlsx`) |
+| POST | `/<domaine>/<entités>/:no/<action>` | execute (approbation, validation...) |
+
+### Données de démonstration
+
+- Les fixtures sont écrites autour du **4 septembre 2026**. À la création d'une collection, les champs listés dans `dateFields` sont décalés pour garder le même écart avec aujourd'hui.
+- Les modifications de l'utilisateur sont conservées d'une visite à l'autre. Le lendemain, les mêmes champs sont décalés d'un jour.
+- `MOCK_SEED_VERSION` (`src/mocks/db/database.ts`) se change quand la structure des fixtures évolue : toutes les collections sont alors régénérées.
+- `POST /__mock/reset` remet toutes les données dans leur état initial.
+- Mot de passe de tous les comptes de démonstration : `demo`.
+
+### Règles
+
+- Le mock joue le serveur : il ne peut importer que des types, des utilitaires purs (`@/utils`, `@/core/utils`) et les règles métier pures des modules (`modules/*/*/domain`). Il n'importe ni Vue, ni Pinia, ni composants, ni stores (règle ESLint `app/mock-backend-isolation`).
+- Aucun fichier de l'application, hormis `src/main.ts`, n'importe le mock (règle `app/mock-backend-entry`).
+- Les règles qui relèvent de l'autorité du serveur (transitions de statut, unicité, numérotation, champs calculés, droits) sont appliquées dans les handlers, même quand l'écran les vérifie aussi pour le confort de l'utilisateur.
+
 ## 10. Outillage et scripts
 
 | Outil | Fichier | Rôle |
