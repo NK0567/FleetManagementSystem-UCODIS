@@ -28,7 +28,6 @@ Comptes de démonstration : sur l'écran de connexion, choisir un compte ; le mo
 ## Documentation
 
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) : architecture, conventions, guide d'ajout d'une entité.
-- [docs/CODE_REVIEW_NOTES.md](docs/CODE_REVIEW_NOTES.md) : revue du code d'origine et corrections appliquées.
 
 ## Refonte en cours
 
