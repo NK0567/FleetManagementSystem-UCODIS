@@ -20,5 +20,8 @@ export default {
   'nav.siteTypes': 'Site types',
   'nav.sites': 'Sites',
   'nav.providers': 'Providers',
-  'nav.vehicles': 'Vehicles'
+  'nav.vehicles': 'Vehicles',
+  'nav.couplings': 'Couplings',
+  'nav.driverAssignments': 'Assignments',
+  'nav.drivers': 'Drivers'
 }

@@ -1,0 +1,35 @@
+export default {
+  'fleet.drivers.title': 'Drivers',
+  'fleet.drivers.card': 'Driver card',
+  'fleet.drivers.loadingList': 'Loading drivers…',
+  'fleet.drivers.loadError': 'The driver could not be loaded.',
+  'fleet.drivers.noResults': 'No driver.',
+  'fleet.drivers.noSearchResults': 'No driver matches "{query}".',
+
+  'fleet.drivers.search.all': 'Staff no., name, phone or vehicle',
+
+  'fleet.drivers.col.no': 'Staff no.',
+  'fleet.drivers.col.fullName': 'Name',
+  'fleet.drivers.col.jobPositionName': 'Position',
+  'fleet.drivers.col.phone': 'Phone',
+  'fleet.drivers.col.vehiclePlate': 'Vehicle',
+  'fleet.drivers.col.assignedSince': 'Assigned since',
+  'fleet.drivers.col.availability': 'Availability',
+  'fleet.drivers.col.eligible': 'Can be given a vehicle',
+  'fleet.drivers.col.ineligibilityReasons': 'Reasons',
+  'fleet.drivers.col.drivingAuthorized': 'Authorized to drive',
+  'fleet.drivers.col.employeeStatus': 'HR status',
+  'fleet.drivers.col.siteName': 'Site',
+
+  'fleet.drivers.section.identity': 'Identity',
+  'fleet.drivers.section.assignment': 'Assignment and availability',
+  'fleet.drivers.section.history': 'Assignment history',
+  'fleet.drivers.action.openEmployee': 'Open the employee card',
+  'fleet.drivers.noVehicle': 'No vehicle',
+  'fleet.drivers.eligibleYes': 'Yes',
+  'fleet.drivers.noAssignment': 'This driver has never been assigned yet.',
+  'fleet.drivers.assignmentCount': 'No assignment | 1 assignment | {count} assignments',
+  'fleet.drivers.history.start': 'Start',
+  'fleet.drivers.history.end': 'End',
+  'fleet.drivers.history.running': 'Running'
+}

@@ -22,6 +22,9 @@ import fleetSiteTypes from './fleetSiteTypes'
 import fleetSites from './fleetSites'
 import fleetProviders from './fleetProviders'
 import fleetVehicles from './fleetVehicles'
+import fleetCouplings from './fleetCouplings'
+import fleetDriverAssignments from './fleetDriverAssignments'
+import fleetDrivers from './fleetDrivers'
 export default {
   ...common,
   ...auth,
@@ -45,5 +48,8 @@ export default {
   ...fleetSiteTypes,
   ...fleetSites,
   ...fleetProviders,
-  ...fleetVehicles
+  ...fleetVehicles,
+  ...fleetCouplings,
+  ...fleetDriverAssignments,
+  ...fleetDrivers
 }

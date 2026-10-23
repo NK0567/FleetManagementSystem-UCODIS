@@ -47,5 +47,16 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
     operational: { fr: 'Opérationnel', en: 'Operational' },
     out_of_service: { fr: 'Hors service', en: 'Out of service' },
     uninstalled: { fr: 'Désinstallé', en: 'Uninstalled' }
+  },
+  periodState: {
+    active: { fr: 'En cours', en: 'Running' },
+    ended: { fr: 'Terminé', en: 'Ended' }
+  },
+  driverAvailability: {
+    available: { fr: 'Disponible', en: 'Available' },
+    on_trip: { fr: 'En trajet', en: 'On trip' },
+    trip_planned: { fr: 'Trajet prévu', en: 'Trip planned' },
+    on_leave: { fr: 'En congé', en: 'On leave' },
+    unavailable: { fr: 'Indisponible', en: 'Unavailable' }
   }
 }

@@ -359,6 +359,12 @@ defineExpose(expose)
           >
             <p class="text-sm text-card-foreground">{{ initialData.statusReason }}</p>
           </BaseFormField>
+          <BaseFormField :label="t('fleet.vehicles.col.driverName')">
+            <FormInput :model-value="initialData.driverName || '—'" disabled />
+          </BaseFormField>
+          <BaseFormField :label="t('fleet.vehicles.col.coupledVehiclePlate')">
+            <FormInput :model-value="initialData.coupledVehiclePlate || '—'" disabled />
+          </BaseFormField>
         </div>
         <div class="space-y-3 min-w-0">
           <template v-if="initialData.outOfService">

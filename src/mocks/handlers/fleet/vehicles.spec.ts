@@ -29,7 +29,7 @@ const newTractor = {
 
 describe('vehicle status', () => {
   it('derives the status from the facts instead of storing it', async () => {
-    expect(await vehicle('VEH-001')).toMatchObject({ status: 'available', statusReason: '' })
+    expect(await vehicle('VEH-019')).toMatchObject({ status: 'available', statusReason: '' })
     expect(await vehicle('VEH-009', 'en')).toMatchObject({
       status: 'out_of_service',
       statusReason: 'Out of service: Accident, expertise en cours.'
@@ -108,27 +108,27 @@ describe('vehicle actions', () => {
   })
 
   it('puts a vehicle out of service with a reason and back', async () => {
-    const withoutReason = await call(server, 'post', '/fleet/vehicles/VEH-001/out-of-service', {
+    const withoutReason = await call(server, 'post', '/fleet/vehicles/VEH-019/out-of-service', {
       as: 'FLT001',
       body: {}
     })
     expect(withoutReason.status).toBe(422)
-    await call(server, 'post', '/fleet/vehicles/VEH-001/out-of-service', {
+    await call(server, 'post', '/fleet/vehicles/VEH-019/out-of-service', {
       as: 'FLT001',
-      body: { reason: 'Pare-brise fêlé' }
+      body: { reason: 'Plancher endommagé' }
     })
-    expect((await vehicle('VEH-001')).status).toBe('out_of_service')
-    await call(server, 'post', '/fleet/vehicles/VEH-001/return-to-service', { as: 'FLT001' })
-    expect((await vehicle('VEH-001')).status).toBe('available')
+    expect((await vehicle('VEH-019')).status).toBe('out_of_service')
+    await call(server, 'post', '/fleet/vehicles/VEH-019/return-to-service', { as: 'FLT001' })
+    expect((await vehicle('VEH-019')).status).toBe('available')
   })
 
   it('freezes a removed vehicle', async () => {
-    await call(server, 'post', '/fleet/vehicles/VEH-020/remove', {
+    await call(server, 'post', '/fleet/vehicles/VEH-019/remove', {
       as: 'FLT001',
       body: { reason: 'Vendue', date: '2026-09-01' }
     })
-    expect((await vehicle('VEH-020')).status).toBe('removed')
-    const edit = await call(server, 'patch', '/fleet/vehicles/VEH-020', {
+    expect((await vehicle('VEH-019')).status).toBe('removed')
+    const edit = await call(server, 'patch', '/fleet/vehicles/VEH-019', {
       as: 'FLT001',
       body: { model: 'Autre' }
     })

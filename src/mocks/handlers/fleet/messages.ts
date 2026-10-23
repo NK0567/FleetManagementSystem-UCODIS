@@ -1,6 +1,70 @@
 import type { LocalizedText } from '../../i18n'
 
 export const FLEET_MESSAGES = {
+  notATractor: {
+    fr: "Ce véhicule ne tire pas de remorque : son type n'est pas un tracteur.",
+    en: 'This vehicle does not tow: its type is not a tractor.'
+  },
+  notATrailer: {
+    fr: "Ce véhicule ne s'attelle pas à un tracteur : son type n'est pas une remorque.",
+    en: 'This vehicle is not towed: its type is not a trailer.'
+  },
+  vehicleNotUsable: {
+    fr: "Le véhicule {plate} n'est pas utilisable : {reason}.",
+    en: 'Vehicle {plate} cannot be used: {reason}.'
+  },
+  alreadyCoupled: {
+    fr: "Le véhicule {plate} est déjà attelé ({no}) : dételez-le d'abord.",
+    en: 'Vehicle {plate} is already coupled ({no}): uncouple it first.'
+  },
+  startBeforePreviousEnd: {
+    fr: 'Le début ne peut pas précéder la fin de la période précédente ({date}).',
+    en: 'The start cannot be before the end of the previous period ({date}).'
+  },
+  dateInFuture: {
+    fr: 'La date ne peut pas être dans le futur.',
+    en: 'The date cannot be in the future.'
+  },
+  endBeforeStart: {
+    fr: 'La fin ne peut pas précéder le début ({date}).',
+    en: 'The end cannot be before the start ({date}).'
+  },
+  periodAlreadyEnded: {
+    fr: 'Cette période est déjà terminée.',
+    en: 'This period has already ended.'
+  },
+  notMotorized: {
+    fr: "Un conducteur s'affecte à un véhicule motorisé.",
+    en: 'A driver is assigned to a motorized vehicle.'
+  },
+  vehicleAlreadyAssigned: {
+    fr: "Le véhicule {plate} a déjà un conducteur ({name}) : terminez d'abord cette affectation.",
+    en: 'Vehicle {plate} already has a driver ({name}): end that assignment first.'
+  },
+  driverAlreadyAssigned: {
+    fr: "Ce conducteur conduit déjà le véhicule {plate} : terminez d'abord cette affectation.",
+    en: 'This driver already drives vehicle {plate}: end that assignment first.'
+  },
+  driverNotEligible: {
+    fr: 'Ce conducteur ne peut pas recevoir de véhicule : {reasons}.',
+    en: 'This driver cannot be given a vehicle: {reasons}.'
+  },
+  vehicleStillLinked: {
+    fr: "Le véhicule est encore attelé ou affecté : terminez d'abord ces liaisons.",
+    en: 'The vehicle is still coupled or assigned: end these links first.'
+  },
+  reasonNotOnStaff: { fr: "n'est plus dans les effectifs", en: 'is no longer on staff' },
+  reasonSuspended: { fr: 'est suspendu', en: 'is suspended' },
+  reasonPositionDoesNotDrive: {
+    fr: 'sa fonction ne comporte pas de conduite',
+    en: 'their position involves no driving'
+  },
+  reasonNotAuthorized: { fr: "n'est pas habilité à conduire", en: 'is not authorized to drive' },
+  reasonOnLeave: { fr: 'est en congé', en: 'is on leave' },
+  reasonDocuments: {
+    fr: 'ses documents obligatoires ne sont pas en règle',
+    en: 'their mandatory documents are not valid'
+  },
   duplicatePlate: {
     fr: "L'immatriculation {plate} est déjà portée, ou l'a été, par le véhicule {no}.",
     en: 'The plate {plate} is or was already used by vehicle {no}.'

@@ -1,0 +1,35 @@
+export default {
+  'fleet.drivers.title': 'Conducteurs',
+  'fleet.drivers.card': 'Fiche conducteur',
+  'fleet.drivers.loadingList': 'Chargement des conducteurs…',
+  'fleet.drivers.loadError': "Le conducteur n'a pas pu être chargé.",
+  'fleet.drivers.noResults': 'Aucun conducteur.',
+  'fleet.drivers.noSearchResults': 'Aucun conducteur ne correspond à « {query} ».',
+
+  'fleet.drivers.search.all': 'Matricule, nom, téléphone ou véhicule',
+
+  'fleet.drivers.col.no': 'Matricule',
+  'fleet.drivers.col.fullName': 'Nom',
+  'fleet.drivers.col.jobPositionName': 'Fonction',
+  'fleet.drivers.col.phone': 'Téléphone',
+  'fleet.drivers.col.vehiclePlate': 'Véhicule',
+  'fleet.drivers.col.assignedSince': 'Affecté depuis',
+  'fleet.drivers.col.availability': 'Disponibilité',
+  'fleet.drivers.col.eligible': 'Peut recevoir un véhicule',
+  'fleet.drivers.col.ineligibilityReasons': 'Motifs',
+  'fleet.drivers.col.drivingAuthorized': 'Habilité à conduire',
+  'fleet.drivers.col.employeeStatus': 'Statut RH',
+  'fleet.drivers.col.siteName': 'Site',
+
+  'fleet.drivers.section.identity': 'Identité',
+  'fleet.drivers.section.assignment': 'Affectation et disponibilité',
+  'fleet.drivers.section.history': 'Historique des affectations',
+  'fleet.drivers.action.openEmployee': 'Ouvrir la fiche employé',
+  'fleet.drivers.noVehicle': 'Aucun véhicule',
+  'fleet.drivers.eligibleYes': 'Oui',
+  'fleet.drivers.noAssignment': "Ce conducteur n'a encore jamais été affecté.",
+  'fleet.drivers.assignmentCount': 'Aucune affectation | 1 affectation | {count} affectations',
+  'fleet.drivers.history.start': 'Début',
+  'fleet.drivers.history.end': 'Fin',
+  'fleet.drivers.history.running': 'En cours'
+}

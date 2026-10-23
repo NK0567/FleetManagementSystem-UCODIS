@@ -39,6 +39,7 @@ import type { MockRouter } from '../../http/router'
 import { sessionUser, type MockRequest } from '../../http/types'
 import type { MockLanguage } from '../../i18n'
 import { FLEET_MESSAGES } from './messages'
+import { activeLinks, coupledWith, employeeNames } from './links'
 import { statusReason, vehicleStatuses } from './vehicleState'
 
 const BASE_PATH = '/fleet/vehicles'
@@ -86,6 +87,9 @@ export function vehiclesApi(db: MockDatabase, language: MockLanguage = 'fr'): Ve
   const types = new Map(db.vehicleTypes.all().map((type) => [type.no, type]))
   const sites = new Map(db.sites.all().map((site) => [site.no, site.name]))
   const statuses = vehicleStatuses(db)
+  const links = activeLinks(db)
+  const names = employeeNames(db)
+  const plates = new Map(db.vehicles.all().map((vehicle) => [vehicle.no, vehicle.plate]))
   const working = equipmentApi(db).filter((item) => item.state === 'operational')
   const capabilities = (vehicleNo: string) =>
     new Set(working.filter((item) => item.vehicleNo === vehicleNo).map((item) => item.capability))
@@ -94,6 +98,9 @@ export function vehiclesApi(db: MockDatabase, language: MockLanguage = 'fr'): Ve
     const type = types.get(vehicle.vehicleTypeNo)
     const result = statuses.get(vehicle.no) ?? { status: 'available' as const, cause: null }
     const owned = capabilities(vehicle.no)
+    const assignment = links.assignmentByVehicle.get(vehicle.no)
+    const coupling = links.couplingByVehicle.get(vehicle.no)
+    const coupledNo = coupling ? coupledWith(coupling, vehicle.no) : null
     return {
       ...vehicle,
       vehicleTypeName: type?.name ?? '',
@@ -106,6 +113,10 @@ export function vehiclesApi(db: MockDatabase, language: MockLanguage = 'fr'): Ve
       formerPlates: vehicle.plateHistory.map((change) => change.previousPlate).join(', '),
       status: result.status,
       statusReason: statusReason(result.cause, vehicle, language),
+      driverNo: assignment?.employeeNo ?? null,
+      driverName: assignment ? (names.get(assignment.employeeNo) ?? '') : '',
+      coupledVehicleNo: coupledNo,
+      coupledVehiclePlate: coupledNo ? (plates.get(coupledNo) ?? '') : '',
       hasTracker: owned.has('tracker'),
       hasCamera: owned.has('camera'),
       hasPump: owned.has('pump')
@@ -335,6 +346,10 @@ export function registerVehiclesHandlers(router: MockRouter, db: MockDatabase): 
   router.post(`${BASE_PATH}/:no/remove`, { feature: FEATURE, action: 'execute' }, (request) => {
     const vehicle = vehicleOf(request)
     assertEditable(vehicle)
+    const links = activeLinks(db)
+    if (links.couplingByVehicle.has(vehicle.no) || links.assignmentByVehicle.has(vehicle.no)) {
+      throw conflict(FLEET_MESSAGES.vehicleStillLinked)
+    }
     const body = readBody(request)
     const reason = readString(body, 'reason')
     if (!reason) throw unprocessable(FLEET_MESSAGES.reasonRequired)

@@ -97,6 +97,10 @@ export interface VehicleApi {
   removal: VehicleRemoval | null
   status: VehicleStatus
   statusReason: string
+  driverNo: string | null
+  driverName: string
+  coupledVehicleNo: string | null
+  coupledVehiclePlate: string
   hasTracker: boolean
   hasCamera: boolean
   hasPump: boolean

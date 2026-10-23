@@ -42,6 +42,12 @@ const tableColumns = computed<TableColumn[]>(() => [
     minW: '150px',
     defaultHidden: true
   },
+  { sortKey: 'driverName', label: t('fleet.vehicles.col.driverName'), minW: '180px' },
+  {
+    sortKey: 'coupledVehiclePlate',
+    label: t('fleet.vehicles.col.coupledVehiclePlate'),
+    minW: '130px'
+  },
   { sortKey: 'homeSiteName', label: t('fleet.vehicles.col.homeSiteNo'), minW: '170px' },
   {
     sortKey: 'year',

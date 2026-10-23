@@ -129,5 +129,7 @@ export default {
     '{plate} will leave the fleet. Its record will stay in the Left the fleet view but can no longer be changed.',
   'fleet.vehicles.dialog.removalDate': 'Removal date',
   'fleet.vehicles.dialog.finalKm': 'Mileage at removal',
-  'fleet.vehicles.dialog.comment': 'Comment'
+  'fleet.vehicles.dialog.comment': 'Comment',
+  'fleet.vehicles.col.driverName': 'Driver',
+  'fleet.vehicles.col.coupledVehiclePlate': 'Coupled with'
 }

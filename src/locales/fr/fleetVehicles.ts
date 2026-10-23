@@ -131,5 +131,7 @@ export default {
     '{plate} quittera le parc. Sa fiche restera consultable dans la vue « Sortis du parc », mais ne pourra plus être modifiée.',
   'fleet.vehicles.dialog.removalDate': 'Date de sortie',
   'fleet.vehicles.dialog.finalKm': 'Kilométrage à la sortie',
-  'fleet.vehicles.dialog.comment': 'Commentaire'
+  'fleet.vehicles.dialog.comment': 'Commentaire',
+  'fleet.vehicles.col.driverName': 'Conducteur',
+  'fleet.vehicles.col.coupledVehiclePlate': 'Attelé à'
 }

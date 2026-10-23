@@ -45,6 +45,48 @@ declare module 'vue-router/auto-routes' {
       { path: ParamValue<false> },
       | never
     >,
+    '/fleet/couplings/': RouteRecordInfo<
+      '/fleet/couplings/',
+      '/fleet/couplings',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/couplings/[id]': RouteRecordInfo<
+      '/fleet/couplings/[id]',
+      '/fleet/couplings/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/driver-assignments/': RouteRecordInfo<
+      '/fleet/driver-assignments/',
+      '/fleet/driver-assignments',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/driver-assignments/[id]': RouteRecordInfo<
+      '/fleet/driver-assignments/[id]',
+      '/fleet/driver-assignments/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/drivers/': RouteRecordInfo<
+      '/fleet/drivers/',
+      '/fleet/drivers',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/drivers/[id]': RouteRecordInfo<
+      '/fleet/drivers/[id]',
+      '/fleet/drivers/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/fleet/equipment-types/': RouteRecordInfo<
       '/fleet/equipment-types/',
       '/fleet/equipment-types',
@@ -304,6 +346,54 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | 'path'
+    }
+    'src/pages/fleet/couplings/index.vue': {
+      routes:
+        | '/fleet/couplings/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/couplings/[id].vue': {
+      routes:
+        | '/fleet/couplings/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/driver-assignments/index.vue': {
+      routes:
+        | '/fleet/driver-assignments/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/driver-assignments/[id].vue': {
+      routes:
+        | '/fleet/driver-assignments/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/drivers/index.vue': {
+      routes:
+        | '/fleet/drivers/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/drivers/[id].vue': {
+      routes:
+        | '/fleet/drivers/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
     }
     'src/pages/fleet/equipment-types/index.vue': {
       routes:
