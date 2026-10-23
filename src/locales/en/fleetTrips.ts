@@ -67,5 +67,8 @@ export default {
   'fleet.trips.dialog.startKm': 'Mileage at departure (last reading by default)',
   'fleet.trips.dialog.endKm': 'Mileage at arrival',
   'fleet.trips.dialog.startWas': 'At departure: {km} km.',
-  'fleet.trips.dialog.cancelReason': 'Reason for cancelling'
+  'fleet.trips.dialog.cancelReason': 'Reason for cancelling',
+  'fleet.trips.needsAuthorization': 'The departure must be granted first.',
+  'fleet.trips.form.authorization': 'Departure authorization',
+  'fleet.trips.form.noAuthorization': 'No request yet.'
 }

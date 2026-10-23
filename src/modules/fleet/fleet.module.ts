@@ -19,6 +19,10 @@ export function registerFleetModule(): void {
     TRAINING: { to: '/fleet/trainings', menuKey: 'training' },
     INFRACTIONTYPE: { to: '/fleet/infraction-types', menuKey: 'infractionType' },
     ROADCHECKLIST: { to: '/fleet/road-checklists', menuKey: 'roadChecklist' },
+    DEPARTUREAUTHORIZATION: {
+      to: '/fleet/departure-authorizations',
+      menuKey: 'departureAuthorization'
+    },
     INSPECTION: { to: '/fleet/inspections', menuKey: 'inspection' },
     CHECKPOINT: { to: '/fleet/check-points', menuKey: 'checkPoint' },
     SITE: { to: '/fleet/sites', menuKey: 'site' },
@@ -36,6 +40,11 @@ export function registerFleetModule(): void {
     order: FLEET_MENU_ORDER,
     subItems: [
       { labelKey: 'nav.trips', to: '/fleet/trips', menuKey: 'trip' },
+      {
+        labelKey: 'nav.departureAuthorizations',
+        to: '/fleet/departure-authorizations',
+        menuKey: 'departureAuthorization'
+      },
       { labelKey: 'nav.vehicles', to: '/fleet/vehicles', menuKey: 'vehicle' },
       { labelKey: 'nav.couplings', to: '/fleet/couplings', menuKey: 'coupling' },
       {

@@ -38,5 +38,6 @@ export default {
   'nav.infractionTypes': "Types d'infractions",
   'nav.roadChecklists': 'Check-lists de route',
   'nav.inspections': 'Visites techniques',
-  'nav.checkPoints': 'Points de contrôle'
+  'nav.checkPoints': 'Points de contrôle',
+  'nav.departureAuthorizations': 'Autorisations de départ'
 }

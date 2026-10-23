@@ -101,6 +101,20 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/fleet/departure-authorizations/': RouteRecordInfo<
+      '/fleet/departure-authorizations/',
+      '/fleet/departure-authorizations',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/departure-authorizations/[id]': RouteRecordInfo<
+      '/fleet/departure-authorizations/[id]',
+      '/fleet/departure-authorizations/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/fleet/document-types/': RouteRecordInfo<
       '/fleet/document-types/',
       '/fleet/document-types',
@@ -602,6 +616,22 @@ declare module 'vue-router/auto-routes' {
     'src/pages/fleet/couplings/[id].vue': {
       routes:
         | '/fleet/couplings/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/departure-authorizations/index.vue': {
+      routes:
+        | '/fleet/departure-authorizations/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/departure-authorizations/[id].vue': {
+      routes:
+        | '/fleet/departure-authorizations/[id]'
       views:
         | never
       pathParamNames:

@@ -26,6 +26,7 @@ import { driverFacts, ineligibilityText } from './drivers'
 import { employeeNames, vehiclePlates } from './links'
 import { FLEET_MESSAGES } from './messages'
 import { plannedArrival, tripWindow } from './tripIndex'
+import { tripAuthorization } from './departureAuthorizations'
 
 const BASE_PATH = '/fleet/trips'
 
@@ -49,6 +50,7 @@ export function tripsApi(db: MockDatabase): TripApi[] {
       }
     })
     const arrival = plannedArrival(trip)
+    const authorization = tripAuthorization(db, trip.no)
     const distanceKm =
       trip.startOdometerKm !== null && trip.endOdometerKm !== null
         ? trip.endOdometerKm - trip.startOdometerKm
@@ -84,6 +86,8 @@ export function tripsApi(db: MockDatabase): TripApi[] {
       stops,
       stopCount: stops.length,
       passedStopCount: stops.filter((stop) => stop.passedAt !== null).length,
+      authorizationNo: authorization?.no ?? null,
+      authorizationDecision: authorization?.decision ?? null,
       createdAt: trip.createdAt,
       createdBy: trip.createdBy,
       modifiedAt: trip.modifiedAt,
@@ -236,6 +240,9 @@ export function registerTripsHandlers(router: MockRouter, db: MockDatabase): voi
 
   action('start', (trip, request) => {
     assertAllowed(trip, 'start')
+    if (tripAuthorization(db, trip.no)?.decision !== 'granted') {
+      throw conflict(FLEET_MESSAGES.tripNeedsAuthorization)
+    }
     const vehicle = db.vehicles.findOrFail(trip.vehicleNo)
     const others = db.trips
       .all()

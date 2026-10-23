@@ -1,0 +1,42 @@
+export default {
+  'fleet.departureAuthorizations.title': 'Autorisations de départ',
+  'fleet.departureAuthorizations.card': "Fiche d'autorisation de départ",
+  'fleet.departureAuthorizations.new': "Demander l'autorisation de départ",
+  'fleet.departureAuthorizations.loadingList': 'Chargement des autorisations…',
+  'fleet.departureAuthorizations.noResults': 'Aucune autorisation de départ.',
+  'fleet.departureAuthorizations.noSearchResults':
+    'Aucune autorisation ne correspond à « {query} ».',
+  'fleet.departureAuthorizations.saveSuccess': 'Autorisation enregistrée.',
+  'fleet.departureAuthorizations.saveError': "L'autorisation n'a pas pu être enregistrée.",
+  'fleet.departureAuthorizations.createError': "La demande n'a pas pu être enregistrée.",
+
+  'fleet.departureAuthorizations.search.all': 'N°, trajet, véhicule ou conducteur',
+
+  'fleet.departureAuthorizations.col.no': 'N°',
+  'fleet.departureAuthorizations.col.tripNo': 'Trajet',
+  'fleet.departureAuthorizations.col.plannedDeparture': 'Départ prévu',
+  'fleet.departureAuthorizations.col.vehiclePlate': 'Véhicule',
+  'fleet.departureAuthorizations.col.driverName': 'Conducteur',
+  'fleet.departureAuthorizations.col.ready': 'Contrôles au vert',
+  'fleet.departureAuthorizations.col.decision': 'Décision',
+
+  'fleet.departureAuthorizations.form.general': 'Demande',
+  'fleet.departureAuthorizations.form.checks': 'Contrôles',
+  'fleet.departureAuthorizations.form.no': 'N°',
+  'fleet.departureAuthorizations.form.tripNo': 'Trajet',
+  'fleet.departureAuthorizations.actionError': "L'action n'a pas pu être effectuée.",
+  'fleet.departureAuthorizations.decidedBy': 'Décision de {user} le {date}.',
+  'fleet.departureAuthorizations.listView.pending': 'En attente',
+  'fleet.departureAuthorizations.listView.granted': 'Accordées',
+  'fleet.departureAuthorizations.listView.refused': 'Refusées',
+  'fleet.departureAuthorizations.listView.all': 'Toutes',
+  'fleet.departureAuthorizations.action.grant': 'Accorder le départ',
+  'fleet.departureAuthorizations.action.refuse': 'Refuser',
+  'fleet.departureAuthorizations.form.plannedDeparture': 'Départ prévu',
+  'fleet.departureAuthorizations.form.vehicle': 'Véhicule',
+  'fleet.departureAuthorizations.form.driver': 'Conducteur',
+  'fleet.departureAuthorizations.form.driverChecks': 'Contrôles du conducteur',
+  'fleet.departureAuthorizations.form.liveChecks': "Contrôles, à l'instant",
+  'fleet.departureAuthorizations.form.frozenChecks': 'Contrôles au moment de la décision',
+  'fleet.departureAuthorizations.form.refusalReason': 'Motif du refus'
+}

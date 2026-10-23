@@ -33,6 +33,35 @@ const plan = (body: Record<string, unknown>) =>
 const act = (no: string, name: string, body: Record<string, unknown> = {}) =>
   call(server, 'post', `/fleet/trips/${no}/${name}`, { as: 'FLT001', language: 'en', body })
 
+/** A departure checklist, a request with the driver checks, and the decision. */
+async function authorize(tripNo: string) {
+  const points = (
+    (await call(server, 'get', '/fleet/check-points', { as: 'FLT001', query: { pageSize: 100 } }))
+      .data.data as { items: { no: string; scope: string }[] }
+  ).items
+  const answers = (scope: string) =>
+    points
+      .filter((point) => point.scope === scope)
+      .map((point) => ({ pointNo: point.no, result: 'ok' }))
+  await call(server, 'post', '/fleet/road-checklists', {
+    as: 'FLT001',
+    body: { tripNo, stage: 'departure', takenAt: '2026-09-04T09:00', results: answers('vehicle') }
+  })
+  const request = await call(server, 'post', '/fleet/departure-authorizations', {
+    as: 'FLT001',
+    body: { tripNo, driverChecks: answers('driver') }
+  })
+  return call(
+    server,
+    'post',
+    `/fleet/departure-authorizations/${(request.data.data as { no: string }).no}/grant`,
+    {
+      as: 'FLT001',
+      language: 'en'
+    }
+  )
+}
+
 describe('trips on the road', () => {
   it('put the vehicle in mission and the driver on trip', async () => {
     expect(await get<VehicleApi>('/fleet/vehicles/VEH-003')).toMatchObject({
@@ -116,6 +145,8 @@ describe('planning a trip', () => {
 describe('trip actions', () => {
   it('runs a trip from start to closure and records the mileage on the vehicle', async () => {
     const created = (await plan({})).data.data as TripApi
+    expect((await act(created.no, 'start', {})).status).toBe(409)
+    expect((await authorize(created.no)).data.data).toMatchObject({ decision: 'granted' })
     expect((await act(created.no, 'start', {})).status).toBe(200)
     expect((await get<VehicleApi>('/fleet/vehicles/VEH-001')).status).toBe('in_mission')
     expect((await act(created.no, 'pass-stop')).status).toBe(200)

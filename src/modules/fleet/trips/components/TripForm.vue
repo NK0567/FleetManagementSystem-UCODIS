@@ -166,6 +166,25 @@ defineExpose(expose)
         :summary="[]"
       >
         <div class="space-y-3 min-w-0">
+          <BaseFormField :label="t('fleet.trips.form.authorization')">
+            <router-link
+              v-if="initialData.authorizationNo"
+              :to="{
+                path: '/fleet/departure-authorizations',
+                query: { no: initialData.authorizationNo, cardMode: 'view' }
+              }"
+              class="inline-flex items-center gap-2 text-sm text-primary hover:underline"
+            >
+              {{ initialData.authorizationNo }}
+              <DepartureDecisionPill
+                v-if="initialData.authorizationDecision"
+                :decision="initialData.authorizationDecision"
+              />
+            </router-link>
+            <p v-else class="text-sm text-muted-foreground">
+              {{ t('fleet.trips.form.noAuthorization') }}
+            </p>
+          </BaseFormField>
           <BaseFormField :label="t('fleet.trips.form.actualDeparture')">
             <FormInput :model-value="formatDateTime(initialData.actualDeparture)" disabled />
           </BaseFormField>

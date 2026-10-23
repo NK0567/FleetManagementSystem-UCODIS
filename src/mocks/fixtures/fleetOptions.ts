@@ -212,6 +212,21 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
     recheck_overdue: { fr: 'Contre-visite en retard', en: 'Re-inspection overdue' },
     rechecked: { fr: 'Contre-visite passée', en: 'Re-inspected' }
   },
+  departureDecision: {
+    pending: { fr: 'En attente', en: 'Pending' },
+    granted: { fr: 'Accordé', en: 'Granted' },
+    refused: { fr: 'Refusé', en: 'Refused' }
+  },
+  departureCheck: {
+    checklist: { fr: 'Check-list de départ', en: 'Departure checklist' },
+    vehicle: { fr: 'Véhicule', en: 'Vehicle' },
+    trailer: { fr: 'Remorque', en: 'Trailer' },
+    vehicleDocuments: { fr: 'Documents du véhicule', en: 'Vehicle documents' },
+    driver: { fr: 'Conducteur', en: 'Driver' },
+    rest: { fr: 'Repos avant le départ', en: 'Rest before departure' },
+    weeklyRest: { fr: 'Repos hebdomadaire', en: 'Weekly rest' },
+    driverChecks: { fr: 'Contrôles du conducteur', en: 'Driver checks' }
+  },
   complianceGapReason: {
     missing: { fr: 'Manquant', en: 'Missing' },
     expired: { fr: 'Expiré', en: 'Expired' },

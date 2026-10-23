@@ -40,6 +40,7 @@ import fleetTrainings from './fleetTrainings'
 import fleetCheckPoints from './fleetCheckPoints'
 import fleetInspections from './fleetInspections'
 import fleetRoadChecklists from './fleetRoadChecklists'
+import fleetDepartureAuthorizations from './fleetDepartureAuthorizations'
 export default {
   ...common,
   ...auth,
@@ -81,5 +82,6 @@ export default {
   ...fleetTrainings,
   ...fleetCheckPoints,
   ...fleetInspections,
-  ...fleetRoadChecklists
+  ...fleetRoadChecklists,
+  ...fleetDepartureAuthorizations
 }

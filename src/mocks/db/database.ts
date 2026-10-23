@@ -36,11 +36,12 @@ import { trainingsCollection } from '../fixtures/fleet/trainings'
 import { checkPointsCollection } from '../fixtures/fleet/checkPoints'
 import { inspectionsCollection } from '../fixtures/fleet/inspections'
 import { roadChecklistsCollection } from '../fixtures/fleet/roadChecklists'
+import { departureAuthorizationsCollection } from '../fixtures/fleet/departureAuthorizations'
 import { createCollection, type CollectionContext } from './collection'
 import { clearStoredCollections } from './storage'
 
 /** Bump when fixtures change shape: every collection is then reseeded. */
-export const MOCK_SEED_VERSION = 10
+export const MOCK_SEED_VERSION = 11
 
 export function createDatabase(
   context: CollectionContext = {
@@ -85,7 +86,8 @@ export function createDatabase(
     trainings: createCollection(trainingsCollection, context),
     checkPoints: createCollection(checkPointsCollection, context),
     inspections: createCollection(inspectionsCollection, context),
-    roadChecklists: createCollection(roadChecklistsCollection, context)
+    roadChecklists: createCollection(roadChecklistsCollection, context),
+    departureAuthorizations: createCollection(departureAuthorizationsCollection, context)
   }
 
   return {

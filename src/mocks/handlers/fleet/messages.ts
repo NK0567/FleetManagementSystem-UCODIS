@@ -479,5 +479,77 @@ export const FLEET_MESSAGES = {
   recheckDateInvalid: {
     fr: 'La contre-visite suit la visite et ne peut pas être future.',
     en: 'The re-inspection follows the inspection and cannot be in the future.'
+  },
+  checkChecklistMissing: {
+    fr: 'Aucune check-list de départ pour ce trajet.',
+    en: 'No departure checklist for this trip.'
+  },
+  checkChecklistBlocking: {
+    fr: 'Anomalie bloquante : {points}.',
+    en: 'Blocking anomaly: {points}.'
+  },
+  checkChecklistOk: {
+    fr: 'Check-list {no}.',
+    en: 'Checklist {no}.'
+  },
+  checkVehicleOk: {
+    fr: '{plate} utilisable.',
+    en: '{plate} is usable.'
+  },
+  checkVehicleKo: {
+    fr: '{plate} : {reason}',
+    en: '{plate}: {reason}'
+  },
+  checkNoTrailer: {
+    fr: 'Sans remorque.',
+    en: 'No trailer.'
+  },
+  checkDocumentsOk: {
+    fr: 'Documents en règle.',
+    en: 'Documents in order.'
+  },
+  checkDriverOk: {
+    fr: '{name} peut conduire.',
+    en: '{name} may drive.'
+  },
+  checkRestOk: {
+    fr: '{hours} h de repos depuis le dernier trajet (minimum {min} h).',
+    en: '{hours} h of rest since the last trip (at least {min} h).'
+  },
+  checkRestNone: {
+    fr: 'Aucun trajet récent.',
+    en: 'No recent trip.'
+  },
+  checkWeeklyRest: {
+    fr: 'Plus long repos sur 7 jours : {hours} h (minimum {min} h).',
+    en: 'Longest rest over 7 days: {hours} h (at least {min} h).'
+  },
+  checkDriverChecksOk: {
+    fr: 'Contrôles du conducteur conformes.',
+    en: 'Driver checks passed.'
+  },
+  checkDriverChecksBlocking: {
+    fr: 'Contrôle bloquant en anomalie : {points}.',
+    en: 'Blocking check failed: {points}.'
+  },
+  departureNotReady: {
+    fr: 'Le départ ne peut pas être accordé : {checks}',
+    en: 'The departure cannot be granted: {checks}'
+  },
+  departureAlreadyRequested: {
+    fr: 'Une demande existe déjà pour ce trajet ({no}).',
+    en: 'A request already exists for this trip ({no}).'
+  },
+  departureNotPending: {
+    fr: 'Cette demande a déjà été décidée.',
+    en: 'This request has already been decided.'
+  },
+  departureTripNotPlanned: {
+    fr: 'Seul un trajet planifié peut demander son départ.',
+    en: 'Only a planned trip can request its departure.'
+  },
+  tripNeedsAuthorization: {
+    fr: "Le trajet n'a pas d'autorisation de départ accordée.",
+    en: 'The trip has no granted departure authorization.'
   }
 } satisfies Record<string, LocalizedText>
