@@ -45,6 +45,20 @@ declare module 'vue-router/auto-routes' {
       { path: ParamValue<false> },
       | never
     >,
+    '/fleet/check-points/': RouteRecordInfo<
+      '/fleet/check-points/',
+      '/fleet/check-points',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/check-points/[id]': RouteRecordInfo<
+      '/fleet/check-points/[id]',
+      '/fleet/check-points/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/fleet/claims/': RouteRecordInfo<
       '/fleet/claims/',
       '/fleet/claims',
@@ -199,6 +213,20 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/fleet/inspections/': RouteRecordInfo<
+      '/fleet/inspections/',
+      '/fleet/inspections',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/inspections/[id]': RouteRecordInfo<
+      '/fleet/inspections/[id]',
+      '/fleet/inspections/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/fleet/insurance-policies/': RouteRecordInfo<
       '/fleet/insurance-policies/',
       '/fleet/insurance-policies',
@@ -223,6 +251,20 @@ declare module 'vue-router/auto-routes' {
     '/fleet/providers/[id]': RouteRecordInfo<
       '/fleet/providers/[id]',
       '/fleet/providers/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/road-checklists/': RouteRecordInfo<
+      '/fleet/road-checklists/',
+      '/fleet/road-checklists',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/road-checklists/[id]': RouteRecordInfo<
+      '/fleet/road-checklists/[id]',
+      '/fleet/road-checklists/:id',
       { id: ParamValue<true> },
       { id: ParamValue<false> },
       | never
@@ -501,6 +543,22 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | 'path'
     }
+    'src/pages/fleet/check-points/index.vue': {
+      routes:
+        | '/fleet/check-points/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/check-points/[id].vue': {
+      routes:
+        | '/fleet/check-points/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
     'src/pages/fleet/claims/index.vue': {
       routes:
         | '/fleet/claims/'
@@ -677,6 +735,22 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | 'id'
     }
+    'src/pages/fleet/inspections/index.vue': {
+      routes:
+        | '/fleet/inspections/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/inspections/[id].vue': {
+      routes:
+        | '/fleet/inspections/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
     'src/pages/fleet/insurance-policies/index.vue': {
       routes:
         | '/fleet/insurance-policies/'
@@ -704,6 +778,22 @@ declare module 'vue-router/auto-routes' {
     'src/pages/fleet/providers/[id].vue': {
       routes:
         | '/fleet/providers/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/road-checklists/index.vue': {
+      routes:
+        | '/fleet/road-checklists/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/road-checklists/[id].vue': {
+      routes:
+        | '/fleet/road-checklists/[id]'
       views:
         | never
       pathParamNames:

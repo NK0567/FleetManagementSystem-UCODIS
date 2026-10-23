@@ -21,6 +21,9 @@ import { registerClaimsHandlers } from './claims'
 import { registerInfractionTypesHandlers } from './infractionTypes'
 import { registerInfractionsHandlers } from './infractions'
 import { registerTrainingsHandlers } from './trainings'
+import { registerCheckPointsHandlers } from './checkPoints'
+import { registerInspectionsHandlers } from './inspections'
+import { registerRoadChecklistsHandlers } from './roadChecklists'
 
 export function registerFleetHandlers(router: MockRouter, db: MockDatabase): void {
   registerFleetSettingsHandlers(router, db)
@@ -44,4 +47,7 @@ export function registerFleetHandlers(router: MockRouter, db: MockDatabase): voi
   registerInfractionTypesHandlers(router, db)
   registerInfractionsHandlers(router, db)
   registerTrainingsHandlers(router, db)
+  registerCheckPointsHandlers(router, db)
+  registerInspectionsHandlers(router, db)
+  registerRoadChecklistsHandlers(router, db)
 }

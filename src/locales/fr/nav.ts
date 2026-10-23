@@ -35,5 +35,8 @@ export default {
   'nav.insurancePolicies': "Polices d'assurance",
   'nav.infractions': 'Infractions',
   'nav.trainings': 'Formations',
-  'nav.infractionTypes': "Types d'infractions"
+  'nav.infractionTypes': "Types d'infractions",
+  'nav.roadChecklists': 'Check-lists de route',
+  'nav.inspections': 'Visites techniques',
+  'nav.checkPoints': 'Points de contrôle'
 }

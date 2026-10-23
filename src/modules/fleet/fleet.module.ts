@@ -18,6 +18,9 @@ export function registerFleetModule(): void {
     INFRACTION: { to: '/fleet/infractions', menuKey: 'infraction' },
     TRAINING: { to: '/fleet/trainings', menuKey: 'training' },
     INFRACTIONTYPE: { to: '/fleet/infraction-types', menuKey: 'infractionType' },
+    ROADCHECKLIST: { to: '/fleet/road-checklists', menuKey: 'roadChecklist' },
+    INSPECTION: { to: '/fleet/inspections', menuKey: 'inspection' },
+    CHECKPOINT: { to: '/fleet/check-points', menuKey: 'checkPoint' },
     SITE: { to: '/fleet/sites', menuKey: 'site' },
     ROUTETEMPLATE: { to: '/fleet/route-templates', menuKey: 'routeTemplate' },
     PROVIDER: { to: '/fleet/providers', menuKey: 'provider' },
@@ -56,6 +59,8 @@ export function registerFleetModule(): void {
       { labelKey: 'nav.claims', to: '/fleet/claims', menuKey: 'claim' },
       { labelKey: 'nav.infractions', to: '/fleet/infractions', menuKey: 'infraction' },
       { labelKey: 'nav.trainings', to: '/fleet/trainings', menuKey: 'training' },
+      { labelKey: 'nav.roadChecklists', to: '/fleet/road-checklists', menuKey: 'roadChecklist' },
+      { labelKey: 'nav.inspections', to: '/fleet/inspections', menuKey: 'inspection' },
       {
         labelKey: 'nav.insurancePolicies',
         to: '/fleet/insurance-policies',
@@ -68,6 +73,7 @@ export function registerFleetModule(): void {
       { labelKey: 'nav.equipmentTypes', to: '/fleet/equipment-types', menuKey: 'equipmentType' },
       { labelKey: 'nav.siteTypes', to: '/fleet/site-types', menuKey: 'siteType' },
       { labelKey: 'nav.documentTypes', to: '/fleet/document-types', menuKey: 'documentType' },
+      { labelKey: 'nav.checkPoints', to: '/fleet/check-points', menuKey: 'checkPoint' },
       {
         labelKey: 'nav.infractionTypes',
         to: '/fleet/infraction-types',

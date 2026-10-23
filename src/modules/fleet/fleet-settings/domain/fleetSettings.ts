@@ -23,15 +23,21 @@ export interface DocumentSettings {
   defaultNoticeDays: number
 }
 
+export interface SafetySettings {
+  /** Days given to re-inspect a vehicle after a non-conforming inspection. */
+  recheckDelayDays: number
+}
+
 export interface FleetSettings {
   drivingTime: DrivingTimeSettings
   geofencing: GeofencingSettings
   documents: DocumentSettings
+  safety: SafetySettings
 }
 
 export type FleetSettingsSection = keyof FleetSettings
 
-export const FLEET_SETTINGS_SECTIONS = ['drivingTime', 'geofencing', 'documents'] as const
+export const FLEET_SETTINGS_SECTIONS = ['drivingTime', 'geofencing', 'documents', 'safety'] as const
 
 export type SettingUnit = 'min' | 'h' | 'm' | 'days'
 
@@ -54,7 +60,8 @@ export const FLEET_SETTING_FIELDS: Record<FleetSettingsSection, readonly Setting
     { key: 'nightBanEnd', kind: 'time' }
   ],
   geofencing: [{ key: 'defaultSiteRadiusM', kind: 'number', unit: 'm', min: 200, max: 20_000 }],
-  documents: [{ key: 'defaultNoticeDays', kind: 'number', unit: 'days', min: 1, max: 180 }]
+  documents: [{ key: 'defaultNoticeDays', kind: 'number', unit: 'days', min: 1, max: 180 }],
+  safety: [{ key: 'recheckDelayDays', kind: 'number', unit: 'days', min: 1, max: 60 }]
 }
 
 export const DEFAULT_FLEET_SETTINGS: FleetSettings = {
@@ -71,7 +78,8 @@ export const DEFAULT_FLEET_SETTINGS: FleetSettings = {
     nightBanEnd: '05:00'
   },
   geofencing: { defaultSiteRadiusM: 5_000 },
-  documents: { defaultNoticeDays: 30 }
+  documents: { defaultNoticeDays: 30 },
+  safety: { recheckDelayDays: 15 }
 }
 
 export type SettingIssue =

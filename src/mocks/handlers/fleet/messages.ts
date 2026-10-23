@@ -455,5 +455,29 @@ export const FLEET_MESSAGES = {
   notOnStaff: {
     fr: 'Cette personne ne fait plus partie du personnel.',
     en: 'This person is no longer on staff.'
+  },
+  checksIncomplete: {
+    fr: 'Renseignez tous les points de contrôle.',
+    en: 'Fill in every check point.'
+  },
+  checksCommentRequired: {
+    fr: 'Expliquez chaque anomalie relevée.',
+    en: 'Explain every anomaly found.'
+  },
+  checklistTripOver: {
+    fr: 'Ce trajet est clôturé ou annulé : il ne reçoit plus de check-list.',
+    en: 'This trip is closed or cancelled: it takes no more checklists.'
+  },
+  inspectionFindingsRequired: {
+    fr: 'Décrivez les défauts relevés.',
+    en: 'Describe the findings.'
+  },
+  inspectionNoRecheck: {
+    fr: "Cette visite n'attend pas de contre-visite.",
+    en: 'This inspection awaits no re-inspection.'
+  },
+  recheckDateInvalid: {
+    fr: 'La contre-visite suit la visite et ne peut pas être future.',
+    en: 'The re-inspection follows the inspection and cannot be in the future.'
   }
 } satisfies Record<string, LocalizedText>

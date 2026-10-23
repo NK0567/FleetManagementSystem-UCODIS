@@ -40,5 +40,8 @@ export default {
   'fleet.settings.issue.invalidTime': 'Indiquez une heure au format HH:MM.',
   'fleet.settings.issue.nightWindowIncomplete':
     "Indiquez l'heure de début et l'heure de fin, ou laissez les deux vides.",
-  'fleet.settings.issue.nightWindowEmpty': "L'heure de fin doit différer de l'heure de début."
+  'fleet.settings.issue.nightWindowEmpty': "L'heure de fin doit différer de l'heure de début.",
+  'fleet.settings.section.safety': 'Sécurité',
+  'fleet.settings.section.safety.hint': 'Délais appliqués aux contrôles des véhicules.',
+  'fleet.settings.field.safety.recheckDelayDays': 'Délai de contre-visite'
 }

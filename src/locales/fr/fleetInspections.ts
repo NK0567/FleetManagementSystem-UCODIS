@@ -1,0 +1,38 @@
+export default {
+  'fleet.inspections.title': 'Visites techniques',
+  'fleet.inspections.card': 'Fiche visite technique',
+  'fleet.inspections.new': 'Nouvelle visite technique',
+  'fleet.inspections.loadingList': 'Chargement des visites…',
+  'fleet.inspections.noResults': 'Aucune visite technique.',
+  'fleet.inspections.noSearchResults': 'Aucune visite ne correspond à « {query} ».',
+  'fleet.inspections.saveSuccess': 'Visite enregistrée.',
+  'fleet.inspections.saveError': "La visite n'a pas pu être enregistrée.",
+  'fleet.inspections.createError': "La visite n'a pas pu être enregistrée.",
+
+  'fleet.inspections.search.all': 'N°, véhicule ou centre',
+
+  'fleet.inspections.col.no': 'N°',
+  'fleet.inspections.col.vehicleNo': 'Véhicule',
+  'fleet.inspections.col.inspectedOn': 'Date',
+  'fleet.inspections.col.center': 'Centre de contrôle',
+  'fleet.inspections.col.result': 'Résultat',
+  'fleet.inspections.col.findings': 'Défauts relevés',
+  'fleet.inspections.col.vehiclePlate': 'Véhicule',
+  'fleet.inspections.col.recheckDueOn': 'Contre-visite avant le',
+  'fleet.inspections.col.recheckDoneOn': 'Contre-visite passée le',
+  'fleet.inspections.col.state': 'État',
+
+  'fleet.inspections.form.general': 'Visite',
+  'fleet.inspections.form.recheck': 'Contre-visite',
+  'fleet.inspections.form.no': 'N°',
+  'fleet.inspections.form.vehicleNo': 'Véhicule',
+  'fleet.inspections.form.inspectedOn': 'Date de la visite',
+  'fleet.inspections.form.center': 'Centre de contrôle',
+  'fleet.inspections.form.result': 'Résultat',
+  'fleet.inspections.form.findings': 'Défauts relevés',
+  'fleet.inspections.actionError': "L'action n'a pas pu être effectuée.",
+  'fleet.inspections.action.recheck': 'Contre-visite passée',
+  'fleet.inspections.form.recheckDueOn': 'Contre-visite avant le',
+  'fleet.inspections.form.recheckDoneOn': 'Contre-visite passée le',
+  'fleet.inspections.form.recheckAwaited': 'En attente : le véhicule est immobilisé'
+}

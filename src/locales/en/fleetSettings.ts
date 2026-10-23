@@ -39,5 +39,8 @@ export default {
   'fleet.settings.issue.invalidTime': 'Enter a time as HH:MM.',
   'fleet.settings.issue.nightWindowIncomplete':
     'Give both the start and the end, or leave both empty.',
-  'fleet.settings.issue.nightWindowEmpty': 'The end must differ from the start.'
+  'fleet.settings.issue.nightWindowEmpty': 'The end must differ from the start.',
+  'fleet.settings.section.safety': 'Safety',
+  'fleet.settings.section.safety.hint': 'Delays applied to vehicle checks.',
+  'fleet.settings.field.safety.recheckDelayDays': 'Re-inspection delay'
 }

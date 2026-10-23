@@ -33,11 +33,14 @@ import { claimsCollection } from '../fixtures/fleet/claims'
 import { infractionTypesCollection } from '../fixtures/fleet/infractionTypes'
 import { infractionsCollection } from '../fixtures/fleet/infractions'
 import { trainingsCollection } from '../fixtures/fleet/trainings'
+import { checkPointsCollection } from '../fixtures/fleet/checkPoints'
+import { inspectionsCollection } from '../fixtures/fleet/inspections'
+import { roadChecklistsCollection } from '../fixtures/fleet/roadChecklists'
 import { createCollection, type CollectionContext } from './collection'
 import { clearStoredCollections } from './storage'
 
 /** Bump when fixtures change shape: every collection is then reseeded. */
-export const MOCK_SEED_VERSION = 9
+export const MOCK_SEED_VERSION = 10
 
 export function createDatabase(
   context: CollectionContext = {
@@ -79,7 +82,10 @@ export function createDatabase(
     claims: createCollection(claimsCollection, context),
     infractionTypes: createCollection(infractionTypesCollection, context),
     infractions: createCollection(infractionsCollection, context),
-    trainings: createCollection(trainingsCollection, context)
+    trainings: createCollection(trainingsCollection, context),
+    checkPoints: createCollection(checkPointsCollection, context),
+    inspections: createCollection(inspectionsCollection, context),
+    roadChecklists: createCollection(roadChecklistsCollection, context)
   }
 
   return {

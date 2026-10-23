@@ -1,0 +1,38 @@
+export default {
+  'fleet.inspections.title': 'Technical inspections',
+  'fleet.inspections.card': 'Technical inspection card',
+  'fleet.inspections.new': 'New technical inspection',
+  'fleet.inspections.loadingList': 'Loading inspections…',
+  'fleet.inspections.noResults': 'No technical inspection.',
+  'fleet.inspections.noSearchResults': 'No inspection matches "{query}".',
+  'fleet.inspections.saveSuccess': 'Inspection saved.',
+  'fleet.inspections.saveError': 'The inspection could not be saved.',
+  'fleet.inspections.createError': 'The inspection could not be recorded.',
+
+  'fleet.inspections.search.all': 'No., vehicle or centre',
+
+  'fleet.inspections.col.no': 'No.',
+  'fleet.inspections.col.vehicleNo': 'Vehicle',
+  'fleet.inspections.col.inspectedOn': 'Date',
+  'fleet.inspections.col.center': 'Inspection centre',
+  'fleet.inspections.col.result': 'Result',
+  'fleet.inspections.col.findings': 'Findings',
+  'fleet.inspections.col.vehiclePlate': 'Vehicle',
+  'fleet.inspections.col.recheckDueOn': 'Re-inspection by',
+  'fleet.inspections.col.recheckDoneOn': 'Re-inspected on',
+  'fleet.inspections.col.state': 'State',
+
+  'fleet.inspections.form.general': 'Inspection',
+  'fleet.inspections.form.recheck': 'Re-inspection',
+  'fleet.inspections.form.no': 'No.',
+  'fleet.inspections.form.vehicleNo': 'Vehicle',
+  'fleet.inspections.form.inspectedOn': 'Inspection date',
+  'fleet.inspections.form.center': 'Inspection centre',
+  'fleet.inspections.form.result': 'Result',
+  'fleet.inspections.form.findings': 'Findings',
+  'fleet.inspections.actionError': 'The action could not be completed.',
+  'fleet.inspections.action.recheck': 'Re-inspection passed',
+  'fleet.inspections.form.recheckDueOn': 'Re-inspection by',
+  'fleet.inspections.form.recheckDoneOn': 'Re-inspected on',
+  'fleet.inspections.form.recheckAwaited': 'Awaited: the vehicle is immobilized'
+}

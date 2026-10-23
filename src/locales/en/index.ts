@@ -37,6 +37,9 @@ import fleetClaims from './fleetClaims'
 import fleetInfractionTypes from './fleetInfractionTypes'
 import fleetInfractions from './fleetInfractions'
 import fleetTrainings from './fleetTrainings'
+import fleetCheckPoints from './fleetCheckPoints'
+import fleetInspections from './fleetInspections'
+import fleetRoadChecklists from './fleetRoadChecklists'
 export default {
   ...common,
   ...auth,
@@ -75,5 +78,8 @@ export default {
   ...fleetClaims,
   ...fleetInfractionTypes,
   ...fleetInfractions,
-  ...fleetTrainings
+  ...fleetTrainings,
+  ...fleetCheckPoints,
+  ...fleetInspections,
+  ...fleetRoadChecklists
 }

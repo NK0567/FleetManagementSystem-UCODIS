@@ -79,6 +79,13 @@ export function fleetReferenceData(db: MockDatabase): Record<string, ReferenceIt
     routeTemplates: db.routeTemplates
       .all()
       .map((route) => ({ code: route.no, description: route.name, active: route.active })),
+    openTrips: db.trips
+      .all()
+      .filter((trip) => trip.status !== 'closed' && trip.status !== 'cancelled')
+      .map((trip) => ({
+        code: trip.no,
+        description: `${trip.no} · ${trip.plannedDeparture.slice(0, 10)}`
+      })),
     infractionTypes: db.infractionTypes
       .all()
       .map((type) => ({ code: type.no, description: type.name, active: type.active })),

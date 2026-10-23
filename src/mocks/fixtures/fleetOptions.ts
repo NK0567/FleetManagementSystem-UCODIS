@@ -188,6 +188,30 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
     attended: { fr: 'Suivie', en: 'Attended' },
     cancelled: { fr: 'Annulée', en: 'Cancelled' }
   },
+  checkPointScope: {
+    vehicle: { fr: 'Véhicule', en: 'Vehicle' },
+    driver: { fr: 'Conducteur', en: 'Driver' }
+  },
+  checkResult: {
+    ok: { fr: 'Conforme', en: 'OK' },
+    anomaly: { fr: 'Anomalie', en: 'Anomaly' },
+    na: { fr: 'Sans objet', en: 'Not applicable' }
+  },
+  checklistStage: {
+    departure: { fr: 'Départ', en: 'Departure' },
+    stop: { fr: 'Pause', en: 'Stop' },
+    arrival: { fr: 'Arrivée', en: 'Arrival' }
+  },
+  inspectionResult: {
+    conforming: { fr: 'Conforme', en: 'Conforming' },
+    non_conforming: { fr: 'Non conforme', en: 'Non-conforming' }
+  },
+  inspectionState: {
+    conforming: { fr: 'Conforme', en: 'Conforming' },
+    recheck_pending: { fr: 'Contre-visite à passer', en: 'Re-inspection due' },
+    recheck_overdue: { fr: 'Contre-visite en retard', en: 'Re-inspection overdue' },
+    rechecked: { fr: 'Contre-visite passée', en: 'Re-inspected' }
+  },
   complianceGapReason: {
     missing: { fr: 'Manquant', en: 'Missing' },
     expired: { fr: 'Expiré', en: 'Expired' },
