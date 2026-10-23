@@ -20,7 +20,7 @@ export default {
     'On-board measures per vehicle and reported events: driving behaviour, camera, engine faults, signal.',
   'settings.moduleToggles.item.trips.label': 'Trips',
   'settings.moduleToggles.item.trips.description':
-    'Trip sheet, document file, route and served sites.',
+    'Vehicle trips and route templates: vehicle, trailer, driver, stops and mileage.',
   'settings.moduleToggles.item.compliance.label': 'Compliance',
   'settings.moduleToggles.item.compliance.description':
     'Route deviations detected on trips, to be qualified by the fleet manager.',
@@ -42,9 +42,9 @@ export default {
   'settings.moduleToggles.item.documents.label': 'Documents',
   'settings.moduleToggles.item.documents.description':
     'Vehicle and staff documents with their due dates, and company documents with their approval workflow.',
-  'settings.moduleToggles.item.fleet-settings.label': 'Configuration',
+  'settings.moduleToggles.item.fleet-settings.label': 'Fleet settings',
   'settings.moduleToggles.item.fleet-settings.description':
-    'Reference data: routes, customers, deviation types, operating thresholds.',
+    'Operating thresholds: driving and rest time, site radius, document notice.',
   'settings.moduleToggles.item.fleet-drivers.label': 'Drivers (fleet view)',
   'settings.moduleToggles.item.fleet-drivers.description':
     'Operational view of the driver: assignment, compliance, trip history.',

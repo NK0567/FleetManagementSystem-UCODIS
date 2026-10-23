@@ -84,6 +84,6 @@ describe('role permissions', () => {
     const disabled = disabledFeatures([
       { no: 'trips', active: false, createdAt: '', createdBy: '', modifiedAt: '', modifiedBy: '' }
     ])
-    expect([...disabled]).toEqual(['TRIP'])
+    expect([...disabled]).toEqual(['TRIP', 'ROUTETEMPLATE'])
   })
 })

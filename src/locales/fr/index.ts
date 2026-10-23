@@ -13,6 +13,7 @@ import hrMyPlanning from './hrMyPlanning'
 import hrOrgUnits from './hrOrgUnits'
 import hrPublicHolidays from './hrPublicHolidays'
 import hrWorkingCalendar from './hrWorkingCalendar'
+import fleetSettings from './fleetSettings'
 import settingsModuleToggles from './settingsModuleToggles'
 
 export default {
@@ -31,5 +32,6 @@ export default {
   ...hrOrgUnits,
   ...hrPublicHolidays,
   ...hrWorkingCalendar,
+  ...fleetSettings,
   ...settingsModuleToggles
 }

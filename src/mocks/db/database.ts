@@ -7,11 +7,12 @@ import { jobPositionsCollection } from '../fixtures/hr/jobPositions'
 import { publicHolidaysCollection, workingCalendarCollection } from '../fixtures/hr/calendar'
 import { employeesCollection } from '../fixtures/hr/employees'
 import { leaveBalanceAdjustmentsCollection, leaveRequestsCollection } from '../fixtures/hr/leave'
+import { fleetSettingsCollection } from '../fixtures/fleet/settings'
 import { createCollection, type CollectionContext } from './collection'
 import { clearStoredCollections } from './storage'
 
 /** Bump when fixtures change shape: every collection is then reseeded. */
-export const MOCK_SEED_VERSION = 2
+export const MOCK_SEED_VERSION = 3
 
 export function createDatabase(
   context: CollectionContext = {
@@ -29,7 +30,8 @@ export function createDatabase(
     publicHolidays: createCollection(publicHolidaysCollection, context),
     employees: createCollection(employeesCollection, context),
     leaveRequests: createCollection(leaveRequestsCollection, context),
-    leaveBalanceAdjustments: createCollection(leaveBalanceAdjustmentsCollection, context)
+    leaveBalanceAdjustments: createCollection(leaveBalanceAdjustmentsCollection, context),
+    fleetSettings: createCollection(fleetSettingsCollection, context)
   }
 
   return {

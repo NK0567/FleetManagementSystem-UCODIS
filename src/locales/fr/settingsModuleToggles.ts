@@ -18,9 +18,9 @@ export default {
   'settings.moduleToggles.item.telematics.label': 'Télémétrie',
   'settings.moduleToggles.item.telematics.description':
     'Mesures embarquées par véhicule et événements remontés : comportements, caméra, défauts moteur, signal.',
-  'settings.moduleToggles.item.trips.label': 'Voyages',
+  'settings.moduleToggles.item.trips.label': 'Trajets',
   'settings.moduleToggles.item.trips.description':
-    'Fiche de voyage, dossier documentaire, trajet et sites desservis.',
+    'Trajets des véhicules et itinéraires types : véhicule, remorque, conducteur, arrêts et kilométrage.',
   'settings.moduleToggles.item.compliance.label': 'Conformité',
   'settings.moduleToggles.item.compliance.description':
     "Écarts d'itinéraire détectés sur les voyages, à qualifier par le responsable flotte.",
@@ -42,9 +42,9 @@ export default {
   'settings.moduleToggles.item.documents.label': 'Documents',
   'settings.moduleToggles.item.documents.description':
     "Documents des véhicules et des personnes avec leurs échéances, et documents de l'entreprise avec leur circuit de validation.",
-  'settings.moduleToggles.item.fleet-settings.label': 'Configuration',
+  'settings.moduleToggles.item.fleet-settings.label': 'Réglages flotte',
   'settings.moduleToggles.item.fleet-settings.description':
-    "Données de référence : trajets, clients, types d'écart, seuils d'exploitation.",
+    "Seuils d'exploitation : temps de conduite et de repos, rayon des sites, préavis documentaire.",
   'settings.moduleToggles.item.fleet-drivers.label': 'Conducteurs (vue Flotte)',
   'settings.moduleToggles.item.fleet-drivers.description':
     'Vue opérationnelle du conducteur : affectation, conformité, historique des voyages.',

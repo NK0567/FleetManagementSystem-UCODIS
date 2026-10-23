@@ -12,5 +12,7 @@ export default {
   'nav.leaveRequests': 'Leave requests',
   'nav.leaveBalances': 'Leave balances',
   'nav.hrDashboard': 'Dashboard',
-  'nav.myPlanning': 'My schedule'
+  'nav.myPlanning': 'My schedule',
+  'nav.fleet': 'Fleet',
+  'nav.fleetSettings': 'Fleet settings'
 }

@@ -12,5 +12,7 @@ export default {
   'nav.leaveRequests': "Demandes d'absence",
   'nav.leaveBalances': 'Soldes de congés',
   'nav.hrDashboard': 'Tableau de bord',
-  'nav.myPlanning': 'Mon planning'
+  'nav.myPlanning': 'Mon planning',
+  'nav.fleet': 'Flotte',
+  'nav.fleetSettings': 'Réglages flotte'
 }

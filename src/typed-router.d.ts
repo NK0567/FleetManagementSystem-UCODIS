@@ -45,6 +45,13 @@ declare module 'vue-router/auto-routes' {
       { path: ParamValue<false> },
       | never
     >,
+    '/fleet/settings': RouteRecordInfo<
+      '/fleet/settings',
+      '/fleet/settings',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/hr/dashboard': RouteRecordInfo<
       '/hr/dashboard',
       '/hr/dashboard',
@@ -213,6 +220,14 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | 'path'
+    }
+    'src/pages/fleet/settings.vue': {
+      routes:
+        | '/fleet/settings'
+      views:
+        | never
+      pathParamNames:
+        | never
     }
     'src/pages/hr/dashboard.vue': {
       routes:

@@ -32,7 +32,7 @@ describe('module toggle endpoints', () => {
 
     expect(response.status).toBe(200)
     expect(response.data.data).toMatchObject({ no: 'trips', active: false, modifiedBy: 'ADM001' })
-    expect([...disabledFeatures(server.db.moduleToggles.all())]).toEqual(['TRIP'])
+    expect([...disabledFeatures(server.db.moduleToggles.all())]).toEqual(['TRIP', 'ROUTETEMPLATE'])
   })
 
   it('rejects a missing active flag', async () => {

@@ -40,6 +40,8 @@ declare module 'vue' {
     EmployeesList: typeof import('./modules/hr/employees/pages/EmployeesList.vue')['default']
     EmployeeStatusPill: typeof import('./modules/hr/employees/components/EmployeeStatusPill.vue')['default']
     FilterPanel: typeof import('./components/shared/FilterPanel.vue')['default']
+    FleetSettingsPage: typeof import('./modules/fleet/fleet-settings/pages/FleetSettingsPage.vue')['default']
+    FleetSettingsSectionCard: typeof import('./modules/fleet/fleet-settings/components/FleetSettingsSectionCard.vue')['default']
     FormAlerts: typeof import('./components/shared/FormAlerts.vue')['default']
     FormInput: typeof import('./components/ui/input/FormInput.vue')['default']
     FormSection: typeof import('./components/ui/form-section/FormSection.vue')['default']
