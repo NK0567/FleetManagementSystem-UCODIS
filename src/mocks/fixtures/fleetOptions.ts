@@ -86,5 +86,32 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
     operational: { fr: 'Opérationnel', en: 'Operational' },
     transit: { fr: 'En route', en: 'On the road' },
     immobilized: { fr: 'Immobilisé', en: 'Immobilized' }
+  },
+  documentTarget: {
+    vehicle: { fr: 'Véhicule', en: 'Vehicle' },
+    person: { fr: 'Personne', en: 'Person' },
+    company: { fr: 'Entreprise', en: 'Company' }
+  },
+  personScope: {
+    all: { fr: 'Tout le personnel', en: 'All staff' },
+    drivers: { fr: 'Personnel roulant', en: 'Road staff' },
+    office: { fr: 'Personnel sédentaire', en: 'Office staff' }
+  },
+  documentValidity: {
+    limited: { fr: 'Limitée', en: 'Limited' },
+    unlimited: { fr: 'Illimitée', en: 'Unlimited' }
+  },
+  documentState: {
+    valid: { fr: 'Valide', en: 'Valid' },
+    expiring: { fr: 'À renouveler', en: 'To renew' },
+    expired: { fr: 'Expiré', en: 'Expired' },
+    cancelled: { fr: 'Annulé', en: 'Cancelled' },
+    lost: { fr: 'Perdu', en: 'Lost' }
+  },
+  complianceGapReason: {
+    missing: { fr: 'Manquant', en: 'Missing' },
+    expired: { fr: 'Expiré', en: 'Expired' },
+    cancelled: { fr: 'Annulé', en: 'Cancelled' },
+    lost: { fr: 'Perdu', en: 'Lost' }
   }
 }

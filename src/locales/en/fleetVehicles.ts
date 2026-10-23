@@ -134,5 +134,7 @@ export default {
   'fleet.vehicles.col.coupledVehiclePlate': 'Coupled with',
   'fleet.vehicles.photoError': 'The photo could not be saved.',
   'fleet.vehicles.form.photos': 'Photos',
-  'fleet.vehicles.form.photoCount': 'No photo | 1 photo | {count} photos'
+  'fleet.vehicles.form.photoCount': 'No photo | 1 photo | {count} photos',
+  'fleet.vehicles.form.documents': 'Documents',
+  'fleet.vehicles.form.documentsNotCompliant': 'Not compliant'
 }

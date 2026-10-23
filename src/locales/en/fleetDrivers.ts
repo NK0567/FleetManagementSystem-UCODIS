@@ -31,5 +31,7 @@ export default {
   'fleet.drivers.assignmentCount': 'No assignment | 1 assignment | {count} assignments',
   'fleet.drivers.history.start': 'Start',
   'fleet.drivers.history.end': 'End',
-  'fleet.drivers.history.running': 'Running'
+  'fleet.drivers.history.running': 'Running',
+  'fleet.drivers.section.documents': 'Documents',
+  'fleet.drivers.documentsNotCompliant': 'Not compliant'
 }

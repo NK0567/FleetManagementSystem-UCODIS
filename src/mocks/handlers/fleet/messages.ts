@@ -1,6 +1,34 @@
 import type { LocalizedText } from '../../i18n'
 
 export const FLEET_MESSAGES = {
+  documentTypeInUse: {
+    fr: 'Des documents sont de ce type : il ne peut pas être supprimé. Désactivez-le plutôt.',
+    en: 'Documents use this type: it cannot be deleted. Deactivate it instead.'
+  },
+  documentTypeNotApplicable: {
+    fr: 'Ce type de document ne concerne pas ce titulaire.',
+    en: 'This document type does not concern this holder.'
+  },
+  documentExpiryRequired: {
+    fr: 'Ce document a une validité limitée : indiquez sa date de fin.',
+    en: 'This document has a limited validity: give its end date.'
+  },
+  documentExpiryBeforeIssue: {
+    fr: "La date de fin précède la date d'émission.",
+    en: 'The end date is before the issue date.'
+  },
+  documentIssueInFuture: {
+    fr: "La date d'émission ne peut pas être dans le futur.",
+    en: 'The issue date cannot be in the future.'
+  },
+  documentReplaced: {
+    fr: 'Une version plus récente remplace ce document : il ne se modifie plus.',
+    en: 'A newer version replaces this document: it can no longer change.'
+  },
+  documentDeclared: {
+    fr: 'Ce document est déclaré annulé ou perdu : renouvelez-le plutôt.',
+    en: 'This document is declared cancelled or lost: renew it instead.'
+  },
   tooManyPhotos: {
     fr: "Un véhicule garde au plus {max} photos : retirez-en une avant d'en ajouter.",
     en: 'A vehicle keeps at most {max} photos: remove one before adding another.'

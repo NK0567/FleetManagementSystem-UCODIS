@@ -106,6 +106,9 @@ export interface VehicleApi {
   hasCamera: boolean
   hasPump: boolean
   photos: FileMeta[]
+  documentsCompliant: boolean
+  /** Mandatory documents missing or past their validity, named in the language of the request. */
+  documentGaps: string
   createdAt: string
   createdBy: string
   modifiedAt: string

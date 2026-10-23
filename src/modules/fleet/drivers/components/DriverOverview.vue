@@ -9,7 +9,7 @@ defineProps<{ driver: DriverApi }>()
 
 const { t } = useI18n()
 const optionsStore = useOptionsStore()
-const expandedSections = ref({ identity: true, assignment: true, history: true })
+const expandedSections = ref({ identity: true, assignment: true, documents: true, history: true })
 </script>
 
 <template>
@@ -71,6 +71,20 @@ const expandedSections = ref({ identity: true, assignment: true, history: true }
             {{ driver.eligible ? t('fleet.drivers.eligibleYes') : driver.ineligibilityReasons }}
           </p>
         </BaseFormField>
+      </div>
+    </FormSection>
+
+    <FormSection
+      v-model:open="expandedSections.documents"
+      :title="t('fleet.drivers.section.documents')"
+      :summary="[driver.documentsCompliant ? '' : t('fleet.drivers.documentsNotCompliant')]"
+    >
+      <div class="xl:col-span-2 min-w-0">
+        <SubjectDocumentsPanel
+          target="person"
+          :subject-no="driver.no"
+          :gaps="driver.documentGaps"
+        />
       </div>
     </FormSection>
 

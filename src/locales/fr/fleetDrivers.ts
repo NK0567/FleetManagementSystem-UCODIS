@@ -31,5 +31,7 @@ export default {
   'fleet.drivers.assignmentCount': 'Aucune affectation | 1 affectation | {count} affectations',
   'fleet.drivers.history.start': 'Début',
   'fleet.drivers.history.end': 'Fin',
-  'fleet.drivers.history.running': 'En cours'
+  'fleet.drivers.history.running': 'En cours',
+  'fleet.drivers.section.documents': 'Documents',
+  'fleet.drivers.documentsNotCompliant': 'Non conforme'
 }

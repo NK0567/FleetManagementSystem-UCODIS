@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   addDays,
   addMinutes,
+  addMonths,
   minutesBetween,
   toIsoDateTime,
   daysBetween,
@@ -54,5 +55,11 @@ describe('date', () => {
     expect(addMinutes('2026-09-04T22:30:00', 120)).toBe('2026-09-05T00:30:00')
     expect(toIsoDateTime(new Date(2026, 8, 4, 6, 5, 0))).toBe('2026-09-04T06:05:00')
     expect(minutesBetween('2026-09-04T06:05:00', '2026-09-04T13:35:00')).toBe(450)
+  })
+
+  it('adds months, keeping the day or falling back to the end of the month', () => {
+    expect(addMonths('2026-01-15', 6)).toBe('2026-07-15')
+    expect(addMonths('2026-01-31', 1)).toBe('2026-02-28')
+    expect(addMonths('2025-12-10', 12)).toBe('2026-12-10')
   })
 })

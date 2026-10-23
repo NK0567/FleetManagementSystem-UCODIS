@@ -136,5 +136,7 @@ export default {
   'fleet.vehicles.col.coupledVehiclePlate': 'Attelé à',
   'fleet.vehicles.photoError': "La photo n'a pas pu être enregistrée.",
   'fleet.vehicles.form.photos': 'Photos',
-  'fleet.vehicles.form.photoCount': 'Aucune photo | 1 photo | {count} photos'
+  'fleet.vehicles.form.photoCount': 'Aucune photo | 1 photo | {count} photos',
+  'fleet.vehicles.form.documents': 'Documents',
+  'fleet.vehicles.form.documentsNotCompliant': 'Non conforme'
 }

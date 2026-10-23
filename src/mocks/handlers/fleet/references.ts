@@ -30,6 +30,16 @@ function vehiclesOfKind(db: MockDatabase, kind: VehicleKind): ReferenceItem[] {
     })
 }
 
+function documentTypesFor(
+  db: MockDatabase,
+  target: 'vehicle' | 'person' | 'company'
+): ReferenceItem[] {
+  return db.documentTypes
+    .all()
+    .filter((type) => type.target === target)
+    .map((type) => ({ code: type.no, description: type.name, active: type.active }))
+}
+
 /** Fleet lists served by GET /reference/all for selects, lookups and filters. */
 export function fleetReferenceData(db: MockDatabase): Record<string, ReferenceItem[]> {
   return {
@@ -53,6 +63,19 @@ export function fleetReferenceData(db: MockDatabase): Record<string, ReferenceIt
       description: employeeFullName(employee),
       active: driverIneligibility(driverFacts(db, employee, todayIso())).length === 0
     })),
+    vehicles: db.vehicles
+      .all()
+      .filter((vehicle) => !vehicle.removal)
+      .map((vehicle) => ({
+        code: vehicle.no,
+        description: `${vehicle.plate} · ${vehicle.make} ${vehicle.model}`
+      })),
+    documentTypes: db.documentTypes
+      .all()
+      .map((type) => ({ code: type.no, description: type.name, active: type.active })),
+    vehicleDocumentTypes: documentTypesFor(db, 'vehicle'),
+    personDocumentTypes: documentTypesFor(db, 'person'),
+    companyDocumentTypes: documentTypesFor(db, 'company'),
     routeTemplates: db.routeTemplates
       .all()
       .map((route) => ({ code: route.no, description: route.name, active: route.active })),

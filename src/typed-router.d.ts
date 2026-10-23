@@ -59,6 +59,41 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/fleet/document-types/': RouteRecordInfo<
+      '/fleet/document-types/',
+      '/fleet/document-types',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/document-types/[id]': RouteRecordInfo<
+      '/fleet/document-types/[id]',
+      '/fleet/document-types/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/documents/': RouteRecordInfo<
+      '/fleet/documents/',
+      '/fleet/documents',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/documents/[id]': RouteRecordInfo<
+      '/fleet/documents/[id]',
+      '/fleet/documents/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/documents/missing': RouteRecordInfo<
+      '/fleet/documents/missing',
+      '/fleet/documents/missing',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/fleet/driver-assignments/': RouteRecordInfo<
       '/fleet/driver-assignments/',
       '/fleet/driver-assignments',
@@ -397,6 +432,46 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | 'id'
+    }
+    'src/pages/fleet/document-types/index.vue': {
+      routes:
+        | '/fleet/document-types/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/document-types/[id].vue': {
+      routes:
+        | '/fleet/document-types/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/documents/index.vue': {
+      routes:
+        | '/fleet/documents/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/documents/[id].vue': {
+      routes:
+        | '/fleet/documents/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/documents/missing.vue': {
+      routes:
+        | '/fleet/documents/missing'
+      views:
+        | never
+      pathParamNames:
+        | never
     }
     'src/pages/fleet/driver-assignments/index.vue': {
       routes:

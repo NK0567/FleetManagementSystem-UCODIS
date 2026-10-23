@@ -26,5 +26,8 @@ export default {
   'nav.drivers': 'Conducteurs',
   'nav.trips': 'Trajets',
   'nav.routeTemplates': 'Itinéraires types',
-  'nav.fleetStatus': 'État de flotte'
+  'nav.fleetStatus': 'État de flotte',
+  'nav.documents': 'Documents',
+  'nav.missingDocuments': 'Documents manquants',
+  'nav.documentTypes': 'Types de documents'
 }

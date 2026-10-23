@@ -10,6 +10,7 @@ import { localize, localizeDay, type MockLanguage } from '../../i18n'
 import { activeLinks, coupledWith, employeeNames, vehiclePlates } from './links'
 import { FLEET_MESSAGES } from './messages'
 import { tripIndex } from './tripIndex'
+import { documentCompliance, invalidatingGaps } from './documentCompliance'
 
 /** Status of every vehicle, from the facts each fleet record contributes. */
 export function vehicleStatuses(db: MockDatabase): Map<string, VehicleStatusResult> {
@@ -17,13 +18,18 @@ export function vehicleStatuses(db: MockDatabase): Map<string, VehicleStatusResu
   const names = employeeNames(db)
   const plates = vehiclePlates(db)
   const trips = tripIndex(db)
+  const compliance = documentCompliance(db).vehicles
+  const typeNames = new Map(db.documentTypes.all().map((type) => [type.no, type.name]))
   const factsOf = (vehicle: VehicleRow): VehicleStatusFacts => {
     const assignment = links.assignmentByVehicle.get(vehicle.no)
     const coupling = links.couplingByVehicle.get(vehicle.no)
     return {
       removed: vehicle.removal !== null,
       outOfServiceReason: vehicle.outOfService?.reason ?? null,
-      immobilizations: [],
+      immobilizations: invalidatingGaps(compliance.get(vehicle.no) ?? []).map((gap) => ({
+        kind: 'document' as const,
+        detail: typeNames.get(gap.documentTypeNo) ?? gap.documentTypeNo
+      })),
       activeTripNo: trips.onRoadByVehicle.get(vehicle.no)?.no ?? null,
       driverName: assignment ? (names.get(assignment.employeeNo) ?? assignment.employeeNo) : null,
       coupledPlate: coupling ? (plates.get(coupledWith(coupling, vehicle.no)) ?? null) : null

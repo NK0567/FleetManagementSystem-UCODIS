@@ -26,5 +26,8 @@ export default {
   'nav.drivers': 'Drivers',
   'nav.trips': 'Trips',
   'nav.routeTemplates': 'Route templates',
-  'nav.fleetStatus': 'Fleet status'
+  'nav.fleetStatus': 'Fleet status',
+  'nav.documents': 'Documents',
+  'nav.missingDocuments': 'Missing documents',
+  'nav.documentTypes': 'Document types'
 }

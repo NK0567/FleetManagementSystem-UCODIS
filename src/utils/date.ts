@@ -67,3 +67,14 @@ export function addMinutes(isoDateTime: string, minutes: number): string {
 export function minutesBetween(fromIso: string, toIso: string): number {
   return Math.round((new Date(toIso).getTime() - new Date(fromIso).getTime()) / 60_000)
 }
+
+/** Same day of the month, months later; the last day of the month when that day is missing. */
+export function addMonths(iso: string, months: number): string {
+  const date = parseIsoDay(iso)
+  const day = date.getDate()
+  date.setDate(1)
+  date.setMonth(date.getMonth() + months)
+  const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()
+  date.setDate(Math.min(day, lastDay))
+  return toIsoDay(date)
+}

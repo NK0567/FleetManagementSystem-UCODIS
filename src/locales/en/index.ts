@@ -28,6 +28,9 @@ import fleetDrivers from './fleetDrivers'
 import fleetRouteTemplates from './fleetRouteTemplates'
 import fleetTrips from './fleetTrips'
 import fleetFleetStatus from './fleetFleetStatus'
+import fleetDocumentTypes from './fleetDocumentTypes'
+import fleetDocuments from './fleetDocuments'
+import fleetMissingDocuments from './fleetMissingDocuments'
 export default {
   ...common,
   ...auth,
@@ -57,5 +60,8 @@ export default {
   ...fleetDrivers,
   ...fleetRouteTemplates,
   ...fleetTrips,
-  ...fleetFleetStatus
+  ...fleetFleetStatus,
+  ...fleetDocumentTypes,
+  ...fleetDocuments,
+  ...fleetMissingDocuments
 }

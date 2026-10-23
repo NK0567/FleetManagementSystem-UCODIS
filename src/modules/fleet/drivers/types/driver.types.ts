@@ -25,6 +25,9 @@ export interface DriverApi {
   assignedSince: string | null
   availability: DriverAvailability
   eligible: boolean
+  documentsCompliant: boolean
+  /** Mandatory documents missing or past their validity, named in the language of the request. */
+  documentGaps: string
   /** Why the driver cannot be given a vehicle, in the language of the request. */
   ineligibilityReasons: string
   assignments: DriverAssignmentSummary[]
