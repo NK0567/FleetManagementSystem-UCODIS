@@ -12,6 +12,7 @@ export function registerFleetModule(): void {
     DRIVER: { to: '/fleet/drivers', menuKey: 'driver' },
     FLEETSTATUS: { to: '/fleet/fleet-status', menuKey: 'fleetStatus' },
     DOCUMENT: { to: '/fleet/documents', menuKey: 'document' },
+    COMPANYDOCUMENT: { to: '/fleet/company-documents', menuKey: 'companyDocument' },
     SITE: { to: '/fleet/sites', menuKey: 'site' },
     ROUTETEMPLATE: { to: '/fleet/route-templates', menuKey: 'routeTemplate' },
     PROVIDER: { to: '/fleet/providers', menuKey: 'provider' },
@@ -41,6 +42,11 @@ export function registerFleetModule(): void {
         labelKey: 'nav.missingDocuments',
         to: '/fleet/documents/missing',
         menuKey: 'document'
+      },
+      {
+        labelKey: 'nav.companyDocuments',
+        to: '/fleet/company-documents',
+        menuKey: 'companyDocument'
       },
       { labelKey: 'nav.routeTemplates', to: '/fleet/route-templates', menuKey: 'routeTemplate' },
       { labelKey: 'nav.sites', to: '/fleet/sites', menuKey: 'site' },

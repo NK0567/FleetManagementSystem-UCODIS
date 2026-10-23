@@ -31,6 +31,7 @@ import fleetFleetStatus from './fleetFleetStatus'
 import fleetDocumentTypes from './fleetDocumentTypes'
 import fleetDocuments from './fleetDocuments'
 import fleetMissingDocuments from './fleetMissingDocuments'
+import fleetCompanyDocuments from './fleetCompanyDocuments'
 export default {
   ...common,
   ...auth,
@@ -63,5 +64,6 @@ export default {
   ...fleetFleetStatus,
   ...fleetDocumentTypes,
   ...fleetDocuments,
-  ...fleetMissingDocuments
+  ...fleetMissingDocuments,
+  ...fleetCompanyDocuments
 }

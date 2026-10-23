@@ -45,6 +45,20 @@ declare module 'vue-router/auto-routes' {
       { path: ParamValue<false> },
       | never
     >,
+    '/fleet/company-documents/': RouteRecordInfo<
+      '/fleet/company-documents/',
+      '/fleet/company-documents',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/company-documents/[id]': RouteRecordInfo<
+      '/fleet/company-documents/[id]',
+      '/fleet/company-documents/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/fleet/couplings/': RouteRecordInfo<
       '/fleet/couplings/',
       '/fleet/couplings',
@@ -416,6 +430,22 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | 'path'
+    }
+    'src/pages/fleet/company-documents/index.vue': {
+      routes:
+        | '/fleet/company-documents/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/company-documents/[id].vue': {
+      routes:
+        | '/fleet/company-documents/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
     }
     'src/pages/fleet/couplings/index.vue': {
       routes:

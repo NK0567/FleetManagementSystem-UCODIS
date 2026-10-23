@@ -303,5 +303,33 @@ export const FLEET_MESSAGES = {
   nightWindowEmpty: {
     fr: "L'heure de fin de la conduite de nuit interdite doit différer de l'heure de début.",
     en: 'The end of the night driving ban must differ from its start.'
+  },
+  companyDocumentFileRequired: {
+    fr: 'Joignez le document scanné.',
+    en: 'Attach the scanned document.'
+  },
+  companyDocumentDecided: {
+    fr: 'Ce document a déjà été examiné : il ne se modifie plus.',
+    en: 'This document has already been reviewed: it can no longer change.'
+  },
+  companyDocumentNotPending: {
+    fr: 'Ce document a déjà été examiné.',
+    en: 'This document has already been reviewed.'
+  },
+  companyDocumentOwnDecision: {
+    fr: "Vous avez déposé ce document : une autre personne doit l'examiner.",
+    en: 'You uploaded this document: someone else must review it.'
+  },
+  companyDocumentNotCurrent: {
+    fr: "Seule la version en vigueur d'un document peut être remplacée, par un document du même type.",
+    en: 'Only the current version of a document can be replaced, by a document of the same type.'
+  },
+  companyDocumentReplacementPending: {
+    fr: 'Une nouvelle version de ce document attend déjà son examen.',
+    en: 'A new version of this document is already awaiting review.'
+  },
+  rejectionReasonTooShort: {
+    fr: 'Expliquez le refus en {min} caractères au moins.',
+    en: 'Explain the rejection in at least {min} characters.'
   }
 } satisfies Record<string, LocalizedText>

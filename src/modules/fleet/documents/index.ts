@@ -4,10 +4,14 @@ export { documentService, missingDocumentService } from './services/documentServ
 export { documentApi } from './api/documentApi'
 export {
   complianceGaps,
+  documentIssues,
   documentState,
   isUsableState,
   noticeDaysOf,
+  notifyOn,
+  suggestedExpiry,
   type ComplianceGapReason,
+  type DocumentIssue,
   type DocumentState
 } from './domain/document'
 export type {

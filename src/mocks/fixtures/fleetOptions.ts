@@ -108,6 +108,11 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
     cancelled: { fr: 'Annulé', en: 'Cancelled' },
     lost: { fr: 'Perdu', en: 'Lost' }
   },
+  companyDocumentStatus: {
+    pending: { fr: 'À examiner', en: 'To review' },
+    approved: { fr: 'Validé', en: 'Approved' },
+    rejected: { fr: 'Refusé', en: 'Rejected' }
+  },
   complianceGapReason: {
     missing: { fr: 'Manquant', en: 'Missing' },
     expired: { fr: 'Expiré', en: 'Expired' },

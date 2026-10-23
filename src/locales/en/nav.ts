@@ -29,5 +29,6 @@ export default {
   'nav.fleetStatus': 'Fleet status',
   'nav.documents': 'Documents',
   'nav.missingDocuments': 'Missing documents',
-  'nav.documentTypes': 'Document types'
+  'nav.documentTypes': 'Document types',
+  'nav.companyDocuments': 'Company documents'
 }
