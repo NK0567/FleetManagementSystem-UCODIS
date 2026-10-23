@@ -73,5 +73,18 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
     check: { fr: 'Contrôle', en: 'Check' },
     delivery: { fr: 'Livraison', en: 'Delivery' },
     arrival: { fr: 'Arrivée', en: 'Arrival' }
+  },
+  fleetState: {
+    AVAILABLE: { fr: 'Disponible, en attente de mission', en: 'Available, waiting for a mission' },
+    TRIP_PLANNED: { fr: 'Départ prévu', en: 'Departure planned' },
+    TO_LOADING: { fr: 'En route vers le chargement', en: 'Heading to loading' },
+    TO_DELIVERY: { fr: 'En route vers la livraison', en: 'Heading to delivery' },
+    RETURNING: { fr: 'En retour', en: 'Returning' },
+    IMMOBILIZED: { fr: 'Immobilisé', en: 'Immobilized' }
+  },
+  fleetStateGroup: {
+    operational: { fr: 'Opérationnel', en: 'Operational' },
+    transit: { fr: 'En route', en: 'On the road' },
+    immobilized: { fr: 'Immobilisé', en: 'Immobilized' }
   }
 }

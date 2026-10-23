@@ -25,5 +25,6 @@ export default {
   'nav.driverAssignments': 'Affectations',
   'nav.drivers': 'Conducteurs',
   'nav.trips': 'Trajets',
-  'nav.routeTemplates': 'Itinéraires types'
+  'nav.routeTemplates': 'Itinéraires types',
+  'nav.fleetStatus': 'État de flotte'
 }

@@ -58,6 +58,8 @@ declare module 'vue' {
     FilterPanel: typeof import('./components/shared/FilterPanel.vue')['default']
     FleetSettingsPage: typeof import('./modules/fleet/fleet-settings/pages/FleetSettingsPage.vue')['default']
     FleetSettingsSectionCard: typeof import('./modules/fleet/fleet-settings/components/FleetSettingsSectionCard.vue')['default']
+    FleetStatePill: typeof import('./modules/fleet/fleet-status/components/FleetStatePill.vue')['default']
+    FleetStatusList: typeof import('./modules/fleet/fleet-status/pages/FleetStatusList.vue')['default']
     FormAlerts: typeof import('./components/shared/FormAlerts.vue')['default']
     FormInput: typeof import('./components/ui/input/FormInput.vue')['default']
     FormSection: typeof import('./components/ui/form-section/FormSection.vue')['default']

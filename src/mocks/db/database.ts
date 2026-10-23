@@ -19,6 +19,10 @@ import { couplingsCollection } from '../fixtures/fleet/couplings'
 import { driverAssignmentsCollection } from '../fixtures/fleet/driverAssignments'
 import { routeTemplatesCollection } from '../fixtures/fleet/routeTemplates'
 import { tripsCollection } from '../fixtures/fleet/trips'
+import {
+  fleetStatusArchivesCollection,
+  fleetStatusNotesCollection
+} from '../fixtures/fleet/fleetStatus'
 import { createCollection, type CollectionContext } from './collection'
 import { clearStoredCollections } from './storage'
 
@@ -53,7 +57,9 @@ export function createDatabase(
     couplings: createCollection(couplingsCollection, context),
     driverAssignments: createCollection(driverAssignmentsCollection, context),
     routeTemplates: createCollection(routeTemplatesCollection, context),
-    trips: createCollection(tripsCollection, context)
+    trips: createCollection(tripsCollection, context),
+    fleetStatusNotes: createCollection(fleetStatusNotesCollection, context),
+    fleetStatusArchives: createCollection(fleetStatusArchivesCollection, context)
   }
 
   return {

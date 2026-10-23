@@ -25,5 +25,6 @@ export default {
   'nav.driverAssignments': 'Assignments',
   'nav.drivers': 'Drivers',
   'nav.trips': 'Trips',
-  'nav.routeTemplates': 'Route templates'
+  'nav.routeTemplates': 'Route templates',
+  'nav.fleetStatus': 'Fleet status'
 }

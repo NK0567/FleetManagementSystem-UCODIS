@@ -27,6 +27,7 @@ import fleetDriverAssignments from './fleetDriverAssignments'
 import fleetDrivers from './fleetDrivers'
 import fleetRouteTemplates from './fleetRouteTemplates'
 import fleetTrips from './fleetTrips'
+import fleetFleetStatus from './fleetFleetStatus'
 export default {
   ...common,
   ...auth,
@@ -55,5 +56,6 @@ export default {
   ...fleetDriverAssignments,
   ...fleetDrivers,
   ...fleetRouteTemplates,
-  ...fleetTrips
+  ...fleetTrips,
+  ...fleetFleetStatus
 }

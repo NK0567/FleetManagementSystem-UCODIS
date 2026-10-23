@@ -1,6 +1,14 @@
 import type { LocalizedText } from '../../i18n'
 
 export const FLEET_MESSAGES = {
+  observationTooLong: {
+    fr: "L'observation dépasse 500 caractères.",
+    en: 'The observation is longer than 500 characters.'
+  },
+  expectedBackInPast: {
+    fr: 'La remise en service prévue ne peut pas être dans le passé.',
+    en: 'The expected return to service cannot be in the past.'
+  },
   inactiveRoute: {
     fr: "Cet itinéraire n'est plus proposé.",
     en: 'This route is no longer offered.'

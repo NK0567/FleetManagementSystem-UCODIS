@@ -10,6 +10,7 @@ export function registerFleetModule(): void {
     COUPLING: { to: '/fleet/couplings', menuKey: 'coupling' },
     DRIVERASSIGNMENT: { to: '/fleet/driver-assignments', menuKey: 'driverAssignment' },
     DRIVER: { to: '/fleet/drivers', menuKey: 'driver' },
+    FLEETSTATUS: { to: '/fleet/fleet-status', menuKey: 'fleetStatus' },
     SITE: { to: '/fleet/sites', menuKey: 'site' },
     ROUTETEMPLATE: { to: '/fleet/route-templates', menuKey: 'routeTemplate' },
     PROVIDER: { to: '/fleet/providers', menuKey: 'provider' },
@@ -32,6 +33,7 @@ export function registerFleetModule(): void {
         menuKey: 'driverAssignment'
       },
       { labelKey: 'nav.drivers', to: '/fleet/drivers', menuKey: 'driver' },
+      { labelKey: 'nav.fleetStatus', to: '/fleet/fleet-status', menuKey: 'fleetStatus' },
       { labelKey: 'nav.routeTemplates', to: '/fleet/route-templates', menuKey: 'routeTemplate' },
       { labelKey: 'nav.sites', to: '/fleet/sites', menuKey: 'site' },
       { labelKey: 'nav.providers', to: '/fleet/providers', menuKey: 'provider' },

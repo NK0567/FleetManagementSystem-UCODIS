@@ -101,6 +101,13 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/fleet/fleet-status': RouteRecordInfo<
+      '/fleet/fleet-status',
+      '/fleet/fleet-status',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/fleet/providers/': RouteRecordInfo<
       '/fleet/providers/',
       '/fleet/providers',
@@ -438,6 +445,14 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | 'id'
+    }
+    'src/pages/fleet/fleet-status.vue': {
+      routes:
+        | '/fleet/fleet-status'
+      views:
+        | never
+      pathParamNames:
+        | never
     }
     'src/pages/fleet/providers/index.vue': {
       routes:

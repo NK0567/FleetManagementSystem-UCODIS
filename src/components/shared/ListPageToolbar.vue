@@ -326,6 +326,8 @@ const toggleSearch = () => {
           </button>
         </div>
 
+        <slot name="extra-actions" />
+
         <div v-if="showCreate" class="border-l border-border h-6 mx-1"></div>
 
         <button
