@@ -9,12 +9,14 @@ import type { VehicleRow } from '../../fixtures/fleet/vehicles'
 import { localize, localizeDay, type MockLanguage } from '../../i18n'
 import { activeLinks, coupledWith, employeeNames, vehiclePlates } from './links'
 import { FLEET_MESSAGES } from './messages'
+import { tripIndex } from './tripIndex'
 
 /** Status of every vehicle, from the facts each fleet record contributes. */
 export function vehicleStatuses(db: MockDatabase): Map<string, VehicleStatusResult> {
   const links = activeLinks(db)
   const names = employeeNames(db)
   const plates = vehiclePlates(db)
+  const trips = tripIndex(db)
   const factsOf = (vehicle: VehicleRow): VehicleStatusFacts => {
     const assignment = links.assignmentByVehicle.get(vehicle.no)
     const coupling = links.couplingByVehicle.get(vehicle.no)
@@ -22,7 +24,7 @@ export function vehicleStatuses(db: MockDatabase): Map<string, VehicleStatusResu
       removed: vehicle.removal !== null,
       outOfServiceReason: vehicle.outOfService?.reason ?? null,
       immobilizations: [],
-      activeTripNo: null,
+      activeTripNo: trips.onRoadByVehicle.get(vehicle.no)?.no ?? null,
       driverName: assignment ? (names.get(assignment.employeeNo) ?? assignment.employeeNo) : null,
       coupledPlate: coupling ? (plates.get(coupledWith(coupling, vehicle.no)) ?? null) : null
     }

@@ -40,6 +40,7 @@ import { sessionUser, type MockRequest } from '../../http/types'
 import type { MockLanguage } from '../../i18n'
 import { FLEET_MESSAGES } from './messages'
 import { activeLinks, coupledWith, employeeNames } from './links'
+import { tripIndex } from './tripIndex'
 import { statusReason, vehicleStatuses } from './vehicleState'
 
 const BASE_PATH = '/fleet/vehicles'
@@ -321,6 +322,8 @@ export function registerVehiclesHandlers(router: MockRouter, db: MockDatabase): 
       const vehicle = vehicleOf(request)
       assertEditable(vehicle)
       if (vehicle.outOfService) throw conflict(FLEET_MESSAGES.alreadyOutOfService)
+      const onRoad = tripIndex(db).onRoadByVehicle.get(vehicle.no)
+      if (onRoad) throw conflict(FLEET_MESSAGES.tripInProgress, { no: onRoad.no })
       const reason = readString(readBody(request), 'reason')
       if (!reason) throw unprocessable(FLEET_MESSAGES.reasonRequired)
       db.vehicles.update(vehicle.no, {
@@ -350,6 +353,14 @@ export function registerVehiclesHandlers(router: MockRouter, db: MockDatabase): 
     if (links.couplingByVehicle.has(vehicle.no) || links.assignmentByVehicle.has(vehicle.no)) {
       throw conflict(FLEET_MESSAGES.vehicleStillLinked)
     }
+    const openTrip = db.trips
+      .all()
+      .some(
+        (trip) =>
+          (trip.status === 'planned' || trip.status === 'in_progress') &&
+          (trip.vehicleNo === vehicle.no || trip.trailerNo === vehicle.no)
+      )
+    if (openTrip) throw conflict(FLEET_MESSAGES.tripsStillOpen)
     const body = readBody(request)
     const reason = readString(body, 'reason')
     if (!reason) throw unprocessable(FLEET_MESSAGES.reasonRequired)

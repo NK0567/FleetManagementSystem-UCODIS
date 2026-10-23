@@ -46,3 +46,24 @@ export function isoWeekday(iso: string): number {
 export function startOfIsoWeek(iso: string): string {
   return addDays(iso, 1 - isoWeekday(iso))
 }
+
+const pad = (value: number) => String(value).padStart(2, '0')
+
+/** Local date-time "YYYY-MM-DDTHH:mm:ss", without any time zone: what a user reads on the clock. */
+export function toIsoDateTime(date: Date): string {
+  return `${toIsoDay(date)}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+}
+
+export function nowIsoDateTime(now: Date = new Date()): string {
+  return toIsoDateTime(now)
+}
+
+export function addMinutes(isoDateTime: string, minutes: number): string {
+  const date = new Date(isoDateTime)
+  date.setMinutes(date.getMinutes() + minutes)
+  return toIsoDateTime(date)
+}
+
+export function minutesBetween(fromIso: string, toIso: string): number {
+  return Math.round((new Date(toIso).getTime() - new Date(fromIso).getTime()) / 60_000)
+}

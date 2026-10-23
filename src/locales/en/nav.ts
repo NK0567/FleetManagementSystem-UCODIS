@@ -23,5 +23,7 @@ export default {
   'nav.vehicles': 'Vehicles',
   'nav.couplings': 'Couplings',
   'nav.driverAssignments': 'Assignments',
-  'nav.drivers': 'Drivers'
+  'nav.drivers': 'Drivers',
+  'nav.trips': 'Trips',
+  'nav.routeTemplates': 'Route templates'
 }

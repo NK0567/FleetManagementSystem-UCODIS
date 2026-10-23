@@ -17,11 +17,13 @@ import { vehiclesCollection } from '../fixtures/fleet/vehicles'
 import { vehicleEquipmentCollection } from '../fixtures/fleet/vehicleEquipment'
 import { couplingsCollection } from '../fixtures/fleet/couplings'
 import { driverAssignmentsCollection } from '../fixtures/fleet/driverAssignments'
+import { routeTemplatesCollection } from '../fixtures/fleet/routeTemplates'
+import { tripsCollection } from '../fixtures/fleet/trips'
 import { createCollection, type CollectionContext } from './collection'
 import { clearStoredCollections } from './storage'
 
 /** Bump when fixtures change shape: every collection is then reseeded. */
-export const MOCK_SEED_VERSION = 3
+export const MOCK_SEED_VERSION = 4
 
 export function createDatabase(
   context: CollectionContext = {
@@ -49,7 +51,9 @@ export function createDatabase(
     vehicles: createCollection(vehiclesCollection, context),
     vehicleEquipment: createCollection(vehicleEquipmentCollection, context),
     couplings: createCollection(couplingsCollection, context),
-    driverAssignments: createCollection(driverAssignmentsCollection, context)
+    driverAssignments: createCollection(driverAssignmentsCollection, context),
+    routeTemplates: createCollection(routeTemplatesCollection, context),
+    trips: createCollection(tripsCollection, context)
   }
 
   return {

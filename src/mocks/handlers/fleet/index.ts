@@ -10,6 +10,8 @@ import { registerVehiclesHandlers } from './vehicles'
 import { registerCouplingsHandlers } from './couplings'
 import { registerDriverAssignmentsHandlers } from './driverAssignments'
 import { registerDriversHandlers } from './drivers'
+import { registerRouteTemplatesHandlers } from './routeTemplates'
+import { registerTripsHandlers } from './trips'
 
 export function registerFleetHandlers(router: MockRouter, db: MockDatabase): void {
   registerFleetSettingsHandlers(router, db)
@@ -22,4 +24,6 @@ export function registerFleetHandlers(router: MockRouter, db: MockDatabase): voi
   registerCouplingsHandlers(router, db)
   registerDriverAssignmentsHandlers(router, db)
   registerDriversHandlers(router, db)
+  registerRouteTemplatesHandlers(router, db)
+  registerTripsHandlers(router, db)
 }

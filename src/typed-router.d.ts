@@ -115,6 +115,20 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/fleet/route-templates/': RouteRecordInfo<
+      '/fleet/route-templates/',
+      '/fleet/route-templates',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/route-templates/[id]': RouteRecordInfo<
+      '/fleet/route-templates/[id]',
+      '/fleet/route-templates/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/fleet/settings': RouteRecordInfo<
       '/fleet/settings',
       '/fleet/settings',
@@ -146,6 +160,20 @@ declare module 'vue-router/auto-routes' {
     '/fleet/sites/[id]': RouteRecordInfo<
       '/fleet/sites/[id]',
       '/fleet/sites/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/trips/': RouteRecordInfo<
+      '/fleet/trips/',
+      '/fleet/trips',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/trips/[id]': RouteRecordInfo<
+      '/fleet/trips/[id]',
+      '/fleet/trips/:id',
       { id: ParamValue<true> },
       { id: ParamValue<false> },
       | never
@@ -427,6 +455,22 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | 'id'
     }
+    'src/pages/fleet/route-templates/index.vue': {
+      routes:
+        | '/fleet/route-templates/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/route-templates/[id].vue': {
+      routes:
+        | '/fleet/route-templates/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
     'src/pages/fleet/settings.vue': {
       routes:
         | '/fleet/settings'
@@ -462,6 +506,22 @@ declare module 'vue-router/auto-routes' {
     'src/pages/fleet/sites/[id].vue': {
       routes:
         | '/fleet/sites/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/trips/index.vue': {
+      routes:
+        | '/fleet/trips/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/trips/[id].vue': {
+      routes:
+        | '/fleet/trips/[id]'
       views:
         | never
       pathParamNames:

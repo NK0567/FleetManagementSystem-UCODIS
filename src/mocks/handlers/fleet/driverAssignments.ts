@@ -13,6 +13,7 @@ import { assertUsable, readEndDate, readStartDate } from './couplings'
 import { driverFacts, ineligibilityText } from './drivers'
 import { activeLinks, coupledWith, employeeNames, vehiclePlates } from './links'
 import { FLEET_MESSAGES } from './messages'
+import { tripIndex } from './tripIndex'
 
 export function driverAssignmentsApi(db: MockDatabase): DriverAssignmentApi[] {
   const names = employeeNames(db)
@@ -96,6 +97,11 @@ export function registerDriverAssignmentsHandlers(router: MockRouter, db: MockDa
     (request) => {
       const assignment = db.driverAssignments.findOrFail(routeParam(request, 'no'))
       if (assignment.endDate) throw conflict(FLEET_MESSAGES.periodAlreadyEnded)
+      const trips = tripIndex(db)
+      const onRoad =
+        trips.onRoadByVehicle.get(assignment.vehicleNo) ??
+        trips.onRoadByDriver.get(assignment.employeeNo)
+      if (onRoad) throw conflict(FLEET_MESSAGES.tripInProgress, { no: onRoad.no })
       const endDate = readEndDate(readBody(request), assignment.startDate)
       db.driverAssignments.update(assignment.no, { endDate, ...stampModified(request) })
       return ok(driverAssignmentsApi(db).find((row) => row.no === assignment.no))

@@ -53,6 +53,9 @@ export function fleetReferenceData(db: MockDatabase): Record<string, ReferenceIt
       description: employeeFullName(employee),
       active: driverIneligibility(driverFacts(db, employee, todayIso())).length === 0
     })),
+    routeTemplates: db.routeTemplates
+      .all()
+      .map((route) => ({ code: route.no, description: route.name, active: route.active })),
     providers: db.providers.all().map((provider) => ({
       code: provider.no,
       description: provider.name,

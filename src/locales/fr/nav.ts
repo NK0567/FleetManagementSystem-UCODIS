@@ -23,5 +23,7 @@ export default {
   'nav.vehicles': 'Véhicules',
   'nav.couplings': 'Attelages',
   'nav.driverAssignments': 'Affectations',
-  'nav.drivers': 'Conducteurs'
+  'nav.drivers': 'Conducteurs',
+  'nav.trips': 'Trajets',
+  'nav.routeTemplates': 'Itinéraires types'
 }

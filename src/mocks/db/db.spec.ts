@@ -34,6 +34,31 @@ describe('createCollection', () => {
     })
   })
 
+  it('moves the dates of list items, keeping their time', () => {
+    interface TripRow extends MockRow {
+      stops: { site: string; passedAt: string | null }[]
+    }
+    const trips: CollectionDefinition<TripRow> = {
+      name: 'test-trips',
+      seed: () => [
+        {
+          no: 'TRP-1',
+          stops: [
+            { site: 'A', passedAt: '2026-09-04T06:05:00' },
+            { site: 'B', passedAt: null }
+          ],
+          ...audit
+        }
+      ],
+      dateFields: ['stops[].passedAt']
+    }
+
+    expect(createCollection(trips, { seedVersion: 1, dayOffset: 2 }).find('TRP-1')?.stops).toEqual([
+      { site: 'A', passedAt: '2026-09-06T06:05:00' },
+      { site: 'B', passedAt: null }
+    ])
+  })
+
   it('keeps user changes across reloads', () => {
     createCollection(definition, { seedVersion: 1, dayOffset: 0 }).update('LR-0001', { label: 'B' })
 

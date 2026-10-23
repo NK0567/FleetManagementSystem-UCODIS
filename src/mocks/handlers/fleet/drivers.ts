@@ -14,6 +14,7 @@ import type { MockRouter } from '../../http/router'
 import { localize, type LocalizedText, type MockLanguage } from '../../i18n'
 import { activeLinks, vehiclePlates } from './links'
 import { FLEET_MESSAGES } from './messages'
+import { tripIndex } from './tripIndex'
 
 const REASON_TEXTS: Record<IneligibilityReason, LocalizedText> = {
   not_on_staff: FLEET_MESSAGES.reasonNotOnStaff,
@@ -58,6 +59,7 @@ export function isOnLeave(db: MockDatabase, employee: EmployeeRow, day: string):
 
 export function driverFacts(db: MockDatabase, employee: EmployeeRow, day: string): DriverFacts {
   const position = db.jobPositions.find(employee.jobPositionNo)
+  const trips = tripIndex(db)
   return {
     onStaff: isOnStaff(employee.status),
     suspended: employee.status === 'suspended',
@@ -65,8 +67,8 @@ export function driverFacts(db: MockDatabase, employee: EmployeeRow, day: string
     drivingAuthorized: employee.drivingAuthorized,
     onLeave: isOnLeave(db, employee, day),
     documentsCompliant: null,
-    onTrip: false,
-    tripPlanned: false
+    onTrip: trips.onRoadByDriver.has(employee.no),
+    tripPlanned: trips.plannedTodayByDriver.has(employee.no)
   }
 }
 

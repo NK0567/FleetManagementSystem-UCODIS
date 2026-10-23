@@ -1,6 +1,50 @@
 import type { LocalizedText } from '../../i18n'
 
 export const FLEET_MESSAGES = {
+  inactiveRoute: {
+    fr: "Cet itinéraire n'est plus proposé.",
+    en: 'This route is no longer offered.'
+  },
+  invalidRoute: {
+    fr: "Les arrêts de l'itinéraire sont incohérents : au moins deux arrêts, un départ en premier, un site par arrêt, des durées positives.",
+    en: 'The stops of the route are inconsistent: at least two stops, a departure first, a site on each stop, positive durations.'
+  },
+  routeInUse: {
+    fr: 'Des trajets suivent cet itinéraire : il ne peut pas être supprimé. Désactivez-le plutôt.',
+    en: 'Trips follow this route: it cannot be deleted. Deactivate it instead.'
+  },
+  invalidDateTime: {
+    fr: 'Indiquez une date et une heure valides.',
+    en: 'Give a valid date and time.'
+  },
+  departureInPast: {
+    fr: "Le départ prévu ne peut pas être avant aujourd'hui.",
+    en: 'The planned departure cannot be before today.'
+  },
+  resourceBusy: {
+    fr: '{name} est déjà pris sur un autre trajet à ce moment-là ({no}).',
+    en: '{name} is already taken by another trip at that time ({no}).'
+  },
+  tripActionNotAllowed: {
+    fr: "Cette action n'est pas possible pour un trajet dans cet état.",
+    en: 'This action is not possible for a trip in this state.'
+  },
+  noStopToPass: {
+    fr: "Il ne reste aucun arrêt intermédiaire à passer : terminez le trajet à l'arrivée.",
+    en: 'No intermediate stop is left to pass: complete the trip on arrival.'
+  },
+  endOdometerBeforeStart: {
+    fr: "Le kilométrage d'arrivée ne peut pas être inférieur à celui du départ ({km} km).",
+    en: 'The arrival mileage cannot be lower than the departure one ({km} km).'
+  },
+  tripInProgress: {
+    fr: 'Un trajet est en cours ({no}) : attendez son arrivée.',
+    en: 'A trip is on the road ({no}): wait for its arrival.'
+  },
+  tripsStillOpen: {
+    fr: 'Des trajets sont encore prévus ou en cours pour ce véhicule.',
+    en: 'Trips are still planned or on the road for this vehicle.'
+  },
   notATractor: {
     fr: "Ce véhicule ne tire pas de remorque : son type n'est pas un tracteur.",
     en: 'This vehicle does not tow: its type is not a tractor.'

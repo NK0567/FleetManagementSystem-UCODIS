@@ -1,0 +1,5 @@
+export { useTripStore } from './stores/tripStore'
+export { tripService } from './services/tripService'
+export { tripApi } from './api/tripApi'
+export type { TripApi, TripSearchColumn } from './types/trip.types'
+export { canApply, type TripStatus } from './domain/trip'

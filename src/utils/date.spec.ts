@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
   addDays,
+  addMinutes,
+  minutesBetween,
+  toIsoDateTime,
   daysBetween,
   isIsoDay,
   isoWeekday,
@@ -45,5 +48,11 @@ describe('date', () => {
     expect(isoWeekday('2026-09-06')).toBe(7)
     expect(startOfIsoWeek('2026-09-06')).toBe('2026-08-31')
     expect(startOfIsoWeek('2026-08-31')).toBe('2026-08-31')
+  })
+
+  it('adds minutes to local date-times across midnight, without any time zone', () => {
+    expect(addMinutes('2026-09-04T22:30:00', 120)).toBe('2026-09-05T00:30:00')
+    expect(toIsoDateTime(new Date(2026, 8, 4, 6, 5, 0))).toBe('2026-09-04T06:05:00')
+    expect(minutesBetween('2026-09-04T06:05:00', '2026-09-04T13:35:00')).toBe(450)
   })
 })

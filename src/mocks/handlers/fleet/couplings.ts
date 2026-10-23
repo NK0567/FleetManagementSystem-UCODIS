@@ -14,6 +14,7 @@ import type { MockRouter } from '../../http/router'
 import { localizeDay, type MockLanguage } from '../../i18n'
 import { activeLinks, vehiclePlates } from './links'
 import { FLEET_MESSAGES } from './messages'
+import { tripIndex } from './tripIndex'
 import { statusReason, vehicleStatuses } from './vehicleState'
 
 export function couplingsApi(db: MockDatabase): CouplingApi[] {
@@ -108,6 +109,8 @@ export function registerCouplingsHandlers(router: MockRouter, db: MockDatabase):
   router.post('/fleet/couplings/:no/end', { feature: 'COUPLING', action: 'update' }, (request) => {
     const coupling = db.couplings.findOrFail(routeParam(request, 'no'))
     if (coupling.endDate) throw conflict(FLEET_MESSAGES.periodAlreadyEnded)
+    const onRoad = tripIndex(db).onRoadByVehicle.get(coupling.tractorNo)
+    if (onRoad) throw conflict(FLEET_MESSAGES.tripInProgress, { no: onRoad.no })
     const endDate = readEndDate(readBody(request), coupling.startDate)
     db.couplings.update(coupling.no, { endDate, ...stampModified(request) })
     const updated = couplingsApi(db).find((row) => row.no === coupling.no)

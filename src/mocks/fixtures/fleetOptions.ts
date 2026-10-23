@@ -58,5 +58,20 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
     trip_planned: { fr: 'Trajet prévu', en: 'Trip planned' },
     on_leave: { fr: 'En congé', en: 'On leave' },
     unavailable: { fr: 'Indisponible', en: 'Unavailable' }
+  },
+  tripStatus: {
+    planned: { fr: 'Prévu', en: 'Planned' },
+    in_progress: { fr: 'En cours', en: 'On the road' },
+    completed: { fr: 'Arrivé, à clôturer', en: 'Arrived, to close' },
+    closed: { fr: 'Clôturé', en: 'Closed' },
+    cancelled: { fr: 'Annulé', en: 'Cancelled' }
+  },
+  stopRole: {
+    departure: { fr: 'Départ', en: 'Departure' },
+    loading: { fr: 'Chargement', en: 'Loading' },
+    rest: { fr: 'Repos', en: 'Rest' },
+    check: { fr: 'Contrôle', en: 'Check' },
+    delivery: { fr: 'Livraison', en: 'Delivery' },
+    arrival: { fr: 'Arrivée', en: 'Arrival' }
   }
 }

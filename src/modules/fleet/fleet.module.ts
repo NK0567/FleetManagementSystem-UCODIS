@@ -5,11 +5,13 @@ const FLEET_MENU_ORDER = 30
 
 export function registerFleetModule(): void {
   registerFeatureRoutes({
+    TRIP: { to: '/fleet/trips', menuKey: 'trip' },
     VEHICLE: { to: '/fleet/vehicles', menuKey: 'vehicle' },
     COUPLING: { to: '/fleet/couplings', menuKey: 'coupling' },
     DRIVERASSIGNMENT: { to: '/fleet/driver-assignments', menuKey: 'driverAssignment' },
     DRIVER: { to: '/fleet/drivers', menuKey: 'driver' },
     SITE: { to: '/fleet/sites', menuKey: 'site' },
+    ROUTETEMPLATE: { to: '/fleet/route-templates', menuKey: 'routeTemplate' },
     PROVIDER: { to: '/fleet/providers', menuKey: 'provider' },
     VEHICLETYPE: { to: '/fleet/vehicle-types', menuKey: 'vehicleType' },
     EQUIPMENTTYPE: { to: '/fleet/equipment-types', menuKey: 'equipmentType' },
@@ -21,6 +23,7 @@ export function registerFleetModule(): void {
     labelKey: 'nav.fleet',
     order: FLEET_MENU_ORDER,
     subItems: [
+      { labelKey: 'nav.trips', to: '/fleet/trips', menuKey: 'trip' },
       { labelKey: 'nav.vehicles', to: '/fleet/vehicles', menuKey: 'vehicle' },
       { labelKey: 'nav.couplings', to: '/fleet/couplings', menuKey: 'coupling' },
       {
@@ -29,6 +32,7 @@ export function registerFleetModule(): void {
         menuKey: 'driverAssignment'
       },
       { labelKey: 'nav.drivers', to: '/fleet/drivers', menuKey: 'driver' },
+      { labelKey: 'nav.routeTemplates', to: '/fleet/route-templates', menuKey: 'routeTemplate' },
       { labelKey: 'nav.sites', to: '/fleet/sites', menuKey: 'site' },
       { labelKey: 'nav.providers', to: '/fleet/providers', menuKey: 'provider' },
       { labelKey: 'nav.vehicleTypes', to: '/fleet/vehicle-types', menuKey: 'vehicleType' },

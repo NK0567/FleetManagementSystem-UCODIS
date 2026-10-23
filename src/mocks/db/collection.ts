@@ -11,12 +11,15 @@ export interface AuditFields {
 
 export type MockRow = { no: string } & AuditFields
 
+/** A date field of the row, or of each item of one of its lists: "stops[].passedAt". */
+export type DateFieldPath<T> = (keyof T & string) | `${keyof T & string}[].${string}`
+
 export interface CollectionDefinition<T extends MockRow> {
   name: string
   /** Rows written around the demo reference date. */
   seed: () => T[]
   /** Fields moved along with the calendar so the demo story stays current. */
-  dateFields?: readonly (keyof T & string)[]
+  dateFields?: readonly DateFieldPath<T>[]
 }
 
 export interface CollectionContext {
@@ -37,13 +40,23 @@ export interface Collection<T extends MockRow> {
   reset(): void
 }
 
+function shiftField(record: Record<string, unknown>, field: string, days: number): void {
+  const value = record[field]
+  if (typeof value === 'string') record[field] = shiftIsoDate(value, days)
+}
+
 function shiftDates<T extends MockRow>(rows: T[], fields: readonly string[], days: number): T[] {
   if (!days || fields.length === 0) return rows
   return rows.map((row) => {
-    const shifted = { ...row } as Record<string, unknown>
+    const shifted = structuredClone(row) as Record<string, unknown>
     for (const field of fields) {
-      const value = shifted[field]
-      if (typeof value === 'string') shifted[field] = shiftIsoDate(value, days)
+      const [list, itemField] = field.split('[].')
+      const items = shifted[list ?? '']
+      if (itemField && Array.isArray(items)) {
+        for (const item of items) shiftField(item as Record<string, unknown>, itemField, days)
+      } else {
+        shiftField(shifted, field, days)
+      }
     }
     return shifted as T
   })
