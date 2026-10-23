@@ -113,7 +113,8 @@ function nightWindowIssue(values: DrivingTimeSettings): SettingIssue | null {
   const start = values.nightBanStart.trim()
   const end = values.nightBanEnd.trim()
   if (!start && !end) return null
-  if (!start || !end) return { field: start ? 'nightBanEnd' : 'nightBanStart', code: 'nightWindowIncomplete' }
+  if (!start || !end)
+    return { field: start ? 'nightBanEnd' : 'nightBanStart', code: 'nightWindowIncomplete' }
   const startMinutes = timeToMinutes(start)
   if (startMinutes !== null && startMinutes === timeToMinutes(end)) {
     return { field: 'nightBanEnd', code: 'nightWindowEmpty' }

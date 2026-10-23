@@ -37,6 +37,7 @@ export default {
   'fleet.settings.issue.required': 'This setting is required.',
   'fleet.settings.issue.outOfRange': 'Enter a value between {min} and {max} {unit}.',
   'fleet.settings.issue.invalidTime': 'Enter a time as HH:MM.',
-  'fleet.settings.issue.nightWindowIncomplete': 'Give both the start and the end, or leave both empty.',
+  'fleet.settings.issue.nightWindowIncomplete':
+    'Give both the start and the end, or leave both empty.',
   'fleet.settings.issue.nightWindowEmpty': 'The end must differ from the start.'
 }

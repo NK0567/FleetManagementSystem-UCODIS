@@ -18,7 +18,12 @@ export const MODULE_TOGGLE_CATALOG: readonly ModuleToggleDefinition[] = [
   { no: 'telematics', group: 'fleet', order: 20, features: ['TELEMATICS', 'TELEMATICSEVENTTYPE'] },
   { no: 'trips', group: 'fleet', order: 30, features: ['TRIP', 'ROUTETEMPLATE'] },
   { no: 'compliance', group: 'fleet', order: 40, features: ['ROUTEDEVIATION', 'DEVIATIONTYPE'] },
-  { no: 'fuel', group: 'fleet', order: 50, features: ['FUELREFILL', 'FUELCONSUMPTION', 'FUELCARD'] },
+  {
+    no: 'fuel',
+    group: 'fleet',
+    order: 50,
+    features: ['FUELREFILL', 'FUELCONSUMPTION', 'FUELCARD']
+  },
   { no: 'fleet-status', group: 'fleet', order: 60, features: ['FLEETSTATUS'] },
   { no: 'checks', group: 'fleet', order: 70, features: ['ROADCHECKLIST', 'INSPECTION'] },
   { no: 'departures', group: 'fleet', order: 80, features: ['DEPARTUREAUTHORIZATION'] },
