@@ -40,7 +40,7 @@ describe('vehicle types', () => {
 describe('sites and site types', () => {
   it('applies the radius of the site type when the site sets none', async () => {
     const sites = (
-      await call(server, 'get', '/fleet/sites', { as: 'FLT001', query: { limit: 50 } })
+      await call(server, 'get', '/fleet/sites', { as: 'FLT001', query: { pageSize: 50 } })
     ).data.data as { items: SiteApi[] }
     const relay = sites.items.find((site) => site.no === 'REL-MOR')
     expect(relay).toMatchObject({ radiusM: null, siteTypeName: 'Relais', effectiveRadiusM: 1000 })

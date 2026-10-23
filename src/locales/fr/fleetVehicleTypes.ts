@@ -35,5 +35,9 @@ export default {
   'fleet.vehicleTypes.issue.unpoweredCannotTow':
     'Un véhicule sans moteur ne peut pas tirer une remorque.',
   'fleet.vehicleTypes.issue.compartmentsNeedGoods':
-    'Seul un véhicule qui porte la marchandise peut être compartimenté.'
+    'Seul un véhicule qui porte la marchandise peut être compartimenté.',
+  'fleet.vehicleTypes.col.vehicleCount': 'Véhicules',
+  'fleet.vehicleTypes.form.vehicleCount': 'Véhicules de ce type',
+  'fleet.vehicleTypes.form.structureFrozen':
+    "Des véhicules utilisent ce type : seuls le libellé et l'activation se modifient encore."
 }

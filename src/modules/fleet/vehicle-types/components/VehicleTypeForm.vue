@@ -123,6 +123,12 @@ defineExpose(expose)
         <BaseFormField :label="t('fleet.vehicleTypes.form.active')">
           <ToggleSwitch v-model="draft.active" :disabled="disabled" />
         </BaseFormField>
+        <BaseFormField v-if="!isNew" :label="t('fleet.vehicleTypes.form.vehicleCount')">
+          <FormInput :model-value="initialData.vehicleCount ?? 0" disabled />
+          <p v-if="(initialData.vehicleCount ?? 0) > 0" class="text-xs text-muted-foreground mt-1">
+            {{ t('fleet.vehicleTypes.form.structureFrozen') }}
+          </p>
+        </BaseFormField>
       </div>
     </FormSection>
 

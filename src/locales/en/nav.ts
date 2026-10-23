@@ -19,5 +19,6 @@ export default {
   'nav.equipmentTypes': 'Equipment types',
   'nav.siteTypes': 'Site types',
   'nav.sites': 'Sites',
-  'nav.providers': 'Providers'
+  'nav.providers': 'Providers',
+  'nav.vehicles': 'Vehicles'
 }

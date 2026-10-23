@@ -21,6 +21,7 @@ import fleetEquipmentTypes from './fleetEquipmentTypes'
 import fleetSiteTypes from './fleetSiteTypes'
 import fleetSites from './fleetSites'
 import fleetProviders from './fleetProviders'
+import fleetVehicles from './fleetVehicles'
 export default {
   ...common,
   ...auth,
@@ -43,5 +44,6 @@ export default {
   ...fleetEquipmentTypes,
   ...fleetSiteTypes,
   ...fleetSites,
-  ...fleetProviders
+  ...fleetProviders,
+  ...fleetVehicles
 }

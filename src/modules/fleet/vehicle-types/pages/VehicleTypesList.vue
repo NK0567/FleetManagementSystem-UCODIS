@@ -13,7 +13,7 @@ import type { VehicleTypeApi, VehicleTypeSearchColumn } from '../types/vehicleTy
 
 const { t } = useI18n()
 const store = useVehicleTypeStore()
-const { formatDateTime, booleanLabel, optionLabel } = useListCellFormatters()
+const { formatDateTime, formatInteger, booleanLabel, optionLabel } = useListCellFormatters()
 
 const searchColumnOptions = computed<{ value: VehicleTypeSearchColumn; label: string }[]>(() => [
   { value: 'no,name', label: t('fleet.vehicleTypes.search.all') },
@@ -47,6 +47,13 @@ const tableColumns = computed<TableColumn[]>(() => [
     label: t('fleet.vehicleTypes.col.hasCompartments'),
     minW: '130px',
     formatter: booleanLabel
+  },
+  {
+    sortKey: 'vehicleCount',
+    label: t('fleet.vehicleTypes.col.vehicleCount'),
+    minW: '100px',
+    align: 'right',
+    formatter: formatInteger
   },
   {
     sortKey: 'active',

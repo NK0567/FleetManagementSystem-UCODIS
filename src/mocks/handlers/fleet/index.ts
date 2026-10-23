@@ -6,6 +6,7 @@ import { registerEquipmentTypesHandlers } from './equipmentTypes'
 import { registerSiteTypesHandlers } from './siteTypes'
 import { registerSitesHandlers } from './sites'
 import { registerProvidersHandlers } from './providers'
+import { registerVehiclesHandlers } from './vehicles'
 
 export function registerFleetHandlers(router: MockRouter, db: MockDatabase): void {
   registerFleetSettingsHandlers(router, db)
@@ -14,4 +15,5 @@ export function registerFleetHandlers(router: MockRouter, db: MockDatabase): voi
   registerSiteTypesHandlers(router, db)
   registerSitesHandlers(router, db)
   registerProvidersHandlers(router, db)
+  registerVehiclesHandlers(router, db)
 }

@@ -56,3 +56,9 @@ export const COMMON_MESSAGES = {
   yes: { fr: 'Oui', en: 'Yes' },
   no: { fr: 'Non', en: 'No' }
 } satisfies Record<string, LocalizedText>
+
+/** A calendar day (YYYY-MM-DD…) as the server writes it in messages: DD/MM/YYYY in both languages. */
+export function localizeDay(isoDay: string): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(isoDay)
+  return match ? `${match[3]}/${match[2]}/${match[1]}` : isoDay
+}

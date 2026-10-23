@@ -9,6 +9,7 @@ export interface VehicleTypeApi {
   carriesGoods: boolean
   hasCompartments: boolean
   active: boolean
+  vehicleCount: number
   createdAt: string
   createdBy: string
   modifiedAt: string

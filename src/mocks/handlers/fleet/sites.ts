@@ -35,8 +35,15 @@ export function sitesApi(db: MockDatabase): SiteApi[] {
   })
 }
 
+/** Vehicles still in the fleet that start from this site. */
+function homeBaseCount(db: MockDatabase, no: string): number {
+  return db.vehicles.all().filter((vehicle) => vehicle.homeSiteNo === no && !vehicle.removal).length
+}
+
 /** A site still referenced is deactivated, never deleted. */
 function assertUnused(db: MockDatabase, no: string): void {
+  const count = homeBaseCount(db, no)
+  if (count > 0) throw conflict(FLEET_MESSAGES.siteIsHomeBase, { count })
   if (db.employees.all().some((employee) => employee.siteCode === no)) {
     throw conflict(FLEET_MESSAGES.siteUsedByStaff)
   }
@@ -87,6 +94,10 @@ export function registerSitesHandlers(router: MockRouter, db: MockDatabase): voi
     update: (existing, input) => {
       const patch = readPatch(input, readers)
       assertUniqueName(patch.name, existing.no)
+      const count = homeBaseCount(db, existing.no)
+      if (patch.active === false && existing.active && count > 0) {
+        throw conflict(FLEET_MESSAGES.siteIsHomeBase, { count })
+      }
       return patch
     },
     remove: (existing) => assertUnused(db, existing.no)

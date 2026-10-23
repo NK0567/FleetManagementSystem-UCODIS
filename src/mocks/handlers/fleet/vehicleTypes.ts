@@ -16,8 +16,11 @@ import {
   type FieldReaders
 } from '../../http/input'
 import type { MockRouter } from '../../http/router'
-import { unprocessable } from '../../http/errors'
-import { vehicleTypeIssues } from '@/modules/fleet/vehicle-types/domain/vehicleType'
+import { conflict, unprocessable } from '../../http/errors'
+import {
+  VEHICLE_TYPE_STRUCTURAL_FIELDS,
+  vehicleTypeIssues
+} from '@/modules/fleet/vehicle-types/domain/vehicleType'
 import { FLEET_MESSAGES } from './messages'
 
 type Fields = Omit<VehicleTypeRow, 'no' | keyof AuditFields>
@@ -27,8 +30,12 @@ function assertConsistent(type: Fields): void {
   if (issue) throw unprocessable(FLEET_MESSAGES[issue])
 }
 
+function vehicleCount(db: MockDatabase, typeNo: string): number {
+  return db.vehicles.all().filter((vehicle) => vehicle.vehicleTypeNo === typeNo).length
+}
+
 export function vehicleTypesApi(db: MockDatabase): VehicleTypeApi[] {
-  return db.vehicleTypes.all()
+  return db.vehicleTypes.all().map((type) => ({ ...type, vehicleCount: vehicleCount(db, type.no) }))
 }
 
 export function registerVehicleTypesHandlers(router: MockRouter, db: MockDatabase): void {
@@ -57,8 +64,17 @@ export function registerVehicleTypesHandlers(router: MockRouter, db: MockDatabas
     update: (existing, input) => {
       const patch = readPatch(input, readers)
       assertConsistent({ ...existing, ...patch })
+      const count = vehicleCount(db, existing.no)
+      const structureChanges = VEHICLE_TYPE_STRUCTURAL_FIELDS.some(
+        (field) => field in patch && patch[field] !== existing[field]
+      )
+      if (count > 0 && structureChanges) {
+        throw conflict(FLEET_MESSAGES.vehicleTypeStructureFrozen, { count })
+      }
       return patch
     },
-    remove: () => undefined
+    remove: (existing) => {
+      if (vehicleCount(db, existing.no) > 0) throw conflict(FLEET_MESSAGES.vehicleTypeInUse)
+    }
   })
 }

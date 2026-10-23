@@ -17,6 +17,8 @@ import {
   type FieldReaders
 } from '../../http/input'
 import type { MockRouter } from '../../http/router'
+import { conflict } from '../../http/errors'
+import { FLEET_MESSAGES } from './messages'
 
 type Fields = Omit<EquipmentTypeRow, 'no' | keyof AuditFields>
 
@@ -46,6 +48,10 @@ export function registerEquipmentTypesHandlers(router: MockRouter, db: MockDatab
       ...readAll(input, readers)
     }),
     update: (_existing, input) => readPatch(input, readers),
-    remove: () => undefined
+    remove: (existing) => {
+      if (db.vehicleEquipment.all().some((item) => item.equipmentTypeNo === existing.no)) {
+        throw conflict(FLEET_MESSAGES.equipmentTypeInUse)
+      }
+    }
   })
 }

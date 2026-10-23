@@ -34,5 +34,9 @@ export default {
     'A motorized vehicle cannot be towed by a tractor.',
   'fleet.vehicleTypes.issue.unpoweredCannotTow': 'An unpowered vehicle cannot tow a trailer.',
   'fleet.vehicleTypes.issue.compartmentsNeedGoods':
-    'Only a vehicle carrying goods can have compartments.'
+    'Only a vehicle carrying goods can have compartments.',
+  'fleet.vehicleTypes.col.vehicleCount': 'Vehicles',
+  'fleet.vehicleTypes.form.vehicleCount': 'Vehicles of this type',
+  'fleet.vehicleTypes.form.structureFrozen':
+    'Vehicles use this type: only the name and the activation can still change.'
 }

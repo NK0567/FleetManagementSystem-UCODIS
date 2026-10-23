@@ -122,6 +122,20 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/fleet/vehicles/': RouteRecordInfo<
+      '/fleet/vehicles/',
+      '/fleet/vehicles',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/vehicles/[id]': RouteRecordInfo<
+      '/fleet/vehicles/[id]',
+      '/fleet/vehicles/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/hr/dashboard': RouteRecordInfo<
       '/hr/dashboard',
       '/hr/dashboard',
@@ -374,6 +388,22 @@ declare module 'vue-router/auto-routes' {
     'src/pages/fleet/vehicle-types/[id].vue': {
       routes:
         | '/fleet/vehicle-types/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/vehicles/index.vue': {
+      routes:
+        | '/fleet/vehicles/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/vehicles/[id].vue': {
+      routes:
+        | '/fleet/vehicles/[id]'
       views:
         | never
       pathParamNames:

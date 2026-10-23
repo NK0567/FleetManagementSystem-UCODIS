@@ -138,6 +138,25 @@ describe('useCrudState: filters', () => {
     expect(crud.userFilters.value).toEqual([])
   })
 
+  it('starts from the default filters and goes back to them on reset', async () => {
+    const { service, call } = createControllableService()
+    const defaultView = [{ field: 'status', valueType: 'string' as const, value: ['active'] }]
+    const crud = useCrudState<Row>({
+      service,
+      defaultSearchColumn: 'no',
+      entityLabelKey: 'common.appName',
+      defaultUserFilters: defaultView
+    })
+    expect(crud.userFilters.value).toEqual(defaultView)
+
+    crud.userFilters.value = []
+    const reset = crud.resetFilters()
+    call(0).gate.resolve(page([]))
+    await reset
+
+    expect(crud.userFilters.value).toEqual(defaultView)
+  })
+
   it('sends only filters with a value', async () => {
     const { service, call } = createControllableService()
     const crud = createState(service)

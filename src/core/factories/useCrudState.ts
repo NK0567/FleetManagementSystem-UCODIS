@@ -32,7 +32,8 @@ export function useCrudState<T extends { no: string }, SearchCol extends string 
     listAccessScope,
     defaultSortBy,
     defaultSortDirection,
-    persistKey
+    persistKey,
+    defaultUserFilters = []
   } = options
 
   const persisted = persistKey ? loadPersistedListState(persistKey) : null
@@ -49,7 +50,7 @@ export function useCrudState<T extends { no: string }, SearchCol extends string 
   const searchColumn = ref(defaultSearchColumn) as Ref<SearchCol>
   const sortBy = ref<string | null>(defaultSortBy ?? null)
   const sortDirection = ref<SortDirection>(defaultSortDirection ?? 'ASC')
-  const userFilters = ref<ListFilter[]>(persisted?.userFilters ?? [])
+  const userFilters = ref<ListFilter[]>(persisted?.userFilters ?? defaultUserFilters)
   const filterPanelOpen = ref(persisted?.filterPanelOpen ?? false)
   const pagination = ref<PaginationMeta>({
     total: 0,
@@ -152,7 +153,7 @@ export function useCrudState<T extends { no: string }, SearchCol extends string 
     searchColumn.value = defaultSearchColumn
     sortBy.value = defaultSortBy ?? null
     sortDirection.value = defaultSortDirection ?? 'ASC'
-    userFilters.value = []
+    userFilters.value = defaultUserFilters
     filterPanelOpen.value = false
     await fetchItems(1)
   }

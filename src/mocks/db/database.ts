@@ -13,6 +13,8 @@ import { equipmentTypesCollection } from '../fixtures/fleet/equipmentTypes'
 import { siteTypesCollection } from '../fixtures/fleet/siteTypes'
 import { sitesCollection } from '../fixtures/fleet/sites'
 import { providersCollection } from '../fixtures/fleet/providers'
+import { vehiclesCollection } from '../fixtures/fleet/vehicles'
+import { vehicleEquipmentCollection } from '../fixtures/fleet/vehicleEquipment'
 import { createCollection, type CollectionContext } from './collection'
 import { clearStoredCollections } from './storage'
 
@@ -41,7 +43,9 @@ export function createDatabase(
     equipmentTypes: createCollection(equipmentTypesCollection, context),
     siteTypes: createCollection(siteTypesCollection, context),
     sites: createCollection(sitesCollection, context),
-    providers: createCollection(providersCollection, context)
+    providers: createCollection(providersCollection, context),
+    vehicles: createCollection(vehiclesCollection, context),
+    vehicleEquipment: createCollection(vehicleEquipmentCollection, context)
   }
 
   return {

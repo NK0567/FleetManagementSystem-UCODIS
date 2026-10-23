@@ -22,5 +22,30 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
     manufacturer: { fr: 'Constructeur', en: 'Manufacturer' },
     bank: { fr: 'Banque', en: 'Bank' },
     carrier: { fr: 'Transporteur', en: 'Carrier' }
+  },
+  vehicleStatus: {
+    available: { fr: 'Disponible', en: 'Available' },
+    assigned: { fr: 'Affecté', en: 'Assigned' },
+    in_mission: { fr: 'En trajet', en: 'On trip' },
+    immobilized: { fr: 'Immobilisé', en: 'Immobilized' },
+    out_of_service: { fr: 'Hors service', en: 'Out of service' },
+    removed: { fr: 'Sorti du parc', en: 'Left the fleet' }
+  },
+  fuelType: {
+    diesel: { fr: 'Gazole', en: 'Diesel' },
+    petrol: { fr: 'Essence', en: 'Petrol' },
+    electric: { fr: 'Électrique', en: 'Electric' },
+    hybrid: { fr: 'Hybride', en: 'Hybrid' },
+    lpg: { fr: 'GPL', en: 'LPG' }
+  },
+  acquisitionMode: {
+    purchase: { fr: 'Achat', en: 'Purchase' },
+    rental: { fr: 'Location', en: 'Rental' },
+    leasing: { fr: 'Crédit-bail', en: 'Leasing' }
+  },
+  equipmentState: {
+    operational: { fr: 'Opérationnel', en: 'Operational' },
+    out_of_service: { fr: 'Hors service', en: 'Out of service' },
+    uninstalled: { fr: 'Désinstallé', en: 'Uninstalled' }
   }
 }

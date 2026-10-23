@@ -61,4 +61,6 @@ export interface CrudStateOptions<T, SearchCol extends string = string> {
   defaultSortDirection?: SortDirection
   /** sessionStorage key that keeps advanced filters and panel state across reloads. */
   persistKey?: string
+  /** Filters of a fresh list, restored by "reset": the default view of the list. */
+  defaultUserFilters?: ListFilter[]
 }
