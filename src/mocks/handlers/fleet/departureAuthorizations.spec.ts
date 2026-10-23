@@ -98,6 +98,15 @@ describe('a pending departure request', () => {
 })
 
 describe('departure decisions', () => {
+  it('are not needed while the departures module is turned off', async () => {
+    await call(server, 'patch', '/settings/module-toggles/departures', {
+      as: 'ADM001',
+      body: { active: false }
+    })
+    await post('/fleet/departure-authorizations/AUT-2026-0007/refuse', { reason: 'Inutile' })
+    expect((await post('/fleet/trips/TRP-00007/start')).status).toBe(200)
+  })
+
   it('allow one request per planned trip', async () => {
     const driverChecks = (await points('driver')).map((pointNo) => ({ pointNo, result: 'ok' }))
     expect(

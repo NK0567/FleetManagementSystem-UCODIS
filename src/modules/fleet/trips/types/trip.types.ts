@@ -45,6 +45,8 @@ export interface TripApi {
   stops: TripStopApi[]
   stopCount: number
   passedStopCount: number
+  /** Off when the departures module is turned off. */
+  authorizationRequired: boolean
   /** The departure request that decides whether the trip may leave. */
   authorizationNo: string | null
   authorizationDecision: DepartureDecision | null

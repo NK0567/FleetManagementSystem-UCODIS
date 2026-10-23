@@ -27,10 +27,17 @@ import { employeeNames, vehiclePlates } from './links'
 import { FLEET_MESSAGES } from './messages'
 import { plannedArrival, tripWindow } from './tripIndex'
 import { tripAuthorization } from './departureAuthorizations'
+import { disabledFeatures } from '../../auth/permissions'
 
 const BASE_PATH = '/fleet/trips'
 
+/** With the departures module turned off, trips leave without an authorization. */
+function authorizationRequired(db: MockDatabase): boolean {
+  return !disabledFeatures(db.moduleToggles.all()).has('DEPARTUREAUTHORIZATION')
+}
+
 export function tripsApi(db: MockDatabase): TripApi[] {
+  const required = authorizationRequired(db)
   const routes = new Map(db.routeTemplates.all().map((route) => [route.no, route.name]))
   const sites = new Map(db.sites.all().map((site) => [site.no, site]))
   const plates = vehiclePlates(db)
@@ -86,6 +93,7 @@ export function tripsApi(db: MockDatabase): TripApi[] {
       stops,
       stopCount: stops.length,
       passedStopCount: stops.filter((stop) => stop.passedAt !== null).length,
+      authorizationRequired: required,
       authorizationNo: authorization?.no ?? null,
       authorizationDecision: authorization?.decision ?? null,
       createdAt: trip.createdAt,
@@ -240,7 +248,7 @@ export function registerTripsHandlers(router: MockRouter, db: MockDatabase): voi
 
   action('start', (trip, request) => {
     assertAllowed(trip, 'start')
-    if (tripAuthorization(db, trip.no)?.decision !== 'granted') {
+    if (authorizationRequired(db) && tripAuthorization(db, trip.no)?.decision !== 'granted') {
       throw conflict(FLEET_MESSAGES.tripNeedsAuthorization)
     }
     const vehicle = db.vehicles.findOrFail(trip.vehicleNo)

@@ -69,6 +69,9 @@ const acting = ref(false)
 const showActions = computed(
   () => canExecute.value && !!item.value && !isEditMode.value && !isFormDirty.value
 )
+const awaitsAuthorization = computed(
+  () => !!item.value?.authorizationRequired && item.value.authorizationDecision !== 'granted'
+)
 const can = (action: Parameters<typeof canApply>[0]) =>
   !!item.value && canApply(action, item.value.status)
 const canPassStop = computed(
@@ -180,12 +183,8 @@ const nextStopName = computed(() => {
         v-if="can('start')"
         type="button"
         class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
-        :disabled="acting || item?.authorizationDecision !== 'granted'"
-        :title="
-          item?.authorizationDecision !== 'granted'
-            ? t('fleet.trips.needsAuthorization')
-            : undefined
-        "
+        :disabled="acting || awaitsAuthorization"
+        :title="awaitsAuthorization ? t('fleet.trips.needsAuthorization') : undefined"
         @click="open('start')"
       >
         <FlagTriangleRight class="w-5 h-5 text-primary" /> {{ t('fleet.trips.action.start') }}

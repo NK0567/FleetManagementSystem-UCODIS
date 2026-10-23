@@ -166,7 +166,10 @@ defineExpose(expose)
         :summary="[]"
       >
         <div class="space-y-3 min-w-0">
-          <BaseFormField :label="t('fleet.trips.form.authorization')">
+          <BaseFormField
+            v-if="initialData.authorizationRequired"
+            :label="t('fleet.trips.form.authorization')"
+          >
             <router-link
               v-if="initialData.authorizationNo"
               :to="{
