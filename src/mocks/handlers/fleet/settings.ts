@@ -54,9 +54,9 @@ export function fleetSettings(db: MockDatabase): FleetSettings {
 /** The fleet has a single settings record; each section is saved on its own. */
 export function registerFleetSettingsHandlers(router: MockRouter, db: MockDatabase): void {
   const toApi = (): FleetSettingsApi => {
-    const { drivingTime, geofencing, documents, safety, modifiedAt, modifiedBy } =
+    const { drivingTime, geofencing, documents, safety, fuel, modifiedAt, modifiedBy } =
       db.fleetSettings.findOrFail(FLEET_SETTINGS_NO)
-    return { drivingTime, geofencing, documents, safety, modifiedAt, modifiedBy }
+    return { drivingTime, geofencing, documents, safety, fuel, modifiedAt, modifiedBy }
   }
 
   router.get('/fleet/settings', { feature: 'FLEETSETTINGS', action: 'read' }, () => ok(toApi()))

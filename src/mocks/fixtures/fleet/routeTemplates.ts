@@ -6,6 +6,7 @@ export interface RouteTemplateRow extends MockRow {
   name: string
   recurring: boolean
   estimatedDistanceKm: number
+  fuelReferenceL100: number | null
   active: boolean
   stops: RouteStop[]
 }
@@ -44,6 +45,7 @@ const SEED: Omit<RouteTemplateRow, keyof typeof seedAudit>[] = [
     name: 'Antananarivo → Toamasina (RN2)',
     recurring: true,
     estimatedDistanceKm: 352,
+    fuelReferenceL100: 36,
     active: true,
     stops: ROUTE_TEMPLATE_STOPS['TNR-TOA']
   },
@@ -52,6 +54,7 @@ const SEED: Omit<RouteTemplateRow, keyof typeof seedAudit>[] = [
     name: 'Antananarivo → Antsirabe (RN7)',
     recurring: true,
     estimatedDistanceKm: 168,
+    fuelReferenceL100: 32,
     active: true,
     stops: ROUTE_TEMPLATE_STOPS['TNR-ATS']
   },
@@ -60,6 +63,7 @@ const SEED: Omit<RouteTemplateRow, keyof typeof seedAudit>[] = [
     name: 'Antananarivo → Mahajanga (RN4)',
     recurring: true,
     estimatedDistanceKm: 570,
+    fuelReferenceL100: 39,
     active: true,
     stops: ROUTE_TEMPLATE_STOPS['TNR-MJN']
   }

@@ -96,6 +96,9 @@ export function fleetReferenceData(db: MockDatabase): Record<string, ReferenceIt
     deviationTypes: db.deviationTypes
       .all()
       .map((type) => ({ code: type.no, description: type.name, active: type.active })),
+    fuelGapCauses: db.fuelGapCauses
+      .all()
+      .map((cause) => ({ code: cause.no, description: cause.name, active: cause.active })),
     infractionTypes: db.infractionTypes
       .all()
       .map((type) => ({ code: type.no, description: type.name, active: type.active })),

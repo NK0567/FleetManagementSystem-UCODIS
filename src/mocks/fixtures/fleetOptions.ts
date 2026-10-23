@@ -283,6 +283,38 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
     handled: { fr: 'Traitée', en: 'Handled' },
     resolved: { fr: 'Résolue', en: 'Resolved' }
   },
+  refillStatus: {
+    valid: { fr: 'Valide', en: 'Valid' },
+    anomaly: { fr: 'Anomalie', en: 'Anomaly' },
+    qualified: { fr: 'Qualifié', en: 'Qualified' }
+  },
+  refillChannel: {
+    manual: { fr: 'Bureau', en: 'Office' },
+    mobile: { fr: 'Espace conducteur', en: 'Driver space' },
+    import: { fr: 'Import', en: 'Import' },
+    card: { fr: 'Carte carburant', en: 'Fuel card' }
+  },
+  refillCheck: {
+    tank: { fr: 'Réservoir', en: 'Tank' },
+    odometer: { fr: 'Kilométrage', en: 'Odometer' },
+    driver: { fr: 'Conducteur', en: 'Driver' },
+    hours: { fr: 'Horaire', en: 'Time of day' },
+    gps: { fr: 'Position', en: 'Position' }
+  },
+  fuelGapStatus: {
+    normal: { fr: 'Normal', en: 'Normal' },
+    to_qualify: { fr: 'À qualifier', en: 'To qualify' },
+    qualified: { fr: 'Qualifié', en: 'Qualified' },
+    deduction_proposed: { fr: 'Retenue proposée', en: 'Deduction proposed' },
+    deduction_approved: { fr: 'Retenue validée', en: 'Deduction approved' },
+    deduction_rejected: { fr: 'Retenue refusée', en: 'Deduction rejected' },
+    dismissed: { fr: 'Classé', en: 'Dismissed' }
+  },
+  fuelReferenceSource: {
+    route: { fr: 'Itinéraire', en: 'Route' },
+    vehicleType: { fr: 'Type de véhicule', en: 'Vehicle type' },
+    default: { fr: 'Par défaut', en: 'Default' }
+  },
   complianceGapReason: {
     missing: { fr: 'Manquant', en: 'Missing' },
     expired: { fr: 'Expiré', en: 'Expired' },

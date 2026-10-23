@@ -22,7 +22,7 @@ export const MODULE_TOGGLE_CATALOG: readonly ModuleToggleDefinition[] = [
     no: 'fuel',
     group: 'fleet',
     order: 50,
-    features: ['FUELREFILL', 'FUELCONSUMPTION', 'FUELCARD']
+    features: ['FUELREFILL', 'FUELCONSUMPTION', 'FUELCARD', 'FUELGAPCAUSE']
   },
   { no: 'fleet-status', group: 'fleet', order: 60, features: ['FLEETSTATUS'] },
   {

@@ -41,11 +41,14 @@ import { deviationTypesCollection } from '../fixtures/fleet/deviationTypes'
 import { routeDeviationsCollection } from '../fixtures/fleet/routeDeviations'
 import { alertRulesCollection } from '../fixtures/fleet/alertRules'
 import { alertHandlingsCollection } from '../fixtures/fleet/alertHandlings'
+import { fuelGapFilesCollection } from '../fixtures/fleet/fuelGapFiles'
+import { fuelGapCausesCollection } from '../fixtures/fleet/fuelGapCauses'
+import { fuelRefillsCollection } from '../fixtures/fleet/fuelRefills'
 import { createCollection, type CollectionContext } from './collection'
 import { clearStoredCollections } from './storage'
 
 /** Bump when fixtures change shape: every collection is then reseeded. */
-export const MOCK_SEED_VERSION = 13
+export const MOCK_SEED_VERSION = 15
 
 export function createDatabase(
   context: CollectionContext = {
@@ -95,7 +98,10 @@ export function createDatabase(
     deviationTypes: createCollection(deviationTypesCollection, context),
     routeDeviations: createCollection(routeDeviationsCollection, context),
     alertRules: createCollection(alertRulesCollection, context),
-    alertHandlings: createCollection(alertHandlingsCollection, context)
+    alertHandlings: createCollection(alertHandlingsCollection, context),
+    fuelGapFiles: createCollection(fuelGapFilesCollection, context),
+    fuelGapCauses: createCollection(fuelGapCausesCollection, context),
+    fuelRefills: createCollection(fuelRefillsCollection, context)
   }
 
   return {

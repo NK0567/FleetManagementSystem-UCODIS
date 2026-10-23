@@ -30,18 +30,52 @@ export interface SafetySettings {
   justificationDelayH: number
 }
 
+export interface FuelSettings {
+  /** Refills are expected between these hours; the window may run past midnight. */
+  refuelStartHour: number
+  refuelEndHour: number
+  /** Distance allowed between the vehicle and the station it says it filled up at. */
+  gpsGapMaxKm: number
+  /** Consumption gap, in percent of the reference, that calls for an explanation. */
+  consumptionGapPct: number
+  /** Reference consumption when neither the route nor the vehicle type sets one. */
+  defaultL100: number
+  co2GramsPerL: number
+  /** Highest amount charged to a driver for one consumption gap; no cap when empty. */
+  deductionCapAmount: number | null
+  /** Tolerances to match a fuel card transaction with a refill. */
+  matchingToleranceMin: number
+  matchingTolerancePct: number
+}
+
 export interface FleetSettings {
   drivingTime: DrivingTimeSettings
   geofencing: GeofencingSettings
   documents: DocumentSettings
   safety: SafetySettings
+  fuel: FuelSettings
 }
 
 export type FleetSettingsSection = keyof FleetSettings
 
-export const FLEET_SETTINGS_SECTIONS = ['drivingTime', 'geofencing', 'documents', 'safety'] as const
+export const FLEET_SETTINGS_SECTIONS = [
+  'drivingTime',
+  'geofencing',
+  'documents',
+  'safety',
+  'fuel'
+] as const
 
-export type SettingUnit = 'min' | 'h' | 'm' | 'days'
+export type SettingUnit =
+  | 'min'
+  | 'h'
+  | 'm'
+  | 'days'
+  | 'km'
+  | 'percent'
+  | 'l100'
+  | 'gPerL'
+  | 'amount'
 
 export type SettingField =
   | { key: string; kind: 'number'; unit: SettingUnit; min: number; max: number }
@@ -66,6 +100,17 @@ export const FLEET_SETTING_FIELDS: Record<FleetSettingsSection, readonly Setting
   safety: [
     { key: 'recheckDelayDays', kind: 'number', unit: 'days', min: 1, max: 60 },
     { key: 'justificationDelayH', kind: 'number', unit: 'h', min: 1, max: 168 }
+  ],
+  fuel: [
+    { key: 'refuelStartHour', kind: 'number', unit: 'h', min: 0, max: 23 },
+    { key: 'refuelEndHour', kind: 'number', unit: 'h', min: 0, max: 24 },
+    { key: 'gpsGapMaxKm', kind: 'number', unit: 'km', min: 1, max: 50 },
+    { key: 'consumptionGapPct', kind: 'number', unit: 'percent', min: 1, max: 50 },
+    { key: 'defaultL100', kind: 'number', unit: 'l100', min: 5, max: 100 },
+    { key: 'co2GramsPerL', kind: 'number', unit: 'gPerL', min: 1000, max: 4000 },
+    { key: 'deductionCapAmount', kind: 'optionalNumber', unit: 'amount', min: 0, max: 100000000 },
+    { key: 'matchingToleranceMin', kind: 'number', unit: 'min', min: 5, max: 1440 },
+    { key: 'matchingTolerancePct', kind: 'number', unit: 'percent', min: 0, max: 20 }
   ]
 }
 
@@ -84,7 +129,18 @@ export const DEFAULT_FLEET_SETTINGS: FleetSettings = {
   },
   geofencing: { defaultSiteRadiusM: 5_000 },
   documents: { defaultNoticeDays: 30 },
-  safety: { recheckDelayDays: 15, justificationDelayH: 48 }
+  safety: { recheckDelayDays: 15, justificationDelayH: 48 },
+  fuel: {
+    refuelStartHour: 4,
+    refuelEndHour: 20,
+    gpsGapMaxKm: 2,
+    consumptionGapPct: 8,
+    defaultL100: 37,
+    co2GramsPerL: 2680,
+    deductionCapAmount: 200000,
+    matchingToleranceMin: 120,
+    matchingTolerancePct: 2
+  }
 }
 
 export type SettingIssue =

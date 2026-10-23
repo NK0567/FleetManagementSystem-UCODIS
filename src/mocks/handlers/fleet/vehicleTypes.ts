@@ -10,6 +10,7 @@ import {
   readAll,
   readBoolean,
   readCode,
+  readNumber,
   readEnum,
   readPatch,
   readString,
@@ -46,6 +47,7 @@ export function registerVehicleTypesHandlers(router: MockRouter, db: MockDatabas
       readEnum(input, 'couplingRole', COUPLING_ROLES, { required: true }) ?? 'none',
     carriesGoods: (input) => readBoolean(input, 'carriesGoods'),
     hasCompartments: (input) => readBoolean(input, 'hasCompartments'),
+    fuelReferenceL100: (input) => readNumber(input, 'fuelReferenceL100', { min: 1, max: 100 }),
     active: (input) => readBoolean(input, 'active', true)
   }
 

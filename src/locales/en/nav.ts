@@ -43,5 +43,8 @@ export default {
   'nav.routeDeviations': 'Route deviations',
   'nav.deviationTypes': 'Deviation types',
   'nav.alerts': 'Alerts',
-  'nav.alertRules': 'Alert rules'
+  'nav.alertRules': 'Alert rules',
+  'nav.fuelRefills': 'Fuel refills',
+  'nav.fuelConsumption': 'Fuel consumption',
+  'nav.fuelGapCauses': 'Fuel gap causes'
 }

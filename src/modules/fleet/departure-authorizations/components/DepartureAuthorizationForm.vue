@@ -147,7 +147,7 @@ defineExpose(expose)
       :summary="[]"
     >
       <div class="xl:col-span-2 min-w-0 space-y-3">
-        <DepartureChecksPanel :checks="initialData.checks ?? []" />
+        <ChecksPanel :checks="initialData.checks ?? []" options-key="departureCheck" />
         <p v-if="initialData.decidedBy" class="text-sm text-muted-foreground">
           {{
             t('fleet.departureAuthorizations.decidedBy', {

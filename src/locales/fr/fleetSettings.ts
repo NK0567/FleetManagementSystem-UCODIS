@@ -44,5 +44,22 @@ export default {
   'fleet.settings.section.safety': 'Sécurité',
   'fleet.settings.section.safety.hint': 'Délais appliqués aux contrôles des véhicules.',
   'fleet.settings.field.safety.recheckDelayDays': 'Délai de contre-visite',
-  'fleet.settings.field.safety.justificationDelayH': "Délai de justification d'un écart"
+  'fleet.settings.field.safety.justificationDelayH': "Délai de justification d'un écart",
+  'fleet.settings.section.fuel': 'Carburant',
+  'fleet.settings.section.fuel.hint':
+    'Contrôles des pleins, références de consommation et retenues.',
+  'fleet.settings.field.fuel.refuelStartHour': 'Pleins autorisés à partir de',
+  'fleet.settings.field.fuel.refuelEndHour': "Pleins autorisés jusqu'à",
+  'fleet.settings.field.fuel.gpsGapMaxKm': 'Écart GPS toléré avec la station',
+  'fleet.settings.field.fuel.consumptionGapPct': 'Écart de consommation à qualifier',
+  'fleet.settings.field.fuel.defaultL100': 'Consommation de référence par défaut',
+  'fleet.settings.field.fuel.co2GramsPerL': 'Émission de CO₂ par litre',
+  'fleet.settings.field.fuel.deductionCapAmount': "Plafond d'une retenue",
+  'fleet.settings.field.fuel.matchingToleranceMin': 'Rapprochement carte : écart de temps',
+  'fleet.settings.field.fuel.matchingTolerancePct': 'Rapprochement carte : écart de volume',
+  'fleet.settings.unit.km': 'km',
+  'fleet.settings.unit.percent': '%',
+  'fleet.settings.unit.l100': 'L/100 km',
+  'fleet.settings.unit.gPerL': 'g/L',
+  'fleet.settings.unit.amount': 'Ar'
 }

@@ -64,6 +64,6 @@ describe('settingsSectionIssues', () => {
 
   it('knows the sections it can validate', () => {
     expect(isFleetSettingsSection('documents')).toBe(true)
-    expect(isFleetSettingsSection('fuel')).toBe(false)
+    expect(isFleetSettingsSection('weather')).toBe(false)
   })
 })

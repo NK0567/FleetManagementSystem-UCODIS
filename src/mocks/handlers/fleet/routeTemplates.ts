@@ -79,6 +79,7 @@ export function registerRouteTemplatesHandlers(router: MockRouter, db: MockDatab
     recurring: (input) => readBoolean(input, 'recurring'),
     estimatedDistanceKm: (input) =>
       readNumber(input, 'estimatedDistanceKm', { required: true, min: 1 }) ?? 0,
+    fuelReferenceL100: (input) => readNumber(input, 'fuelReferenceL100', { min: 1, max: 100 }),
     active: (input) => readBoolean(input, 'active', true),
     stops: (input) => readStops(db, input)
   }

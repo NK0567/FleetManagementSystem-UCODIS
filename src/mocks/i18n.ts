@@ -72,3 +72,10 @@ export function localizeDay(isoDay: string): string {
   const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(isoDay)
   return match ? `${match[3]}/${match[2]}/${match[1]}` : isoDay
 }
+
+const NUMBER_LOCALES: Record<MockLanguage, string> = { fr: 'fr-FR', en: 'en-GB' }
+
+/** A number as the server writes it in messages, with the separators of the language. */
+export function localizeNumber(language: MockLanguage, value: number): string {
+  return new Intl.NumberFormat(NUMBER_LOCALES[language], { maximumFractionDigits: 1 }).format(value)
+}

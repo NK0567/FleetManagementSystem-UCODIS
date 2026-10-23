@@ -22,6 +22,9 @@ export function registerFleetModule(): void {
     ROUTEDEVIATION: { to: '/fleet/route-deviations', menuKey: 'routeDeviation' },
     DEVIATIONTYPE: { to: '/fleet/deviation-types', menuKey: 'deviationType' },
     ALERTRULE: { to: '/fleet/alert-rules', menuKey: 'alertRule' },
+    FUELREFILL: { to: '/fleet/fuel-refills', menuKey: 'fuelRefill' },
+    FUELCONSUMPTION: { to: '/fleet/fuel-consumption', menuKey: 'fuelConsumption' },
+    FUELGAPCAUSE: { to: '/fleet/fuel-gap-causes', menuKey: 'fuelGapCause' },
     ROADCHECKLIST: { to: '/fleet/road-checklists', menuKey: 'roadChecklist' },
     DEPARTUREAUTHORIZATION: {
       to: '/fleet/departure-authorizations',
@@ -60,6 +63,12 @@ export function registerFleetModule(): void {
       },
       { labelKey: 'nav.drivers', to: '/fleet/drivers', menuKey: 'driver' },
       { labelKey: 'nav.fleetStatus', to: '/fleet/fleet-status', menuKey: 'fleetStatus' },
+      { labelKey: 'nav.fuelRefills', to: '/fleet/fuel-refills', menuKey: 'fuelRefill' },
+      {
+        labelKey: 'nav.fuelConsumption',
+        to: '/fleet/fuel-consumption',
+        menuKey: 'fuelConsumption'
+      },
       { labelKey: 'nav.documents', to: '/fleet/documents', menuKey: 'document' },
       {
         labelKey: 'nav.missingDocuments',
@@ -91,6 +100,7 @@ export function registerFleetModule(): void {
       { labelKey: 'nav.checkPoints', to: '/fleet/check-points', menuKey: 'checkPoint' },
       { labelKey: 'nav.deviationTypes', to: '/fleet/deviation-types', menuKey: 'deviationType' },
       { labelKey: 'nav.alertRules', to: '/fleet/alert-rules', menuKey: 'alertRule' },
+      { labelKey: 'nav.fuelGapCauses', to: '/fleet/fuel-gap-causes', menuKey: 'fuelGapCause' },
       {
         labelKey: 'nav.infractionTypes',
         to: '/fleet/infraction-types',

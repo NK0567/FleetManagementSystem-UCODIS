@@ -43,5 +43,21 @@ export default {
   'fleet.settings.section.safety': 'Safety',
   'fleet.settings.section.safety.hint': 'Delays applied to vehicle checks.',
   'fleet.settings.field.safety.recheckDelayDays': 'Re-inspection delay',
-  'fleet.settings.field.safety.justificationDelayH': 'Time to justify a deviation'
+  'fleet.settings.field.safety.justificationDelayH': 'Time to justify a deviation',
+  'fleet.settings.section.fuel': 'Fuel',
+  'fleet.settings.section.fuel.hint': 'Refill checks, consumption references and deductions.',
+  'fleet.settings.field.fuel.refuelStartHour': 'Refills allowed from',
+  'fleet.settings.field.fuel.refuelEndHour': 'Refills allowed until',
+  'fleet.settings.field.fuel.gpsGapMaxKm': 'GPS gap allowed with the station',
+  'fleet.settings.field.fuel.consumptionGapPct': 'Consumption gap to qualify',
+  'fleet.settings.field.fuel.defaultL100': 'Default reference consumption',
+  'fleet.settings.field.fuel.co2GramsPerL': 'CO₂ emitted per litre',
+  'fleet.settings.field.fuel.deductionCapAmount': 'Cap of a deduction',
+  'fleet.settings.field.fuel.matchingToleranceMin': 'Card matching: time tolerance',
+  'fleet.settings.field.fuel.matchingTolerancePct': 'Card matching: volume tolerance',
+  'fleet.settings.unit.km': 'km',
+  'fleet.settings.unit.percent': '%',
+  'fleet.settings.unit.l100': 'L/100 km',
+  'fleet.settings.unit.gPerL': 'g/L',
+  'fleet.settings.unit.amount': 'Ar'
 }

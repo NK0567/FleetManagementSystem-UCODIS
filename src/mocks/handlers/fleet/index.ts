@@ -29,6 +29,9 @@ import { registerDeviationTypesHandlers } from './deviationTypes'
 import { registerRouteDeviationsHandlers } from './routeDeviations'
 import { registerAlertRulesHandlers } from './alertRules'
 import { registerAlertsHandlers } from './alerts'
+import { registerFuelConsumptionHandlers } from './fuelConsumption'
+import { registerFuelGapCausesHandlers } from './fuelGapCauses'
+import { registerFuelRefillsHandlers } from './fuelRefills'
 
 export function registerFleetHandlers(router: MockRouter, db: MockDatabase): void {
   registerFleetSettingsHandlers(router, db)
@@ -60,4 +63,7 @@ export function registerFleetHandlers(router: MockRouter, db: MockDatabase): voi
   registerRouteDeviationsHandlers(router, db)
   registerAlertRulesHandlers(router, db)
   registerAlertsHandlers(router, db)
+  registerFuelConsumptionHandlers(router, db)
+  registerFuelGapCausesHandlers(router, db)
+  registerFuelRefillsHandlers(router, db)
 }

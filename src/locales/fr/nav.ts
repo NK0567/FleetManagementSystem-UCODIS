@@ -43,5 +43,8 @@ export default {
   'nav.routeDeviations': "Écarts d'itinéraire",
   'nav.deviationTypes': "Types d'écarts",
   'nav.alerts': 'Alertes',
-  'nav.alertRules': "Règles d'alerte"
+  'nav.alertRules': "Règles d'alerte",
+  'nav.fuelRefills': 'Pleins de carburant',
+  'nav.fuelConsumption': 'Consommation carburant',
+  'nav.fuelGapCauses': "Causes d'écart carburant"
 }

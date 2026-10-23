@@ -234,6 +234,41 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/fleet/fuel-consumption/': RouteRecordInfo<
+      '/fleet/fuel-consumption/',
+      '/fleet/fuel-consumption',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/fuel-gap-causes/': RouteRecordInfo<
+      '/fleet/fuel-gap-causes/',
+      '/fleet/fuel-gap-causes',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/fuel-gap-causes/[id]': RouteRecordInfo<
+      '/fleet/fuel-gap-causes/[id]',
+      '/fleet/fuel-gap-causes/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/fuel-refills/': RouteRecordInfo<
+      '/fleet/fuel-refills/',
+      '/fleet/fuel-refills',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/fuel-refills/[id]': RouteRecordInfo<
+      '/fleet/fuel-refills/[id]',
+      '/fleet/fuel-refills/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/fleet/infraction-types/': RouteRecordInfo<
       '/fleet/infraction-types/',
       '/fleet/infraction-types',
@@ -821,6 +856,46 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | never
+    }
+    'src/pages/fleet/fuel-consumption/index.vue': {
+      routes:
+        | '/fleet/fuel-consumption/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/fuel-gap-causes/index.vue': {
+      routes:
+        | '/fleet/fuel-gap-causes/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/fuel-gap-causes/[id].vue': {
+      routes:
+        | '/fleet/fuel-gap-causes/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/fuel-refills/index.vue': {
+      routes:
+        | '/fleet/fuel-refills/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/fuel-refills/[id].vue': {
+      routes:
+        | '/fleet/fuel-refills/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
     }
     'src/pages/fleet/infraction-types/index.vue': {
       routes:

@@ -45,6 +45,9 @@ import fleetDeviationTypes from './fleetDeviationTypes'
 import fleetRouteDeviations from './fleetRouteDeviations'
 import fleetAlertRules from './fleetAlertRules'
 import fleetAlerts from './fleetAlerts'
+import fleetFuelGapCauses from './fleetFuelGapCauses'
+import fleetFuelRefills from './fleetFuelRefills'
+import fleetFuelConsumption from './fleetFuelConsumption'
 export default {
   ...common,
   ...auth,
@@ -91,5 +94,8 @@ export default {
   ...fleetDeviationTypes,
   ...fleetRouteDeviations,
   ...fleetAlertRules,
-  ...fleetAlerts
+  ...fleetAlerts,
+  ...fleetFuelGapCauses,
+  ...fleetFuelRefills,
+  ...fleetFuelConsumption
 }

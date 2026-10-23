@@ -595,5 +595,93 @@ export const FLEET_MESSAGES = {
   alertHandled: {
     fr: 'Cette alerte est déjà traitée.',
     en: 'This alert is already handled.'
+  },
+  refillDuplicate: {
+    fr: 'Ce plein est déjà enregistré ({no}).',
+    en: 'This refill is already recorded ({no}).'
+  },
+  refillQualified: {
+    fr: 'Ce plein est qualifié : il ne se modifie plus.',
+    en: 'This refill is qualified: it can no longer change.'
+  },
+  refillNotAnomaly: {
+    fr: 'Seul un plein en anomalie se qualifie.',
+    en: 'Only a refill with an anomaly can be qualified.'
+  },
+  fuelCauseInactive: {
+    fr: "Cette cause n'est plus active.",
+    en: 'This cause is no longer active.'
+  },
+  refillCheckTank: {
+    fr: '{liters} L pour un réservoir de {capacity} L',
+    en: '{liters} L for a {capacity} L tank'
+  },
+  refillCheckTankUnknown: {
+    fr: 'Capacité du réservoir inconnue',
+    en: 'Tank capacity unknown'
+  },
+  refillCheckOdometer: {
+    fr: '{odometer} km, après {previous} km au plein précédent',
+    en: '{odometer} km, after {previous} km at the previous refill'
+  },
+  refillCheckOdometerFirst: {
+    fr: '{odometer} km, premier plein connu',
+    en: '{odometer} km, first known refill'
+  },
+  refillCheckDriverOk: {
+    fr: '{name}, affecté au véhicule ce jour-là',
+    en: '{name}, assigned to the vehicle that day'
+  },
+  refillCheckDriverOther: {
+    fr: "{name} n'était pas affecté au véhicule ce jour-là",
+    en: '{name} was not assigned to the vehicle that day'
+  },
+  refillCheckDriverNone: {
+    fr: 'Conducteur non renseigné',
+    en: 'Driver not given'
+  },
+  refillCheckHours: {
+    fr: 'Plein à {time}, plage autorisée de {start} h à {end} h',
+    en: 'Refill at {time}, allowed from {start}:00 to {end}:00'
+  },
+  refillCheckGps: {
+    fr: 'Véhicule à {gap} km de la station (au plus {max} km)',
+    en: 'Vehicle {gap} km from the station (at most {max} km)'
+  },
+  refillCheckGpsNone: {
+    fr: 'Position non relevée',
+    en: 'Position not recorded'
+  },
+  gapNotToQualify: {
+    fr: "Cet écart n'attend pas de qualification.",
+    en: 'This gap awaits no qualification.'
+  },
+  gapNotQualified: {
+    fr: "Qualifiez d'abord l'écart.",
+    en: 'Qualify the gap first.'
+  },
+  gapNotProposed: {
+    fr: "Aucune retenue n'attend de décision.",
+    en: 'No deduction awaits a decision.'
+  },
+  gapOwnProposal: {
+    fr: 'Vous avez proposé cette retenue : une autre personne doit la décider.',
+    en: 'You proposed this deduction: someone else must decide it.'
+  },
+  gapDeductionCause: {
+    fr: "La cause retenue n'est pas imputable au conducteur.",
+    en: 'The cause is not chargeable to the driver.'
+  },
+  gapDeductionAboveExcess: {
+    fr: 'La retenue dépasse le surcoût de la période.',
+    en: 'The deduction exceeds the extra cost of the period.'
+  },
+  gapDeductionAboveCap: {
+    fr: 'La retenue dépasse le plafond réglé.',
+    en: 'The deduction exceeds the set cap.'
+  },
+  gapClosed: {
+    fr: 'Cet écart est clos.',
+    en: 'This gap is closed.'
   }
 } satisfies Record<string, LocalizedText>

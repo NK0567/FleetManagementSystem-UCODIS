@@ -1,0 +1,39 @@
+export default {
+  'fleet.fuelConsumption.title': 'Consommation plein à plein',
+  'fleet.fuelConsumption.loadingList': 'Calcul des consommations…',
+  'fleet.fuelConsumption.noResults': 'Aucune période de consommation.',
+  'fleet.fuelConsumption.noSearchResults': 'Aucune période ne correspond à « {query} ».',
+  'fleet.fuelConsumption.actionError': "L'action n'a pas pu être effectuée.",
+  'fleet.fuelConsumption.summary':
+    '{liters} L pour {amount} · moyenne {average} L/100 · {co2} kg de CO₂ · pleins en anomalie : {refills} · écarts à qualifier : {gaps}',
+  'fleet.fuelConsumption.search.all': 'Véhicule ou conducteur',
+  'fleet.fuelConsumption.listView.gaps': 'Écarts à traiter',
+  'fleet.fuelConsumption.listView.toDecide': 'Retenues à décider',
+  'fleet.fuelConsumption.listView.all': 'Toutes les périodes',
+  'fleet.fuelConsumption.col.vehiclePlate': 'Véhicule',
+  'fleet.fuelConsumption.col.driverName': 'Conducteur',
+  'fleet.fuelConsumption.col.to': 'Fin de période',
+  'fleet.fuelConsumption.col.km': 'Km',
+  'fleet.fuelConsumption.col.liters': 'Litres',
+  'fleet.fuelConsumption.col.l100': 'L/100',
+  'fleet.fuelConsumption.col.referenceL100': 'Référence',
+  'fleet.fuelConsumption.col.gapPct': 'Écart %',
+  'fleet.fuelConsumption.col.excessCost': 'Surcoût',
+  'fleet.fuelConsumption.col.status': 'Statut',
+  'fleet.fuelConsumption.periodDetail':
+    '{km} km, {liters} L : {l100} L/100 pour une référence de {reference} ({source})',
+  'fleet.fuelConsumption.excess': 'Surcoût : {amount}',
+  'fleet.fuelConsumption.proposed': 'Retenue de {amount} proposée par {user}',
+  'fleet.fuelConsumption.ownProposal':
+    'Vous avez proposé cette retenue : une autre personne doit la décider.',
+  'fleet.fuelConsumption.action.qualify': "Qualifier l'écart",
+  'fleet.fuelConsumption.action.propose': 'Proposer une retenue',
+  'fleet.fuelConsumption.action.approve': 'Valider la retenue',
+  'fleet.fuelConsumption.action.reject': 'Refuser la retenue',
+  'fleet.fuelConsumption.action.dismiss': 'Classer',
+  'fleet.fuelConsumption.form.cause': 'Cause',
+  'fleet.fuelConsumption.form.comment': 'Commentaire',
+  'fleet.fuelConsumption.form.amount': 'Montant de la retenue',
+  'fleet.fuelConsumption.form.amountHint':
+    'Au plus le surcoût de la période ({amount}) et le plafond réglé.'
+}

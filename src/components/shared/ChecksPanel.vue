@@ -1,9 +1,19 @@
 <script lang="ts" setup>
 import { CircleCheck, CircleX } from '@lucide/vue'
 import { useOptionsStore } from '@/stores/optionsStore'
-import type { DepartureCheck } from '../domain/departure'
 
-defineProps<{ checks: DepartureCheck[] }>()
+export interface CheckLine {
+  code: string
+  ok: boolean
+  /** What was found, as the server words it. */
+  detail: string
+}
+
+defineProps<{
+  checks: CheckLine[]
+  /** Option set naming each check code. */
+  optionsKey: string
+}>()
 
 const optionsStore = useOptionsStore()
 </script>
@@ -15,7 +25,7 @@ const optionsStore = useOptionsStore()
       <CircleX v-else class="w-5 h-5 shrink-0 text-destructive" />
       <div class="min-w-0">
         <p class="font-medium text-card-foreground">
-          {{ optionsStore.getOptionLabel('departureCheck', check.code) }}
+          {{ optionsStore.getOptionLabel(optionsKey, check.code) }}
         </p>
         <p class="text-muted-foreground">{{ check.detail }}</p>
       </div>
