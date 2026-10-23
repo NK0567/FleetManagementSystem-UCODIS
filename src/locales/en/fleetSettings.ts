@@ -42,5 +42,6 @@ export default {
   'fleet.settings.issue.nightWindowEmpty': 'The end must differ from the start.',
   'fleet.settings.section.safety': 'Safety',
   'fleet.settings.section.safety.hint': 'Delays applied to vehicle checks.',
-  'fleet.settings.field.safety.recheckDelayDays': 'Re-inspection delay'
+  'fleet.settings.field.safety.recheckDelayDays': 'Re-inspection delay',
+  'fleet.settings.field.safety.justificationDelayH': 'Time to justify a deviation'
 }

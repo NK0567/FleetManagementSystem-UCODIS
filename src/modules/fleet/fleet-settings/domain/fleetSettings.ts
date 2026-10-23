@@ -26,6 +26,8 @@ export interface DocumentSettings {
 export interface SafetySettings {
   /** Days given to re-inspect a vehicle after a non-conforming inspection. */
   recheckDelayDays: number
+  /** Hours the driver has to explain a route deviation. */
+  justificationDelayH: number
 }
 
 export interface FleetSettings {
@@ -61,7 +63,10 @@ export const FLEET_SETTING_FIELDS: Record<FleetSettingsSection, readonly Setting
   ],
   geofencing: [{ key: 'defaultSiteRadiusM', kind: 'number', unit: 'm', min: 200, max: 20_000 }],
   documents: [{ key: 'defaultNoticeDays', kind: 'number', unit: 'days', min: 1, max: 180 }],
-  safety: [{ key: 'recheckDelayDays', kind: 'number', unit: 'days', min: 1, max: 60 }]
+  safety: [
+    { key: 'recheckDelayDays', kind: 'number', unit: 'days', min: 1, max: 60 },
+    { key: 'justificationDelayH', kind: 'number', unit: 'h', min: 1, max: 168 }
+  ]
 }
 
 export const DEFAULT_FLEET_SETTINGS: FleetSettings = {
@@ -79,7 +84,7 @@ export const DEFAULT_FLEET_SETTINGS: FleetSettings = {
   },
   geofencing: { defaultSiteRadiusM: 5_000 },
   documents: { defaultNoticeDays: 30 },
-  safety: { recheckDelayDays: 15 }
+  safety: { recheckDelayDays: 15, justificationDelayH: 48 }
 }
 
 export type SettingIssue =

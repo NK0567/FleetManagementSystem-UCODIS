@@ -18,6 +18,8 @@ export function registerFleetModule(): void {
     INFRACTION: { to: '/fleet/infractions', menuKey: 'infraction' },
     TRAINING: { to: '/fleet/trainings', menuKey: 'training' },
     INFRACTIONTYPE: { to: '/fleet/infraction-types', menuKey: 'infractionType' },
+    ROUTEDEVIATION: { to: '/fleet/route-deviations', menuKey: 'routeDeviation' },
+    DEVIATIONTYPE: { to: '/fleet/deviation-types', menuKey: 'deviationType' },
     ROADCHECKLIST: { to: '/fleet/road-checklists', menuKey: 'roadChecklist' },
     DEPARTUREAUTHORIZATION: {
       to: '/fleet/departure-authorizations',
@@ -45,6 +47,7 @@ export function registerFleetModule(): void {
         to: '/fleet/departure-authorizations',
         menuKey: 'departureAuthorization'
       },
+      { labelKey: 'nav.routeDeviations', to: '/fleet/route-deviations', menuKey: 'routeDeviation' },
       { labelKey: 'nav.vehicles', to: '/fleet/vehicles', menuKey: 'vehicle' },
       { labelKey: 'nav.couplings', to: '/fleet/couplings', menuKey: 'coupling' },
       {
@@ -83,6 +86,7 @@ export function registerFleetModule(): void {
       { labelKey: 'nav.siteTypes', to: '/fleet/site-types', menuKey: 'siteType' },
       { labelKey: 'nav.documentTypes', to: '/fleet/document-types', menuKey: 'documentType' },
       { labelKey: 'nav.checkPoints', to: '/fleet/check-points', menuKey: 'checkPoint' },
+      { labelKey: 'nav.deviationTypes', to: '/fleet/deviation-types', menuKey: 'deviationType' },
       {
         labelKey: 'nav.infractionTypes',
         to: '/fleet/infraction-types',

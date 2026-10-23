@@ -212,7 +212,12 @@ const nextStopName = computed(() => {
         v-if="can('close')"
         type="button"
         class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
-        :disabled="acting"
+        :disabled="acting || !!item?.deviationsToQualify"
+        :title="
+          item?.deviationsToQualify
+            ? t('fleet.trips.deviationsToQualify', { count: item.deviationsToQualify })
+            : undefined
+        "
         @click="closeTrip"
       >
         <Lock class="w-5 h-5 text-primary" /> {{ t('fleet.trips.action.close') }}

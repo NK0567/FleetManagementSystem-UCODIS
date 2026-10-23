@@ -551,5 +551,41 @@ export const FLEET_MESSAGES = {
   tripNeedsAuthorization: {
     fr: "Le trajet n'a pas d'autorisation de départ accordée.",
     en: 'The trip has no granted departure authorization.'
+  },
+  deviationTypeInUse: {
+    fr: 'Des écarts sont de ce type : il ne peut pas être supprimé. Désactivez-le plutôt.',
+    en: 'Deviations have this type: it cannot be deleted. Deactivate it instead.'
+  },
+  deviationTypeInactive: {
+    fr: "Ce type d'écart est désactivé.",
+    en: 'This deviation type is inactive.'
+  },
+  deviationTripOver: {
+    fr: "Ce trajet est clôturé ou annulé : il ne reçoit plus d'écart.",
+    en: 'This trip is closed or cancelled: it takes no more deviations.'
+  },
+  deviationQualified: {
+    fr: 'Cet écart est déjà qualifié : il ne se modifie plus.',
+    en: 'This deviation is already qualified: it can no longer change.'
+  },
+  deviationJustified: {
+    fr: 'Une justification est déjà enregistrée pour cet écart.',
+    en: 'A justification is already recorded for this deviation.'
+  },
+  deviationJustificationLate: {
+    fr: 'Le délai de justification de cet écart est dépassé.',
+    en: 'The time to justify this deviation is over.'
+  },
+  deviationNatureRequired: {
+    fr: "Choisissez la nature de l'écart.",
+    en: 'Choose the nature of the deviation.'
+  },
+  deviationDecisionNotAllowed: {
+    fr: 'Un écart autorisé ou subi ne peut être que classé.',
+    en: 'An authorized or endured deviation can only be dismissed.'
+  },
+  tripDeviationsToQualify: {
+    fr: 'Écarts encore à qualifier sur ce trajet : {count}.',
+    en: 'Deviations still to qualify on this trip: {count}.'
   }
 } satisfies Record<string, LocalizedText>

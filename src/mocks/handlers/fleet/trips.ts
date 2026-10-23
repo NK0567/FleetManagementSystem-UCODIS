@@ -27,6 +27,7 @@ import { employeeNames, vehiclePlates } from './links'
 import { FLEET_MESSAGES } from './messages'
 import { plannedArrival, tripWindow } from './tripIndex'
 import { tripAuthorization } from './departureAuthorizations'
+import { deviationsToQualify } from './routeDeviations'
 import { disabledFeatures } from '../../auth/permissions'
 
 const BASE_PATH = '/fleet/trips'
@@ -93,6 +94,7 @@ export function tripsApi(db: MockDatabase): TripApi[] {
       stops,
       stopCount: stops.length,
       passedStopCount: stops.filter((stop) => stop.passedAt !== null).length,
+      deviationsToQualify: deviationsToQualify(db, trip.no),
       authorizationRequired: required,
       authorizationNo: authorization?.no ?? null,
       authorizationDecision: authorization?.decision ?? null,
@@ -328,6 +330,8 @@ export function registerTripsHandlers(router: MockRouter, db: MockDatabase): voi
 
   action('close', (trip, request) => {
     assertAllowed(trip, 'close')
+    const pending = deviationsToQualify(db, trip.no)
+    if (pending) throw conflict(FLEET_MESSAGES.tripDeviationsToQualify, { count: pending })
     db.trips.update(trip.no, {
       status: 'closed',
       closedAt: nowIsoDateTime(),

@@ -59,6 +59,24 @@ describe('createCollection', () => {
     ])
   })
 
+  it('moves the dates of a nested object, and leaves a missing one alone', () => {
+    interface DecisionRow extends MockRow {
+      decision: { by: string; at: string } | null
+    }
+    const decisions: CollectionDefinition<DecisionRow> = {
+      name: 'test-decisions',
+      seed: () => [
+        { no: 'D-1', decision: { by: 'FLT001', at: '2026-09-04T09:00:00' }, ...audit },
+        { no: 'D-2', decision: null, ...audit }
+      ],
+      dateFields: ['decision.at']
+    }
+
+    const collection = createCollection(decisions, { seedVersion: 1, dayOffset: 3 })
+    expect(collection.find('D-1')?.decision).toEqual({ by: 'FLT001', at: '2026-09-07T09:00:00' })
+    expect(collection.find('D-2')?.decision).toBeNull()
+  })
+
   it('keeps user changes across reloads', () => {
     createCollection(definition, { seedVersion: 1, dayOffset: 0 }).update('LR-0001', { label: 'B' })
 

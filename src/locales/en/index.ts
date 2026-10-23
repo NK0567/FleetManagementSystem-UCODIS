@@ -41,6 +41,8 @@ import fleetCheckPoints from './fleetCheckPoints'
 import fleetInspections from './fleetInspections'
 import fleetRoadChecklists from './fleetRoadChecklists'
 import fleetDepartureAuthorizations from './fleetDepartureAuthorizations'
+import fleetDeviationTypes from './fleetDeviationTypes'
+import fleetRouteDeviations from './fleetRouteDeviations'
 export default {
   ...common,
   ...auth,
@@ -83,5 +85,7 @@ export default {
   ...fleetCheckPoints,
   ...fleetInspections,
   ...fleetRoadChecklists,
-  ...fleetDepartureAuthorizations
+  ...fleetDepartureAuthorizations,
+  ...fleetDeviationTypes,
+  ...fleetRouteDeviations
 }

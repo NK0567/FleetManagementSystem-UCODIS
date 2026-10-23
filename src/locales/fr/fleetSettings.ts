@@ -43,5 +43,6 @@ export default {
   'fleet.settings.issue.nightWindowEmpty': "L'heure de fin doit différer de l'heure de début.",
   'fleet.settings.section.safety': 'Sécurité',
   'fleet.settings.section.safety.hint': 'Délais appliqués aux contrôles des véhicules.',
-  'fleet.settings.field.safety.recheckDelayDays': 'Délai de contre-visite'
+  'fleet.settings.field.safety.recheckDelayDays': 'Délai de contre-visite',
+  'fleet.settings.field.safety.justificationDelayH': "Délai de justification d'un écart"
 }

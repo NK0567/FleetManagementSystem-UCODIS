@@ -115,6 +115,20 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/fleet/deviation-types/': RouteRecordInfo<
+      '/fleet/deviation-types/',
+      '/fleet/deviation-types',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/deviation-types/[id]': RouteRecordInfo<
+      '/fleet/deviation-types/[id]',
+      '/fleet/deviation-types/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/fleet/document-types/': RouteRecordInfo<
       '/fleet/document-types/',
       '/fleet/document-types',
@@ -279,6 +293,20 @@ declare module 'vue-router/auto-routes' {
     '/fleet/road-checklists/[id]': RouteRecordInfo<
       '/fleet/road-checklists/[id]',
       '/fleet/road-checklists/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/route-deviations/': RouteRecordInfo<
+      '/fleet/route-deviations/',
+      '/fleet/route-deviations',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/route-deviations/[id]': RouteRecordInfo<
+      '/fleet/route-deviations/[id]',
+      '/fleet/route-deviations/:id',
       { id: ParamValue<true> },
       { id: ParamValue<false> },
       | never
@@ -637,6 +665,22 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | 'id'
     }
+    'src/pages/fleet/deviation-types/index.vue': {
+      routes:
+        | '/fleet/deviation-types/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/deviation-types/[id].vue': {
+      routes:
+        | '/fleet/deviation-types/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
     'src/pages/fleet/document-types/index.vue': {
       routes:
         | '/fleet/document-types/'
@@ -824,6 +868,22 @@ declare module 'vue-router/auto-routes' {
     'src/pages/fleet/road-checklists/[id].vue': {
       routes:
         | '/fleet/road-checklists/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/route-deviations/index.vue': {
+      routes:
+        | '/fleet/route-deviations/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/route-deviations/[id].vue': {
+      routes:
+        | '/fleet/route-deviations/[id]'
       views:
         | never
       pathParamNames:

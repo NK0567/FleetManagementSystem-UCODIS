@@ -227,6 +227,34 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
     weeklyRest: { fr: 'Repos hebdomadaire', en: 'Weekly rest' },
     driverChecks: { fr: 'Contrôles du conducteur', en: 'Driver checks' }
   },
+  deviationCategory: {
+    route: { fr: 'Itinéraire', en: 'Route' },
+    stop: { fr: 'Arrêt', en: 'Stop' },
+    time: { fr: 'Temps de conduite', en: 'Driving time' }
+  },
+  deviationSeverity: {
+    minor: { fr: 'Mineur', en: 'Minor' },
+    major: { fr: 'Majeur', en: 'Major' },
+    critical: { fr: 'Critique', en: 'Critical' }
+  },
+  deviationUnit: {
+    min: { fr: 'min', en: 'min' },
+    h: { fr: 'h', en: 'h' },
+    m: { fr: 'm', en: 'm' },
+    km: { fr: 'km', en: 'km' },
+    percent: { fr: '%', en: '%' }
+  },
+  deviationNature: {
+    to_qualify: { fr: 'À qualifier', en: 'To qualify' },
+    authorized: { fr: 'Autorisé', en: 'Authorized' },
+    endured: { fr: 'Subi', en: 'Endured' },
+    unjustified: { fr: 'Non justifié', en: 'Unjustified' }
+  },
+  deviationDecision: {
+    dismissed: { fr: 'Classé', en: 'Dismissed' },
+    warning: { fr: 'Avertissement', en: 'Warning' },
+    sanction: { fr: 'Sanction', en: 'Sanction' }
+  },
   complianceGapReason: {
     missing: { fr: 'Manquant', en: 'Missing' },
     expired: { fr: 'Expiré', en: 'Expired' },

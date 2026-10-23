@@ -70,5 +70,6 @@ export default {
   'fleet.trips.dialog.cancelReason': "Motif de l'annulation",
   'fleet.trips.needsAuthorization': "Le départ doit d'abord être accordé.",
   'fleet.trips.form.authorization': 'Autorisation de départ',
-  'fleet.trips.form.noAuthorization': "Aucune demande pour l'instant."
+  'fleet.trips.form.noAuthorization': "Aucune demande pour l'instant.",
+  'fleet.trips.deviationsToQualify': 'Écarts encore à qualifier sur ce trajet : {count}.'
 }

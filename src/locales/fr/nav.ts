@@ -39,5 +39,7 @@ export default {
   'nav.roadChecklists': 'Check-lists de route',
   'nav.inspections': 'Visites techniques',
   'nav.checkPoints': 'Points de contrôle',
-  'nav.departureAuthorizations': 'Autorisations de départ'
+  'nav.departureAuthorizations': 'Autorisations de départ',
+  'nav.routeDeviations': "Écarts d'itinéraire",
+  'nav.deviationTypes': "Types d'écarts"
 }

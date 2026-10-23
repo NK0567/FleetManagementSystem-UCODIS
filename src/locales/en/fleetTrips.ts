@@ -70,5 +70,6 @@ export default {
   'fleet.trips.dialog.cancelReason': 'Reason for cancelling',
   'fleet.trips.needsAuthorization': 'The departure must be granted first.',
   'fleet.trips.form.authorization': 'Departure authorization',
-  'fleet.trips.form.noAuthorization': 'No request yet.'
+  'fleet.trips.form.noAuthorization': 'No request yet.',
+  'fleet.trips.deviationsToQualify': 'Deviations still to qualify on this trip: {count}.'
 }

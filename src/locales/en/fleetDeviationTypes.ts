@@ -1,0 +1,40 @@
+export default {
+  'fleet.deviationTypes.title': 'Deviation types',
+  'fleet.deviationTypes.card': 'Deviation type card',
+  'fleet.deviationTypes.new': 'New deviation type',
+  'fleet.deviationTypes.loadingList': 'Loading deviation types…',
+  'fleet.deviationTypes.noResults': 'No deviation type.',
+  'fleet.deviationTypes.noSearchResults': 'No type matches "{query}".',
+  'fleet.deviationTypes.saveSuccess': 'Deviation type saved.',
+  'fleet.deviationTypes.saveError': 'The deviation type could not be saved.',
+  'fleet.deviationTypes.createError': 'The deviation type could not be created.',
+  'fleet.deviationTypes.deleteError': 'The deviation type could not be deleted.',
+  'fleet.deviationTypes.confirmDelete': 'Delete the deviation type',
+  'fleet.deviationTypes.confirmDeleteMsg': 'The "{name}" type will be permanently deleted.',
+
+  'fleet.deviationTypes.search.all': 'Code or name',
+
+  'fleet.deviationTypes.col.no': 'Code',
+  'fleet.deviationTypes.col.name': 'Name',
+  'fleet.deviationTypes.col.category': 'Category',
+  'fleet.deviationTypes.col.severity': 'Severity',
+  'fleet.deviationTypes.col.threshold': 'Threshold',
+  'fleet.deviationTypes.col.unit': 'Unit',
+  'fleet.deviationTypes.col.autoDetected': 'Detected by telematics',
+  'fleet.deviationTypes.col.active': 'Active',
+  'fleet.deviationTypes.col.deviationCount': 'Deviations',
+
+  'fleet.deviationTypes.form.general': 'General',
+  'fleet.deviationTypes.form.no': 'Code',
+  'fleet.deviationTypes.form.name': 'Name',
+  'fleet.deviationTypes.form.category': 'Category',
+  'fleet.deviationTypes.form.severity': 'Severity',
+  'fleet.deviationTypes.form.threshold': 'Threshold',
+  'fleet.deviationTypes.form.thresholdHint': 'Beyond this threshold, the deviation is recorded.',
+  'fleet.deviationTypes.form.unit': 'Unit',
+  'fleet.deviationTypes.form.autoDetected': 'Detected by telematics',
+  'fleet.deviationTypes.form.autoDetectedHint':
+    'On-board units record this deviation without any entry.',
+  'fleet.deviationTypes.form.active': 'Active',
+  'fleet.deviationTypes.form.deviationCount': 'Deviations of this type'
+}

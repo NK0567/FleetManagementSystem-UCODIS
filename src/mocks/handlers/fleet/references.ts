@@ -93,6 +93,9 @@ export function fleetReferenceData(db: MockDatabase): Record<string, ReferenceIt
         code: trip.no,
         description: `${trip.no} · ${trip.plannedDeparture.slice(0, 16).replace('T', ' ')}`
       })),
+    deviationTypes: db.deviationTypes
+      .all()
+      .map((type) => ({ code: type.no, description: type.name, active: type.active })),
     infractionTypes: db.infractionTypes
       .all()
       .map((type) => ({ code: type.no, description: type.name, active: type.active })),
