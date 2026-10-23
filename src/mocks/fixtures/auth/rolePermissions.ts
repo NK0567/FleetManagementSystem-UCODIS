@@ -36,6 +36,7 @@ const FLEET_REFERENCE = [
   'DOCUMENTTYPE',
   'INFRACTIONTYPE',
   'CHECKPOINT',
+  'ALERTRULE',
   'TELEMATICSEVENTTYPE',
   'DEVIATIONTYPE',
   'ROUTETEMPLATE',
@@ -124,7 +125,8 @@ export const ROLE_PERMISSIONS: Record<UserProfileCode, Record<string, Grant>> = 
     ...backOffice,
     ...grant(['VEHICLETYPE', 'EQUIPMENTTYPE', 'COUPLING', 'DOCUMENT', 'FLEETSTATUS'], READ),
     ...grant(['ROADCHECKLIST', 'INSPECTION'], allRecords(['read', 'insert', 'update'])),
-    CHECKPOINT: READ
+    CHECKPOINT: READ,
+    ALERT: allRecords(['read', 'update'])
   },
   CUSTOMER_SERVICE: backOffice,
   SALES: backOffice,

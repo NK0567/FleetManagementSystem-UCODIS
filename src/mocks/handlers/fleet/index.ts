@@ -27,6 +27,8 @@ import { registerRoadChecklistsHandlers } from './roadChecklists'
 import { registerDepartureAuthorizationsHandlers } from './departureAuthorizations'
 import { registerDeviationTypesHandlers } from './deviationTypes'
 import { registerRouteDeviationsHandlers } from './routeDeviations'
+import { registerAlertRulesHandlers } from './alertRules'
+import { registerAlertsHandlers } from './alerts'
 
 export function registerFleetHandlers(router: MockRouter, db: MockDatabase): void {
   registerFleetSettingsHandlers(router, db)
@@ -56,4 +58,6 @@ export function registerFleetHandlers(router: MockRouter, db: MockDatabase): voi
   registerDepartureAuthorizationsHandlers(router, db)
   registerDeviationTypesHandlers(router, db)
   registerRouteDeviationsHandlers(router, db)
+  registerAlertRulesHandlers(router, db)
+  registerAlertsHandlers(router, db)
 }

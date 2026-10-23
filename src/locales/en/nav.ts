@@ -41,5 +41,7 @@ export default {
   'nav.checkPoints': 'Check points',
   'nav.departureAuthorizations': 'Departure authorizations',
   'nav.routeDeviations': 'Route deviations',
-  'nav.deviationTypes': 'Deviation types'
+  'nav.deviationTypes': 'Deviation types',
+  'nav.alerts': 'Alerts',
+  'nav.alertRules': 'Alert rules'
 }

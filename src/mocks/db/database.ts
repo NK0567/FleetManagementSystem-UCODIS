@@ -39,11 +39,13 @@ import { roadChecklistsCollection } from '../fixtures/fleet/roadChecklists'
 import { departureAuthorizationsCollection } from '../fixtures/fleet/departureAuthorizations'
 import { deviationTypesCollection } from '../fixtures/fleet/deviationTypes'
 import { routeDeviationsCollection } from '../fixtures/fleet/routeDeviations'
+import { alertRulesCollection } from '../fixtures/fleet/alertRules'
+import { alertHandlingsCollection } from '../fixtures/fleet/alertHandlings'
 import { createCollection, type CollectionContext } from './collection'
 import { clearStoredCollections } from './storage'
 
 /** Bump when fixtures change shape: every collection is then reseeded. */
-export const MOCK_SEED_VERSION = 12
+export const MOCK_SEED_VERSION = 13
 
 export function createDatabase(
   context: CollectionContext = {
@@ -91,7 +93,9 @@ export function createDatabase(
     roadChecklists: createCollection(roadChecklistsCollection, context),
     departureAuthorizations: createCollection(departureAuthorizationsCollection, context),
     deviationTypes: createCollection(deviationTypesCollection, context),
-    routeDeviations: createCollection(routeDeviationsCollection, context)
+    routeDeviations: createCollection(routeDeviationsCollection, context),
+    alertRules: createCollection(alertRulesCollection, context),
+    alertHandlings: createCollection(alertHandlingsCollection, context)
   }
 
   return {

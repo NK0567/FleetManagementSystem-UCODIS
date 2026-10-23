@@ -45,6 +45,27 @@ declare module 'vue-router/auto-routes' {
       { path: ParamValue<false> },
       | never
     >,
+    '/fleet/alert-rules/': RouteRecordInfo<
+      '/fleet/alert-rules/',
+      '/fleet/alert-rules',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/alert-rules/[id]': RouteRecordInfo<
+      '/fleet/alert-rules/[id]',
+      '/fleet/alert-rules/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/alerts/': RouteRecordInfo<
+      '/fleet/alerts/',
+      '/fleet/alerts',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/fleet/check-points/': RouteRecordInfo<
       '/fleet/check-points/',
       '/fleet/check-points',
@@ -584,6 +605,30 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | 'path'
+    }
+    'src/pages/fleet/alert-rules/index.vue': {
+      routes:
+        | '/fleet/alert-rules/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/alert-rules/[id].vue': {
+      routes:
+        | '/fleet/alert-rules/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/alerts/index.vue': {
+      routes:
+        | '/fleet/alerts/'
+      views:
+        | never
+      pathParamNames:
+        | never
     }
     'src/pages/fleet/check-points/index.vue': {
       routes:

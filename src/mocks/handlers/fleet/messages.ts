@@ -587,5 +587,13 @@ export const FLEET_MESSAGES = {
   tripDeviationsToQualify: {
     fr: 'Écarts encore à qualifier sur ce trajet : {count}.',
     en: 'Deviations still to qualify on this trip: {count}.'
+  },
+  alertAlreadyTaken: {
+    fr: 'Cette alerte est déjà prise en charge.',
+    en: 'This alert is already taken in charge.'
+  },
+  alertHandled: {
+    fr: 'Cette alerte est déjà traitée.',
+    en: 'This alert is already handled.'
   }
 } satisfies Record<string, LocalizedText>

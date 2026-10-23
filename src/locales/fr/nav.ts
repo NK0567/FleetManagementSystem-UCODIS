@@ -41,5 +41,7 @@ export default {
   'nav.checkPoints': 'Points de contrôle',
   'nav.departureAuthorizations': 'Autorisations de départ',
   'nav.routeDeviations': "Écarts d'itinéraire",
-  'nav.deviationTypes': "Types d'écarts"
+  'nav.deviationTypes': "Types d'écarts",
+  'nav.alerts': 'Alertes',
+  'nav.alertRules': "Règles d'alerte"
 }

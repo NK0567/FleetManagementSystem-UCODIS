@@ -255,6 +255,34 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
     warning: { fr: 'Avertissement', en: 'Warning' },
     sanction: { fr: 'Sanction', en: 'Sanction' }
   },
+  equipmentDueState: {
+    ok: { fr: 'À jour', en: 'Up to date' },
+    due_soon: { fr: 'Échéance proche', en: 'Due soon' },
+    overdue: { fr: 'Échéance dépassée', en: 'Overdue' }
+  },
+  alertCategory: {
+    document: { fr: 'Documents', en: 'Documents' },
+    companyDocument: { fr: "Documents de l'entreprise", en: 'Company documents' },
+    checklist: { fr: 'Check-list de départ', en: 'Departure checklist' },
+    infraction: { fr: 'Infractions', en: 'Infractions' },
+    training: { fr: 'Formations', en: 'Trainings' },
+    departure: { fr: 'Départs', en: 'Departures' },
+    equipment: { fr: 'Équipements', en: 'Equipment' },
+    inspection: { fr: 'Contre-visites', en: 'Re-inspections' },
+    deviation: { fr: "Écarts d'itinéraire", en: 'Route deviations' },
+    insurance: { fr: 'Assurances', en: 'Insurance' }
+  },
+  alertSeverity: {
+    info: { fr: 'Information', en: 'Information' },
+    warning: { fr: 'Attention', en: 'Warning' },
+    critical: { fr: 'Critique', en: 'Critical' }
+  },
+  alertStatus: {
+    new: { fr: 'Nouvelle', en: 'New' },
+    acknowledged: { fr: 'Prise en charge', en: 'Taken in charge' },
+    handled: { fr: 'Traitée', en: 'Handled' },
+    resolved: { fr: 'Résolue', en: 'Resolved' }
+  },
   complianceGapReason: {
     missing: { fr: 'Manquant', en: 'Missing' },
     expired: { fr: 'Expiré', en: 'Expired' },

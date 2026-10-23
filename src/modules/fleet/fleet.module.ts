@@ -5,6 +5,7 @@ const FLEET_MENU_ORDER = 30
 
 export function registerFleetModule(): void {
   registerFeatureRoutes({
+    ALERT: { to: '/fleet/alerts', menuKey: 'alert' },
     TRIP: { to: '/fleet/trips', menuKey: 'trip' },
     VEHICLE: { to: '/fleet/vehicles', menuKey: 'vehicle' },
     COUPLING: { to: '/fleet/couplings', menuKey: 'coupling' },
@@ -20,6 +21,7 @@ export function registerFleetModule(): void {
     INFRACTIONTYPE: { to: '/fleet/infraction-types', menuKey: 'infractionType' },
     ROUTEDEVIATION: { to: '/fleet/route-deviations', menuKey: 'routeDeviation' },
     DEVIATIONTYPE: { to: '/fleet/deviation-types', menuKey: 'deviationType' },
+    ALERTRULE: { to: '/fleet/alert-rules', menuKey: 'alertRule' },
     ROADCHECKLIST: { to: '/fleet/road-checklists', menuKey: 'roadChecklist' },
     DEPARTUREAUTHORIZATION: {
       to: '/fleet/departure-authorizations',
@@ -41,6 +43,7 @@ export function registerFleetModule(): void {
     labelKey: 'nav.fleet',
     order: FLEET_MENU_ORDER,
     subItems: [
+      { labelKey: 'nav.alerts', to: '/fleet/alerts', menuKey: 'alert' },
       { labelKey: 'nav.trips', to: '/fleet/trips', menuKey: 'trip' },
       {
         labelKey: 'nav.departureAuthorizations',
@@ -87,6 +90,7 @@ export function registerFleetModule(): void {
       { labelKey: 'nav.documentTypes', to: '/fleet/document-types', menuKey: 'documentType' },
       { labelKey: 'nav.checkPoints', to: '/fleet/check-points', menuKey: 'checkPoint' },
       { labelKey: 'nav.deviationTypes', to: '/fleet/deviation-types', menuKey: 'deviationType' },
+      { labelKey: 'nav.alertRules', to: '/fleet/alert-rules', menuKey: 'alertRule' },
       {
         labelKey: 'nav.infractionTypes',
         to: '/fleet/infraction-types',
