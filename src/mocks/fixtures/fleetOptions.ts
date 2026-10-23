@@ -153,6 +153,41 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
     open: { fr: 'Ouvert', en: 'Open' },
     closed: { fr: 'Clos', en: 'Closed' }
   },
+  infractionSeverity: {
+    minor: { fr: 'Mineure', en: 'Minor' },
+    major: { fr: 'Majeure', en: 'Major' },
+    serious: { fr: 'Grave', en: 'Serious' }
+  },
+  infractionSource: {
+    manual: { fr: 'Saisie', en: 'Recorded' },
+    telematics: { fr: 'Télématique', en: 'Telematics' }
+  },
+  infractionStatus: {
+    new: { fr: 'Nouvelle', en: 'New' },
+    in_progress: { fr: 'En traitement', en: 'In progress' },
+    closed: { fr: 'Clôturée', en: 'Closed' }
+  },
+  infractionOutcome: {
+    reminder: { fr: 'Rappel à l’ordre', en: 'Reminder' },
+    warning: { fr: 'Avertissement écrit', en: 'Written warning' },
+    training: { fr: 'Formation ciblée', en: 'Targeted training' },
+    sanction: { fr: 'Sanction disciplinaire', en: 'Disciplinary sanction' },
+    fine_paid: { fr: 'Amende payée par le conducteur', en: 'Fine paid by the driver' },
+    dismissed: { fr: 'Infraction contestée et levée', en: 'Contested and dismissed' }
+  },
+  trainingReason: {
+    score: { fr: 'Score de conduite', en: 'Driving score' },
+    accident: { fr: 'Accident', en: 'Accident' },
+    incident: { fr: 'Incident', en: 'Incident' },
+    infraction: { fr: 'Infraction', en: 'Infraction' },
+    other: { fr: 'Autre', en: 'Other' }
+  },
+  trainingStatus: {
+    to_plan: { fr: 'À planifier', en: 'To plan' },
+    planned: { fr: 'Planifiée', en: 'Planned' },
+    attended: { fr: 'Suivie', en: 'Attended' },
+    cancelled: { fr: 'Annulée', en: 'Cancelled' }
+  },
   complianceGapReason: {
     missing: { fr: 'Manquant', en: 'Missing' },
     expired: { fr: 'Expiré', en: 'Expired' },

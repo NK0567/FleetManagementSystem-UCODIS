@@ -73,5 +73,7 @@ export default {
   'fleet.claims.form.policyHint':
     'Found from the vehicle and the date; fixed once reported to the insurer.',
   'fleet.claims.form.photos': 'Photos',
-  'fleet.claims.form.history': 'History'
+  'fleet.claims.form.history': 'History',
+  'fleet.claims.action.training': 'Send to a training',
+  'fleet.claims.trainingHint': '{driver} will be enrolled in a training linked to this claim.'
 }

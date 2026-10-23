@@ -18,6 +18,9 @@ import { registerDocumentsHandlers } from './documents'
 import { registerCompanyDocumentsHandlers } from './companyDocuments'
 import { registerInsurancePoliciesHandlers } from './insurancePolicies'
 import { registerClaimsHandlers } from './claims'
+import { registerInfractionTypesHandlers } from './infractionTypes'
+import { registerInfractionsHandlers } from './infractions'
+import { registerTrainingsHandlers } from './trainings'
 
 export function registerFleetHandlers(router: MockRouter, db: MockDatabase): void {
   registerFleetSettingsHandlers(router, db)
@@ -38,4 +41,7 @@ export function registerFleetHandlers(router: MockRouter, db: MockDatabase): voi
   registerCompanyDocumentsHandlers(router, db)
   registerInsurancePoliciesHandlers(router, db)
   registerClaimsHandlers(router, db)
+  registerInfractionTypesHandlers(router, db)
+  registerInfractionsHandlers(router, db)
+  registerTrainingsHandlers(router, db)
 }

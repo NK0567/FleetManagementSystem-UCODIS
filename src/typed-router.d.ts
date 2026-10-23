@@ -171,6 +171,34 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/fleet/infraction-types/': RouteRecordInfo<
+      '/fleet/infraction-types/',
+      '/fleet/infraction-types',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/infraction-types/[id]': RouteRecordInfo<
+      '/fleet/infraction-types/[id]',
+      '/fleet/infraction-types/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/infractions/': RouteRecordInfo<
+      '/fleet/infractions/',
+      '/fleet/infractions',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/infractions/[id]': RouteRecordInfo<
+      '/fleet/infractions/[id]',
+      '/fleet/infractions/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/fleet/insurance-policies/': RouteRecordInfo<
       '/fleet/insurance-policies/',
       '/fleet/insurance-policies',
@@ -244,6 +272,20 @@ declare module 'vue-router/auto-routes' {
     '/fleet/sites/[id]': RouteRecordInfo<
       '/fleet/sites/[id]',
       '/fleet/sites/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/trainings/': RouteRecordInfo<
+      '/fleet/trainings/',
+      '/fleet/trainings',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/trainings/[id]': RouteRecordInfo<
+      '/fleet/trainings/[id]',
+      '/fleet/trainings/:id',
       { id: ParamValue<true> },
       { id: ParamValue<false> },
       | never
@@ -603,6 +645,38 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
+    'src/pages/fleet/infraction-types/index.vue': {
+      routes:
+        | '/fleet/infraction-types/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/infraction-types/[id].vue': {
+      routes:
+        | '/fleet/infraction-types/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/infractions/index.vue': {
+      routes:
+        | '/fleet/infractions/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/infractions/[id].vue': {
+      routes:
+        | '/fleet/infractions/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
     'src/pages/fleet/insurance-policies/index.vue': {
       routes:
         | '/fleet/insurance-policies/'
@@ -686,6 +760,22 @@ declare module 'vue-router/auto-routes' {
     'src/pages/fleet/sites/[id].vue': {
       routes:
         | '/fleet/sites/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/trainings/index.vue': {
+      routes:
+        | '/fleet/trainings/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/trainings/[id].vue': {
+      routes:
+        | '/fleet/trainings/[id]'
       views:
         | never
       pathParamNames:

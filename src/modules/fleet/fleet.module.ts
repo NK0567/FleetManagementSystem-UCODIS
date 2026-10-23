@@ -15,6 +15,9 @@ export function registerFleetModule(): void {
     COMPANYDOCUMENT: { to: '/fleet/company-documents', menuKey: 'companyDocument' },
     INSURANCEPOLICY: { to: '/fleet/insurance-policies', menuKey: 'insurancePolicy' },
     CLAIM: { to: '/fleet/claims', menuKey: 'claim' },
+    INFRACTION: { to: '/fleet/infractions', menuKey: 'infraction' },
+    TRAINING: { to: '/fleet/trainings', menuKey: 'training' },
+    INFRACTIONTYPE: { to: '/fleet/infraction-types', menuKey: 'infractionType' },
     SITE: { to: '/fleet/sites', menuKey: 'site' },
     ROUTETEMPLATE: { to: '/fleet/route-templates', menuKey: 'routeTemplate' },
     PROVIDER: { to: '/fleet/providers', menuKey: 'provider' },
@@ -51,6 +54,8 @@ export function registerFleetModule(): void {
         menuKey: 'companyDocument'
       },
       { labelKey: 'nav.claims', to: '/fleet/claims', menuKey: 'claim' },
+      { labelKey: 'nav.infractions', to: '/fleet/infractions', menuKey: 'infraction' },
+      { labelKey: 'nav.trainings', to: '/fleet/trainings', menuKey: 'training' },
       {
         labelKey: 'nav.insurancePolicies',
         to: '/fleet/insurance-policies',
@@ -63,6 +68,11 @@ export function registerFleetModule(): void {
       { labelKey: 'nav.equipmentTypes', to: '/fleet/equipment-types', menuKey: 'equipmentType' },
       { labelKey: 'nav.siteTypes', to: '/fleet/site-types', menuKey: 'siteType' },
       { labelKey: 'nav.documentTypes', to: '/fleet/document-types', menuKey: 'documentType' },
+      {
+        labelKey: 'nav.infractionTypes',
+        to: '/fleet/infraction-types',
+        menuKey: 'infractionType'
+      },
       { labelKey: 'nav.fleetSettings', to: '/fleet/settings', menuKey: 'fleetSettings' }
     ]
   })

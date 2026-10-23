@@ -32,5 +32,8 @@ export default {
   'nav.documentTypes': 'Document types',
   'nav.companyDocuments': 'Company documents',
   'nav.claims': 'Claims',
-  'nav.insurancePolicies': 'Insurance policies'
+  'nav.insurancePolicies': 'Insurance policies',
+  'nav.infractions': 'Infractions',
+  'nav.trainings': 'Trainings',
+  'nav.infractionTypes': 'Infraction types'
 }

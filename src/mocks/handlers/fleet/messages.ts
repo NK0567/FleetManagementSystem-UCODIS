@@ -399,5 +399,61 @@ export const FLEET_MESSAGES = {
   claimBlockInsurance: {
     fr: "l'assureur n'a pas encore rendu sa décision",
     en: 'the insurer has not decided yet'
+  },
+  infractionTypeInUse: {
+    fr: 'Des infractions sont de ce type : il ne peut pas être supprimé. Désactivez-le plutôt.',
+    en: 'Infractions have this type: it cannot be deleted. Deactivate it instead.'
+  },
+  infractionTypeInactive: {
+    fr: "Ce type d'infraction est désactivé.",
+    en: 'This infraction type is inactive.'
+  },
+  infractionInFuture: {
+    fr: "La date de l'infraction ne peut pas être dans le futur.",
+    en: 'The date of the infraction cannot be in the future.'
+  },
+  infractionDuplicate: {
+    fr: 'Cette infraction est déjà enregistrée ({no}).',
+    en: 'This infraction is already recorded ({no}).'
+  },
+  infractionClosed: {
+    fr: 'Cette infraction est clôturée : elle ne se modifie plus.',
+    en: 'This infraction is closed: it can no longer change.'
+  },
+  infractionAlreadyTaken: {
+    fr: 'Cette infraction est déjà prise en charge.',
+    en: 'This infraction is already being handled.'
+  },
+  infractionOutcomeRequired: {
+    fr: 'Choisissez la suite donnée et expliquez-la.',
+    en: 'Choose the outcome and explain it.'
+  },
+  trainingNeedsDriver: {
+    fr: "Indiquez d'abord le conducteur : la formation lui est destinée.",
+    en: 'Give the driver first: the training is meant for them.'
+  },
+  trainingDuplicate: {
+    fr: 'Une formation existe déjà pour {origin} et ce conducteur ({no}).',
+    en: 'A training already exists for {origin} and this driver ({no}).'
+  },
+  trainingNotPending: {
+    fr: 'Cette formation est suivie ou annulée : elle ne se modifie plus.',
+    en: 'This training was attended or cancelled: it can no longer change.'
+  },
+  trainingNotPlanned: {
+    fr: 'Planifiez la formation avant de la marquer comme suivie.',
+    en: 'Plan the training before marking it as attended.'
+  },
+  trainingAttendedInFuture: {
+    fr: 'Une formation ne peut pas être suivie à une date future.',
+    en: 'A training cannot be attended on a future date.'
+  },
+  trainingPlannedInPast: {
+    fr: 'La date prévue ne peut pas être passée.',
+    en: 'The planned date cannot be in the past.'
+  },
+  notOnStaff: {
+    fr: 'Cette personne ne fait plus partie du personnel.',
+    en: 'This person is no longer on staff.'
   }
 } satisfies Record<string, LocalizedText>

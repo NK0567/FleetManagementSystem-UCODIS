@@ -40,6 +40,7 @@ import { sessionUser, type MockRequest } from '../../http/types'
 import { localize } from '../../i18n'
 import { filesMetaOf } from '../files'
 import { FLEET_MESSAGES } from './messages'
+import { createTraining } from './trainings'
 
 type EditableFields = Pick<
   ClaimRow,
@@ -219,6 +220,23 @@ export function registerClaimsHandlers(router: MockRouter, db: MockDatabase): vo
       ...stampModified(request)
     })
     return ok(claimApiOf(db, claim.no))
+  })
+
+  router.post('/fleet/claims/:no/training', { feature: 'CLAIM', action: 'update' }, (request) => {
+    const claim = db.claims.findOrFail(routeParam(request, 'no'))
+    assertOpen(claim)
+    if (!claim.driverNo) throw unprocessable(FLEET_MESSAGES.trainingNeedsDriver)
+    const training = createTraining(
+      db,
+      {
+        employeeNo: claim.driverNo,
+        topic: readString(readBody(request), 'topic', { required: true }),
+        reason: claim.nature,
+        originNo: claim.no
+      },
+      request
+    )
+    return ok(training)
   })
 
   router.post('/fleet/claims/:no/close', { feature: 'CLAIM', action: 'execute' }, (request) => {

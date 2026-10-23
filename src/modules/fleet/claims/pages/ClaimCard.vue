@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { FolderCheck, ShieldCheck } from '@lucide/vue'
+import { useRouter } from 'vue-router'
+import { FolderCheck, GraduationCap, ShieldCheck } from '@lucide/vue'
 import { apiErrorMessage } from '@/core/api/apiError'
 import type { CardOpenMode } from '@/composables/cardOpenMode'
 import { useEntityCard } from '@/composables/useEntityCard'
@@ -26,7 +27,9 @@ const emit = defineEmits<{ close: []; create: [] }>()
 
 const { t } = useI18n()
 const store = useClaimStore()
+const router = useRouter()
 const { canUpdate, canInsert, canExecute } = usePermissions('CLAIM')
+const { canInsert: canTrain } = usePermissions('TRAINING')
 const canEdit = computed(() => canUpdate.value && store.currentItem?.status === 'open')
 const formRef = ref<InstanceType<typeof ClaimForm> | null>(null)
 
@@ -119,6 +122,31 @@ async function confirmInsurance() {
   if (done) showInsurance.value = false
 }
 
+const showTraining = ref(false)
+const topic = ref('')
+
+function openTraining() {
+  topic.value = ''
+  showTraining.value = true
+}
+
+async function confirmTraining() {
+  const no = item.value?.no
+  if (!no || !topic.value.trim()) return
+  working.value = true
+  saveError.value = null
+  try {
+    const training = await claimService.training(no, topic.value)
+    showTraining.value = false
+    void router.push({ path: '/fleet/trainings', query: { no: training.no, cardMode: 'view' } })
+  } catch (error) {
+    showTraining.value = false
+    saveError.value = apiErrorMessage(error, t('fleet.claims.actionError'))
+  } finally {
+    working.value = false
+  }
+}
+
 const showClose = ref(false)
 
 async function confirmClose() {
@@ -173,6 +201,14 @@ async function confirmClose() {
         @click="openInsurance"
       >
         <ShieldCheck class="w-5 h-5 text-primary" /> {{ t('fleet.claims.action.insurance') }}
+      </button>
+      <button
+        v-if="canEdit && canTrain && item?.driverNo"
+        type="button"
+        class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
+        @click="openTraining"
+      >
+        <GraduationCap class="w-5 h-5 text-primary" /> {{ t('fleet.claims.action.training') }}
       </button>
       <button
         v-if="canExecute"
@@ -238,6 +274,26 @@ async function confirmClose() {
       </BaseFormField>
       <BaseFormField :label="t('fleet.claims.form.comment')">
         <FormTextarea v-model="comment" :rows="2" :maxlength="300" />
+      </BaseFormField>
+    </div>
+  </ConfirmDialog>
+
+  <ConfirmDialog
+    :open="showTraining"
+    :title="t('fleet.claims.action.training')"
+    :confirm-label="t('common.confirm')"
+    :confirm-disabled="!topic.trim()"
+    :loading="working"
+    panel-class="max-w-md"
+    @confirm="confirmTraining"
+    @cancel="showTraining = false"
+  >
+    <div class="space-y-3">
+      <p class="text-sm text-muted-foreground">
+        {{ t('fleet.claims.trainingHint', { driver: item?.driverName ?? '' }) }}
+      </p>
+      <BaseFormField :label="t('fleet.trainings.form.topic')" required>
+        <FormInput v-model="topic" :maxlength="120" />
       </BaseFormField>
     </div>
   </ConfirmDialog>
