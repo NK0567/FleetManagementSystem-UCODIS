@@ -4,6 +4,7 @@ import { registerAuthHandlers } from './auth/handlers'
 import { resolveToken } from './auth/session'
 import { createDatabase } from './db/database'
 import type { CollectionContext } from './db/collection'
+import { registerFileHandlers } from './handlers/files'
 import { registerSharedHandlers } from './handlers/shared'
 import { registerModuleToggleHandlers } from './handlers/settings/moduleToggles'
 import { registerHrHandlers } from './handlers/hr'
@@ -25,6 +26,7 @@ export function createMockServer(context?: CollectionContext) {
 
   registerAuthHandlers(router, db)
   registerSharedHandlers(router, db)
+  registerFileHandlers(router, db)
   registerModuleToggleHandlers(router, db)
   registerHrHandlers(router, db)
   registerFleetHandlers(router, db)

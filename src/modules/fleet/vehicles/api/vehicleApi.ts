@@ -18,6 +18,11 @@ export const vehicleApi = {
   putOutOfService: (no: string, reason: string) => action(no, 'out-of-service', { reason }),
   returnToService: (no: string) => action(no, 'return-to-service', {}),
   removeFromFleet: (no: string, body: Record<string, unknown>) => action(no, 'remove', body),
+  addPhoto: (no: string, fileNo: string) => action(no, 'photos', { fileNo }),
+  removePhoto: (no: string, fileNo: string) =>
+    httpClient.delete<SingleResponse<VehicleApi>>(
+      `${resourcePath(basePath, no)}/photos/${encodeURIComponent(fileNo)}`
+    ),
   getEquipment: (no: string) =>
     httpClient.get<SingleResponse<VehicleEquipmentApi[]>>(equipmentPath(no)),
   addEquipment: (no: string, body: Record<string, unknown>) =>

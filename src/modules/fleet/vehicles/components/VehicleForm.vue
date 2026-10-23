@@ -3,7 +3,10 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useEntityForm, type FormValidationError } from '@/composables/useEntityForm'
 import { useFormValidationUi } from '@/composables/useFormValidationUi'
+import { apiErrorMessage } from '@/core/api/apiError'
 import { vehicleTypeService, type VehicleTypeApi } from '@/modules/fleet/vehicle-types'
+import type { FileMeta } from '@/types/file.types'
+import { vehicleService } from '../services/vehicleService'
 import { formatDate, formatDateTime, formatNumber } from '@/utils/format'
 import type {
   AcquisitionMode,
@@ -18,19 +21,41 @@ const props = withDefaults(
     disabled?: boolean
     isNew?: boolean
     validationErrors?: string[]
-    /** Equipment is saved line by line, outside the edit mode of the card. */
-    canEditEquipment?: boolean
+    /** Equipment and photos are saved as soon as they change, outside the edit mode of the card. */
+    canEditDirectly?: boolean
   }>(),
   {
     initialData: () => ({}),
     disabled: false,
     isNew: false,
     validationErrors: () => [],
-    canEditEquipment: false
+    canEditDirectly: false
   }
 )
 
+const emit = defineEmits<{ updated: [vehicle: VehicleApi] }>()
+
 const { t } = useI18n()
+const photoError = ref<string | null>(null)
+
+async function changePhotos(change: () => Promise<VehicleApi>) {
+  photoError.value = null
+  try {
+    emit('updated', await change())
+  } catch (cause) {
+    photoError.value = apiErrorMessage(cause, t('fleet.vehicles.photoError'))
+  }
+}
+
+function addPhoto(photo: FileMeta) {
+  const no = props.initialData.no
+  if (no) void changePhotos(() => vehicleService.addPhoto(no, photo.no))
+}
+
+function removePhoto(fileNo: string) {
+  const no = props.initialData.no
+  if (no) void changePhotos(() => vehicleService.removePhoto(no, fileNo))
+}
 
 const { draft, isRequired, expose } = useEntityForm({
   initialData: () => props.initialData,
@@ -93,6 +118,7 @@ const expandedSections = ref({
   specifications: true,
   acquisition: false,
   status: true,
+  photos: false,
   equipment: true,
   history: false,
   audit: false
@@ -392,6 +418,22 @@ defineExpose(expose)
       </FormSection>
 
       <FormSection
+        v-model:open="expandedSections.photos"
+        :title="t('fleet.vehicles.form.photos')"
+        :summary="[t('fleet.vehicles.form.photoCount', initialData.photos?.length ?? 0)]"
+      >
+        <div class="xl:col-span-2 min-w-0 space-y-2">
+          <PhotoGallery
+            :photos="initialData.photos ?? []"
+            :editable="canEditDirectly"
+            @add="addPhoto"
+            @remove="removePhoto"
+          />
+          <p v-if="photoError" class="text-xs text-destructive">{{ photoError }}</p>
+        </div>
+      </FormSection>
+
+      <FormSection
         v-model:open="expandedSections.equipment"
         :title="t('fleet.vehicles.form.equipment')"
         :summary="[]"
@@ -400,7 +442,7 @@ defineExpose(expose)
           <VehicleEquipmentPanel
             v-if="initialData.no"
             :vehicle-no="initialData.no"
-            :editable="canEditEquipment"
+            :editable="canEditDirectly"
           />
         </div>
       </FormSection>

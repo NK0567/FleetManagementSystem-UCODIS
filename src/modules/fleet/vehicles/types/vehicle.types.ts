@@ -1,3 +1,4 @@
+import type { FileMeta } from '@/types/file.types'
 import type { CouplingRole } from '@/modules/fleet/vehicle-types/types/vehicleType.types'
 import type { EquipmentCapability } from '@/modules/fleet/equipment-types/types/equipmentType.types'
 
@@ -104,6 +105,7 @@ export interface VehicleApi {
   hasTracker: boolean
   hasCamera: boolean
   hasPump: boolean
+  photos: FileMeta[]
   createdAt: string
   createdBy: string
   modifiedAt: string

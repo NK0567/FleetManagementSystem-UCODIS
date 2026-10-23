@@ -36,9 +36,10 @@ export interface VehicleRow extends MockRow {
   plateHistory: PlateChange[]
   outOfService: VehicleOutOfService | null
   removal: VehicleRemoval | null
+  photoFileNos: string[]
 }
 
-const SEED: Omit<VehicleRow, keyof typeof seedAudit>[] = [
+const SEED: Omit<VehicleRow, keyof typeof seedAudit | 'photoFileNos'>[] = [
   {
     fuelType: 'diesel',
     tankCapacityL: 500,
@@ -841,5 +842,5 @@ const SEED: Omit<VehicleRow, keyof typeof seedAudit>[] = [
 
 export const vehiclesCollection: CollectionDefinition<VehicleRow> = {
   name: 'vehicles',
-  seed: () => SEED.map((row) => ({ ...row, ...seedAudit }))
+  seed: () => SEED.map((row) => ({ ...row, photoFileNos: [], ...seedAudit }))
 }

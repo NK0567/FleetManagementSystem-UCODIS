@@ -9,7 +9,7 @@ const props = defineProps<{ availability: DriverAvailability }>()
 const TONES: Record<DriverAvailability, StatusTone> = {
   available: 'success',
   on_trip: 'info',
-  trip_planned: 'primary',
+  trip_planned: 'info',
   on_leave: 'warning',
   unavailable: 'neutral'
 }

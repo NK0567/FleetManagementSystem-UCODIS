@@ -133,5 +133,8 @@ export default {
   'fleet.vehicles.dialog.finalKm': 'Kilométrage à la sortie',
   'fleet.vehicles.dialog.comment': 'Commentaire',
   'fleet.vehicles.col.driverName': 'Conducteur',
-  'fleet.vehicles.col.coupledVehiclePlate': 'Attelé à'
+  'fleet.vehicles.col.coupledVehiclePlate': 'Attelé à',
+  'fleet.vehicles.photoError': "La photo n'a pas pu être enregistrée.",
+  'fleet.vehicles.form.photos': 'Photos',
+  'fleet.vehicles.form.photoCount': 'Aucune photo | 1 photo | {count} photos'
 }

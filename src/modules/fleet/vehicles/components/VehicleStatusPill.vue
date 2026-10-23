@@ -8,7 +8,7 @@ const props = defineProps<{ status: VehicleStatus }>()
 
 const TONES: Record<VehicleStatus, StatusTone> = {
   available: 'success',
-  assigned: 'primary',
+  assigned: 'info',
   in_mission: 'info',
   immobilized: 'warning',
   out_of_service: 'danger',

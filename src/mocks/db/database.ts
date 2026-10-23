@@ -23,19 +23,23 @@ import {
   fleetStatusArchivesCollection,
   fleetStatusNotesCollection
 } from '../fixtures/fleet/fleetStatus'
+import { filesCollection } from '../fixtures/files'
+import { createFileStore, type FileStore } from '../files/fileStore'
 import { createCollection, type CollectionContext } from './collection'
 import { clearStoredCollections } from './storage'
 
 /** Bump when fixtures change shape: every collection is then reseeded. */
-export const MOCK_SEED_VERSION = 4
+export const MOCK_SEED_VERSION = 5
 
 export function createDatabase(
   context: CollectionContext = {
     seedVersion: MOCK_SEED_VERSION,
     dayOffset: demoDayOffset()
-  }
+  },
+  fileStore: FileStore = createFileStore()
 ) {
   const collections = {
+    files: createCollection(filesCollection, context),
     moduleToggles: createCollection(moduleTogglesCollection, context),
     orgUnits: createCollection(orgUnitsCollection, context),
     employeeCategories: createCollection(employeeCategoriesCollection, context),
@@ -64,9 +68,11 @@ export function createDatabase(
 
   return {
     ...collections,
+    fileStore,
     reset(): void {
       clearStoredCollections()
       for (const collection of Object.values(collections)) collection.reset()
+      void fileStore.clear()
     }
   }
 }

@@ -42,6 +42,21 @@ export default {
     'Le code ne peut contenir que des lettres, des chiffres et des tirets (12 caractères au plus).',
   'common.validation.emailFormat': "L'adresse e-mail n'est pas valide.",
 
+  'common.file.none': 'Aucun fichier',
+  'common.file.choose': 'Choisir un fichier',
+  'common.file.replace': 'Remplacer',
+  'common.file.remove': 'Retirer',
+  'common.file.open': 'Ouvrir le fichier',
+  'common.file.uploading': 'Envoi en cours…',
+  'common.file.uploadError': "Le fichier n'a pas pu être envoyé.",
+  'common.file.openError': "Le fichier n'a pas pu être ouvert.",
+  'common.file.addPhoto': 'Ajouter une photo',
+  'common.file.noPhoto': 'Aucune photo.',
+  'common.file.issue.type':
+    'Ce type de fichier est refusé : PDF ou image (PNG, JPEG, WEBP) seulement.',
+  'common.file.issue.size': 'Le fichier dépasse {max} Mo.',
+  'common.file.issue.empty': 'Le fichier est vide.',
+
   'common.audit.title': 'Traçabilité',
   'common.audit.createdAt': 'Créé le',
   'common.audit.createdBy': 'Créé par',

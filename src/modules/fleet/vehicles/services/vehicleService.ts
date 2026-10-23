@@ -26,6 +26,12 @@ export const vehicleService = {
   async removeFromFleet(no: string, removal: VehicleRemovalInput): Promise<VehicleApi> {
     return (await vehicleApi.removeFromFleet(no, { ...removal })).data.data
   },
+  async addPhoto(no: string, fileNo: string): Promise<VehicleApi> {
+    return (await vehicleApi.addPhoto(no, fileNo)).data.data
+  },
+  async removePhoto(no: string, fileNo: string): Promise<VehicleApi> {
+    return (await vehicleApi.removePhoto(no, fileNo)).data.data
+  },
   async getEquipment(no: string): Promise<VehicleEquipmentApi[]> {
     return (await vehicleApi.getEquipment(no)).data.data
   },

@@ -42,8 +42,11 @@ import { FLEET_MESSAGES } from './messages'
 import { activeLinks, coupledWith, employeeNames } from './links'
 import { tripIndex } from './tripIndex'
 import { statusReason, vehicleStatuses } from './vehicleState'
+import { fileMetaOf, filesMetaOf, releaseFiles } from '../files'
+import { IMAGE_FILE_TYPES } from '@/utils/fileRules'
 
 const BASE_PATH = '/fleet/vehicles'
+const MAX_PHOTOS = 6
 const FEATURE = 'VEHICLE'
 
 type EditableFields = Omit<
@@ -57,6 +60,7 @@ type EditableFields = Omit<
   | 'plateHistory'
   | 'outOfService'
   | 'removal'
+  | 'photoFileNos'
 >
 
 function equipmentApi(db: MockDatabase): VehicleEquipmentApi[] {
@@ -120,7 +124,8 @@ export function vehiclesApi(db: MockDatabase, language: MockLanguage = 'fr'): Ve
       coupledVehiclePlate: coupledNo ? (plates.get(coupledNo) ?? '') : '',
       hasTracker: owned.has('tracker'),
       hasCamera: owned.has('camera'),
-      hasPump: owned.has('pump')
+      hasPump: owned.has('pump'),
+      photos: filesMetaOf(db, vehicle.photoFileNos)
     }
   })
 }
@@ -259,7 +264,8 @@ export function registerVehiclesHandlers(router: MockRouter, db: MockDatabase): 
         ],
         plateHistory: [],
         outOfService: null,
-        removal: null
+        removal: null,
+        photoFileNos: []
       }
     },
     update: (existing, input) => {
@@ -386,6 +392,42 @@ export function registerVehiclesHandlers(router: MockRouter, db: MockDatabase): 
     })
     return respond(request)
   })
+
+  router.post(`${BASE_PATH}/:no/photos`, { feature: FEATURE, action: 'update' }, (request) => {
+    const vehicle = vehicleOf(request)
+    assertEditable(vehicle)
+    const fileNo = readString(readBody(request), 'fileNo', { required: true })
+    const meta = fileMetaOf(db, fileNo)
+    if (!meta || !(IMAGE_FILE_TYPES as readonly string[]).includes(meta.mimeType)) {
+      throw invalidField('fileNo')
+    }
+    if (vehicle.photoFileNos.length >= MAX_PHOTOS) {
+      throw unprocessable(FLEET_MESSAGES.tooManyPhotos, { max: MAX_PHOTOS })
+    }
+    if (!vehicle.photoFileNos.includes(fileNo)) {
+      db.vehicles.update(vehicle.no, {
+        photoFileNos: [...vehicle.photoFileNos, fileNo],
+        ...stampModified(request)
+      })
+    }
+    return respond(request)
+  })
+
+  router.delete(
+    `${BASE_PATH}/:no/photos/:fileNo`,
+    { feature: FEATURE, action: 'update' },
+    async (request) => {
+      const vehicle = vehicleOf(request)
+      assertEditable(vehicle)
+      const fileNo = routeParam(request, 'fileNo')
+      db.vehicles.update(vehicle.no, {
+        photoFileNos: vehicle.photoFileNos.filter((no) => no !== fileNo),
+        ...stampModified(request)
+      })
+      await releaseFiles(db, [fileNo])
+      return respond(request)
+    }
+  )
 
   registerEquipmentHandlers(router, db)
 }

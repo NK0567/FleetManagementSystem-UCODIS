@@ -257,7 +257,8 @@ const dialogTitle = computed(() => (dialog.value ? t(`fleet.vehicles.action.${di
             :initial-data="item ?? {}"
             :disabled="!isEditMode || isSaving"
             :validation-errors="validationErrors"
-            :can-edit-equipment="canEdit"
+            :can-edit-directly="canEdit"
+            @updated="store.setCurrentItem"
           />
         </div>
       </div>

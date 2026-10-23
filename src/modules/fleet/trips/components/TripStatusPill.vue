@@ -7,7 +7,7 @@ import type { TripStatus } from '../domain/trip'
 const props = defineProps<{ status: TripStatus }>()
 
 const TONES: Record<TripStatus, StatusTone> = {
-  planned: 'primary',
+  planned: 'info',
   in_progress: 'info',
   completed: 'warning',
   closed: 'success',

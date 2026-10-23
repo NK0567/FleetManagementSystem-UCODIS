@@ -8,7 +8,7 @@ const props = defineProps<{ state: FleetState }>()
 
 const TONES: Record<FleetState, StatusTone> = {
   AVAILABLE: 'success',
-  TRIP_PLANNED: 'primary',
+  TRIP_PLANNED: 'info',
   TO_LOADING: 'info',
   TO_DELIVERY: 'info',
   RETURNING: 'info',

@@ -1,6 +1,10 @@
 import type { LocalizedText } from '../../i18n'
 
 export const FLEET_MESSAGES = {
+  tooManyPhotos: {
+    fr: "Un véhicule garde au plus {max} photos : retirez-en une avant d'en ajouter.",
+    en: 'A vehicle keeps at most {max} photos: remove one before adding another.'
+  },
   observationTooLong: {
     fr: "L'observation dépasse 500 caractères.",
     en: 'The observation is longer than 500 characters.'

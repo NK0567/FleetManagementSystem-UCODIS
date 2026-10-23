@@ -21,6 +21,16 @@ export function localize(language: MockLanguage, text: LocalizedText, params?: M
 }
 
 export const COMMON_MESSAGES = {
+  fileMissing: { fr: 'Aucun fichier reçu.', en: 'No file received.' },
+  fileType: {
+    fr: 'Ce type de fichier est refusé : seuls les PDF et les images (PNG, JPEG, WEBP) sont acceptés.',
+    en: 'This file type is refused: only PDF files and images (PNG, JPEG, WEBP) are accepted.'
+  },
+  fileSize: {
+    fr: 'Le fichier dépasse la taille maximale de {max} Mo.',
+    en: 'The file is larger than the {max} MB limit.'
+  },
+  fileEmpty: { fr: 'Le fichier est vide.', en: 'The file is empty.' },
   unknownReference: {
     fr: "La valeur choisie pour « {field} » n'existe pas.",
     en: 'The value chosen for "{field}" does not exist.'
