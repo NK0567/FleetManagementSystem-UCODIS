@@ -94,6 +94,12 @@ export function fuelRefillsApi(db: MockDatabase, language: MockLanguage): FuelRe
     db.employees.all().map((employee) => [employee.no, employeeFullName(employee)])
   )
   const refills = db.fuelRefills.all()
+  const transactions = new Map(
+    db.fuelCardTransactions
+      .all()
+      .filter((transaction) => transaction.refillNo)
+      .map((transaction) => [transaction.refillNo, transaction.no])
+  )
   const byVehicle = new Map<string, FuelRefillRow[]>()
   for (const refill of [...refills].sort((a, b) => a.refueledAt.localeCompare(b.refueledAt))) {
     byVehicle.set(refill.vehicleNo, [...(byVehicle.get(refill.vehicleNo) ?? []), refill])
@@ -176,6 +182,7 @@ export function fuelRefillsApi(db: MockDatabase, language: MockLanguage): FuelRe
       driverName,
       stationLabel: site?.name ?? refill.stationName,
       amount: Math.round(refill.liters * refill.unitPrice),
+      transactionNo: transactions.get(refill.no) ?? null,
       checks,
       status: refillStatus(results, !!refill.qualification),
       receipt: refill.receiptFileNo ? fileMetaOf(db, refill.receiptFileNo) : null
@@ -261,7 +268,6 @@ export function registerFuelRefillsHandlers(router: MockRouter, db: MockDatabase
         latitude: readNumber(input, 'latitude', { min: -90, max: 90 }),
         longitude: readNumber(input, 'longitude', { min: -180, max: 180 }),
         channel: 'manual' as const,
-        transactionNo: null,
         qualification: null
       }
       assertNotDuplicate(refill)

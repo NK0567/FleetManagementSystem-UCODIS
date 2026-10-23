@@ -20,7 +20,6 @@ export interface FuelRefillRow extends MockRow {
   fullTank: boolean
   channel: RefillChannel
   receiptFileNo: string | null
-  transactionNo: string | null
   qualification: RefillQualification | null
 }
 
@@ -78,7 +77,6 @@ function vehicleRefills(vehicle: (typeof FLEET)[number], fleetIndex: number): Se
       fullTank: true,
       channel: 'manual',
       receiptFileNo: null,
-      transactionNo: null,
       qualification: null
     }
   })
@@ -101,7 +99,6 @@ function oversizedRefill(): Seed {
     fullTank: false,
     channel: 'manual',
     receiptFileNo: null,
-    transactionNo: null,
     qualification: null
   }
 }

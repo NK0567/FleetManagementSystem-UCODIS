@@ -32,6 +32,8 @@ import { registerAlertsHandlers } from './alerts'
 import { registerFuelConsumptionHandlers } from './fuelConsumption'
 import { registerFuelGapCausesHandlers } from './fuelGapCauses'
 import { registerFuelRefillsHandlers } from './fuelRefills'
+import { registerFuelCardsHandlers } from './fuelCards'
+import { registerFuelCardTransactionsHandlers } from './fuelCardTransactions'
 
 export function registerFleetHandlers(router: MockRouter, db: MockDatabase): void {
   registerFleetSettingsHandlers(router, db)
@@ -66,4 +68,6 @@ export function registerFleetHandlers(router: MockRouter, db: MockDatabase): voi
   registerFuelConsumptionHandlers(router, db)
   registerFuelGapCausesHandlers(router, db)
   registerFuelRefillsHandlers(router, db)
+  registerFuelCardsHandlers(router, db)
+  registerFuelCardTransactionsHandlers(router, db)
 }

@@ -683,5 +683,85 @@ export const FLEET_MESSAGES = {
   gapClosed: {
     fr: 'Cet écart est clos.',
     en: 'This gap is closed.'
+  },
+  cardNumberTaken: {
+    fr: 'Une carte porte déjà ce numéro ({no}).',
+    en: 'A card already has this number ({no}).'
+  },
+  cardSupplierInvalid: {
+    fr: 'Choisissez un fournisseur de carburant agréé.',
+    en: 'Choose an authorized fuel supplier.'
+  },
+  cardHolderRequired: {
+    fr: 'Indiquez le véhicule ou le conducteur titulaire de la carte.',
+    en: 'Give the vehicle or the driver holding the card.'
+  },
+  cardHolderHasCard: {
+    fr: 'Ce titulaire a déjà une carte active chez ce fournisseur ({no}).',
+    en: 'This holder already has an active card with this supplier ({no}).'
+  },
+  cardNotActive: {
+    fr: 'Seule une carte active peut être bloquée.',
+    en: 'Only an active card can be blocked.'
+  },
+  cardNotBlocked: {
+    fr: "Cette carte n'est pas bloquée.",
+    en: 'This card is not blocked.'
+  },
+  cardExpired: {
+    fr: 'Cette carte est expirée : elle ne peut pas être débloquée.',
+    en: 'This card has expired: it cannot be unblocked.'
+  },
+  transactionDuplicate: {
+    fr: 'Cette transaction est déjà enregistrée ({no}).',
+    en: 'This transaction is already recorded ({no}).'
+  },
+  transactionMatched: {
+    fr: "Cette transaction est déjà rapprochée d'un plein.",
+    en: 'This transaction is already matched with a refill.'
+  },
+  transactionNotMatched: {
+    fr: "Cette transaction n'est rapprochée d'aucun plein.",
+    en: 'This transaction is matched with no refill.'
+  },
+  transactionRefillInvalid: {
+    fr: 'Ce plein ne correspond pas au titulaire de la carte, ou il est trop éloigné dans le temps.',
+    en: 'This refill does not belong to the card holder, or it is too far apart in time.'
+  },
+  transactionRefillTaken: {
+    fr: "Ce plein est déjà rapproché d'une autre transaction.",
+    en: 'This refill is already matched with another transaction.'
+  },
+  cardNoVehicle: {
+    fr: "Aucun véhicule n'est rattaché à ce titulaire ce jour-là.",
+    en: 'No vehicle is tied to this holder on that day.'
+  },
+  overrunExpired: {
+    fr: 'Carte expirée à cette date',
+    en: 'Card expired on that date'
+  },
+  overrunBlocked: {
+    fr: 'Carte bloquée à cette date',
+    en: 'Card blocked on that date'
+  },
+  overrunZone: {
+    fr: "{city} n'est pas une ville autorisée",
+    en: '{city} is not an allowed city'
+  },
+  overrunHours: {
+    fr: 'Transaction à {hour} h, hors de la plage de {start} h à {end} h',
+    en: 'Transaction at {hour}:00, outside {start}:00 to {end}:00'
+  },
+  overrunDailyCount: {
+    fr: 'Au-delà de {max} transactions par jour',
+    en: 'Beyond {max} transactions a day'
+  },
+  overrunMonthlyAmount: {
+    fr: 'Plafond mensuel en montant dépassé',
+    en: 'Monthly amount cap exceeded'
+  },
+  overrunMonthlyVolume: {
+    fr: 'Plafond mensuel en volume dépassé',
+    en: 'Monthly volume cap exceeded'
   }
 } satisfies Record<string, LocalizedText>

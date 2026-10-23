@@ -25,6 +25,7 @@ export function registerFleetModule(): void {
     FUELREFILL: { to: '/fleet/fuel-refills', menuKey: 'fuelRefill' },
     FUELCONSUMPTION: { to: '/fleet/fuel-consumption', menuKey: 'fuelConsumption' },
     FUELGAPCAUSE: { to: '/fleet/fuel-gap-causes', menuKey: 'fuelGapCause' },
+    FUELCARD: { to: '/fleet/fuel-cards', menuKey: 'fuelCard' },
     ROADCHECKLIST: { to: '/fleet/road-checklists', menuKey: 'roadChecklist' },
     DEPARTUREAUTHORIZATION: {
       to: '/fleet/departure-authorizations',
@@ -68,6 +69,12 @@ export function registerFleetModule(): void {
         labelKey: 'nav.fuelConsumption',
         to: '/fleet/fuel-consumption',
         menuKey: 'fuelConsumption'
+      },
+      { labelKey: 'nav.fuelCards', to: '/fleet/fuel-cards', menuKey: 'fuelCard' },
+      {
+        labelKey: 'nav.fuelCardTransactions',
+        to: '/fleet/fuel-cards/transactions',
+        menuKey: 'fuelCard'
       },
       { labelKey: 'nav.documents', to: '/fleet/documents', menuKey: 'document' },
       {

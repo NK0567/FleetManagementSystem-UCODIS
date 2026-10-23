@@ -315,6 +315,35 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
     vehicleType: { fr: 'Type de véhicule', en: 'Vehicle type' },
     default: { fr: 'Par défaut', en: 'Default' }
   },
+  cardHolderType: {
+    vehicle: { fr: 'Véhicule', en: 'Vehicle' },
+    driver: { fr: 'Conducteur', en: 'Driver' }
+  },
+  cardStatus: {
+    active: { fr: 'Active', en: 'Active' },
+    blocked: { fr: 'Bloquée', en: 'Blocked' },
+    expired: { fr: 'Expirée', en: 'Expired' }
+  },
+  cardOverrun: {
+    expired: { fr: 'Carte expirée', en: 'Card expired' },
+    blocked: { fr: 'Carte bloquée', en: 'Card blocked' },
+    zone: { fr: 'Hors zone', en: 'Outside zones' },
+    hours: { fr: 'Hors horaire', en: 'Outside hours' },
+    dailyCount: { fr: 'Trop de transactions', en: 'Too many transactions' },
+    monthlyAmount: { fr: 'Plafond en montant', en: 'Amount cap' },
+    monthlyVolume: { fr: 'Plafond en volume', en: 'Volume cap' }
+  },
+  cardEvent: {
+    created: { fr: 'Carte créée', en: 'Card created' },
+    blocked: { fr: 'Carte bloquée', en: 'Card blocked' },
+    unblocked: { fr: 'Carte débloquée', en: 'Card unblocked' },
+    limits: { fr: 'Limites modifiées', en: 'Limits changed' }
+  },
+  matchMode: {
+    auto: { fr: 'Automatique', en: 'Automatic' },
+    manual: { fr: 'Manuel', en: 'Manual' },
+    detached: { fr: 'Détaché', en: 'Detached' }
+  },
   complianceGapReason: {
     missing: { fr: 'Manquant', en: 'Missing' },
     expired: { fr: 'Expiré', en: 'Expired' },

@@ -234,6 +234,27 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/fleet/fuel-cards/': RouteRecordInfo<
+      '/fleet/fuel-cards/',
+      '/fleet/fuel-cards',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/fuel-cards/[id]': RouteRecordInfo<
+      '/fleet/fuel-cards/[id]',
+      '/fleet/fuel-cards/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/fuel-cards/transactions': RouteRecordInfo<
+      '/fleet/fuel-cards/transactions',
+      '/fleet/fuel-cards/transactions',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/fleet/fuel-consumption/': RouteRecordInfo<
       '/fleet/fuel-consumption/',
       '/fleet/fuel-consumption',
@@ -852,6 +873,30 @@ declare module 'vue-router/auto-routes' {
     'src/pages/fleet/fleet-status.vue': {
       routes:
         | '/fleet/fleet-status'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/fuel-cards/index.vue': {
+      routes:
+        | '/fleet/fuel-cards/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/fuel-cards/[id].vue': {
+      routes:
+        | '/fleet/fuel-cards/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/fuel-cards/transactions.vue': {
+      routes:
+        | '/fleet/fuel-cards/transactions'
       views:
         | never
       pathParamNames:

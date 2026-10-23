@@ -48,6 +48,8 @@ import fleetAlerts from './fleetAlerts'
 import fleetFuelGapCauses from './fleetFuelGapCauses'
 import fleetFuelRefills from './fleetFuelRefills'
 import fleetFuelConsumption from './fleetFuelConsumption'
+import fleetFuelCards from './fleetFuelCards'
+import fleetFuelCardTransactions from './fleetFuelCardTransactions'
 export default {
   ...common,
   ...auth,
@@ -97,5 +99,7 @@ export default {
   ...fleetAlerts,
   ...fleetFuelGapCauses,
   ...fleetFuelRefills,
-  ...fleetFuelConsumption
+  ...fleetFuelConsumption,
+  ...fleetFuelCards,
+  ...fleetFuelCardTransactions
 }

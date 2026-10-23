@@ -46,5 +46,7 @@ export default {
   'nav.alertRules': "Règles d'alerte",
   'nav.fuelRefills': 'Pleins de carburant',
   'nav.fuelConsumption': 'Consommation carburant',
-  'nav.fuelGapCauses': "Causes d'écart carburant"
+  'nav.fuelGapCauses': "Causes d'écart carburant",
+  'nav.fuelCards': 'Cartes carburant',
+  'nav.fuelCardTransactions': 'Transactions cartes'
 }

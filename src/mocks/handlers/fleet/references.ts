@@ -102,6 +102,17 @@ export function fleetReferenceData(db: MockDatabase): Record<string, ReferenceIt
     infractionTypes: db.infractionTypes
       .all()
       .map((type) => ({ code: type.no, description: type.name, active: type.active })),
+    fuelSuppliers: db.providers
+      .all()
+      .filter((provider) => provider.providerType === 'fuel_supplier')
+      .map((provider) => ({
+        code: provider.no,
+        description: provider.name,
+        active: provider.authorized
+      })),
+    fuelCards: db.fuelCards
+      .all()
+      .map((card) => ({ code: card.no, description: card.number, active: !card.blockedAt })),
     insurers: db.providers
       .all()
       .filter((provider) => provider.providerType === 'insurer')

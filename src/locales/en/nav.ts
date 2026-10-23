@@ -46,5 +46,7 @@ export default {
   'nav.alertRules': 'Alert rules',
   'nav.fuelRefills': 'Fuel refills',
   'nav.fuelConsumption': 'Fuel consumption',
-  'nav.fuelGapCauses': 'Fuel gap causes'
+  'nav.fuelGapCauses': 'Fuel gap causes',
+  'nav.fuelCards': 'Fuel cards',
+  'nav.fuelCardTransactions': 'Card transactions'
 }
