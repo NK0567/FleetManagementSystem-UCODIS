@@ -21,6 +21,10 @@ export function localize(language: MockLanguage, text: LocalizedText, params?: M
 }
 
 export const COMMON_MESSAGES = {
+  unknownReference: {
+    fr: "La valeur choisie pour « {field} » n'existe pas.",
+    en: 'The value chosen for "{field}" does not exist.'
+  },
   notFound: { fr: 'Enregistrement introuvable.', en: 'Record not found.' },
   routeNotFound: { fr: 'Ressource inconnue : {path}', en: 'Unknown resource: {path}' },
   methodNotAllowed: {

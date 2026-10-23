@@ -28,7 +28,7 @@ import { sessionUser, type MockRequest } from '../../http/types'
 import { COMPANY } from '../../fixtures/company'
 import type { EmployeeRow } from '../../fixtures/hr/employees'
 import { HR_MESSAGES } from './messages'
-import { requireReference, requireSite } from './references'
+import { requireReference } from '../../http/references'
 import { employeesApi } from './views'
 
 /** Fields typed in the form; status, exit and driving authorization have their own actions. */
@@ -59,7 +59,7 @@ export function registerEmployeeHandlers(router: MockRouter, db: MockDatabase): 
     jobPositionNo: (input) => requireReference(db.jobPositions, input, 'jobPositionNo'),
     orgUnitNo: (input) => requireReference(db.orgUnits, input, 'orgUnitNo'),
     categoryNo: (input) => requireReference(db.employeeCategories, input, 'categoryNo'),
-    siteCode: (input) => requireSite(input),
+    siteCode: (input) => requireReference(db.sites, input, 'siteCode'),
     phone: (input) => readString(input, 'phone', { required: true }),
     email: (input) => {
       const email = readString(input, 'email')

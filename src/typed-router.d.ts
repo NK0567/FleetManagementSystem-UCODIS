@@ -45,11 +45,81 @@ declare module 'vue-router/auto-routes' {
       { path: ParamValue<false> },
       | never
     >,
+    '/fleet/equipment-types/': RouteRecordInfo<
+      '/fleet/equipment-types/',
+      '/fleet/equipment-types',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/equipment-types/[id]': RouteRecordInfo<
+      '/fleet/equipment-types/[id]',
+      '/fleet/equipment-types/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/providers/': RouteRecordInfo<
+      '/fleet/providers/',
+      '/fleet/providers',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/providers/[id]': RouteRecordInfo<
+      '/fleet/providers/[id]',
+      '/fleet/providers/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/fleet/settings': RouteRecordInfo<
       '/fleet/settings',
       '/fleet/settings',
       Record<never, never>,
       Record<never, never>,
+      | never
+    >,
+    '/fleet/site-types/': RouteRecordInfo<
+      '/fleet/site-types/',
+      '/fleet/site-types',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/site-types/[id]': RouteRecordInfo<
+      '/fleet/site-types/[id]',
+      '/fleet/site-types/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/sites/': RouteRecordInfo<
+      '/fleet/sites/',
+      '/fleet/sites',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/sites/[id]': RouteRecordInfo<
+      '/fleet/sites/[id]',
+      '/fleet/sites/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/vehicle-types/': RouteRecordInfo<
+      '/fleet/vehicle-types/',
+      '/fleet/vehicle-types',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/vehicle-types/[id]': RouteRecordInfo<
+      '/fleet/vehicle-types/[id]',
+      '/fleet/vehicle-types/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
       | never
     >,
     '/hr/dashboard': RouteRecordInfo<
@@ -221,6 +291,38 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | 'path'
     }
+    'src/pages/fleet/equipment-types/index.vue': {
+      routes:
+        | '/fleet/equipment-types/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/equipment-types/[id].vue': {
+      routes:
+        | '/fleet/equipment-types/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/providers/index.vue': {
+      routes:
+        | '/fleet/providers/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/providers/[id].vue': {
+      routes:
+        | '/fleet/providers/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
     'src/pages/fleet/settings.vue': {
       routes:
         | '/fleet/settings'
@@ -228,6 +330,54 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | never
+    }
+    'src/pages/fleet/site-types/index.vue': {
+      routes:
+        | '/fleet/site-types/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/site-types/[id].vue': {
+      routes:
+        | '/fleet/site-types/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/sites/index.vue': {
+      routes:
+        | '/fleet/sites/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/sites/[id].vue': {
+      routes:
+        | '/fleet/sites/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/vehicle-types/index.vue': {
+      routes:
+        | '/fleet/vehicle-types/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/vehicle-types/[id].vue': {
+      routes:
+        | '/fleet/vehicle-types/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
     }
     'src/pages/hr/dashboard.vue': {
       routes:

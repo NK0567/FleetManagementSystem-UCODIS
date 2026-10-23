@@ -1,10 +1,6 @@
 import type { LocalizedText } from '../../i18n'
 
 export const HR_MESSAGES = {
-  unknownReference: {
-    fr: "La valeur choisie pour « {field} » n'existe pas.",
-    en: 'The value chosen for "{field}" does not exist.'
-  },
   categoryInUse: {
     fr: 'Des employés sont rattachés à cette catégorie : elle ne peut pas être supprimée.',
     en: 'Employees belong to this category: it cannot be deleted.'

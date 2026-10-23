@@ -164,6 +164,7 @@ defineExpose(expose)
             v-model="draft.siteCode"
             reference-key="sites"
             :modal-title="t('hr.orgUnits.form.siteCode')"
+            detail-path="/fleet/sites"
             :disabled="disabled"
             :invalid="hasValidationError('siteCode')"
           />

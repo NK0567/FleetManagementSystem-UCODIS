@@ -16,6 +16,11 @@ import hrWorkingCalendar from './hrWorkingCalendar'
 import fleetSettings from './fleetSettings'
 import settingsModuleToggles from './settingsModuleToggles'
 
+import fleetVehicleTypes from './fleetVehicleTypes'
+import fleetEquipmentTypes from './fleetEquipmentTypes'
+import fleetSiteTypes from './fleetSiteTypes'
+import fleetSites from './fleetSites'
+import fleetProviders from './fleetProviders'
 export default {
   ...common,
   ...auth,
@@ -33,5 +38,10 @@ export default {
   ...hrPublicHolidays,
   ...hrWorkingCalendar,
   ...fleetSettings,
-  ...settingsModuleToggles
+  ...settingsModuleToggles,
+  ...fleetVehicleTypes,
+  ...fleetEquipmentTypes,
+  ...fleetSiteTypes,
+  ...fleetSites,
+  ...fleetProviders
 }

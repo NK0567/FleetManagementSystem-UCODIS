@@ -21,7 +21,7 @@ import type { PublicHolidayRow } from '../../fixtures/hr/calendar'
 import type { AuditFields } from '../../db/collection'
 import { HR_MESSAGES } from './messages'
 import { employeeCategoriesApi, jobPositionsApi } from './views'
-import { requireReference } from './references'
+import { requireReference } from '../../http/references'
 
 type Fields<Row> = Omit<Row, 'no' | keyof AuditFields>
 

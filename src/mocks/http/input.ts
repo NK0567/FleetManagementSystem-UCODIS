@@ -32,7 +32,7 @@ export function readNullableString(input: Input, field: string): string | null {
 export function readNumber(
   input: Input,
   field: string,
-  options: { required?: boolean; min?: number } = {}
+  options: { required?: boolean; min?: number; max?: number } = {}
 ): number | null {
   const raw = input[field]
   if (raw == null || raw === '') {
@@ -40,7 +40,11 @@ export function readNumber(
     return null
   }
   const value = Number(raw)
-  if (!Number.isFinite(value) || (options.min !== undefined && value < options.min)) {
+  if (
+    !Number.isFinite(value) ||
+    (options.min !== undefined && value < options.min) ||
+    (options.max !== undefined && value > options.max)
+  ) {
     throw invalidField(field)
   }
   return value

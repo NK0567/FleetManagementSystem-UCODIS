@@ -8,6 +8,11 @@ import { publicHolidaysCollection, workingCalendarCollection } from '../fixtures
 import { employeesCollection } from '../fixtures/hr/employees'
 import { leaveBalanceAdjustmentsCollection, leaveRequestsCollection } from '../fixtures/hr/leave'
 import { fleetSettingsCollection } from '../fixtures/fleet/settings'
+import { vehicleTypesCollection } from '../fixtures/fleet/vehicleTypes'
+import { equipmentTypesCollection } from '../fixtures/fleet/equipmentTypes'
+import { siteTypesCollection } from '../fixtures/fleet/siteTypes'
+import { sitesCollection } from '../fixtures/fleet/sites'
+import { providersCollection } from '../fixtures/fleet/providers'
 import { createCollection, type CollectionContext } from './collection'
 import { clearStoredCollections } from './storage'
 
@@ -31,7 +36,12 @@ export function createDatabase(
     employees: createCollection(employeesCollection, context),
     leaveRequests: createCollection(leaveRequestsCollection, context),
     leaveBalanceAdjustments: createCollection(leaveBalanceAdjustmentsCollection, context),
-    fleetSettings: createCollection(fleetSettingsCollection, context)
+    fleetSettings: createCollection(fleetSettingsCollection, context),
+    vehicleTypes: createCollection(vehicleTypesCollection, context),
+    equipmentTypes: createCollection(equipmentTypesCollection, context),
+    siteTypes: createCollection(siteTypesCollection, context),
+    sites: createCollection(sitesCollection, context),
+    providers: createCollection(providersCollection, context)
   }
 
   return {

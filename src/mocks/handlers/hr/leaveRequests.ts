@@ -28,7 +28,7 @@ import { ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
 import { sessionUser, type MockRequest } from '../../http/types'
 import { HR_MESSAGES } from './messages'
-import { requireReference } from './references'
+import { requireReference } from '../../http/references'
 import { leaveBalancesApi, leaveRequestApi, leaveRequestsApi, workingDaysOf } from './views'
 
 const DECISIONS: readonly LeaveRequestDecision[] = ['approve', 'send-back', 'reject']

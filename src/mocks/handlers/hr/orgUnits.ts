@@ -18,7 +18,7 @@ import type { MockRouter } from '../../http/router'
 import { sessionUser } from '../../http/types'
 import type { OrgUnitRow } from '../../fixtures/hr/orgUnits'
 import { HR_MESSAGES } from './messages'
-import { optionalReference, requireReference, requireSite } from './references'
+import { optionalReference, requireReference } from '../../http/references'
 import { orgUnitsApi } from './views'
 
 type EditableFields = Pick<OrgUnitRow, 'name' | 'type' | 'managerNo' | 'siteCode' | 'description'>
@@ -28,7 +28,7 @@ export function registerOrgUnitHandlers(router: MockRouter, db: MockDatabase): v
     name: (input) => readString(input, 'name', { required: true }),
     type: (input) => readEnum(input, 'type', ORG_UNIT_TYPES, { required: true }) ?? 'department',
     managerNo: (input) => optionalReference(db.employees, input, 'managerNo'),
-    siteCode: (input) => requireSite(input),
+    siteCode: (input) => requireReference(db.sites, input, 'siteCode'),
     description: (input) => readString(input, 'description')
   }
 

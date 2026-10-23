@@ -14,5 +14,10 @@ export default {
   'nav.hrDashboard': 'Dashboard',
   'nav.myPlanning': 'My schedule',
   'nav.fleet': 'Fleet',
-  'nav.fleetSettings': 'Fleet settings'
+  'nav.fleetSettings': 'Fleet settings',
+  'nav.vehicleTypes': 'Vehicle types',
+  'nav.equipmentTypes': 'Equipment types',
+  'nav.siteTypes': 'Site types',
+  'nav.sites': 'Sites',
+  'nav.providers': 'Providers'
 }

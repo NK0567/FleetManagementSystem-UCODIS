@@ -40,6 +40,7 @@ export default {
   'common.validationRequired': 'Required fields are missing',
   'common.validation.codeFormat':
     'The code may only contain letters, digits and dashes (12 characters at most).',
+  'common.validation.emailFormat': 'The e-mail address is not valid.',
 
   'common.audit.title': 'Audit trail',
   'common.audit.createdAt': 'Created on',

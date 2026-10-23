@@ -40,6 +40,7 @@ export default {
   'common.validationRequired': 'Champs obligatoires manquants',
   'common.validation.codeFormat':
     'Le code ne peut contenir que des lettres, des chiffres et des tirets (12 caractères au plus).',
+  'common.validation.emailFormat': "L'adresse e-mail n'est pas valide.",
 
   'common.audit.title': 'Traçabilité',
   'common.audit.createdAt': 'Créé le',

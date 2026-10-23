@@ -1,6 +1,7 @@
 import type { EnrichOption } from '@/types/options.types'
 import type { UserProfileCode } from '@/types/auth.types'
 import { localize, type LocalizedText, type MockLanguage } from '../i18n'
+import { FLEET_OPTION_SETS } from './fleetOptions'
 import { HR_OPTION_SETS } from './hrOptions'
 
 interface OptionDefinition {
@@ -26,7 +27,8 @@ function fromRecord(record: Record<string, LocalizedText>): OptionDefinition[] {
 
 const OPTION_RECORDS: Record<string, Record<string, LocalizedText>> = {
   userProfile,
-  ...HR_OPTION_SETS
+  ...HR_OPTION_SETS,
+  ...FLEET_OPTION_SETS
 }
 
 /** Enumerations served by GET /options/all. */
