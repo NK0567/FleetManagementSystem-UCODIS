@@ -28,11 +28,13 @@ import { createFileStore, type FileStore } from '../files/fileStore'
 import { documentTypesCollection } from '../fixtures/fleet/documentTypes'
 import { documentsCollection } from '../fixtures/fleet/documents'
 import { companyDocumentsCollection } from '../fixtures/fleet/companyDocuments'
+import { insurancePoliciesCollection } from '../fixtures/fleet/insurancePolicies'
+import { claimsCollection } from '../fixtures/fleet/claims'
 import { createCollection, type CollectionContext } from './collection'
 import { clearStoredCollections } from './storage'
 
 /** Bump when fixtures change shape: every collection is then reseeded. */
-export const MOCK_SEED_VERSION = 7
+export const MOCK_SEED_VERSION = 8
 
 export function createDatabase(
   context: CollectionContext = {
@@ -69,7 +71,9 @@ export function createDatabase(
     fleetStatusArchives: createCollection(fleetStatusArchivesCollection, context),
     documentTypes: createCollection(documentTypesCollection, context),
     documents: createCollection(documentsCollection, context),
-    companyDocuments: createCollection(companyDocumentsCollection, context)
+    companyDocuments: createCollection(companyDocumentsCollection, context),
+    insurancePolicies: createCollection(insurancePoliciesCollection, context),
+    claims: createCollection(claimsCollection, context)
   }
 
   return {

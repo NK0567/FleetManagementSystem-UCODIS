@@ -30,5 +30,7 @@ export default {
   'nav.documents': 'Documents',
   'nav.missingDocuments': 'Documents manquants',
   'nav.documentTypes': 'Types de documents',
-  'nav.companyDocuments': "Documents de l'entreprise"
+  'nav.companyDocuments': "Documents de l'entreprise",
+  'nav.claims': 'Sinistres',
+  'nav.insurancePolicies': "Polices d'assurance"
 }

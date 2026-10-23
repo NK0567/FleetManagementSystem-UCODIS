@@ -80,6 +80,18 @@ export function readDate(input: Input, field: string, options: { required?: bool
   return value
 }
 
+const DATE_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/
+
+/** A local date and time, "YYYY-MM-DDTHH:mm" or with seconds; returned with seconds. */
+export function readDateTime(input: Input, field: string, options: { required?: boolean } = {}) {
+  const value = readString(input, field, options)
+  if (!value) return null
+  if (!DATE_TIME.test(value) || !isValidCalendarDateYmd(value.slice(0, 10))) {
+    throw invalidField(field)
+  }
+  return value.length === 16 ? `${value}:00` : value
+}
+
 /** Business codes are typed by users: upper case letters, digits and dashes only. */
 export function readCode(input: Input, field = 'no'): string {
   const value = readString(input, field, { required: true })

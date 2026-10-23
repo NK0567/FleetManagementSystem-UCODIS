@@ -32,6 +32,8 @@ import fleetDocumentTypes from './fleetDocumentTypes'
 import fleetDocuments from './fleetDocuments'
 import fleetMissingDocuments from './fleetMissingDocuments'
 import fleetCompanyDocuments from './fleetCompanyDocuments'
+import fleetInsurancePolicies from './fleetInsurancePolicies'
+import fleetClaims from './fleetClaims'
 export default {
   ...common,
   ...auth,
@@ -65,5 +67,7 @@ export default {
   ...fleetDocumentTypes,
   ...fleetDocuments,
   ...fleetMissingDocuments,
-  ...fleetCompanyDocuments
+  ...fleetCompanyDocuments,
+  ...fleetInsurancePolicies,
+  ...fleetClaims
 }

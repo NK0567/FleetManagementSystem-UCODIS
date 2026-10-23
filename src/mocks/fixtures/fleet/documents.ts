@@ -75,6 +75,10 @@ function unlimited(
   }
 }
 
+/** Two insurers share the fleet; the policy number starts with the insurer's prefix. */
+const insurerPrefix = (vehicleIndex: number) =>
+  vehicleIndex >= 15 && vehicleIndex <= 20 ? 'NYH' : 'ARO'
+
 /** Vehicle documents: every vehicle in order, with a few situations to show. */
 function vehicleDocuments(): Seed[] {
   const docs: Seed[] = []
@@ -108,7 +112,7 @@ function vehicleDocuments(): Seed[] {
         'VEH-INS',
         12,
         index === 8 ? 18 : 120 + index * 9,
-        `ARO-2026-${pad(index, 4)}`
+        `${insurerPrefix(index)}-2026-${pad(index, 4)}`
       )
     )
     docs.push(

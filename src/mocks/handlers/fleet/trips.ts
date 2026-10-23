@@ -15,7 +15,7 @@ import { nextNo } from '../../db/numbering'
 import type { TripRow } from '../../fixtures/fleet/trips'
 import { readBody, registerCrudResource, routeParam, stampModified } from '../../http/crudResource'
 import { conflict, unprocessable } from '../../http/errors'
-import { invalidField, readNumber, readString } from '../../http/input'
+import { readDateTime, readNumber, readString } from '../../http/input'
 import { optionalReference, requireReference } from '../../http/references'
 import { ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
@@ -28,7 +28,6 @@ import { FLEET_MESSAGES } from './messages'
 import { plannedArrival, tripWindow } from './tripIndex'
 
 const BASE_PATH = '/fleet/trips'
-const DATE_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/
 
 export function tripsApi(db: MockDatabase): TripApi[] {
   const routes = new Map(db.routeTemplates.all().map((route) => [route.no, route.name]))
@@ -94,12 +93,9 @@ export function tripsApi(db: MockDatabase): TripApi[] {
 }
 
 function readDeparture(input: Record<string, unknown>): string {
-  const value = readString(input, 'plannedDeparture', { required: true })
-  if (!DATE_TIME.test(value) || Number.isNaN(new Date(value).getTime())) {
-    throw invalidField('plannedDeparture')
-  }
+  const value = readDateTime(input, 'plannedDeparture', { required: true }) ?? ''
   if (value.slice(0, 10) < todayIso()) throw unprocessable(FLEET_MESSAGES.departureInPast)
-  return value.length === 16 ? `${value}:00` : value
+  return value
 }
 
 type Plan = Pick<

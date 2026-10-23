@@ -79,6 +79,14 @@ export function fleetReferenceData(db: MockDatabase): Record<string, ReferenceIt
     routeTemplates: db.routeTemplates
       .all()
       .map((route) => ({ code: route.no, description: route.name, active: route.active })),
+    insurers: db.providers
+      .all()
+      .filter((provider) => provider.providerType === 'insurer')
+      .map((provider) => ({
+        code: provider.no,
+        description: provider.name,
+        active: provider.authorized
+      })),
     providers: db.providers.all().map((provider) => ({
       code: provider.no,
       description: provider.name,

@@ -113,6 +113,46 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
     approved: { fr: 'Validé', en: 'Approved' },
     rejected: { fr: 'Refusé', en: 'Rejected' }
   },
+  insuranceCoverage: {
+    third_party: { fr: 'Responsabilité civile', en: 'Third party' },
+    third_party_fire_theft: { fr: 'RC, incendie et vol', en: 'Third party, fire and theft' },
+    comprehensive: { fr: 'Tous risques', en: 'Comprehensive' }
+  },
+  policyState: {
+    upcoming: { fr: 'À venir', en: 'Upcoming' },
+    active: { fr: 'En cours', en: 'Active' },
+    expiring: { fr: 'À renouveler', en: 'To renew' },
+    expired: { fr: 'Échue', en: 'Expired' },
+    terminated: { fr: 'Résiliée', en: 'Terminated' }
+  },
+  claimNature: {
+    accident: { fr: 'Accident', en: 'Accident' },
+    incident: { fr: 'Incident', en: 'Incident' }
+  },
+  claimSeverity: {
+    minor_damage: { fr: 'Dégâts matériels légers', en: 'Minor damage' },
+    major_damage: { fr: 'Dégâts matériels lourds', en: 'Major damage' },
+    bodily_injury: { fr: 'Dommages corporels', en: 'Bodily injury' },
+    environmental: { fr: 'Atteinte à l’environnement', en: 'Environmental damage' }
+  },
+  claimLiability: {
+    to_determine: { fr: 'À déterminer', en: 'To be determined' },
+    company: { fr: 'Entreprise', en: 'Company' },
+    third_party: { fr: 'Tiers', en: 'Third party' },
+    shared: { fr: 'Partagée', en: 'Shared' }
+  },
+  claimInsuranceStatus: {
+    not_declared: { fr: 'Non déclaré', en: 'Not reported' },
+    declared: { fr: 'Déclaré', en: 'Reported' },
+    assessment: { fr: 'Expertise', en: 'Assessment' },
+    accepted: { fr: 'Accepté', en: 'Accepted' },
+    refused: { fr: 'Refusé', en: 'Refused' },
+    settled: { fr: 'Indemnisé', en: 'Settled' }
+  },
+  claimStatus: {
+    open: { fr: 'Ouvert', en: 'Open' },
+    closed: { fr: 'Clos', en: 'Closed' }
+  },
   complianceGapReason: {
     missing: { fr: 'Manquant', en: 'Missing' },
     expired: { fr: 'Expiré', en: 'Expired' },

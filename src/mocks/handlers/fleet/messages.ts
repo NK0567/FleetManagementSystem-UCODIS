@@ -331,5 +331,73 @@ export const FLEET_MESSAGES = {
   rejectionReasonTooShort: {
     fr: 'Expliquez le refus en {min} caractères au moins.',
     en: 'Explain the rejection in at least {min} characters.'
+  },
+  insurerNotAuthorized: {
+    fr: 'Choisissez un assureur agréé.',
+    en: 'Choose an authorized insurer.'
+  },
+  policyNumberTaken: {
+    fr: 'Cet assureur a déjà une police portant ce numéro.',
+    en: 'This insurer already has a policy with this number.'
+  },
+  policyOverlap: {
+    fr: 'Le véhicule est déjà couvert sur cette période par la police {no}.',
+    en: 'The vehicle is already covered over this period by policy {no}.'
+  },
+  policyEndBeforeStart: {
+    fr: "L'échéance précède le début de la police.",
+    en: 'The end date is before the start of the policy.'
+  },
+  policyTerminationOutsidePeriod: {
+    fr: 'La résiliation doit tomber pendant la période de la police.',
+    en: 'The termination must fall within the policy period.'
+  },
+  policyTerminated: {
+    fr: 'Cette police est résiliée : elle ne se modifie plus.',
+    en: 'This policy is terminated: it can no longer change.'
+  },
+  policyHasClaims: {
+    fr: 'Des sinistres renvoient à cette police : elle ne peut pas être supprimée.',
+    en: 'Claims refer to this policy: it cannot be deleted.'
+  },
+  claimInFuture: {
+    fr: 'La date du sinistre ne peut pas être dans le futur.',
+    en: 'The date of the claim cannot be in the future.'
+  },
+  claimClosed: {
+    fr: 'Ce dossier est clos : il ne se modifie plus.',
+    en: 'This file is closed: it can no longer change.'
+  },
+  claimInsuranceStep: {
+    fr: "Cette étape ne suit pas la précédente dans le traitement par l'assureur.",
+    en: "This step does not follow the previous one in the insurer's handling."
+  },
+  claimNoPolicy: {
+    fr: "Aucune police n'assure ce véhicule à la date du sinistre : il ne peut pas être déclaré à un assureur.",
+    en: 'No policy covers this vehicle on the date of the claim: it cannot be reported to an insurer.'
+  },
+  claimIndemnityRequired: {
+    fr: "Indiquez le montant de l'indemnité.",
+    en: 'Give the amount of the indemnity.'
+  },
+  claimIndemnityAboveDamage: {
+    fr: "L'indemnité ne peut pas dépasser le montant des dommages.",
+    en: 'The indemnity cannot exceed the damage amount.'
+  },
+  claimClosureBlocked: {
+    fr: 'Le dossier ne peut pas encore être clos : {reasons}.',
+    en: 'The file cannot be closed yet: {reasons}.'
+  },
+  claimBlockAnalysis: {
+    fr: "l'analyse des causes manque",
+    en: 'the root cause analysis is missing'
+  },
+  claimBlockLiability: {
+    fr: 'la responsabilité reste à déterminer',
+    en: 'the liability is still to be determined'
+  },
+  claimBlockInsurance: {
+    fr: "l'assureur n'a pas encore rendu sa décision",
+    en: 'the insurer has not decided yet'
   }
 } satisfies Record<string, LocalizedText>

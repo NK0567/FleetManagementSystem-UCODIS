@@ -45,6 +45,20 @@ declare module 'vue-router/auto-routes' {
       { path: ParamValue<false> },
       | never
     >,
+    '/fleet/claims/': RouteRecordInfo<
+      '/fleet/claims/',
+      '/fleet/claims',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/claims/[id]': RouteRecordInfo<
+      '/fleet/claims/[id]',
+      '/fleet/claims/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/fleet/company-documents/': RouteRecordInfo<
       '/fleet/company-documents/',
       '/fleet/company-documents',
@@ -155,6 +169,20 @@ declare module 'vue-router/auto-routes' {
       '/fleet/fleet-status',
       Record<never, never>,
       Record<never, never>,
+      | never
+    >,
+    '/fleet/insurance-policies/': RouteRecordInfo<
+      '/fleet/insurance-policies/',
+      '/fleet/insurance-policies',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/insurance-policies/[id]': RouteRecordInfo<
+      '/fleet/insurance-policies/[id]',
+      '/fleet/insurance-policies/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
       | never
     >,
     '/fleet/providers/': RouteRecordInfo<
@@ -431,6 +459,22 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | 'path'
     }
+    'src/pages/fleet/claims/index.vue': {
+      routes:
+        | '/fleet/claims/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/claims/[id].vue': {
+      routes:
+        | '/fleet/claims/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
     'src/pages/fleet/company-documents/index.vue': {
       routes:
         | '/fleet/company-documents/'
@@ -558,6 +602,22 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | never
+    }
+    'src/pages/fleet/insurance-policies/index.vue': {
+      routes:
+        | '/fleet/insurance-policies/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/insurance-policies/[id].vue': {
+      routes:
+        | '/fleet/insurance-policies/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
     }
     'src/pages/fleet/providers/index.vue': {
       routes:
