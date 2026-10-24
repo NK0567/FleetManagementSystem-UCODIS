@@ -49,7 +49,10 @@ import fleetFuelGapCauses from './fleetFuelGapCauses'
 import fleetFuelRefills from './fleetFuelRefills'
 import fleetFuelConsumption from './fleetFuelConsumption'
 import fleetFuelCards from './fleetFuelCards'
+import fleetLiveMap from './fleetLiveMap'
 import fleetFuelCardTransactions from './fleetFuelCardTransactions'
+import fleetTelematicsEventTypes from './fleetTelematicsEventTypes'
+import fleetTelematicsEvents from './fleetTelematicsEvents'
 export default {
   ...common,
   ...auth,
@@ -101,5 +104,8 @@ export default {
   ...fleetFuelRefills,
   ...fleetFuelConsumption,
   ...fleetFuelCards,
-  ...fleetFuelCardTransactions
+  ...fleetLiveMap,
+  ...fleetFuelCardTransactions,
+  ...fleetTelematicsEventTypes,
+  ...fleetTelematicsEvents
 }

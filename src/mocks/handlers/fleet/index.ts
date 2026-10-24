@@ -34,6 +34,9 @@ import { registerFuelGapCausesHandlers } from './fuelGapCauses'
 import { registerFuelRefillsHandlers } from './fuelRefills'
 import { registerFuelCardsHandlers } from './fuelCards'
 import { registerFuelCardTransactionsHandlers } from './fuelCardTransactions'
+import { registerTelematicsEventTypesHandlers } from './telematicsEventTypes'
+import { registerTelematicsEventsHandlers } from './telematicsEvents'
+import { registerLivePositionsHandlers } from './livePositions'
 
 export function registerFleetHandlers(router: MockRouter, db: MockDatabase): void {
   registerFleetSettingsHandlers(router, db)
@@ -70,4 +73,7 @@ export function registerFleetHandlers(router: MockRouter, db: MockDatabase): voi
   registerFuelRefillsHandlers(router, db)
   registerFuelCardsHandlers(router, db)
   registerFuelCardTransactionsHandlers(router, db)
+  registerTelematicsEventTypesHandlers(router, db)
+  registerTelematicsEventsHandlers(router, db)
+  registerLivePositionsHandlers(router, db)
 }

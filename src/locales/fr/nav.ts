@@ -48,5 +48,8 @@ export default {
   'nav.fuelConsumption': 'Consommation carburant',
   'nav.fuelGapCauses': "Causes d'écart carburant",
   'nav.fuelCards': 'Cartes carburant',
-  'nav.fuelCardTransactions': 'Transactions cartes'
+  'nav.fuelCardTransactions': 'Transactions cartes',
+  'nav.liveMap': 'Carte en temps réel',
+  'nav.telematicsEvents': 'Événements télématiques',
+  'nav.telematicsEventTypes': "Types d'événements télématiques"
 }

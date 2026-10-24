@@ -46,11 +46,13 @@ import { fuelGapCausesCollection } from '../fixtures/fleet/fuelGapCauses'
 import { fuelRefillsCollection } from '../fixtures/fleet/fuelRefills'
 import { fuelCardsCollection } from '../fixtures/fleet/fuelCards'
 import { fuelCardTransactionsCollection } from '../fixtures/fleet/fuelCardTransactions'
+import { telematicsEventTypesCollection } from '../fixtures/fleet/telematicsEventTypes'
+import { telematicsEventsCollection } from '../fixtures/fleet/telematicsEvents'
 import { createCollection, type CollectionContext } from './collection'
 import { clearStoredCollections } from './storage'
 
 /** Bump when fixtures change shape: every collection is then reseeded. */
-export const MOCK_SEED_VERSION = 16
+export const MOCK_SEED_VERSION = 17
 
 export function createDatabase(
   context: CollectionContext = {
@@ -105,7 +107,9 @@ export function createDatabase(
     fuelGapCauses: createCollection(fuelGapCausesCollection, context),
     fuelRefills: createCollection(fuelRefillsCollection, context),
     fuelCards: createCollection(fuelCardsCollection, context),
-    fuelCardTransactions: createCollection(fuelCardTransactionsCollection, context)
+    fuelCardTransactions: createCollection(fuelCardTransactionsCollection, context),
+    telematicsEventTypes: createCollection(telematicsEventTypesCollection, context),
+    telematicsEvents: createCollection(telematicsEventsCollection, context)
   }
 
   return {

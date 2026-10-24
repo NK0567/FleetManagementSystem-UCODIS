@@ -48,12 +48,18 @@ export interface FuelSettings {
   matchingTolerancePct: number
 }
 
+export interface TelematicsSettings {
+  /** A unit silent for longer is shown as having lost its signal. */
+  signalLossMin: number
+}
+
 export interface FleetSettings {
   drivingTime: DrivingTimeSettings
   geofencing: GeofencingSettings
   documents: DocumentSettings
   safety: SafetySettings
   fuel: FuelSettings
+  telematics: TelematicsSettings
 }
 
 export type FleetSettingsSection = keyof FleetSettings
@@ -63,7 +69,8 @@ export const FLEET_SETTINGS_SECTIONS = [
   'geofencing',
   'documents',
   'safety',
-  'fuel'
+  'fuel',
+  'telematics'
 ] as const
 
 export type SettingUnit =
@@ -111,7 +118,8 @@ export const FLEET_SETTING_FIELDS: Record<FleetSettingsSection, readonly Setting
     { key: 'deductionCapAmount', kind: 'optionalNumber', unit: 'amount', min: 0, max: 100000000 },
     { key: 'matchingToleranceMin', kind: 'number', unit: 'min', min: 5, max: 1440 },
     { key: 'matchingTolerancePct', kind: 'number', unit: 'percent', min: 0, max: 20 }
-  ]
+  ],
+  telematics: [{ key: 'signalLossMin', kind: 'number', unit: 'min', min: 5, max: 240 }]
 }
 
 export const DEFAULT_FLEET_SETTINGS: FleetSettings = {
@@ -140,7 +148,8 @@ export const DEFAULT_FLEET_SETTINGS: FleetSettings = {
     deductionCapAmount: 200000,
     matchingToleranceMin: 120,
     matchingTolerancePct: 2
-  }
+  },
+  telematics: { signalLossMin: 15 }
 }
 
 export type SettingIssue =

@@ -6,6 +6,7 @@ const FLEET_MENU_ORDER = 30
 export function registerFleetModule(): void {
   registerFeatureRoutes({
     ALERT: { to: '/fleet/alerts', menuKey: 'alert' },
+    LIVEMAP: { to: '/fleet/live-map', menuKey: 'liveMap' },
     TRIP: { to: '/fleet/trips', menuKey: 'trip' },
     VEHICLE: { to: '/fleet/vehicles', menuKey: 'vehicle' },
     COUPLING: { to: '/fleet/couplings', menuKey: 'coupling' },
@@ -26,6 +27,8 @@ export function registerFleetModule(): void {
     FUELCONSUMPTION: { to: '/fleet/fuel-consumption', menuKey: 'fuelConsumption' },
     FUELGAPCAUSE: { to: '/fleet/fuel-gap-causes', menuKey: 'fuelGapCause' },
     FUELCARD: { to: '/fleet/fuel-cards', menuKey: 'fuelCard' },
+    TELEMATICS: { to: '/fleet/telematics-events', menuKey: 'telematicsEvent' },
+    TELEMATICSEVENTTYPE: { to: '/fleet/telematics-event-types', menuKey: 'telematicsEventType' },
     ROADCHECKLIST: { to: '/fleet/road-checklists', menuKey: 'roadChecklist' },
     DEPARTUREAUTHORIZATION: {
       to: '/fleet/departure-authorizations',
@@ -48,6 +51,7 @@ export function registerFleetModule(): void {
     order: FLEET_MENU_ORDER,
     subItems: [
       { labelKey: 'nav.alerts', to: '/fleet/alerts', menuKey: 'alert' },
+      { labelKey: 'nav.liveMap', to: '/fleet/live-map', menuKey: 'liveMap' },
       { labelKey: 'nav.trips', to: '/fleet/trips', menuKey: 'trip' },
       {
         labelKey: 'nav.departureAuthorizations',
@@ -55,6 +59,11 @@ export function registerFleetModule(): void {
         menuKey: 'departureAuthorization'
       },
       { labelKey: 'nav.routeDeviations', to: '/fleet/route-deviations', menuKey: 'routeDeviation' },
+      {
+        labelKey: 'nav.telematicsEvents',
+        to: '/fleet/telematics-events',
+        menuKey: 'telematicsEvent'
+      },
       { labelKey: 'nav.vehicles', to: '/fleet/vehicles', menuKey: 'vehicle' },
       { labelKey: 'nav.couplings', to: '/fleet/couplings', menuKey: 'coupling' },
       {
@@ -106,6 +115,11 @@ export function registerFleetModule(): void {
       { labelKey: 'nav.documentTypes', to: '/fleet/document-types', menuKey: 'documentType' },
       { labelKey: 'nav.checkPoints', to: '/fleet/check-points', menuKey: 'checkPoint' },
       { labelKey: 'nav.deviationTypes', to: '/fleet/deviation-types', menuKey: 'deviationType' },
+      {
+        labelKey: 'nav.telematicsEventTypes',
+        to: '/fleet/telematics-event-types',
+        menuKey: 'telematicsEventType'
+      },
       { labelKey: 'nav.alertRules', to: '/fleet/alert-rules', menuKey: 'alertRule' },
       { labelKey: 'nav.fuelGapCauses', to: '/fleet/fuel-gap-causes', menuKey: 'fuelGapCause' },
       {

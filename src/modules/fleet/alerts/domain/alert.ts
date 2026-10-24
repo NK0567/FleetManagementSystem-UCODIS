@@ -10,7 +10,8 @@ export const ALERT_CATEGORIES = [
   'equipment',
   'inspection',
   'deviation',
-  'insurance'
+  'insurance',
+  'telematics'
 ] as const
 export type AlertCategory = (typeof ALERT_CATEGORIES)[number]
 

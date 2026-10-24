@@ -27,6 +27,7 @@ import { insurancePoliciesApi } from './insurancePolicies'
 import { FLEET_MESSAGES } from './messages'
 import { departureChecklist } from './roadChecklists'
 import { routeDeviationsApi } from './routeDeviations'
+import { telematicsEventsApi } from './telematicsEvents'
 import { trainingsApi } from './trainings'
 
 /** A situation that calls for someone, found in the fleet records each time alerts are read. */
@@ -199,6 +200,28 @@ export function alertSignals(db: MockDatabase, language: MockLanguage): AlertSig
         subject: policy.vehiclePlate,
         detail: `${policy.policyNumber} · ${label('policyState', policy.state)}`,
         since: policy.notifyOn ?? policy.endDate
+      })
+    )
+  }
+  const alerting = new Set(
+    db.telematicsEventTypes
+      .all()
+      .filter((type) => type.raisesAlert)
+      .map((type) => type.no)
+  )
+  for (const event of telematicsEventsApi(db)) {
+    if (event.status !== 'new' || !alerting.has(event.eventTypeNo)) continue
+    signals.push(
+      signal('telematics', event.no, '/fleet/telematics-events', {
+        severity:
+          event.severity === 'critical'
+            ? 'critical'
+            : event.severity === 'major'
+              ? 'warning'
+              : 'info',
+        subject: event.vehiclePlate,
+        detail: [event.eventTypeName, event.driverName].filter(Boolean).join(' · '),
+        since: event.occurredAt
       })
     )
   }

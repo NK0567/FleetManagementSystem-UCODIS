@@ -763,5 +763,33 @@ export const FLEET_MESSAGES = {
   overrunMonthlyVolume: {
     fr: 'Plafond mensuel en volume dépassé',
     en: 'Monthly volume cap exceeded'
+  },
+  telematicsEventTypeInUse: {
+    fr: 'Ce type est utilisé par des événements : désactivez-le plutôt.',
+    en: 'Events use this type: deactivate it instead.'
+  },
+  telematicsEventTypeInactive: {
+    fr: "Ce type d'événement est désactivé.",
+    en: 'This event type is inactive.'
+  },
+  telematicsBelowThreshold: {
+    fr: "La mesure est sous le seuil du type ({threshold}) : ce n'est pas un événement.",
+    en: 'The reading is below the threshold of the type ({threshold}): it is not an event.'
+  },
+  telematicsDuplicate: {
+    fr: 'Cet événement a déjà été reçu pour ce véhicule ({no}).',
+    en: 'This event was already received for this vehicle ({no}).'
+  },
+  telematicsEventHandled: {
+    fr: 'Cet événement a déjà été traité.',
+    en: 'This event was already handled.'
+  },
+  telematicsNoInfractionType: {
+    fr: "Ce type d'événement ne correspond à aucun type d'infraction.",
+    en: 'This event type matches no infraction type.'
+  },
+  positionUnknown: {
+    fr: 'Position non transmise',
+    en: 'Position not reported'
   }
 } satisfies Record<string, LocalizedText>

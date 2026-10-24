@@ -1,0 +1,49 @@
+export default {
+  'fleet.telematicsEventTypes.title': 'Telematics event types',
+  'fleet.telematicsEventTypes.card': 'Event type card',
+  'fleet.telematicsEventTypes.new': 'New event type',
+  'fleet.telematicsEventTypes.loadingList': 'Loading event types…',
+  'fleet.telematicsEventTypes.noResults': 'No event type.',
+  'fleet.telematicsEventTypes.noSearchResults': 'No type matches "{query}".',
+  'fleet.telematicsEventTypes.saveSuccess': 'Event type saved.',
+  'fleet.telematicsEventTypes.saveError': 'The event type could not be saved.',
+  'fleet.telematicsEventTypes.createError': 'The event type could not be created.',
+  'fleet.telematicsEventTypes.deleteError': 'The event type could not be deleted.',
+  'fleet.telematicsEventTypes.confirmDelete': 'Delete the event type',
+  'fleet.telematicsEventTypes.confirmDeleteMsg': 'The "{name}" type will be permanently deleted.',
+
+  'fleet.telematicsEventTypes.search.all': 'Code or name',
+
+  'fleet.telematicsEventTypes.col.no': 'Code',
+  'fleet.telematicsEventTypes.col.name': 'Name',
+  'fleet.telematicsEventTypes.col.family': 'Family',
+  'fleet.telematicsEventTypes.col.severity': 'Severity',
+  'fleet.telematicsEventTypes.col.threshold': 'Threshold',
+  'fleet.telematicsEventTypes.col.unit': 'Unit',
+  'fleet.telematicsEventTypes.col.raisesAlert': 'Raises an alert',
+  'fleet.telematicsEventTypes.col.affectsScore': 'Counts in the driver score',
+  'fleet.telematicsEventTypes.col.infractionTypeNo': 'Infraction type',
+  'fleet.telematicsEventTypes.col.active': 'Active',
+  'fleet.telematicsEventTypes.col.infractionTypeName': 'Infraction type',
+  'fleet.telematicsEventTypes.col.eventCount': 'Events',
+
+  'fleet.telematicsEventTypes.form.general': 'Event',
+  'fleet.telematicsEventTypes.form.follow': 'Follow-up',
+  'fleet.telematicsEventTypes.form.no': 'Code',
+  'fleet.telematicsEventTypes.form.name': 'Name',
+  'fleet.telematicsEventTypes.form.family': 'Family',
+  'fleet.telematicsEventTypes.form.severity': 'Severity',
+  'fleet.telematicsEventTypes.form.threshold': 'Threshold',
+  'fleet.telematicsEventTypes.form.thresholdHint':
+    'A reading below this threshold is not recorded.',
+  'fleet.telematicsEventTypes.form.unit': 'Unit',
+  'fleet.telematicsEventTypes.form.raisesAlert': 'Raises an alert',
+  'fleet.telematicsEventTypes.form.raisesAlertHint':
+    'Until it is handled, the event is listed among the alerts.',
+  'fleet.telematicsEventTypes.form.affectsScore': 'Counts in the driver score',
+  'fleet.telematicsEventTypes.form.infractionTypeNo': 'Infraction type',
+  'fleet.telematicsEventTypes.form.infractionTypeNoHint':
+    'Lets an infraction be opened from the event.',
+  'fleet.telematicsEventTypes.form.active': 'Active',
+  'fleet.telematicsEventTypes.form.eventCount': 'Events of this type'
+}

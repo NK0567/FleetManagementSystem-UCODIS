@@ -16,7 +16,13 @@ import { nowIso } from '../../clock'
 import type { MockDatabase } from '../../db/database'
 import { nextNo } from '../../db/numbering'
 import type { InfractionRow } from '../../fixtures/fleet/infractions'
-import { readBody, registerCrudResource, routeParam, stampModified } from '../../http/crudResource'
+import {
+  readBody,
+  registerCrudResource,
+  routeParam,
+  stampCreated,
+  stampModified
+} from '../../http/crudResource'
 import { conflict, unprocessable } from '../../http/errors'
 import {
   readAll,
@@ -72,6 +78,38 @@ function historyEvent(
   comment = ''
 ): InfractionEvent {
   return { at: nowIso(), by: sessionUser(request).code, kind, comment }
+}
+
+/** An offence seen by the on-board units; seen twice within minutes, it stays one infraction. */
+export function infractionFromTelematics(
+  db: MockDatabase,
+  fields: Pick<
+    InfractionRow,
+    'infractionTypeNo' | 'occurredAt' | 'location' | 'vehicleNo' | 'driverNo' | 'detail'
+  >,
+  request: MockRequest
+): string {
+  const twin = db.infractions.all().find((row) => isDuplicate(row, fields))
+  if (twin) return twin.no
+  const type = db.infractionTypes.findOrFail(fields.infractionTypeNo)
+  const infraction = {
+    no: nextNo(
+      db.infractions.all().map((row) => row.no),
+      `INF-${fields.occurredAt.slice(0, 4)}-`,
+      3
+    ),
+    ...fields,
+    severity: type.defaultSeverity,
+    fineAmount: null,
+    source: 'telematics' as const,
+    handlerCode: null,
+    outcome: null,
+    outcomeComment: '',
+    closedAt: null,
+    history: [historyEvent(request, 'recorded')]
+  }
+  db.infractions.insert(stampCreated(infraction, request))
+  return infraction.no
 }
 
 export function registerInfractionsHandlers(router: MockRouter, db: MockDatabase): void {

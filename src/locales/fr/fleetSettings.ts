@@ -61,5 +61,8 @@ export default {
   'fleet.settings.unit.percent': '%',
   'fleet.settings.unit.l100': 'L/100 km',
   'fleet.settings.unit.gPerL': 'g/L',
-  'fleet.settings.unit.amount': 'Ar'
+  'fleet.settings.unit.amount': 'Ar',
+  'fleet.settings.section.telematics': 'Télématique',
+  'fleet.settings.section.telematics.hint': 'Suivi des boîtiers embarqués.',
+  'fleet.settings.field.telematics.signalLossMin': 'Silence avant perte de signal'
 }

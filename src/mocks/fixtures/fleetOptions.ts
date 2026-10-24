@@ -270,7 +270,8 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
     equipment: { fr: 'Équipements', en: 'Equipment' },
     inspection: { fr: 'Contre-visites', en: 'Re-inspections' },
     deviation: { fr: "Écarts d'itinéraire", en: 'Route deviations' },
-    insurance: { fr: 'Assurances', en: 'Insurance' }
+    insurance: { fr: 'Assurances', en: 'Insurance' },
+    telematics: { fr: 'Télématique', en: 'Telematics' }
   },
   alertSeverity: {
     info: { fr: 'Information', en: 'Information' },
@@ -343,6 +344,43 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
     auto: { fr: 'Automatique', en: 'Automatic' },
     manual: { fr: 'Manuel', en: 'Manual' },
     detached: { fr: 'Détaché', en: 'Detached' }
+  },
+  telematicsFamily: {
+    behavior: { fr: 'Conduite', en: 'Driving behaviour' },
+    camera: { fr: 'Caméra', en: 'Camera' },
+    fault: { fr: 'Défaut véhicule', en: 'Vehicle fault' },
+    signal: { fr: 'Signal', en: 'Signal' },
+    site: { fr: 'Site', en: 'Site' },
+    stop: { fr: 'Arrêt', en: 'Stop' }
+  },
+  telematicsSeverity: {
+    minor: { fr: 'Mineur', en: 'Minor' },
+    major: { fr: 'Majeur', en: 'Major' },
+    critical: { fr: 'Critique', en: 'Critical' }
+  },
+  telematicsUnit: {
+    kmh: { fr: 'km/h', en: 'km/h' },
+    g: { fr: 'g', en: 'g' },
+    min: { fr: 'min', en: 'min' },
+    celsius: { fr: '°C', en: '°C' }
+  },
+  telematicsSource: {
+    box: { fr: 'Boîtier', en: 'On-board unit' },
+    camera: { fr: 'Caméra', en: 'Camera' },
+    obd: { fr: 'Prise diagnostic', en: 'Diagnostic port' },
+    gps: { fr: 'GPS', en: 'GPS' }
+  },
+  telematicsEventStatus: {
+    new: { fr: 'À traiter', en: 'To handle' },
+    acknowledged: { fr: 'Pris en compte', en: 'Acknowledged' },
+    infraction: { fr: 'Infraction ouverte', en: 'Infraction opened' }
+  },
+  liveSituation: {
+    moving: { fr: 'En route', en: 'On the road' },
+    stopped: { fr: 'À un arrêt', en: 'At a stop' },
+    parked: { fr: 'Stationné', en: 'Parked' },
+    immobilized: { fr: 'Immobilisé', en: 'Immobilized' },
+    signal_lost: { fr: 'Signal perdu', en: 'Signal lost' }
   },
   complianceGapReason: {
     missing: { fr: 'Manquant', en: 'Missing' },

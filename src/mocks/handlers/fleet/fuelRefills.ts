@@ -33,6 +33,7 @@ import type { MockRouter } from '../../http/router'
 import { sessionUser } from '../../http/types'
 import { localize, localizeNumber, type MockLanguage } from '../../i18n'
 import { fileMetaOf } from '../files'
+import { expectedDrivers, tripAt } from './links'
 import { FLEET_MESSAGES } from './messages'
 import { fleetSettings } from './settings'
 
@@ -48,43 +49,6 @@ type EditableFields = Pick<
   | 'fullTank'
   | 'receiptFileNo'
 >
-
-/** The driver assigned to the vehicle that day, and the driver of a trip it was on. */
-function expectedDrivers(
-  db: MockDatabase,
-  refill: Pick<FuelRefillRow, 'vehicleNo' | 'refueledAt' | 'tripNo'>
-) {
-  const day = refill.refueledAt.slice(0, 10)
-  const assigned = db.driverAssignments
-    .all()
-    .filter(
-      (row) =>
-        row.vehicleNo === refill.vehicleNo &&
-        row.startDate <= day &&
-        (!row.endDate || row.endDate >= day)
-    )
-    .map((row) => row.employeeNo)
-  const trip = refill.tripNo
-    ? db.trips.find(refill.tripNo)
-    : tripAt(db, refill.vehicleNo, refill.refueledAt)
-  return trip ? [...assigned, trip.driverNo] : assigned
-}
-
-/** The trip the vehicle was on at that moment, if any. */
-export function tripAt(db: MockDatabase, vehicleNo: string, at: string) {
-  const now = nowIsoDateTime()
-  return (
-    db.trips
-      .all()
-      .find(
-        (trip) =>
-          (trip.vehicleNo === vehicleNo || trip.trailerNo === vehicleNo) &&
-          !!trip.actualDeparture &&
-          trip.actualDeparture <= at &&
-          (trip.actualArrival ?? (trip.status === 'in_progress' ? now : '')) >= at
-      ) ?? null
-  )
-}
 
 export function fuelRefillsApi(db: MockDatabase, language: MockLanguage): FuelRefillApi[] {
   const settings = fleetSettings(db).fuel
@@ -121,7 +85,7 @@ export function fuelRefillsApi(db: MockDatabase, language: MockLanguage): FuelRe
             distanceKm(site, { latitude: refill.latitude, longitude: refill.longitude }) * 10
           ) / 10
         : null
-    const expected = expectedDrivers(db, refill)
+    const expected = expectedDrivers(db, refill.vehicleNo, refill.refueledAt, refill.tripNo)
     const hour = Number(refill.refueledAt.slice(11, 13))
     const results = refillChecks({
       liters: refill.liters,
@@ -249,11 +213,7 @@ export function registerFuelRefillsHandlers(router: MockRouter, db: MockDatabase
       // Left empty, the driver is the one assigned to the vehicle that day, or the one on the trip.
       const driverNo =
         fields.driverNo ??
-        expectedDrivers(db, {
-          vehicleNo,
-          refueledAt: fields.refueledAt,
-          tripNo: trip?.no ?? null
-        })[0] ??
+        expectedDrivers(db, vehicleNo, fields.refueledAt, trip?.no ?? null)[0] ??
         null
       const refill = {
         no: nextNo(

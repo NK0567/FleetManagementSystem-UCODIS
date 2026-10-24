@@ -346,6 +346,13 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/fleet/live-map': RouteRecordInfo<
+      '/fleet/live-map',
+      '/fleet/live-map',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/fleet/providers/': RouteRecordInfo<
       '/fleet/providers/',
       '/fleet/providers',
@@ -433,6 +440,34 @@ declare module 'vue-router/auto-routes' {
     '/fleet/sites/[id]': RouteRecordInfo<
       '/fleet/sites/[id]',
       '/fleet/sites/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/telematics-event-types/': RouteRecordInfo<
+      '/fleet/telematics-event-types/',
+      '/fleet/telematics-event-types',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/telematics-event-types/[id]': RouteRecordInfo<
+      '/fleet/telematics-event-types/[id]',
+      '/fleet/telematics-event-types/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/telematics-events/': RouteRecordInfo<
+      '/fleet/telematics-events/',
+      '/fleet/telematics-events',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/telematics-events/[id]': RouteRecordInfo<
+      '/fleet/telematics-events/[id]',
+      '/fleet/telematics-events/:id',
       { id: ParamValue<true> },
       { id: ParamValue<false> },
       | never
@@ -1006,6 +1041,14 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | 'id'
     }
+    'src/pages/fleet/live-map.vue': {
+      routes:
+        | '/fleet/live-map'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
     'src/pages/fleet/providers/index.vue': {
       routes:
         | '/fleet/providers/'
@@ -1105,6 +1148,38 @@ declare module 'vue-router/auto-routes' {
     'src/pages/fleet/sites/[id].vue': {
       routes:
         | '/fleet/sites/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/telematics-event-types/index.vue': {
+      routes:
+        | '/fleet/telematics-event-types/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/telematics-event-types/[id].vue': {
+      routes:
+        | '/fleet/telematics-event-types/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/telematics-events/index.vue': {
+      routes:
+        | '/fleet/telematics-events/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/telematics-events/[id].vue': {
+      routes:
+        | '/fleet/telematics-events/[id]'
       views:
         | never
       pathParamNames:
