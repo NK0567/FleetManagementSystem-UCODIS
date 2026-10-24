@@ -60,5 +60,6 @@ export default {
   'nav.failureCodes': 'Nomenclature des pannes',
   'nav.downtimeCodes': "Causes d'indisponibilité",
   'nav.missionTypes': 'Types de mission',
-  'nav.maintenanceSettings': 'Réglages maintenance'
+  'nav.maintenanceSettings': 'Réglages maintenance',
+  'nav.downtimes': 'Indisponibilités'
 }

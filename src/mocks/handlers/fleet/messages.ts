@@ -236,7 +236,7 @@ export const FLEET_MESSAGES = {
     fr: 'Contre-visite en attente : {detail}',
     en: 'Re-inspection pending: {detail}'
   },
-  causeMaintenance: { fr: 'En atelier : {detail}', en: 'In the workshop: {detail}' },
+  causeMaintenance: { fr: 'Indisponible : {detail}', en: 'Unavailable: {detail}' },
   causeTrip: { fr: 'En trajet ({detail})', en: 'On trip ({detail})' },
   causeDriver: { fr: 'Conducteur : {detail}', en: 'Driver: {detail}' },
   causeCoupling: { fr: 'Attelé à {detail}', en: 'Coupled with {detail}' },

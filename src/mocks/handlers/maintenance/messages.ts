@@ -44,5 +44,33 @@ export const MAINTENANCE_MESSAGES = {
   downtimeCodeHasRole: {
     fr: 'Cette cause porte un rôle automatique : retirez le rôle avant de la supprimer.',
     en: 'This cause holds an automatic role: remove the role before deleting it.'
+  },
+  downtimeCodeInactive: {
+    fr: 'Cette cause est désactivée.',
+    en: 'This cause is inactive.'
+  },
+  vehicleRemoved: {
+    fr: 'Ce véhicule est sorti du parc.',
+    en: 'This vehicle has left the fleet.'
+  },
+  dateInFuture: {
+    fr: 'La date ne peut pas être dans le futur.',
+    en: 'The date cannot be in the future.'
+  },
+  downtimeAlreadyOpen: {
+    fr: 'Le véhicule est déjà indisponible pour cette cause ({no}).',
+    en: 'The vehicle is already out for this cause ({no}).'
+  },
+  downtimeAlreadyEnded: {
+    fr: 'Cette indisponibilité est déjà terminée.',
+    en: 'This downtime has already ended.'
+  },
+  downtimeHeldByWorkOrder: {
+    fr: 'Un ordre de travail porte cette indisponibilité : elle se termine avec lui.',
+    en: 'A work order holds this downtime: it ends with the order.'
+  },
+  downtimeEndInvalid: {
+    fr: 'La fin doit suivre le début et ne pas être dans le futur.',
+    en: 'The end must follow the start and not be in the future.'
   }
 } satisfies Record<string, LocalizedText>

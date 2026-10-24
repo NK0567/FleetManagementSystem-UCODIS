@@ -703,6 +703,20 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/maintenance/downtimes/': RouteRecordInfo<
+      '/maintenance/downtimes/',
+      '/maintenance/downtimes',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/downtimes/[id]': RouteRecordInfo<
+      '/maintenance/downtimes/[id]',
+      '/maintenance/downtimes/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/maintenance/failure-codes/': RouteRecordInfo<
       '/maintenance/failure-codes/',
       '/maintenance/failure-codes',
@@ -1535,6 +1549,22 @@ declare module 'vue-router/auto-routes' {
     'src/pages/maintenance/downtime-codes/[id].vue': {
       routes:
         | '/maintenance/downtime-codes/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/maintenance/downtimes/index.vue': {
+      routes:
+        | '/maintenance/downtimes/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/downtimes/[id].vue': {
+      routes:
+        | '/maintenance/downtimes/[id]'
       views:
         | never
       pathParamNames:

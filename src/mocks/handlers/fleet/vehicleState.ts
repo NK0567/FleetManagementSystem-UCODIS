@@ -8,6 +8,7 @@ import type { MockDatabase } from '../../db/database'
 import type { VehicleRow } from '../../fixtures/fleet/vehicles'
 import { localize, localizeDay, type MockLanguage } from '../../i18n'
 import { activeLinks, coupledWith, employeeNames, vehiclePlates } from './links'
+import { openDowntimeCauses } from '../maintenance/downtimes'
 import { FLEET_MESSAGES } from './messages'
 import { tripIndex } from './tripIndex'
 import { documentCompliance, invalidatingGaps } from './documentCompliance'
@@ -22,6 +23,7 @@ export function vehicleStatuses(db: MockDatabase): Map<string, VehicleStatusResu
   const compliance = documentCompliance(db).vehicles
   const typeNames = new Map(db.documentTypes.all().map((type) => [type.no, type.name]))
   const rechecks = vehiclesAwaitingRecheck(db)
+  const downtimes = openDowntimeCauses(db)
   const factsOf = (vehicle: VehicleRow): VehicleStatusFacts => {
     const assignment = links.assignmentByVehicle.get(vehicle.no)
     const coupling = links.couplingByVehicle.get(vehicle.no)
@@ -35,7 +37,11 @@ export function vehicleStatuses(db: MockDatabase): Map<string, VehicleStatusResu
         })),
         ...[rechecks.get(vehicle.no)]
           .filter((inspection) => !!inspection)
-          .map((inspection) => ({ kind: 'inspection' as const, detail: inspection.findings }))
+          .map((inspection) => ({ kind: 'inspection' as const, detail: inspection.findings })),
+        ...(downtimes.get(vehicle.no) ?? []).map((detail) => ({
+          kind: 'maintenance' as const,
+          detail
+        }))
       ],
       activeTripNo: trips.onRoadByVehicle.get(vehicle.no)?.no ?? null,
       driverName: assignment ? (names.get(assignment.employeeNo) ?? assignment.employeeNo) : null,

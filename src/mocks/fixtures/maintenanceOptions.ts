@@ -17,5 +17,13 @@ export const MAINTENANCE_OPTION_SETS: Record<string, Record<string, LocalizedTex
     breakdown: { fr: 'Panne', en: 'Breakdown' },
     preventive: { fr: 'Entretien préventif', en: 'Preventive service' },
     accident: { fr: 'Accident', en: 'Accident' }
+  },
+  downtimeStatus: {
+    open: { fr: 'En cours', en: 'Open' },
+    closed: { fr: 'Terminée', en: 'Ended' }
+  },
+  downtimeOrigin: {
+    manual: { fr: 'Déclarée', en: 'Declared' },
+    work_order: { fr: 'Ordre de travail', en: 'Work order' }
   }
 }

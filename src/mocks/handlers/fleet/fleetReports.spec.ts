@@ -25,10 +25,11 @@ const indicator = (summary: FleetReportApi, key: string) =>
 describe('fleet dashboard', () => {
   it('counts what is ready, what is moving and what is stuck', async () => {
     const dashboard = (await get('/fleet/dashboard')).data.data as FleetDashboardApi
-    expect(dashboard.availability.tractors).toEqual({ available: 7, total: 10 })
-    expect(dashboard.movement).toMatchObject({ moving: 1, immobilized: 1, signal_lost: 0 })
+    expect(dashboard.availability.tractors).toEqual({ available: 6, total: 10 })
+    expect(dashboard.movement).toMatchObject({ moving: 1, immobilized: 2, signal_lost: 0 })
     expect(dashboard.immobilized.map((vehicle) => vehicle.vehicleNo)).toEqual([
       'VEH-005',
+      'VEH-008',
       'VEH-009',
       'VEH-022',
       'VEH-024'

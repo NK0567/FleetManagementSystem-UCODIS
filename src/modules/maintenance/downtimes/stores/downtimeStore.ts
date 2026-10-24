@@ -1,0 +1,49 @@
+import { defineStore } from 'pinia'
+import { makeViewAsFilters, useCrudState } from '@/core/factories'
+import type { ListFilter } from '@/core/types/crud.types'
+import type { DowntimeStatus } from '../domain/downtime'
+import { downtimeService } from '../services/downtimeService'
+import type { DowntimeApi, DowntimeSearchColumn } from '../types/downtime.types'
+
+export type DowntimeListView = 'open' | 'closed' | 'all'
+
+const VIEW_STATUSES: Record<DowntimeListView, DowntimeStatus[] | null> = {
+  open: ['open'],
+  closed: ['closed'],
+  all: null
+}
+
+function viewFilters(view: DowntimeListView): ListFilter[] {
+  const statuses = VIEW_STATUSES[view]
+  return statuses ? [{ field: 'status', valueType: 'string', value: statuses }] : []
+}
+
+function detectView(filters: ListFilter[]): DowntimeListView {
+  const value = JSON.stringify(filters.find((filter) => filter.field === 'status')?.value ?? null)
+  const match = (Object.keys(VIEW_STATUSES) as DowntimeListView[]).find(
+    (view) => JSON.stringify(VIEW_STATUSES[view]) === value
+  )
+  return match ?? 'all'
+}
+
+export const useDowntimeStore = defineStore('maintenance-downtime', () => {
+  const crud = useCrudState<DowntimeApi, DowntimeSearchColumn>({
+    persistKey: 'maintenance-downtime',
+    service: downtimeService,
+    defaultSearchColumn: 'no,vehiclePlate,downtimeCodeName',
+    entityLabelKey: 'maintenance.downtimes.title',
+    defaultSortBy: 'startedAt',
+    defaultSortDirection: 'DESC',
+    defaultUserFilters: viewFilters('open')
+  })
+
+  const { listView, setListView } = makeViewAsFilters<DowntimeListView>({
+    userFilters: crud.userFilters,
+    setUserFilters: crud.setUserFilters,
+    managedFields: ['status'],
+    buildViewFilters: viewFilters,
+    detect: detectView
+  })
+
+  return { ...crud, listView, setListView }
+})

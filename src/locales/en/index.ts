@@ -61,6 +61,7 @@ import maintenanceFailureCodes from './maintenanceFailureCodes'
 import maintenanceDowntimeCodes from './maintenanceDowntimeCodes'
 import maintenanceMissionTypes from './maintenanceMissionTypes'
 import maintenanceTechnicians from './maintenanceTechnicians'
+import maintenanceDowntimes from './maintenanceDowntimes'
 export default {
   ...common,
   ...auth,
@@ -123,5 +124,6 @@ export default {
   ...maintenanceFailureCodes,
   ...maintenanceDowntimeCodes,
   ...maintenanceMissionTypes,
-  ...maintenanceTechnicians
+  ...maintenanceTechnicians,
+  ...maintenanceDowntimes
 }
