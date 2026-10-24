@@ -9,6 +9,7 @@ import { registerSharedHandlers } from './handlers/shared'
 import { registerModuleToggleHandlers } from './handlers/settings/moduleToggles'
 import { registerHrHandlers } from './handlers/hr'
 import { registerFleetHandlers } from './handlers/fleet'
+import { registerMaintenanceHandlers } from './handlers/maintenance'
 import { createMockAdapter } from './http/adapter'
 import { createMockRouter } from './http/router'
 
@@ -30,6 +31,7 @@ export function createMockServer(context?: CollectionContext) {
   registerModuleToggleHandlers(router, db)
   registerHrHandlers(router, db)
   registerFleetHandlers(router, db)
+  registerMaintenanceHandlers(router, db)
 
   return { db, router }
 }

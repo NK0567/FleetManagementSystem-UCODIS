@@ -68,5 +68,11 @@ export default {
     "Dépannage sur route d'un camion bloqué loin d'un atelier, et sécurisation d'accident.",
   'settings.moduleToggles.item.purchasing.label': 'Achats et stock',
   'settings.moduleToggles.item.purchasing.description':
-    "Catalogue de pièces, fournisseurs et mouvements de stock, avec seuils d'alerte de réapprovisionnement."
+    "Catalogue de pièces, fournisseurs et mouvements de stock, avec seuils d'alerte de réapprovisionnement.",
+  'settings.moduleToggles.item.tyres.label': 'Pneus',
+  'settings.moduleToggles.item.tyres.description':
+    "Suivi des pneus : montage, relevés de pression et d'usure, rotations, rechapage et coût au kilomètre.",
+  'settings.moduleToggles.item.vehicle-checks.label': 'Contrôles véhicule',
+  'settings.moduleToggles.item.vehicle-checks.description':
+    "Contrôles de l'atelier avant chargement, au retour de voyage et à la réception d'un véhicule neuf."
 }

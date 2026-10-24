@@ -68,5 +68,11 @@ export default {
     'Roadside repair of a truck stranded far from a workshop, and accident securing.',
   'settings.moduleToggles.item.purchasing.label': 'Purchasing and stock',
   'settings.moduleToggles.item.purchasing.description':
-    'Parts catalogue, suppliers and stock movements, with reorder alert thresholds.'
+    'Parts catalogue, suppliers and stock movements, with reorder alert thresholds.',
+  'settings.moduleToggles.item.tyres.label': 'Tyres',
+  'settings.moduleToggles.item.tyres.description':
+    'Tyre tracking: mounting, pressure and wear readings, rotations, retreading and cost per kilometre.',
+  'settings.moduleToggles.item.vehicle-checks.label': 'Vehicle checks',
+  'settings.moduleToggles.item.vehicle-checks.description':
+    'Workshop checks before loading, on return from a trip and on receiving a new vehicle.'
 }

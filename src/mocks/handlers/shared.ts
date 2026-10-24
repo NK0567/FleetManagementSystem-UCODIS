@@ -6,10 +6,11 @@ import { ok } from '../http/responses'
 import type { MockRouter } from '../http/router'
 import { fleetReferenceData } from './fleet/references'
 import { hrReferenceData } from './hr/references'
+import { maintenanceReferenceData } from './maintenance/references'
 
 /** Small lists used by selects and filters; each module adds its own entries. */
 function referenceData(db: MockDatabase): ReferenceData {
-  return { ...hrReferenceData(db), ...fleetReferenceData(db) }
+  return { ...hrReferenceData(db), ...fleetReferenceData(db), ...maintenanceReferenceData(db) }
 }
 
 export function registerSharedHandlers(router: MockRouter, db: MockDatabase): void {

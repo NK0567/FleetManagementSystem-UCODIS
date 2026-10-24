@@ -53,5 +53,12 @@ export default {
   'nav.telematicsEvents': 'Événements télématiques',
   'nav.telematicsEventTypes': "Types d'événements télématiques",
   'nav.fleetDashboard': 'Tableau de bord',
-  'nav.fleetReports': 'Rapports'
+  'nav.fleetReports': 'Rapports',
+  'nav.maintenance': 'Maintenance',
+  'nav.technicians': 'Techniciens',
+  'nav.competences': 'Compétences',
+  'nav.failureCodes': 'Nomenclature des pannes',
+  'nav.downtimeCodes': "Causes d'indisponibilité",
+  'nav.missionTypes': 'Types de mission',
+  'nav.maintenanceSettings': 'Réglages maintenance'
 }

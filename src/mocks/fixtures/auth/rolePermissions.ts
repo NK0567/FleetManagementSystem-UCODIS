@@ -70,6 +70,32 @@ const FLEET_OPERATIONS = [
   'TELEMATICS',
   'FLEETREPORT'
 ]
+const MAINTENANCE_REFERENCE = [
+  'TECHNICIAN',
+  'COMPETENCE',
+  'FAILURECODE',
+  'DOWNTIMECODE',
+  'MISSIONTYPE'
+]
+const MAINTENANCE_OPERATIONS = [
+  'MAINTENANCEDASHBOARD',
+  'WORKORDER',
+  'SERVICEDUE',
+  'DOWNTIME',
+  'WORKSHOPLOAD',
+  'VEHICLECHECK',
+  'MOBILEINTERVENTION',
+  'TYRE',
+  'PURCHASEREQUEST',
+  'STOCKITEM',
+  'RELIABILITY'
+]
+/** Execute covers what commits the workshop: validating or refusing a closing, cancelling, adjusting stock. */
+const MAINTENANCE_MANAGEMENT: Record<string, Grant> = {
+  ...grant([...MAINTENANCE_REFERENCE, ...MAINTENANCE_OPERATIONS], FULL),
+  MAINTENANCESETTINGS: allRecords(['read', 'update'])
+}
+
 /** Vehicles are removed from the park through an action, never deleted. */
 const FLEET_MANAGEMENT: Record<string, Grant> = {
   ...grant([...FLEET_REFERENCE, ...FLEET_OPERATIONS], FULL),
@@ -104,6 +130,7 @@ export const ROLE_PERMISSIONS: Record<UserProfileCode, Record<string, Grant>> = 
     LEAVEREQUEST: allRecords(['read', 'insert', 'execute', 'export']),
     LEAVEBALANCE: READ_EXPORT,
     ...FLEET_MANAGEMENT,
+    ...MAINTENANCE_MANAGEMENT,
     MODULETOGGLE: allRecords(['read', 'update'])
   },
   FLEET_MANAGER: {
@@ -114,12 +141,15 @@ export const ROLE_PERMISSIONS: Record<UserProfileCode, Record<string, Grant>> = 
     ORGUNIT: READ_EXPORT,
     LEAVEREQUEST: allRecords(['read', 'insert', 'execute', 'export']),
     LEAVEBALANCE: READ_EXPORT,
-    ...FLEET_MANAGEMENT
+    ...FLEET_MANAGEMENT,
+    ...MAINTENANCE_MANAGEMENT
   },
   MANAGEMENT: {
     ...grant([...HR_READ_FEATURES, 'HRDASHBOARD', 'LEAVEREQUEST'], READ_EXPORT),
     ...grant([...FLEET_REFERENCE, ...FLEET_OPERATIONS], READ_EXPORT),
+    ...grant([...MAINTENANCE_REFERENCE, ...MAINTENANCE_OPERATIONS], READ_EXPORT),
     FLEETSETTINGS: READ,
+    MAINTENANCESETTINGS: READ,
     MYPLANNING: READ
   },
   MAINTENANCE_TECHNICIAN: {
@@ -127,7 +157,14 @@ export const ROLE_PERMISSIONS: Record<UserProfileCode, Record<string, Grant>> = 
     ...grant(['VEHICLETYPE', 'EQUIPMENTTYPE', 'COUPLING', 'DOCUMENT', 'FLEETSTATUS'], READ),
     ...grant(['ROADCHECKLIST', 'INSPECTION'], allRecords(['read', 'insert', 'update'])),
     CHECKPOINT: READ,
-    ALERT: allRecords(['read', 'update'])
+    ALERT: allRecords(['read', 'update']),
+    ...grant([...MAINTENANCE_REFERENCE, 'MAINTENANCESETTINGS', 'WORKSHOPLOAD', 'STOCKITEM'], READ),
+    ...grant(['MAINTENANCEDASHBOARD', 'RELIABILITY'], READ),
+    ...grant(
+      ['WORKORDER', 'SERVICEDUE', 'VEHICLECHECK', 'MOBILEINTERVENTION', 'TYRE'],
+      allRecords(['read', 'insert', 'update'])
+    ),
+    ...grant(['DOWNTIME', 'PURCHASEREQUEST'], allRecords(['read', 'insert']))
   },
   CUSTOMER_SERVICE: backOffice,
   SALES: backOffice,

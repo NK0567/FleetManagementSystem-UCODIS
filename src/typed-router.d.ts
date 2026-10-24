@@ -675,6 +675,83 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/maintenance/competences/': RouteRecordInfo<
+      '/maintenance/competences/',
+      '/maintenance/competences',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/competences/[id]': RouteRecordInfo<
+      '/maintenance/competences/[id]',
+      '/maintenance/competences/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/maintenance/downtime-codes/': RouteRecordInfo<
+      '/maintenance/downtime-codes/',
+      '/maintenance/downtime-codes',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/downtime-codes/[id]': RouteRecordInfo<
+      '/maintenance/downtime-codes/[id]',
+      '/maintenance/downtime-codes/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/maintenance/failure-codes/': RouteRecordInfo<
+      '/maintenance/failure-codes/',
+      '/maintenance/failure-codes',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/failure-codes/[id]': RouteRecordInfo<
+      '/maintenance/failure-codes/[id]',
+      '/maintenance/failure-codes/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/maintenance/mission-types/': RouteRecordInfo<
+      '/maintenance/mission-types/',
+      '/maintenance/mission-types',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/mission-types/[id]': RouteRecordInfo<
+      '/maintenance/mission-types/[id]',
+      '/maintenance/mission-types/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/maintenance/settings': RouteRecordInfo<
+      '/maintenance/settings',
+      '/maintenance/settings',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/technicians/': RouteRecordInfo<
+      '/maintenance/technicians/',
+      '/maintenance/technicians',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/technicians/[id]': RouteRecordInfo<
+      '/maintenance/technicians/[id]',
+      '/maintenance/technicians/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/settings/module-toggles': RouteRecordInfo<
       '/settings/module-toggles',
       '/settings/module-toggles',
@@ -1430,6 +1507,94 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | never
+    }
+    'src/pages/maintenance/competences/index.vue': {
+      routes:
+        | '/maintenance/competences/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/competences/[id].vue': {
+      routes:
+        | '/maintenance/competences/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/maintenance/downtime-codes/index.vue': {
+      routes:
+        | '/maintenance/downtime-codes/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/downtime-codes/[id].vue': {
+      routes:
+        | '/maintenance/downtime-codes/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/maintenance/failure-codes/index.vue': {
+      routes:
+        | '/maintenance/failure-codes/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/failure-codes/[id].vue': {
+      routes:
+        | '/maintenance/failure-codes/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/maintenance/mission-types/index.vue': {
+      routes:
+        | '/maintenance/mission-types/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/mission-types/[id].vue': {
+      routes:
+        | '/maintenance/mission-types/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/maintenance/settings.vue': {
+      routes:
+        | '/maintenance/settings'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/technicians/index.vue': {
+      routes:
+        | '/maintenance/technicians/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/technicians/[id].vue': {
+      routes:
+        | '/maintenance/technicians/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
     }
     'src/pages/settings/module-toggles.vue': {
       routes:

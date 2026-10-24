@@ -52,9 +52,15 @@ import fleetFuelCards from './fleetFuelCards'
 import fleetLiveMap from './fleetLiveMap'
 import fleetDashboard from './fleetDashboard'
 import fleetReports from './fleetReports'
+import maintenanceSettings from './maintenanceSettings'
 import fleetFuelCardTransactions from './fleetFuelCardTransactions'
 import fleetTelematicsEventTypes from './fleetTelematicsEventTypes'
 import fleetTelematicsEvents from './fleetTelematicsEvents'
+import maintenanceCompetences from './maintenanceCompetences'
+import maintenanceFailureCodes from './maintenanceFailureCodes'
+import maintenanceDowntimeCodes from './maintenanceDowntimeCodes'
+import maintenanceMissionTypes from './maintenanceMissionTypes'
+import maintenanceTechnicians from './maintenanceTechnicians'
 export default {
   ...common,
   ...auth,
@@ -109,7 +115,13 @@ export default {
   ...fleetLiveMap,
   ...fleetDashboard,
   ...fleetReports,
+  ...maintenanceSettings,
   ...fleetFuelCardTransactions,
   ...fleetTelematicsEventTypes,
-  ...fleetTelematicsEvents
+  ...fleetTelematicsEvents,
+  ...maintenanceCompetences,
+  ...maintenanceFailureCodes,
+  ...maintenanceDowntimeCodes,
+  ...maintenanceMissionTypes,
+  ...maintenanceTechnicians
 }

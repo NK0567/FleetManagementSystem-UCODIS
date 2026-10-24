@@ -1,0 +1,17 @@
+import type { MockDatabase } from '../../db/database'
+import type { MockRouter } from '../../http/router'
+import { registerMaintenanceSettingsHandlers } from './settings'
+import { registerCompetencesHandlers } from './competences'
+import { registerFailureCodesHandlers } from './failureCodes'
+import { registerDowntimeCodesHandlers } from './downtimeCodes'
+import { registerMissionTypesHandlers } from './missionTypes'
+import { registerTechniciansHandlers } from './technicians'
+
+export function registerMaintenanceHandlers(router: MockRouter, db: MockDatabase): void {
+  registerMaintenanceSettingsHandlers(router, db)
+  registerCompetencesHandlers(router, db)
+  registerFailureCodesHandlers(router, db)
+  registerDowntimeCodesHandlers(router, db)
+  registerMissionTypesHandlers(router, db)
+  registerTechniciansHandlers(router, db)
+}
