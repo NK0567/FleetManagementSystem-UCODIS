@@ -51,5 +51,7 @@ export default {
   'nav.fuelCardTransactions': 'Card transactions',
   'nav.liveMap': 'Live map',
   'nav.telematicsEvents': 'Telematics events',
-  'nav.telematicsEventTypes': 'Telematics event types'
+  'nav.telematicsEventTypes': 'Telematics event types',
+  'nav.fleetDashboard': 'Dashboard',
+  'nav.fleetReports': 'Reports'
 }

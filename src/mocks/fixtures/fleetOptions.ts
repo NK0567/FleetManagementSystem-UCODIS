@@ -376,6 +376,11 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
     acknowledged: { fr: 'Pris en compte', en: 'Acknowledged' },
     infraction: { fr: 'Infraction ouverte', en: 'Infraction opened' }
   },
+  auditDocumentState: {
+    expiring: { fr: 'À renouveler', en: 'To renew' },
+    expired: { fr: 'Expiré', en: 'Expired' },
+    missing: { fr: 'Manquant', en: 'Missing' }
+  },
   scoreFamily: {
     safety: { fr: 'Sécurité routière', en: 'Road safety' },
     route: { fr: "Conformité d'itinéraire", en: 'Route compliance' },

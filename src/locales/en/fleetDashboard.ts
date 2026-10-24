@@ -1,0 +1,25 @@
+export default {
+  'fleet.dashboard.title': 'Fleet dashboard',
+  'fleet.dashboard.subtitle': 'The state of the fleet, the drivers and compliance today.',
+  'fleet.dashboard.loadError': 'The dashboard could not be loaded.',
+  'fleet.dashboard.kpi.tractors': 'Tractors ready',
+  'fleet.dashboard.kpi.trailers': 'Trailers ready',
+  'fleet.dashboard.kpi.readySub': 'Available or assigned, not immobilized',
+  'fleet.dashboard.kpi.drivers': 'Drivers available',
+  'fleet.dashboard.kpi.driversSub': 'Not on leave, not on a trip, eligible',
+  'fleet.dashboard.kpi.documents': 'Documents to sort out',
+  'fleet.dashboard.kpi.documentsSub': 'Expired or missing · {expiring} to renew',
+  'fleet.dashboard.kpi.fuel': 'Fuel this month',
+  'fleet.dashboard.kpi.fuelSub': 'Average {average} L/100 km',
+  'fleet.dashboard.kpi.compliance': 'Compliant trips',
+  'fleet.dashboard.kpi.complianceSub':
+    'Open infractions: {infractions} · below the score threshold: {drivers}',
+  'fleet.dashboard.movement': 'Situation of the tracked vehicles',
+  'fleet.dashboard.openMap': 'Open the map',
+  'fleet.dashboard.latestAlerts': 'Latest alerts',
+  'fleet.dashboard.seeAll': 'See all',
+  'fleet.dashboard.noAlert': 'No alert open.',
+  'fleet.dashboard.immobilized': 'Immobilized vehicles',
+  'fleet.dashboard.noImmobilized': 'No vehicle immobilized.',
+  'fleet.dashboard.fleetByStatus': 'Fleet by status'
+}

@@ -6,7 +6,9 @@ const FLEET_MENU_ORDER = 30
 export function registerFleetModule(): void {
   registerFeatureRoutes({
     ALERT: { to: '/fleet/alerts', menuKey: 'alert' },
+    FLEETDASHBOARD: { to: '/fleet/dashboard', menuKey: 'fleetDashboard' },
     LIVEMAP: { to: '/fleet/live-map', menuKey: 'liveMap' },
+    FLEETREPORT: { to: '/fleet/reports', menuKey: 'fleetReport' },
     TRIP: { to: '/fleet/trips', menuKey: 'trip' },
     VEHICLE: { to: '/fleet/vehicles', menuKey: 'vehicle' },
     COUPLING: { to: '/fleet/couplings', menuKey: 'coupling' },
@@ -51,7 +53,9 @@ export function registerFleetModule(): void {
     order: FLEET_MENU_ORDER,
     subItems: [
       { labelKey: 'nav.alerts', to: '/fleet/alerts', menuKey: 'alert' },
+      { labelKey: 'nav.fleetDashboard', to: '/fleet/dashboard', menuKey: 'fleetDashboard' },
       { labelKey: 'nav.liveMap', to: '/fleet/live-map', menuKey: 'liveMap' },
+      { labelKey: 'nav.fleetReports', to: '/fleet/reports', menuKey: 'fleetReport' },
       { labelKey: 'nav.trips', to: '/fleet/trips', menuKey: 'trip' },
       {
         labelKey: 'nav.departureAuthorizations',

@@ -50,6 +50,8 @@ import fleetFuelRefills from './fleetFuelRefills'
 import fleetFuelConsumption from './fleetFuelConsumption'
 import fleetFuelCards from './fleetFuelCards'
 import fleetLiveMap from './fleetLiveMap'
+import fleetDashboard from './fleetDashboard'
+import fleetReports from './fleetReports'
 import fleetFuelCardTransactions from './fleetFuelCardTransactions'
 import fleetTelematicsEventTypes from './fleetTelematicsEventTypes'
 import fleetTelematicsEvents from './fleetTelematicsEvents'
@@ -105,6 +107,8 @@ export default {
   ...fleetFuelConsumption,
   ...fleetFuelCards,
   ...fleetLiveMap,
+  ...fleetDashboard,
+  ...fleetReports,
   ...fleetFuelCardTransactions,
   ...fleetTelematicsEventTypes,
   ...fleetTelematicsEvents

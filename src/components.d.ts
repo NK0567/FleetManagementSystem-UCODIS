@@ -102,6 +102,8 @@ declare module 'vue' {
     EquipmentTypesList: typeof import('./modules/fleet/equipment-types/pages/EquipmentTypesList.vue')['default']
     FileAttachmentField: typeof import('./components/shared/FileAttachmentField.vue')['default']
     FilterPanel: typeof import('./components/shared/FilterPanel.vue')['default']
+    FleetDashboardPage: typeof import('./modules/fleet/dashboard/pages/FleetDashboardPage.vue')['default']
+    FleetReportsPage: typeof import('./modules/fleet/reports/pages/FleetReportsPage.vue')['default']
     FleetSettingsPage: typeof import('./modules/fleet/fleet-settings/pages/FleetSettingsPage.vue')['default']
     FleetSettingsSectionCard: typeof import('./modules/fleet/fleet-settings/components/FleetSettingsSectionCard.vue')['default']
     FleetStatePill: typeof import('./modules/fleet/fleet-status/components/FleetStatePill.vue')['default']

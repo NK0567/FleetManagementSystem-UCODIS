@@ -807,5 +807,9 @@ export const FLEET_MESSAGES = {
   scoreAlertDetail: {
     fr: 'Score de {score}/100, seuil {threshold}',
     en: 'Score {score}/100, threshold {threshold}'
+  },
+  reportPeriodInvalid: {
+    fr: 'La période du rapport est invalide : indiquez deux dates, la première avant la seconde.',
+    en: 'The report period is invalid: give two dates, the first one before the second.'
   }
 } satisfies Record<string, LocalizedText>

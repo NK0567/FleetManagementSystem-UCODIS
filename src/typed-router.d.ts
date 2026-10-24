@@ -122,6 +122,13 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/fleet/dashboard': RouteRecordInfo<
+      '/fleet/dashboard',
+      '/fleet/dashboard',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/fleet/departure-authorizations/': RouteRecordInfo<
       '/fleet/departure-authorizations/',
       '/fleet/departure-authorizations',
@@ -365,6 +372,13 @@ declare module 'vue-router/auto-routes' {
       '/fleet/providers/:id',
       { id: ParamValue<true> },
       { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/reports': RouteRecordInfo<
+      '/fleet/reports',
+      '/fleet/reports',
+      Record<never, never>,
+      Record<never, never>,
       | never
     >,
     '/fleet/road-checklists/': RouteRecordInfo<
@@ -785,6 +799,14 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | 'id'
     }
+    'src/pages/fleet/dashboard.vue': {
+      routes:
+        | '/fleet/dashboard'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
     'src/pages/fleet/departure-authorizations/index.vue': {
       routes:
         | '/fleet/departure-authorizations/'
@@ -1064,6 +1086,14 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | 'id'
+    }
+    'src/pages/fleet/reports.vue': {
+      routes:
+        | '/fleet/reports'
+      views:
+        | never
+      pathParamNames:
+        | never
     }
     'src/pages/fleet/road-checklists/index.vue': {
       routes:
