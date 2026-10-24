@@ -98,6 +98,7 @@ export default {
   'fleet.vehicles.odometerSource.trip': 'Fin de trajet',
   'fleet.vehicles.odometerSource.refill': 'Plein',
   'fleet.vehicles.odometerSource.removal': 'Sortie du parc',
+  'fleet.vehicles.odometerSource.work_order': 'Ordre de travail',
   'fleet.vehicles.compartment': 'Compartiment {no}',
   'fleet.vehicles.addCompartment': 'Ajouter un compartiment',
   'fleet.vehicles.removeCompartment': 'Retirer le compartiment',

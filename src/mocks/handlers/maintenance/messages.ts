@@ -72,5 +72,81 @@ export const MAINTENANCE_MESSAGES = {
   downtimeEndInvalid: {
     fr: 'La fin doit suivre le début et ne pas être dans le futur.',
     en: 'The end must follow the start and not be in the future.'
+  },
+  downtimeRoleMissing: {
+    fr: "Aucune cause d'indisponibilité ne porte le rôle automatique nécessaire : complétez les causes dans les réglages.",
+    en: 'No downtime cause holds the automatic role needed: complete the causes in the settings.'
+  },
+  symptomTooShort: {
+    fr: 'Décrivez le symptôme en {min} caractères au moins.',
+    en: 'Describe the symptom in at least {min} characters.'
+  },
+  workOrderOriginNotManual: {
+    fr: "Une panne déclarée à la main vient d'un conducteur ou d'un constat d'atelier.",
+    en: 'A fault reported by hand comes from a driver or a workshop finding.'
+  },
+  workOrderNotWorkable: {
+    fr: "Cet ordre de travail n'accepte plus de travaux : il est terminé, validé ou annulé.",
+    en: 'This work order takes no more work: it is finished, validated or cancelled.'
+  },
+  workOrderNotEditable: {
+    fr: 'Le symptôme et la gravité ne se modifient plus une fois les travaux commencés.',
+    en: 'The symptom and the severity can no longer change once the work has started.'
+  },
+  diagnosisCodeKind: {
+    fr: "Le code « {field} » n'est pas de la bonne nature.",
+    en: 'The "{field}" code is not of the right kind.'
+  },
+  diagnosisIncomplete: {
+    fr: 'Diagnostic incomplet : {fields}.',
+    en: 'Incomplete diagnosis: {fields}.'
+  },
+  workOrderAlreadyStarted: {
+    fr: 'Les travaux ont déjà commencé.',
+    en: 'The work has already started.'
+  },
+  technicianInactive: {
+    fr: "Ce technicien n'est plus actif.",
+    en: 'This technician is no longer active.'
+  },
+  labourDateInvalid: {
+    fr: "Le pointage se fait entre la déclaration de la panne et aujourd'hui.",
+    en: 'Time is logged between the fault report and today.'
+  },
+  labourDayFull: {
+    fr: 'Ce technicien a déjà {logged} h ce jour-là ; une journée compte {max} h au plus.',
+    en: 'This technician already has {logged} h that day; a day holds {max} h at most.'
+  },
+  diagnosisMissing: {
+    fr: 'Posez le diagnostic avant de déclarer la fin des travaux.',
+    en: 'Make the diagnosis before declaring the work finished.'
+  },
+  labourMissing: {
+    fr: 'Pointez le temps passé avant de déclarer la fin des travaux.',
+    en: 'Log the time spent before declaring the work finished.'
+  },
+  workDoneTooShort: {
+    fr: 'Décrivez les travaux réalisés en {min} caractères au moins.',
+    en: 'Describe the work done in at least {min} characters.'
+  },
+  odometerBackwards: {
+    fr: "Le kilométrage ne peut pas être inférieur à celui de l'ouverture ({km} km).",
+    en: 'The odometer cannot be below the one at opening ({km} km).'
+  },
+  workOrderNotAwaitingValidation: {
+    fr: "Cet ordre de travail n'attend pas de validation.",
+    en: 'This work order is not awaiting validation.'
+  },
+  fourEyes: {
+    fr: 'La validation revient à une autre personne que celle qui a déclaré la fin ou fait les travaux.',
+    en: 'Validation falls to someone other than whoever declared the work finished or did it.'
+  },
+  reasonTooShort: {
+    fr: 'Donnez un motif de {min} caractères au moins.',
+    en: 'Give a reason of at least {min} characters.'
+  },
+  workOrderFinished: {
+    fr: 'Cet ordre de travail est déjà validé ou annulé.',
+    en: 'This work order is already validated or cancelled.'
   }
 } satisfies Record<string, LocalizedText>

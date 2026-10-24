@@ -63,19 +63,22 @@ describe('downtimes', () => {
   })
 
   it('end once, between the start and now, and set the vehicle free', async () => {
+    const before = (await get<VehicleApi>('/fleet/vehicles/VEH-003')).status
+    const opened = (await declare({ vehicleNo: 'VEH-003' })).data.data as DowntimeApi
+    expect((await get<VehicleApi>('/fleet/vehicles/VEH-003')).status).toBe('immobilized')
     const end = (body: Record<string, unknown>, as = 'FLT001') =>
-      send('post', '/maintenance/downtimes/IND-00004/end', body, as)
-    expect((await end({ comment: 'Démarreur changé.' }, 'MNT001')).status).toBe(403)
+      send('post', `/maintenance/downtimes/${opened.no}/end`, body, as)
+    expect((await end({ comment: 'Retour au poste.' }, 'MNT001')).status).toBe(403)
     expect((await end({ endedAt: '2026-08-01T08:00' })).status).toBe(422)
-    const ended = (await end({ comment: 'Démarreur changé.' })).data.data as DowntimeApi
+    const ended = (await end({ comment: 'Retour au poste.' })).data.data as DowntimeApi
     expect(ended).toMatchObject({
       status: 'closed',
       endedBy: 'FLT001',
-      endComment: 'Démarreur changé.'
+      endComment: 'Retour au poste.'
     })
     expect((await end({})).status).toBe(409)
-    expect((await get<VehicleApi>('/fleet/vehicles/VEH-008')).status).toBe('assigned')
-    const requalified = await send('patch', '/maintenance/downtimes/IND-00004', {
+    expect((await get<VehicleApi>('/fleet/vehicles/VEH-003')).status).toBe(before)
+    const requalified = await send('patch', `/maintenance/downtimes/${opened.no}`, {
       downtimeCodeNo: 'ATP',
       startedAt: '2026-01-01T00:00'
     })
@@ -83,6 +86,13 @@ describe('downtimes', () => {
       downtimeCodeNo: 'ATP',
       startedAt: ended.startedAt
     })
+  })
+
+  it('leave the downtime of a work order to the order', async () => {
+    const ended = await send('post', '/maintenance/downtimes/IND-00004/end', {
+      comment: 'Démarreur changé.'
+    })
+    expect(ended.status).toBe(409)
   })
 
   it('refuse a vehicle that has left the fleet', async () => {

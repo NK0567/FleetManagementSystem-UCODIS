@@ -25,5 +25,45 @@ export const MAINTENANCE_OPTION_SETS: Record<string, Record<string, LocalizedTex
   downtimeOrigin: {
     manual: { fr: 'Déclarée', en: 'Declared' },
     work_order: { fr: 'Ordre de travail', en: 'Work order' }
+  },
+  maintenanceType: {
+    corrective: { fr: 'Correctif', en: 'Corrective' },
+    preventive: { fr: 'Préventif', en: 'Preventive' },
+    improvement: { fr: 'Amélioratif', en: 'Improvement' }
+  },
+  workOrderSeverity: {
+    minor: { fr: 'Mineure', en: 'Minor' },
+    major: { fr: 'Majeure', en: 'Major' },
+    critical: { fr: 'Critique', en: 'Critical' }
+  },
+  workOrderOrigin: {
+    driver_report: { fr: 'Signalement conducteur', en: 'Driver report' },
+    workshop_finding: { fr: "Constat d'atelier", en: 'Workshop finding' },
+    vehicle_check: { fr: 'Contrôle véhicule', en: 'Vehicle check' },
+    road_checklist: { fr: 'Check-list de départ', en: 'Departure checklist' },
+    inspection: { fr: 'Visite technique', en: 'Inspection' },
+    preventive: { fr: 'Entretien planifié', en: 'Planned service' },
+    mobile_team: { fr: 'Équipe mobile', en: 'Mobile team' },
+    telematics: { fr: 'Télématique', en: 'Telematics' },
+    claim: { fr: 'Sinistre', en: 'Claim' },
+    history: { fr: 'Historique importé', en: 'Imported history' }
+  },
+  workOrderStatus: {
+    open: { fr: 'Déclaré', en: 'Reported' },
+    diagnosed: { fr: 'Diagnostiqué', en: 'Diagnosed' },
+    in_progress: { fr: 'En cours', en: 'In progress' },
+    awaiting_validation: { fr: 'À valider', en: 'To validate' },
+    closed: { fr: 'Clôturé', en: 'Closed' },
+    cancelled: { fr: 'Annulé', en: 'Cancelled' }
+  },
+  workOrderEvent: {
+    declared: { fr: 'Panne déclarée', en: 'Fault reported' },
+    diagnosed: { fr: 'Diagnostic posé', en: 'Diagnosis made' },
+    started: { fr: 'Travaux commencés', en: 'Work started' },
+    labour: { fr: 'Temps pointé', en: 'Time logged' },
+    completed: { fr: 'Fin des travaux déclarée', en: 'Work declared finished' },
+    refused: { fr: 'Fin refusée', en: 'Finish refused' },
+    validated: { fr: 'Ordre validé', en: 'Order validated' },
+    cancelled: { fr: 'Ordre annulé', en: 'Order cancelled' }
   }
 }

@@ -7,6 +7,7 @@ import { registerDowntimeCodesHandlers } from './downtimeCodes'
 import { registerMissionTypesHandlers } from './missionTypes'
 import { registerTechniciansHandlers } from './technicians'
 import { registerDowntimesHandlers } from './downtimes'
+import { registerWorkOrdersHandlers } from './workOrders'
 
 export function registerMaintenanceHandlers(router: MockRouter, db: MockDatabase): void {
   registerMaintenanceSettingsHandlers(router, db)
@@ -16,4 +17,5 @@ export function registerMaintenanceHandlers(router: MockRouter, db: MockDatabase
   registerMissionTypesHandlers(router, db)
   registerTechniciansHandlers(router, db)
   registerDowntimesHandlers(router, db)
+  registerWorkOrdersHandlers(router, db)
 }

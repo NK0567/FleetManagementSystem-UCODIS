@@ -766,6 +766,20 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/maintenance/work-orders/': RouteRecordInfo<
+      '/maintenance/work-orders/',
+      '/maintenance/work-orders',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/work-orders/[id]': RouteRecordInfo<
+      '/maintenance/work-orders/[id]',
+      '/maintenance/work-orders/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/settings/module-toggles': RouteRecordInfo<
       '/settings/module-toggles',
       '/settings/module-toggles',
@@ -1621,6 +1635,22 @@ declare module 'vue-router/auto-routes' {
     'src/pages/maintenance/technicians/[id].vue': {
       routes:
         | '/maintenance/technicians/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/maintenance/work-orders/index.vue': {
+      routes:
+        | '/maintenance/work-orders/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/work-orders/[id].vue': {
+      routes:
+        | '/maintenance/work-orders/[id]'
       views:
         | never
       pathParamNames:

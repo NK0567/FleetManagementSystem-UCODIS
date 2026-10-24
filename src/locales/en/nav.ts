@@ -61,5 +61,6 @@ export default {
   'nav.downtimeCodes': 'Downtime causes',
   'nav.missionTypes': 'Mission types',
   'nav.maintenanceSettings': 'Maintenance settings',
+  'nav.workOrders': 'Work orders',
   'nav.downtimes': 'Downtimes'
 }

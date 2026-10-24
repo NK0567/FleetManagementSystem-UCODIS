@@ -18,7 +18,7 @@ export type FuelType = (typeof FUEL_TYPES)[number]
 export const ACQUISITION_MODES = ['purchase', 'rental', 'leasing'] as const
 export type AcquisitionMode = (typeof ACQUISITION_MODES)[number]
 
-export const ODOMETER_SOURCES = ['manual', 'trip', 'refill', 'removal'] as const
+export const ODOMETER_SOURCES = ['manual', 'trip', 'refill', 'removal', 'work_order'] as const
 export type OdometerSource = (typeof ODOMETER_SOURCES)[number]
 
 export const EQUIPMENT_STATES = ['operational', 'out_of_service', 'uninstalled'] as const

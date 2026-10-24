@@ -300,5 +300,11 @@ declare module 'vue' {
     VehicleTypeForm: typeof import('./modules/fleet/vehicle-types/components/VehicleTypeForm.vue')['default']
     VehicleTypesList: typeof import('./modules/fleet/vehicle-types/pages/VehicleTypesList.vue')['default']
     WorkingCalendarPage: typeof import('./modules/hr/working-calendar/pages/WorkingCalendarPage.vue')['default']
+    WorkOrderCard: typeof import('./modules/maintenance/work-orders/pages/WorkOrderCard.vue')['default']
+    WorkOrderCreateModal: typeof import('./modules/maintenance/work-orders/pages/WorkOrderCreateModal.vue')['default']
+    WorkOrderForm: typeof import('./modules/maintenance/work-orders/components/WorkOrderForm.vue')['default']
+    WorkOrderProgressSections: typeof import('./modules/maintenance/work-orders/components/WorkOrderProgressSections.vue')['default']
+    WorkOrdersList: typeof import('./modules/maintenance/work-orders/pages/WorkOrdersList.vue')['default']
+    WorkOrderStatusPill: typeof import('./modules/maintenance/work-orders/components/WorkOrderStatusPill.vue')['default']
   }
 }

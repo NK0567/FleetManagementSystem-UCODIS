@@ -5,6 +5,7 @@ const MAINTENANCE_MENU_ORDER = 40
 
 export function registerMaintenanceModule(): void {
   registerFeatureRoutes({
+    WORKORDER: { to: '/maintenance/work-orders', menuKey: 'workOrder' },
     DOWNTIME: { to: '/maintenance/downtimes', menuKey: 'downtime' },
     TECHNICIAN: { to: '/maintenance/technicians', menuKey: 'technician' },
     COMPETENCE: { to: '/maintenance/competences', menuKey: 'competence' },
@@ -18,6 +19,7 @@ export function registerMaintenanceModule(): void {
     labelKey: 'nav.maintenance',
     order: MAINTENANCE_MENU_ORDER,
     subItems: [
+      { labelKey: 'nav.workOrders', to: '/maintenance/work-orders', menuKey: 'workOrder' },
       { labelKey: 'nav.downtimes', to: '/maintenance/downtimes', menuKey: 'downtime' },
       { labelKey: 'nav.technicians', to: '/maintenance/technicians', menuKey: 'technician' },
       { labelKey: 'nav.competences', to: '/maintenance/competences', menuKey: 'competence' },
