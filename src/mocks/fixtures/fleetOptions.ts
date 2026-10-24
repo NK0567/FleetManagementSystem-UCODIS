@@ -160,7 +160,8 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
   },
   infractionSource: {
     manual: { fr: 'Saisie', en: 'Recorded' },
-    telematics: { fr: 'Télématique', en: 'Telematics' }
+    telematics: { fr: 'Télématique', en: 'Telematics' },
+    driverScore: { fr: 'Scores de conduite', en: 'Driving scores' }
   },
   infractionStatus: {
     new: { fr: 'Nouvelle', en: 'New' },
@@ -374,6 +375,13 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
     new: { fr: 'À traiter', en: 'To handle' },
     acknowledged: { fr: 'Pris en compte', en: 'Acknowledged' },
     infraction: { fr: 'Infraction ouverte', en: 'Infraction opened' }
+  },
+  scoreFamily: {
+    safety: { fr: 'Sécurité routière', en: 'Road safety' },
+    route: { fr: "Conformité d'itinéraire", en: 'Route compliance' },
+    regulatory: { fr: 'Conformité réglementaire', en: 'Regulatory compliance' },
+    discipline: { fr: 'Discipline', en: 'Discipline' },
+    ecoDriving: { fr: 'Écoconduite', en: 'Eco-driving' }
   },
   liveSituation: {
     moving: { fr: 'En route', en: 'On the road' },

@@ -1,5 +1,6 @@
 import type { EmployeeStatus } from '@/modules/hr/employees'
 import type { DriverAvailability } from '../domain/driver'
+import type { FamilyScore } from '../domain/driverScore'
 
 export interface DriverAssignmentSummary {
   no: string
@@ -31,6 +32,9 @@ export interface DriverApi {
   /** Why the driver cannot be given a vehicle, in the language of the request. */
   ineligibilityReasons: string
   assignments: DriverAssignmentSummary[]
+  score: number
+  /** Change since the end of last month. */
+  scoreDelta: number
   modifiedAt: string
   modifiedBy: string
 }
@@ -41,3 +45,20 @@ export type DriverSearchColumn =
   | 'phone'
   | 'vehiclePlate'
   | 'no,fullName,phone,vehiclePlate'
+
+export interface DriverScoreApi {
+  driverNo: string
+  fullName: string
+  score: number
+  /** The score at the end of last month, from the events dated until then. */
+  previousScore: number
+  delta: number
+  /** 1 for the best score; drivers with the same score share their rank. */
+  rank: number
+  driverCount: number
+  threshold: number
+  belowThreshold: boolean
+  families: FamilyScore[]
+  /** The score training still to come, if one was proposed. */
+  trainingNo: string | null
+}

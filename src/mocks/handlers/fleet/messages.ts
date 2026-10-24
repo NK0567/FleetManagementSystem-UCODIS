@@ -791,5 +791,21 @@ export const FLEET_MESSAGES = {
   positionUnknown: {
     fr: 'Position non transmise',
     en: 'Position not reported'
+  },
+  scoreAboveThreshold: {
+    fr: "Le score du conducteur ({score}) n'est pas sous le seuil de formation ({threshold}).",
+    en: "The driver's score ({score}) is not below the training threshold ({threshold})."
+  },
+  scoreTrainingPending: {
+    fr: 'Une formation liée au score est déjà prévue pour ce conducteur ({no}).',
+    en: 'A score training is already pending for this driver ({no}).'
+  },
+  scoreTrainingTopic: {
+    fr: 'Score de conduite de {score}/100, sous le seuil de {threshold}',
+    en: 'Driving score of {score}/100, below the threshold of {threshold}'
+  },
+  scoreAlertDetail: {
+    fr: 'Score de {score}/100, seuil {threshold}',
+    en: 'Score {score}/100, threshold {threshold}'
   }
 } satisfies Record<string, LocalizedText>

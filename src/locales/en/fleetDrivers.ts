@@ -33,5 +33,28 @@ export default {
   'fleet.drivers.history.end': 'End',
   'fleet.drivers.history.running': 'Running',
   'fleet.drivers.section.documents': 'Documents',
-  'fleet.drivers.documentsNotCompliant': 'Not compliant'
+  'fleet.drivers.documentsNotCompliant': 'Not compliant',
+  'fleet.drivers.section.score': 'Driving score',
+  'fleet.drivers.col.score': 'Score',
+  'fleet.drivers.col.scoreDelta': 'Score change',
+  'fleet.drivers.score.loadError': 'The score could not be loaded.',
+  'fleet.drivers.score.actionError': 'The training could not be proposed.',
+  'fleet.drivers.score.stable': 'Unchanged since the end of last month',
+  'fleet.drivers.score.delta': '{delta} since the end of last month',
+  'fleet.drivers.score.rank': 'Rank {rank} of {count} drivers',
+  'fleet.drivers.score.belowThreshold': 'Below the training threshold ({threshold})',
+  'fleet.drivers.score.aboveThreshold': 'Training threshold: {threshold}',
+  'fleet.drivers.score.trainingPending': 'Training to come: {no}',
+  'fleet.drivers.score.proposeTraining': 'Propose a training',
+  'fleet.drivers.score.weight': '{weight}% of the score',
+  'fleet.drivers.score.explain.safety':
+    'No unjustified stop and no confirmed risky behaviour. | One unjustified stop or behaviour confirmed by an upheld infraction. | {n} unjustified stops or behaviours confirmed by an upheld infraction.',
+  'fleet.drivers.score.explain.route':
+    'No unjustified route deviation. | One route deviation qualified unjustified. | {n} route deviations qualified unjustified.',
+  'fleet.drivers.score.explain.regulatory':
+    'Mandatory documents in order. | A mandatory document is missing or out of date: the mark is capped. | Mandatory documents missing or out of date: the mark is capped.',
+  'fleet.drivers.score.explain.discipline':
+    'No infraction recorded and upheld. | One infraction recorded and upheld. | {n} infractions recorded and upheld.',
+  'fleet.drivers.score.explain.ecoDriving':
+    'No long idling or harsh driving recorded. | One long idling or harsh driving episode recorded. | {n} long idlings or harsh driving episodes recorded.'
 }

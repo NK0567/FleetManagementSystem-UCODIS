@@ -33,5 +33,28 @@ export default {
   'fleet.drivers.history.end': 'Fin',
   'fleet.drivers.history.running': 'En cours',
   'fleet.drivers.section.documents': 'Documents',
-  'fleet.drivers.documentsNotCompliant': 'Non conforme'
+  'fleet.drivers.documentsNotCompliant': 'Non conforme',
+  'fleet.drivers.section.score': 'Score de conduite',
+  'fleet.drivers.col.score': 'Score',
+  'fleet.drivers.col.scoreDelta': 'Évolution du score',
+  'fleet.drivers.score.loadError': "Le score n'a pas pu être chargé.",
+  'fleet.drivers.score.actionError': "La formation n'a pas pu être proposée.",
+  'fleet.drivers.score.stable': 'Stable depuis la fin du mois dernier',
+  'fleet.drivers.score.delta': '{delta} depuis la fin du mois dernier',
+  'fleet.drivers.score.rank': '{rank}ᵉ sur {count} conducteurs',
+  'fleet.drivers.score.belowThreshold': 'Sous le seuil de formation ({threshold})',
+  'fleet.drivers.score.aboveThreshold': 'Seuil de formation : {threshold}',
+  'fleet.drivers.score.trainingPending': 'Formation prévue : {no}',
+  'fleet.drivers.score.proposeTraining': 'Proposer une formation',
+  'fleet.drivers.score.weight': '{weight} % du score',
+  'fleet.drivers.score.explain.safety':
+    'Aucun arrêt non justifié ni comportement à risque confirmé. | Un arrêt non justifié ou comportement confirmé par une infraction retenue. | {n} arrêts non justifiés ou comportements confirmés par une infraction retenue.',
+  'fleet.drivers.score.explain.route':
+    "Aucun écart d'itinéraire non justifié. | Un écart d'itinéraire qualifié non justifié. | {n} écarts d'itinéraire qualifiés non justifiés.",
+  'fleet.drivers.score.explain.regulatory':
+    "Documents obligatoires en règle. | Un document obligatoire manque ou n'est plus valide : la note est plafonnée. | Documents obligatoires manquants ou expirés : la note est plafonnée.",
+  'fleet.drivers.score.explain.discipline':
+    'Aucune infraction saisie et retenue. | Une infraction saisie et retenue. | {n} infractions saisies et retenues.',
+  'fleet.drivers.score.explain.ecoDriving':
+    'Aucun ralenti prolongé ni conduite brusque relevé. | Un ralenti prolongé ou épisode de conduite brusque relevé. | {n} ralentis prolongés ou épisodes de conduite brusque relevés.'
 }

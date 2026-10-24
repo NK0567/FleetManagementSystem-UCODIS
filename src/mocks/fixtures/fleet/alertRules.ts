@@ -97,6 +97,14 @@ const SEED: Omit<AlertRuleRow, keyof typeof seedAudit>[] = [
     escalationHours: 24,
     escalateTo: 'MANAGEMENT',
     active: true
+  },
+  {
+    no: 'driverScore',
+    name: 'Conducteurs sous le seuil de score',
+    recipients: ['ADMIN', 'FLEET_MANAGER'],
+    escalationHours: 168,
+    escalateTo: 'MANAGEMENT',
+    active: true
   }
 ]
 

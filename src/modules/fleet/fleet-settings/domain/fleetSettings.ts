@@ -1,3 +1,5 @@
+import type { DriverScoreSettings } from '@/modules/fleet/drivers'
+
 export interface DrivingTimeSettings {
   continuousDrivingMaxMin: number
   breakAfterDrivingMin: number
@@ -60,6 +62,7 @@ export interface FleetSettings {
   safety: SafetySettings
   fuel: FuelSettings
   telematics: TelematicsSettings
+  driverScore: DriverScoreSettings
 }
 
 export type FleetSettingsSection = keyof FleetSettings
@@ -70,7 +73,8 @@ export const FLEET_SETTINGS_SECTIONS = [
   'documents',
   'safety',
   'fuel',
-  'telematics'
+  'telematics',
+  'driverScore'
 ] as const
 
 export type SettingUnit =
@@ -83,6 +87,7 @@ export type SettingUnit =
   | 'l100'
   | 'gPerL'
   | 'amount'
+  | 'points'
 
 export type SettingField =
   | { key: string; kind: 'number'; unit: SettingUnit; min: number; max: number }
@@ -119,7 +124,24 @@ export const FLEET_SETTING_FIELDS: Record<FleetSettingsSection, readonly Setting
     { key: 'matchingToleranceMin', kind: 'number', unit: 'min', min: 5, max: 1440 },
     { key: 'matchingTolerancePct', kind: 'number', unit: 'percent', min: 0, max: 20 }
   ],
-  telematics: [{ key: 'signalLossMin', kind: 'number', unit: 'min', min: 5, max: 240 }]
+  telematics: [{ key: 'signalLossMin', kind: 'number', unit: 'min', min: 5, max: 240 }],
+  driverScore: [
+    { key: 'periodDays', kind: 'number', unit: 'days', min: 30, max: 365 },
+    { key: 'weightSafety', kind: 'number', unit: 'points', min: 0, max: 100 },
+    { key: 'weightRoute', kind: 'number', unit: 'points', min: 0, max: 100 },
+    { key: 'weightRegulatory', kind: 'number', unit: 'points', min: 0, max: 100 },
+    { key: 'weightDiscipline', kind: 'number', unit: 'points', min: 0, max: 100 },
+    { key: 'weightEcoDriving', kind: 'number', unit: 'points', min: 0, max: 100 },
+    { key: 'criticalPoints', kind: 'number', unit: 'points', min: 0, max: 100 },
+    { key: 'majorPoints', kind: 'number', unit: 'points', min: 0, max: 100 },
+    { key: 'minorPoints', kind: 'number', unit: 'points', min: 0, max: 100 },
+    { key: 'stopCriticalPoints', kind: 'number', unit: 'points', min: 0, max: 100 },
+    { key: 'stopOtherPoints', kind: 'number', unit: 'points', min: 0, max: 100 },
+    { key: 'routeDeviationPoints', kind: 'number', unit: 'points', min: 0, max: 100 },
+    { key: 'ecoEventPoints', kind: 'number', unit: 'points', min: 0, max: 100 },
+    { key: 'missingDocumentCap', kind: 'number', unit: 'points', min: 0, max: 100 },
+    { key: 'trainingThreshold', kind: 'number', unit: 'points', min: 0, max: 100 }
+  ]
 }
 
 export const DEFAULT_FLEET_SETTINGS: FleetSettings = {
@@ -149,7 +171,24 @@ export const DEFAULT_FLEET_SETTINGS: FleetSettings = {
     matchingToleranceMin: 120,
     matchingTolerancePct: 2
   },
-  telematics: { signalLossMin: 15 }
+  telematics: { signalLossMin: 15 },
+  driverScore: {
+    periodDays: 90,
+    weightSafety: 30,
+    weightRoute: 25,
+    weightRegulatory: 20,
+    weightDiscipline: 15,
+    weightEcoDriving: 10,
+    criticalPoints: 15,
+    majorPoints: 8,
+    minorPoints: 3,
+    stopCriticalPoints: 25,
+    stopOtherPoints: 10,
+    routeDeviationPoints: 20,
+    ecoEventPoints: 5,
+    missingDocumentCap: 60,
+    trainingThreshold: 70
+  }
 }
 
 export type SettingIssue =

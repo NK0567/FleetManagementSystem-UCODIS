@@ -18,7 +18,7 @@ import { readString } from '../../http/input'
 import { ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
 import { sessionUser, type MockRequest } from '../../http/types'
-import type { MockLanguage } from '../../i18n'
+import { localize, type MockLanguage } from '../../i18n'
 import { companyDocumentsApi } from './companyDocuments'
 import { documentsApi, missingDocumentsApi } from './documents'
 import { infractionsApi } from './infractions'
@@ -28,6 +28,7 @@ import { FLEET_MESSAGES } from './messages'
 import { departureChecklist } from './roadChecklists'
 import { routeDeviationsApi } from './routeDeviations'
 import { telematicsEventsApi } from './telematicsEvents'
+import { driverScoresApi } from './driverScores'
 import { trainingsApi } from './trainings'
 
 /** A situation that calls for someone, found in the fleet records each time alerts are read. */
@@ -222,6 +223,20 @@ export function alertSignals(db: MockDatabase, language: MockLanguage): AlertSig
         subject: event.vehiclePlate,
         detail: [event.eventTypeName, event.driverName].filter(Boolean).join(' · '),
         since: event.occurredAt
+      })
+    )
+  }
+  for (const score of driverScoresApi(db)) {
+    if (!score.belowThreshold || score.trainingNo) continue
+    signals.push(
+      signal('driverScore', score.driverNo, '/fleet/drivers', {
+        severity: 'warning',
+        subject: score.fullName,
+        detail: localize(language, FLEET_MESSAGES.scoreAlertDetail, {
+          score: score.score,
+          threshold: score.threshold
+        }),
+        since: todayIso()
       })
     )
   }

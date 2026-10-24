@@ -9,7 +9,13 @@ defineProps<{ driver: DriverApi }>()
 
 const { t } = useI18n()
 const optionsStore = useOptionsStore()
-const expandedSections = ref({ identity: true, assignment: true, documents: true, history: true })
+const expandedSections = ref({
+  identity: true,
+  assignment: true,
+  score: true,
+  documents: true,
+  history: true
+})
 </script>
 
 <template>
@@ -86,6 +92,14 @@ const expandedSections = ref({ identity: true, assignment: true, documents: true
           :gaps="driver.documentGaps"
         />
       </div>
+    </FormSection>
+
+    <FormSection
+      v-model:open="expandedSections.score"
+      :title="t('fleet.drivers.section.score')"
+      :summary="[`${driver.score}/100`]"
+    >
+      <DriverScorePanel :driver-no="driver.no" />
     </FormSection>
 
     <FormSection

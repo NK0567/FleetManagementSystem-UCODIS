@@ -37,6 +37,7 @@ import { registerFuelCardTransactionsHandlers } from './fuelCardTransactions'
 import { registerTelematicsEventTypesHandlers } from './telematicsEventTypes'
 import { registerTelematicsEventsHandlers } from './telematicsEvents'
 import { registerLivePositionsHandlers } from './livePositions'
+import { registerDriverScoresHandlers } from './driverScores'
 
 export function registerFleetHandlers(router: MockRouter, db: MockDatabase): void {
   registerFleetSettingsHandlers(router, db)
@@ -76,4 +77,5 @@ export function registerFleetHandlers(router: MockRouter, db: MockDatabase): voi
   registerTelematicsEventTypesHandlers(router, db)
   registerTelematicsEventsHandlers(router, db)
   registerLivePositionsHandlers(router, db)
+  registerDriverScoresHandlers(router, db)
 }

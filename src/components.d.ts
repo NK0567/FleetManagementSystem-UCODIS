@@ -85,6 +85,7 @@ declare module 'vue' {
     DriverAvailabilityPill: typeof import('./modules/fleet/drivers/components/DriverAvailabilityPill.vue')['default']
     DriverCard: typeof import('./modules/fleet/drivers/pages/DriverCard.vue')['default']
     DriverOverview: typeof import('./modules/fleet/drivers/components/DriverOverview.vue')['default']
+    DriverScorePanel: typeof import('./modules/fleet/drivers/components/DriverScorePanel.vue')['default']
     DriversList: typeof import('./modules/fleet/drivers/pages/DriversList.vue')['default']
     EmployeeCard: typeof import('./modules/hr/employees/pages/EmployeeCard.vue')['default']
     EmployeeCategoriesList: typeof import('./modules/hr/employee-categories/pages/EmployeeCategoriesList.vue')['default']

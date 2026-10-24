@@ -13,6 +13,7 @@ import { registerListResource } from '../../http/crudResource'
 import type { MockRouter } from '../../http/router'
 import { localize, type LocalizedText, type MockLanguage } from '../../i18n'
 import { activeLinks, vehiclePlates } from './links'
+import { driverScoresApi } from './driverScores'
 import { FLEET_MESSAGES } from './messages'
 import { tripIndex } from './tripIndex'
 import { documentCompliance, gapsText } from './documentCompliance'
@@ -82,6 +83,7 @@ export function driversApi(db: MockDatabase, language: MockLanguage = 'fr'): Dri
   const sites = new Map(db.sites.all().map((site) => [site.no, site.name]))
   const history = db.driverAssignments.all()
   const compliance = documentCompliance(db).persons
+  const scores = new Map(driverScoresApi(db).map((score) => [score.driverNo, score]))
 
   return driverEmployees(db).map((employee) => {
     const facts = driverFacts(db, employee, today)
@@ -115,6 +117,8 @@ export function driversApi(db: MockDatabase, language: MockLanguage = 'fr'): Dri
           startDate: row.startDate,
           endDate: row.endDate
         })),
+      score: scores.get(employee.no)?.score ?? 100,
+      scoreDelta: scores.get(employee.no)?.delta ?? 0,
       modifiedAt: employee.modifiedAt,
       modifiedBy: employee.modifiedBy
     }

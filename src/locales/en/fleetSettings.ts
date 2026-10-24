@@ -62,5 +62,24 @@ export default {
   'fleet.settings.unit.amount': 'Ar',
   'fleet.settings.section.telematics': 'Telematics',
   'fleet.settings.section.telematics.hint': 'Monitoring of the on-board units.',
-  'fleet.settings.field.telematics.signalLossMin': 'Silence before the signal is lost'
+  'fleet.settings.field.telematics.signalLossMin': 'Silence before the signal is lost',
+  'fleet.settings.unit.points': 'points',
+  'fleet.settings.section.driverScore': 'Driver score',
+  'fleet.settings.section.driverScore.hint':
+    'Family weights (0 turns one off), points lost per confirmed fact, and the training threshold.',
+  'fleet.settings.field.driverScore.periodDays': 'Period taken into account',
+  'fleet.settings.field.driverScore.weightSafety': 'Weight: road safety',
+  'fleet.settings.field.driverScore.weightRoute': 'Weight: route compliance',
+  'fleet.settings.field.driverScore.weightRegulatory': 'Weight: regulatory compliance',
+  'fleet.settings.field.driverScore.weightDiscipline': 'Weight: discipline',
+  'fleet.settings.field.driverScore.weightEcoDriving': 'Weight: eco-driving',
+  'fleet.settings.field.driverScore.criticalPoints': 'Points per critical or serious fact',
+  'fleet.settings.field.driverScore.majorPoints': 'Points per major fact',
+  'fleet.settings.field.driverScore.minorPoints': 'Points per minor fact',
+  'fleet.settings.field.driverScore.stopCriticalPoints': 'Points per critical unjustified stop',
+  'fleet.settings.field.driverScore.stopOtherPoints': 'Points per other unjustified stop or rest',
+  'fleet.settings.field.driverScore.routeDeviationPoints': 'Points per unjustified route deviation',
+  'fleet.settings.field.driverScore.ecoEventPoints': 'Points per idling or harsh driving',
+  'fleet.settings.field.driverScore.missingDocumentCap': 'Highest mark while a document is missing',
+  'fleet.settings.field.driverScore.trainingThreshold': 'Training threshold'
 }
