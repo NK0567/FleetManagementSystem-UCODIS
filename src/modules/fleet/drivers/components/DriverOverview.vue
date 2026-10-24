@@ -102,6 +102,8 @@ const expandedSections = ref({
       <DriverScorePanel :driver-no="driver.no" />
     </FormSection>
 
+    <DriverActivitySections :driver-no="driver.no" />
+
     <FormSection
       v-model:open="expandedSections.history"
       :title="t('fleet.drivers.section.history')"

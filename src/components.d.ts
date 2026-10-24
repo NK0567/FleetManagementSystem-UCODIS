@@ -78,6 +78,7 @@ declare module 'vue' {
     DocumentTypeCreateModal: typeof import('./modules/fleet/document-types/pages/DocumentTypeCreateModal.vue')['default']
     DocumentTypeForm: typeof import('./modules/fleet/document-types/components/DocumentTypeForm.vue')['default']
     DocumentTypesList: typeof import('./modules/fleet/document-types/pages/DocumentTypesList.vue')['default']
+    DriverActivitySections: typeof import('./modules/fleet/drivers/components/DriverActivitySections.vue')['default']
     DriverAssignmentCard: typeof import('./modules/fleet/driver-assignments/pages/DriverAssignmentCard.vue')['default']
     DriverAssignmentCreateModal: typeof import('./modules/fleet/driver-assignments/pages/DriverAssignmentCreateModal.vue')['default']
     DriverAssignmentForm: typeof import('./modules/fleet/driver-assignments/components/DriverAssignmentForm.vue')['default']

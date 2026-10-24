@@ -56,5 +56,18 @@ export default {
   'fleet.drivers.score.explain.discipline':
     'Aucune infraction saisie et retenue. | Une infraction saisie et retenue. | {n} infractions saisies et retenues.',
   'fleet.drivers.score.explain.ecoDriving':
-    'Aucun ralenti prolongé ni conduite brusque relevé. | Un ralenti prolongé ou épisode de conduite brusque relevé. | {n} ralentis prolongés ou épisodes de conduite brusque relevés.'
+    'Aucun ralenti prolongé ni conduite brusque relevé. | Un ralenti prolongé ou épisode de conduite brusque relevé. | {n} ralentis prolongés ou épisodes de conduite brusque relevés.',
+  'fleet.drivers.section.trips': 'Trajets',
+  'fleet.drivers.section.fuel': 'Carburant',
+  'fleet.drivers.section.compliance': 'Écarts, infractions et formations',
+  'fleet.drivers.activity.loadError': "L'activité du conducteur n'a pas pu être chargée.",
+  'fleet.drivers.activity.tripsSummary': 'Trajets terminés sur {days} jours : {trips} · {km} km',
+  'fleet.drivers.activity.fuelSummary':
+    'Sur {days} jours : {liters} L · pleins en anomalie : {anomalies}',
+  'fleet.drivers.activity.noTrip': 'Aucun trajet pour ce conducteur.',
+  'fleet.drivers.activity.noRefill': 'Aucun plein enregistré pour ce conducteur.',
+  'fleet.drivers.activity.deviations': "Écarts d'itinéraire",
+  'fleet.drivers.activity.infractions': 'Infractions',
+  'fleet.drivers.activity.trainings': 'Formations',
+  'fleet.drivers.activity.none': 'Aucun.'
 }

@@ -56,5 +56,18 @@ export default {
   'fleet.drivers.score.explain.discipline':
     'No infraction recorded and upheld. | One infraction recorded and upheld. | {n} infractions recorded and upheld.',
   'fleet.drivers.score.explain.ecoDriving':
-    'No long idling or harsh driving recorded. | One long idling or harsh driving episode recorded. | {n} long idlings or harsh driving episodes recorded.'
+    'No long idling or harsh driving recorded. | One long idling or harsh driving episode recorded. | {n} long idlings or harsh driving episodes recorded.',
+  'fleet.drivers.section.trips': 'Trips',
+  'fleet.drivers.section.fuel': 'Fuel',
+  'fleet.drivers.section.compliance': 'Deviations, infractions and trainings',
+  'fleet.drivers.activity.loadError': "The driver's activity could not be loaded.",
+  'fleet.drivers.activity.tripsSummary': 'Trips finished over {days} days: {trips} · {km} km',
+  'fleet.drivers.activity.fuelSummary':
+    'Over {days} days: {liters} L · refills with an anomaly: {anomalies}',
+  'fleet.drivers.activity.noTrip': 'No trip for this driver.',
+  'fleet.drivers.activity.noRefill': 'No refill recorded for this driver.',
+  'fleet.drivers.activity.deviations': 'Route deviations',
+  'fleet.drivers.activity.infractions': 'Infractions',
+  'fleet.drivers.activity.trainings': 'Trainings',
+  'fleet.drivers.activity.none': 'None.'
 }

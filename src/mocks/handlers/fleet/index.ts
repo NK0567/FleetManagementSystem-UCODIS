@@ -38,6 +38,7 @@ import { registerTelematicsEventTypesHandlers } from './telematicsEventTypes'
 import { registerTelematicsEventsHandlers } from './telematicsEvents'
 import { registerLivePositionsHandlers } from './livePositions'
 import { registerDriverScoresHandlers } from './driverScores'
+import { registerDriverActivityHandlers } from './driverActivity'
 import { registerFleetDashboardHandlers } from './fleetDashboard'
 import { registerFleetReportsHandlers } from './fleetReports'
 
@@ -80,6 +81,7 @@ export function registerFleetHandlers(router: MockRouter, db: MockDatabase): voi
   registerTelematicsEventsHandlers(router, db)
   registerLivePositionsHandlers(router, db)
   registerDriverScoresHandlers(router, db)
+  registerDriverActivityHandlers(router, db)
   registerFleetDashboardHandlers(router, db)
   registerFleetReportsHandlers(router, db)
 }
