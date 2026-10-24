@@ -62,6 +62,18 @@ export const COMMON_MESSAGES = {
     fr: "L'espace de stockage du navigateur est plein : la modification n'a pas été enregistrée.",
     en: 'The browser storage is full: the change was not saved.'
   },
+  settingRequired: {
+    fr: 'Le réglage « {field} » est obligatoire.',
+    en: 'The "{field}" setting is required.'
+  },
+  settingOutOfRange: {
+    fr: 'Le réglage « {field} » doit être compris entre {min} et {max}.',
+    en: 'The "{field}" setting must be between {min} and {max}.'
+  },
+  settingInvalidTime: {
+    fr: "Le réglage « {field} » n'est pas une heure valide (HH:MM).",
+    en: 'The "{field}" setting is not a valid time (HH:MM).'
+  },
   unexpected: { fr: 'Une erreur inattendue est survenue.', en: 'An unexpected error occurred.' },
   yes: { fr: 'Oui', en: 'Yes' },
   no: { fr: 'Non', en: 'No' }

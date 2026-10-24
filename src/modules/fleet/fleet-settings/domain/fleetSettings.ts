@@ -1,4 +1,12 @@
+import {
+  settingFieldIssues,
+  timeToMinutes,
+  type SettingField as GenericSettingField,
+  type SettingFieldIssue
+} from '@/core/utils/settingFields'
 import type { DriverScoreSettings } from '@/modules/fleet/drivers'
+
+export { timeToMinutes }
 
 export interface DrivingTimeSettings {
   continuousDrivingMaxMin: number
@@ -89,10 +97,7 @@ export type SettingUnit =
   | 'amount'
   | 'points'
 
-export type SettingField =
-  | { key: string; kind: 'number'; unit: SettingUnit; min: number; max: number }
-  | { key: string; kind: 'optionalNumber'; unit: SettingUnit; min: number; max: number }
-  | { key: string; kind: 'time' }
+export type SettingField = GenericSettingField<SettingUnit>
 
 export const FLEET_SETTING_FIELDS: Record<FleetSettingsSection, readonly SettingField[]> = {
   drivingTime: [
@@ -192,38 +197,12 @@ export const DEFAULT_FLEET_SETTINGS: FleetSettings = {
 }
 
 export type SettingIssue =
-  | { field: string; code: 'required' }
-  | { field: string; code: 'outOfRange'; min: number; max: number }
-  | { field: string; code: 'invalidTime' }
+  | SettingFieldIssue
   | { field: string; code: 'nightWindowIncomplete' }
   | { field: string; code: 'nightWindowEmpty' }
 
 export function isFleetSettingsSection(value: string): value is FleetSettingsSection {
   return (FLEET_SETTINGS_SECTIONS as readonly string[]).includes(value)
-}
-
-/** Minutes since midnight, or null when the text is not a valid HH:MM time. */
-export function timeToMinutes(value: string): number | null {
-  const match = /^(\d{1,2}):(\d{2})$/.exec(value.trim())
-  if (!match) return null
-  const hours = Number(match[1])
-  const minutes = Number(match[2])
-  return hours < 24 && minutes < 60 ? hours * 60 + minutes : null
-}
-
-function fieldIssue(field: SettingField, value: unknown): SettingIssue | null {
-  if (field.kind === 'time') {
-    const text = typeof value === 'string' ? value : ''
-    return text && timeToMinutes(text) === null ? { field: field.key, code: 'invalidTime' } : null
-  }
-  if (value == null || value === '') {
-    return field.kind === 'number' ? { field: field.key, code: 'required' } : null
-  }
-  const number = Number(value)
-  if (!Number.isFinite(number) || number < field.min || number > field.max) {
-    return { field: field.key, code: 'outOfRange', min: field.min, max: field.max }
-  }
-  return null
 }
 
 function nightWindowIssue(values: DrivingTimeSettings): SettingIssue | null {
@@ -245,9 +224,7 @@ export function settingsSectionIssues<S extends FleetSettingsSection>(
   values: FleetSettings[S]
 ): SettingIssue[] {
   const record = values as unknown as Record<string, unknown>
-  const issues = FLEET_SETTING_FIELDS[section]
-    .map((field) => fieldIssue(field, record[field.key]))
-    .filter((issue): issue is SettingIssue => issue !== null)
+  const issues: SettingIssue[] = settingFieldIssues(FLEET_SETTING_FIELDS[section], record)
   if (section === 'drivingTime' && issues.length === 0) {
     const night = nightWindowIssue(values as DrivingTimeSettings)
     if (night) issues.push(night)

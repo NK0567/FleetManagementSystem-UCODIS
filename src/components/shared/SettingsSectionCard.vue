@@ -2,79 +2,74 @@
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Check, PenLine, X } from '@lucide/vue'
-import {
-  FLEET_SETTING_FIELDS,
-  settingsSectionIssues,
-  type FleetSettings,
-  type FleetSettingsSection,
-  type SettingField,
-  type SettingIssue
-} from '../domain/fleetSettings'
+import type { SettingField } from '@/core/utils/settingFields'
+
+type Values = Record<string, unknown>
+/** Field issues, plus any rule of the section that spans several fields. */
+export interface SectionIssue {
+  field: string
+  code: string
+  min?: number
+  max?: number
+}
 
 const props = defineProps<{
-  section: FleetSettingsSection
-  values: FleetSettings[FleetSettingsSection]
+  /** Translation prefix of the settings page, such as `fleet.settings`. */
+  labelPrefix: string
+  section: string
+  fields: readonly SettingField[]
+  values: Values
+  validate: (values: Values) => SectionIssue[]
   canEdit: boolean
   saving: boolean
   /** Resolves to true once the server has accepted the values. */
-  save: (values: FleetSettings[FleetSettingsSection]) => Promise<boolean>
+  save: (values: Values) => Promise<boolean>
 }>()
 const emit = defineEmits<{ 'update:dirty': [dirty: boolean] }>()
 
 const { t } = useI18n()
-const fields = computed(() => FLEET_SETTING_FIELDS[props.section])
 
 type Draft = Record<string, string | number | null>
 const draft = ref<Draft | null>(null)
 const isEditing = computed(() => draft.value !== null)
-const shown = computed<Draft>(() => draft.value ?? { ...props.values })
+const shown = computed<Draft>(() => draft.value ?? ({ ...props.values } as Draft))
 
-function toValues(values: Draft): FleetSettings[FleetSettingsSection] {
-  const result: Record<string, string | number | null> = {}
-  for (const field of fields.value) {
+function toValues(values: Draft): Values {
+  const result: Values = {}
+  for (const field of props.fields) {
     const raw = values[field.key]
     if (field.kind === 'time') result[field.key] = String(raw ?? '').trim()
     else if (raw === '' || raw == null) result[field.key] = null
     else result[field.key] = Number(raw)
   }
-  return result as unknown as FleetSettings[FleetSettingsSection]
+  return result
 }
 
-const issues = computed<SettingIssue[]>(() =>
-  draft.value ? settingsSectionIssues(props.section, toValues(draft.value)) : []
-)
+const issues = computed(() => (draft.value ? props.validate(toValues(draft.value)) : []))
 
 const isDirty = computed(
   () => !!draft.value && JSON.stringify(toValues(draft.value)) !== JSON.stringify(props.values)
 )
 watch(isDirty, (dirty) => emit('update:dirty', dirty))
 
-function issueText(issue: SettingIssue, field: SettingField | undefined): string {
+function issueText(issue: SectionIssue): string {
+  const field = props.fields.find((item) => item.key === issue.field)
   if (issue.code === 'outOfRange' && field && field.kind !== 'time') {
-    return t('fleet.settings.issue.outOfRange', {
-      min: issue.min,
-      max: issue.max,
-      unit: t(`fleet.settings.unit.${field.unit}`)
+    return t(`${props.labelPrefix}.issue.outOfRange`, {
+      min: issue.min ?? 0,
+      max: issue.max ?? 0,
+      unit: t(`${props.labelPrefix}.unit.${field.unit}`)
     })
   }
-  return t(`fleet.settings.issue.${issue.code}`)
+  return t(`${props.labelPrefix}.issue.${issue.code}`)
 }
 
 const issueMessages = computed(
-  () =>
-    new Map(
-      issues.value.map((issue) => [
-        issue.field,
-        issueText(
-          issue,
-          fields.value.find((field) => field.key === issue.field)
-        )
-      ])
-    )
+  () => new Map(issues.value.map((issue) => [issue.field, issueText(issue)]))
 )
 
 function startEditing() {
-  draft.value = { ...props.values }
+  draft.value = { ...props.values } as Draft
 }
 
 async function submit() {
@@ -88,10 +83,10 @@ async function submit() {
     <header class="flex items-start justify-between gap-4 px-4 py-3 border-b border-border">
       <div>
         <h2 class="text-base font-semibold text-card-foreground">
-          {{ t(`fleet.settings.section.${section}`) }}
+          {{ t(`${labelPrefix}.section.${section}`) }}
         </h2>
         <p class="text-xs text-muted-foreground">
-          {{ t(`fleet.settings.section.${section}.hint`) }}
+          {{ t(`${labelPrefix}.section.${section}.hint`) }}
         </p>
       </div>
       <div v-if="canEdit" class="flex items-center gap-2 shrink-0">
@@ -129,7 +124,7 @@ async function submit() {
         v-for="field in fields"
         :key="field.key"
         :field="field.key"
-        :label="t(`fleet.settings.field.${section}.${field.key}`)"
+        :label="t(`${labelPrefix}.field.${section}.${field.key}`)"
         :required="field.kind === 'number'"
       >
         <div class="flex items-center gap-2">
@@ -143,7 +138,7 @@ async function submit() {
             />
           </div>
           <span v-if="field.kind !== 'time'" class="text-sm text-muted-foreground">
-            {{ t(`fleet.settings.unit.${field.unit}`) }}
+            {{ t(`${labelPrefix}.unit.${field.unit}`) }}
           </span>
         </div>
         <p v-if="issueMessages.has(field.key)" class="text-xs text-destructive mt-1">
