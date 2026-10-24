@@ -1,6 +1,7 @@
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { Upload } from '@lucide/vue'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
 import { useListCellFormatters } from '@/composables/useListCellFormatters'
@@ -123,6 +124,8 @@ function detailValue(item: FuelRefillApi, column: TableColumn): string {
   )
 }
 
+const importing = ref(false)
+
 const {
   canInsert,
   showFilterPanel,
@@ -220,6 +223,16 @@ const {
             :set-column-order="setColumnOrder"
             :reset-preferences="resetPreferences"
           />
+        </template>
+        <template v-if="canInsert" #extra-actions>
+          <button
+            type="button"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
+            @click="importing = true"
+          >
+            <Upload class="w-4 h-4 text-primary" />
+            {{ t('fleet.fuelRefills.import.action') }}
+          </button>
         </template>
       </ListPageToolbar>
 
@@ -331,4 +344,10 @@ const {
       @created="onCreated"
     />
   </div>
+
+  <RefillImportDialog
+    :open="importing"
+    @close="importing = false"
+    @imported="store.fetchItems(store.pagination.page, store.pagination.limit)"
+  />
 </template>

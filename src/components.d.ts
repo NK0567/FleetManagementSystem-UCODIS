@@ -202,6 +202,7 @@ declare module 'vue' {
     PublicHolidaysList: typeof import('./modules/hr/public-holidays/pages/PublicHolidaysList.vue')['default']
     ReasonDialog: typeof import('./components/shared/ReasonDialog.vue')['default']
     ReferenceLookup: typeof import('./components/ui/table-lookup/ReferenceLookup.vue')['default']
+    RefillImportDialog: typeof import('./modules/fleet/fuel-refills/components/RefillImportDialog.vue')['default']
     RefillStatusPill: typeof import('./modules/fleet/fuel-refills/components/RefillStatusPill.vue')['default']
     RequiredAsterisk: typeof import('./components/ui/RequiredAsterisk.vue')['default']
     RoadChecklistCard: typeof import('./modules/fleet/road-checklists/pages/RoadChecklistCard.vue')['default']

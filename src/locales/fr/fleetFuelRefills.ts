@@ -49,5 +49,18 @@ export default {
   'fleet.fuelRefills.form.checks': 'Contrôles',
   'fleet.fuelRefills.form.qualification': 'Qualification',
   'fleet.fuelRefills.form.cause': 'Cause',
-  'fleet.fuelRefills.form.comment': 'Commentaire'
+  'fleet.fuelRefills.form.comment': 'Commentaire',
+  'fleet.fuelRefills.import.action': 'Importer',
+  'fleet.fuelRefills.import.title': 'Importer des pleins',
+  'fleet.fuelRefills.import.hint':
+    "Fichier CSV (séparateur ; ou ,) avec une ligne d'en-têtes. Le véhicule est retrouvé par son immatriculation, le conducteur par son matricule ; laissé vide, il est déduit de l'affectation ou du trajet. Chaque ligne est contrôlée comme un plein saisi à la main.",
+  'fleet.fuelRefills.import.template': 'Télécharger le modèle',
+  'fleet.fuelRefills.import.read': '{file} : {count} lignes lues.',
+  'fleet.fuelRefills.import.missing': 'Colonnes obligatoires absentes : {columns}.',
+  'fleet.fuelRefills.import.run': 'Importer | Importer une ligne | Importer {n} lignes',
+  'fleet.fuelRefills.import.created': 'Aucun plein créé. | Un plein créé. | {n} pleins créés.',
+  'fleet.fuelRefills.import.rejected':
+    'Aucune ligne refusée. | Une ligne refusée : | {n} lignes refusées :',
+  'fleet.fuelRefills.import.line': 'Ligne {line}',
+  'fleet.fuelRefills.import.error': "L'import n'a pas pu être effectué."
 }

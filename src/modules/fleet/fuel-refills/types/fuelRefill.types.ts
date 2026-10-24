@@ -52,3 +52,16 @@ export type FuelRefillSearchColumn =
   | 'driverName'
   | 'stationLabel'
   | 'no,vehiclePlate,driverName,stationLabel'
+
+/** What happened to one line of an imported file. */
+export interface RefillImportResult {
+  line: number
+  no: string | null
+  error: string | null
+}
+
+export interface RefillImportReport {
+  created: number
+  rejected: number
+  results: RefillImportResult[]
+}

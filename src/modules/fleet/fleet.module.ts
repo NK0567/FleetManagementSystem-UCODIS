@@ -1,5 +1,12 @@
+import { FileText, Route, Truck, UserRound } from '@lucide/vue'
 import { registerFeatureRoutes } from '@/core/navigation/featureRoutes'
 import { registerNavMenu } from '@/core/navigation/moduleRegistry'
+import { registerSearchableEntity } from '@/core/search/searchRegistry'
+import { formatDate } from '@/utils/format'
+import { documentService, type DocumentApi } from './documents'
+import { driverService, type DriverApi } from './drivers'
+import { tripService, type TripApi } from './trips'
+import { vehicleService, type VehicleApi } from './vehicles'
 
 const FLEET_MENU_ORDER = 30
 
@@ -133,5 +140,65 @@ export function registerFleetModule(): void {
       },
       { labelKey: 'nav.fleetSettings', to: '/fleet/settings', menuKey: 'fleetSettings' }
     ]
+  })
+
+  registerSearchableEntity({
+    key: 'vehicle',
+    feature: 'VEHICLE',
+    labelKey: 'fleet.vehicles.title',
+    icon: Truck,
+    basePath: '/fleet/vehicles',
+    searchColumns: 'no,plate,vin,formerPlates',
+    service: vehicleService,
+    toHit: (vehicle: VehicleApi) => ({
+      id: vehicle.no,
+      title: vehicle.plate,
+      subtitle: `${vehicle.no} · ${vehicle.make} ${vehicle.model}`
+    })
+  })
+
+  registerSearchableEntity({
+    key: 'driver',
+    feature: 'DRIVER',
+    labelKey: 'fleet.drivers.title',
+    icon: UserRound,
+    basePath: '/fleet/drivers',
+    searchColumns: 'no,fullName,phone,vehiclePlate',
+    service: driverService,
+    toHit: (driver: DriverApi) => ({
+      id: driver.no,
+      title: driver.fullName,
+      subtitle: [driver.no, driver.vehiclePlate].filter(Boolean).join(' · ')
+    })
+  })
+
+  registerSearchableEntity({
+    key: 'trip',
+    feature: 'TRIP',
+    labelKey: 'fleet.trips.title',
+    icon: Route,
+    basePath: '/fleet/trips',
+    searchColumns: 'no,vehiclePlate,driverName',
+    service: tripService,
+    toHit: (trip: TripApi) => ({
+      id: trip.no,
+      title: `${trip.no} · ${trip.routeName}`,
+      subtitle: `${trip.vehiclePlate} · ${trip.driverName} · ${formatDate(trip.plannedDeparture)}`
+    })
+  })
+
+  registerSearchableEntity({
+    key: 'document',
+    feature: 'DOCUMENT',
+    labelKey: 'fleet.documents.title',
+    icon: FileText,
+    basePath: '/fleet/documents',
+    searchColumns: 'no,subjectName,number',
+    service: documentService,
+    toHit: (document: DocumentApi) => ({
+      id: document.no,
+      title: `${document.documentTypeName} · ${document.subjectName}`,
+      subtitle: [document.no, document.number].filter(Boolean).join(' · ')
+    })
   })
 }
