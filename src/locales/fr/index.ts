@@ -66,6 +66,7 @@ import maintenanceWorkOrders from './maintenanceWorkOrders'
 import maintenanceMaintenancePlans from './maintenanceMaintenancePlans'
 import maintenanceServiceDue from './maintenanceServiceDue'
 import maintenanceWorkshopLoad from './maintenanceWorkshopLoad'
+import maintenanceReliability from './maintenanceReliability'
 import maintenanceStockItems from './maintenanceStockItems'
 import maintenancePurchaseRequests from './maintenancePurchaseRequests'
 import maintenanceVehicleCheckPoints from './maintenanceVehicleCheckPoints'
@@ -141,6 +142,7 @@ export default {
   ...maintenanceMaintenancePlans,
   ...maintenanceServiceDue,
   ...maintenanceWorkshopLoad,
+  ...maintenanceReliability,
   ...maintenanceStockItems,
   ...maintenancePurchaseRequests,
   ...maintenanceVehicleCheckPoints,

@@ -842,5 +842,7 @@ const SEED: Omit<VehicleRow, keyof typeof seedAudit | 'photoFileNos'>[] = [
 
 export const vehiclesCollection: CollectionDefinition<VehicleRow> = {
   name: 'vehicles',
-  seed: () => SEED.map((row) => ({ ...row, photoFileNos: [], ...seedAudit }))
+  seed: () => SEED.map((row) => ({ ...row, photoFileNos: [], ...seedAudit })),
+  // Readings move with the demo clock, like the refills and trips that also carry the odometer.
+  dateFields: ['odometerReadings[].readAt']
 }

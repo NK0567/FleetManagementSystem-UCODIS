@@ -689,6 +689,13 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/maintenance/dashboard': RouteRecordInfo<
+      '/maintenance/dashboard',
+      '/maintenance/dashboard',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/maintenance/downtime-codes/': RouteRecordInfo<
       '/maintenance/downtime-codes/',
       '/maintenance/downtime-codes',
@@ -785,6 +792,13 @@ declare module 'vue-router/auto-routes' {
       '/maintenance/purchase-requests/:id',
       { id: ParamValue<true> },
       { id: ParamValue<false> },
+      | never
+    >,
+    '/maintenance/reliability/': RouteRecordInfo<
+      '/maintenance/reliability/',
+      '/maintenance/reliability',
+      Record<never, never>,
+      Record<never, never>,
       | never
     >,
     '/maintenance/service-due/': RouteRecordInfo<
@@ -1678,6 +1692,14 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | 'id'
     }
+    'src/pages/maintenance/dashboard.vue': {
+      routes:
+        | '/maintenance/dashboard'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
     'src/pages/maintenance/downtime-codes/index.vue': {
       routes:
         | '/maintenance/downtime-codes/'
@@ -1789,6 +1811,14 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | 'id'
+    }
+    'src/pages/maintenance/reliability/index.vue': {
+      routes:
+        | '/maintenance/reliability/'
+      views:
+        | never
+      pathParamNames:
+        | never
     }
     'src/pages/maintenance/service-due/index.vue': {
       routes:

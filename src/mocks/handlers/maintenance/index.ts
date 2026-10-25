@@ -11,6 +11,7 @@ import { registerWorkOrdersHandlers } from './workOrders'
 import { registerMaintenancePlansHandlers } from './maintenancePlans'
 import { registerServiceDueHandlers } from './serviceDue'
 import { registerWorkshopLoadHandlers } from './workshopLoad'
+import { registerReliabilityHandlers } from './reliability'
 import { registerStockItemsHandlers } from './stockItems'
 import { registerPurchaseRequestsHandlers } from './purchaseRequests'
 import { registerVehicleCheckPointsHandlers } from './vehicleCheckPoints'
@@ -31,6 +32,7 @@ export function registerMaintenanceHandlers(router: MockRouter, db: MockDatabase
   registerMaintenancePlansHandlers(router, db)
   registerServiceDueHandlers(router, db)
   registerWorkshopLoadHandlers(router, db)
+  registerReliabilityHandlers(router, db)
   registerStockItemsHandlers(router, db)
   registerPurchaseRequestsHandlers(router, db)
   registerVehicleCheckPointsHandlers(router, db)

@@ -63,6 +63,8 @@ export default {
   'nav.vehicleCheckPoints': 'Points des contrôles véhicule',
   'nav.maintenanceSettings': 'Réglages maintenance',
   'nav.workOrders': 'Ordres de travail',
+  'nav.maintenanceDashboard': 'Tableau de bord maintenance',
+  'nav.reliability': 'Fiabilité et coûts',
   'nav.serviceDue': "Échéances d'entretien",
   'nav.workshopLoad': 'Charge atelier',
   'nav.vehicleChecks': 'Contrôles véhicule',

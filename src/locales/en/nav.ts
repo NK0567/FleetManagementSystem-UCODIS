@@ -63,6 +63,8 @@ export default {
   'nav.vehicleCheckPoints': 'Vehicle check points',
   'nav.maintenanceSettings': 'Maintenance settings',
   'nav.workOrders': 'Work orders',
+  'nav.maintenanceDashboard': 'Maintenance dashboard',
+  'nav.reliability': 'Reliability and costs',
   'nav.serviceDue': 'Service due',
   'nav.workshopLoad': 'Workshop load',
   'nav.vehicleChecks': 'Vehicle checks',

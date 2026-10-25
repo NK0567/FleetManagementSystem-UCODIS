@@ -5,6 +5,8 @@ const MAINTENANCE_MENU_ORDER = 40
 
 export function registerMaintenanceModule(): void {
   registerFeatureRoutes({
+    MAINTENANCEDASHBOARD: { to: '/maintenance/dashboard', menuKey: 'maintenanceDashboard' },
+    RELIABILITY: { to: '/maintenance/reliability', menuKey: 'reliability' },
     WORKORDER: { to: '/maintenance/work-orders', menuKey: 'workOrder' },
     SERVICEDUE: { to: '/maintenance/service-due', menuKey: 'serviceDue' },
     WORKSHOPLOAD: { to: '/maintenance/workshop-load', menuKey: 'workshopLoad' },
@@ -29,6 +31,11 @@ export function registerMaintenanceModule(): void {
     labelKey: 'nav.maintenance',
     order: MAINTENANCE_MENU_ORDER,
     subItems: [
+      {
+        labelKey: 'nav.maintenanceDashboard',
+        to: '/maintenance/dashboard',
+        menuKey: 'maintenanceDashboard'
+      },
       { labelKey: 'nav.workOrders', to: '/maintenance/work-orders', menuKey: 'workOrder' },
       { labelKey: 'nav.serviceDue', to: '/maintenance/service-due', menuKey: 'serviceDue' },
       { labelKey: 'nav.workshopLoad', to: '/maintenance/workshop-load', menuKey: 'workshopLoad' },
@@ -46,6 +53,7 @@ export function registerMaintenanceModule(): void {
       },
       { labelKey: 'nav.downtimes', to: '/maintenance/downtimes', menuKey: 'downtime' },
       { labelKey: 'nav.stockItems', to: '/maintenance/stock-items', menuKey: 'stockItem' },
+      { labelKey: 'nav.reliability', to: '/maintenance/reliability', menuKey: 'reliability' },
       {
         labelKey: 'nav.purchaseRequests',
         to: '/maintenance/purchase-requests',

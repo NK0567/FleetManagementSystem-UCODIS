@@ -1,0 +1,55 @@
+export default {
+  'maintenance.reliability.title': 'Fiabilité et coûts',
+  'maintenance.reliability.subtitle': 'Indicateurs de la période, aux définitions standard.',
+  'maintenance.reliability.loadError': "Les indicateurs n'ont pas pu être chargés.",
+  'maintenance.reliability.from': 'Du',
+  'maintenance.reliability.to': 'Au',
+  'maintenance.reliability.apply': 'Calculer',
+  'maintenance.reliability.kpi.mttrHours': 'MTTR',
+  'maintenance.reliability.kpi.mtbfKm': 'MTBF',
+  'maintenance.reliability.kpi.preventiveShare': 'Part du préventif',
+  'maintenance.reliability.kpi.costPerKm': 'Coût au km',
+  'maintenance.reliability.kpi.availabilityRate': 'Disponibilité',
+  'maintenance.reliability.kpi.totalCost': 'Coût de maintenance',
+  'maintenance.reliability.definition.mttrHours':
+    'Ordres correctifs : de la déclaration à la fin déclarée.',
+  'maintenance.reliability.definition.mtbfKm':
+    'Km parcourus par le parc divisés par le nombre de pannes.',
+  'maintenance.reliability.definition.preventiveShare':
+    'Ordres préventifs parmi les ordres déclarés, historique importé exclu.',
+  'maintenance.reliability.definition.costPerKm':
+    'Coût des ordres validés divisé par les km de la période.',
+  'maintenance.reliability.definition.availabilityRate':
+    'Jours-véhicules non perdus par une indisponibilité.',
+  'maintenance.reliability.definition.totalCost':
+    'Ordres validés dans la période, historique compris.',
+  'maintenance.reliability.basis':
+    'Sur la période : {failures} pannes, {km} km parcourus, {days} jours perdus.',
+  'maintenance.reliability.bySubsystem': 'Pannes par sous-système',
+  'maintenance.reliability.noFailure': 'Aucune panne sur la période.',
+  'maintenance.reliability.topVehicles': 'Véhicules les plus touchés',
+  'maintenance.reliability.vehicleLine': 'pannes : {failures} · {cost}',
+  'maintenance.reliability.modesAndCauses': 'Modes et causes de défaillance',
+  'maintenance.reliability.lostDays': 'Jours perdus par famille',
+  'maintenance.reliability.lostLine': '{days} jours · {cost}',
+  'maintenance.dashboard.title': 'Tableau de bord maintenance',
+  'maintenance.dashboard.subtitle': "Ce qui attend l'atelier aujourd'hui.",
+  'maintenance.dashboard.kpi.openOrders': 'Ordres en cours',
+  'maintenance.dashboard.kpi.awaitingValidation': 'Fins à valider',
+  'maintenance.dashboard.kpi.unavailableVehicles': 'Véhicules indisponibles',
+  'maintenance.dashboard.kpi.servicesToPlan': 'Entretiens à planifier',
+  'maintenance.dashboard.kpi.lowStockItems': 'Articles à réapprovisionner',
+  'maintenance.dashboard.kpi.pendingPurchases': 'Achats en cours',
+  'maintenance.dashboard.kpi.tyreAlerts': 'Pneus en alerte',
+  'maintenance.dashboard.kpi.workshop': 'MTTR sur 30 jours',
+  'maintenance.dashboard.sub.awaitingParts': 'dont {count} en attente de pièces',
+  'maintenance.dashboard.sub.atGarage': '{count} chez un garage',
+  'maintenance.dashboard.sub.unavailable': 'Avec une indisponibilité ouverte',
+  'maintenance.dashboard.sub.blocking': 'dont {count} bloquants',
+  'maintenance.dashboard.sub.lowStock': 'Stock bas ou épuisé',
+  'maintenance.dashboard.sub.purchases': 'Demandées ou commandées',
+  'maintenance.dashboard.sub.tyres': 'Pression ou sculpture sous le seuil',
+  'maintenance.dashboard.sub.mttr': 'De la déclaration à la fin déclarée',
+  'maintenance.dashboard.last30': 'Les 30 derniers jours',
+  'maintenance.dashboard.openReliability': 'Voir la fiabilité'
+}
