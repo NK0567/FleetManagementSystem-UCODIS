@@ -68,5 +68,17 @@ export const MAINTENANCE_OPTION_SETS: Record<string, Record<string, LocalizedTex
     refused: { fr: 'Fin refusée', en: 'Finish refused' },
     validated: { fr: 'Ordre validé', en: 'Order validated' },
     cancelled: { fr: 'Ordre annulé', en: 'Order cancelled' }
+  },
+  serviceDueStatus: {
+    unknown: { fr: 'À renseigner', en: 'To fill in' },
+    upcoming: { fr: 'À venir', en: 'Upcoming' },
+    due_soon: { fr: 'Proche', en: 'Due soon' },
+    overdue: { fr: 'Dépassée', en: 'Overdue' },
+    blocking: { fr: 'Bloquante', en: 'Blocking' }
+  },
+  operationNature: {
+    check: { fr: 'Vérifier', en: 'Check' },
+    lubricate: { fr: 'Lubrifier', en: 'Lubricate' },
+    replace: { fr: 'Remplacer', en: 'Replace' }
   }
 }

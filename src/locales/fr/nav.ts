@@ -62,5 +62,7 @@ export default {
   'nav.missionTypes': 'Types de mission',
   'nav.maintenanceSettings': 'Réglages maintenance',
   'nav.workOrders': 'Ordres de travail',
+  'nav.serviceDue': "Échéances d'entretien",
+  'nav.maintenancePlans': "Plans d'entretien",
   'nav.downtimes': 'Indisponibilités'
 }

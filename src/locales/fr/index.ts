@@ -63,6 +63,8 @@ import maintenanceMissionTypes from './maintenanceMissionTypes'
 import maintenanceTechnicians from './maintenanceTechnicians'
 import maintenanceDowntimes from './maintenanceDowntimes'
 import maintenanceWorkOrders from './maintenanceWorkOrders'
+import maintenanceMaintenancePlans from './maintenanceMaintenancePlans'
+import maintenanceServiceDue from './maintenanceServiceDue'
 export default {
   ...common,
   ...auth,
@@ -127,5 +129,7 @@ export default {
   ...maintenanceMissionTypes,
   ...maintenanceTechnicians,
   ...maintenanceDowntimes,
-  ...maintenanceWorkOrders
+  ...maintenanceWorkOrders,
+  ...maintenanceMaintenancePlans,
+  ...maintenanceServiceDue
 }

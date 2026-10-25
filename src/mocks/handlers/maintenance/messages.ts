@@ -176,5 +176,33 @@ export const MAINTENANCE_MESSAGES = {
   returnDateInvalid: {
     fr: 'Le retour se fait entre la remise du véhicule et maintenant.',
     en: 'The return falls between the hand-over and now.'
+  },
+  invalidOperation: {
+    fr: 'Opération {line} incomplète : libellé, sous-système et au moins un intervalle positif.',
+    en: 'Operation {line} is incomplete: a label, a subsystem and at least one positive interval.'
+  },
+  vehicleHasPlan: {
+    fr: 'Le véhicule {plate} suit déjà le plan « {plan} ».',
+    en: 'Vehicle {plate} already follows the "{plan}" plan.'
+  },
+  planHasVehicles: {
+    fr: 'Retirez les véhicules du plan avant de le supprimer.',
+    en: 'Remove the vehicles from the plan before deleting it.'
+  },
+  operationNotInPlan: {
+    fr: 'Cette opération ne fait pas partie du plan actif du véhicule.',
+    en: "This operation is not part of the vehicle's active plan."
+  },
+  passageBeyondOdometer: {
+    fr: 'Le kilométrage du passage dépasse le compteur du véhicule ({km} km).',
+    en: "The passage odometer is beyond the vehicle's ({km} km)."
+  },
+  serviceOrderOpen: {
+    fr: "L'ordre {no} couvre déjà l'entretien de ce véhicule.",
+    en: "Order {no} already covers this vehicle's service."
+  },
+  nothingDue: {
+    fr: "Aucune opération de ce véhicule n'arrive à échéance.",
+    en: 'No operation of this vehicle is due.'
   }
 } satisfies Record<string, LocalizedText>

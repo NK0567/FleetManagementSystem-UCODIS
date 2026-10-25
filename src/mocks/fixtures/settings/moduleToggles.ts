@@ -38,7 +38,12 @@ export const MODULE_TOGGLE_CATALOG: readonly ModuleToggleDefinition[] = [
   { no: 'fleet-drivers', group: 'fleet', order: 120, features: ['DRIVER'] },
   { no: 'sites', group: 'fleet', order: 130, features: ['SITE'] },
   { no: 'workshop-load', group: 'maintenance', order: 210, features: ['WORKSHOPLOAD'] },
-  { no: 'service-due', group: 'maintenance', order: 220, features: ['SERVICEDUE'] },
+  {
+    no: 'service-due',
+    group: 'maintenance',
+    order: 220,
+    features: ['SERVICEDUE', 'MAINTENANCEPLAN']
+  },
   { no: 'downtimes', group: 'maintenance', order: 230, features: ['DOWNTIME'] },
   { no: 'reliability', group: 'maintenance', order: 240, features: ['RELIABILITY'] },
   {

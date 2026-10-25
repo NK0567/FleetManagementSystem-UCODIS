@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
 import { useListCellFormatters } from '@/composables/useListCellFormatters'
 import { useListPage } from '@/composables/useListPage'
@@ -82,6 +83,23 @@ const tableColumns = computed<TableColumn[]>(() => [
   { sortKey: 'modifiedBy', label: t('common.audit.modifiedBy'), minW: '110px', defaultHidden: true }
 ])
 
+const filterDefs: FilterFieldDef[] = [
+  {
+    field: 'status',
+    labelKey: 'maintenance.downtimes.col.status',
+    valueType: 'string',
+    kind: 'option',
+    optionsKey: 'downtimeStatus'
+  },
+  {
+    field: 'family',
+    labelKey: 'maintenance.downtimes.col.family',
+    valueType: 'string',
+    kind: 'option',
+    optionsKey: 'downtimeFamily'
+  }
+]
+
 const detailKeys = ['vehiclePlate', 'downtimeCodeName', 'durationDays', 'status']
 const detailColumns = computed(() =>
   detailKeys
@@ -142,6 +160,7 @@ const {
 } = useListPage<DowntimeApi, DowntimeSearchColumn>({
   tableId: 'maintenance-downtimes',
   feature: 'DOWNTIME',
+  filterDefs,
   store,
   columns: tableColumns,
   exportFileBaseName: 'downtimes',

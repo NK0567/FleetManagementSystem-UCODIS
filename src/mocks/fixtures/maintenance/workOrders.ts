@@ -30,6 +30,7 @@ export type WorkOrderRow = MockRow &
     | 'cancelReason'
     | 'downtimeNo'
     | 'external'
+    | 'serviceOperationNos'
     | 'history'
   >
 
@@ -51,7 +52,8 @@ const open = {
   cancelledBy: null,
   cancelReason: '',
   downtimeNo: null,
-  external: null
+  external: null,
+  serviceOperationNos: [] as string[]
 }
 
 const SEED: Seed[] = [
@@ -82,6 +84,7 @@ const SEED: Seed[] = [
     validatedAt: '2026-08-18T17:30:00',
     validatedBy: 'FLT001',
     downtimeNo: 'IND-00001',
+    serviceOperationNos: ['OP-001', 'OP-002'],
     history: []
   },
   {

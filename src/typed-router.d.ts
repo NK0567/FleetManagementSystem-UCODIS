@@ -731,6 +731,20 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/maintenance/maintenance-plans/': RouteRecordInfo<
+      '/maintenance/maintenance-plans/',
+      '/maintenance/maintenance-plans',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/maintenance-plans/[id]': RouteRecordInfo<
+      '/maintenance/maintenance-plans/[id]',
+      '/maintenance/maintenance-plans/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/maintenance/mission-types/': RouteRecordInfo<
       '/maintenance/mission-types/',
       '/maintenance/mission-types',
@@ -743,6 +757,13 @@ declare module 'vue-router/auto-routes' {
       '/maintenance/mission-types/:id',
       { id: ParamValue<true> },
       { id: ParamValue<false> },
+      | never
+    >,
+    '/maintenance/service-due/': RouteRecordInfo<
+      '/maintenance/service-due/',
+      '/maintenance/service-due',
+      Record<never, never>,
+      Record<never, never>,
       | never
     >,
     '/maintenance/settings': RouteRecordInfo<
@@ -1600,6 +1621,22 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | 'id'
     }
+    'src/pages/maintenance/maintenance-plans/index.vue': {
+      routes:
+        | '/maintenance/maintenance-plans/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/maintenance-plans/[id].vue': {
+      routes:
+        | '/maintenance/maintenance-plans/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
     'src/pages/maintenance/mission-types/index.vue': {
       routes:
         | '/maintenance/mission-types/'
@@ -1615,6 +1652,14 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | 'id'
+    }
+    'src/pages/maintenance/service-due/index.vue': {
+      routes:
+        | '/maintenance/service-due/'
+      views:
+        | never
+      pathParamNames:
+        | never
     }
     'src/pages/maintenance/settings.vue': {
       routes:

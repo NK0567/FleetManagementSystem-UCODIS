@@ -8,6 +8,8 @@ import { registerMissionTypesHandlers } from './missionTypes'
 import { registerTechniciansHandlers } from './technicians'
 import { registerDowntimesHandlers } from './downtimes'
 import { registerWorkOrdersHandlers } from './workOrders'
+import { registerMaintenancePlansHandlers } from './maintenancePlans'
+import { registerServiceDueHandlers } from './serviceDue'
 
 export function registerMaintenanceHandlers(router: MockRouter, db: MockDatabase): void {
   registerMaintenanceSettingsHandlers(router, db)
@@ -18,4 +20,6 @@ export function registerMaintenanceHandlers(router: MockRouter, db: MockDatabase
   registerTechniciansHandlers(router, db)
   registerDowntimesHandlers(router, db)
   registerWorkOrdersHandlers(router, db)
+  registerMaintenancePlansHandlers(router, db)
+  registerServiceDueHandlers(router, db)
 }

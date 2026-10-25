@@ -41,6 +41,7 @@ import { ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
 import { sessionUser, type MockRequest } from '../../http/types'
 import { MAINTENANCE_MESSAGES } from './messages'
+import { recordPassages } from './serviceRecords'
 import { maintenanceSettings } from './settings'
 
 /** Shortest account of what was done that the workshop accepts. */
@@ -134,6 +135,7 @@ export interface WorkOrderRequest {
   originNo: string | null
   symptom: string
   declaredAt: string
+  serviceOperationNos?: string[]
 }
 
 /** The one way an order is built, by hand or from a check, a claim or a telematics event. */
@@ -158,6 +160,7 @@ function buildWorkOrder(db: MockDatabase, order: WorkOrderRequest, request: Mock
     diagnosis: null,
     labour: [],
     external: null,
+    serviceOperationNos: order.serviceOperationNos ?? [],
     startedAt: null,
     completedAt: null,
     completedBy: null,
@@ -533,6 +536,17 @@ export function registerWorkOrdersHandlers(router: MockRouter, db: MockDatabase)
       if (block) throw forbidden(MAINTENANCE_MESSAGES.fourEyes)
       const at = nowIsoDateTime()
       endDowntime(db, order.downtimeNo, at, user.code)
+      recordPassages(
+        db,
+        order.serviceOperationNos.map((operationNo) => ({
+          vehicleNo: order.vehicleNo,
+          operationNo,
+          km: order.odometerKmAtCompletion,
+          date: (order.completedAt ?? at).slice(0, 10),
+          workOrderNo: order.no
+        })),
+        request
+      )
       db.workOrders.update(order.no, {
         validatedAt: at,
         validatedBy: user.code,

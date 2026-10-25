@@ -1,0 +1,62 @@
+export default {
+  'maintenance.maintenancePlans.title': 'Maintenance plans',
+  'maintenance.maintenancePlans.card': 'Maintenance plan card',
+  'maintenance.maintenancePlans.new': 'New maintenance plan',
+  'maintenance.maintenancePlans.loadingList': 'Loading maintenance plans…',
+  'maintenance.maintenancePlans.noResults': 'No maintenance plan.',
+  'maintenance.maintenancePlans.noSearchResults': 'No plan matches "{query}".',
+  'maintenance.maintenancePlans.saveSuccess': 'Maintenance plan saved.',
+  'maintenance.maintenancePlans.saveError': 'The maintenance plan could not be saved.',
+  'maintenance.maintenancePlans.createError': 'The maintenance plan could not be created.',
+  'maintenance.maintenancePlans.deleteError': 'The maintenance plan could not be deleted.',
+  'maintenance.maintenancePlans.confirmDelete': 'Delete the plan',
+  'maintenance.maintenancePlans.confirmDeleteMsg': 'The "{name}" plan will be permanently deleted.',
+
+  'maintenance.maintenancePlans.search.all': 'No. or name',
+
+  'maintenance.maintenancePlans.col.no': 'No.',
+  'maintenance.maintenancePlans.col.name': 'Name',
+  'maintenance.maintenancePlans.col.provisional': 'Provisional',
+  'maintenance.maintenancePlans.col.active': 'Active',
+  'maintenance.maintenancePlans.col.source': 'Source',
+  'maintenance.maintenancePlans.col.vehicleCount': 'Vehicles',
+  'maintenance.maintenancePlans.col.operationCount': 'Operations',
+
+  'maintenance.maintenancePlans.form.general': 'General',
+  'maintenance.maintenancePlans.form.no': 'No.',
+  'maintenance.maintenancePlans.form.name': 'Name',
+  'maintenance.maintenancePlans.form.provisional': 'Provisional',
+  'maintenance.maintenancePlans.form.provisionalHint':
+    'Intervals to be confirmed: the plan warns but never immobilizes a vehicle.',
+  'maintenance.maintenancePlans.form.active': 'Active',
+  'maintenance.maintenancePlans.form.source': 'Source',
+  'maintenance.maintenancePlans.form.vehicles': 'Vehicles',
+  'maintenance.maintenancePlans.form.operations': 'Operations',
+  'maintenance.maintenancePlans.vehicles.empty': 'No vehicle follows this plan.',
+  'maintenance.maintenancePlans.vehicles.count': 'No vehicle | 1 vehicle | {count} vehicles',
+  'maintenance.maintenancePlans.vehicles.addOne': 'Add a vehicle',
+  'maintenance.maintenancePlans.vehicles.addModel': 'Add a whole model',
+  'maintenance.maintenancePlans.vehicles.addModelHint':
+    'Adds every vehicle of this make and model.',
+  'maintenance.maintenancePlans.operations.empty': 'No operation.',
+  'maintenance.maintenancePlans.operations.count':
+    'No operation | 1 operation | {count} operations',
+  'maintenance.maintenancePlans.operations.no': 'No.',
+  'maintenance.maintenancePlans.operations.newNo': 'New',
+  'maintenance.maintenancePlans.operations.label': 'Operation',
+  'maintenance.maintenancePlans.operations.subsystem': 'Subsystem',
+  'maintenance.maintenancePlans.operations.nature': 'Kind',
+  'maintenance.maintenancePlans.operations.intervalKm': 'Every (km)',
+  'maintenance.maintenancePlans.operations.intervalDays': 'Every (days)',
+  'maintenance.maintenancePlans.operations.add': 'Add an operation',
+  'maintenance.maintenancePlans.operations.remove': 'Remove the operation',
+  'maintenance.maintenancePlans.operations.invalid':
+    'Complete each operation: a label, a subsystem and at least one interval.',
+  'maintenance.maintenancePlans.operations.issue.label': 'Label missing.',
+  'maintenance.maintenancePlans.operations.issue.subsystem': 'Subsystem missing.',
+  'maintenance.maintenancePlans.operations.issue.interval': 'Give at least one interval.',
+  'maintenance.maintenancePlans.operations.issue.intervalPositive': 'An interval must be positive.',
+  'maintenance.maintenancePlans.action.duplicate': 'Duplicate',
+  'maintenance.maintenancePlans.duplicateHint':
+    'The copy takes the operations, with no vehicle and no passage.'
+}

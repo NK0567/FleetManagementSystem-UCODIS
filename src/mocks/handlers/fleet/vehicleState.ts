@@ -9,6 +9,7 @@ import type { VehicleRow } from '../../fixtures/fleet/vehicles'
 import { localize, localizeDay, type MockLanguage } from '../../i18n'
 import { activeLinks, coupledWith, employeeNames, vehiclePlates } from './links'
 import { openDowntimeCauses } from '../maintenance/downtimes'
+import { blockingServiceCauses } from '../maintenance/serviceDue'
 import { FLEET_MESSAGES } from './messages'
 import { tripIndex } from './tripIndex'
 import { documentCompliance, invalidatingGaps } from './documentCompliance'
@@ -24,6 +25,7 @@ export function vehicleStatuses(db: MockDatabase): Map<string, VehicleStatusResu
   const typeNames = new Map(db.documentTypes.all().map((type) => [type.no, type.name]))
   const rechecks = vehiclesAwaitingRecheck(db)
   const downtimes = openDowntimeCauses(db)
+  const services = blockingServiceCauses(db)
   const factsOf = (vehicle: VehicleRow): VehicleStatusFacts => {
     const assignment = links.assignmentByVehicle.get(vehicle.no)
     const coupling = links.couplingByVehicle.get(vehicle.no)
@@ -41,7 +43,8 @@ export function vehicleStatuses(db: MockDatabase): Map<string, VehicleStatusResu
         ...(downtimes.get(vehicle.no) ?? []).map((detail) => ({
           kind: 'maintenance' as const,
           detail
-        }))
+        })),
+        ...(services.get(vehicle.no) ?? []).map((detail) => ({ kind: 'service' as const, detail }))
       ],
       activeTripNo: trips.onRoadByVehicle.get(vehicle.no)?.no ?? null,
       driverName: assignment ? (names.get(assignment.employeeNo) ?? assignment.employeeNo) : null,
@@ -70,6 +73,8 @@ export function statusReason(
       return localize(language, FLEET_MESSAGES.causeInspection, { detail: cause.detail })
     case 'maintenance':
       return localize(language, FLEET_MESSAGES.causeMaintenance, { detail: cause.detail })
+    case 'service':
+      return localize(language, FLEET_MESSAGES.causeService, { detail: cause.detail })
     case 'trip':
       return localize(language, FLEET_MESSAGES.causeTrip, { detail: cause.detail })
     case 'driver':

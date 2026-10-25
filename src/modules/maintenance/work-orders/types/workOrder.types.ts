@@ -75,6 +75,8 @@ export interface WorkOrderApi {
   cancelReason: string
   /** The downtime this order keeps open; it ends when the order is validated or cancelled. */
   downtimeNo: string | null
+  /** Plan operations a preventive order carries out; validating it records their passages. */
+  serviceOperationNos: string[]
   external: ExternalWork | null
   history: WorkOrderEvent[]
   vehiclePlate: string

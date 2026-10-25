@@ -104,6 +104,13 @@ const tableColumns = computed<TableColumn[]>(() => [
 
 const filterDefs: FilterFieldDef[] = [
   {
+    field: 'status',
+    labelKey: 'maintenance.workOrders.col.status',
+    valueType: 'string',
+    kind: 'option',
+    optionsKey: 'workOrderStatus'
+  },
+  {
     field: 'maintenanceType',
     labelKey: 'maintenance.workOrders.col.maintenanceType',
     valueType: 'string',

@@ -8,6 +8,11 @@ export function maintenanceReferenceData(db: MockDatabase): Record<string, Refer
     failureCodes
       .filter((code) => code.kind === kind)
       .map((code) => ({ code: code.no, description: code.name, active: code.active }))
+  const vehicles = db.vehicles.all().filter((vehicle) => !vehicle.removal)
+  const modelCode = (vehicle: { make: string; model: string }) => `${vehicle.make}|${vehicle.model}`
+  const vehicleModels = new Map(
+    vehicles.map((vehicle) => [modelCode(vehicle), `${vehicle.make} ${vehicle.model}`])
+  )
   return {
     competences: db.competences
       .all()
@@ -32,6 +37,16 @@ export function maintenanceReferenceData(db: MockDatabase): Record<string, Refer
         description: provider.name,
         active: provider.authorized
       })),
+    vehicleModels: [...vehicleModels.entries()].map(([code, description]) => ({
+      code,
+      description
+    })),
+    // Each vehicle under its make and model, so a plan can take every vehicle of a model at once.
+    planVehicles: vehicles.map((vehicle) => ({
+      code: vehicle.no,
+      description: vehicle.plate,
+      parentCode: modelCode(vehicle)
+    })),
     missionTypes: db.missionTypes
       .all()
       .map((item) => ({ code: item.no, description: item.name, active: item.active }))
