@@ -1,3 +1,10 @@
+import {
+  mapHeaders as mapColumns,
+  missingColumns as missingOf,
+  parseImportDateTime,
+  parseImportNumber
+} from '@/core/utils/csvImport'
+
 /** Column names a refill file may use, in French or English; the first one goes into the template. */
 export const REFILL_IMPORT_COLUMNS = {
   plate: ['immatriculation', 'plaque', 'plate'],
@@ -12,58 +19,21 @@ export const REFILL_IMPORT_COLUMNS = {
 
 export type RefillImportField = keyof typeof REFILL_IMPORT_COLUMNS
 
+export const REFILL_REQUIRED: readonly RefillImportField[] = [
+  'plate',
+  'refueledAt',
+  'liters',
+  'unitPrice',
+  'odometerKm'
+]
+
 const NUMBER_FIELDS: readonly RefillImportField[] = ['liters', 'unitPrice', 'odometerKm']
 const YES = new Set(['oui', 'o', 'yes', 'y', '1', 'vrai', 'true', 'x'])
 
-export function normalizeHeader(header: string): string {
-  return header
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .trim()
-    .toLowerCase()
-    .replace(/[\s-]+/g, '_')
-}
+export const mapHeaders = (headers: readonly string[]) => mapColumns(REFILL_IMPORT_COLUMNS, headers)
 
-/** Which import field each header of the file feeds; unknown headers are left out. */
-export function mapHeaders(headers: readonly string[]): Map<string, RefillImportField> {
-  const mapping = new Map<string, RefillImportField>()
-  for (const header of headers) {
-    const name = normalizeHeader(header)
-    const field = (Object.keys(REFILL_IMPORT_COLUMNS) as RefillImportField[]).find((key) =>
-      (REFILL_IMPORT_COLUMNS[key] as readonly string[]).includes(name)
-    )
-    if (field) mapping.set(header, field)
-  }
-  return mapping
-}
-
-export function missingColumns(mapping: Map<string, RefillImportField>): RefillImportField[] {
-  const found = new Set(mapping.values())
-  return (['plate', 'refueledAt', 'liters', 'unitPrice', 'odometerKm'] as const).filter(
-    (field) => !found.has(field)
-  )
-}
-
-/** Accepts 2026-09-03 15:00 and 03/09/2026 15:00; anything else is passed on for the server to refuse. */
-export function parseImportDateTime(value: string): string {
-  const text = value.trim()
-  const french = /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[ T](\d{1,2}):(\d{2}))?$/.exec(text)
-  if (french) {
-    const [, day, month, year, hour = '00', minute = '00'] = french
-    return `${year}-${month!.padStart(2, '0')}-${day!.padStart(2, '0')}T${hour.padStart(2, '0')}:${minute}`
-  }
-  const iso = /^(\d{4}-\d{2}-\d{2})(?:[ T](\d{1,2}):(\d{2}))?$/.exec(text)
-  if (iso) return `${iso[1]}T${(iso[2] ?? '00').padStart(2, '0')}:${iso[3] ?? '00'}`
-  return text
-}
-
-/** A decimal comma and spaces between thousands are accepted; a blank cell stays empty. */
-export function parseImportNumber(value: string): number | string | null {
-  const text = value.replace(/\s/g, '').replace(',', '.')
-  if (!text) return null
-  const number = Number(text)
-  return Number.isNaN(number) ? value : number
-}
+export const missingColumns = (mapping: Map<string, RefillImportField>) =>
+  missingOf(mapping, REFILL_REQUIRED)
 
 /** One line of the file, as the server expects it. */
 export function toImportRow(

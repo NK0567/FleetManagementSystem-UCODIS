@@ -54,14 +54,7 @@ export type FuelRefillSearchColumn =
   | 'no,vehiclePlate,driverName,stationLabel'
 
 /** What happened to one line of an imported file. */
-export interface RefillImportResult {
-  line: number
-  no: string | null
-  error: string | null
-}
-
-export interface RefillImportReport {
-  created: number
-  rejected: number
-  results: RefillImportResult[]
-}
+export type {
+  ImportResult as RefillImportResult,
+  ImportReport as RefillImportReport
+} from '@/core/utils/csvImport'

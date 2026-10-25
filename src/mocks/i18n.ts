@@ -21,6 +21,18 @@ export function localize(language: MockLanguage, text: LocalizedText, params?: M
 }
 
 export const COMMON_MESSAGES = {
+  importEmpty: {
+    fr: 'Le fichier ne contient aucune ligne à importer.',
+    en: 'The file holds no line to import.'
+  },
+  importTooLarge: {
+    fr: 'Un import est limité à {max} lignes : découpez le fichier.',
+    en: 'An import is limited to {max} lines: split the file.'
+  },
+  importUnknownPlate: {
+    fr: "Aucun véhicule ne porte l'immatriculation « {plate} ».",
+    en: 'No vehicle has the plate "{plate}".'
+  },
   fileMissing: { fr: 'Aucun fichier reçu.', en: 'No file received.' },
   fileType: {
     fr: 'Ce type de fichier est refusé : seuls les PDF et les images (PNG, JPEG, WEBP) sont acceptés.',

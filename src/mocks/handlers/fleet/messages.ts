@@ -804,17 +804,5 @@ export const FLEET_MESSAGES = {
   reportPeriodInvalid: {
     fr: 'La période du rapport est invalide : indiquez deux dates, la première avant la seconde.',
     en: 'The report period is invalid: give two dates, the first one before the second.'
-  },
-  importEmpty: {
-    fr: 'Le fichier ne contient aucune ligne à importer.',
-    en: 'The file holds no line to import.'
-  },
-  importTooLarge: {
-    fr: 'Un import est limité à {max} lignes : découpez le fichier.',
-    en: 'An import is limited to {max} lines: split the file.'
-  },
-  importUnknownPlate: {
-    fr: "Aucun véhicule ne porte l'immatriculation « {plate} ».",
-    en: 'No vehicle has the plate "{plate}".'
   }
 } satisfies Record<string, LocalizedText>

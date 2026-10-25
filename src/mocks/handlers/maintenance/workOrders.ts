@@ -45,6 +45,7 @@ import {
 } from '../../http/input'
 import { optionalReference, requireReference } from '../../http/references'
 import { created, ok } from '../../http/responses'
+import { importRows, vehicleByPlate } from '../../http/importRows'
 import type { MockRouter } from '../../http/router'
 import { sessionUser, type MockRequest } from '../../http/types'
 import { MAINTENANCE_MESSAGES } from './messages'
@@ -86,7 +87,7 @@ export function workOrdersApi(db: MockDatabase): WorkOrderApi[] {
       subcontractingCost: subcontracting,
       partsCost,
       pendingPartCount: row.parts.length - received.length,
-      totalCost: labourCost + partsCost + subcontracting,
+      totalCost: labourCost + partsCost + subcontracting + (row.historicalCost ?? 0),
       diagnosedAt: row.diagnosis?.at ?? null,
       status: workOrderStatus({ ...row, diagnosedAt: row.diagnosis?.at ?? null })
     }
@@ -176,6 +177,7 @@ function buildWorkOrder(db: MockDatabase, order: WorkOrderRequest, request: Mock
     parts: [],
     planning: null,
     external: null,
+    historicalCost: null,
     serviceOperationNos: order.serviceOperationNos ?? [],
     startedAt: null,
     completedAt: null,
@@ -448,6 +450,55 @@ export function registerWorkOrdersHandlers(router: MockRouter, db: MockDatabase)
         ...stampModified(request)
       })
       return respond(order.no)
+    }
+  )
+
+  // History from former books goes through the same door as a new order, then is closed as it was.
+  router.post(
+    '/maintenance/work-orders/import',
+    { feature: 'WORKORDER', action: 'execute' },
+    (request) => {
+      const vehicleOf = vehicleByPlate(db)
+      const code = sessionUser(request).code
+      return ok(
+        importRows(readBody(request).rows, request, (input) => {
+          const vehicleNo = vehicleOf(readString(input, 'plate'))
+          const doneOn = readDate(input, 'doneOn', { required: true }) ?? todayIso()
+          const maintenanceType =
+            readEnum(input, 'maintenanceType', ['corrective', 'preventive'] as const, {
+              required: true
+            }) ?? 'corrective'
+          const workDone = readString(input, 'workDone', { required: true })
+          const cost = readNumber(input, 'cost', { required: true, min: 0 }) ?? 0
+          const km = readNumber(input, 'odometerKm', { min: 0 }) ?? null
+          const at = `${doneOn}T08:00:00`
+          const order = createWorkOrder(
+            db,
+            {
+              vehicleNo,
+              maintenanceType,
+              severity: 'minor',
+              origin: 'history',
+              originNo: null,
+              symptom: workDone,
+              declaredAt: at
+            },
+            request
+          )
+          db.workOrders.update(order.no, {
+            odometerKmAtOpening: km,
+            odometerKmAtCompletion: km,
+            startedAt: at,
+            completedAt: at,
+            completedBy: code,
+            workDone,
+            validatedAt: at,
+            validatedBy: code,
+            historicalCost: cost
+          })
+          return order.no
+        })
+      )
     }
   )
 

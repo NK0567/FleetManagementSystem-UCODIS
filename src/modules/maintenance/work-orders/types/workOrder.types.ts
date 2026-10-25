@@ -98,6 +98,8 @@ export interface WorkOrderApi {
   /** Plan operations a preventive order carries out; validating it records their passages. */
   serviceOperationNos: string[]
   external: ExternalWork | null
+  /** Cost carried over from the books for an imported order, which has no parts or time of its own. */
+  historicalCost: number | null
   history: WorkOrderEvent[]
   vehiclePlate: string
   subsystemName: string

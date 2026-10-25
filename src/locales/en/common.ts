@@ -134,5 +134,12 @@ export default {
 
   'common.error.loadList': 'Could not load the "{entity}" list.',
   'common.error.loadCard': 'Could not load the record.',
-  'common.error.unexpected': 'An unexpected error occurred.'
+  'common.error.unexpected': 'An unexpected error occurred.',
+  'common.import.template': 'Download the template',
+  'common.import.read': '{file}: {count} lines read.',
+  'common.import.missing': 'Required columns missing: {columns}.',
+  'common.import.run': 'Import | Import one line | Import {n} lines',
+  'common.import.rejected': 'No line refused. | One line refused: | {n} lines refused:',
+  'common.import.line': 'Line {line}',
+  'common.import.error': 'The import could not be done.'
 }

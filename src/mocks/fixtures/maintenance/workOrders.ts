@@ -35,6 +35,7 @@ export type WorkOrderRow = MockRow &
     | 'cancelReason'
     | 'downtimeNo'
     | 'external'
+    | 'historicalCost'
     | 'serviceOperationNos'
     | 'history'
   >
@@ -67,6 +68,7 @@ const open = {
   cancelReason: '',
   downtimeNo: null,
   external: null,
+  historicalCost: null,
   serviceOperationNos: [] as string[],
   parts: [] as PartLine[],
   planning: null

@@ -105,5 +105,11 @@ export default {
   'maintenance.workOrders.dialog.techniciansHint':
     'The server checks they hold the competence of the diagnosed subsystem.',
   'maintenance.workOrders.progress.planned': 'Planned on {date} · {hours} h · {technicians}',
-  'maintenance.workOrders.action.openFromSource': 'Open a work order'
+  'maintenance.workOrders.action.openFromSource': 'Open a work order',
+  'maintenance.workOrders.import.action': 'Import history',
+  'maintenance.workOrders.import.title': 'Import maintenance history',
+  'maintenance.workOrders.import.hint':
+    'CSV file (; or , separated) with a header line. Each line becomes a closed order, created with the same checks as an entry; its cost counts in the costs, not in the reliability indicators.',
+  'maintenance.workOrders.import.created':
+    'No order created. | One order created. | {n} orders created.'
 }

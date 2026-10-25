@@ -54,13 +54,6 @@ export default {
   'fleet.fuelRefills.import.title': 'Import refills',
   'fleet.fuelRefills.import.hint':
     'CSV file (; or , separated) with a header line. The vehicle is found by its plate, the driver by their employee number; left empty, it is worked out from the assignment or the trip. Each line is checked like a refill typed in by hand.',
-  'fleet.fuelRefills.import.template': 'Download the template',
-  'fleet.fuelRefills.import.read': '{file}: {count} lines read.',
-  'fleet.fuelRefills.import.missing': 'Required columns missing: {columns}.',
-  'fleet.fuelRefills.import.run': 'Import | Import one line | Import {n} lines',
   'fleet.fuelRefills.import.created':
-    'No refill created. | One refill created. | {n} refills created.',
-  'fleet.fuelRefills.import.rejected': 'No line refused. | One line refused: | {n} lines refused:',
-  'fleet.fuelRefills.import.line': 'Line {line}',
-  'fleet.fuelRefills.import.error': 'The import could not be done.'
+    'No refill created. | One refill created. | {n} refills created.'
 }

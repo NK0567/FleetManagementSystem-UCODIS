@@ -1,5 +1,7 @@
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
+import { Upload } from '@lucide/vue'
+import { usePermissions } from '@/composables/usePermissions'
 import { useI18n } from 'vue-i18n'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
@@ -12,6 +14,8 @@ import type { WorkOrderApi, WorkOrderSearchColumn } from '../types/workOrder.typ
 
 const { t } = useI18n()
 const store = useWorkOrderStore()
+const { canExecute } = usePermissions('WORKORDER')
+const importing = ref(false)
 const { formatDateTime, formatDecimal, formatInteger, optionLabel } = useListCellFormatters()
 
 const listViewOptions = computed<{ value: WorkOrderListView; label: string }[]>(() => [
@@ -246,6 +250,16 @@ const {
             :reset-preferences="resetPreferences"
           />
         </template>
+        <template v-if="canExecute" #extra-actions>
+          <button
+            type="button"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
+            @click="importing = true"
+          >
+            <Upload class="w-4 h-4 text-primary" />
+            {{ t('maintenance.workOrders.import.action') }}
+          </button>
+        </template>
       </ListPageToolbar>
 
       <FormAlerts class="mx-4" :error="exportError" @clear:error="exportError = null" />
@@ -351,6 +365,11 @@ const {
       v-if="showCreateModal"
       @close="showCreateModal = false"
       @created="onCreated"
+    />
+    <HistoryImportDialog
+      :open="importing"
+      @close="importing = false"
+      @imported="store.fetchItems(store.pagination.page, store.pagination.limit)"
     />
   </div>
 </template>

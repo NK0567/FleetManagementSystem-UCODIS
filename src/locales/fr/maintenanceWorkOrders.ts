@@ -104,5 +104,10 @@ export default {
   'maintenance.workOrders.dialog.techniciansHint':
     "Le serveur vérifie qu'ils ont la compétence du sous-système diagnostiqué.",
   'maintenance.workOrders.progress.planned': 'Planifié le {date} · {hours} h · {technicians}',
-  'maintenance.workOrders.action.openFromSource': 'Ouvrir un ordre de travail'
+  'maintenance.workOrders.action.openFromSource': 'Ouvrir un ordre de travail',
+  'maintenance.workOrders.import.action': "Importer l'historique",
+  'maintenance.workOrders.import.title': "Importer l'historique de maintenance",
+  'maintenance.workOrders.import.hint':
+    "Fichier CSV (séparateur ; ou ,) avec une ligne d'en-têtes. Chaque ligne devient un ordre clôturé, créé avec les mêmes contrôles qu'une saisie ; son coût compte dans les coûts, pas dans les indicateurs de fiabilité.",
+  'maintenance.workOrders.import.created': 'Aucun ordre créé. | Un ordre créé. | {n} ordres créés.'
 }

@@ -7,8 +7,7 @@ import {
 } from '@/modules/fleet/fuel-refills/domain/refill'
 import type {
   FuelRefillApi,
-  RefillCheck,
-  RefillImportResult
+  RefillCheck
 } from '@/modules/fleet/fuel-refills/types/fuelRefill.types'
 import { employeeFullName } from '@/modules/hr/employees/domain/employee'
 
@@ -25,7 +24,7 @@ import {
   stampCreated,
   stampModified
 } from '../../http/crudResource'
-import { conflict, MockHttpError, unprocessable } from '../../http/errors'
+import { conflict, unprocessable } from '../../http/errors'
 import {
   readBoolean,
   readDateTime,
@@ -36,6 +35,7 @@ import {
 } from '../../http/input'
 import { optionalReference, requireReference, unknownReference } from '../../http/references'
 import { ok } from '../../http/responses'
+import { importRows, vehicleByPlate } from '../../http/importRows'
 import type { MockRouter } from '../../http/router'
 import { sessionUser } from '../../http/types'
 import { localize, localizeNumber, type MockLanguage } from '../../i18n'
@@ -165,10 +165,6 @@ function refillApiOf(db: MockDatabase, no: string, language: MockLanguage) {
   return fuelRefillsApi(db, language).find((row) => row.no === no)
 }
 
-const MAX_IMPORT_ROWS = 1000
-
-const normalizePlate = (plate: string) => plate.replace(/\s+/g, '').toUpperCase()
-
 export function registerFuelRefillsHandlers(router: MockRouter, db: MockDatabase): void {
   const readers: FieldReaders<EditableFields> = {
     refueledAt: (input) => {
@@ -281,37 +277,15 @@ export function registerFuelRefillsHandlers(router: MockRouter, db: MockDatabase
     '/fleet/fuel-refills/import',
     { feature: 'FUELREFILL', action: 'insert' },
     (request) => {
-      const rows = readBody(request).rows
-      if (!Array.isArray(rows) || rows.length === 0) {
-        throw unprocessable(FLEET_MESSAGES.importEmpty)
-      }
-      if (rows.length > MAX_IMPORT_ROWS) {
-        throw unprocessable(FLEET_MESSAGES.importTooLarge, { max: MAX_IMPORT_ROWS })
-      }
-      const byPlate = new Map(
-        db.vehicles.all().map((vehicle) => [normalizePlate(vehicle.plate), vehicle.no])
-      )
-      const results: RefillImportResult[] = rows.map((row: unknown, index) => {
-        const line = index + 1
-        const input = (row && typeof row === 'object' ? row : {}) as Record<string, unknown>
-        try {
-          const plate = readString(input, 'plate')
-          const vehicleNo = byPlate.get(normalizePlate(plate))
-          if (!vehicleNo) throw unprocessable(FLEET_MESSAGES.importUnknownPlate, { plate })
-          const refill = db.fuelRefills.insert(
+      const vehicleOf = vehicleByPlate(db)
+      return ok(
+        importRows(readBody(request).rows, request, (input) => {
+          const vehicleNo = vehicleOf(readString(input, 'plate'))
+          return db.fuelRefills.insert(
             stampCreated(buildRefill({ ...input, vehicleNo }, 'import'), request)
-          )
-          return { line, no: refill.no, error: null }
-        } catch (error) {
-          if (!(error instanceof MockHttpError)) throw error
-          return { line, no: null, error: localize(request.language, error.text, error.params) }
-        }
-      })
-      return ok({
-        created: results.filter((result) => result.no).length,
-        rejected: results.filter((result) => result.error).length,
-        results
-      })
+          ).no
+        })
+      )
     }
   )
 }

@@ -137,5 +137,12 @@ export default {
 
   'common.error.loadList': 'Impossible de charger la liste « {entity} ».',
   'common.error.loadCard': 'Impossible de charger la fiche.',
-  'common.error.unexpected': 'Une erreur inattendue est survenue.'
+  'common.error.unexpected': 'Une erreur inattendue est survenue.',
+  'common.import.template': 'Télécharger le modèle',
+  'common.import.read': '{file} : {count} lignes lues.',
+  'common.import.missing': 'Colonnes obligatoires absentes : {columns}.',
+  'common.import.run': 'Importer | Importer une ligne | Importer {n} lignes',
+  'common.import.rejected': 'Aucune ligne refusée. | Une ligne refusée : | {n} lignes refusées :',
+  'common.import.line': 'Ligne {line}',
+  'common.import.error': "L'import n'a pas pu être effectué."
 }
