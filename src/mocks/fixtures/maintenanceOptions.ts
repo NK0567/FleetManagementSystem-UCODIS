@@ -111,5 +111,11 @@ export const MAINTENANCE_OPTION_SETS: Record<string, Record<string, LocalizedTex
     ok: { fr: 'Conforme', en: 'OK' },
     anomaly: { fr: 'Anomalie à suivre', en: 'Anomaly to follow' },
     blocking: { fr: 'Anomalie bloquante', en: 'Blocking anomaly' }
+  },
+  mobileInterventionStatus: {
+    en_route: { fr: 'En route', en: 'En route' },
+    on_site: { fr: 'Sur place', en: 'On site' },
+    resolved: { fr: 'Résolue', en: 'Resolved' },
+    unresolved: { fr: 'Non résolue', en: 'Unresolved' }
   }
 }

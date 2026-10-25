@@ -256,5 +256,45 @@ export const MAINTENANCE_MESSAGES = {
   checkAnomalySymptom: {
     fr: 'Contrôle véhicule : {points} en anomalie.',
     en: 'Vehicle check: {points} failed.'
+  },
+  missionTypeInactive: {
+    fr: "Ce type de mission n'est plus actif.",
+    en: 'This mission type is no longer active.'
+  },
+  interventionInProgress: {
+    fr: 'Une intervention est déjà en cours sur ce véhicule ({no}).',
+    en: 'An intervention is already under way on this vehicle ({no}).'
+  },
+  crewMissing: {
+    fr: "Choisissez au moins un technicien pour l'équipe.",
+    en: 'Pick at least one technician for the crew.'
+  },
+  interventionClosed: {
+    fr: 'Cette intervention est clôturée.',
+    en: 'This intervention is closed.'
+  },
+  interventionUseActions: {
+    fr: 'Une intervention avance par ses actions : arrivée, contrôles, clôture.',
+    en: 'An intervention moves through its actions: arrival, checks, closing.'
+  },
+  arrivalInvalid: {
+    fr: "L'arrivée se situe entre le départ et maintenant.",
+    en: 'The arrival falls between the departure and now.'
+  },
+  arrivalMissing: {
+    fr: "Indiquez l'heure d'arrivée avant de clôturer.",
+    en: 'Record the arrival before closing.'
+  },
+  notAControlMission: {
+    fr: 'Seule une mission de contrôle compte des contrôles.',
+    en: 'Only a control mission counts checks.'
+  },
+  checkCountsInvalid: {
+    fr: 'Les contrôles et les cas positifs sont des nombres entiers, les positifs au plus égaux aux contrôles.',
+    en: 'Checks and positives are whole numbers, positives at most the checks.'
+  },
+  observationTooShort: {
+    fr: 'Décrivez ce qui reste à faire ({min} caractères au moins).',
+    en: 'Describe what is left to do ({min} characters at least).'
   }
 } satisfies Record<string, LocalizedText>

@@ -70,6 +70,7 @@ import maintenanceStockItems from './maintenanceStockItems'
 import maintenancePurchaseRequests from './maintenancePurchaseRequests'
 import maintenanceVehicleCheckPoints from './maintenanceVehicleCheckPoints'
 import maintenanceVehicleChecks from './maintenanceVehicleChecks'
+import maintenanceMobileInterventions from './maintenanceMobileInterventions'
 export default {
   ...common,
   ...auth,
@@ -141,5 +142,6 @@ export default {
   ...maintenanceStockItems,
   ...maintenancePurchaseRequests,
   ...maintenanceVehicleCheckPoints,
-  ...maintenanceVehicleChecks
+  ...maintenanceVehicleChecks,
+  ...maintenanceMobileInterventions
 }

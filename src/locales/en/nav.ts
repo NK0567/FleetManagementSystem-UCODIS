@@ -66,6 +66,7 @@ export default {
   'nav.serviceDue': 'Service due',
   'nav.workshopLoad': 'Workshop load',
   'nav.vehicleChecks': 'Vehicle checks',
+  'nav.mobileInterventions': 'Mobile team',
   'nav.maintenancePlans': 'Maintenance plans',
   'nav.downtimes': 'Downtimes',
   'nav.stockItems': 'Parts stock',

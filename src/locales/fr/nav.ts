@@ -66,6 +66,7 @@ export default {
   'nav.serviceDue': "Échéances d'entretien",
   'nav.workshopLoad': 'Charge atelier',
   'nav.vehicleChecks': 'Contrôles véhicule',
+  'nav.mobileInterventions': 'Équipe mobile',
   'nav.maintenancePlans': "Plans d'entretien",
   'nav.downtimes': 'Indisponibilités',
   'nav.stockItems': 'Stock de pièces',

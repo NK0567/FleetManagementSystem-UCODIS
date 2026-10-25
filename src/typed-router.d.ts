@@ -759,6 +759,20 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/maintenance/mobile-interventions/': RouteRecordInfo<
+      '/maintenance/mobile-interventions/',
+      '/maintenance/mobile-interventions',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/mobile-interventions/[id]': RouteRecordInfo<
+      '/maintenance/mobile-interventions/[id]',
+      '/maintenance/mobile-interventions/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/maintenance/purchase-requests/': RouteRecordInfo<
       '/maintenance/purchase-requests/',
       '/maintenance/purchase-requests',
@@ -1711,6 +1725,22 @@ declare module 'vue-router/auto-routes' {
     'src/pages/maintenance/mission-types/[id].vue': {
       routes:
         | '/maintenance/mission-types/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/maintenance/mobile-interventions/index.vue': {
+      routes:
+        | '/maintenance/mobile-interventions/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/mobile-interventions/[id].vue': {
+      routes:
+        | '/maintenance/mobile-interventions/[id]'
       views:
         | never
       pathParamNames:

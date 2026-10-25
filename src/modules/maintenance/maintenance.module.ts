@@ -9,6 +9,7 @@ export function registerMaintenanceModule(): void {
     SERVICEDUE: { to: '/maintenance/service-due', menuKey: 'serviceDue' },
     WORKSHOPLOAD: { to: '/maintenance/workshop-load', menuKey: 'workshopLoad' },
     VEHICLECHECK: { to: '/maintenance/vehicle-checks', menuKey: 'vehicleCheck' },
+    MOBILEINTERVENTION: { to: '/maintenance/mobile-interventions', menuKey: 'mobileIntervention' },
     DOWNTIME: { to: '/maintenance/downtimes', menuKey: 'downtime' },
     STOCKITEM: { to: '/maintenance/stock-items', menuKey: 'stockItem' },
     PURCHASEREQUEST: { to: '/maintenance/purchase-requests', menuKey: 'purchaseRequest' },
@@ -30,6 +31,11 @@ export function registerMaintenanceModule(): void {
       { labelKey: 'nav.serviceDue', to: '/maintenance/service-due', menuKey: 'serviceDue' },
       { labelKey: 'nav.workshopLoad', to: '/maintenance/workshop-load', menuKey: 'workshopLoad' },
       { labelKey: 'nav.vehicleChecks', to: '/maintenance/vehicle-checks', menuKey: 'vehicleCheck' },
+      {
+        labelKey: 'nav.mobileInterventions',
+        to: '/maintenance/mobile-interventions',
+        menuKey: 'mobileIntervention'
+      },
       {
         labelKey: 'nav.maintenancePlans',
         to: '/maintenance/maintenance-plans',
