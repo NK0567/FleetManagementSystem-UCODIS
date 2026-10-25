@@ -244,5 +244,17 @@ export const MAINTENANCE_MESSAGES = {
   technicianNotCompetent: {
     fr: "Ce technicien n'a pas la compétence « {competence} » demandée par ce travail.",
     en: 'This technician lacks the "{competence}" competence this job needs.'
+  },
+  noCheckPoint: {
+    fr: 'Aucun point de contrôle actif pour ce moment.',
+    en: 'No active check point for this moment.'
+  },
+  checkPointsMissing: {
+    fr: 'Renseignez tous les points : {points}.',
+    en: 'Answer every point: {points}.'
+  },
+  checkAnomalySymptom: {
+    fr: 'Contrôle véhicule : {points} en anomalie.',
+    en: 'Vehicle check: {points} failed.'
   }
 } satisfies Record<string, LocalizedText>

@@ -97,5 +97,19 @@ export const MAINTENANCE_OPTION_SETS: Record<string, Record<string, LocalizedTex
     ordered: { fr: 'Commandée', en: 'Ordered' },
     received: { fr: 'Reçue', en: 'Received' },
     cancelled: { fr: 'Annulée', en: 'Cancelled' }
+  },
+  vehicleCheckMoment: {
+    before_loading: { fr: 'Avant le chargement', en: 'Before loading' },
+    trip_return: { fr: 'Au retour de voyage', en: 'On trip return' },
+    new_vehicle: { fr: "À la réception d'un camion neuf", en: 'On new vehicle delivery' }
+  },
+  checkResult: {
+    ok: { fr: 'Conforme', en: 'OK' },
+    anomaly: { fr: 'Anomalie', en: 'Anomaly' }
+  },
+  vehicleCheckOutcome: {
+    ok: { fr: 'Conforme', en: 'OK' },
+    anomaly: { fr: 'Anomalie à suivre', en: 'Anomaly to follow' },
+    blocking: { fr: 'Anomalie bloquante', en: 'Blocking anomaly' }
   }
 }

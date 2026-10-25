@@ -13,6 +13,8 @@ import { registerServiceDueHandlers } from './serviceDue'
 import { registerWorkshopLoadHandlers } from './workshopLoad'
 import { registerStockItemsHandlers } from './stockItems'
 import { registerPurchaseRequestsHandlers } from './purchaseRequests'
+import { registerVehicleCheckPointsHandlers } from './vehicleCheckPoints'
+import { registerVehicleChecksHandlers } from './vehicleChecks'
 
 export function registerMaintenanceHandlers(router: MockRouter, db: MockDatabase): void {
   registerMaintenanceSettingsHandlers(router, db)
@@ -28,4 +30,6 @@ export function registerMaintenanceHandlers(router: MockRouter, db: MockDatabase
   registerWorkshopLoadHandlers(router, db)
   registerStockItemsHandlers(router, db)
   registerPurchaseRequestsHandlers(router, db)
+  registerVehicleCheckPointsHandlers(router, db)
+  registerVehicleChecksHandlers(router, db)
 }

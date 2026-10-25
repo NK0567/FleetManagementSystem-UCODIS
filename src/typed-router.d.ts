@@ -815,6 +815,34 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/maintenance/vehicle-check-points/': RouteRecordInfo<
+      '/maintenance/vehicle-check-points/',
+      '/maintenance/vehicle-check-points',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/vehicle-check-points/[id]': RouteRecordInfo<
+      '/maintenance/vehicle-check-points/[id]',
+      '/maintenance/vehicle-check-points/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/maintenance/vehicle-checks/': RouteRecordInfo<
+      '/maintenance/vehicle-checks/',
+      '/maintenance/vehicle-checks',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/vehicle-checks/[id]': RouteRecordInfo<
+      '/maintenance/vehicle-checks/[id]',
+      '/maintenance/vehicle-checks/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/maintenance/work-orders/': RouteRecordInfo<
       '/maintenance/work-orders/',
       '/maintenance/work-orders',
@@ -1747,6 +1775,38 @@ declare module 'vue-router/auto-routes' {
     'src/pages/maintenance/technicians/[id].vue': {
       routes:
         | '/maintenance/technicians/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/maintenance/vehicle-check-points/index.vue': {
+      routes:
+        | '/maintenance/vehicle-check-points/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/vehicle-check-points/[id].vue': {
+      routes:
+        | '/maintenance/vehicle-check-points/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/maintenance/vehicle-checks/index.vue': {
+      routes:
+        | '/maintenance/vehicle-checks/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/vehicle-checks/[id].vue': {
+      routes:
+        | '/maintenance/vehicle-checks/[id]'
       views:
         | never
       pathParamNames:

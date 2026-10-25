@@ -8,6 +8,7 @@ export function registerMaintenanceModule(): void {
     WORKORDER: { to: '/maintenance/work-orders', menuKey: 'workOrder' },
     SERVICEDUE: { to: '/maintenance/service-due', menuKey: 'serviceDue' },
     WORKSHOPLOAD: { to: '/maintenance/workshop-load', menuKey: 'workshopLoad' },
+    VEHICLECHECK: { to: '/maintenance/vehicle-checks', menuKey: 'vehicleCheck' },
     DOWNTIME: { to: '/maintenance/downtimes', menuKey: 'downtime' },
     STOCKITEM: { to: '/maintenance/stock-items', menuKey: 'stockItem' },
     PURCHASEREQUEST: { to: '/maintenance/purchase-requests', menuKey: 'purchaseRequest' },
@@ -16,6 +17,7 @@ export function registerMaintenanceModule(): void {
     FAILURECODE: { to: '/maintenance/failure-codes', menuKey: 'failureCode' },
     DOWNTIMECODE: { to: '/maintenance/downtime-codes', menuKey: 'downtimeCode' },
     MISSIONTYPE: { to: '/maintenance/mission-types', menuKey: 'missionType' },
+    VEHICLECHECKPOINT: { to: '/maintenance/vehicle-check-points', menuKey: 'vehicleCheckPoint' },
     MAINTENANCEPLAN: { to: '/maintenance/maintenance-plans', menuKey: 'maintenancePlan' },
     MAINTENANCESETTINGS: { to: '/maintenance/settings', menuKey: 'maintenanceSettings' }
   })
@@ -27,6 +29,7 @@ export function registerMaintenanceModule(): void {
       { labelKey: 'nav.workOrders', to: '/maintenance/work-orders', menuKey: 'workOrder' },
       { labelKey: 'nav.serviceDue', to: '/maintenance/service-due', menuKey: 'serviceDue' },
       { labelKey: 'nav.workshopLoad', to: '/maintenance/workshop-load', menuKey: 'workshopLoad' },
+      { labelKey: 'nav.vehicleChecks', to: '/maintenance/vehicle-checks', menuKey: 'vehicleCheck' },
       {
         labelKey: 'nav.maintenancePlans',
         to: '/maintenance/maintenance-plans',
@@ -44,6 +47,11 @@ export function registerMaintenanceModule(): void {
       { labelKey: 'nav.failureCodes', to: '/maintenance/failure-codes', menuKey: 'failureCode' },
       { labelKey: 'nav.downtimeCodes', to: '/maintenance/downtime-codes', menuKey: 'downtimeCode' },
       { labelKey: 'nav.missionTypes', to: '/maintenance/mission-types', menuKey: 'missionType' },
+      {
+        labelKey: 'nav.vehicleCheckPoints',
+        to: '/maintenance/vehicle-check-points',
+        menuKey: 'vehicleCheckPoint'
+      },
       {
         labelKey: 'nav.maintenanceSettings',
         to: '/maintenance/settings',

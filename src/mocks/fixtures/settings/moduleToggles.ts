@@ -59,7 +59,12 @@ export const MODULE_TOGGLE_CATALOG: readonly ModuleToggleDefinition[] = [
     features: ['PURCHASEREQUEST', 'STOCKITEM']
   },
   { no: 'tyres', group: 'maintenance', order: 270, features: ['TYRE'] },
-  { no: 'vehicle-checks', group: 'maintenance', order: 280, features: ['VEHICLECHECK'] }
+  {
+    no: 'vehicle-checks',
+    group: 'maintenance',
+    order: 280,
+    features: ['VEHICLECHECK', 'VEHICLECHECKPOINT']
+  }
 ]
 
 export const moduleTogglesCollection: CollectionDefinition<ModuleToggleRow> = {
