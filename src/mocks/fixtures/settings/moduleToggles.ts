@@ -58,7 +58,7 @@ export const MODULE_TOGGLE_CATALOG: readonly ModuleToggleDefinition[] = [
     order: 260,
     features: ['PURCHASEREQUEST', 'STOCKITEM']
   },
-  { no: 'tyres', group: 'maintenance', order: 270, features: ['TYRE'] },
+  { no: 'tyres', group: 'maintenance', order: 270, features: ['TYRE', 'TYRELAYOUT'] },
   {
     no: 'vehicle-checks',
     group: 'maintenance',

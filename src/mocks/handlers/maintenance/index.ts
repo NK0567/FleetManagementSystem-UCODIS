@@ -16,6 +16,8 @@ import { registerPurchaseRequestsHandlers } from './purchaseRequests'
 import { registerVehicleCheckPointsHandlers } from './vehicleCheckPoints'
 import { registerVehicleChecksHandlers } from './vehicleChecks'
 import { registerMobileInterventionsHandlers } from './mobileInterventions'
+import { registerTyreLayoutsHandlers } from './tyreLayouts'
+import { registerTyresHandlers } from './tyres'
 
 export function registerMaintenanceHandlers(router: MockRouter, db: MockDatabase): void {
   registerMaintenanceSettingsHandlers(router, db)
@@ -34,4 +36,6 @@ export function registerMaintenanceHandlers(router: MockRouter, db: MockDatabase
   registerVehicleCheckPointsHandlers(router, db)
   registerVehicleChecksHandlers(router, db)
   registerMobileInterventionsHandlers(router, db)
+  registerTyreLayoutsHandlers(router, db)
+  registerTyresHandlers(router, db)
 }

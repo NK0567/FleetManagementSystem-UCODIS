@@ -10,6 +10,8 @@ export function registerMaintenanceModule(): void {
     WORKSHOPLOAD: { to: '/maintenance/workshop-load', menuKey: 'workshopLoad' },
     VEHICLECHECK: { to: '/maintenance/vehicle-checks', menuKey: 'vehicleCheck' },
     MOBILEINTERVENTION: { to: '/maintenance/mobile-interventions', menuKey: 'mobileIntervention' },
+    TYRE: { to: '/maintenance/tyres', menuKey: 'tyre' },
+    TYRELAYOUT: { to: '/maintenance/tyre-layouts', menuKey: 'tyreLayout' },
     DOWNTIME: { to: '/maintenance/downtimes', menuKey: 'downtime' },
     STOCKITEM: { to: '/maintenance/stock-items', menuKey: 'stockItem' },
     PURCHASEREQUEST: { to: '/maintenance/purchase-requests', menuKey: 'purchaseRequest' },
@@ -36,6 +38,7 @@ export function registerMaintenanceModule(): void {
         to: '/maintenance/mobile-interventions',
         menuKey: 'mobileIntervention'
       },
+      { labelKey: 'nav.tyres', to: '/maintenance/tyres', menuKey: 'tyre' },
       {
         labelKey: 'nav.maintenancePlans',
         to: '/maintenance/maintenance-plans',
@@ -58,6 +61,7 @@ export function registerMaintenanceModule(): void {
         to: '/maintenance/vehicle-check-points',
         menuKey: 'vehicleCheckPoint'
       },
+      { labelKey: 'nav.tyreLayouts', to: '/maintenance/tyre-layouts', menuKey: 'tyreLayout' },
       {
         labelKey: 'nav.maintenanceSettings',
         to: '/maintenance/settings',

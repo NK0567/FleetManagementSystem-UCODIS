@@ -30,6 +30,7 @@ import { routeDeviationsApi } from './routeDeviations'
 import { telematicsEventsApi } from './telematicsEvents'
 import { driverScoresApi } from './driverScores'
 import { trainingsApi } from './trainings'
+import { tyresApi } from '../maintenance/tyres'
 
 /** A situation that calls for someone, found in the fleet records each time alerts are read. */
 interface AlertSignal {
@@ -237,6 +238,19 @@ export function alertSignals(db: MockDatabase, language: MockLanguage): AlertSig
           threshold: score.threshold
         }),
         since: todayIso()
+      })
+    )
+  }
+  for (const tyre of tyresApi(db).filter((row) => row.alert !== 'none')) {
+    signals.push(
+      signal('tyre', tyre.no, '/maintenance/tyres', {
+        severity: tyre.alert === 'safety' ? 'critical' : 'info',
+        subject: `${tyre.vehiclePlate} · ${tyre.positionCode}`,
+        detail:
+          tyre.alert === 'safety'
+            ? tyre.safetyIssues.map((issue) => label('tyreSafetyIssue', issue)).join(', ')
+            : label('tyreAlert', tyre.alert),
+        since: tyre.lastReading?.at.slice(0, 10) ?? todayIso()
       })
     )
   }

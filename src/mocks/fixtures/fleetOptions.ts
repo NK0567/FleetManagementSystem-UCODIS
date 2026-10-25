@@ -272,7 +272,9 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
     inspection: { fr: 'Contre-visites', en: 'Re-inspections' },
     deviation: { fr: "Écarts d'itinéraire", en: 'Route deviations' },
     insurance: { fr: 'Assurances', en: 'Insurance' },
-    telematics: { fr: 'Télématique', en: 'Telematics' }
+    telematics: { fr: 'Télématique', en: 'Telematics' },
+    driverScore: { fr: 'Scores de conduite', en: 'Driving scores' },
+    tyre: { fr: 'Pneumatiques', en: 'Tyres' }
   },
   alertSeverity: {
     info: { fr: 'Information', en: 'Information' },

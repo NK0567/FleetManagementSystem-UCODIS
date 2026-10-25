@@ -296,5 +296,45 @@ export const MAINTENANCE_MESSAGES = {
   observationTooShort: {
     fr: 'Décrivez ce qui reste à faire ({min} caractères au moins).',
     en: 'Describe what is left to do ({min} characters at least).'
+  },
+  layoutInvalid: {
+    fr: 'Un plan a au moins un essieu nommé et de 0 à 4 roues de secours.',
+    en: 'A layout has at least one named axle and 0 to 4 spare wheels.'
+  },
+  layoutPositionInUse: {
+    fr: "La position {position} porte un pneu monté : elle ne peut ni disparaître ni changer d'essieu.",
+    en: 'Position {position} carries a mounted tyre: it can neither disappear nor change axle.'
+  },
+  tyreWrongStatus: {
+    fr: "Ce pneu n'est pas dans la situation voulue pour cette action.",
+    en: 'This tyre is not in the right state for this action.'
+  },
+  tyreSerialTaken: {
+    fr: 'Ce numéro de série est déjà celui du pneu {no}.',
+    en: 'This serial number already belongs to tyre {no}.'
+  },
+  dotInvalid: {
+    fr: 'Le code DOT tient en quatre chiffres : semaine (01 à 53) puis année.',
+    en: 'The DOT code is four digits: week (01 to 53) then year.'
+  },
+  tyreSupplierInvalid: {
+    fr: 'Choisissez un fournisseur de pneus.',
+    en: 'Pick a tyre supplier.'
+  },
+  tyreVehicleUnavailable: {
+    fr: 'On ne monte pas de pneu sur un véhicule sorti ou hors service.',
+    en: 'A tyre cannot be mounted on a vehicle that has left or is out of service.'
+  },
+  tyrePositionUnknown: {
+    fr: "Cette position n'existe pas dans le plan de pneus du véhicule.",
+    en: "This position is not in the vehicle's tyre layout."
+  },
+  tyrePositionTaken: {
+    fr: 'Cette position porte déjà le pneu {no}.',
+    en: 'This position already carries tyre {no}.'
+  },
+  tyreSamePosition: {
+    fr: 'Choisissez une autre position.',
+    en: 'Pick another position.'
   }
 } satisfies Record<string, LocalizedText>

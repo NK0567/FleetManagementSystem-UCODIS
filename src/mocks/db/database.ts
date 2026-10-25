@@ -64,11 +64,13 @@ import { purchaseRequestsCollection } from '../fixtures/maintenance/purchaseRequ
 import { vehicleCheckPointsCollection } from '../fixtures/maintenance/vehicleCheckPoints'
 import { vehicleChecksCollection } from '../fixtures/maintenance/vehicleChecks'
 import { mobileInterventionsCollection } from '../fixtures/maintenance/mobileInterventions'
+import { tyreLayoutsCollection } from '../fixtures/maintenance/tyreLayouts'
+import { tyresCollection } from '../fixtures/maintenance/tyres'
 import { createCollection, type CollectionContext } from './collection'
 import { clearStoredCollections } from './storage'
 
 /** Bump when fixtures change shape: every collection is then reseeded. */
-export const MOCK_SEED_VERSION = 30
+export const MOCK_SEED_VERSION = 31
 
 export function createDatabase(
   context: CollectionContext = {
@@ -141,7 +143,9 @@ export function createDatabase(
     purchaseRequests: createCollection(purchaseRequestsCollection, context),
     vehicleCheckPoints: createCollection(vehicleCheckPointsCollection, context),
     vehicleChecks: createCollection(vehicleChecksCollection, context),
-    mobileInterventions: createCollection(mobileInterventionsCollection, context)
+    mobileInterventions: createCollection(mobileInterventionsCollection, context),
+    tyreLayouts: createCollection(tyreLayoutsCollection, context),
+    tyres: createCollection(tyresCollection, context)
   }
 
   return {

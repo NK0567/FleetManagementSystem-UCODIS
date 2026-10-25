@@ -67,6 +67,8 @@ export default {
   'nav.workshopLoad': 'Charge atelier',
   'nav.vehicleChecks': 'Contrôles véhicule',
   'nav.mobileInterventions': 'Équipe mobile',
+  'nav.tyres': 'Pneumatiques',
+  'nav.tyreLayouts': 'Plans de pneus',
   'nav.maintenancePlans': "Plans d'entretien",
   'nav.downtimes': 'Indisponibilités',
   'nav.stockItems': 'Stock de pièces',

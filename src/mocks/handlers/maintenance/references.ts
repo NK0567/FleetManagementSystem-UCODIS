@@ -65,6 +65,14 @@ export function maintenanceReferenceData(db: MockDatabase): Record<string, Refer
         isWorkable(workOrderStatus({ ...order, diagnosedAt: order.diagnosis?.at ?? null }))
       )
       .map((order) => ({ code: order.no, description: order.symptom })),
+    tyreSuppliers: db.providers
+      .all()
+      .filter((provider) => provider.providerType === 'tyre_supplier')
+      .map((provider) => ({
+        code: provider.no,
+        description: provider.name,
+        active: provider.authorized
+      })),
     missionTypes: db.missionTypes
       .all()
       .map((item) => ({ code: item.no, description: item.name, active: item.active }))

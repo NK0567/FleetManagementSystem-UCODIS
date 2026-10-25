@@ -117,5 +117,30 @@ export const MAINTENANCE_OPTION_SETS: Record<string, Record<string, LocalizedTex
     on_site: { fr: 'Sur place', en: 'On site' },
     resolved: { fr: 'Résolue', en: 'Resolved' },
     unresolved: { fr: 'Non résolue', en: 'Unresolved' }
+  },
+  tyreStatus: {
+    stock: { fr: 'En stock', en: 'In stock' },
+    mounted: { fr: 'Monté', en: 'Mounted' },
+    retreading: { fr: 'En rechapage', en: 'At the retreader' },
+    scrapped: { fr: 'Au rebut', en: 'Scrapped' }
+  },
+  tyreAlert: {
+    none: { fr: 'Aucune', en: 'None' },
+    safety: { fr: 'Sécurité', en: 'Safety' },
+    rotation: { fr: 'Rotation due', en: 'Rotation due' }
+  },
+  tyreEvent: {
+    purchased: { fr: 'Achat', en: 'Purchase' },
+    mounted: { fr: 'Montage', en: 'Mounted' },
+    dismounted: { fr: 'Démontage', en: 'Dismounted' },
+    reading: { fr: 'Relevé', en: 'Reading' },
+    rotated: { fr: 'Rotation', en: 'Rotation' },
+    sent_retreading: { fr: 'Envoi au rechapage', en: 'Sent for retreading' },
+    back_retreading: { fr: 'Retour du rechapage', en: 'Back from retreading' },
+    scrapped: { fr: 'Mise au rebut', en: 'Scrapped' }
+  },
+  tyreSafetyIssue: {
+    pressure: { fr: 'Pression sous le seuil', en: 'Pressure under the threshold' },
+    tread: { fr: 'Sculpture sous le seuil', en: 'Tread under the threshold' }
   }
 }

@@ -71,6 +71,8 @@ import maintenancePurchaseRequests from './maintenancePurchaseRequests'
 import maintenanceVehicleCheckPoints from './maintenanceVehicleCheckPoints'
 import maintenanceVehicleChecks from './maintenanceVehicleChecks'
 import maintenanceMobileInterventions from './maintenanceMobileInterventions'
+import maintenanceTyreLayouts from './maintenanceTyreLayouts'
+import maintenanceTyres from './maintenanceTyres'
 export default {
   ...common,
   ...auth,
@@ -143,5 +145,7 @@ export default {
   ...maintenancePurchaseRequests,
   ...maintenanceVehicleCheckPoints,
   ...maintenanceVehicleChecks,
-  ...maintenanceMobileInterventions
+  ...maintenanceMobileInterventions,
+  ...maintenanceTyreLayouts,
+  ...maintenanceTyres
 }

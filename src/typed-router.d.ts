@@ -829,6 +829,34 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/maintenance/tyre-layouts/': RouteRecordInfo<
+      '/maintenance/tyre-layouts/',
+      '/maintenance/tyre-layouts',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/tyre-layouts/[id]': RouteRecordInfo<
+      '/maintenance/tyre-layouts/[id]',
+      '/maintenance/tyre-layouts/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/maintenance/tyres/': RouteRecordInfo<
+      '/maintenance/tyres/',
+      '/maintenance/tyres',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/tyres/[id]': RouteRecordInfo<
+      '/maintenance/tyres/[id]',
+      '/maintenance/tyres/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/maintenance/vehicle-check-points/': RouteRecordInfo<
       '/maintenance/vehicle-check-points/',
       '/maintenance/vehicle-check-points',
@@ -1805,6 +1833,38 @@ declare module 'vue-router/auto-routes' {
     'src/pages/maintenance/technicians/[id].vue': {
       routes:
         | '/maintenance/technicians/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/maintenance/tyre-layouts/index.vue': {
+      routes:
+        | '/maintenance/tyre-layouts/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/tyre-layouts/[id].vue': {
+      routes:
+        | '/maintenance/tyre-layouts/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/maintenance/tyres/index.vue': {
+      routes:
+        | '/maintenance/tyres/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/tyres/[id].vue': {
+      routes:
+        | '/maintenance/tyres/[id]'
       views:
         | never
       pathParamNames:

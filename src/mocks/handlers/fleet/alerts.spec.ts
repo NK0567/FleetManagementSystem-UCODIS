@@ -52,7 +52,9 @@ describe('alerts', () => {
     expect(find(management, 'training.FOR-00003')).toBeUndefined()
     const technician = await alerts('MNT001')
     expect(
-      technician.every((alert) => ['checklist', 'equipment', 'inspection'].includes(alert.category))
+      technician.every((alert) =>
+        ['checklist', 'equipment', 'inspection', 'tyre'].includes(alert.category)
+      )
     ).toBe(true)
   })
 
