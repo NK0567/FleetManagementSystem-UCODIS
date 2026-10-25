@@ -15,8 +15,9 @@
 9. Ajouter une entité
 10. Outillage et scripts
 11. Le domaine flotte
+12. Le domaine maintenance
 
-*(Les modules RH et flotte sont migrés ; maintenance, planification et libre-service suivront le même modèle.)*
+*(Les modules RH, flotte et maintenance sont migrés ; planification et libre-service suivront le même modèle.)*
 
 ## 1. Vue d'ensemble
 
@@ -373,7 +374,7 @@ Aucun statut n'est stocké quand les faits suffisent à le déduire. Il est calc
 | Événement télématique | `telematicsEventStatus` | prise en compte, infraction ouverte |
 | Situation sur la carte | `liveSituation` | trajet en cours, position, dernière remontée |
 
-Une immobilisation vient d'une cause : chaque module ajoute la sienne à `vehicleStatus` (documents et contre-visites aujourd'hui, maintenance en phase 3). Aucun module ne modifie le statut d'un véhicule directement.
+Une immobilisation vient d'une cause : chaque module ajoute la sienne à `vehicleStatus` (documents, contre-visites, indisponibilités et entretiens dépassés de la maintenance). Aucun module ne modifie le statut d'un véhicule directement.
 
 ### Règles qui traversent plusieurs entités
 
@@ -396,12 +397,80 @@ Elles sont appliquées par le backend simulé (`src/mocks/handlers/fleet/`), com
 ### Fichiers, imports et exports
 
 - Les pièces jointes (documents, reçus, photos) passent par le stockage de fichiers simulé (`src/mocks/files/`), avec une liste de types autorisés et une taille maximale (`src/utils/fileRules.ts`). Aucun fichier n'est stocké en base64 dans un enregistrement.
-- L'import des pleins (`POST /fleet/fuel-refills/import`) passe chaque ligne par la même fonction que la saisie manuelle (`buildRefill`). Le navigateur se contente de lire le CSV (`fuel-refills/domain/refillImport.ts`).
+- L'import des pleins (`POST /fleet/fuel-refills/import`) passe chaque ligne par la même fonction que la saisie manuelle (`buildRefill`). Le navigateur se contente de lire le CSV. La lecture (`src/core/utils/csvImport.ts`), le dialogue (`CsvImportDialog`) et la boucle serveur qui rend compte de chaque ligne refusée (`src/mocks/http/importRows.ts`) sont partagés avec l'import de l'historique de maintenance.
 - Les exports de listes sont produits par le serveur (`POST <base>/export`). Les rapports sont exportés en Excel et en PDF dans le navigateur, à partir des tableaux traduits affichés à l'écran (`reports/services/reportExport.ts`).
 
 ### Points d'extension pour les phases suivantes
 
 | Phase | Branchement prévu |
 |---|---|
-| 3. Maintenance | Nouvelle cause d'immobilisation dans `vehicleStatus` ; action « ouvrir un ordre de travail » depuis un sinistre, une check-list ou un défaut télématique |
+| 3. Maintenance | Fait : causes `maintenance` et `service` dans `vehicleStatus` ; ordre de travail ouvert depuis un sinistre, une check-list, une visite ou un défaut télématique (§ 12) |
 | 4. Planification | Ordres de transport qui référencent un trajet ; famille « qualité de livraison » du score conducteur |
+
+## 12. Le domaine maintenance
+
+Le domaine `maintenance` couvre l'atelier, de la panne déclarée à sa réparation validée, ainsi que l'entretien préventif, le stock de pièces, les pneus et les indicateurs. Il a un seul menu « Maintenance ». Ses entités suivent le modèle des § 3 et 9. Cette section décrit ce qui lui est propre.
+
+### Entités et responsabilités
+
+| Groupe | Entités (`src/modules/maintenance/`) |
+|---|---|
+| Pilotage | `reliability` (tableau de bord, indicateurs, coût de possession d'un véhicule) |
+| Atelier | `work-orders` (diagnostic, temps, pièces, atelier externe, planification), `downtimes`, `workshop-load` |
+| Préventif | `maintenance-plans`, `service-due` (échéances dérivées, passages) |
+| Contrôles | `vehicle-checks`, `mobile-interventions` |
+| Pièces | `stock-items` (stock et mouvements), `purchase-requests` |
+| Pneumatiques | `tyres`, `tyre-layouts` |
+| Référentiels | `technicians` (compétences des employés de maintenance), `competences`, `failure-codes` (systèmes, sous-systèmes, modes, causes), `downtime-codes`, `mission-types`, `vehicle-check-points` |
+| Réglages | `maintenance-settings` : capacité de l'atelier, main-d'œuvre, coût d'immobilisation, préavis et tolérance d'entretien, seuils pneus, objectifs de l'équipe mobile |
+
+Trois choix structurent le domaine :
+- **Un technicien est un employé RH.** La maintenance ajoute ses compétences, sous son matricule. Toute personne (équipe mobile, temps pointé, technicien qui valide une rotation) est désignée par son matricule, jamais par un nom saisi.
+- **L'ordre de travail est la porte unique.** Une panne déclarée à la main, un contrôle véhicule, une intervention mobile non résolue, un sinistre, une check-list, une visite, un défaut télématique, un entretien dû et l'import d'historique passent tous par `createWorkOrder` (`src/mocks/handlers/maintenance/workOrders.ts`). Les mêmes contrôles s'appliquent partout. L'origine (`origin`) et la source (`originNo`) sont stockées sur l'ordre, jamais sur la source ; celle-ci retrouve son ordre à la lecture (`workOrdersBySource`).
+- **Rien ne se recopie.** Le coût d'un ordre, le stock d'un article, l'état d'une échéance ou d'un pneu sont calculés à la lecture à partir des faits enregistrés (temps, mouvements, passages, relevés).
+
+### Statuts dérivés
+
+| Statut | Fonction | Déduit de |
+|---|---|---|
+| Ordre de travail | `workOrderStatus` | diagnostic, démarrage, fin déclarée, validation, annulation |
+| Indisponibilité | `downtimeStatus` | date de fin |
+| Échéance d'entretien | `serviceDue` | dernier passage, intervalles km et jours, préavis, tolérance, plan provisoire |
+| Stock d'un article | `stockQuantity`, `stockStatus` | somme des mouvements, seuil d'alerte |
+| Demande d'achat | `purchaseRequestStatus` | dates de commande, de réception, d'annulation |
+| Contrôle véhicule | `vehicleCheckOutcome` | résultats figés, points bloquants |
+| Intervention mobile | `mobileInterventionStatus` | arrivée, clôture, résolution |
+| Pneu | `tyreStatus` (mock), `safetyAlert`, `rotationDue` | passages sur les véhicules, rechapage, rebut, dernier relevé |
+
+Deux causes d'immobilisation s'ajoutent à `vehicleStatus` (§ 11) : `maintenance` (une indisponibilité ouverte) et `service` (un entretien dépassé au-delà de la tolérance, sur un plan confirmé). Plusieurs indisponibilités peuvent être ouvertes en même temps sur un véhicule, une par cause.
+
+### Règles qui traversent plusieurs entités
+
+- **Immobilisation selon la gravité.** Une panne majeure ou critique ouvre l'indisponibilité dès la déclaration ; une panne mineure ou un entretien, au démarrage du travail. L'indisponibilité d'un travail confié à un garage s'arrête au retour du véhicule, pas à la validation.
+- **Quatre yeux.** La validation d'une fin de travaux est refusée à qui a déclaré la fin, saisi du temps ou fait partie des techniciens (`fourEyesBlock`, comparaison sur les codes).
+- **Le serveur vérifie ce que l'écran filtre.** Garage autorisé, fournisseur de pièces ou de pneus autorisé, technicien actif et compétent pour le sous-système, position libre dans le plan de pneus, véhicule en service.
+- **Stock.** Toute variation passe par `addMovement` (`stockLedger.ts`), qui refuse un stock négatif. Une réception d'achat fait entrer la pièce, puis la sort vers l'ordre qui l'attendait. La fin d'un ordre attend toutes ses pièces achetées.
+- **Passages d'entretien.** La validation d'un ordre préventif enregistre un passage par opération couverte, au kilométrage de fin.
+- **Sinistre.** Un sinistre ne se clôture pas tant que sa réparation est en cours (`closureBlocks`, motif `repairOpen`).
+
+### Indicateurs
+
+Une seule fonction calcule les indicateurs d'une période, `reliabilityKpis` (`reliability/domain/reliability.ts`), selon les définitions validées :
+- MTTR sur les ordres correctifs, de la déclaration à la fin déclarée ;
+- MTBF égal aux km du parc divisés par le nombre de pannes ;
+- coût au km égal au coût des ordres validés dans la période divisé par les km de la période ;
+- disponibilité égale aux jours-véhicules non perdus, en fractions de jour.
+
+L'historique importé compte dans les coûts, pas dans la fiabilité. Les km d'une période se lisent entre toutes les mesures de compteur d'un véhicule (relevés, pleins, trajets, ordres) par interpolation (`kmAt`, `kmInPeriod`). Le tableau de bord, la page de fiabilité et le coût de possession les réutilisent.
+
+### Imports et alertes
+
+- L'historique de maintenance s'importe en CSV (`POST /maintenance/work-orders/import`). Le mécanisme est le même que pour les pleins (§ 11) : chaque ligne devient un ordre clôturé, porteur de son coût d'origine (`historicalCost`).
+- Les pneus remontent dans les alertes de la flotte (catégorie `tyre`) : critique pour un relevé sous les seuils de sécurité, information pour une rotation due.
+
+### Points d'extension pour les phases suivantes
+
+| Phase | Branchement prévu |
+|---|---|
+| 4. Planification | La disponibilité d'un véhicule pour un transport lit `vehicleStatus`, qui inclut déjà les causes de maintenance ; un ordre de transport ne recopie pas l'état de l'atelier |
+| 5. Réglages restants | Les réglages de l'atelier sont déjà dans `maintenance-settings` ; seuls les paramètres transverses restent à migrer |
