@@ -15,6 +15,7 @@ import { requireReference } from '../../http/references'
 import type { MockRouter } from '../../http/router'
 import { readCheckResults } from './checkPoints'
 import { FLEET_MESSAGES } from './messages'
+import { workOrdersBySource } from '../maintenance/workOrderSources'
 
 export function roadChecklistsApi(db: MockDatabase): RoadChecklistApi[] {
   const trips = new Map(db.trips.all().map((trip) => [trip.no, trip]))
@@ -22,10 +23,12 @@ export function roadChecklistsApi(db: MockDatabase): RoadChecklistApi[] {
   const names = new Map(
     db.employees.all().map((employee) => [employee.no, employeeFullName(employee)])
   )
+  const orders = workOrdersBySource(db)
   return db.roadChecklists.all().map((checklist) => {
     const trip = trips.get(checklist.tripNo)
     return {
       ...checklist,
+      workOrderNo: orders.get(`road_checklist ${checklist.no}`)?.no ?? null,
       vehicleNo: trip?.vehicleNo ?? '',
       vehiclePlate: trip ? (plates.get(trip.vehicleNo) ?? trip.vehicleNo) : '',
       driverName: trip ? (names.get(trip.driverNo) ?? trip.driverNo) : '',

@@ -385,6 +385,10 @@ export const FLEET_MESSAGES = {
     fr: 'la responsabilité reste à déterminer',
     en: 'the liability is still to be determined'
   },
+  claimBlockRepair: {
+    fr: 'la réparation est encore en cours',
+    en: 'the repair is still under way'
+  },
   claimBlockInsurance: {
     fr: "l'assureur n'a pas encore rendu sa décision",
     en: 'the insurer has not decided yet'

@@ -40,6 +40,7 @@ import { sessionUser, type MockRequest } from '../../http/types'
 import { localize } from '../../i18n'
 import { filesMetaOf } from '../files'
 import { FLEET_MESSAGES } from './messages'
+import { workOrdersBySource } from '../maintenance/workOrderSources'
 import { createTraining } from './trainings'
 
 type EditableFields = Pick<
@@ -70,7 +71,8 @@ const BLOCK_MESSAGES: Record<
 > = {
   analysisRequired: FLEET_MESSAGES.claimBlockAnalysis,
   liabilityUndetermined: FLEET_MESSAGES.claimBlockLiability,
-  insurancePending: FLEET_MESSAGES.claimBlockInsurance
+  insurancePending: FLEET_MESSAGES.claimBlockInsurance,
+  repairOpen: FLEET_MESSAGES.claimBlockRepair
 }
 
 export function claimsApi(db: MockDatabase): ClaimApi[] {
@@ -80,10 +82,14 @@ export function claimsApi(db: MockDatabase): ClaimApi[] {
   )
   const policies = new Map(db.insurancePolicies.all().map((policy) => [policy.no, policy]))
   const insurers = new Map(db.providers.all().map((provider) => [provider.no, provider.name]))
+  const repairs = workOrdersBySource(db)
   return db.claims.all().map((claim) => {
     const policy = claim.policyNo ? policies.get(claim.policyNo) : undefined
+    const repair = repairs.get(`claim ${claim.no}`)
     return {
       ...claim,
+      workOrderNo: repair?.no ?? null,
+      repairOpen: repair?.open ?? false,
       vehiclePlate: plates.get(claim.vehicleNo) ?? claim.vehicleNo,
       driverName: claim.driverNo ? (names.get(claim.driverNo) ?? claim.driverNo) : '',
       policyNumber: policy?.policyNumber ?? '',
@@ -241,7 +247,7 @@ export function registerClaimsHandlers(router: MockRouter, db: MockDatabase): vo
 
   router.post('/fleet/claims/:no/close', { feature: 'CLAIM', action: 'execute' }, (request) => {
     const claim = db.claims.findOrFail(routeParam(request, 'no'))
-    const blocks = closureBlocks(claim)
+    const blocks = closureBlocks(claimApiOf(db, claim.no) ?? claim)
     if (blocks.includes('alreadyClosed')) throw conflict(FLEET_MESSAGES.claimClosed)
     if (blocks.length) {
       const reasons = blocks

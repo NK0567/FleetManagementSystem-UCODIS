@@ -104,5 +104,6 @@ export default {
   'maintenance.workOrders.dialog.technicians': 'Technicians',
   'maintenance.workOrders.dialog.techniciansHint':
     'The server checks they hold the competence of the diagnosed subsystem.',
-  'maintenance.workOrders.progress.planned': 'Planned on {date} · {hours} h · {technicians}'
+  'maintenance.workOrders.progress.planned': 'Planned on {date} · {hours} h · {technicians}',
+  'maintenance.workOrders.action.openFromSource': 'Open a work order'
 }

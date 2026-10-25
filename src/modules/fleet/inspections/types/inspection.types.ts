@@ -4,6 +4,8 @@ export const INSPECTION_RESULTS = ['conforming', 'non_conforming'] as const
 export type InspectionResult = (typeof INSPECTION_RESULTS)[number]
 
 export interface InspectionApi {
+  /** The work order opened from this record, if any. */
+  workOrderNo: string | null
   no: string
   vehicleNo: string
   inspectedOn: string

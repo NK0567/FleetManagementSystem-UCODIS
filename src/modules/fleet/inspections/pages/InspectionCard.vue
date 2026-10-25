@@ -124,8 +124,15 @@ async function confirmRecheck() {
     <template #title-badges>
       <InspectionStatePill v-if="item" :state="item.state" />
     </template>
-    <template v-if="canRecheck && !isFormDirty" #action-buttons>
+    <template v-if="item && !isFormDirty" #action-buttons>
+      <SourceWorkOrder
+        origin="inspection"
+        :origin-no="item.no"
+        :work-order-no="item.workOrderNo"
+        :eligible="item.result === 'non_conforming' && !item.recheckDoneOn"
+      />
       <button
+        v-if="canRecheck"
         type="button"
         class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
         @click="openRecheck"

@@ -117,8 +117,15 @@ async function openInfraction() {
     <template #title-badges>
       <TelematicsEventStatusPill v-if="item" :status="item.status" />
     </template>
-    <template v-if="showActions" #action-buttons>
+    <template v-if="item" #action-buttons>
+      <SourceWorkOrder
+        origin="telematics"
+        :origin-no="item.no"
+        :work-order-no="item.workOrderNo"
+        :eligible="item.family === 'fault'"
+      />
       <button
+        v-if="showActions"
         type="button"
         class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
         :disabled="working"
@@ -128,7 +135,7 @@ async function openInfraction() {
         {{ t('fleet.telematicsEvents.action.acknowledge') }}
       </button>
       <button
-        v-if="item?.infractionTypeNo"
+        v-if="showActions && item?.infractionTypeNo"
         type="button"
         class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
         :disabled="working"

@@ -52,6 +52,7 @@ export type ClosureBlock =
   | 'analysisRequired'
   | 'liabilityUndetermined'
   | 'insurancePending'
+  | 'repairOpen'
 
 /** What still stands in the way of closing the file. */
 export function closureBlocks(claim: {
@@ -59,6 +60,8 @@ export function closureBlocks(claim: {
   analysis: string
   liability: string
   insuranceStatus: InsuranceStatus
+  /** A repair order still under way for the damage. */
+  repairOpen?: boolean
 }): ClosureBlock[] {
   if (claim.status === 'closed') return ['alreadyClosed']
   const blocks: ClosureBlock[] = []
@@ -67,5 +70,6 @@ export function closureBlocks(claim: {
   if (claim.insuranceStatus === 'declared' || claim.insuranceStatus === 'assessment') {
     blocks.push('insurancePending')
   }
+  if (claim.repairOpen) blocks.push('repairOpen')
   return blocks
 }

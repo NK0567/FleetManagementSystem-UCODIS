@@ -75,5 +75,6 @@ export default {
   'fleet.claims.form.photos': 'Photos',
   'fleet.claims.form.history': 'History',
   'fleet.claims.action.training': 'Send to a training',
-  'fleet.claims.trainingHint': '{driver} will be enrolled in a training linked to this claim.'
+  'fleet.claims.trainingHint': '{driver} will be enrolled in a training linked to this claim.',
+  'fleet.claims.closureBlock.repairOpen': 'the repair is still under way'
 }

@@ -193,33 +193,41 @@ async function confirmClose() {
         <ClaimInsurancePill :status="item.insuranceStatus" />
       </template>
     </template>
-    <template v-if="showActions && item?.status === 'open'" #action-buttons>
-      <button
-        v-if="canEdit && nextSteps.length"
-        type="button"
-        class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
-        @click="openInsurance"
-      >
-        <ShieldCheck class="w-5 h-5 text-primary" /> {{ t('fleet.claims.action.insurance') }}
-      </button>
-      <button
-        v-if="canEdit && canTrain && item?.driverNo"
-        type="button"
-        class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
-        @click="openTraining"
-      >
-        <GraduationCap class="w-5 h-5 text-primary" /> {{ t('fleet.claims.action.training') }}
-      </button>
-      <button
-        v-if="canExecute"
-        type="button"
-        class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
-        :disabled="blocks.length > 0"
-        :title="blockText || undefined"
-        @click="showClose = true"
-      >
-        <FolderCheck class="w-5 h-5 text-primary" /> {{ t('fleet.claims.action.close') }}
-      </button>
+    <template v-if="showActions && item" #action-buttons>
+      <SourceWorkOrder
+        origin="claim"
+        :origin-no="item.no"
+        :work-order-no="item.workOrderNo"
+        :eligible="item.status === 'open'"
+      />
+      <template v-if="item.status === 'open'">
+        <button
+          v-if="canEdit && nextSteps.length"
+          type="button"
+          class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
+          @click="openInsurance"
+        >
+          <ShieldCheck class="w-5 h-5 text-primary" /> {{ t('fleet.claims.action.insurance') }}
+        </button>
+        <button
+          v-if="canEdit && canTrain && item?.driverNo"
+          type="button"
+          class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
+          @click="openTraining"
+        >
+          <GraduationCap class="w-5 h-5 text-primary" /> {{ t('fleet.claims.action.training') }}
+        </button>
+        <button
+          v-if="canExecute"
+          type="button"
+          class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
+          :disabled="blocks.length > 0"
+          :title="blockText || undefined"
+          @click="showClose = true"
+        >
+          <FolderCheck class="w-5 h-5 text-primary" /> {{ t('fleet.claims.action.close') }}
+        </button>
+      </template>
     </template>
     <template #form>
       <div class="min-h-0 flex flex-col h-full">

@@ -22,5 +22,7 @@ export type WorkOrderAction =
 export const workOrderApi = {
   ...createCrudApi<WorkOrderApi>({ basePath }),
   act: (no: string, action: WorkOrderAction, body: Record<string, unknown> = {}) =>
-    httpClient.post<SingleResponse<WorkOrderApi>>(`${resourcePath(basePath, no)}/${action}`, body)
+    httpClient.post<SingleResponse<WorkOrderApi>>(`${resourcePath(basePath, no)}/${action}`, body),
+  openFromSource: (origin: string, originNo: string) =>
+    httpClient.post<SingleResponse<WorkOrderApi>>(`${basePath}/from-source`, { origin, originNo })
 }

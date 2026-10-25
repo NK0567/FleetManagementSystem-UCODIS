@@ -9,6 +9,8 @@ export const TELEMATICS_SOURCES = ['box', 'camera', 'obd', 'gps'] as const
 export type TelematicsSource = (typeof TELEMATICS_SOURCES)[number]
 
 export interface TelematicsEventApi {
+  /** The work order opened from this record, if any. */
+  workOrderNo: string | null
   no: string
   eventTypeNo: string
   vehicleNo: string

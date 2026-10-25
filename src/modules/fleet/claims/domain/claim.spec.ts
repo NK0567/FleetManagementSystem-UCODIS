@@ -49,6 +49,7 @@ describe('closureBlocks', () => {
         insuranceStatus: 'assessment'
       })
     ).toEqual(['analysisRequired', 'liabilityUndetermined', 'insurancePending'])
+    expect(closureBlocks({ ...ready, repairOpen: true })).toEqual(['repairOpen'])
     expect(closureBlocks({ ...ready, status: 'closed' })).toEqual(['alreadyClosed'])
   })
 })

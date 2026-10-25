@@ -90,6 +90,14 @@ const pageTitle = computed(() =>
     @create="emit('create')"
     @clear-save-error="saveError = null"
   >
+    <template v-if="item" #action-buttons>
+      <SourceWorkOrder
+        origin="road_checklist"
+        :origin-no="item.no"
+        :work-order-no="item.workOrderNo"
+        :eligible="item.anomalyCount > 0"
+      />
+    </template>
     <template #form>
       <div class="min-h-0 flex flex-col h-full">
         <div class="sticky top-0 z-20 shrink-0 pt-1 px-6">

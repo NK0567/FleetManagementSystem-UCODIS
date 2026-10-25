@@ -10,5 +10,8 @@ export const workOrderService = {
     body: Record<string, unknown> = {}
   ): Promise<WorkOrderApi> {
     return (await workOrderApi.act(no, action, body)).data.data
+  },
+  async openFromSource(origin: string, originNo: string): Promise<WorkOrderApi> {
+    return (await workOrderApi.openFromSource(origin, originNo)).data.data
   }
 }

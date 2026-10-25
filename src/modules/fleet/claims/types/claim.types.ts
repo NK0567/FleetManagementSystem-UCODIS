@@ -24,6 +24,9 @@ export interface ClaimEvent {
 }
 
 export interface ClaimApi {
+  /** The work order opened from this record, if any. */
+  workOrderNo: string | null
+  repairOpen: boolean
   no: string
   nature: ClaimNature
   occurredAt: string

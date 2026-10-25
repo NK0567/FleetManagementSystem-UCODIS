@@ -44,11 +44,12 @@ import {
   readStringList
 } from '../../http/input'
 import { optionalReference, requireReference } from '../../http/references'
-import { ok } from '../../http/responses'
+import { created, ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
 import { sessionUser, type MockRequest } from '../../http/types'
 import { MAINTENANCE_MESSAGES } from './messages'
 import { recordPassages } from './serviceRecords'
+import { SOURCED_ORIGINS, sourceRequest } from './workOrderSources'
 import { addMovement } from './stockLedger'
 import { technicianIssue } from '@/modules/maintenance/workshop-load/domain/workshopLoad'
 import { maintenanceSettings } from './settings'
@@ -447,6 +448,23 @@ export function registerWorkOrdersHandlers(router: MockRouter, db: MockDatabase)
         ...stampModified(request)
       })
       return respond(order.no)
+    }
+  )
+
+  // An order opened from a fleet record takes its vehicle, severity and symptom from it.
+  router.post(
+    '/maintenance/work-orders/from-source',
+    { feature: 'WORKORDER', action: 'insert' },
+    (request) => {
+      const body = readBody(request)
+      const origin = readEnum(body, 'origin', SOURCED_ORIGINS, { required: true }) ?? 'claim'
+      const originNo = readString(body, 'originNo', { required: true })
+      const order = createWorkOrder(
+        db,
+        sourceRequest(db, origin, originNo, request.language),
+        request
+      )
+      return created(workOrderApiOf(db, order.no))
     }
   )
 

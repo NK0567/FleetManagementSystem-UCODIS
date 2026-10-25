@@ -4,6 +4,8 @@ export const CHECKLIST_STAGES = ['departure', 'stop', 'arrival'] as const
 export type ChecklistStage = (typeof CHECKLIST_STAGES)[number]
 
 export interface RoadChecklistApi {
+  /** The work order opened from this record, if any. */
+  workOrderNo: string | null
   no: string
   tripNo: string
   stage: ChecklistStage

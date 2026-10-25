@@ -18,14 +18,17 @@ import { requireReference, unknownReference } from '../../http/references'
 import { ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
 import { FLEET_MESSAGES } from './messages'
+import { workOrdersBySource } from '../maintenance/workOrderSources'
 import { fleetSettings } from './settings'
 
 export function inspectionsApi(db: MockDatabase): InspectionApi[] {
   const today = todayIso()
   const delay = fleetSettings(db).safety.recheckDelayDays
   const plates = new Map(db.vehicles.all().map((vehicle) => [vehicle.no, vehicle.plate]))
+  const orders = workOrdersBySource(db)
   return db.inspections.all().map((inspection) => ({
     ...inspection,
+    workOrderNo: orders.get(`inspection ${inspection.no}`)?.no ?? null,
     vehiclePlate: plates.get(inspection.vehicleNo) ?? inspection.vehicleNo,
     recheckDueOn: recheckDueOn(inspection, delay),
     state: inspectionState(inspection, delay, today)

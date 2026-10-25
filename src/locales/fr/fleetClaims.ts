@@ -75,5 +75,6 @@ export default {
   'fleet.claims.form.photos': 'Photos',
   'fleet.claims.form.history': 'Historique',
   'fleet.claims.action.training': 'Déclencher une formation',
-  'fleet.claims.trainingHint': '{driver} sera inscrit à une formation liée à ce sinistre.'
+  'fleet.claims.trainingHint': '{driver} sera inscrit à une formation liée à ce sinistre.',
+  'fleet.claims.closureBlock.repairOpen': 'la réparation est encore en cours'
 }

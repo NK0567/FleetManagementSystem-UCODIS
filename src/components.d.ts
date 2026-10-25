@@ -273,6 +273,7 @@ declare module 'vue' {
     SiteTypeForm: typeof import('./modules/fleet/site-types/components/SiteTypeForm.vue')['default']
     SiteTypesList: typeof import('./modules/fleet/site-types/pages/SiteTypesList.vue')['default']
     SortableTableHeader: typeof import('./components/shared/SortableTableHeader.vue')['default']
+    SourceWorkOrder: typeof import('./modules/maintenance/work-orders/components/SourceWorkOrder.vue')['default']
     StatusPill: typeof import('./components/ui/status-pill/StatusPill.vue')['default']
     StockItemCard: typeof import('./modules/maintenance/stock-items/pages/StockItemCard.vue')['default']
     StockItemCreateModal: typeof import('./modules/maintenance/stock-items/pages/StockItemCreateModal.vue')['default']

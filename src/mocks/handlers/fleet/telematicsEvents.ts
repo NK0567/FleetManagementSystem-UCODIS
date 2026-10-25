@@ -23,6 +23,7 @@ import { localize } from '../../i18n'
 import { infractionFromTelematics } from './infractions'
 import { expectedDrivers, tripAt } from './links'
 import { FLEET_MESSAGES } from './messages'
+import { workOrdersBySource } from '../maintenance/workOrderSources'
 import { sitesApi } from './sites'
 
 /** The same reading sent again by a unit within this window is the same event. */
@@ -37,6 +38,7 @@ export function telematicsEventsApi(db: MockDatabase): TelematicsEventApi[] {
   const areas = sitesApi(db)
     .filter((site) => site.active)
     .map((site) => ({ ...site, radiusM: site.effectiveRadiusM }))
+  const orders = workOrdersBySource(db)
   return db.telematicsEvents.all().map((event) => {
     const type = types.get(event.eventTypeNo)
     const site =
@@ -46,6 +48,7 @@ export function telematicsEventsApi(db: MockDatabase): TelematicsEventApi[] {
     return {
       ...event,
       eventTypeName: type?.name ?? event.eventTypeNo,
+      workOrderNo: orders.get(`telematics ${event.no}`)?.no ?? null,
       vehiclePlate: plates.get(event.vehicleNo) ?? event.vehicleNo,
       driverName: event.driverNo ? (names.get(event.driverNo) ?? event.driverNo) : '',
       siteName: site?.name ?? '',

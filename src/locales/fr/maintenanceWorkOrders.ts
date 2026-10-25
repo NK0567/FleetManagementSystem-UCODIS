@@ -103,5 +103,6 @@ export default {
   'maintenance.workOrders.dialog.technicians': 'Techniciens',
   'maintenance.workOrders.dialog.techniciansHint':
     "Le serveur vérifie qu'ils ont la compétence du sous-système diagnostiqué.",
-  'maintenance.workOrders.progress.planned': 'Planifié le {date} · {hours} h · {technicians}'
+  'maintenance.workOrders.progress.planned': 'Planifié le {date} · {hours} h · {technicians}',
+  'maintenance.workOrders.action.openFromSource': 'Ouvrir un ordre de travail'
 }

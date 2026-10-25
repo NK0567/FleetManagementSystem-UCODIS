@@ -336,5 +336,29 @@ export const MAINTENANCE_MESSAGES = {
   tyreSamePosition: {
     fr: 'Choisissez une autre position.',
     en: 'Pick another position.'
+  },
+  sourceHasOrder: {
+    fr: 'Un ordre de travail ({no}) a déjà été ouvert pour cet enregistrement.',
+    en: 'A work order ({no}) has already been opened for this record.'
+  },
+  sourceClosed: {
+    fr: 'Ce dossier est clôturé.',
+    en: 'This file is closed.'
+  },
+  sourceNothingToRepair: {
+    fr: 'Cet enregistrement ne relève aucun défaut à réparer.',
+    en: 'This record shows no fault to repair.'
+  },
+  sourceClaimSymptom: {
+    fr: 'Réparation du sinistre {no} : {circumstances}',
+    en: 'Repair of claim {no}: {circumstances}'
+  },
+  sourceChecklistSymptom: {
+    fr: 'Check-list de route : {points} en anomalie.',
+    en: 'Road checklist: {points} failed.'
+  },
+  sourceInspectionSymptom: {
+    fr: 'Visite technique non conforme : {findings}',
+    en: 'Failed inspection: {findings}'
   }
 } satisfies Record<string, LocalizedText>
