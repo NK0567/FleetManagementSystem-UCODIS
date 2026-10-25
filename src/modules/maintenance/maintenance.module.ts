@@ -1,5 +1,10 @@
+import { CircleDot, Package, Wrench } from '@lucide/vue'
 import { registerFeatureRoutes } from '@/core/navigation/featureRoutes'
 import { registerNavMenu } from '@/core/navigation/moduleRegistry'
+import { registerSearchableEntity } from '@/core/search/searchRegistry'
+import { stockItemService, type StockItemApi } from './stock-items'
+import { tyreService, type TyreApi } from './tyres'
+import { workOrderService, type WorkOrderApi } from './work-orders'
 
 const MAINTENANCE_MENU_ORDER = 40
 
@@ -76,5 +81,50 @@ export function registerMaintenanceModule(): void {
         menuKey: 'maintenanceSettings'
       }
     ]
+  })
+
+  registerSearchableEntity({
+    key: 'workOrder',
+    feature: 'WORKORDER',
+    labelKey: 'maintenance.workOrders.title',
+    icon: Wrench,
+    basePath: '/maintenance/work-orders',
+    searchColumns: 'no,vehiclePlate,symptom',
+    service: workOrderService,
+    toHit: (order: WorkOrderApi) => ({
+      id: order.no,
+      title: `${order.no} · ${order.vehiclePlate}`,
+      subtitle: order.symptom
+    })
+  })
+
+  registerSearchableEntity({
+    key: 'tyre',
+    feature: 'TYRE',
+    labelKey: 'maintenance.tyres.title',
+    icon: CircleDot,
+    basePath: '/maintenance/tyres',
+    searchColumns: 'no,serialNumber,make,vehiclePlate',
+    service: tyreService,
+    toHit: (tyre: TyreApi) => ({
+      id: tyre.no,
+      title: `${tyre.serialNumber} · ${tyre.make}`,
+      subtitle: [tyre.no, tyre.vehiclePlate, tyre.positionCode].filter(Boolean).join(' · ')
+    })
+  })
+
+  registerSearchableEntity({
+    key: 'stockItem',
+    feature: 'STOCKITEM',
+    labelKey: 'maintenance.stockItems.title',
+    icon: Package,
+    basePath: '/maintenance/stock-items',
+    searchColumns: 'no,name',
+    service: stockItemService,
+    toHit: (item: StockItemApi) => ({
+      id: item.no,
+      title: item.name,
+      subtitle: [item.no, item.supplierName].filter(Boolean).join(' · ')
+    })
   })
 }
