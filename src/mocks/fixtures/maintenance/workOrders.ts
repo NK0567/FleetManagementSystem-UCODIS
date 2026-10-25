@@ -1,4 +1,7 @@
-import type { WorkOrderApi } from '@/modules/maintenance/work-orders/types/workOrder.types'
+import type {
+  PartLine,
+  WorkOrderApi
+} from '@/modules/maintenance/work-orders/types/workOrder.types'
 import { addDays } from '@/utils/date'
 import { DEMO_REFERENCE_DATE } from '../../clock'
 import type { CollectionDefinition, MockRow } from '../../db/collection'
@@ -18,6 +21,7 @@ export type WorkOrderRow = MockRow &
     | 'odometerKmAtOpening'
     | 'diagnosis'
     | 'labour'
+    | 'parts'
     | 'startedAt'
     | 'completedAt'
     | 'completedBy'
@@ -39,6 +43,15 @@ type Seed = Omit<WorkOrderRow, keyof typeof seedAudit>
 const at = (days: number, time: string) => `${addDays(DEMO_REFERENCE_DATE, days)}T${time}:00`
 const day = (days: number) => addDays(DEMO_REFERENCE_DATE, days)
 
+const stockPart = (itemNo: string, label: string, quantity: number, unitPrice: number) => ({
+  itemNo,
+  label,
+  quantity,
+  unitPrice,
+  purchaseRequestNo: null,
+  receivedAt: '2026-08-18T08:00:00'
+})
+
 const open = {
   originNo: null,
   startedAt: null,
@@ -53,7 +66,8 @@ const open = {
   cancelReason: '',
   downtimeNo: null,
   external: null,
-  serviceOperationNos: [] as string[]
+  serviceOperationNos: [] as string[],
+  parts: [] as PartLine[]
 }
 
 const SEED: Seed[] = [
@@ -85,6 +99,11 @@ const SEED: Seed[] = [
     validatedBy: 'FLT001',
     downtimeNo: 'IND-00001',
     serviceOperationNos: ['OP-001', 'OP-002'],
+    parts: [
+      stockPart('FLT-HUI-HW', 'Filtre à huile Howo', 1, 45_000),
+      stockPart('FLT-GAZ-HW', 'Filtre à gazole Howo', 1, 52_000),
+      stockPart('HUI-15W40', 'Huile moteur 15W40 (bidon de 20 L)', 2, 28_000)
+    ],
     history: []
   },
   {
@@ -117,6 +136,16 @@ const SEED: Seed[] = [
     validatedAt: '2026-08-29T15:00:00',
     validatedBy: 'FLT001',
     downtimeNo: 'IND-00003',
+    parts: [
+      {
+        itemNo: null,
+        label: "Raccord rapide du circuit d'air",
+        quantity: 1,
+        unitPrice: 35_000,
+        purchaseRequestNo: 'DA-2026-0002',
+        receivedAt: '2026-08-28T16:00:00'
+      }
+    ],
     history: []
   },
   {
@@ -220,6 +249,7 @@ export const workOrdersCollection: CollectionDefinition<WorkOrderRow> = {
     'external.returnedAt',
     'diagnosis.at',
     'labour[].date',
+    'parts[].receivedAt',
     'startedAt',
     'completedAt',
     'validatedAt',

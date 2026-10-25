@@ -1,3 +1,7 @@
+import {
+  averageLeadTime,
+  leadTimeDays
+} from '@/modules/maintenance/purchase-requests/domain/purchaseRequest'
 import { stockStatus } from '@/modules/maintenance/stock-items/domain/stock'
 import type {
   StockItemApi,
@@ -37,12 +41,23 @@ export function stockItemsApi(db: MockDatabase): StockItemApi[] {
   const quantities = stockQuantities(db)
   const subsystems = new Map(db.failureCodes.all().map((code) => [code.no, code.name]))
   const suppliers = new Map(db.providers.all().map((provider) => [provider.no, provider.name]))
+  const leadTimes = new Map<string, (number | null)[]>()
+  for (const row of db.purchaseRequests.all()) {
+    if (!row.supplierNo) continue
+    leadTimes.set(row.supplierNo, [
+      ...(leadTimes.get(row.supplierNo) ?? []),
+      leadTimeDays(row.orderedAt, row.receivedAt)
+    ])
+  }
   return db.stockItems.all().map((row) => {
     const stock = quantities.get(row.no) ?? 0
     return {
       ...row,
       subsystemName: subsystems.get(row.subsystemNo) ?? row.subsystemNo,
       supplierName: row.supplierNo ? (suppliers.get(row.supplierNo) ?? row.supplierNo) : '',
+      supplierLeadTimeDays: row.supplierNo
+        ? averageLeadTime(leadTimes.get(row.supplierNo) ?? [])
+        : null,
       stockQuantity: stock,
       stockValue: stock * row.unitPrice,
       status: stockStatus(stock, row.alertThreshold)

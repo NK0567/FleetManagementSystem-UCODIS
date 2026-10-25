@@ -90,5 +90,11 @@ export const MAINTENANCE_OPTION_SETS: Record<string, Record<string, LocalizedTex
     in: { fr: 'Entrée', en: 'In' },
     out: { fr: 'Sortie', en: 'Out' },
     adjustment: { fr: 'Ajustement', en: 'Adjustment' }
+  },
+  purchaseRequestStatus: {
+    requested: { fr: 'Demandée', en: 'Requested' },
+    ordered: { fr: 'Commandée', en: 'Ordered' },
+    received: { fr: 'Reçue', en: 'Received' },
+    cancelled: { fr: 'Annulée', en: 'Cancelled' }
   }
 }

@@ -8,12 +8,15 @@ import {
   Clock,
   Factory,
   NotebookPen,
+  Package,
   Play,
+  ShoppingCart,
   Stethoscope,
   Undo2,
   Wrench
 } from '@lucide/vue'
 import { apiErrorMessage } from '@/core/api/apiError'
+import { purchaseRequestService } from '@/modules/maintenance/purchase-requests'
 import type { CardOpenMode } from '@/composables/cardOpenMode'
 import { useEntityCard } from '@/composables/useEntityCard'
 import { usePermissions } from '@/composables/usePermissions'
@@ -121,6 +124,30 @@ async function act(action: WorkOrderAction, body: Record<string, unknown> = {}) 
   }
 }
 
+/** The request is the purchasing team's record; the order shows it as a pending part line. */
+async function requestPurchase() {
+  const no = item.value?.no
+  if (!no) return false
+  acting.value = true
+  saveError.value = null
+  try {
+    await purchaseRequestService.create({
+      workOrderNo: no,
+      itemNo: part.value.itemNo || null,
+      label: part.value.label.trim(),
+      quantity: part.value.quantity,
+      estimatedAmount: part.value.estimatedAmount
+    })
+    store.setCurrentItem(await workOrderService.getById(no))
+    return true
+  } catch (error) {
+    saveError.value = apiErrorMessage(error, t('maintenance.workOrders.actionError'))
+    return false
+  } finally {
+    acting.value = false
+  }
+}
+
 type Dialog =
   | 'diagnose'
   | 'labour'
@@ -128,6 +155,8 @@ type Dialog =
   | 'handOver'
   | 'followUp'
   | 'return'
+  | 'takePart'
+  | 'buyPart'
   | 'validate'
   | null
 const dialog = ref<Dialog>(null)
@@ -135,6 +164,12 @@ const reasonDialog = ref<'refuse' | 'cancel' | null>(null)
 const diagnosis = ref({ subsystemNo: '', modeNo: '', causeNo: '' })
 const labour = ref({ technicianNo: '', date: todayIso(), hours: null as number | null })
 const completion = ref({ workDone: '', odometerKm: null as number | null })
+const part = ref({
+  itemNo: '',
+  label: '',
+  quantity: 1 as number | null,
+  estimatedAmount: null as number | null
+})
 const external = ref({
   providerNo: '',
   handedOverAt: '',
@@ -154,6 +189,7 @@ function open(next: Dialog) {
   }
   labour.value = { technicianNo: '', date: todayIso(), hours: null }
   completion.value = { workDone: '', odometerKm: order?.odometerKmAtOpening ?? null }
+  part.value = { itemNo: '', label: '', quantity: 1, estimatedAmount: null }
   const now = nowIsoDateTime().slice(0, 16)
   external.value = {
     providerNo: order?.external?.providerNo ?? '',
@@ -192,6 +228,14 @@ const confirmDisabled = computed(() => {
         labour.value.hours <= 0 ||
         labour.value.hours > MAX_HOURS_PER_DAY
       )
+    case 'takePart':
+      return !part.value.itemNo || !part.value.quantity || part.value.quantity < 1
+    case 'buyPart':
+      return (
+        (!part.value.itemNo && !part.value.label.trim()) ||
+        !part.value.quantity ||
+        part.value.quantity < 1
+      )
     case 'handOver':
       return !external.value.providerNo || !external.value.handedOverAt
     case 'complete':
@@ -227,6 +271,10 @@ async function confirm() {
           workDone: completion.value.workDone.trim(),
           odometerKm: completion.value.odometerKm
         })
+      case 'takePart':
+        return act('take-part', { itemNo: part.value.itemNo, quantity: part.value.quantity })
+      case 'buyPart':
+        return requestPurchase()
       case 'handOver':
         return act('hand-over', {
           providerNo: external.value.providerNo,
@@ -339,6 +387,14 @@ const buttonClass =
           >
             <Wrench class="w-5 h-5 text-primary" />
             {{ t('maintenance.workOrders.action.complete') }}
+          </button>
+          <button type="button" :class="buttonClass" :disabled="acting" @click="open('takePart')">
+            <Package class="w-5 h-5 text-primary" />
+            {{ t('maintenance.workOrders.action.takePart') }}
+          </button>
+          <button type="button" :class="buttonClass" :disabled="acting" @click="open('buyPart')">
+            <ShoppingCart class="w-5 h-5 text-primary" />
+            {{ t('maintenance.workOrders.action.buyPart') }}
           </button>
           <button
             v-if="!item.external"
@@ -473,6 +529,36 @@ const buttonClass =
           <p class="text-xs mt-1 text-muted-foreground">
             {{ t('maintenance.workOrders.dialog.hoursHint', { max: MAX_HOURS_PER_DAY }) }}
           </p>
+        </BaseFormField>
+      </template>
+      <template v-else-if="dialog === 'takePart' || dialog === 'buyPart'">
+        <BaseFormField
+          :label="t('maintenance.workOrders.dialog.stockItem')"
+          :required="dialog === 'takePart'"
+        >
+          <ReferenceLookup
+            v-model="part.itemNo"
+            reference-key="stockItems"
+            :modal-title="t('maintenance.workOrders.dialog.stockItem')"
+          />
+        </BaseFormField>
+        <BaseFormField
+          v-if="dialog === 'buyPart'"
+          :label="t('maintenance.workOrders.dialog.partLabel')"
+        >
+          <FormInput v-model="part.label" :maxlength="160" />
+          <p class="text-xs mt-1 text-muted-foreground">
+            {{ t('maintenance.workOrders.dialog.partLabelHint') }}
+          </p>
+        </BaseFormField>
+        <BaseFormField :label="t('maintenance.workOrders.dialog.quantity')" required>
+          <FormInput v-model="part.quantity" type="number" :min="1" :step="1" />
+        </BaseFormField>
+        <BaseFormField
+          v-if="dialog === 'buyPart'"
+          :label="t('maintenance.workOrders.dialog.estimatedAmount')"
+        >
+          <FormInput v-model="part.estimatedAmount" type="number" :min="0" />
         </BaseFormField>
       </template>
       <template v-else-if="dialog === 'handOver'">

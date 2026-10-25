@@ -85,5 +85,16 @@ export default {
   'maintenance.workOrders.dialog.quoteAmount': 'Montant du devis',
   'maintenance.workOrders.dialog.progress': 'Avancement',
   'maintenance.workOrders.dialog.returnedAt': 'Revenu le',
-  'maintenance.workOrders.dialog.finalAmount': 'Montant final'
+  'maintenance.workOrders.dialog.finalAmount': 'Montant final',
+  'maintenance.workOrders.section.parts': 'Pièces',
+  'maintenance.workOrders.progress.partsSummary': '{cost} · {pending} en attente',
+  'maintenance.workOrders.progress.noParts': 'Aucune pièce.',
+  'maintenance.workOrders.progress.partPending': 'en attente',
+  'maintenance.workOrders.action.takePart': 'Sortir du stock',
+  'maintenance.workOrders.action.buyPart': "Demander l'achat",
+  'maintenance.workOrders.dialog.stockItem': 'Article du stock',
+  'maintenance.workOrders.dialog.partLabel': 'Pièce hors stock',
+  'maintenance.workOrders.dialog.partLabelHint': "À décrire si la pièce n'est pas au catalogue.",
+  'maintenance.workOrders.dialog.quantity': 'Quantité',
+  'maintenance.workOrders.dialog.estimatedAmount': 'Montant estimé'
 }

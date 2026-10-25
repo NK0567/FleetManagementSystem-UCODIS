@@ -60,11 +60,12 @@ import { maintenancePlansCollection } from '../fixtures/maintenance/maintenanceP
 import { serviceRecordsCollection } from '../fixtures/maintenance/serviceRecords'
 import { stockItemsCollection } from '../fixtures/maintenance/stockItems'
 import { stockMovementsCollection } from '../fixtures/maintenance/stockMovements'
+import { purchaseRequestsCollection } from '../fixtures/maintenance/purchaseRequests'
 import { createCollection, type CollectionContext } from './collection'
 import { clearStoredCollections } from './storage'
 
 /** Bump when fixtures change shape: every collection is then reseeded. */
-export const MOCK_SEED_VERSION = 26
+export const MOCK_SEED_VERSION = 27
 
 export function createDatabase(
   context: CollectionContext = {
@@ -133,7 +134,8 @@ export function createDatabase(
     maintenancePlans: createCollection(maintenancePlansCollection, context),
     serviceRecords: createCollection(serviceRecordsCollection, context),
     stockItems: createCollection(stockItemsCollection, context),
-    stockMovements: createCollection(stockMovementsCollection, context)
+    stockMovements: createCollection(stockMovementsCollection, context),
+    purchaseRequests: createCollection(purchaseRequestsCollection, context)
   }
 
   return {

@@ -212,5 +212,25 @@ export const MAINTENANCE_MESSAGES = {
   adjustmentInvalid: {
     fr: "L'ajustement est un nombre entier non nul de pièces.",
     en: 'An adjustment is a non-zero whole number of parts.'
+  },
+  partsPending: {
+    fr: 'Des pièces achetées pour cet ordre ne sont pas encore reçues.',
+    en: 'Parts bought for this order have not been received yet.'
+  },
+  stockItemInactive: {
+    fr: "Cet article n'est plus actif.",
+    en: 'This item is no longer active.'
+  },
+  purchaseRequestWrongStatus: {
+    fr: "Cette demande d'achat n'en est pas à cette étape.",
+    en: 'This purchase request is not at this step.'
+  },
+  purchaseLabelMissing: {
+    fr: 'Choisissez un article ou décrivez la pièce.',
+    en: 'Pick an item or describe the part.'
+  },
+  supplierNotAuthorized: {
+    fr: "« {name} » n'est pas un fournisseur de pièces autorisé.",
+    en: '"{name}" is not an authorized parts supplier.'
   }
 } satisfies Record<string, LocalizedText>

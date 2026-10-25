@@ -65,5 +65,6 @@ export default {
   'nav.serviceDue': "Échéances d'entretien",
   'nav.maintenancePlans': "Plans d'entretien",
   'nav.downtimes': 'Indisponibilités',
-  'nav.stockItems': 'Stock de pièces'
+  'nav.stockItems': 'Stock de pièces',
+  'nav.purchaseRequests': "Demandes d'achat"
 }

@@ -10,6 +10,8 @@ export interface StockItemApi {
   active: boolean
   subsystemName: string
   supplierName: string
+  /** Average order-to-receipt days of the supplier over its received requests. */
+  supplierLeadTimeDays: number | null
   stockQuantity: number
   stockValue: number
   status: StockStatus

@@ -42,6 +42,7 @@ import type { MockRouter } from '../../http/router'
 import { sessionUser, type MockRequest } from '../../http/types'
 import { MAINTENANCE_MESSAGES } from './messages'
 import { recordPassages } from './serviceRecords'
+import { addMovement } from './stockLedger'
 import { maintenanceSettings } from './settings'
 
 /** Shortest account of what was done that the workshop accepts. */
@@ -59,6 +60,8 @@ export function workOrdersApi(db: MockDatabase): WorkOrderApi[] {
     const hours = labourHours(row.labour)
     const labourCost = Math.round(hours * rate)
     const subcontracting = subcontractingCost(row.external)
+    const received = row.parts.filter((part) => part.receivedAt)
+    const partsCost = received.reduce((total, part) => total + part.quantity * part.unitPrice, 0)
     return {
       ...row,
       vehiclePlate: plates.get(row.vehicleNo) ?? row.vehicleNo,
@@ -72,7 +75,9 @@ export function workOrdersApi(db: MockDatabase): WorkOrderApi[] {
       labourCost,
       providerName: row.external ? (providers.get(row.external.providerNo) ?? '') : '',
       subcontractingCost: subcontracting,
-      totalCost: labourCost + subcontracting,
+      partsCost,
+      pendingPartCount: row.parts.length - received.length,
+      totalCost: labourCost + partsCost + subcontracting,
       diagnosedAt: row.diagnosis?.at ?? null,
       status: workOrderStatus({ ...row, diagnosedAt: row.diagnosis?.at ?? null })
     }
@@ -159,6 +164,7 @@ function buildWorkOrder(db: MockDatabase, order: WorkOrderRequest, request: Mock
     odometerKmAtOpening: vehicle.odometerKm,
     diagnosis: null,
     labour: [],
+    parts: [],
     external: null,
     serviceOperationNos: order.serviceOperationNos ?? [],
     startedAt: null,
@@ -218,6 +224,9 @@ export function registerWorkOrdersHandlers(router: MockRouter, db: MockDatabase)
   /** What an inside and an outside finish both require: a diagnosis, the work done, the odometer. */
   function readCompletion(order: WorkOrderRow, body: Record<string, unknown>) {
     if (!order.diagnosis) throw unprocessable(MAINTENANCE_MESSAGES.diagnosisMissing)
+    if (order.parts.some((part) => !part.receivedAt)) {
+      throw unprocessable(MAINTENANCE_MESSAGES.partsPending)
+    }
     const workDone = readString(body, 'workDone', { required: true })
     if (workDone.length < MIN_TEXT) {
       throw unprocessable(MAINTENANCE_MESSAGES.workDoneTooShort, { min: MIN_TEXT })
@@ -264,6 +273,47 @@ export function registerWorkOrdersHandlers(router: MockRouter, db: MockDatabase)
     }
     return expectedReturnOn
   }
+
+  router.post(
+    '/maintenance/work-orders/:no/take-part',
+    { feature: 'WORKORDER', action: 'update' },
+    (request) => {
+      const order = workable(routeParam(request, 'no'))
+      const body = readBody(request)
+      const item = db.stockItems.findOrFail(requireReference(db.stockItems, body, 'itemNo'))
+      if (!item.active) throw unprocessable(MAINTENANCE_MESSAGES.stockItemInactive)
+      const quantity = readNumber(body, 'quantity', { required: true, min: 1 }) ?? 0
+      if (!Number.isInteger(quantity)) throw unprocessable(MAINTENANCE_MESSAGES.adjustmentInvalid)
+      const movement = addMovement(
+        db,
+        {
+          itemNo: item.no,
+          kind: 'out',
+          delta: -quantity,
+          unitPrice: item.unitPrice,
+          reason: order.symptom,
+          workOrderNo: order.no,
+          purchaseRequestNo: null
+        },
+        request
+      )
+      db.workOrders.update(order.no, {
+        parts: [
+          ...order.parts,
+          {
+            itemNo: item.no,
+            label: item.name,
+            quantity,
+            unitPrice: item.unitPrice,
+            purchaseRequestNo: null,
+            receivedAt: movement.at
+          }
+        ],
+        ...stampModified(request)
+      })
+      return respond(order.no)
+    }
+  )
 
   router.post(
     '/maintenance/work-orders/:no/hand-over',

@@ -759,6 +759,20 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/maintenance/purchase-requests/': RouteRecordInfo<
+      '/maintenance/purchase-requests/',
+      '/maintenance/purchase-requests',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/purchase-requests/[id]': RouteRecordInfo<
+      '/maintenance/purchase-requests/[id]',
+      '/maintenance/purchase-requests/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/maintenance/service-due/': RouteRecordInfo<
       '/maintenance/service-due/',
       '/maintenance/service-due',
@@ -1662,6 +1676,22 @@ declare module 'vue-router/auto-routes' {
     'src/pages/maintenance/mission-types/[id].vue': {
       routes:
         | '/maintenance/mission-types/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/maintenance/purchase-requests/index.vue': {
+      routes:
+        | '/maintenance/purchase-requests/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/purchase-requests/[id].vue': {
+      routes:
+        | '/maintenance/purchase-requests/[id]'
       views:
         | never
       pathParamNames:

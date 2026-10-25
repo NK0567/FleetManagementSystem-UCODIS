@@ -15,6 +15,7 @@ const referenceStore = useReferenceStore()
 const expandedSections = ref({
   diagnosis: true,
   labour: true,
+  parts: true,
   external: true,
   completion: true,
   history: false
@@ -69,6 +70,56 @@ const technician = (no: string) => referenceStore.getLabel('technicians', no) ||
               <td class="px-3 py-1.5">{{ technician(line.technicianNo) }}</td>
               <td class="px-3 py-1.5 text-right tabular-nums">
                 {{ formatNumber(line.hours, 2) }} h
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </FormSection>
+
+    <FormSection
+      v-model:open="expandedSections.parts"
+      :title="t('maintenance.workOrders.section.parts')"
+      :summary="[
+        t('maintenance.workOrders.progress.partsSummary', {
+          cost: formatNumber(order.partsCost),
+          pending: order.pendingPartCount
+        })
+      ]"
+    >
+      <div class="xl:col-span-2 min-w-0">
+        <p v-if="!order.parts.length" class="text-sm text-muted-foreground">
+          {{ t('maintenance.workOrders.progress.noParts') }}
+        </p>
+        <table v-else class="w-full text-sm border border-border rounded">
+          <tbody>
+            <tr
+              v-for="(line, index) in order.parts"
+              :key="`${line.itemNo ?? line.label}-${index}`"
+              class="border-t border-border first:border-t-0"
+            >
+              <td class="px-3 py-1.5">
+                {{ line.label }}
+                <span v-if="line.itemNo" class="text-muted-foreground">· {{ line.itemNo }}</span>
+              </td>
+              <td class="px-3 py-1.5 text-right tabular-nums">× {{ line.quantity }}</td>
+              <td class="px-3 py-1.5 text-right tabular-nums">
+                {{ formatNumber(line.quantity * line.unitPrice) }}
+              </td>
+              <td class="px-3 py-1.5 whitespace-nowrap">
+                <RouterLink
+                  v-if="line.purchaseRequestNo"
+                  :to="{
+                    path: '/maintenance/purchase-requests',
+                    query: { no: line.purchaseRequestNo, cardMode: 'view' }
+                  }"
+                  class="text-primary hover:underline"
+                >
+                  {{ line.purchaseRequestNo }}
+                </RouterLink>
+                <span v-if="!line.receivedAt" class="ml-1 text-warning">
+                  {{ t('maintenance.workOrders.progress.partPending') }}
+                </span>
               </td>
             </tr>
           </tbody>

@@ -1,5 +1,6 @@
 import type { ReferenceItem } from '@/types/reference.types'
 import type { MockDatabase } from '../../db/database'
+import { isWorkable, workOrderStatus } from '@/modules/maintenance/work-orders/domain/workOrder'
 import { techniciansApi } from './technicians'
 
 export function maintenanceReferenceData(db: MockDatabase): Record<string, ReferenceItem[]> {
@@ -58,6 +59,12 @@ export function maintenanceReferenceData(db: MockDatabase): Record<string, Refer
     stockItems: db.stockItems
       .all()
       .map((item) => ({ code: item.no, description: item.name, active: item.active })),
+    openWorkOrders: db.workOrders
+      .all()
+      .filter((order) =>
+        isWorkable(workOrderStatus({ ...order, diagnosedAt: order.diagnosis?.at ?? null }))
+      )
+      .map((order) => ({ code: order.no, description: order.symptom })),
     missionTypes: db.missionTypes
       .all()
       .map((item) => ({ code: item.no, description: item.name, active: item.active }))

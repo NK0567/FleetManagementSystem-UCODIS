@@ -9,6 +9,7 @@ export type WorkOrderAction =
   | 'diagnose'
   | 'start'
   | 'labour'
+  | 'take-part'
   | 'hand-over'
   | 'external-progress'
   | 'return'

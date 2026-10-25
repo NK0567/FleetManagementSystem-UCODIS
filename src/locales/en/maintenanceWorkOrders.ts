@@ -85,5 +85,17 @@ export default {
   'maintenance.workOrders.dialog.quoteAmount': 'Quote amount',
   'maintenance.workOrders.dialog.progress': 'Progress',
   'maintenance.workOrders.dialog.returnedAt': 'Back on',
-  'maintenance.workOrders.dialog.finalAmount': 'Final amount'
+  'maintenance.workOrders.dialog.finalAmount': 'Final amount',
+  'maintenance.workOrders.section.parts': 'Parts',
+  'maintenance.workOrders.progress.partsSummary': '{cost} · {pending} pending',
+  'maintenance.workOrders.progress.noParts': 'No part.',
+  'maintenance.workOrders.progress.partPending': 'pending',
+  'maintenance.workOrders.action.takePart': 'Take from stock',
+  'maintenance.workOrders.action.buyPart': 'Request a purchase',
+  'maintenance.workOrders.dialog.stockItem': 'Stock item',
+  'maintenance.workOrders.dialog.partLabel': 'Part not in stock',
+  'maintenance.workOrders.dialog.partLabelHint':
+    'Describe it when the part is not in the catalogue.',
+  'maintenance.workOrders.dialog.quantity': 'Quantity',
+  'maintenance.workOrders.dialog.estimatedAmount': 'Estimated amount'
 }

@@ -31,6 +31,16 @@ export interface ExternalWork {
   finalAmount: number | null
 }
 
+/** A part used on the order: taken from stock at once, or bought and pending until received. */
+export interface PartLine {
+  itemNo: string | null
+  label: string
+  quantity: number
+  unitPrice: number
+  purchaseRequestNo: string | null
+  receivedAt: string | null
+}
+
 export interface WorkOrderEvent {
   at: string
   by: string
@@ -63,6 +73,7 @@ export interface WorkOrderApi {
   odometerKmAtOpening: number | null
   diagnosis: WorkOrderDiagnosis | null
   labour: LabourLine[]
+  parts: PartLine[]
   startedAt: string | null
   completedAt: string | null
   completedBy: string | null
@@ -86,6 +97,8 @@ export interface WorkOrderApi {
   technicianNames: string
   labourHours: number
   labourCost: number
+  partsCost: number
+  pendingPartCount: number
   providerName: string
   subcontractingCost: number
   totalCost: number
