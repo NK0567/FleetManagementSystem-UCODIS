@@ -65,6 +65,7 @@ import maintenanceDowntimes from './maintenanceDowntimes'
 import maintenanceWorkOrders from './maintenanceWorkOrders'
 import maintenanceMaintenancePlans from './maintenanceMaintenancePlans'
 import maintenanceServiceDue from './maintenanceServiceDue'
+import maintenanceStockItems from './maintenanceStockItems'
 export default {
   ...common,
   ...auth,
@@ -131,5 +132,6 @@ export default {
   ...maintenanceDowntimes,
   ...maintenanceWorkOrders,
   ...maintenanceMaintenancePlans,
-  ...maintenanceServiceDue
+  ...maintenanceServiceDue,
+  ...maintenanceStockItems
 }

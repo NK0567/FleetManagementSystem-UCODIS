@@ -64,5 +64,6 @@ export default {
   'nav.workOrders': 'Ordres de travail',
   'nav.serviceDue': "Échéances d'entretien",
   'nav.maintenancePlans': "Plans d'entretien",
-  'nav.downtimes': 'Indisponibilités'
+  'nav.downtimes': 'Indisponibilités',
+  'nav.stockItems': 'Stock de pièces'
 }

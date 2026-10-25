@@ -773,6 +773,20 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/maintenance/stock-items/': RouteRecordInfo<
+      '/maintenance/stock-items/',
+      '/maintenance/stock-items',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/stock-items/[id]': RouteRecordInfo<
+      '/maintenance/stock-items/[id]',
+      '/maintenance/stock-items/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/maintenance/technicians/': RouteRecordInfo<
       '/maintenance/technicians/',
       '/maintenance/technicians',
@@ -1668,6 +1682,22 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | never
+    }
+    'src/pages/maintenance/stock-items/index.vue': {
+      routes:
+        | '/maintenance/stock-items/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/stock-items/[id].vue': {
+      routes:
+        | '/maintenance/stock-items/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
     }
     'src/pages/maintenance/technicians/index.vue': {
       routes:

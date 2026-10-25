@@ -80,5 +80,15 @@ export const MAINTENANCE_OPTION_SETS: Record<string, Record<string, LocalizedTex
     check: { fr: 'Vérifier', en: 'Check' },
     lubricate: { fr: 'Lubrifier', en: 'Lubricate' },
     replace: { fr: 'Remplacer', en: 'Replace' }
+  },
+  stockStatus: {
+    available: { fr: 'Disponible', en: 'Available' },
+    low: { fr: 'Stock bas', en: 'Low stock' },
+    out: { fr: 'Épuisé', en: 'Out of stock' }
+  },
+  stockMovementKind: {
+    in: { fr: 'Entrée', en: 'In' },
+    out: { fr: 'Sortie', en: 'Out' },
+    adjustment: { fr: 'Ajustement', en: 'Adjustment' }
   }
 }

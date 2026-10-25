@@ -8,6 +8,7 @@ export function registerMaintenanceModule(): void {
     WORKORDER: { to: '/maintenance/work-orders', menuKey: 'workOrder' },
     SERVICEDUE: { to: '/maintenance/service-due', menuKey: 'serviceDue' },
     DOWNTIME: { to: '/maintenance/downtimes', menuKey: 'downtime' },
+    STOCKITEM: { to: '/maintenance/stock-items', menuKey: 'stockItem' },
     TECHNICIAN: { to: '/maintenance/technicians', menuKey: 'technician' },
     COMPETENCE: { to: '/maintenance/competences', menuKey: 'competence' },
     FAILURECODE: { to: '/maintenance/failure-codes', menuKey: 'failureCode' },
@@ -29,6 +30,7 @@ export function registerMaintenanceModule(): void {
         menuKey: 'maintenancePlan'
       },
       { labelKey: 'nav.downtimes', to: '/maintenance/downtimes', menuKey: 'downtime' },
+      { labelKey: 'nav.stockItems', to: '/maintenance/stock-items', menuKey: 'stockItem' },
       { labelKey: 'nav.technicians', to: '/maintenance/technicians', menuKey: 'technician' },
       { labelKey: 'nav.competences', to: '/maintenance/competences', menuKey: 'competence' },
       { labelKey: 'nav.failureCodes', to: '/maintenance/failure-codes', menuKey: 'failureCode' },

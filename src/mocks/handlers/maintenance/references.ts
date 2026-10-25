@@ -47,6 +47,17 @@ export function maintenanceReferenceData(db: MockDatabase): Record<string, Refer
       description: vehicle.plate,
       parentCode: modelCode(vehicle)
     })),
+    partsSuppliers: db.providers
+      .all()
+      .filter((provider) => provider.providerType === 'parts_supplier')
+      .map((provider) => ({
+        code: provider.no,
+        description: provider.name,
+        active: provider.authorized
+      })),
+    stockItems: db.stockItems
+      .all()
+      .map((item) => ({ code: item.no, description: item.name, active: item.active })),
     missionTypes: db.missionTypes
       .all()
       .map((item) => ({ code: item.no, description: item.name, active: item.active }))

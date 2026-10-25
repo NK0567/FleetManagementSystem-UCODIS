@@ -1,0 +1,47 @@
+export default {
+  'maintenance.stockItems.title': 'Stock de pièces',
+  'maintenance.stockItems.card': 'Fiche article',
+  'maintenance.stockItems.new': 'Nouvel article',
+  'maintenance.stockItems.loadingList': 'Chargement des articles…',
+  'maintenance.stockItems.noResults': 'Aucun article.',
+  'maintenance.stockItems.noSearchResults': 'Aucun article ne correspond à « {query} ».',
+  'maintenance.stockItems.saveSuccess': 'Article enregistré.',
+  'maintenance.stockItems.saveError': "L'article n'a pas pu être enregistré.",
+  'maintenance.stockItems.createError': "L'article n'a pas pu être créé.",
+
+  'maintenance.stockItems.search.all': 'Référence ou désignation',
+
+  'maintenance.stockItems.col.no': 'Référence',
+  'maintenance.stockItems.col.name': 'Désignation',
+  'maintenance.stockItems.col.subsystemNo': 'Sous-système',
+  'maintenance.stockItems.col.supplierNo': 'Fournisseur principal',
+  'maintenance.stockItems.col.unitPrice': 'Prix unitaire',
+  'maintenance.stockItems.col.alertThreshold': "Seuil d'alerte",
+  'maintenance.stockItems.col.active': 'Actif',
+  'maintenance.stockItems.col.stockQuantity': 'En stock',
+  'maintenance.stockItems.col.stockValue': 'Valeur',
+  'maintenance.stockItems.col.status': 'État',
+
+  'maintenance.stockItems.form.general': 'Général',
+  'maintenance.stockItems.form.no': 'Référence',
+  'maintenance.stockItems.form.name': 'Désignation',
+  'maintenance.stockItems.form.subsystemNo': 'Sous-système',
+  'maintenance.stockItems.form.supplierNo': 'Fournisseur principal',
+  'maintenance.stockItems.form.unitPrice': 'Prix unitaire',
+  'maintenance.stockItems.form.alertThreshold': "Seuil d'alerte",
+  'maintenance.stockItems.form.alertThresholdHint':
+    'Le stock est signalé bas à ce niveau ou en dessous.',
+  'maintenance.stockItems.form.active': 'Actif',
+  'maintenance.stockItems.col.subsystemName': 'Sous-système',
+  'maintenance.stockItems.listView.toReorder': 'À réapprovisionner',
+  'maintenance.stockItems.listView.all': 'Tous',
+  'maintenance.stockItems.movements.title': 'Mouvements',
+  'maintenance.stockItems.movements.count': 'Aucun mouvement | 1 mouvement | {count} mouvements',
+  'maintenance.stockItems.movements.empty': 'Aucun mouvement pour cet article.',
+  'maintenance.stockItems.movements.loadError': "Les mouvements n'ont pas pu être chargés.",
+  'maintenance.stockItems.action.adjust': 'Ajuster le stock',
+  'maintenance.stockItems.adjustHint':
+    "Le stock compté diffère des mouvements ? Saisissez l'écart ({quantity} en stock), positif ou négatif, et sa raison.",
+  'maintenance.stockItems.form.delta': 'Écart (pièces)',
+  'maintenance.stockItems.form.reason': 'Raison'
+}

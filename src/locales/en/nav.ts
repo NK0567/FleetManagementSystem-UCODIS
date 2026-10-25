@@ -64,5 +64,6 @@ export default {
   'nav.workOrders': 'Work orders',
   'nav.serviceDue': 'Service due',
   'nav.maintenancePlans': 'Maintenance plans',
-  'nav.downtimes': 'Downtimes'
+  'nav.downtimes': 'Downtimes',
+  'nav.stockItems': 'Parts stock'
 }

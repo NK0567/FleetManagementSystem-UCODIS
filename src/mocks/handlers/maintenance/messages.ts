@@ -204,5 +204,13 @@ export const MAINTENANCE_MESSAGES = {
   nothingDue: {
     fr: "Aucune opération de ce véhicule n'arrive à échéance.",
     en: 'No operation of this vehicle is due.'
+  },
+  stockInsufficient: {
+    fr: 'Stock insuffisant : {available} disponible.',
+    en: 'Not enough stock: {available} available.'
+  },
+  adjustmentInvalid: {
+    fr: "L'ajustement est un nombre entier non nul de pièces.",
+    en: 'An adjustment is a non-zero whole number of parts.'
   }
 } satisfies Record<string, LocalizedText>
