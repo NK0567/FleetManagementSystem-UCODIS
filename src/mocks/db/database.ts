@@ -65,7 +65,7 @@ import { createCollection, type CollectionContext } from './collection'
 import { clearStoredCollections } from './storage'
 
 /** Bump when fixtures change shape: every collection is then reseeded. */
-export const MOCK_SEED_VERSION = 27
+export const MOCK_SEED_VERSION = 28
 
 export function createDatabase(
   context: CollectionContext = {

@@ -65,6 +65,7 @@ import maintenanceDowntimes from './maintenanceDowntimes'
 import maintenanceWorkOrders from './maintenanceWorkOrders'
 import maintenanceMaintenancePlans from './maintenanceMaintenancePlans'
 import maintenanceServiceDue from './maintenanceServiceDue'
+import maintenanceWorkshopLoad from './maintenanceWorkshopLoad'
 import maintenanceStockItems from './maintenanceStockItems'
 import maintenancePurchaseRequests from './maintenancePurchaseRequests'
 export default {
@@ -134,6 +135,7 @@ export default {
   ...maintenanceWorkOrders,
   ...maintenanceMaintenancePlans,
   ...maintenanceServiceDue,
+  ...maintenanceWorkshopLoad,
   ...maintenanceStockItems,
   ...maintenancePurchaseRequests
 }

@@ -829,6 +829,13 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/maintenance/workshop-load/': RouteRecordInfo<
+      '/maintenance/workshop-load/',
+      '/maintenance/workshop-load',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/settings/module-toggles': RouteRecordInfo<
       '/settings/module-toggles',
       '/settings/module-toggles',
@@ -1760,6 +1767,14 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | 'id'
+    }
+    'src/pages/maintenance/workshop-load/index.vue': {
+      routes:
+        | '/maintenance/workshop-load/'
+      views:
+        | never
+      pathParamNames:
+        | never
     }
     'src/pages/settings/module-toggles.vue': {
       routes:

@@ -10,6 +10,7 @@ export type WorkOrderAction =
   | 'start'
   | 'labour'
   | 'take-part'
+  | 'plan'
   | 'hand-over'
   | 'external-progress'
   | 'return'

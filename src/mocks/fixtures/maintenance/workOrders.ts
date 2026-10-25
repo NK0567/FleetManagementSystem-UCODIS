@@ -22,6 +22,7 @@ export type WorkOrderRow = MockRow &
     | 'diagnosis'
     | 'labour'
     | 'parts'
+    | 'planning'
     | 'startedAt'
     | 'completedAt'
     | 'completedBy'
@@ -67,7 +68,8 @@ const open = {
   downtimeNo: null,
   external: null,
   serviceOperationNos: [] as string[],
-  parts: [] as PartLine[]
+  parts: [] as PartLine[],
+  planning: null
 }
 
 const SEED: Seed[] = [
@@ -167,6 +169,7 @@ const SEED: Seed[] = [
       at: at(-1, '10:30')
     },
     labour: [],
+    planning: { date: day(1), estimatedHours: 3, technicianNos: ['UCT-003'] },
     history: []
   },
   {
@@ -250,6 +253,7 @@ export const workOrdersCollection: CollectionDefinition<WorkOrderRow> = {
     'diagnosis.at',
     'labour[].date',
     'parts[].receivedAt',
+    'planning.date',
     'startedAt',
     'completedAt',
     'validatedAt',

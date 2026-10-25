@@ -97,5 +97,12 @@ export default {
   'maintenance.workOrders.dialog.partLabelHint':
     'Describe it when the part is not in the catalogue.',
   'maintenance.workOrders.dialog.quantity': 'Quantity',
-  'maintenance.workOrders.dialog.estimatedAmount': 'Estimated amount'
+  'maintenance.workOrders.dialog.estimatedAmount': 'Estimated amount',
+  'maintenance.workOrders.action.plan': 'Plan',
+  'maintenance.workOrders.dialog.planDate': 'Planned date',
+  'maintenance.workOrders.dialog.estimatedHours': 'Estimated hours',
+  'maintenance.workOrders.dialog.technicians': 'Technicians',
+  'maintenance.workOrders.dialog.techniciansHint':
+    'The server checks they hold the competence of the diagnosed subsystem.',
+  'maintenance.workOrders.progress.planned': 'Planned on {date} · {hours} h · {technicians}'
 }

@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
   Ban,
+  CalendarClock,
   CircleCheck,
   CircleX,
   Clock,
@@ -20,6 +21,7 @@ import { purchaseRequestService } from '@/modules/maintenance/purchase-requests'
 import type { CardOpenMode } from '@/composables/cardOpenMode'
 import { useEntityCard } from '@/composables/useEntityCard'
 import { usePermissions } from '@/composables/usePermissions'
+import { useReferenceStore } from '@/stores/referenceStore'
 import { useUserStore } from '@/stores/user'
 import { nowIsoDateTime, todayIso } from '@/utils/date'
 import { formatNumber } from '@/utils/format'
@@ -155,6 +157,7 @@ type Dialog =
   | 'handOver'
   | 'followUp'
   | 'return'
+  | 'plan'
   | 'takePart'
   | 'buyPart'
   | 'validate'
@@ -164,6 +167,22 @@ const reasonDialog = ref<'refuse' | 'cancel' | null>(null)
 const diagnosis = ref({ subsystemNo: '', modeNo: '', causeNo: '' })
 const labour = ref({ technicianNo: '', date: todayIso(), hours: null as number | null })
 const completion = ref({ workDone: '', odometerKm: null as number | null })
+const referenceStore = useReferenceStore()
+const technicians = computed(() =>
+  referenceStore.getItems('technicians').filter((technician) => technician.active !== false)
+)
+const planning = ref({
+  date: todayIso(),
+  estimatedHours: null as number | null,
+  technicianNos: [] as string[]
+})
+
+function toggleTechnician(no: string, picked: boolean) {
+  planning.value.technicianNos = picked
+    ? [...planning.value.technicianNos, no]
+    : planning.value.technicianNos.filter((item) => item !== no)
+}
+
 const part = ref({
   itemNo: '',
   label: '',
@@ -190,6 +209,11 @@ function open(next: Dialog) {
   labour.value = { technicianNo: '', date: todayIso(), hours: null }
   completion.value = { workDone: '', odometerKm: order?.odometerKmAtOpening ?? null }
   part.value = { itemNo: '', label: '', quantity: 1, estimatedAmount: null }
+  planning.value = {
+    date: order?.planning?.date ?? todayIso(),
+    estimatedHours: order?.planning?.estimatedHours ?? null,
+    technicianNos: [...(order?.planning?.technicianNos ?? [])]
+  }
   const now = nowIsoDateTime().slice(0, 16)
   external.value = {
     providerNo: order?.external?.providerNo ?? '',
@@ -227,6 +251,13 @@ const confirmDisabled = computed(() => {
         !labour.value.hours ||
         labour.value.hours <= 0 ||
         labour.value.hours > MAX_HOURS_PER_DAY
+      )
+    case 'plan':
+      return (
+        !planning.value.date ||
+        !planning.value.estimatedHours ||
+        planning.value.estimatedHours <= 0 ||
+        !planning.value.technicianNos.length
       )
     case 'takePart':
       return !part.value.itemNo || !part.value.quantity || part.value.quantity < 1
@@ -271,6 +302,8 @@ async function confirm() {
           workDone: completion.value.workDone.trim(),
           odometerKm: completion.value.odometerKm
         })
+      case 'plan':
+        return act('plan', planning.value)
       case 'takePart':
         return act('take-part', { itemNo: part.value.itemNo, quantity: part.value.quantity })
       case 'buyPart':
@@ -387,6 +420,10 @@ const buttonClass =
           >
             <Wrench class="w-5 h-5 text-primary" />
             {{ t('maintenance.workOrders.action.complete') }}
+          </button>
+          <button type="button" :class="buttonClass" :disabled="acting" @click="open('plan')">
+            <CalendarClock class="w-5 h-5 text-primary" />
+            {{ t('maintenance.workOrders.action.plan') }}
           </button>
           <button type="button" :class="buttonClass" :disabled="acting" @click="open('takePart')">
             <Package class="w-5 h-5 text-primary" />
@@ -528,6 +565,35 @@ const buttonClass =
           />
           <p class="text-xs mt-1 text-muted-foreground">
             {{ t('maintenance.workOrders.dialog.hoursHint', { max: MAX_HOURS_PER_DAY }) }}
+          </p>
+        </BaseFormField>
+      </template>
+      <template v-else-if="dialog === 'plan'">
+        <BaseFormField :label="t('maintenance.workOrders.dialog.planDate')" required>
+          <DateFormInput v-model="planning.date" />
+        </BaseFormField>
+        <BaseFormField :label="t('maintenance.workOrders.dialog.estimatedHours')" required>
+          <FormInput v-model="planning.estimatedHours" type="number" :min="0.25" :step="0.25" />
+        </BaseFormField>
+        <BaseFormField :label="t('maintenance.workOrders.dialog.technicians')" required>
+          <div class="space-y-1">
+            <label
+              v-for="technician in technicians"
+              :key="technician.code"
+              class="flex items-center gap-2 text-sm"
+            >
+              <input
+                type="checkbox"
+                :checked="planning.technicianNos.includes(technician.code)"
+                @change="
+                  toggleTechnician(technician.code, ($event.target as HTMLInputElement).checked)
+                "
+              />
+              {{ technician.description }}
+            </label>
+          </div>
+          <p class="text-xs mt-1 text-muted-foreground">
+            {{ t('maintenance.workOrders.dialog.techniciansHint') }}
           </p>
         </BaseFormField>
       </template>

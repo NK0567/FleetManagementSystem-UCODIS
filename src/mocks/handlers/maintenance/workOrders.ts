@@ -35,7 +35,14 @@ import {
   stampModified
 } from '../../http/crudResource'
 import { conflict, forbidden, unprocessable } from '../../http/errors'
-import { readDate, readDateTime, readEnum, readNumber, readString } from '../../http/input'
+import {
+  readDate,
+  readDateTime,
+  readEnum,
+  readNumber,
+  readString,
+  readStringList
+} from '../../http/input'
 import { optionalReference, requireReference } from '../../http/references'
 import { ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
@@ -43,6 +50,7 @@ import { sessionUser, type MockRequest } from '../../http/types'
 import { MAINTENANCE_MESSAGES } from './messages'
 import { recordPassages } from './serviceRecords'
 import { addMovement } from './stockLedger'
+import { technicianIssue } from '@/modules/maintenance/workshop-load/domain/workshopLoad'
 import { maintenanceSettings } from './settings'
 
 /** Shortest account of what was done that the workshop accepts. */
@@ -165,6 +173,7 @@ function buildWorkOrder(db: MockDatabase, order: WorkOrderRequest, request: Mock
     diagnosis: null,
     labour: [],
     parts: [],
+    planning: null,
     external: null,
     serviceOperationNos: order.serviceOperationNos ?? [],
     startedAt: null,
@@ -273,6 +282,42 @@ export function registerWorkOrdersHandlers(router: MockRouter, db: MockDatabase)
     }
     return expectedReturnOn
   }
+
+  // Planning is for the inside workshop: whoever is put on the job must be active and competent for it.
+  router.post(
+    '/maintenance/work-orders/:no/plan',
+    { feature: 'WORKORDER', action: 'update' },
+    (request) => {
+      const order = workable(routeParam(request, 'no'))
+      if (order.external) throw conflict(MAINTENANCE_MESSAGES.workOrderExternal)
+      const body = readBody(request)
+      const date = readDate(body, 'date', { required: true }) ?? todayIso()
+      if (date < todayIso()) throw unprocessable(MAINTENANCE_MESSAGES.planDateInPast)
+      const estimatedHours =
+        readNumber(body, 'estimatedHours', { required: true, min: 0.25, max: 500 }) ?? 0
+      const technicianNos = [...new Set(readStringList(body, 'technicianNos'))]
+      if (!technicianNos.length) throw unprocessable(MAINTENANCE_MESSAGES.planTechnicianMissing)
+      const competenceNo = order.diagnosis
+        ? (db.failureCodes.find(order.diagnosis.subsystemNo)?.competenceNo ?? null)
+        : null
+      for (const no of technicianNos) {
+        const technician = db.technicians.findOrFail(no)
+        const issue = technicianIssue(technician, competenceNo)
+        if (issue === 'inactive') throw unprocessable(MAINTENANCE_MESSAGES.technicianInactive)
+        if (issue === 'competence') {
+          throw unprocessable(MAINTENANCE_MESSAGES.technicianNotCompetent, {
+            competence: db.competences.find(competenceNo ?? '')?.name ?? competenceNo ?? ''
+          })
+        }
+      }
+      db.workOrders.update(order.no, {
+        planning: { date, estimatedHours, technicianNos },
+        history: [...order.history, event(request, 'planned', `${date} · ${estimatedHours} h`)],
+        ...stampModified(request)
+      })
+      return respond(order.no)
+    }
+  )
 
   router.post(
     '/maintenance/work-orders/:no/take-part',

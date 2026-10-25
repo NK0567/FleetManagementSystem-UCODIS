@@ -325,5 +325,6 @@ declare module 'vue' {
     WorkOrderProgressSections: typeof import('./modules/maintenance/work-orders/components/WorkOrderProgressSections.vue')['default']
     WorkOrdersList: typeof import('./modules/maintenance/work-orders/pages/WorkOrdersList.vue')['default']
     WorkOrderStatusPill: typeof import('./modules/maintenance/work-orders/components/WorkOrderStatusPill.vue')['default']
+    WorkshopLoadPage: typeof import('./modules/maintenance/workshop-load/pages/WorkshopLoadPage.vue')['default']
   }
 }

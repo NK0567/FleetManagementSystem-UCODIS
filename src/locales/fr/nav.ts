@@ -63,6 +63,7 @@ export default {
   'nav.maintenanceSettings': 'Réglages maintenance',
   'nav.workOrders': 'Ordres de travail',
   'nav.serviceDue': "Échéances d'entretien",
+  'nav.workshopLoad': 'Charge atelier',
   'nav.maintenancePlans': "Plans d'entretien",
   'nav.downtimes': 'Indisponibilités',
   'nav.stockItems': 'Stock de pièces',

@@ -96,5 +96,12 @@ export default {
   'maintenance.workOrders.dialog.partLabel': 'Pièce hors stock',
   'maintenance.workOrders.dialog.partLabelHint': "À décrire si la pièce n'est pas au catalogue.",
   'maintenance.workOrders.dialog.quantity': 'Quantité',
-  'maintenance.workOrders.dialog.estimatedAmount': 'Montant estimé'
+  'maintenance.workOrders.dialog.estimatedAmount': 'Montant estimé',
+  'maintenance.workOrders.action.plan': 'Planifier',
+  'maintenance.workOrders.dialog.planDate': 'Date prévue',
+  'maintenance.workOrders.dialog.estimatedHours': 'Durée estimée (h)',
+  'maintenance.workOrders.dialog.technicians': 'Techniciens',
+  'maintenance.workOrders.dialog.techniciansHint':
+    "Le serveur vérifie qu'ils ont la compétence du sous-système diagnostiqué.",
+  'maintenance.workOrders.progress.planned': 'Planifié le {date} · {hours} h · {technicians}'
 }

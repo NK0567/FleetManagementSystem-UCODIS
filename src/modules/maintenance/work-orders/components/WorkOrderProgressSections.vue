@@ -56,6 +56,15 @@ const technician = (no: string) => referenceStore.getLabel('technicians', no) ||
       ]"
     >
       <div class="xl:col-span-2 min-w-0">
+        <p v-if="order.planning" class="text-sm mb-2">
+          {{
+            t('maintenance.workOrders.progress.planned', {
+              date: formatDate(order.planning.date),
+              hours: formatNumber(order.planning.estimatedHours, 2),
+              technicians: order.planning.technicianNos.map(technician).join(', ')
+            })
+          }}
+        </p>
         <p v-if="!order.labour.length" class="text-sm text-muted-foreground">
           {{ t('maintenance.workOrders.progress.noLabour') }}
         </p>

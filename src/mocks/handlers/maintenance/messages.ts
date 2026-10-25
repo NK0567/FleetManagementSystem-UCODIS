@@ -232,5 +232,17 @@ export const MAINTENANCE_MESSAGES = {
   supplierNotAuthorized: {
     fr: "« {name} » n'est pas un fournisseur de pièces autorisé.",
     en: '"{name}" is not an authorized parts supplier.'
+  },
+  planDateInPast: {
+    fr: 'La date prévue ne peut pas être passée.',
+    en: 'The planned date cannot be in the past.'
+  },
+  planTechnicianMissing: {
+    fr: 'Choisissez au moins un technicien.',
+    en: 'Pick at least one technician.'
+  },
+  technicianNotCompetent: {
+    fr: "Ce technicien n'a pas la compétence « {competence} » demandée par ce travail.",
+    en: 'This technician lacks the "{competence}" competence this job needs.'
   }
 } satisfies Record<string, LocalizedText>

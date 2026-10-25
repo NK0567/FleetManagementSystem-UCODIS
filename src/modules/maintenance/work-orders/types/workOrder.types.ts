@@ -41,6 +41,13 @@ export interface PartLine {
   receivedAt: string | null
 }
 
+/** When the inside workshop expects to do the job, for how long and with whom. */
+export interface WorkOrderPlanning {
+  date: string
+  estimatedHours: number
+  technicianNos: string[]
+}
+
 export interface WorkOrderEvent {
   at: string
   by: string
@@ -49,6 +56,7 @@ export interface WorkOrderEvent {
     | 'diagnosed'
     | 'started'
     | 'labour'
+    | 'planned'
     | 'handed_over'
     | 'external_update'
     | 'returned'
@@ -74,6 +82,7 @@ export interface WorkOrderApi {
   diagnosis: WorkOrderDiagnosis | null
   labour: LabourLine[]
   parts: PartLine[]
+  planning: WorkOrderPlanning | null
   startedAt: string | null
   completedAt: string | null
   completedBy: string | null

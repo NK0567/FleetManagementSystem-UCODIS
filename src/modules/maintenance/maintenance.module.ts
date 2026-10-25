@@ -7,6 +7,7 @@ export function registerMaintenanceModule(): void {
   registerFeatureRoutes({
     WORKORDER: { to: '/maintenance/work-orders', menuKey: 'workOrder' },
     SERVICEDUE: { to: '/maintenance/service-due', menuKey: 'serviceDue' },
+    WORKSHOPLOAD: { to: '/maintenance/workshop-load', menuKey: 'workshopLoad' },
     DOWNTIME: { to: '/maintenance/downtimes', menuKey: 'downtime' },
     STOCKITEM: { to: '/maintenance/stock-items', menuKey: 'stockItem' },
     PURCHASEREQUEST: { to: '/maintenance/purchase-requests', menuKey: 'purchaseRequest' },
@@ -25,6 +26,7 @@ export function registerMaintenanceModule(): void {
     subItems: [
       { labelKey: 'nav.workOrders', to: '/maintenance/work-orders', menuKey: 'workOrder' },
       { labelKey: 'nav.serviceDue', to: '/maintenance/service-due', menuKey: 'serviceDue' },
+      { labelKey: 'nav.workshopLoad', to: '/maintenance/workshop-load', menuKey: 'workshopLoad' },
       {
         labelKey: 'nav.maintenancePlans',
         to: '/maintenance/maintenance-plans',

@@ -61,6 +61,7 @@ export const MAINTENANCE_OPTION_SETS: Record<string, Record<string, LocalizedTex
     diagnosed: { fr: 'Diagnostic posé', en: 'Diagnosis made' },
     started: { fr: 'Travaux commencés', en: 'Work started' },
     labour: { fr: 'Temps pointé', en: 'Time logged' },
+    planned: { fr: 'Travail planifié', en: 'Job planned' },
     handed_over: { fr: 'Confié à un atelier externe', en: 'Handed to an outside garage' },
     external_update: { fr: 'Suivi du garage', en: 'Garage follow-up' },
     returned: { fr: 'Retour du garage', en: 'Back from the garage' },
