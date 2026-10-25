@@ -1,4 +1,4 @@
-import type { ReliabilityKpis } from '../domain/reliability'
+import type { OwnershipCost, ReliabilityKpis } from '../domain/reliability'
 
 export interface NamedCount {
   name: string
@@ -28,4 +28,12 @@ export interface MaintenanceDashboardApi {
   pendingPurchases: number
   tyreAlerts: number
   last30Days: ReliabilityKpis
+}
+
+export interface VehicleCostApi extends OwnershipCost {
+  vehicleNo: string
+  from: string
+  to: string
+  km: number
+  acquisitionCost: number | null
 }

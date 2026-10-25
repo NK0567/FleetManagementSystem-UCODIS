@@ -51,5 +51,15 @@ export default {
   'maintenance.dashboard.sub.tyres': 'Pression ou sculpture sous le seuil',
   'maintenance.dashboard.sub.mttr': 'De la déclaration à la fin déclarée',
   'maintenance.dashboard.last30': 'Les 30 derniers jours',
-  'maintenance.dashboard.openReliability': 'Voir la fiabilité'
+  'maintenance.dashboard.openReliability': 'Voir la fiabilité',
+  'maintenance.vehicleCost.title': 'Coût de possession',
+  'maintenance.vehicleCost.summary': '{total} sur la période',
+  'maintenance.vehicleCost.maintenance': 'Maintenance',
+  'maintenance.vehicleCost.fuel': 'Carburant',
+  'maintenance.vehicleCost.tyres': 'Pneumatiques',
+  'maintenance.vehicleCost.insurance': 'Assurance (au prorata)',
+  'maintenance.vehicleCost.total': 'Total de la période',
+  'maintenance.vehicleCost.perKm': '{km} km parcourus · {cost} au km',
+  'maintenance.vehicleCost.acquisition': 'Acquisition, à part : {cost}',
+  'maintenance.vehicleCost.noAcquisition': "Coût d'acquisition non renseigné."
 }

@@ -23,6 +23,7 @@ const emit = defineEmits<{ close: []; create: [] }>()
 const { t } = useI18n()
 const store = useVehicleStore()
 const { canUpdate, canInsert, canExecute } = usePermissions('VEHICLE')
+const { canRead: canReadCosts } = usePermissions('RELIABILITY')
 const formRef = ref<InstanceType<typeof VehicleForm> | null>(null)
 
 const isRemoved = computed(() => store.currentItem?.status === 'removed')
@@ -260,6 +261,7 @@ const dialogTitle = computed(() => (dialog.value ? t(`fleet.vehicles.action.${di
             :can-edit-directly="canEdit"
             @updated="store.setCurrentItem"
           />
+          <VehicleCostSection v-if="item && canReadCosts" :vehicle-no="item.no" />
         </div>
       </div>
     </template>

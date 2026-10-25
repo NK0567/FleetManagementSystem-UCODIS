@@ -105,3 +105,43 @@ export function reliabilityKpis(input: {
     lostDays: round(input.lostDays, 2)
   }
 }
+
+const DAY_MS = 86_400_000
+
+/** Days two periods share, counted on whole days. */
+export function overlapDays(start: string, end: string, from: string, to: string): number {
+  const first = Math.max(
+    new Date(start.slice(0, 10)).getTime(),
+    new Date(from.slice(0, 10)).getTime()
+  )
+  const last = Math.min(new Date(end.slice(0, 10)).getTime(), new Date(to.slice(0, 10)).getTime())
+  return last >= first ? Math.round((last - first) / DAY_MS) + 1 : 0
+}
+
+/** The part of a yearly premium that falls in the period. */
+export function premiumShare(
+  annualPremium: number,
+  policy: { startDate: string; endDate: string },
+  from: string,
+  to: string
+): number {
+  return Math.round((annualPremium * overlapDays(policy.startDate, policy.endDate, from, to)) / 365)
+}
+
+export interface OwnershipCost {
+  maintenance: number
+  fuel: number
+  tyres: number
+  insurance: number
+  /** Running cost of the period; acquisition stays apart, it is not spread over the years. */
+  total: number
+  costPerKm: number | null
+}
+
+export function ownershipCost(
+  parts: Pick<OwnershipCost, 'maintenance' | 'fuel' | 'tyres' | 'insurance'>,
+  km: number
+): OwnershipCost {
+  const total = parts.maintenance + parts.fuel + parts.tyres + parts.insurance
+  return { ...parts, total, costPerKm: km > 0 ? Math.round((total / km) * 100) / 100 : null }
+}

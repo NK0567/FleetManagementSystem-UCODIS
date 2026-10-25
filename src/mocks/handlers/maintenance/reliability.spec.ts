@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import type {
   MaintenanceDashboardApi,
-  ReliabilityApi
+  ReliabilityApi,
+  VehicleCostApi
 } from '@/modules/maintenance/reliability/types/reliability.types'
 import { call, createTestServer } from '../../testing'
 import type { MockServer } from '../../index'
@@ -53,5 +54,21 @@ describe('maintenance dashboard', () => {
       tyreAlerts: 2
     })
     expect(data.unavailableVehicles).toBeGreaterThan(0)
+  })
+})
+
+describe('vehicle running cost', () => {
+  it('add the period costs by item and keep acquisition apart', async () => {
+    const { data } = await get<VehicleCostApi>('/maintenance/vehicle-costs/VEH-001', {
+      from: '2026-01-01',
+      to: '2026-12-31'
+    })
+    expect(data.vehicleNo).toBe('VEH-001')
+    expect(data.maintenance).toBeGreaterThan(0)
+    expect(data.fuel).toBeGreaterThan(0)
+    expect(data.tyres).toBeGreaterThan(0)
+    expect(data.insurance).toBeGreaterThan(0)
+    expect(data.total).toBe(data.maintenance + data.fuel + data.tyres + data.insurance)
+    expect(data.costPerKm).toBe(data.km ? Math.round((data.total / data.km) * 100) / 100 : null)
   })
 })

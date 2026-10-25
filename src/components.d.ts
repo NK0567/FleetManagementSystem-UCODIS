@@ -336,6 +336,7 @@ declare module 'vue' {
     VehicleCheckResults: typeof import('./modules/maintenance/vehicle-checks/components/VehicleCheckResults.vue')['default']
     VehicleChecksList: typeof import('./modules/maintenance/vehicle-checks/pages/VehicleChecksList.vue')['default']
     VehicleCompartmentsEditor: typeof import('./modules/fleet/vehicles/components/VehicleCompartmentsEditor.vue')['default']
+    VehicleCostSection: typeof import('./modules/maintenance/reliability/components/VehicleCostSection.vue')['default']
     VehicleCreateModal: typeof import('./modules/fleet/vehicles/pages/VehicleCreateModal.vue')['default']
     VehicleEquipmentPanel: typeof import('./modules/fleet/vehicles/components/VehicleEquipmentPanel.vue')['default']
     VehicleForm: typeof import('./modules/fleet/vehicles/components/VehicleForm.vue')['default']

@@ -50,5 +50,15 @@ export default {
   'maintenance.dashboard.sub.tyres': 'Pressure or tread under the threshold',
   'maintenance.dashboard.sub.mttr': 'From the report to the declared finish',
   'maintenance.dashboard.last30': 'The last 30 days',
-  'maintenance.dashboard.openReliability': 'See reliability'
+  'maintenance.dashboard.openReliability': 'See reliability',
+  'maintenance.vehicleCost.title': 'Running cost',
+  'maintenance.vehicleCost.summary': '{total} over the period',
+  'maintenance.vehicleCost.maintenance': 'Maintenance',
+  'maintenance.vehicleCost.fuel': 'Fuel',
+  'maintenance.vehicleCost.tyres': 'Tyres',
+  'maintenance.vehicleCost.insurance': 'Insurance (prorated)',
+  'maintenance.vehicleCost.total': 'Period total',
+  'maintenance.vehicleCost.perKm': '{km} km run · {cost} per km',
+  'maintenance.vehicleCost.acquisition': 'Acquisition, apart: {cost}',
+  'maintenance.vehicleCost.noAcquisition': 'Acquisition cost not entered.'
 }

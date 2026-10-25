@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { kmAt, kmInPeriod, reliabilityKpis, type ReliabilityOrder } from './reliability'
+import {
+  kmAt,
+  kmInPeriod,
+  overlapDays,
+  ownershipCost,
+  premiumShare,
+  reliabilityKpis,
+  type ReliabilityOrder
+} from './reliability'
 
 const points = [
   { at: '2026-08-01T00:00:00', km: 100_000 },
@@ -53,6 +61,31 @@ describe('reliability indicators', () => {
       totalCost: 650_000,
       fleetKm: 20_000,
       lostDays: 3
+    })
+  })
+})
+
+describe('ownership cost', () => {
+  it('prorates a premium over the days the period shares with the policy', () => {
+    const policy = { startDate: '2026-01-01', endDate: '2026-12-31' }
+    expect(overlapDays('2026-01-01', '2026-12-31', '2026-08-01', '2026-08-31')).toBe(31)
+    expect(premiumShare(3_650_000, policy, '2026-08-01', '2026-08-31')).toBe(310_000)
+    expect(premiumShare(3_650_000, policy, '2027-02-01', '2027-02-28')).toBe(0)
+  })
+
+  it('adds the running costs, acquisition apart, and divides by the km run', () => {
+    expect(
+      ownershipCost(
+        { maintenance: 400_000, fuel: 1_200_000, tyres: 100_000, insurance: 300_000 },
+        8_000
+      )
+    ).toEqual({
+      maintenance: 400_000,
+      fuel: 1_200_000,
+      tyres: 100_000,
+      insurance: 300_000,
+      total: 2_000_000,
+      costPerKm: 250
     })
   })
 })

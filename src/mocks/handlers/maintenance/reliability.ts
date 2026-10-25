@@ -1,16 +1,21 @@
 import { dayCostOf, downtimeDaysWithin } from '@/modules/maintenance/downtimes/domain/downtime'
 import {
+  kmAt,
   kmInPeriod,
+  ownershipCost,
+  premiumShare,
   reliabilityKpis,
   type OdometerPoint
 } from '@/modules/maintenance/reliability/domain/reliability'
 import type {
   MaintenanceDashboardApi,
-  ReliabilityApi
+  ReliabilityApi,
+  VehicleCostApi
 } from '@/modules/maintenance/reliability/types/reliability.types'
 import { isWorkable } from '@/modules/maintenance/work-orders/domain/workOrder'
 import { addDays, daysBetween, nowIsoDateTime, todayIso } from '@/utils/date'
 import type { MockDatabase } from '../../db/database'
+import { routeParam } from '../../http/crudResource'
 import { ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
 import type { MockRequest } from '../../http/types'
@@ -185,6 +190,60 @@ export function maintenanceDashboardApi(db: MockDatabase): MaintenanceDashboardA
   }
 }
 
+/** What running a vehicle cost over a period, by item; acquisition is shown apart. */
+export function vehicleCostApi(
+  db: MockDatabase,
+  vehicleNo: string,
+  from: string,
+  to: string
+): VehicleCostApi {
+  const vehicle = db.vehicles.findOrFail(vehicleNo)
+  const fromAt = `${from}T00:00:00`
+  const toAt = `${to}T23:59:59`
+  const points = odometerPoints(db).get(vehicleNo) ?? []
+  const within = (at: string | null) => !!at && at >= fromAt && at <= toAt
+  const maintenance = workOrdersApi(db)
+    .filter(
+      (order) =>
+        order.vehicleNo === vehicleNo && order.status !== 'cancelled' && within(order.validatedAt)
+    )
+    .reduce((total, order) => total + order.totalCost, 0)
+  const fuel = Math.round(
+    db.fuelRefills
+      .all()
+      .filter((refill) => refill.vehicleNo === vehicleNo && within(refill.refueledAt))
+      .reduce((total, refill) => total + refill.liters * refill.unitPrice, 0)
+  )
+  // A tyre costs, per km run on this vehicle in the period, what it costs per km over its life.
+  const tyres = Math.round(
+    tyresApi(db).reduce((total, tyre) => {
+      if (!tyre.costPerKm) return total
+      const km = tyre.stints
+        .filter((stint) => stint.vehicleNo === vehicleNo)
+        .reduce((sum, stint) => {
+          const start = stint.mountedAt > fromAt ? stint.mountedAt : fromAt
+          const endAt = stint.dismountedAt && stint.dismountedAt < toAt ? stint.dismountedAt : toAt
+          if (endAt <= start) return sum
+          return sum + Math.max(0, (kmAt(points, endAt) ?? 0) - (kmAt(points, start) ?? 0))
+        }, 0)
+      return total + km * tyre.costPerKm
+    }, 0)
+  )
+  const insurance = db.insurancePolicies
+    .all()
+    .filter((policy) => policy.vehicleNo === vehicleNo && policy.annualPremium)
+    .reduce((total, policy) => total + premiumShare(policy.annualPremium ?? 0, policy, from, to), 0)
+  const km = kmInPeriod(points, fromAt, toAt)
+  return {
+    vehicleNo,
+    from,
+    to,
+    km,
+    acquisitionCost: vehicle.acquisitionCost,
+    ...ownershipCost({ maintenance, fuel, tyres, insurance }, km)
+  }
+}
+
 const isDay = (value: unknown): value is string =>
   typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)
 
@@ -197,6 +256,16 @@ export function registerReliabilityHandlers(router: MockRouter, db: MockDatabase
       const to = isDay(request.query.to) ? request.query.to : today
       const from = isDay(request.query.from) ? request.query.from : addDays(to, -364)
       return ok(reliabilityApi(db, from <= to ? from : to, to))
+    }
+  )
+
+  router.get(
+    '/maintenance/vehicle-costs/:vehicleNo',
+    { feature: 'RELIABILITY', action: 'read' },
+    (request) => {
+      const to = isDay(request.query.to) ? request.query.to : todayIso()
+      const from = isDay(request.query.from) ? request.query.from : addDays(to, -364)
+      return ok(vehicleCostApi(db, routeParam(request, 'vehicleNo'), from <= to ? from : to, to))
     }
   )
 
