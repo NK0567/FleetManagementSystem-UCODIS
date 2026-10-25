@@ -29,6 +29,7 @@ export type WorkOrderRow = MockRow &
     | 'cancelledBy'
     | 'cancelReason'
     | 'downtimeNo'
+    | 'external'
     | 'history'
   >
 
@@ -49,7 +50,8 @@ const open = {
   cancelledAt: null,
   cancelledBy: null,
   cancelReason: '',
-  downtimeNo: null
+  downtimeNo: null,
+  external: null
 }
 
 const SEED: Seed[] = [
@@ -164,6 +166,44 @@ const SEED: Seed[] = [
     odometerKmAtCompletion: 132_800,
     downtimeNo: 'IND-00004',
     history: []
+  },
+  {
+    ...open,
+    no: 'OT-2026-0005',
+    vehicleNo: 'VEH-005',
+    maintenanceType: 'corrective',
+    severity: 'major',
+    origin: 'driver_report',
+    symptom: 'Les vitesses craquent et la 4e saute sous charge.',
+    declaredAt: '2026-08-04T10:00:00',
+    declaredBy: 'FLT001',
+    odometerKmAtOpening: 243_700,
+    diagnosis: {
+      subsystemNo: 'TRANSMISSION',
+      modeNo: 'BREAKAGE',
+      causeNo: 'SUPPLIER',
+      by: 'MNT001',
+      at: '2026-08-04T15:00:00'
+    },
+    labour: [{ technicianNo: 'UCT-008', date: '2026-08-04', hours: 2, loggedBy: 'MNT001' }],
+    startedAt: '2026-08-05T08:00:00',
+    completedAt: '2026-08-12T15:00:00',
+    completedBy: 'MNT001',
+    workDone: 'Boîte de vitesses déposée et reconditionnée par le garage, synchros remplacés.',
+    odometerKmAtCompletion: 243_720,
+    validatedAt: '2026-08-12T17:00:00',
+    validatedBy: 'FLT001',
+    downtimeNo: 'IND-00005',
+    external: {
+      providerNo: 'PRS-002',
+      handedOverAt: '2026-08-05T08:00:00',
+      expectedReturnOn: '2026-08-11',
+      quoteAmount: 4_500_000,
+      progress: 'Synchros commandés chez le distributeur.',
+      returnedAt: '2026-08-12T15:00:00',
+      finalAmount: 4_800_000
+    },
+    history: []
   }
 ]
 
@@ -172,6 +212,9 @@ export const workOrdersCollection: CollectionDefinition<WorkOrderRow> = {
   seed: () => SEED.map((row) => ({ ...structuredClone(row), ...seedAudit })),
   dateFields: [
     'declaredAt',
+    'external.handedOverAt',
+    'external.expectedReturnOn',
+    'external.returnedAt',
     'diagnosis.at',
     'labour[].date',
     'startedAt',

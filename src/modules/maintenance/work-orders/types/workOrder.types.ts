@@ -20,6 +20,17 @@ export interface LabourLine {
   loggedBy: string
 }
 
+/** The order handed to an outside garage: the order keeps its diagnosis, only who does the work changes. */
+export interface ExternalWork {
+  providerNo: string
+  handedOverAt: string
+  expectedReturnOn: string | null
+  quoteAmount: number | null
+  progress: string
+  returnedAt: string | null
+  finalAmount: number | null
+}
+
 export interface WorkOrderEvent {
   at: string
   by: string
@@ -28,6 +39,9 @@ export interface WorkOrderEvent {
     | 'diagnosed'
     | 'started'
     | 'labour'
+    | 'handed_over'
+    | 'external_update'
+    | 'returned'
     | 'completed'
     | 'refused'
     | 'validated'
@@ -61,6 +75,7 @@ export interface WorkOrderApi {
   cancelReason: string
   /** The downtime this order keeps open; it ends when the order is validated or cancelled. */
   downtimeNo: string | null
+  external: ExternalWork | null
   history: WorkOrderEvent[]
   vehiclePlate: string
   subsystemName: string
@@ -69,6 +84,8 @@ export interface WorkOrderApi {
   technicianNames: string
   labourHours: number
   labourCost: number
+  providerName: string
+  subcontractingCost: number
   totalCost: number
   status: WorkOrderStatus
   diagnosedAt: string | null

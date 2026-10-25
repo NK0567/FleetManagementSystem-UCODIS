@@ -72,5 +72,18 @@ export default {
   'maintenance.workOrders.dialog.odometerAtOpening': 'At opening: {km} km.',
   'maintenance.workOrders.dialog.validateHint':
     'Validation closes the order and puts the vehicle back in service.',
-  'maintenance.workOrders.dialog.reason': 'Reason'
+  'maintenance.workOrders.dialog.reason': 'Reason',
+  'maintenance.workOrders.col.providerName': 'Outside garage',
+  'maintenance.workOrders.col.subcontractingCost': 'Subcontracting',
+  'maintenance.workOrders.section.external': 'Outside garage',
+  'maintenance.workOrders.action.handOver': 'Hand to a garage',
+  'maintenance.workOrders.action.followUp': 'Garage follow-up',
+  'maintenance.workOrders.action.return': 'Back from the garage',
+  'maintenance.workOrders.dialog.garage': 'Garage',
+  'maintenance.workOrders.dialog.handedOverAt': 'Handed over on',
+  'maintenance.workOrders.dialog.expectedReturnOn': 'Expected back on',
+  'maintenance.workOrders.dialog.quoteAmount': 'Quote amount',
+  'maintenance.workOrders.dialog.progress': 'Progress',
+  'maintenance.workOrders.dialog.returnedAt': 'Back on',
+  'maintenance.workOrders.dialog.finalAmount': 'Final amount'
 }

@@ -1,17 +1,34 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Ban, CircleCheck, CircleX, Clock, Play, Stethoscope, Wrench } from '@lucide/vue'
+import {
+  Ban,
+  CircleCheck,
+  CircleX,
+  Clock,
+  Factory,
+  NotebookPen,
+  Play,
+  Stethoscope,
+  Undo2,
+  Wrench
+} from '@lucide/vue'
 import { apiErrorMessage } from '@/core/api/apiError'
 import type { CardOpenMode } from '@/composables/cardOpenMode'
 import { useEntityCard } from '@/composables/useEntityCard'
 import { usePermissions } from '@/composables/usePermissions'
 import { useUserStore } from '@/stores/user'
-import { todayIso } from '@/utils/date'
+import { nowIsoDateTime, todayIso } from '@/utils/date'
 import { formatNumber } from '@/utils/format'
 import type { WorkOrderAction } from '../api/workOrderApi'
 import WorkOrderForm from '../components/WorkOrderForm.vue'
-import { diagnosisGaps, fourEyesBlock, isWorkable, MAX_HOURS_PER_DAY } from '../domain/workOrder'
+import {
+  diagnosisGaps,
+  fourEyesBlock,
+  isAtExternalWorkshop,
+  isWorkable,
+  MAX_HOURS_PER_DAY
+} from '../domain/workOrder'
 import { workOrderService } from '../services/workOrderService'
 import { useWorkOrderStore } from '../stores/workOrderStore'
 
@@ -71,6 +88,7 @@ const editable = computed(() => canUpdate.value && workable.value && !item.value
 
 const showActions = computed(() => !!item.value && !isEditMode.value && !isFormDirty.value)
 const canWork = computed(() => canUpdate.value && workable.value)
+const atGarage = computed(() => !!item.value && isAtExternalWorkshop(item.value))
 const awaitingValidation = computed(() => item.value?.status === 'awaiting_validation')
 const finished = computed(
   () => item.value?.status === 'closed' || item.value?.status === 'cancelled'
@@ -103,12 +121,29 @@ async function act(action: WorkOrderAction, body: Record<string, unknown> = {}) 
   }
 }
 
-type Dialog = 'diagnose' | 'labour' | 'complete' | 'validate' | null
+type Dialog =
+  | 'diagnose'
+  | 'labour'
+  | 'complete'
+  | 'handOver'
+  | 'followUp'
+  | 'return'
+  | 'validate'
+  | null
 const dialog = ref<Dialog>(null)
 const reasonDialog = ref<'refuse' | 'cancel' | null>(null)
 const diagnosis = ref({ subsystemNo: '', modeNo: '', causeNo: '' })
 const labour = ref({ technicianNo: '', date: todayIso(), hours: null as number | null })
 const completion = ref({ workDone: '', odometerKm: null as number | null })
+const external = ref({
+  providerNo: '',
+  handedOverAt: '',
+  expectedReturnOn: '',
+  quoteAmount: null as number | null,
+  progress: '',
+  returnedAt: '',
+  finalAmount: null as number | null
+})
 
 function open(next: Dialog) {
   const order = item.value
@@ -119,6 +154,16 @@ function open(next: Dialog) {
   }
   labour.value = { technicianNo: '', date: todayIso(), hours: null }
   completion.value = { workDone: '', odometerKm: order?.odometerKmAtOpening ?? null }
+  const now = nowIsoDateTime().slice(0, 16)
+  external.value = {
+    providerNo: order?.external?.providerNo ?? '',
+    handedOverAt: now,
+    expectedReturnOn: order?.external?.expectedReturnOn ?? '',
+    quoteAmount: order?.external?.quoteAmount ?? null,
+    progress: order?.external?.progress ?? '',
+    returnedAt: now,
+    finalAmount: order?.external?.quoteAmount ?? null
+  }
   dialog.value = next
 }
 
@@ -147,8 +192,12 @@ const confirmDisabled = computed(() => {
         labour.value.hours <= 0 ||
         labour.value.hours > MAX_HOURS_PER_DAY
       )
+    case 'handOver':
+      return !external.value.providerNo || !external.value.handedOverAt
     case 'complete':
+    case 'return':
       return (
+        (dialog.value === 'return' && !external.value.returnedAt) ||
         completion.value.workDone.trim().length < MIN_TEXT ||
         completion.value.odometerKm === null ||
         kmTooLow.value
@@ -177,6 +226,26 @@ async function confirm() {
         return act('complete', {
           workDone: completion.value.workDone.trim(),
           odometerKm: completion.value.odometerKm
+        })
+      case 'handOver':
+        return act('hand-over', {
+          providerNo: external.value.providerNo,
+          handedOverAt: external.value.handedOverAt,
+          expectedReturnOn: external.value.expectedReturnOn || null,
+          quoteAmount: external.value.quoteAmount
+        })
+      case 'followUp':
+        return act('external-progress', {
+          progress: external.value.progress.trim(),
+          expectedReturnOn: external.value.expectedReturnOn || null,
+          quoteAmount: external.value.quoteAmount
+        })
+      case 'return':
+        return act('return', {
+          returnedAt: external.value.returnedAt,
+          workDone: completion.value.workDone.trim(),
+          odometerKm: completion.value.odometerKm,
+          finalAmount: external.value.finalAmount
         })
       default:
         return act('validate')
@@ -234,32 +303,54 @@ const buttonClass =
           <Stethoscope class="w-5 h-5 text-primary" />
           {{ t('maintenance.workOrders.action.diagnose') }}
         </button>
-        <button
-          v-if="!item.startedAt"
-          type="button"
-          :class="buttonClass"
-          :disabled="acting"
-          @click="act('start')"
-        >
-          <Play class="w-5 h-5 text-primary" /> {{ t('maintenance.workOrders.action.start') }}
-        </button>
-        <button type="button" :class="buttonClass" :disabled="acting" @click="open('labour')">
-          <Clock class="w-5 h-5 text-primary" /> {{ t('maintenance.workOrders.action.labour') }}
-        </button>
-        <button
-          type="button"
-          :class="buttonClass"
-          :disabled="acting || !item.diagnosis || !item.labour.length"
-          :title="
-            !item.diagnosis || !item.labour.length
-              ? t('maintenance.workOrders.hint.completeNeeds')
-              : undefined
-          "
-          @click="open('complete')"
-        >
-          <Wrench class="w-5 h-5 text-primary" />
-          {{ t('maintenance.workOrders.action.complete') }}
-        </button>
+        <template v-if="atGarage">
+          <button type="button" :class="buttonClass" :disabled="acting" @click="open('followUp')">
+            <NotebookPen class="w-5 h-5 text-primary" />
+            {{ t('maintenance.workOrders.action.followUp') }}
+          </button>
+          <button type="button" :class="buttonClass" :disabled="acting" @click="open('return')">
+            <Undo2 class="w-5 h-5 text-primary" />
+            {{ t('maintenance.workOrders.action.return') }}
+          </button>
+        </template>
+        <template v-else>
+          <button
+            v-if="!item.startedAt"
+            type="button"
+            :class="buttonClass"
+            :disabled="acting"
+            @click="act('start')"
+          >
+            <Play class="w-5 h-5 text-primary" /> {{ t('maintenance.workOrders.action.start') }}
+          </button>
+          <button type="button" :class="buttonClass" :disabled="acting" @click="open('labour')">
+            <Clock class="w-5 h-5 text-primary" /> {{ t('maintenance.workOrders.action.labour') }}
+          </button>
+          <button
+            type="button"
+            :class="buttonClass"
+            :disabled="acting || !item.diagnosis || !item.labour.length"
+            :title="
+              !item.diagnosis || !item.labour.length
+                ? t('maintenance.workOrders.hint.completeNeeds')
+                : undefined
+            "
+            @click="open('complete')"
+          >
+            <Wrench class="w-5 h-5 text-primary" />
+            {{ t('maintenance.workOrders.action.complete') }}
+          </button>
+          <button
+            v-if="!item.external"
+            type="button"
+            :class="buttonClass"
+            :disabled="acting"
+            @click="open('handOver')"
+          >
+            <Factory class="w-5 h-5 text-primary" />
+            {{ t('maintenance.workOrders.action.handOver') }}
+          </button>
+        </template>
       </template>
       <template v-if="canExecute && awaitingValidation">
         <button
@@ -384,7 +475,42 @@ const buttonClass =
           </p>
         </BaseFormField>
       </template>
-      <template v-else-if="dialog === 'complete'">
+      <template v-else-if="dialog === 'handOver'">
+        <BaseFormField :label="t('maintenance.workOrders.dialog.garage')" required>
+          <ReferenceLookup
+            v-model="external.providerNo"
+            reference-key="garages"
+            :modal-title="t('maintenance.workOrders.dialog.garage')"
+            detail-path="/fleet/providers"
+          />
+        </BaseFormField>
+        <BaseFormField :label="t('maintenance.workOrders.dialog.handedOverAt')" required>
+          <FormInput v-model="external.handedOverAt" type="datetime-local" />
+        </BaseFormField>
+      </template>
+      <template v-if="dialog === 'handOver' || dialog === 'followUp'">
+        <BaseFormField :label="t('maintenance.workOrders.dialog.expectedReturnOn')">
+          <DateFormInput v-model="external.expectedReturnOn" />
+        </BaseFormField>
+        <BaseFormField :label="t('maintenance.workOrders.dialog.quoteAmount')">
+          <FormInput v-model="external.quoteAmount" type="number" :min="0" />
+        </BaseFormField>
+      </template>
+      <BaseFormField
+        v-if="dialog === 'followUp'"
+        :label="t('maintenance.workOrders.dialog.progress')"
+      >
+        <FormTextarea v-model="external.progress" :rows="3" :maxlength="500" />
+      </BaseFormField>
+      <template v-if="dialog === 'return'">
+        <BaseFormField :label="t('maintenance.workOrders.dialog.returnedAt')" required>
+          <FormInput v-model="external.returnedAt" type="datetime-local" />
+        </BaseFormField>
+        <BaseFormField :label="t('maintenance.workOrders.dialog.finalAmount')">
+          <FormInput v-model="external.finalAmount" type="number" :min="0" />
+        </BaseFormField>
+      </template>
+      <template v-if="dialog === 'complete' || dialog === 'return'">
         <BaseFormField :label="t('maintenance.workOrders.dialog.workDone')" required>
           <FormTextarea v-model="completion.workDone" :rows="4" :maxlength="1000" />
           <p class="text-xs mt-1 text-muted-foreground">

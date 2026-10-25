@@ -3,11 +3,13 @@ import {
   downtimeRoleOf,
   fourEyesBlock,
   immobilizesOnDeclaration,
+  isAtExternalWorkshop,
   isWorkable,
   labourHours,
   MAINTENANCE_TYPES,
   MANUAL_ORIGINS,
   MAX_HOURS_PER_DAY,
+  subcontractingCost,
   WORK_ORDER_ORIGINS,
   WORK_ORDER_SEVERITIES,
   workOrderStatus,
@@ -48,12 +50,14 @@ export function workOrdersApi(db: MockDatabase): WorkOrderApi[] {
   const rate = maintenanceSettings(db).labour.hourlyRate
   const plates = new Map(db.vehicles.all().map((vehicle) => [vehicle.no, vehicle.plate]))
   const codes = new Map(db.failureCodes.all().map((code) => [code.no, code.name]))
+  const providers = new Map(db.providers.all().map((provider) => [provider.no, provider.name]))
   const names = new Map(
     db.employees.all().map((employee) => [employee.no, employeeFullName(employee)])
   )
   return db.workOrders.all().map((row) => {
     const hours = labourHours(row.labour)
     const labourCost = Math.round(hours * rate)
+    const subcontracting = subcontractingCost(row.external)
     return {
       ...row,
       vehiclePlate: plates.get(row.vehicleNo) ?? row.vehicleNo,
@@ -65,7 +69,9 @@ export function workOrdersApi(db: MockDatabase): WorkOrderApi[] {
         .join(', '),
       labourHours: hours,
       labourCost,
-      totalCost: labourCost,
+      providerName: row.external ? (providers.get(row.external.providerNo) ?? '') : '',
+      subcontractingCost: subcontracting,
+      totalCost: labourCost + subcontracting,
       diagnosedAt: row.diagnosis?.at ?? null,
       status: workOrderStatus({ ...row, diagnosedAt: row.diagnosis?.at ?? null })
     }
@@ -151,6 +157,7 @@ function buildWorkOrder(db: MockDatabase, order: WorkOrderRequest, request: Mock
     odometerKmAtOpening: vehicle.odometerKm,
     diagnosis: null,
     labour: [],
+    external: null,
     startedAt: null,
     completedAt: null,
     completedBy: null,
@@ -186,9 +193,8 @@ export function registerWorkOrdersHandlers(router: MockRouter, db: MockDatabase)
   }
 
   /** Starting the work stops the vehicle, if the declaration did not already. */
-  function start(order: WorkOrderRow, request: MockRequest) {
+  function start(order: WorkOrderRow, request: MockRequest, at = nowIsoDateTime()) {
     if (order.startedAt) return {}
-    const at = nowIsoDateTime()
     return {
       startedAt: at,
       downtimeNo: order.downtimeNo ?? openDowntime(db, order, at, request),
@@ -205,6 +211,146 @@ export function registerWorkOrdersHandlers(router: MockRouter, db: MockDatabase)
   }
 
   const respond = (no: string) => ok(workOrderApiOf(db, no))
+
+  /** What an inside and an outside finish both require: a diagnosis, the work done, the odometer. */
+  function readCompletion(order: WorkOrderRow, body: Record<string, unknown>) {
+    if (!order.diagnosis) throw unprocessable(MAINTENANCE_MESSAGES.diagnosisMissing)
+    const workDone = readString(body, 'workDone', { required: true })
+    if (workDone.length < MIN_TEXT) {
+      throw unprocessable(MAINTENANCE_MESSAGES.workDoneTooShort, { min: MIN_TEXT })
+    }
+    const odometerKm = readNumber(body, 'odometerKm', { required: true, min: 0 }) ?? 0
+    if (odometerKm < (order.odometerKmAtOpening ?? 0)) {
+      throw unprocessable(MAINTENANCE_MESSAGES.odometerBackwards, {
+        km: order.odometerKmAtOpening ?? 0
+      })
+    }
+    return { workDone, odometerKm }
+  }
+
+  function recordOdometer(vehicleNo: string, odometerKm: number, by: string) {
+    const vehicle = db.vehicles.findOrFail(vehicleNo)
+    if (odometerKm <= vehicle.odometerKm) return
+    db.vehicles.update(vehicle.no, {
+      odometerKm,
+      odometerReadings: [
+        ...vehicle.odometerReadings,
+        { readAt: nowIso(), km: odometerKm, source: 'work_order' as const, recordedBy: by }
+      ]
+    })
+  }
+
+  function atExternalWorkshop(no: string) {
+    const order = workable(no)
+    if (!order.external || !isAtExternalWorkshop(order)) {
+      throw conflict(MAINTENANCE_MESSAGES.workOrderNotAtWorkshop)
+    }
+    return { ...order, external: order.external }
+  }
+
+  function readAmount(body: Record<string, unknown>, field: string): number | null {
+    const value = body[field]
+    if (value === null || value === undefined || value === '') return null
+    return readNumber(body, field, { min: 0 }) ?? null
+  }
+
+  function readExpectedReturn(body: Record<string, unknown>, handedOverAt: string) {
+    const expectedReturnOn = readDate(body, 'expectedReturnOn') ?? null
+    if (expectedReturnOn && expectedReturnOn < handedOverAt.slice(0, 10)) {
+      throw unprocessable(MAINTENANCE_MESSAGES.expectedReturnBeforeHandOver)
+    }
+    return expectedReturnOn
+  }
+
+  router.post(
+    '/maintenance/work-orders/:no/hand-over',
+    { feature: 'WORKORDER', action: 'update' },
+    (request) => {
+      const order = workable(routeParam(request, 'no'))
+      if (order.external) throw conflict(MAINTENANCE_MESSAGES.workOrderAlreadyExternal)
+      const body = readBody(request)
+      const provider = db.providers.findOrFail(requireReference(db.providers, body, 'providerNo'))
+      if (provider.providerType !== 'garage' || !provider.authorized) {
+        throw unprocessable(MAINTENANCE_MESSAGES.garageNotAuthorized, { name: provider.name })
+      }
+      const handedOverAt = readDateTime(body, 'handedOverAt') ?? nowIsoDateTime()
+      if (handedOverAt > nowIsoDateTime() || handedOverAt < order.declaredAt) {
+        throw unprocessable(MAINTENANCE_MESSAGES.handOverDateInvalid)
+      }
+      const started = start(order, request, handedOverAt)
+      db.workOrders.update(order.no, {
+        ...started,
+        external: {
+          providerNo: provider.no,
+          handedOverAt,
+          expectedReturnOn: readExpectedReturn(body, handedOverAt),
+          quoteAmount: readAmount(body, 'quoteAmount'),
+          progress: '',
+          returnedAt: null,
+          finalAmount: null
+        },
+        history: [
+          ...(started.history ?? order.history),
+          event(request, 'handed_over', provider.name)
+        ],
+        ...stampModified(request)
+      })
+      return respond(order.no)
+    }
+  )
+
+  router.post(
+    '/maintenance/work-orders/:no/external-progress',
+    { feature: 'WORKORDER', action: 'update' },
+    (request) => {
+      const order = atExternalWorkshop(routeParam(request, 'no'))
+      const body = readBody(request)
+      const external = {
+        ...order.external,
+        progress: 'progress' in body ? readString(body, 'progress') : order.external.progress,
+        expectedReturnOn:
+          'expectedReturnOn' in body
+            ? readExpectedReturn(body, order.external.handedOverAt)
+            : order.external.expectedReturnOn,
+        quoteAmount:
+          'quoteAmount' in body ? readAmount(body, 'quoteAmount') : order.external.quoteAmount
+      }
+      db.workOrders.update(order.no, {
+        external,
+        history: [...order.history, event(request, 'external_update', external.progress)],
+        ...stampModified(request)
+      })
+      return respond(order.no)
+    }
+  )
+
+  // The garage's account of the work is the declared finish; the downtime stops at the return, not at validation.
+  router.post(
+    '/maintenance/work-orders/:no/return',
+    { feature: 'WORKORDER', action: 'update' },
+    (request) => {
+      const order = atExternalWorkshop(routeParam(request, 'no'))
+      const body = readBody(request)
+      const { workDone, odometerKm } = readCompletion(order, body)
+      const returnedAt = readDateTime(body, 'returnedAt') ?? nowIsoDateTime()
+      if (returnedAt > nowIsoDateTime() || returnedAt < order.external.handedOverAt) {
+        throw unprocessable(MAINTENANCE_MESSAGES.returnDateInvalid)
+      }
+      const code = sessionUser(request).code
+      recordOdometer(order.vehicleNo, odometerKm, code)
+      endDowntime(db, order.downtimeNo, returnedAt, code)
+      db.workOrders.update(order.no, {
+        external: { ...order.external, returnedAt, finalAmount: readAmount(body, 'finalAmount') },
+        completedAt: returnedAt,
+        completedBy: code,
+        workDone,
+        odometerKmAtCompletion: odometerKm,
+        history: [...order.history, event(request, 'returned')],
+        ...stampModified(request)
+      })
+      return respond(order.no)
+    }
+  )
 
   registerCrudResource(router, {
     basePath: '/maintenance/work-orders',
@@ -305,6 +451,7 @@ export function registerWorkOrdersHandlers(router: MockRouter, db: MockDatabase)
     { feature: 'WORKORDER', action: 'update' },
     (request) => {
       const order = workable(routeParam(request, 'no'))
+      if (order.external) throw conflict(MAINTENANCE_MESSAGES.workOrderExternal)
       const body = readBody(request)
       const technicianNo = requireReference(db.technicians, body, 'technicianNo')
       if (!db.technicians.findOrFail(technicianNo).active) {
@@ -349,30 +496,13 @@ export function registerWorkOrdersHandlers(router: MockRouter, db: MockDatabase)
     { feature: 'WORKORDER', action: 'update' },
     (request) => {
       const order = workable(routeParam(request, 'no'))
-      const body = readBody(request)
-      if (!order.diagnosis) throw unprocessable(MAINTENANCE_MESSAGES.diagnosisMissing)
-      if (!order.labour.length) throw unprocessable(MAINTENANCE_MESSAGES.labourMissing)
-      const workDone = readString(body, 'workDone', { required: true })
-      if (workDone.length < MIN_TEXT) {
-        throw unprocessable(MAINTENANCE_MESSAGES.workDoneTooShort, { min: MIN_TEXT })
+      if (order.external) throw conflict(MAINTENANCE_MESSAGES.workOrderExternal)
+      if (order.diagnosis && !order.labour.length) {
+        throw unprocessable(MAINTENANCE_MESSAGES.labourMissing)
       }
-      const vehicle = db.vehicles.findOrFail(order.vehicleNo)
-      const odometerKm = readNumber(body, 'odometerKm', { required: true, min: 0 }) ?? 0
-      if (odometerKm < (order.odometerKmAtOpening ?? 0)) {
-        throw unprocessable(MAINTENANCE_MESSAGES.odometerBackwards, {
-          km: order.odometerKmAtOpening ?? 0
-        })
-      }
+      const { workDone, odometerKm } = readCompletion(order, readBody(request))
       const code = sessionUser(request).code
-      if (odometerKm > vehicle.odometerKm) {
-        db.vehicles.update(vehicle.no, {
-          odometerKm,
-          odometerReadings: [
-            ...vehicle.odometerReadings,
-            { readAt: nowIso(), km: odometerKm, source: 'work_order' as const, recordedBy: code }
-          ]
-        })
-      }
+      recordOdometer(order.vehicleNo, odometerKm, code)
       db.workOrders.update(order.no, {
         completedAt: nowIsoDateTime(),
         completedBy: code,
@@ -426,7 +556,15 @@ export function registerWorkOrdersHandlers(router: MockRouter, db: MockDatabase)
       if (reason.length < MIN_TEXT) {
         throw unprocessable(MAINTENANCE_MESSAGES.reasonTooShort, { min: MIN_TEXT })
       }
+      // A refused outside job goes back to the garage, and the vehicle is out again from now.
+      const backToGarage = order.external
+        ? {
+            external: { ...order.external, returnedAt: null, finalAmount: null },
+            downtimeNo: openDowntime(db, order, nowIsoDateTime(), request)
+          }
+        : {}
       db.workOrders.update(order.no, {
+        ...backToGarage,
         completedAt: null,
         completedBy: null,
         history: [...order.history, event(request, 'refused', reason)],

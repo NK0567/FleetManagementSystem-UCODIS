@@ -24,6 +24,14 @@ export function maintenanceReferenceData(db: MockDatabase): Record<string, Refer
       description: technician.fullName,
       active: technician.active
     })),
+    garages: db.providers
+      .all()
+      .filter((provider) => provider.providerType === 'garage')
+      .map((provider) => ({
+        code: provider.no,
+        description: provider.name,
+        active: provider.authorized
+      })),
     missionTypes: db.missionTypes
       .all()
       .map((item) => ({ code: item.no, description: item.name, active: item.active }))

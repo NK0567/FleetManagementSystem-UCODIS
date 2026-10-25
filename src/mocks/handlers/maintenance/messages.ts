@@ -148,5 +148,33 @@ export const MAINTENANCE_MESSAGES = {
   workOrderFinished: {
     fr: 'Cet ordre de travail est déjà validé ou annulé.',
     en: 'This work order is already validated or cancelled.'
+  },
+  workOrderExternal: {
+    fr: 'Cet ordre est confié à un atelier externe : le temps et la fin se suivent par le garage.',
+    en: 'This order is with an outside garage: its time and finish go through the garage.'
+  },
+  workOrderNotAtWorkshop: {
+    fr: "Ce véhicule n'est pas chez un atelier externe.",
+    en: 'This vehicle is not at an outside garage.'
+  },
+  workOrderAlreadyExternal: {
+    fr: 'Cet ordre a déjà été confié à un atelier externe.',
+    en: 'This order has already been handed to an outside garage.'
+  },
+  garageNotAuthorized: {
+    fr: "« {name} » n'est pas un garage autorisé.",
+    en: '"{name}" is not an authorized garage.'
+  },
+  handOverDateInvalid: {
+    fr: 'La remise se fait entre la déclaration de la panne et maintenant.',
+    en: 'The hand-over falls between the fault report and now.'
+  },
+  expectedReturnBeforeHandOver: {
+    fr: 'Le retour prévu ne peut pas précéder la remise du véhicule.',
+    en: 'The expected return cannot come before the hand-over.'
+  },
+  returnDateInvalid: {
+    fr: 'Le retour se fait entre la remise du véhicule et maintenant.',
+    en: 'The return falls between the hand-over and now.'
   }
 } satisfies Record<string, LocalizedText>

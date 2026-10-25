@@ -12,7 +12,13 @@ const { t } = useI18n()
 const optionsStore = useOptionsStore()
 const referenceStore = useReferenceStore()
 
-const expandedSections = ref({ diagnosis: true, labour: true, completion: true, history: false })
+const expandedSections = ref({
+  diagnosis: true,
+  labour: true,
+  external: true,
+  completion: true,
+  history: false
+})
 const technician = (no: string) => referenceStore.getLabel('technicians', no) || no
 </script>
 
@@ -68,6 +74,52 @@ const technician = (no: string) => referenceStore.getLabel('technicians', no) ||
           </tbody>
         </table>
       </div>
+    </FormSection>
+
+    <FormSection
+      v-if="order.external"
+      v-model:open="expandedSections.external"
+      :title="t('maintenance.workOrders.section.external')"
+      :summary="[order.providerName]"
+    >
+      <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm xl:col-span-2">
+        <dt class="text-muted-foreground">{{ t('maintenance.workOrders.dialog.garage') }}</dt>
+        <dd>
+          <RouterLink
+            :to="{
+              path: '/fleet/providers',
+              query: { no: order.external.providerNo, cardMode: 'view' }
+            }"
+            class="text-primary hover:underline"
+          >
+            {{ order.providerName }}
+          </RouterLink>
+        </dd>
+        <dt class="text-muted-foreground">
+          {{ t('maintenance.workOrders.dialog.handedOverAt') }}
+        </dt>
+        <dd>{{ formatDateTime(order.external.handedOverAt) }}</dd>
+        <dt class="text-muted-foreground">
+          {{ t('maintenance.workOrders.dialog.expectedReturnOn') }}
+        </dt>
+        <dd>{{ formatDate(order.external.expectedReturnOn) || '—' }}</dd>
+        <dt class="text-muted-foreground">{{ t('maintenance.workOrders.dialog.returnedAt') }}</dt>
+        <dd>{{ formatDateTime(order.external.returnedAt) || '—' }}</dd>
+        <dt class="text-muted-foreground">{{ t('maintenance.workOrders.dialog.progress') }}</dt>
+        <dd class="whitespace-pre-line">{{ order.external.progress || '—' }}</dd>
+        <dt class="text-muted-foreground">
+          {{ t('maintenance.workOrders.dialog.quoteAmount') }}
+        </dt>
+        <dd class="tabular-nums">
+          {{ order.external.quoteAmount === null ? '—' : formatNumber(order.external.quoteAmount) }}
+        </dd>
+        <dt class="text-muted-foreground">
+          {{ t('maintenance.workOrders.dialog.finalAmount') }}
+        </dt>
+        <dd class="tabular-nums">
+          {{ order.external.finalAmount === null ? '—' : formatNumber(order.external.finalAmount) }}
+        </dd>
+      </dl>
     </FormSection>
 
     <FormSection

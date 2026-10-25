@@ -111,6 +111,20 @@ export function fourEyesBlock(
   return worked ? 'technician' : null
 }
 
+/** Still at the outside garage: handed over and not back yet. */
+export function isAtExternalWorkshop(order: {
+  external: { returnedAt: string | null } | null
+}): boolean {
+  return !!order.external && !order.external.returnedAt
+}
+
+/** The final invoice once known, else the quote. */
+export function subcontractingCost(
+  external: { quoteAmount: number | null; finalAmount: number | null } | null
+): number {
+  return external ? (external.finalAmount ?? external.quoteAmount ?? 0) : 0
+}
+
 export function labourHours(labour: readonly { hours: number }[]): number {
   return Math.round(labour.reduce((total, line) => total + line.hours, 0) * 100) / 100
 }

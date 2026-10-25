@@ -70,7 +70,7 @@ describe('work orders', () => {
     expect((await declare({}, 'DIR001')).status).toBe(403)
     const created = (await declare({}, 'MNT001')).data.data as WorkOrderApi
     expect(created).toMatchObject({
-      no: 'OT-2026-0005',
+      no: 'OT-2026-0006',
       status: 'open',
       declaredBy: 'MNT001',
       odometerKmAtOpening: 201_300,
@@ -180,5 +180,99 @@ describe('work orders', () => {
     expect((await get<DowntimeApi>('/maintenance/downtimes/IND-00004')).status).toBe('closed')
     expect((await vehicle('VEH-008')).status).toBe('assigned')
     expect((await send('/OT-2026-0004/cancel', { reason: 'Une seconde fois.' })).status).toBe(409)
+  })
+})
+
+describe('external workshop', () => {
+  const handOver = (no: string, body: Record<string, unknown> = {}, as = 'MNT001') =>
+    send(
+      `/${no}/hand-over`,
+      {
+        providerNo: 'PRS-002',
+        handedOverAt: `${DEMO_REFERENCE_DATE}T08:00`,
+        expectedReturnOn: addDays(DEMO_REFERENCE_DATE, 5),
+        quoteAmount: 1_200_000,
+        ...body
+      },
+      as
+    )
+
+  it('cost the closed seed job from the final invoice', async () => {
+    expect(await order('OT-2026-0005')).toMatchObject({
+      status: 'closed',
+      providerName: 'Atelier Diesel Tanjombato',
+      labourCost: 20_000,
+      subcontractingCost: 4_800_000,
+      totalCost: 4_820_000
+    })
+  })
+
+  it('hand over only to an authorized garage, and only once', async () => {
+    const { no } = (await declare()).data.data as WorkOrderApi
+    expect((await handOver(no, { providerNo: 'PRS-003' })).status).toBe(422)
+    expect((await handOver(no, { providerNo: 'PRS-006' })).status).toBe(422)
+    expect((await handOver(no, { handedOverAt: '2026-01-01T08:00' })).status).toBe(422)
+    expect((await handOver(no, { expectedReturnOn: '2026-01-01' })).status).toBe(422)
+    expect((await handOver(no, {}, 'DIR001')).status).toBe(403)
+    const handed = (await handOver(no)).data.data as WorkOrderApi
+    expect(handed).toMatchObject({
+      status: 'in_progress',
+      providerName: 'Atelier Diesel Tanjombato',
+      subcontractingCost: 1_200_000
+    })
+    expect(handed.downtimeNo).not.toBeNull()
+    expect((await vehicle('VEH-003')).status).toBe('immobilized')
+    expect((await handOver(no)).status).toBe(409)
+    expect(
+      (await send(`/${no}/labour`, { technicianNo: 'UCT-008', hours: 1 }, 'MNT001')).status
+    ).toBe(409)
+    expect(
+      (await send(`/${no}/complete`, { workDone: 'Fait au garage.', odometerKm: 201_300 })).status
+    ).toBe(409)
+  })
+
+  it('stop the downtime at the return, then validate or send the job back', async () => {
+    const { no } = (await declare()).data.data as WorkOrderApi
+    await send(`/${no}/diagnose`, diagnosis)
+    await handOver(no)
+    expect(
+      (
+        await send(`/${no}/external-progress`, {
+          progress: 'Pièce commandée.',
+          quoteAmount: 1_500_000
+        })
+      ).data.data
+    ).toMatchObject({ subcontractingCost: 1_500_000 })
+
+    const back = (body: Record<string, unknown>) =>
+      send(
+        `/${no}/return`,
+        {
+          returnedAt: `${DEMO_REFERENCE_DATE}T09:30`,
+          workDone: 'Injecteur remplacé par le garage.',
+          odometerKm: 201_310,
+          finalAmount: 1_450_000,
+          ...body
+        },
+        'MNT001'
+      )
+    expect((await back({ returnedAt: `${DEMO_REFERENCE_DATE}T07:00` })).status).toBe(422)
+    const returned = (await back({})).data.data as WorkOrderApi
+    expect(returned).toMatchObject({ status: 'awaiting_validation', subcontractingCost: 1_450_000 })
+    const downtime = await get<DowntimeApi>(`/maintenance/downtimes/${returned.downtimeNo}`)
+    expect(downtime).toMatchObject({ status: 'closed', endedAt: `${DEMO_REFERENCE_DATE}T09:30:00` })
+    expect((await vehicle('VEH-003')).status).not.toBe('immobilized')
+    expect((await send(`/${no}/external-progress`, { progress: 'Encore ?' })).status).toBe(409)
+
+    const refused = (
+      await send(`/${no}/refuse`, { reason: 'Le moteur fume toujours au démarrage.' })
+    ).data.data as WorkOrderApi
+    expect(refused).toMatchObject({ status: 'in_progress' })
+    expect(refused.external?.returnedAt).toBeNull()
+    expect(refused.downtimeNo).not.toBe(returned.downtimeNo)
+    expect((await vehicle('VEH-003')).status).toBe('immobilized')
+
+    await back({ returnedAt: undefined })
+    expect((await send(`/${no}/validate`)).data.data).toMatchObject({ status: 'closed' })
   })
 })

@@ -66,6 +66,20 @@ const tableColumns = computed<TableColumn[]>(() => [
     formatter: formatDecimal
   },
   {
+    sortKey: 'providerName',
+    label: t('maintenance.workOrders.col.providerName'),
+    minW: '180px',
+    defaultHidden: true
+  },
+  {
+    sortKey: 'subcontractingCost',
+    label: t('maintenance.workOrders.col.subcontractingCost'),
+    minW: '130px',
+    align: 'right',
+    defaultHidden: true,
+    formatter: formatInteger
+  },
+  {
     sortKey: 'totalCost',
     label: t('maintenance.workOrders.col.totalCost'),
     minW: '120px',

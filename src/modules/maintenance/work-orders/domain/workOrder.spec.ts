@@ -4,7 +4,9 @@ import {
   downtimeRoleOf,
   fourEyesBlock,
   immobilizesOnDeclaration,
+  isAtExternalWorkshop,
   labourHours,
+  subcontractingCost,
   workOrderStatus
 } from './workOrder'
 
@@ -77,5 +79,22 @@ describe('fourEyesBlock', () => {
 describe('labourHours', () => {
   it('adds the logged hours', () => {
     expect(labourHours([{ hours: 2.5 }, { hours: 1.25 }])).toBe(3.75)
+  })
+})
+
+describe('external workshop', () => {
+  const external = { quoteAmount: 400, finalAmount: null, returnedAt: null }
+
+  it('is at the garage until the vehicle is back', () => {
+    expect(isAtExternalWorkshop({ external: null })).toBe(false)
+    expect(isAtExternalWorkshop({ external })).toBe(true)
+    expect(isAtExternalWorkshop({ external: { returnedAt: '2026-09-01T10:00' } })).toBe(false)
+  })
+
+  it('costs the final invoice once known, else the quote', () => {
+    expect(subcontractingCost(null)).toBe(0)
+    expect(subcontractingCost(external)).toBe(400)
+    expect(subcontractingCost({ ...external, finalAmount: 450 })).toBe(450)
+    expect(subcontractingCost({ quoteAmount: null, finalAmount: null })).toBe(0)
   })
 })

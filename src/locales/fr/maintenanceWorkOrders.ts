@@ -72,5 +72,18 @@ export default {
   'maintenance.workOrders.dialog.odometerAtOpening': "À l'ouverture : {km} km.",
   'maintenance.workOrders.dialog.validateHint':
     "La validation clôt l'ordre et remet le véhicule en service.",
-  'maintenance.workOrders.dialog.reason': 'Motif'
+  'maintenance.workOrders.dialog.reason': 'Motif',
+  'maintenance.workOrders.col.providerName': 'Atelier externe',
+  'maintenance.workOrders.col.subcontractingCost': 'Sous-traitance',
+  'maintenance.workOrders.section.external': 'Atelier externe',
+  'maintenance.workOrders.action.handOver': 'Confier à un garage',
+  'maintenance.workOrders.action.followUp': 'Suivi du garage',
+  'maintenance.workOrders.action.return': 'Retour du garage',
+  'maintenance.workOrders.dialog.garage': 'Garage',
+  'maintenance.workOrders.dialog.handedOverAt': 'Remis le',
+  'maintenance.workOrders.dialog.expectedReturnOn': 'Retour prévu le',
+  'maintenance.workOrders.dialog.quoteAmount': 'Montant du devis',
+  'maintenance.workOrders.dialog.progress': 'Avancement',
+  'maintenance.workOrders.dialog.returnedAt': 'Revenu le',
+  'maintenance.workOrders.dialog.finalAmount': 'Montant final'
 }
