@@ -405,7 +405,7 @@ Elles sont appliquées par le backend simulé (`src/mocks/handlers/fleet/`), com
 | Phase | Branchement prévu |
 |---|---|
 | 3. Maintenance | Fait : causes `maintenance` et `service` dans `vehicleStatus` ; ordre de travail ouvert depuis un sinistre, une check-list, une visite ou un défaut télématique (§ 12) |
-| 4. Planification | Ordres de transport qui référencent un trajet ; famille « qualité de livraison » du score conducteur |
+| 4. Planification | Fait : l'ordre référence le trajet (§ 13) ; la famille « qualité de livraison » lit les contestations de cet ordre |
 
 ## 12. Le domaine maintenance
 
@@ -472,5 +472,58 @@ L'historique importé compte dans les coûts, pas dans la fiabilité. Les km d'u
 
 | Phase | Branchement prévu |
 |---|---|
-| 4. Planification | La disponibilité d'un véhicule pour un transport lit `vehicleStatus`, qui inclut déjà les causes de maintenance ; un ordre de transport ne recopie pas l'état de l'atelier |
+| 4. Planification | Fait (§ 13) : la disponibilité d'un véhicule pour un transport lit `vehicleStatus` ; l'ordre ne recopie pas l'état de l'atelier |
 | 5. Réglages restants | Les réglages de l'atelier sont déjà dans `maintenance-settings` ; seuls les paramètres transverses restent à migrer |
+
+## 13. Le domaine planification
+
+Le domaine `planning` couvre la demande de livraison, l'ordre de transport et ce qui suit jusqu'à la facture. Il a un seul menu « Planification ». La flotte garde le trajet (véhicule, conducteur, départ, compteur). L'ordre référence ce trajet, ou un transporteur, et porte les lignes, le chargement, l'exécution et l'argent.
+
+### Entités et responsabilités
+
+| Groupe | Entités (`src/modules/planning/`) |
+|---|---|
+| Pilotage | `reports` (tableau de bord et rapport des transporteurs, un calcul par indicateur) |
+| Ordres | `delivery-requests`, `transport-orders`, `customer-confirmations`, `loading`, `execution`, `reception`, `closing` |
+| Qualité | `delivery-quality` (protêts, parts, retenues, avoirs) |
+| Factures | `customer-billing`, `carrier-invoices` |
+| Carburant | `fuel-tours` (compartiments, bon d'enlèvement, BSL, bons de livraison) |
+| Référentiels | `customers`, `delivery-points`, `products`, `product-compatibilities`, `quantity-tolerances`, `transport-tariffs`, `reasons` |
+| Réglages | `planning-settings` : horaires, confirmation tacite, marchandises, demandes, quantités et volume à 15 °C, facturation, documents de clôture |
+
+Trois choix structurent le domaine :
+- **L'ordre n'est pas le trajet.** Un trajet de flotte porte plusieurs ordres. Un transporteur n'a pas de trajet. Le départ de la flotte se lit sur le statut du trajet ; le départ d'un transporteur est un fait de l'ordre.
+- **Le statut se lit.** Brouillon, planifié, confirmé, prêt, en cours, livré, clôturé, annulé : `transportOrderStatus`. Une ligne est réglée quand elle est déclarée, refusée ou sortie de la tournée. Un report simple ne la règle pas.
+- **Rien ne se recopie.** Le tarif, la retenue, le volume à 15 °C et les indicateurs se calculent. Le montant d'une facture client et le montant convenu d'une facture transporteur sont figés au moment où on les marque.
+
+### Statuts dérivés
+
+| Statut | Fonction | Déduit de |
+|---|---|---|
+| Demande | `deliveryRequestStatus` | lien vers un ordre, rejet, annulation, date dépassée |
+| Ordre | `transportOrderStatus` | moyens, confirmations, chargement, départ, lignes réglées, clôture |
+| Protêt | `protestStatus` | émission, clôture |
+| Facture transporteur | `carrierInvoiceStatus` | validation, refus |
+
+### Règles qui traversent plusieurs entités
+
+- **Planifier.** Depuis le brouillon, flotte (nouveau trajet ou groupage sur un trajet `planned`) ou transporteur autorisé. Disponibilité sur la fenêtre, capacité, pompe, types acceptés, produits incompatibles. Une demande prise reçoit `transportOrderNo`.
+- **Replanifier.** Accepter une date ou un reliquat crée une nouvelle demande en attente. Les moyens ne sont pas repris.
+- **Réception.** Confirmation nommée, ou contestation puis traitement. Le silence au-delà du délai tacite atteste la réception, pour la facture et pour la clôture.
+- **Clôture.** `closingBlocks` est la seule liste : ordre livré, réception attestée, contestation traitée, protêt clôturé, écart qualifié, documents exigés déposés par `POST /files`. Le compteur reste sur le trajet.
+- **Facture client.** `applicableTariff`, distance de référence de l'itinéraire. Un forfait est partagé entre les livraisons du client (`flatShare`). L'avoir est déduit. La référence est unique avec les avoirs.
+- **Facture transporteur.** Une seule, groupée (`CI-AAAA-####`). Le montant convenu, retenues déduites, est figé à la validation. Hors tolérance, elle est refusée. Sans tarif, un motif et le droit d'exécution sont exigés. Valider fige les parts de responsabilité.
+- **Carburant.** `volumeAt15` et `planIssue`. La validation émet le bon d'enlèvement, un bon par compartiment, et un ordre par citerne.
+- **Périmètre.** `inPerimeter` filtre les listes d'ordres et de demandes, le tableau de bord et les rapports, à partir des dépôts et des régions des sites de la flotte. Vide, il ne filtre pas.
+
+### Branchements flotte
+
+- L'état de flotte lit le trajet, et y ajoute les ordres dont `tripNo` est ce trajet.
+- Le score conducteur a une famille « qualité de livraison » : une contestation non traitée sur un ordre de ses trajets retire des points.
+- Le rapport de synthèse liste, pour chaque trajet terminé, les ordres liés.
+
+### Points d'extension pour la phase suivante
+
+| Phase | Branchement prévu |
+|---|---|
+| 5. Libre-service | Les pages publiques (suivi, confirmation, contestation, satisfaction) et l'espace conducteur consomment les mêmes actions. Les jetons de suivi existent déjà (`trackingToken`). La phase 5 ne redéfinit pas les règles. |
