@@ -17,6 +17,7 @@ import { registerReceptionHandlers } from './reception'
 import { registerDeliveryQualityHandlers } from './deliveryQuality'
 import { registerClosingHandlers } from './closing'
 import { registerCustomerBillingHandlers } from './customerBilling'
+import { registerCarrierInvoiceHandlers } from './carrierInvoices'
 
 export function registerPlanningHandlers(router: MockRouter, db: MockDatabase): void {
   registerPlanningSettingsHandlers(router, db)
@@ -36,4 +37,5 @@ export function registerPlanningHandlers(router: MockRouter, db: MockDatabase): 
   registerDeliveryQualityHandlers(router, db)
   registerClosingHandlers(router, db)
   registerCustomerBillingHandlers(router, db)
+  registerCarrierInvoiceHandlers(router, db)
 }

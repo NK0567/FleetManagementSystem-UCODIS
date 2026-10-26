@@ -89,5 +89,6 @@ export default {
   'nav.loading': 'Loading',
   'nav.deliveryQuality': 'Delivery quality',
   'nav.customerBilling': 'Customer billing',
+  'nav.carrierInvoices': 'Carrier invoices',
   'nav.deliveryRequests': 'Delivery requests'
 }

@@ -69,7 +69,8 @@ export const MODULE_TOGGLE_CATALOG: readonly ModuleToggleDefinition[] = [
   { no: 'customer-confirmation', group: 'planning', order: 320, features: ['CUSTOMERCONFIRMATION'] },
   { no: 'loading-control', group: 'planning', order: 330, features: ['LOADING'] },
   { no: 'delivery-quality', group: 'planning', order: 340, features: ['DELIVERYQUALITY'] },
-  { no: 'customer-billing', group: 'planning', order: 350, features: ['CUSTOMERBILLING'] }
+  { no: 'customer-billing', group: 'planning', order: 350, features: ['CUSTOMERBILLING'] },
+  { no: 'carrier-invoices', group: 'planning', order: 360, features: ['CARRIERINVOICE'] }
 ]
 
 export const moduleTogglesCollection: CollectionDefinition<ModuleToggleRow> = {

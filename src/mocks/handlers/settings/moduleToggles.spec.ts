@@ -19,7 +19,7 @@ describe('module toggle endpoints', () => {
       response.data.data as { items: { no: string; active: boolean; group: string }[] }
     ).items
 
-    expect(items).toHaveLength(26)
+    expect(items).toHaveLength(27)
     expect(items[0]).toMatchObject({ no: 'live-map', group: 'fleet', active: true })
     expect(items.every((item) => item.active)).toBe(true)
   })

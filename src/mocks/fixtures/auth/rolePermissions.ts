@@ -108,7 +108,8 @@ const PLANNING_OPERATIONS = [
   'CUSTOMERCONFIRMATION',
   'LOADING',
   'DELIVERYQUALITY',
-  'CUSTOMERBILLING'
+  'CUSTOMERBILLING',
+  'CARRIERINVOICE'
 ]
 /** Planning rights replace the old role lists of the planning settings. */
 const PLANNING_MANAGEMENT: Record<string, Grant> = {

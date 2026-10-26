@@ -76,11 +76,12 @@ import { quantityTolerancesCollection } from '../fixtures/planning/quantityToler
 import { transportTariffsCollection } from '../fixtures/planning/transportTariffs'
 import { deliveryRequestsCollection } from '../fixtures/planning/deliveryRequests'
 import { transportOrdersCollection } from '../fixtures/planning/transportOrders'
+import { carrierInvoicesCollection } from '../fixtures/planning/carrierInvoices'
 import { createCollection, type CollectionContext } from './collection'
 import { clearStoredCollections } from './storage'
 
 /** Bump when fixtures change shape: every collection is then reseeded. */
-export const MOCK_SEED_VERSION = 46
+export const MOCK_SEED_VERSION = 47
 
 export function createDatabase(
   context: CollectionContext = {
@@ -165,7 +166,8 @@ export function createDatabase(
     quantityTolerances: createCollection(quantityTolerancesCollection, context),
     transportTariffs: createCollection(transportTariffsCollection, context),
     deliveryRequests: createCollection(deliveryRequestsCollection, context),
-    transportOrders: createCollection(transportOrdersCollection, context)
+    transportOrders: createCollection(transportOrdersCollection, context),
+    carrierInvoices: createCollection(carrierInvoicesCollection, context)
   }
 
   return {

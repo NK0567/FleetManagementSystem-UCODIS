@@ -32,6 +32,7 @@ declare module 'vue' {
     CardModalShell: typeof import('./components/shared/CardModalShell.vue')['default']
     CardStatusPill: typeof import('./modules/fleet/fuel-cards/components/CardStatusPill.vue')['default']
     CardTitle: typeof import('./components/ui/card/CardTitle.vue')['default']
+    CarrierInvoicesPage: typeof import('./modules/planning/carrier-invoices/pages/CarrierInvoicesPage.vue')['default']
     CheckPointCard: typeof import('./modules/fleet/check-points/pages/CheckPointCard.vue')['default']
     CheckPointCreateModal: typeof import('./modules/fleet/check-points/pages/CheckPointCreateModal.vue')['default']
     CheckPointForm: typeof import('./modules/fleet/check-points/components/CheckPointForm.vue')['default']

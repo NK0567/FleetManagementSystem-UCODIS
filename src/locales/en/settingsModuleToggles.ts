@@ -90,5 +90,8 @@ export default {
     'Protest notes, responsibility shares, withholdings on the carrier invoice and credit notes to the customer.',
   'settings.moduleToggles.item.customer-billing.label': 'Customer billing',
   'settings.moduleToggles.item.customer-billing.description':
-    'Prices each delivered line and marks the invoice: the amount and the reference no longer change.'
+    'Prices each delivered line and marks the invoice: the amount and the reference no longer change.',
+  'settings.moduleToggles.item.carrier-invoices.label': 'Carrier invoices',
+  'settings.moduleToggles.item.carrier-invoices.description':
+    'One invoice can cover several orders. The agreed amount, net of withholdings, is frozen at validation.'
 }

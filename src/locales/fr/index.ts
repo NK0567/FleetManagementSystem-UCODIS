@@ -88,6 +88,7 @@ import planningConfirmations from './planningConfirmations'
 import planningLoading from './planningLoading'
 import planningQuality from './planningQuality'
 import planningBilling from './planningBilling'
+import planningCarrierInvoices from './planningCarrierInvoices'
 export default {
   ...common,
   ...auth,
@@ -177,5 +178,6 @@ export default {
   ...planningConfirmations,
   ...planningLoading,
   ...planningQuality,
-  ...planningBilling
+  ...planningBilling,
+  ...planningCarrierInvoices
 }

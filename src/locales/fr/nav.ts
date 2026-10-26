@@ -89,5 +89,6 @@ export default {
   'nav.loading': 'Chargement',
   'nav.deliveryQuality': 'Qualité de livraison',
   'nav.customerBilling': 'Facturation client',
+  'nav.carrierInvoices': 'Factures transporteurs',
   'nav.deliveryRequests': 'Demandes de livraison'
 }

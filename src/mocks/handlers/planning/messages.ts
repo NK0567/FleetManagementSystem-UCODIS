@@ -500,5 +500,45 @@ export const PLANNING_MESSAGES = {
   billingReference: {
     fr: 'Cette référence est déjà utilisée par une facture ou un avoir.',
     en: 'This reference is already used by an invoice or a credit note.'
+  },
+  carrierInvoiceNotCarrier: {
+    fr: 'Seuls les transporteurs reçoivent une facture de transport.',
+    en: 'Only carriers receive a transport invoice.'
+  },
+  carrierInvoiceDate: {
+    fr: 'La date de la facture ne peut pas être dans le futur.',
+    en: 'The invoice date cannot be in the future.'
+  },
+  carrierInvoiceOrders: {
+    fr: 'Cochez au moins un ordre couvert par la facture.',
+    en: 'Tick at least one order covered by the invoice.'
+  },
+  carrierInvoiceReference: {
+    fr: 'Ce numéro de facture est déjà enregistré pour ce transporteur.',
+    en: 'This invoice number is already recorded for this carrier.'
+  },
+  carrierInvoiceOrder: {
+    fr: 'Cet ordre n’a pas été confié à ce transporteur.',
+    en: 'This order was not entrusted to this carrier.'
+  },
+  carrierInvoiceCovered: {
+    fr: 'Cet ordre figure déjà dans la facture {no}.',
+    en: 'This order is already on invoice {no}.'
+  },
+  carrierInvoiceClosed: {
+    fr: 'Cette facture a déjà été contrôlée.',
+    en: 'This invoice has already been checked.'
+  },
+  carrierInvoiceNotDone: {
+    fr: 'Seules les expéditions réellement effectuées se paient.',
+    en: 'Only expeditions that were actually carried out are paid.'
+  },
+  carrierInvoiceOutside: {
+    fr: 'Le montant facturé s’écarte du montant convenu au-delà de la tolérance.',
+    en: 'The invoiced amount differs from the agreed amount beyond the tolerance.'
+  },
+  carrierInvoiceReason: {
+    fr: 'Sans tarif, la validation exige un motif.',
+    en: 'Without a tariff, validation requires a reason.'
   }
 } satisfies Record<string, LocalizedText>

@@ -90,5 +90,8 @@ export default {
     'Protêts, parts de responsabilité, retenues sur la facture du transporteur et avoirs au client.',
   'settings.moduleToggles.item.customer-billing.label': 'Facturation client',
   'settings.moduleToggles.item.customer-billing.description':
-    'Valorise chaque livraison livrée et marque la facture : le montant et la référence ne changent plus.'
+    'Valorise chaque livraison livrée et marque la facture : le montant et la référence ne changent plus.',
+  'settings.moduleToggles.item.carrier-invoices.label': 'Factures transporteurs',
+  'settings.moduleToggles.item.carrier-invoices.description':
+    'Une facture peut couvrir plusieurs ordres. Le montant convenu, retenues déduites, est figé à la validation.'
 }
