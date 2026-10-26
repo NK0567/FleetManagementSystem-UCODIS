@@ -214,6 +214,14 @@ export const ROLE_PERMISSIONS: Record<UserProfileCode, Record<string, Grant>> = 
     ...grant(PLANNING_REFERENCE, READ),
     LOADING: allRecords(['read', 'update', 'execute'])
   },
-  DRIVER: {},
-  DRIVER_ASSISTANT: {}
+  DRIVER: {
+    MYSPACE: allRecords(['read', 'execute']),
+    LEAVEBALANCE: ownRecords(['read']),
+    LEAVEREQUEST: ownRecords(['read', 'insert'])
+  },
+  DRIVER_ASSISTANT: {
+    MYSPACE: allRecords(['read']),
+    LEAVEBALANCE: ownRecords(['read']),
+    LEAVEREQUEST: ownRecords(['read', 'insert'])
+  }
 }

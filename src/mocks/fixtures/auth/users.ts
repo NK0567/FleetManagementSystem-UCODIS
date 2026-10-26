@@ -108,7 +108,7 @@ export const MOCK_ACCOUNTS: readonly MockAccount[] = [
     employeeNo: 'UCT-012',
     orgUnitNo: 'CND',
     language: 'fr',
-    landingRoute: '/self-service',
+    landingRoute: '/me',
     active: true
   },
   {
@@ -119,7 +119,7 @@ export const MOCK_ACCOUNTS: readonly MockAccount[] = [
     employeeNo: 'UCT-011',
     orgUnitNo: 'CND',
     language: 'fr',
-    landingRoute: '/self-service',
+    landingRoute: '/me',
     active: true
   },
   {
@@ -130,7 +130,7 @@ export const MOCK_ACCOUNTS: readonly MockAccount[] = [
     employeeNo: 'UCT-018',
     orgUnitNo: 'CND',
     language: 'fr',
-    landingRoute: '/self-service',
+    landingRoute: '/me',
     active: false
   },
   {
@@ -141,7 +141,7 @@ export const MOCK_ACCOUNTS: readonly MockAccount[] = [
     employeeNo: 'UCT-020',
     orgUnitNo: 'CND',
     language: 'fr',
-    landingRoute: '/self-service',
+    landingRoute: '/me',
     active: true
   }
 ]

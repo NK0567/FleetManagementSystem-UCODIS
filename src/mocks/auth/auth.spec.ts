@@ -76,8 +76,12 @@ describe('role permissions', () => {
     expect(permission(permissionsFor('ADMIN'), 'EMPLOYEE')?.delete).toBe(false)
   })
 
-  it('gives field profiles no HR feature', () => {
-    expect(permissionsFor('DRIVER')).toEqual([])
+  it('gives field profiles their own space and their own leave, nothing else in HR', () => {
+    expect(permission(permissionsFor('DRIVER'), 'MYSPACE')?.execute).toBe(true)
+    expect(permission(permissionsFor('DRIVER_ASSISTANT'), 'MYSPACE')?.execute).toBe(false)
+    expect(permission(permissionsFor('DRIVER'), 'LEAVEREQUEST')?.insert).toBe(true)
+    expect(permission(permissionsFor('DRIVER'), 'LEAVEREQUEST')?.execute).toBe(false)
+    expect(permission(permissionsFor('DRIVER'), 'EMPLOYEE')).toBeUndefined()
   })
 
   it('removes the features of a disabled module toggle', () => {

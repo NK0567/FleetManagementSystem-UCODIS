@@ -220,6 +220,8 @@ declare module 'vue' {
     MaintenanceSettingsPage: typeof import('./modules/maintenance/maintenance-settings/pages/MaintenanceSettingsPage.vue')['default']
     MapPointPicker: typeof import('./components/shared/MapPointPicker.vue')['default']
     MapView: typeof import('./components/shared/MapView.vue')['default']
+    MeAbsencesPage: typeof import('./modules/self-service/pages/MeAbsencesPage.vue')['default']
+    MePage: typeof import('./modules/self-service/pages/MePage.vue')['default']
     MissingDocumentsList: typeof import('./modules/fleet/documents/pages/MissingDocumentsList.vue')['default']
     MissionTypeCard: typeof import('./modules/maintenance/mission-types/pages/MissionTypeCard.vue')['default']
     MissionTypeCreateModal: typeof import('./modules/maintenance/mission-types/pages/MissionTypeCreateModal.vue')['default']
