@@ -88,9 +88,11 @@ onMounted(async () => {
         <ul class="space-y-1">
           <li v-for="balance in profile.balances" :key="balance.leaveTypeNo">
             {{
-              t('selfService.profile.balance', balance.remainingDays, {
-                name: balance.leaveTypeName
-              })
+              t(
+                'selfService.profile.balance',
+                { name: balance.leaveTypeName, count: balance.remainingDays },
+                balance.remainingDays
+              )
             }}
           </li>
         </ul>
