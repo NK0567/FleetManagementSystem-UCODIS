@@ -54,6 +54,7 @@ declare module 'vue' {
     CompetenceCreateModal: typeof import('./modules/maintenance/competences/pages/CompetenceCreateModal.vue')['default']
     CompetenceForm: typeof import('./modules/maintenance/competences/components/CompetenceForm.vue')['default']
     CompetencesList: typeof import('./modules/maintenance/competences/pages/CompetencesList.vue')['default']
+    ConfirmationsPage: typeof import('./modules/planning/customer-confirmations/pages/ConfirmationsPage.vue')['default']
     ConfirmDialog: typeof import('./components/shared/ConfirmDialog.vue')['default']
     CouplingCard: typeof import('./modules/fleet/couplings/pages/CouplingCard.vue')['default']
     CouplingCreateModal: typeof import('./modules/fleet/couplings/pages/CouplingCreateModal.vue')['default']

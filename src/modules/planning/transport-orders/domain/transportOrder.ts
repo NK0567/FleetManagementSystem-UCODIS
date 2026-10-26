@@ -1,6 +1,12 @@
 import type { LoadCapacity } from '@/modules/fleet/vehicles/domain/capacity'
 
-export const TRANSPORT_ORDER_STATUSES = ['draft', 'planned', 'in_progress', 'cancelled'] as const
+export const TRANSPORT_ORDER_STATUSES = [
+  'draft',
+  'planned',
+  'confirmed',
+  'in_progress',
+  'cancelled'
+] as const
 export type TransportOrderStatus = (typeof TRANSPORT_ORDER_STATUSES)[number]
 
 export const TRANSPORT_MEANS = ['fleet', 'carrier'] as const
@@ -10,6 +16,8 @@ export const TRANSPORT_ORDER_EVENT_KINDS = [
   'created',
   'lines_changed',
   'planned',
+  'confirmed',
+  'replanned',
   'cancelled'
 ] as const
 export type TransportOrderEventKind = (typeof TRANSPORT_ORDER_EVENT_KINDS)[number]
@@ -22,6 +30,8 @@ export interface TransportOrderFacts {
   means: TransportMeans | null
   /** Status of the fleet trip, when the order has one. */
   tripStatus: string | null
+  /** Every line still in the tour has been confirmed. */
+  linesConfirmed?: boolean
 }
 
 /**
@@ -33,6 +43,7 @@ export function transportOrderStatus(order: TransportOrderFacts): TransportOrder
   if (order.means === 'fleet' && order.tripStatus && TRIP_DEPARTED.includes(order.tripStatus)) {
     return 'in_progress'
   }
+  if (order.means && order.linesConfirmed) return 'confirmed'
   if (order.means) return 'planned'
   return 'draft'
 }

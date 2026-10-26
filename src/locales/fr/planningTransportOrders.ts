@@ -88,6 +88,8 @@ export default {
   'planning.transportOrders.history.created': 'Créé',
   'planning.transportOrders.history.lines_changed': 'Lignes modifiées',
   'planning.transportOrders.history.planned': 'Planifié',
+  'planning.transportOrders.history.confirmed': 'Destinataires confirmés',
+  'planning.transportOrders.history.replanned': 'Ligne replanifiée',
   'planning.transportOrders.history.cancelled': 'Annulé',
 
   'planning.transportOrders.createDialog.title': 'Créer un ordre depuis des demandes',

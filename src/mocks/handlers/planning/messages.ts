@@ -252,5 +252,29 @@ export const PLANNING_MESSAGES = {
   orderCarrierNotAuthorized: {
     fr: 'Ce transporteur n’est plus autorisé.',
     en: 'This carrier is no longer authorized.'
+  },
+  confirmationClosed: {
+    fr: 'On ne confirme les destinataires qu’une fois l’ordre planifié, et avant le départ.',
+    en: 'Recipients are confirmed only once the order is planned, and before it leaves.'
+  },
+  confirmationLineMissing: {
+    fr: 'Cette ligne n’est pas sur l’ordre.',
+    en: 'This line is not on the order.'
+  },
+  confirmationOutOfTour: {
+    fr: 'Cette ligne n’est plus dans la tournée.',
+    en: 'This line is no longer in the tour.'
+  },
+  confirmationAlreadyReplanned: {
+    fr: 'Cette ligne est déjà repartie dans les demandes à planifier.',
+    en: 'This line has already gone back to the requests waiting to be planned.'
+  },
+  confirmationDateMissing: {
+    fr: 'Indiquez la date retenue pour replanifier.',
+    en: 'Give the date kept for replanning.'
+  },
+  confirmationNeedsOrderer: {
+    fr: 'Cette ligne n’a pas de donneur d’ordre : elle ne peut pas revenir dans les demandes.',
+    en: 'This line has no orderer: it cannot go back to the requests.'
   }
 } satisfies Record<string, LocalizedText>

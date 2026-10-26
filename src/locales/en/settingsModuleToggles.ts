@@ -78,5 +78,8 @@ export default {
   'settings.moduleToggles.group.planning': 'Planning',
   'settings.moduleToggles.item.delivery-requests.label': 'Delivery requests',
   'settings.moduleToggles.item.delivery-requests.description':
-    'Sales staff enter or import their customers’ requests. Without this module, the planner creates orders directly.'
+    'Sales staff enter or import their customers’ requests. Without this module, the planner creates orders directly.',
+  'settings.moduleToggles.item.customer-confirmation.label': 'Recipient confirmation',
+  'settings.moduleToggles.item.customer-confirmation.description':
+    'The call agent confirms deliveries, records unavailability and sends a line back to the requests waiting to be planned.'
 }

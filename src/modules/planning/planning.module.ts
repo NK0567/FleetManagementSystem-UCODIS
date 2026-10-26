@@ -7,6 +7,7 @@ export function registerPlanningModule(): void {
   registerFeatureRoutes({
     DELIVERYREQUEST: { to: '/planning/delivery-requests', menuKey: 'deliveryRequest' },
     TRANSPORTORDER: { to: '/planning/transport-orders', menuKey: 'transportOrder' },
+    CUSTOMERCONFIRMATION: { to: '/planning/confirmations', menuKey: 'customerConfirmation' },
     CUSTOMER: { to: '/planning/customers', menuKey: 'customer' },
     DELIVERYPOINT: { to: '/planning/delivery-points', menuKey: 'deliveryPoint' },
     PRODUCT: { to: '/planning/products', menuKey: 'product' },
@@ -28,6 +29,11 @@ export function registerPlanningModule(): void {
         labelKey: 'nav.transportOrders',
         to: '/planning/transport-orders',
         menuKey: 'transportOrder'
+      },
+      {
+        labelKey: 'nav.customerConfirmations',
+        to: '/planning/confirmations',
+        menuKey: 'customerConfirmation'
       },
       {
         labelKey: 'nav.deliveryRequests',

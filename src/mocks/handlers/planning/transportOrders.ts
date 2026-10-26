@@ -22,6 +22,12 @@ import type {
   TransportOrderApi,
   TransportOrderLineApi
 } from '@/modules/planning/transport-orders/types/transportOrder.types'
+import {
+  emptyFollowUp,
+  linesConfirmed,
+  opaqueToken,
+  trackingExpiry
+} from '@/modules/planning/customer-confirmations/domain/confirmation'
 import { combinationCapacity, type LoadCapacity } from '@/modules/fleet/vehicles/domain/capacity'
 import { nowIsoDateTime, todayIso } from '@/utils/date'
 import type { MockDatabase } from '../../db/database'
@@ -148,7 +154,8 @@ export function transportOrdersApi(db: MockDatabase): TransportOrderApi[] {
       status: transportOrderStatus({
         cancelledAt: row.cancelledAt,
         means: row.means,
-        tripStatus: trip?.status ?? null
+        tripStatus: trip?.status ?? null,
+        linesConfirmed: linesConfirmed(row.lines)
       }),
       createdAt: row.createdAt,
       createdBy: row.createdBy,
@@ -179,7 +186,8 @@ function statusOf(db: MockDatabase, row: TransportOrderRow) {
   return transportOrderStatus({
     cancelledAt: row.cancelledAt,
     means: row.means,
-    tripStatus: trip?.status ?? null
+    tripStatus: trip?.status ?? null,
+    linesConfirmed: linesConfirmed(row.lines)
   })
 }
 
@@ -297,7 +305,8 @@ function resolveLines(
         deliveryPointNo: request.deliveryPointNo,
         productNo: request.productNo,
         quantity: request.quantity,
-        weightKg: request.weightKg
+        weightKg: request.weightKg,
+        ...emptyFollowUp()
       }
     }
     assertActiveGoods(db, raw.deliveryPointNo, raw.productNo)
@@ -307,9 +316,38 @@ function resolveLines(
       deliveryPointNo: raw.deliveryPointNo,
       productNo: raw.productNo,
       quantity: raw.quantity,
-      weightKg: raw.weightKg
+      weightKg: raw.weightKg,
+      ...emptyFollowUp()
     }
   })
+}
+
+function keepFollowUp(
+  previous: readonly TransportOrderLineRow[],
+  lines: TransportOrderLineRow[]
+): TransportOrderLineRow[] {
+  return lines.map((line) => {
+    const kept = line.deliveryRequestNo
+      ? previous.find((item) => item.deliveryRequestNo === line.deliveryRequestNo)
+      : undefined
+    if (!kept) return line
+    return {
+      ...kept,
+      lineNo: line.lineNo,
+      deliveryPointNo: line.deliveryPointNo,
+      productNo: line.productNo,
+      quantity: line.quantity,
+      weightKg: line.weightKg
+    }
+  })
+}
+
+function issueTokens(lines: readonly TransportOrderLineRow[]): TransportOrderLineRow[] {
+  return lines.map((line) =>
+    line.trackingToken
+      ? line
+      : { ...line, trackingToken: opaqueToken(), trackingExpiresOn: trackingExpiry(todayIso()) }
+  )
 }
 
 function syncRequests(
@@ -556,7 +594,7 @@ export function registerTransportOrdersHandlers(router: MockRouter, db: MockData
     (request) => {
       const order = orderOf(request)
       if (!canEditLines(statusOf(db, order))) throw conflict(PLANNING_MESSAGES.orderLinesLocked)
-      const lines = resolveLines(db, order.no, readLines(readBody(request)))
+      const lines = keepFollowUp(order.lines, resolveLines(db, order.no, readLines(readBody(request))))
       if (order.means === 'fleet' && order.tripNo) {
         const trip = db.trips.findOrFail(order.tripNo)
         assertServed(db, tripLines(db, trip.no, order.no, lines), trip.vehicleNo, trip.trailerNo)
@@ -652,6 +690,7 @@ function planNewTrip(
     means: 'fleet',
     tripNo: trip.no,
     ...blankCarrier(),
+    lines: issueTokens(order.lines),
     events: [...order.events, eventOf(request, 'planned', trip.no)]
   }
 }
@@ -672,6 +711,7 @@ function planOnTrip(
     routeTemplateNo: trip.routeTemplateNo,
     plannedDeparture: trip.plannedDeparture,
     ...blankCarrier(),
+    lines: issueTokens(order.lines),
     events: [...order.events, eventOf(request, 'planned', trip.no)]
   }
 }
@@ -694,6 +734,7 @@ function planCarrier(
     carrierNo,
     carrierVehiclePlate: readLimited(body, 'carrierVehiclePlate', 20),
     carrierDriverName: readLimited(body, 'carrierDriverName', 80),
+    lines: issueTokens(order.lines),
     events: [...order.events, eventOf(request, 'planned', carrierNo)]
   }
 }

@@ -2,10 +2,14 @@ import type {
   TransportMeans,
   TransportOrderEventKind
 } from '@/modules/planning/transport-orders/domain/transportOrder'
+import {
+  emptyFollowUp,
+  type LineFollowUp
+} from '@/modules/planning/customer-confirmations/domain/confirmation'
 import type { CollectionDefinition, MockRow } from '../../db/collection'
 import { seedAudit } from '../seedAudit'
 
-export interface TransportOrderLineRow {
+export interface TransportOrderLineRow extends LineFollowUp {
   lineNo: number
   deliveryRequestNo: string | null
   deliveryPointNo: string
@@ -51,7 +55,8 @@ const line = (
   deliveryPointNo,
   productNo,
   quantity,
-  weightKg
+  weightKg,
+  ...emptyFollowUp()
 })
 
 const event = (at: string, kind: TransportOrderEventKind, detail = ''): TransportOrderEventRow => ({

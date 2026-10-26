@@ -55,6 +55,7 @@ export const PLANNING_OPTION_SETS: Record<string, Record<string, LocalizedText>>
   transportOrderStatus: {
     draft: { fr: 'Brouillon', en: 'Draft' },
     planned: { fr: 'Planifié', en: 'Planned' },
+    confirmed: { fr: 'Confirmé', en: 'Confirmed' },
     in_progress: { fr: 'En cours', en: 'In progress' },
     cancelled: { fr: 'Annulé', en: 'Cancelled' }
   },

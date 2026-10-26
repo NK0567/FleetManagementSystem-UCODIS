@@ -84,6 +84,7 @@ import planningQuantityTolerances from './planningQuantityTolerances'
 import planningTransportTariffs from './planningTransportTariffs'
 import planningDeliveryRequests from './planningDeliveryRequests'
 import planningTransportOrders from './planningTransportOrders'
+import planningConfirmations from './planningConfirmations'
 export default {
   ...common,
   ...auth,
@@ -169,5 +170,6 @@ export default {
   ...planningQuantityTolerances,
   ...planningTransportTariffs,
   ...planningDeliveryRequests,
-  ...planningTransportOrders
+  ...planningTransportOrders,
+  ...planningConfirmations
 }

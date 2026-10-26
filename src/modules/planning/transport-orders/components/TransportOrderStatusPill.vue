@@ -9,6 +9,7 @@ const props = defineProps<{ status: TransportOrderStatus }>()
 const TONES: Record<TransportOrderStatus, StatusTone> = {
   draft: 'neutral',
   planned: 'info',
+  confirmed: 'success',
   in_progress: 'warning',
   cancelled: 'danger'
 }
