@@ -1,3 +1,4 @@
+import { CalendarOff, ClipboardCheck, House, Route } from '@lucide/vue'
 import { registerFeatureRoutes } from '@/core/navigation/featureRoutes'
 import { registerNavMenu } from '@/core/navigation/moduleRegistry'
 
@@ -12,10 +13,34 @@ export function registerSelfServiceModule(): void {
     labelKey: 'nav.mySpace',
     order: MY_SPACE_ORDER,
     subItems: [
-      { labelKey: 'nav.myProfile', to: '/me', menuKey: 'mySpace' },
-      { labelKey: 'nav.myTour', to: '/me/tour', menuKey: 'mySpace' },
-      { labelKey: 'nav.myChecklist', to: '/me/checklist', menuKey: 'mySpace' },
-      { labelKey: 'nav.myAbsences', to: '/me/absences', menuKey: 'mySpace' }
+      {
+        labelKey: 'nav.myProfile',
+        to: '/me',
+        group: 'nav.group.mySpace',
+        icon: House,
+        menuKey: 'mySpace'
+      },
+      {
+        labelKey: 'nav.myTour',
+        to: '/me/tour',
+        group: 'nav.group.mySpace',
+        icon: Route,
+        menuKey: 'mySpace'
+      },
+      {
+        labelKey: 'nav.myChecklist',
+        to: '/me/checklist',
+        group: 'nav.group.mySpace',
+        icon: ClipboardCheck,
+        menuKey: 'mySpace'
+      },
+      {
+        labelKey: 'nav.myAbsences',
+        to: '/me/absences',
+        group: 'nav.group.mySpace',
+        icon: CalendarOff,
+        menuKey: 'mySpace'
+      }
     ]
   })
 }

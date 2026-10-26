@@ -1,4 +1,16 @@
-import { CalendarDays, Network, Users } from '@lucide/vue'
+import {
+  Briefcase,
+  CalendarDays,
+  CalendarOff,
+  CalendarRange,
+  ChartPie,
+  LayoutDashboard,
+  Network,
+  PartyPopper,
+  Tag,
+  Tags,
+  Users
+} from '@lucide/vue'
 import { registerFeatureRoutes } from '@/core/navigation/featureRoutes'
 import { registerNavMenu } from '@/core/navigation/moduleRegistry'
 import { registerSearchableEntity } from '@/core/search/searchRegistry'
@@ -28,25 +40,83 @@ export function registerHrModule(): void {
     labelKey: 'nav.hr',
     order: HR_MENU_ORDER,
     subItems: [
-      { labelKey: 'nav.hrDashboard', to: '/hr/dashboard', menuKey: 'hrDashboard' },
-      { labelKey: 'nav.myPlanning', to: '/hr/my-planning', menuKey: 'myPlanning' },
-      { labelKey: 'nav.employees', to: '/hr/employees', menuKey: 'employee' },
-      { labelKey: 'nav.leaveRequests', to: '/hr/leave-requests', menuKey: 'leaveRequest' },
-      { labelKey: 'nav.leaveBalances', to: '/hr/leave-balances', menuKey: 'leaveBalance' },
-      { labelKey: 'nav.orgUnits', to: '/hr/org-units', menuKey: 'orgUnit' },
-      { labelKey: 'nav.jobPositions', to: '/hr/job-positions', menuKey: 'jobPosition' },
+      {
+        labelKey: 'nav.hrDashboard',
+        to: '/hr/dashboard',
+        group: 'nav.group.overview',
+        icon: LayoutDashboard,
+        menuKey: 'hrDashboard'
+      },
+      {
+        labelKey: 'nav.myPlanning',
+        to: '/hr/my-planning',
+        group: 'nav.group.overview',
+        icon: CalendarRange,
+        menuKey: 'myPlanning'
+      },
+      {
+        labelKey: 'nav.employees',
+        to: '/hr/employees',
+        group: 'nav.group.people',
+        icon: Users,
+        menuKey: 'employee'
+      },
+      {
+        labelKey: 'nav.leaveRequests',
+        to: '/hr/leave-requests',
+        group: 'nav.group.leave',
+        icon: CalendarOff,
+        menuKey: 'leaveRequest'
+      },
+      {
+        labelKey: 'nav.leaveBalances',
+        to: '/hr/leave-balances',
+        group: 'nav.group.leave',
+        icon: ChartPie,
+        menuKey: 'leaveBalance'
+      },
+      {
+        labelKey: 'nav.orgUnits',
+        to: '/hr/org-units',
+        group: 'nav.group.people',
+        icon: Network,
+        menuKey: 'orgUnit'
+      },
+      {
+        labelKey: 'nav.jobPositions',
+        to: '/hr/job-positions',
+        group: 'nav.group.people',
+        icon: Briefcase,
+        menuKey: 'jobPosition'
+      },
       {
         labelKey: 'nav.employeeCategories',
         to: '/hr/employee-categories',
+        group: 'nav.group.setup',
+        icon: Tags,
         menuKey: 'employeeCategory'
       },
-      { labelKey: 'nav.leaveTypes', to: '/hr/leave-types', menuKey: 'leaveType' },
+      {
+        labelKey: 'nav.leaveTypes',
+        to: '/hr/leave-types',
+        group: 'nav.group.setup',
+        icon: Tag,
+        menuKey: 'leaveType'
+      },
       {
         labelKey: 'nav.workingCalendar',
         to: '/hr/working-calendar',
+        group: 'nav.group.setup',
+        icon: CalendarDays,
         menuKey: 'workingCalendar'
       },
-      { labelKey: 'nav.publicHolidays', to: '/hr/public-holidays', menuKey: 'publicHoliday' }
+      {
+        labelKey: 'nav.publicHolidays',
+        to: '/hr/public-holidays',
+        group: 'nav.group.setup',
+        icon: PartyPopper,
+        menuKey: 'publicHoliday'
+      }
     ]
   })
 

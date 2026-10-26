@@ -1,4 +1,26 @@
-import { ClipboardList, FileText, Users } from '@lucide/vue'
+import {
+  BadgeDollarSign,
+  Building,
+  ClipboardList,
+  FileChartColumn,
+  FileSpreadsheet,
+  FileText,
+  Fuel,
+  Inbox,
+  Layers,
+  LayoutDashboard,
+  MapPinned,
+  MessageSquareWarning,
+  MessageSquareX,
+  Package2,
+  PackageCheck,
+  PhoneCall,
+  ReceiptText,
+  Scale,
+  Settings2,
+  Truck,
+  Users
+} from '@lucide/vue'
 import { registerFeatureRoutes } from '@/core/navigation/featureRoutes'
 import { registerNavMenu } from '@/core/navigation/moduleRegistry'
 import { registerSearchableEntity } from '@/core/search/searchRegistry'
@@ -40,65 +62,129 @@ export function registerPlanningModule(): void {
       {
         labelKey: 'nav.transportOrders',
         to: '/planning/transport-orders',
+        group: 'nav.group.orders',
+        icon: Truck,
         menuKey: 'transportOrder'
       },
       {
         labelKey: 'nav.customerConfirmations',
         to: '/planning/confirmations',
+        group: 'nav.group.execution',
+        icon: PhoneCall,
         menuKey: 'customerConfirmation'
       },
-      { labelKey: 'nav.loading', to: '/planning/loading', menuKey: 'loading' },
+      {
+        labelKey: 'nav.loading',
+        to: '/planning/loading',
+        group: 'nav.group.execution',
+        icon: PackageCheck,
+        menuKey: 'loading'
+      },
       {
         labelKey: 'nav.deliveryQuality',
         to: '/planning/delivery-quality',
+        group: 'nav.group.execution',
+        icon: MessageSquareWarning,
         menuKey: 'deliveryQuality'
       },
       {
         labelKey: 'nav.customerBilling',
         to: '/planning/customer-billing',
+        group: 'nav.group.billing',
+        icon: ReceiptText,
         menuKey: 'customerBilling'
       },
       {
         labelKey: 'nav.carrierInvoices',
         to: '/planning/carrier-invoices',
+        group: 'nav.group.billing',
+        icon: FileSpreadsheet,
         menuKey: 'carrierInvoice'
       },
-      { labelKey: 'nav.fuelTours', to: '/planning/fuel-tours', menuKey: 'fuelTour' },
+      {
+        labelKey: 'nav.fuelTours',
+        to: '/planning/fuel-tours',
+        group: 'nav.group.orders',
+        icon: Fuel,
+        menuKey: 'fuelTour'
+      },
       {
         labelKey: 'nav.planningDashboard',
         to: '/planning/dashboard',
+        group: 'nav.group.overview',
+        icon: LayoutDashboard,
         menuKey: 'planningDashboard'
       },
-      { labelKey: 'nav.transportReports', to: '/planning/reports', menuKey: 'transportReport' },
+      {
+        labelKey: 'nav.transportReports',
+        to: '/planning/reports',
+        group: 'nav.group.overview',
+        icon: FileChartColumn,
+        menuKey: 'transportReport'
+      },
       {
         labelKey: 'nav.deliveryRequests',
         to: '/planning/delivery-requests',
+        group: 'nav.group.orders',
+        icon: Inbox,
         menuKey: 'deliveryRequest'
       },
-      { labelKey: 'nav.customers', to: '/planning/customers', menuKey: 'customer' },
+      {
+        labelKey: 'nav.customers',
+        to: '/planning/customers',
+        group: 'nav.group.setup',
+        icon: Building,
+        menuKey: 'customer'
+      },
       {
         labelKey: 'nav.deliveryPoints',
         to: '/planning/delivery-points',
+        group: 'nav.group.setup',
+        icon: MapPinned,
         menuKey: 'deliveryPoint'
       },
-      { labelKey: 'nav.products', to: '/planning/products', menuKey: 'product' },
+      {
+        labelKey: 'nav.products',
+        to: '/planning/products',
+        group: 'nav.group.setup',
+        icon: Package2,
+        menuKey: 'product'
+      },
       {
         labelKey: 'nav.transportTariffs',
         to: '/planning/transport-tariffs',
+        group: 'nav.group.setup',
+        icon: BadgeDollarSign,
         menuKey: 'transportTariff'
       },
       {
         labelKey: 'nav.productCompatibilities',
         to: '/planning/product-compatibilities',
+        group: 'nav.group.setup',
+        icon: Layers,
         menuKey: 'productCompatibility'
       },
       {
         labelKey: 'nav.quantityTolerances',
         to: '/planning/quantity-tolerances',
+        group: 'nav.group.setup',
+        icon: Scale,
         menuKey: 'quantityTolerance'
       },
-      { labelKey: 'nav.planningReasons', to: '/planning/reasons', menuKey: 'planningReason' },
-      { labelKey: 'nav.planningSettings', to: '/planning/settings', menuKey: 'planningSettings' }
+      {
+        labelKey: 'nav.planningReasons',
+        to: '/planning/reasons',
+        group: 'nav.group.setup',
+        icon: MessageSquareX,
+        menuKey: 'planningReason'
+      },
+      {
+        labelKey: 'nav.planningSettings',
+        to: '/planning/settings',
+        group: 'nav.group.setup',
+        icon: Settings2,
+        menuKey: 'planningSettings'
+      }
     ]
   })
 

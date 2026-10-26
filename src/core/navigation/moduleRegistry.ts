@@ -1,8 +1,12 @@
+import type { Component } from 'vue'
 import type { UserMenu } from '@/types/auth.types'
 
 export interface NavSubItem {
   labelKey: string
   to: string
+  /** Sidebar section, as an i18n key. */
+  group?: string
+  icon?: Component
   /** Shown only when userMenu[menuKey] is true. */
   menuKey?: string
 }

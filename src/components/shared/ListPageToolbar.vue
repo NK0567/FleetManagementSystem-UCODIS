@@ -97,6 +97,8 @@ const props = withDefaults(
   }
 )
 
+const hasListViews = computed(() => props.showListView && props.listViewOptions.length > 0)
+
 const emit = defineEmits<{
   toggleFilter: []
   toggleDetails: []
@@ -130,9 +132,11 @@ const toggleSearch = () => {
 <template>
   <div class="bg-card border-b border-border px-2 py-1 shrink-0">
     <div class="flex flex-nowrap items-center min-w-0 gap-0">
-      <div v-if="showListView" class="flex shrink-0 items-center gap-1" ref="listViewDropdownRef">
-        <h1 class="text-sm font-medium text-card-foreground">{{ title }}:</h1>
-        <template v-if="listViewOptions && listViewOptions.length > 0">
+      <div class="flex shrink-0 items-center gap-1" ref="listViewDropdownRef">
+        <h1 class="text-sm font-medium text-card-foreground">
+          {{ title }}<template v-if="hasListViews">:</template>
+        </h1>
+        <template v-if="hasListViews && listViewOptions">
           <div class="relative">
             <button
               type="button"
