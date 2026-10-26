@@ -25,7 +25,11 @@ describe('customer billing', () => {
     expect((await post(`${line}/invoice`, { reference: 'FAC-2026-0001' })).status).toBe(422)
     await post(`${line}/receive-confirm`, { signer: 'Aina' }, 'CLI001')
     const invoiced = await post(`${line}/invoice`, { reference: 'FAC-2026-0001' })
-    expect(invoiced.data.data).toMatchObject({ reference: 'FAC-2026-0001', amount: 1_800_000, customerNo: 'CLI-002' })
+    expect(invoiced.data.data).toMatchObject({
+      reference: 'FAC-2026-0001',
+      amount: 1_800_000,
+      customerNo: 'CLI-002'
+    })
     expect((await post(`${line}/invoice`, { reference: 'FAC-2026-0002' })).status).toBe(409)
     expect(
       (
@@ -37,20 +41,40 @@ describe('customer billing', () => {
         })
       ).status
     ).toBe(409)
-    expect((await post('/planning/transport-orders/TR-2026-0003/lines/1/declare', { receivedQuantity: 100 })).status).toBe(
-      200
-    )
-    await post('/planning/transport-orders/TR-2026-0003/lines/1/receive-confirm', { signer: 'Rabe' }, 'CLI001')
     expect(
-      (await post('/planning/transport-orders/TR-2026-0003/lines/1/invoice', { reference: 'fac-2026-0001' })).status
+      (
+        await post('/planning/transport-orders/TR-2026-0003/lines/1/declare', {
+          receivedQuantity: 100
+        })
+      ).status
+    ).toBe(200)
+    await post(
+      '/planning/transport-orders/TR-2026-0003/lines/1/receive-confirm',
+      { signer: 'Rabe' },
+      'CLI001'
+    )
+    expect(
+      (
+        await post('/planning/transport-orders/TR-2026-0003/lines/1/invoice', {
+          reference: 'fac-2026-0001'
+        })
+      ).status
     ).toBe(409)
   })
 
   it('refuses to invoice an unqualified gap', async () => {
     await post('/planning/transport-orders/TR-2026-0003/lines/1/declare', { receivedQuantity: 100 })
-    await post('/planning/transport-orders/TR-2026-0003/lines/1/receive-confirm', { signer: 'Rabe' }, 'CLI001')
-    expect((await post('/planning/transport-orders/TR-2026-0003/lines/1/invoice', { reference: 'FAC-9' })).status).toBe(
-      422
+    await post(
+      '/planning/transport-orders/TR-2026-0003/lines/1/receive-confirm',
+      { signer: 'Rabe' },
+      'CLI001'
     )
+    expect(
+      (
+        await post('/planning/transport-orders/TR-2026-0003/lines/1/invoice', {
+          reference: 'FAC-9'
+        })
+      ).status
+    ).toBe(422)
   })
 })

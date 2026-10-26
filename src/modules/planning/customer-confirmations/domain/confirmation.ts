@@ -115,7 +115,12 @@ type TourLine = {
 
 /** A line left the tour: the recipient is unavailable, the goods failed the loading check, or the delivery was sent back to the pool. */
 export function lineOutOfTour(line: TourLine): boolean {
-  return line.unavailableAt !== null || line.replannedAt !== null || !!line.nonconformityAt || !!line.returnedAt
+  return (
+    line.unavailableAt !== null ||
+    line.replannedAt !== null ||
+    !!line.nonconformityAt ||
+    !!line.returnedAt
+  )
 }
 
 export function confirmationState(line: TourLine): ConfirmationState {

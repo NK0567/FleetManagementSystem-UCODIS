@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  confirmationState,
-  linesConfirmed,
-  lineOutOfTour,
-  tacitlyConfirmed
-} from './confirmation'
+import { confirmationState, linesConfirmed, lineOutOfTour, tacitlyConfirmed } from './confirmation'
 
 const open = {
   confirmedAt: null,

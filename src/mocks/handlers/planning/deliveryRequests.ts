@@ -67,20 +67,20 @@ export function deliveryRequestsApi(db: MockDatabase, userCode?: string): Delive
     .all()
     .filter((row) => !userCode || visibleTo(db, userCode, requestPlace(db, row.deliveryPointNo)))
     .map((row) => {
-    const point = points.get(row.deliveryPointNo)
-    const product = products.get(row.productNo)
-    return {
-      ...row,
-      status: deliveryRequestStatus(row, today),
-      ordererName: customers.get(row.ordererNo) ?? '',
-      deliveryPointName: point?.name ?? '',
-      recipientName: customers.get(point?.customerNo ?? '') ?? '',
-      productName: product?.name ?? '',
-      unit: product?.unit ?? '',
-      rejectionReasonName: reasons.get(row.rejectionReasonNo ?? '') ?? '',
-      cancellationReasonName: reasons.get(row.cancellationReasonNo ?? '') ?? ''
-    }
-  })
+      const point = points.get(row.deliveryPointNo)
+      const product = products.get(row.productNo)
+      return {
+        ...row,
+        status: deliveryRequestStatus(row, today),
+        ordererName: customers.get(row.ordererNo) ?? '',
+        deliveryPointName: point?.name ?? '',
+        recipientName: customers.get(point?.customerNo ?? '') ?? '',
+        productName: product?.name ?? '',
+        unit: product?.unit ?? '',
+        rejectionReasonName: reasons.get(row.rejectionReasonNo ?? '') ?? '',
+        cancellationReasonName: reasons.get(row.cancellationReasonNo ?? '') ?? ''
+      }
+    })
 }
 
 const statusOf = (row: DeliveryRequestRow) => deliveryRequestStatus(row, todayIso())

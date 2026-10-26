@@ -9,13 +9,16 @@ import {
 import { applicableTariff } from '@/modules/planning/transport-tariffs/domain/transportTariff'
 import { nowIsoDateTime, todayIso } from '@/utils/date'
 import type { MockDatabase } from '../../db/database'
-import type { TransportOrderLineRow, TransportOrderRow } from '../../fixtures/planning/transportOrders'
+import type {
+  TransportOrderLineRow,
+  TransportOrderRow
+} from '../../fixtures/planning/transportOrders'
 import { readBody, routeParam, stampModified } from '../../http/crudResource'
 import { conflict, unprocessable } from '../../http/errors'
 import { readString } from '../../http/input'
 import { ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
-import { sessionUser, type MockRequest } from '../../http/types'
+import { sessionUser } from '../../http/types'
 import { PLANNING_MESSAGES } from './messages'
 import { planningSettings } from './settings'
 
@@ -31,7 +34,9 @@ const ISSUE_MESSAGES = {
 } as const
 
 function customerOf(db: MockDatabase, line: TransportOrderLineRow) {
-  const request = line.deliveryRequestNo ? db.deliveryRequests.find(line.deliveryRequestNo) : undefined
+  const request = line.deliveryRequestNo
+    ? db.deliveryRequests.find(line.deliveryRequestNo)
+    : undefined
   const point = db.deliveryPoints.findOrFail(line.deliveryPointNo)
   const recipient = db.customers.findOrFail(point.customerNo)
   const orderer = request?.ordererNo ? db.customers.find(request.ordererNo) : undefined
@@ -47,7 +52,9 @@ function customerOf(db: MockDatabase, line: TransportOrderLineRow) {
 function quote(db: MockDatabase, order: TransportOrderRow, line: TransportOrderLineRow) {
   const customerNo = customerOf(db, line)
   if (customerNo === 'internal') return { issue: 'internal' as BillIssue }
-  const routeNo = order.tripNo ? (db.trips.find(order.tripNo)?.routeTemplateNo ?? order.routeTemplateNo) : order.routeTemplateNo
+  const routeNo = order.tripNo
+    ? (db.trips.find(order.tripNo)?.routeTemplateNo ?? order.routeTemplateNo)
+    : order.routeTemplateNo
   const route = routeNo ? db.routeTemplates.find(routeNo) : undefined
   const product = db.products.find(line.productNo)
   const tariff = applicableTariff(db.transportTariffs.all(), {
@@ -60,14 +67,22 @@ function quote(db: MockDatabase, order: TransportOrderRow, line: TransportOrderL
     productNo: line.productNo,
     family: product?.family ?? null
   })
-  const issue = billIssue(line, todayIso(), planningSettings(db).confirmation.tacitConfirmationDays, tariff)
+  const issue = billIssue(
+    line,
+    todayIso(),
+    planningSettings(db).confirmation.tacitConfirmationDays,
+    tariff
+  )
   if (issue || !tariff) return { issue: issue ?? ('tariff' as BillIssue) }
-  const credit = line.responsibility?.impacts.find((impact) => impact.type === 'customer_credit')?.amount ?? 0
+  const credit =
+    line.responsibility?.impacts.find((impact) => impact.type === 'customer_credit')?.amount ?? 0
   let gross = tariff.amount
   let flat: number | null = null
   if (tariff.rule.basis === 'route_template') {
     const parts = order.lines
-      .filter((other) => customerOf(db, other) === customerNo && other.declaredAt && !lineOutOfTour(other))
+      .filter(
+        (other) => customerOf(db, other) === customerNo && other.declaredAt && !lineOutOfTour(other)
+      )
       .map((other) => ({ key: String(other.lineNo), invoicedShare: other.invoiceFlatShare }))
     flat = flatShare(tariff.amount, parts, String(line.lineNo))
     gross = flat
@@ -84,13 +99,15 @@ function quote(db: MockDatabase, order: TransportOrderRow, line: TransportOrderL
 
 function referenceTaken(db: MockDatabase, reference: string): boolean {
   const key = reference.toLowerCase()
-  return db.transportOrders.all().some((order) =>
-    order.lines.some(
-      (line) =>
-        (line.invoiceReference && line.invoiceReference.toLowerCase() === key) ||
-        (line.creditReference && line.creditReference.toLowerCase() === key)
+  return db.transportOrders
+    .all()
+    .some((order) =>
+      order.lines.some(
+        (line) =>
+          (line.invoiceReference && line.invoiceReference.toLowerCase() === key) ||
+          (line.creditReference && line.creditReference.toLowerCase() === key)
+      )
     )
-  )
 }
 
 function lineLabels(db: MockDatabase, line: TransportOrderLineRow, customerNo: string | null) {
@@ -143,7 +160,9 @@ export function customerBillingApi(db: MockDatabase) {
 }
 
 export function registerCustomerBillingHandlers(router: MockRouter, db: MockDatabase): void {
-  router.get('/planning/customer-billing', { feature: FEATURE, action: 'read' }, () => ok(customerBillingApi(db)))
+  router.get('/planning/customer-billing', { feature: FEATURE, action: 'read' }, () =>
+    ok(customerBillingApi(db))
+  )
 
   router.post(
     '/planning/transport-orders/:no/lines/:lineNo/invoice',
@@ -173,7 +192,12 @@ export function registerCustomerBillingHandlers(router: MockRouter, db: MockData
         lines: order.lines.map((item) => (item.lineNo === lineNo ? next : item)),
         events: [
           ...order.events,
-          { at: nowIsoDateTime(), by: sessionUser(request).code, kind: 'invoiced' as const, detail: reference }
+          {
+            at: nowIsoDateTime(),
+            by: sessionUser(request).code,
+            kind: 'invoiced' as const,
+            detail: reference
+          }
         ],
         ...stampModified(request)
       })

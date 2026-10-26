@@ -14,10 +14,22 @@ describe('delivery execution', () => {
   })
 
   it('blocks an out-of-tolerance quantity only in block mode without a justification', () => {
-    expect(receivedQuantityDecision(100, 90, rule, 'block', '')).toMatchObject({ outside: true, blocked: true })
-    expect(receivedQuantityDecision(100, 90, rule, 'block', 'fuite')).toMatchObject({ blocked: false, gap: -10 })
-    expect(receivedQuantityDecision(100, 99, rule, 'block', '')).toMatchObject({ outside: false, gap: null })
-    expect(receivedQuantityDecision(100, 90, rule, 'flag', '')).toMatchObject({ blocked: false, gap: -10 })
+    expect(receivedQuantityDecision(100, 90, rule, 'block', '')).toMatchObject({
+      outside: true,
+      blocked: true
+    })
+    expect(receivedQuantityDecision(100, 90, rule, 'block', 'fuite')).toMatchObject({
+      blocked: false,
+      gap: -10
+    })
+    expect(receivedQuantityDecision(100, 99, rule, 'block', '')).toMatchObject({
+      outside: false,
+      gap: null
+    })
+    expect(receivedQuantityDecision(100, 90, rule, 'flag', '')).toMatchObject({
+      blocked: false,
+      gap: -10
+    })
   })
 
   it('accepts a gain only for a positive gap', () => {

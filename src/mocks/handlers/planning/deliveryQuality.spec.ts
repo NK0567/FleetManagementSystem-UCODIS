@@ -14,22 +14,37 @@ const post = (url: string, body: Record<string, unknown> = {}, as = 'FLT001') =>
 describe('delivery quality', () => {
   it('numbers protest notes by year and closes only an issued note', async () => {
     const line = '/planning/transport-orders/TR-2026-0003/lines/1'
-    expect((await post(`${line}/protests`, { reasonNo: 'PRT-DAMAGE', quantity: 1 })).status).toBe(409)
+    expect((await post(`${line}/protests`, { reasonNo: 'PRT-DAMAGE', quantity: 1 })).status).toBe(
+      409
+    )
     await post(`${line}/declare`, { receivedQuantity: 100 })
-    expect((await post(`${line}/protests`, { reasonNo: 'PRT-DAMAGE', quantity: 200 })).status).toBe(422)
-    expect((await post(`${line}/protests`, { reasonNo: 'RFS-DAMAGED', quantity: 10 })).status).toBe(422)
+    expect((await post(`${line}/protests`, { reasonNo: 'PRT-DAMAGE', quantity: 200 })).status).toBe(
+      422
+    )
+    expect((await post(`${line}/protests`, { reasonNo: 'RFS-DAMAGED', quantity: 10 })).status).toBe(
+      422
+    )
     const first = await post(`${line}/protests`, { reasonNo: 'PRT-DAMAGE', quantity: 10 })
     expect(first.data.data).toMatchObject({ no: 'NP-2026-0001' })
     const second = await post(`${line}/protests`, { reasonNo: 'PRT-SHORT', quantity: 5 })
     expect(second.data.data).toMatchObject({ no: 'NP-2026-0002' })
-    expect((await post(`${line}/protests/NP-2026-0001/close`, { outcome: 'Réglé' })).status).toBe(409)
-    expect((await post(`${line}/protests/NP-2026-0001/issue`, {}, 'DIR001')).status).toBe(403)
-    expect((await post(`${line}/protests/NP-2026-0001/issue`)).status).toBe(200)
-    expect((await call(server, 'patch', `${line}/protests/NP-2026-0001`, { as: 'FLT001', body: { reasonNo: 'PRT-DAMAGE', quantity: 2 } })).status).toBe(
+    expect((await post(`${line}/protests/NP-2026-0001/close`, { outcome: 'Réglé' })).status).toBe(
       409
     )
+    expect((await post(`${line}/protests/NP-2026-0001/issue`, {}, 'DIR001')).status).toBe(403)
+    expect((await post(`${line}/protests/NP-2026-0001/issue`)).status).toBe(200)
+    expect(
+      (
+        await call(server, 'patch', `${line}/protests/NP-2026-0001`, {
+          as: 'FLT001',
+          body: { reasonNo: 'PRT-DAMAGE', quantity: 2 }
+        })
+      ).status
+    ).toBe(409)
     expect((await post(`${line}/protests/NP-2026-0001/close`, {})).status).toBe(400)
-    expect((await post(`${line}/protests/NP-2026-0001/close`, { outcome: 'Avoir accepté' })).status).toBe(200)
+    expect(
+      (await post(`${line}/protests/NP-2026-0001/close`, { outcome: 'Avoir accepté' })).status
+    ).toBe(200)
   })
 
   it('sets the withholding to the credit times the carrier share and freezes it', async () => {
@@ -65,7 +80,7 @@ describe('delivery quality', () => {
         { type: 'carrier_withholding', amount: 1 }
       ]
     })
-    expect(set.data.data.impacts).toEqual([
+    expect((set.data.data as { impacts: unknown }).impacts).toEqual([
       { type: 'customer_credit', amount: 1000 },
       { type: 'carrier_withholding', amount: 400 }
     ])
@@ -74,12 +89,21 @@ describe('delivery quality', () => {
     expect((await post(`${line}/issue-credit`, { reference: 'av-2026-0001' })).status).toBe(409)
     server.db.transportOrders.update('TR-2026-0004', {
       ...server.db.transportOrders.findOrFail('TR-2026-0004'),
-      lines: server.db.transportOrders.findOrFail('TR-2026-0004').lines.map((item) =>
-        item.lineNo === 1 ? { ...item, carrierInvoiceValidatedAt: '2026-09-04T18:00:00' } : item
-      )
+      lines: server.db.transportOrders
+        .findOrFail('TR-2026-0004')
+        .lines.map((item) =>
+          item.lineNo === 1 ? { ...item, carrierInvoiceValidatedAt: '2026-09-04T18:00:00' } : item
+        )
     })
     expect(
-      (await post(`${line}/responsibility`, { origin: 'transport', comment: 'Encore', shares, impacts: [{ type: 'customer_credit', amount: 1000 }] })).status
+      (
+        await post(`${line}/responsibility`, {
+          origin: 'transport',
+          comment: 'Encore',
+          shares,
+          impacts: [{ type: 'customer_credit', amount: 1000 }]
+        })
+      ).status
     ).toBe(409)
   })
 })

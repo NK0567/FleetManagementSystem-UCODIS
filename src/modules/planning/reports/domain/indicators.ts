@@ -15,7 +15,8 @@ export function inPerimeter(perimeter: Perimeter | null, place: Place): boolean 
   const depots = new Set(perimeter.depotNos)
   const regions = new Set(perimeter.regions)
   return (
-    place.siteNos.some((siteNo) => depots.has(siteNo)) || place.regions.some((region) => regions.has(region))
+    place.siteNos.some((siteNo) => depots.has(siteNo)) ||
+    place.regions.some((region) => regions.has(region))
   )
 }
 
@@ -45,8 +46,10 @@ export function orderCost(input: {
   costPerKm: number | null
 }): number | null {
   if (input.carrierAmount !== null) return input.carrierAmount
-  if (input.fuelCost === null && (input.distanceKm === null || input.costPerKm === null)) return null
-  const distance = input.distanceKm !== null && input.costPerKm !== null ? input.distanceKm * input.costPerKm : 0
+  if (input.fuelCost === null && (input.distanceKm === null || input.costPerKm === null))
+    return null
+  const distance =
+    input.distanceKm !== null && input.costPerKm !== null ? input.distanceKm * input.costPerKm : 0
   return Math.round((input.fuelCost ?? 0) + distance)
 }
 

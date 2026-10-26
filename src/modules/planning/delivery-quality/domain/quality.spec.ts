@@ -13,7 +13,12 @@ import {
   withholdingOf
 } from './quality'
 
-const line = () => ({ ...emptyFollowUp(), ...emptyQuality(), quantity: 60, receivedQuantity: null as number | null })
+const line = () => ({
+  ...emptyFollowUp(),
+  ...emptyQuality(),
+  quantity: 60,
+  receivedQuantity: null as number | null
+})
 
 describe('delivery quality', () => {
   it('lists the facts that can ground a responsibility', () => {
@@ -44,21 +49,52 @@ describe('delivery quality', () => {
   it('derives the protest status and caps the quantity at what was loaded', () => {
     expect(protestStatus({ issuedAt: null, closedAt: null })).toBe('preparing')
     expect(protestStatus({ issuedAt: '2026-09-04T12:00:00', closedAt: null })).toBe('issued')
-    expect(protestStatus({ issuedAt: '2026-09-04T12:00:00', closedAt: '2026-09-05T08:00:00' })).toBe('closed')
+    expect(
+      protestStatus({ issuedAt: '2026-09-04T12:00:00', closedAt: '2026-09-05T08:00:00' })
+    ).toBe('closed')
     expect(protestQuantityAllowed(10, 60)).toBe(true)
     expect(protestQuantityAllowed(0, 60)).toBe(false)
     expect(protestQuantityAllowed(61, 60)).toBe(false)
   })
 
   it('keeps shares at 100 percent and recomputes the carrier withholding from the credit', () => {
-    expect(shareIssue([{ actor: 'external_carrier', percent: 40 }, { actor: 'external_carrier', percent: 60 }], 'carrier')).toBe(
-      'duplicate'
-    )
+    expect(
+      shareIssue(
+        [
+          { actor: 'external_carrier', percent: 40 },
+          { actor: 'external_carrier', percent: 60 }
+        ],
+        'carrier'
+      )
+    ).toBe('duplicate')
     expect(shareIssue([{ actor: 'external_carrier', percent: 100 }], 'fleet')).toBe('externalMeans')
-    expect(shareIssue([{ actor: 'internal_carrier', percent: 100 }], 'carrier')).toBe('internalMeans')
-    expect(shareIssue([{ actor: 'logistics', percent: 40 }, { actor: 'orderer', percent: 50 }], 'fleet')).toBe('total')
-    expect(shareIssue([{ actor: 'external_carrier', percent: 40 }, { actor: 'orderer', percent: 60 }], 'carrier')).toBeNull()
-    expect(mainActor([{ actor: 'orderer', percent: 60 }, { actor: 'external_carrier', percent: 40 }])).toBe('orderer')
+    expect(shareIssue([{ actor: 'internal_carrier', percent: 100 }], 'carrier')).toBe(
+      'internalMeans'
+    )
+    expect(
+      shareIssue(
+        [
+          { actor: 'logistics', percent: 40 },
+          { actor: 'orderer', percent: 50 }
+        ],
+        'fleet'
+      )
+    ).toBe('total')
+    expect(
+      shareIssue(
+        [
+          { actor: 'external_carrier', percent: 40 },
+          { actor: 'orderer', percent: 60 }
+        ],
+        'carrier'
+      )
+    ).toBeNull()
+    expect(
+      mainActor([
+        { actor: 'orderer', percent: 60 },
+        { actor: 'external_carrier', percent: 40 }
+      ])
+    ).toBe('orderer')
     expect(withholdingOf(1000, 40)).toBe(400)
     expect(
       settleImpacts(
@@ -79,7 +115,9 @@ describe('delivery quality', () => {
     const open = emptyQuality()
     expect(responsibilityFrozen(open)).toBe(false)
     expect(responsibilityFrozen({ ...open, customerInvoicedAt: '2026-09-10T08:00:00' })).toBe(true)
-    expect(responsibilityFrozen({ ...open, carrierInvoiceValidatedAt: '2026-09-10T08:00:00' })).toBe(true)
+    expect(
+      responsibilityFrozen({ ...open, carrierInvoiceValidatedAt: '2026-09-10T08:00:00' })
+    ).toBe(true)
     expect(followUpOpen({ cancelled: false, closed: false }, false)).toBe(true)
     expect(followUpOpen({ cancelled: true, closed: false }, false)).toBe(false)
     expect(followUpOpen({ cancelled: true, closed: false }, true)).toBe(true)

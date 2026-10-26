@@ -9,5 +9,8 @@ export function stillToLoad(line: LineFollowUp): boolean {
 /** Ready to leave once every line still in the tour was checked conforming. */
 export function loadingReady(lines: readonly LineFollowUp[]): boolean {
   const staying = lines.filter(stillToLoad)
-  return staying.length > 0 && staying.every((line) => line.conformingAt !== null && line.loadedQuantity !== null)
+  return (
+    staying.length > 0 &&
+    staying.every((line) => line.conformingAt !== null && line.loadedQuantity !== null)
+  )
 }

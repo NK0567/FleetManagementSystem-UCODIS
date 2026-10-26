@@ -1,5 +1,11 @@
-import { quantityGap, type ToleranceRule } from '@/modules/planning/quantity-tolerances/domain/quantityTolerance'
-import { lineOutOfTour, type LineFollowUp } from '@/modules/planning/customer-confirmations/domain/confirmation'
+import {
+  quantityGap,
+  type ToleranceRule
+} from '@/modules/planning/quantity-tolerances/domain/quantityTolerance'
+import {
+  lineOutOfTour,
+  type LineFollowUp
+} from '@/modules/planning/customer-confirmations/domain/confirmation'
 import type { OverToleranceMode } from '@/modules/planning/planning-settings/domain/planningSettings'
 
 export type GapQualification = 'gain' | 'loss'

@@ -64,16 +64,22 @@ describe('fuel tours', () => {
     })
     const validated = await post(`/planning/fuel-tours/${no}/validate`)
     expect(validated.status).toBe(200)
-    const blNo = (validated.data.data as { bls: { no: string }[] }).bls[0].no
+    const blNo = (validated.data.data as { bls: { no: string }[] }).bls[0]?.no
     expect(blNo).toBe('BL-2026-0001')
     const confirmed = await post(`/planning/fuel-tours/${no}/confirm-pickup`, {
       bslNo: 'BSL-1',
       measures: [{ vehicleNo: 'VEH-021', compartmentNo: 1, volumeL: 10000, temperature: 25 }]
     })
-    expect(confirmed.data.data.voucher.measures[0].volume15).toBe(9920)
-    expect((await post(`/planning/fuel-tours/${no}/bls/${blNo}/cancel`, { reason: 'Citerne indisponible' })).status).toBe(
-      200
-    )
+    const voucher = (confirmed.data.data as { voucher: { measures: { volume15: number }[] } })
+      .voucher
+    expect(voucher.measures[0]?.volume15).toBe(9920)
+    expect(
+      (
+        await post(`/planning/fuel-tours/${no}/bls/${blNo}/cancel`, {
+          reason: 'Citerne indisponible'
+        })
+      ).status
+    ).toBe(200)
     expect(server.db.deliveryRequests.findOrFail(requestNo).transportOrderNo).toBeNull()
   })
 })

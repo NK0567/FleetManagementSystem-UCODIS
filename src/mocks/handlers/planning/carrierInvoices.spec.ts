@@ -33,18 +33,24 @@ async function deliver() {
 
 describe('carrier invoices', () => {
   it('freezes the agreed amount when the invoice matches, and keeps a corrected amount', async () => {
-    expect((await invoice(100)).status).toBe(201)
-    const early = server.db.carrierInvoices.all()[0]
+    const first = await invoice(100)
+    expect(first.status).toBe(201)
+    const early = first.data.data as { no: string }
     expect((await post(`/planning/carrier-invoices/${early.no}/validate`)).status).toBe(422)
     await post(`/planning/carrier-invoices/${early.no}/refuse`, { reason: 'Pas encore livré' })
     await deliver()
     const created = await invoice(700_000, 'F-2026-2')
     const no = (created.data.data as { no: string }).no
     expect((await post(`/planning/carrier-invoices/${no}/validate`)).status).toBe(422)
-    await call(server, 'patch', `/planning/carrier-invoices/${no}`, { as: 'FLT001', body: { amount: 604_800 } })
+    await call(server, 'patch', `/planning/carrier-invoices/${no}`, {
+      as: 'FLT001',
+      body: { amount: 604_800 }
+    })
     const validated = await post(`/planning/carrier-invoices/${no}/validate`)
     expect(validated.data.data).toMatchObject({ status: 'validated', agreedAmount: 604_800 })
-    expect(server.db.transportOrders.findOrFail('TR-2026-0004').lines[0].carrierInvoiceValidatedAt).toBeTruthy()
+    expect(
+      server.db.transportOrders.findOrFail('TR-2026-0004').lines[0]?.carrierInvoiceValidatedAt
+    ).toBeTruthy()
     expect((await post(`/planning/carrier-invoices/${no}/validate`)).status).toBe(409)
     expect((await invoice(604_800, 'F-2026-3')).status).toBe(409)
   })
@@ -55,7 +61,9 @@ describe('carrier invoices', () => {
     const created = await invoice(500_000, 'F-2026-9')
     const no = (created.data.data as { no: string }).no
     expect((await post(`/planning/carrier-invoices/${no}/validate`)).status).toBe(422)
-    const validated = await post(`/planning/carrier-invoices/${no}/validate`, { reason: 'Grille absente' })
+    const validated = await post(`/planning/carrier-invoices/${no}/validate`, {
+      reason: 'Grille absente'
+    })
     expect(validated.data.data).toMatchObject({ status: 'validated', agreedAmount: null })
   })
 })

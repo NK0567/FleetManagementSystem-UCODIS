@@ -38,14 +38,20 @@ describe('customer billing', () => {
   })
 
   it('refuses a line that is not attested, contested or outside tolerance', () => {
-    expect(billIssue({ ...line(), declaredAt: '2026-09-04T11:00:00' }, '2026-09-04', 3, tariff)).toBe('reception')
+    expect(
+      billIssue({ ...line(), declaredAt: '2026-09-04T11:00:00' }, '2026-09-04', 3, tariff)
+    ).toBe('reception')
     expect(billIssue(line(), '2026-09-04', 3, tariff)).toBeNull()
-    expect(billIssue({ ...line(), receptionContestedAt: '2026-09-02T08:00:00' }, '2026-09-04', 3, tariff)).toBe(
-      'contestation'
-    )
-    expect(billIssue({ ...line(), quantityGap: -4, gapQualification: null }, '2026-09-04', 3, tariff)).toBe('gap')
+    expect(
+      billIssue({ ...line(), receptionContestedAt: '2026-09-02T08:00:00' }, '2026-09-04', 3, tariff)
+    ).toBe('contestation')
+    expect(
+      billIssue({ ...line(), quantityGap: -4, gapQualification: null }, '2026-09-04', 3, tariff)
+    ).toBe('gap')
     expect(billIssue(line(), '2026-09-04', 3, null)).toBe('tariff')
-    expect(billIssue({ ...line(), declaredAt: null }, '2026-09-04', 3, tariff)).toBe('not_delivered')
+    expect(billIssue({ ...line(), declaredAt: null }, '2026-09-04', 3, tariff)).toBe(
+      'not_delivered'
+    )
   })
 
   it('splits one flat rate and lets the last delivery take the remainder', () => {
@@ -56,7 +62,16 @@ describe('customer billing', () => {
     ]
     expect(flatShare(100, parts, '1')).toBe(33)
     expect(flatShare(100, parts, '3')).toBe(34)
-    expect(flatShare(100, [{ key: '1', invoicedShare: 33 }, { key: '2', invoicedShare: null }], '2')).toBe(67)
+    expect(
+      flatShare(
+        100,
+        [
+          { key: '1', invoicedShare: 33 },
+          { key: '2', invoicedShare: null }
+        ],
+        '2'
+      )
+    ).toBe(67)
     expect(netAmount(1_800_000, 200_000)).toBe(1_600_000)
     expect(netAmount(100, 250)).toBe(0)
   })

@@ -16,17 +16,30 @@ describe('reception', () => {
     expect(receptionAttested(declared, '2026-09-03', 3)).toBe(false)
     expect(receptionAttested(declared, '2026-09-04', 3)).toBe(true)
     expect(receptionAttested(declared, '2026-09-20', null)).toBe(false)
-    expect(receptionAttested({ ...declared, receptionConfirmedAt: '2026-09-01T12:00:00' }, '2026-09-01', 3)).toBe(
-      true
-    )
-    expect(receptionAttested({ ...declared, receptionContestedAt: '2026-09-02T08:00:00' }, '2026-09-20', 3)).toBe(
-      false
-    )
+    expect(
+      receptionAttested(
+        { ...declared, receptionConfirmedAt: '2026-09-01T12:00:00' },
+        '2026-09-01',
+        3
+      )
+    ).toBe(true)
+    expect(
+      receptionAttested(
+        { ...declared, receptionContestedAt: '2026-09-02T08:00:00' },
+        '2026-09-20',
+        3
+      )
+    ).toBe(false)
     expect(receptionAttested(line(), '2026-09-20', 3)).toBe(false)
   })
 
   it('sends the missing quantity back to the pool once, and expects a refusal home', () => {
-    const declared = { ...line(), declaredAt: '2026-09-04T11:00:00', loadedQuantity: 60, receivedQuantity: 50 }
+    const declared = {
+      ...line(),
+      declaredAt: '2026-09-04T11:00:00',
+      loadedQuantity: 60,
+      receivedQuantity: 50
+    }
     expect(remainderQuantity(declared)).toBe(10)
     expect(remainderQuantity({ ...declared, receivedQuantity: 60 })).toBeNull()
     expect(remainderQuantity({ ...declared, remainderAt: '2026-09-04T12:00:00' })).toBeNull()

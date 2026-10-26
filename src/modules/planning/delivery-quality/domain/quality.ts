@@ -1,4 +1,9 @@
-export const QUALITY_ACTORS = ['orderer', 'logistics', 'internal_carrier', 'external_carrier'] as const
+export const QUALITY_ACTORS = [
+  'orderer',
+  'logistics',
+  'internal_carrier',
+  'external_carrier'
+] as const
 export type QualityActor = (typeof QUALITY_ACTORS)[number]
 
 export const QUALITY_ORIGINS = ['departure', 'transport', 'order'] as const
@@ -130,14 +135,19 @@ export function protestQuantityAllowed(quantity: number, reference: number): boo
  * Follow-up stays open until the order is closed. A cancelled order keeps it
  * only for a line that was actually declared or refused.
  */
-export function followUpOpen(order: { cancelled: boolean; closed: boolean }, declared: boolean): boolean {
+export function followUpOpen(
+  order: { cancelled: boolean; closed: boolean },
+  declared: boolean
+): boolean {
   if (order.closed) return false
   if (!order.cancelled) return true
   return declared
 }
 
 /** Shares are frozen once the customer is invoiced or the carrier invoice is validated. */
-export function responsibilityFrozen(line: Pick<QualityFields, 'customerInvoicedAt' | 'carrierInvoiceValidatedAt'>): boolean {
+export function responsibilityFrozen(
+  line: Pick<QualityFields, 'customerInvoicedAt' | 'carrierInvoiceValidatedAt'>
+): boolean {
   return line.customerInvoicedAt !== null || line.carrierInvoiceValidatedAt !== null
 }
 
@@ -148,16 +158,19 @@ export function shareIssue(
   means: 'fleet' | 'carrier' | null
 ): ShareIssue | null {
   if (new Set(shares.map((share) => share.actor)).size !== shares.length) return 'duplicate'
-  if (shares.some((share) => share.actor === 'external_carrier') && means !== 'carrier') return 'externalMeans'
-  if (shares.some((share) => share.actor === 'internal_carrier') && means !== 'fleet') return 'internalMeans'
-  if (shares.some((share) => !Number.isFinite(share.percent) || share.percent <= 0)) return 'percent'
+  if (shares.some((share) => share.actor === 'external_carrier') && means !== 'carrier')
+    return 'externalMeans'
+  if (shares.some((share) => share.actor === 'internal_carrier') && means !== 'fleet')
+    return 'internalMeans'
+  if (shares.some((share) => !Number.isFinite(share.percent) || share.percent <= 0))
+    return 'percent'
   const total = shares.reduce((sum, share) => sum + share.percent, 0)
   if (Math.abs(total - 100) > 0.001) return 'total'
   return null
 }
 
 export function mainActor(shares: readonly ResponsibilityShare[]): QualityActor {
-  return [...shares].sort((left, right) => right.percent - left.percent)[0].actor
+  return shares.reduce((main, share) => (share.percent > main.percent ? share : main)).actor
 }
 
 /** The carrier withholding is the customer credit times the carrier's share. */
@@ -176,7 +189,8 @@ export function settleImpacts(
   externalPercent: number
 ): ResponsibilityImpact[] | ImpactIssue {
   if (new Set(impacts.map((impact) => impact.type)).size !== impacts.length) return 'duplicate'
-  if (impacts.some((impact) => !Number.isFinite(impact.amount) || impact.amount <= 0)) return 'amount'
+  if (impacts.some((impact) => !Number.isFinite(impact.amount) || impact.amount <= 0))
+    return 'amount'
   const credit = impacts.find((impact) => impact.type === 'customer_credit')?.amount ?? 0
   if (credit > 0 && externalPercent > 0) {
     return [

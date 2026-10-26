@@ -23,7 +23,8 @@ export function agreedTotal(orders: readonly AgreedOrder[]): {
   untariffed: boolean
 } {
   const withholding = orders.reduce((sum, order) => sum + order.withholding, 0)
-  if (orders.some((order) => order.net === null)) return { total: null, withholding, untariffed: true }
+  if (orders.some((order) => order.net === null))
+    return { total: null, withholding, untariffed: true }
   return {
     total: orders.reduce((sum, order) => sum + (order.net ?? 0), 0),
     withholding,

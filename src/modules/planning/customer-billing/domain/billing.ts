@@ -3,7 +3,13 @@ import { receptionAttested } from '@/modules/planning/reception/domain/reception
 import type { FreightPayer } from '@/modules/planning/planning-settings/domain/planningSettings'
 import type { TariffAmount } from '@/modules/planning/transport-tariffs/domain/transportTariff'
 
-export type BillIssue = 'not_delivered' | 'internal' | 'reception' | 'gap' | 'contestation' | 'tariff'
+export type BillIssue =
+  | 'not_delivered'
+  | 'internal'
+  | 'reception'
+  | 'gap'
+  | 'contestation'
+  | 'tariff'
 
 export interface BillLine {
   declaredAt: string | null

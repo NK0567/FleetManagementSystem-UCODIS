@@ -15,7 +15,9 @@ export interface ReceptionFacts {
 }
 
 /** The loaded quantity is the reference. Before loading, the ordered quantity is. */
-export function referenceQuantity(line: Pick<ReceptionFacts, 'quantity' | 'loadedQuantity'>): number {
+export function referenceQuantity(
+  line: Pick<ReceptionFacts, 'quantity' | 'loadedQuantity'>
+): number {
   return line.loadedQuantity ?? line.quantity
 }
 

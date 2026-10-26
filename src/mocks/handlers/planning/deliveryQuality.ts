@@ -2,7 +2,6 @@ import {
   QUALITY_ACTORS,
   QUALITY_IMPACTS,
   QUALITY_ORIGINS,
-  emptyQuality,
   followUpOpen,
   protestQuantityAllowed,
   protestStatus,

@@ -24,7 +24,8 @@ export interface ReportPeriod {
 const DASHBOARD_CARRIERS = 5
 
 function periodOf(request: MockRequest): ReportPeriod {
-  const read = (key: string) => (typeof request.query[key] === 'string' ? String(request.query[key]) : '')
+  const read = (key: string) =>
+    typeof request.query[key] === 'string' ? String(request.query[key]) : ''
   return { from: read('from'), to: read('to') }
 }
 
@@ -139,7 +140,9 @@ export function registerReportHandlers(router: MockRouter, db: MockDatabase): vo
   router.get('/planning/dashboard', { feature: 'PLANNINGDASHBOARD', action: 'read' }, (request) =>
     ok(planningDashboard(db, sessionUser(request).code))
   )
-  router.get('/planning/reports/carriers', { feature: 'TRANSPORTREPORT', action: 'read' }, (request) =>
-    ok(carrierReport(db, sessionUser(request).code, periodOf(request)))
+  router.get(
+    '/planning/reports/carriers',
+    { feature: 'TRANSPORTREPORT', action: 'read' },
+    (request) => ok(carrierReport(db, sessionUser(request).code, periodOf(request)))
   )
 }

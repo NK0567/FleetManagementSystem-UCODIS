@@ -8,7 +8,10 @@ import {
 import { transportOrderStatus } from '@/modules/planning/transport-orders/domain/transportOrder'
 import { nowIsoDateTime } from '@/utils/date'
 import type { MockDatabase } from '../../db/database'
-import type { TransportOrderLineRow, TransportOrderRow } from '../../fixtures/planning/transportOrders'
+import type {
+  TransportOrderLineRow,
+  TransportOrderRow
+} from '../../fixtures/planning/transportOrders'
 import { readBody, routeParam, stampCreated, stampModified } from '../../http/crudResource'
 import { conflict, unprocessable } from '../../http/errors'
 import { readDate } from '../../http/input'
@@ -103,7 +106,12 @@ function saveLine(
     events: event
       ? [
           ...order.events,
-          { at: nowIsoDateTime(), by: sessionUser(request).code, kind: event.kind, detail: event.detail }
+          {
+            at: nowIsoDateTime(),
+            by: sessionUser(request).code,
+            kind: event.kind,
+            detail: event.detail
+          }
         ]
       : order.events,
     ...stampModified(request)
@@ -128,7 +136,11 @@ export function registerConfirmationsHandlers(router: MockRouter, db: MockDataba
         const line = lineOf(order, Number(routeParam(request, 'lineNo')))
         if (line.replannedAt) throw conflict(PLANNING_MESSAGES.confirmationAlreadyReplanned)
         apply(order, line, request)
-        return ok(confirmationsApi(db).find((item) => item.orderNo === order.no && item.lineNo === line.lineNo))
+        return ok(
+          confirmationsApi(db).find(
+            (item) => item.orderNo === order.no && item.lineNo === line.lineNo
+          )
+        )
       }
     )
 
@@ -180,7 +192,9 @@ export function registerConfirmationsHandlers(router: MockRouter, db: MockDataba
       ? db.deliveryRequests.find(line.deliveryRequestNo)
       : undefined
     const point = db.deliveryPoints.findOrFail(line.deliveryPointNo)
-    const ordererNo = source?.ordererNo ?? (db.customers.findOrFail(point.customerNo).isOrderer ? point.customerNo : '')
+    const ordererNo =
+      source?.ordererNo ??
+      (db.customers.findOrFail(point.customerNo).isOrderer ? point.customerNo : '')
     if (!ordererNo) throw unprocessable(PLANNING_MESSAGES.confirmationNeedsOrderer)
     const entry = {
       ordererNo,
@@ -198,7 +212,10 @@ export function registerConfirmationsHandlers(router: MockRouter, db: MockDataba
     checkDeliveryRequest(db, entry)
     const no = nextDeliveryRequestNo(db)
     db.deliveryRequests.insert(
-      stampCreated({ ...newDeliveryRequest(no, entry, 'planner'), parentNo: source?.no ?? null }, request)
+      stampCreated(
+        { ...newDeliveryRequest(no, entry, 'planner'), parentNo: source?.no ?? null },
+        request
+      )
     )
     saveLine(db, order, { ...line, replannedAt: nowIsoDateTime() }, request, {
       kind: 'replanned',

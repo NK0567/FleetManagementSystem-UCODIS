@@ -10,7 +10,9 @@ describe('loading control', () => {
     const aside = { ...line(), nonconformityAt: '2026-09-04T12:00:00' }
     expect(stillToLoad(aside)).toBe(false)
     expect(loadingReady([staying, aside])).toBe(false)
-    expect(loadingReady([{ ...staying, loadedQuantity: 10, conformingAt: '2026-09-04T12:00:00' }, aside])).toBe(true)
+    expect(
+      loadingReady([{ ...staying, loadedQuantity: 10, conformingAt: '2026-09-04T12:00:00' }, aside])
+    ).toBe(true)
     expect(loadingReady([aside])).toBe(false)
   })
 })

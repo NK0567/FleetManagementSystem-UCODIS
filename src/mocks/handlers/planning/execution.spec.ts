@@ -24,20 +24,35 @@ async function readyCarrier() {
 describe('delivery execution', () => {
   it('records a carrier departure and settles the order when the quantity is declared', async () => {
     await readyCarrier()
-    expect((await act('/planning/transport-orders/TR-2026-0004/lines/1/declare', { receivedQuantity: 60 })).status).toBe(409)
+    expect(
+      (
+        await act('/planning/transport-orders/TR-2026-0004/lines/1/declare', {
+          receivedQuantity: 60
+        })
+      ).status
+    ).toBe(409)
     const left = await act('/planning/transport-orders/TR-2026-0004/depart')
     expect(left.data.data).toMatchObject({ status: 'in_progress' })
-    const declared = await act('/planning/transport-orders/TR-2026-0004/lines/1/declare', { receivedQuantity: 60 })
+    const declared = await act('/planning/transport-orders/TR-2026-0004/lines/1/declare', {
+      receivedQuantity: 60
+    })
     expect(declared.data.data).toMatchObject({ delivered: true, status: 'delivered' })
-    const order = (await call(server, 'get', '/planning/transport-orders/TR-2026-0004', { as: 'FLT001' })).data.data as TransportOrderApi
+    const order = (
+      await call(server, 'get', '/planning/transport-orders/TR-2026-0004', { as: 'FLT001' })
+    ).data.data as TransportOrderApi
     expect(order.status).toBe('delivered')
-    expect((await act('/planning/transport-orders/TR-2026-0004/cancel', { reasonNo: 'CXL-CUSTOMER' })).status).toBe(409)
+    expect(
+      (await act('/planning/transport-orders/TR-2026-0004/cancel', { reasonNo: 'CXL-CUSTOMER' }))
+        .status
+    ).toBe(409)
   })
 
   it('keeps an out-of-tolerance gap and qualifies a loss, and blocks it when the setting says so', async () => {
     await readyCarrier()
     await act('/planning/transport-orders/TR-2026-0004/depart')
-    const flagged = await act('/planning/transport-orders/TR-2026-0004/lines/1/declare', { receivedQuantity: 50 })
+    const flagged = await act('/planning/transport-orders/TR-2026-0004/lines/1/declare', {
+      receivedQuantity: 50
+    })
     expect(flagged.status).toBe(200)
     const qualified = await act('/planning/transport-orders/TR-2026-0004/lines/1/qualify', {
       kind: 'loss',
@@ -45,7 +60,12 @@ describe('delivery execution', () => {
     })
     expect(qualified.status).toBe(200)
     expect(
-      (await act('/planning/transport-orders/TR-2026-0004/lines/1/qualify', { kind: 'gain', comment: 'Non' })).status
+      (
+        await act('/planning/transport-orders/TR-2026-0004/lines/1/qualify', {
+          kind: 'gain',
+          comment: 'Non'
+        })
+      ).status
     ).toBe(409)
 
     const settings = server.db.planningSettings.findOrFail('PLANNING')
@@ -53,14 +73,20 @@ describe('delivery execution', () => {
       quantities: { ...settings.quantities, overToleranceMode: 'block' }
     })
     expect(
-      (await act('/planning/transport-orders/TR-2026-0003/lines/1/declare', { receivedQuantity: 1 })).status
+      (
+        await act('/planning/transport-orders/TR-2026-0003/lines/1/declare', {
+          receivedQuantity: 1
+        })
+      ).status
     ).toBe(422)
   })
 
   it('refuses a line, which settles the order', async () => {
     await readyCarrier()
     await act('/planning/transport-orders/TR-2026-0004/depart')
-    const refused = await act('/planning/transport-orders/TR-2026-0004/lines/1/refuse', { reasonNo: 'RFS-DAMAGED' })
+    const refused = await act('/planning/transport-orders/TR-2026-0004/lines/1/refuse', {
+      reasonNo: 'RFS-DAMAGED'
+    })
     expect(refused.data.data).toMatchObject({ delivered: true, status: 'delivered' })
   })
 })

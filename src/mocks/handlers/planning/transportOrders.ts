@@ -100,81 +100,81 @@ export function transportOrdersApi(db: MockDatabase, userCode?: string): Transpo
     .all()
     .filter((row) => !userCode || visibleTo(db, userCode, orderPlace(db, row)))
     .map((row) => {
-    const trip = row.tripNo ? trips.get(row.tripNo) : undefined
-    const routeNo = trip?.routeTemplateNo ?? row.routeTemplateNo
-    const route = routeNo ? routes.get(routeNo) : undefined
-    const departure = trip?.plannedDeparture ?? row.plannedDeparture
-    const lines = row.lines.map((line): TransportOrderLineApi => {
-      const point = points.get(line.deliveryPointNo)
-      const product = products.get(line.productNo)
+      const trip = row.tripNo ? trips.get(row.tripNo) : undefined
+      const routeNo = trip?.routeTemplateNo ?? row.routeTemplateNo
+      const route = routeNo ? routes.get(routeNo) : undefined
+      const departure = trip?.plannedDeparture ?? row.plannedDeparture
+      const lines = row.lines.map((line): TransportOrderLineApi => {
+        const point = points.get(line.deliveryPointNo)
+        const product = products.get(line.productNo)
+        return {
+          ...line,
+          deliveryPointName: point?.name ?? '',
+          recipientName: customers.get(point?.customerNo ?? '') ?? '',
+          productName: product?.name ?? '',
+          unit: product?.unit ?? ''
+        }
+      })
+      const recipients: string[] = []
+      for (const line of lines) {
+        if (line.recipientName && !recipients.includes(line.recipientName)) {
+          recipients.push(line.recipientName)
+        }
+      }
+      const weights = lines
+        .map((line) => line.weightKg)
+        .filter((weight): weight is number => weight !== null)
+      const fuelLiters = row.lines.reduce((total, line) => {
+        const product = products.get(line.productNo)
+        return total + (product?.isFuel ? line.quantity : 0)
+      }, 0)
       return {
-        ...line,
-        deliveryPointName: point?.name ?? '',
-        recipientName: customers.get(point?.customerNo ?? '') ?? '',
-        productName: product?.name ?? '',
-        unit: product?.unit ?? ''
+        no: row.no,
+        routeTemplateNo: routeNo,
+        routeName: route?.name ?? '',
+        plannedDeparture: departure,
+        plannedArrival: arrivalOf(departure, route?.stops, trip),
+        comment: row.comment,
+        lines,
+        lineCount: lines.length,
+        recipientSummary: recipients.join(', '),
+        totalWeightKg: weights.length ? weights.reduce((total, weight) => total + weight, 0) : null,
+        totalFuelL: fuelLiters > 0 ? fuelLiters : null,
+        means: row.means,
+        tripNo: row.tripNo,
+        tripStatus: trip?.status ?? null,
+        vehicleNo: trip?.vehicleNo ?? null,
+        vehiclePlate: trip ? (plates.get(trip.vehicleNo) ?? '') : '',
+        trailerNo: trip?.trailerNo ?? null,
+        trailerPlate: trip?.trailerNo ? (plates.get(trip.trailerNo) ?? '') : '',
+        driverNo: trip?.driverNo ?? null,
+        driverName: trip ? (names.get(trip.driverNo) ?? '') : '',
+        carrierNo: row.carrierNo,
+        carrierName: carriers.get(row.carrierNo ?? '') ?? '',
+        carrierVehiclePlate: row.carrierVehiclePlate,
+        carrierDriverName: row.carrierDriverName,
+        cancellationReasonNo: row.cancellationReasonNo,
+        cancellationReasonName: reasons.get(row.cancellationReasonNo ?? '') ?? '',
+        cancellationComment: row.cancellationComment,
+        cancelledAt: row.cancelledAt,
+        cancelledBy: row.cancelledBy,
+        events: row.events,
+        status: transportOrderStatus({
+          cancelledAt: row.cancelledAt,
+          means: row.means,
+          tripStatus: trip?.status ?? null,
+          linesConfirmed: linesConfirmed(row.lines),
+          loadingReady: loadingReady(row.lines),
+          carrierDeparted: row.carrierDepartedAt !== null,
+          linesDelivered: linesDelivered(row.lines),
+          closedAt: row.closedAt
+        }),
+        createdAt: row.createdAt,
+        createdBy: row.createdBy,
+        modifiedAt: row.modifiedAt,
+        modifiedBy: row.modifiedBy
       }
     })
-    const recipients: string[] = []
-    for (const line of lines) {
-      if (line.recipientName && !recipients.includes(line.recipientName)) {
-        recipients.push(line.recipientName)
-      }
-    }
-    const weights = lines
-      .map((line) => line.weightKg)
-      .filter((weight): weight is number => weight !== null)
-    const fuelLiters = row.lines.reduce((total, line) => {
-      const product = products.get(line.productNo)
-      return total + (product?.isFuel ? line.quantity : 0)
-    }, 0)
-    return {
-      no: row.no,
-      routeTemplateNo: routeNo,
-      routeName: route?.name ?? '',
-      plannedDeparture: departure,
-      plannedArrival: arrivalOf(departure, route?.stops, trip),
-      comment: row.comment,
-      lines,
-      lineCount: lines.length,
-      recipientSummary: recipients.join(', '),
-      totalWeightKg: weights.length ? weights.reduce((total, weight) => total + weight, 0) : null,
-      totalFuelL: fuelLiters > 0 ? fuelLiters : null,
-      means: row.means,
-      tripNo: row.tripNo,
-      tripStatus: trip?.status ?? null,
-      vehicleNo: trip?.vehicleNo ?? null,
-      vehiclePlate: trip ? (plates.get(trip.vehicleNo) ?? '') : '',
-      trailerNo: trip?.trailerNo ?? null,
-      trailerPlate: trip?.trailerNo ? (plates.get(trip.trailerNo) ?? '') : '',
-      driverNo: trip?.driverNo ?? null,
-      driverName: trip ? (names.get(trip.driverNo) ?? '') : '',
-      carrierNo: row.carrierNo,
-      carrierName: carriers.get(row.carrierNo ?? '') ?? '',
-      carrierVehiclePlate: row.carrierVehiclePlate,
-      carrierDriverName: row.carrierDriverName,
-      cancellationReasonNo: row.cancellationReasonNo,
-      cancellationReasonName: reasons.get(row.cancellationReasonNo ?? '') ?? '',
-      cancellationComment: row.cancellationComment,
-      cancelledAt: row.cancelledAt,
-      cancelledBy: row.cancelledBy,
-      events: row.events,
-      status: transportOrderStatus({
-        cancelledAt: row.cancelledAt,
-        means: row.means,
-        tripStatus: trip?.status ?? null,
-        linesConfirmed: linesConfirmed(row.lines),
-        loadingReady: loadingReady(row.lines),
-        carrierDeparted: row.carrierDepartedAt !== null,
-        linesDelivered: linesDelivered(row.lines),
-        closedAt: row.closedAt
-      }),
-      createdAt: row.createdAt,
-      createdBy: row.createdBy,
-      modifiedAt: row.modifiedAt,
-      modifiedBy: row.modifiedBy
-    }
-  })
 }
 
 function arrivalOf(
@@ -541,7 +541,11 @@ function assertSchedule(order: TransportOrderRow): void {
 
 function blankCarrier(): Pick<
   TransportOrderRow,
-  'carrierNo' | 'carrierVehiclePlate' | 'carrierDriverName' | 'carrierDepartedAt' | 'carrierArrivedAt'
+  | 'carrierNo'
+  | 'carrierVehiclePlate'
+  | 'carrierDriverName'
+  | 'carrierDepartedAt'
+  | 'carrierArrivedAt'
 > {
   return {
     carrierNo: null,
@@ -619,7 +623,10 @@ export function registerTransportOrdersHandlers(router: MockRouter, db: MockData
     (request) => {
       const order = orderOf(request)
       if (!canEditLines(statusOf(db, order))) throw conflict(PLANNING_MESSAGES.orderLinesLocked)
-      const lines = keepFollowUp(order.lines, resolveLines(db, order.no, readLines(readBody(request))))
+      const lines = keepFollowUp(
+        order.lines,
+        resolveLines(db, order.no, readLines(readBody(request)))
+      )
       if (order.means === 'fleet' && order.tripNo) {
         const trip = db.trips.findOrFail(order.tripNo)
         assertServed(db, tripLines(db, trip.no, order.no, lines), trip.vehicleNo, trip.trailerNo)
@@ -709,7 +716,7 @@ function planNewTrip(
     request.language
   )
   assertServed(db, order.lines, vehicleNo, trailerNo)
-  const trip = stampCreated(built, request)
+  const trip = stampCreated<TripRow>(built, request)
   db.trips.insert(trip)
   return {
     means: 'fleet',

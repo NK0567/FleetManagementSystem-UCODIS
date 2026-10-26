@@ -34,15 +34,27 @@ describe('reception', () => {
     expect(early.status).toBe(409)
     await post('/planning/transport-orders/TR-2026-0004/lines/1/declare', { receivedQuantity: 60 })
     expect(
-      (await post('/planning/transport-orders/TR-2026-0004/lines/1/receive-confirm', {}, 'CLI001')).status
+      (await post('/planning/transport-orders/TR-2026-0004/lines/1/receive-confirm', {}, 'CLI001'))
+        .status
     ).toBe(400)
     expect(
-      (await post('/planning/transport-orders/TR-2026-0004/lines/1/receive-contest', { reasonNo: 'RFS-DAMAGED' }, 'CLI001'))
-        .status
+      (
+        await post(
+          '/planning/transport-orders/TR-2026-0004/lines/1/receive-contest',
+          { reasonNo: 'RFS-DAMAGED' },
+          'CLI001'
+        )
+      ).status
     ).toBe(422)
-    expect((await post('/planning/transport-orders/TR-2026-0004/lines/1/receive-contest', { reasonNo: 'CST-QUANTITY' }, 'DEP001')).status).toBe(
-      403
-    )
+    expect(
+      (
+        await post(
+          '/planning/transport-orders/TR-2026-0004/lines/1/receive-contest',
+          { reasonNo: 'CST-QUANTITY' },
+          'DEP001'
+        )
+      ).status
+    ).toBe(403)
     const contested = await post(
       '/planning/transport-orders/TR-2026-0004/lines/1/receive-contest',
       { reasonNo: 'CST-QUANTITY' },
@@ -50,44 +62,92 @@ describe('reception', () => {
     )
     expect(contested.status).toBe(200)
     expect(
-      (await post('/planning/transport-orders/TR-2026-0004/lines/1/receive-confirm', { signer: 'Aina' }, 'CLI001')).status
+      (
+        await post(
+          '/planning/transport-orders/TR-2026-0004/lines/1/receive-confirm',
+          { signer: 'Aina' },
+          'CLI001'
+        )
+      ).status
     ).toBe(409)
-    expect((await post('/planning/transport-orders/TR-2026-0004/lines/1/handle-contest', {}, 'CLI001')).status).toBe(403)
+    expect(
+      (await post('/planning/transport-orders/TR-2026-0004/lines/1/handle-contest', {}, 'CLI001'))
+        .status
+    ).toBe(403)
     const handled = await post('/planning/transport-orders/TR-2026-0004/lines/1/handle-contest', {
       note: 'Avoir proposé',
       reasonNo: 'CST-QUANTITY'
     })
     expect(handled.data.data).toMatchObject({ handled: true })
     expect(
-      (await post('/planning/transport-orders/TR-2026-0004/lines/1/handle-contest', { note: 'Encore' })).status
+      (
+        await post('/planning/transport-orders/TR-2026-0004/lines/1/handle-contest', {
+          note: 'Encore'
+        })
+      ).status
     ).toBe(409)
   })
 
   it('records satisfaction once the recipient has confirmed', async () => {
     await post('/planning/transport-orders/TR-2026-0003/lines/1/declare', { receivedQuantity: 150 })
-    expect((await post('/planning/transport-orders/TR-2026-0003/lines/1/satisfaction', { score: 5 }, 'CLI001')).status).toBe(
-      409
+    expect(
+      (
+        await post(
+          '/planning/transport-orders/TR-2026-0003/lines/1/satisfaction',
+          { score: 5 },
+          'CLI001'
+        )
+      ).status
+    ).toBe(409)
+    await post(
+      '/planning/transport-orders/TR-2026-0003/lines/1/receive-confirm',
+      { signer: 'Rabe' },
+      'CLI001'
     )
-    await post('/planning/transport-orders/TR-2026-0003/lines/1/receive-confirm', { signer: 'Rabe' }, 'CLI001')
-    expect((await post('/planning/transport-orders/TR-2026-0003/lines/1/satisfaction', { score: 6 }, 'CLI001')).status).toBe(
-      400
+    expect(
+      (
+        await post(
+          '/planning/transport-orders/TR-2026-0003/lines/1/satisfaction',
+          { score: 6 },
+          'CLI001'
+        )
+      ).status
+    ).toBe(400)
+    const rated = await post(
+      '/planning/transport-orders/TR-2026-0003/lines/1/satisfaction',
+      { score: 4 },
+      'CLI001'
     )
-    const rated = await post('/planning/transport-orders/TR-2026-0003/lines/1/satisfaction', { score: 4 }, 'CLI001')
     expect(rated.data.data).toMatchObject({ score: 4 })
-    expect((await post('/planning/transport-orders/TR-2026-0003/lines/1/satisfaction', { score: 3 }, 'CLI001')).status).toBe(
-      409
-    )
+    expect(
+      (
+        await post(
+          '/planning/transport-orders/TR-2026-0003/lines/1/satisfaction',
+          { score: 3 },
+          'CLI001'
+        )
+      ).status
+    ).toBe(409)
     const listed = await call(server, 'get', '/planning/receptions', { as: 'CLI001' })
-    const line = (listed.data.data as ReceptionLineApi[]).find((item) => item.orderNo === 'TR-2026-0003')
+    const line = (listed.data.data as ReceptionLineApi[]).find(
+      (item) => item.orderNo === 'TR-2026-0003'
+    )
     expect(line).toBeUndefined()
   })
 
   it('receives a refused load at the warehouse', async () => {
     await readyCarrier()
-    await post('/planning/transport-orders/TR-2026-0004/lines/1/refuse', { reasonNo: 'RFS-DAMAGED' })
+    await post('/planning/transport-orders/TR-2026-0004/lines/1/refuse', {
+      reasonNo: 'RFS-DAMAGED'
+    })
     expect(
-      (await post('/planning/transport-orders/TR-2026-0004/lines/1/receive-return', { conforming: false }, 'DEP001'))
-        .status
+      (
+        await post(
+          '/planning/transport-orders/TR-2026-0004/lines/1/receive-return',
+          { conforming: false },
+          'DEP001'
+        )
+      ).status
     ).toBe(400)
     const received = await post(
       '/planning/transport-orders/TR-2026-0004/lines/1/receive-return',
@@ -95,21 +155,30 @@ describe('reception', () => {
       'DEP001'
     )
     expect(received.status).toBe(200)
-    expect((await post('/planning/transport-orders/TR-2026-0004/lines/1/hand-back')).status).toBe(409)
+    expect((await post('/planning/transport-orders/TR-2026-0004/lines/1/hand-back')).status).toBe(
+      409
+    )
   })
 
   it('puts the missing quantity back into the request pool once', async () => {
     await post('/planning/transport-orders/TR-2026-0003/lines/1/declare', { receivedQuantity: 100 })
-    expect((await post('/planning/transport-orders/TR-2026-0003/lines/1/hand-back')).status).toBe(409)
+    expect((await post('/planning/transport-orders/TR-2026-0003/lines/1/hand-back')).status).toBe(
+      409
+    )
     expect(
-      (await post('/planning/transport-orders/TR-2026-0003/lines/1/remainder', { date: '2026-09-01' })).status
+      (
+        await post('/planning/transport-orders/TR-2026-0003/lines/1/remainder', {
+          date: '2026-09-01'
+        })
+      ).status
     ).toBe(422)
     const remainder = await post('/planning/transport-orders/TR-2026-0003/lines/1/remainder', {
       date: '2026-09-12'
     })
     expect(remainder.data.data).toMatchObject({ requestNo: 'DL-2026-0012' })
-    const created = (await call(server, 'get', '/planning/delivery-requests/DL-2026-0012', { as: 'FLT001' }))
-      .data.data as DeliveryRequestApi
+    const created = (
+      await call(server, 'get', '/planning/delivery-requests/DL-2026-0012', { as: 'FLT001' })
+    ).data.data as DeliveryRequestApi
     expect(created).toMatchObject({
       status: 'pending',
       quantity: 50,
@@ -119,7 +188,11 @@ describe('reception', () => {
       transportOrderNo: null
     })
     expect(
-      (await post('/planning/transport-orders/TR-2026-0003/lines/1/remainder', { date: '2026-09-15' })).status
+      (
+        await post('/planning/transport-orders/TR-2026-0003/lines/1/remainder', {
+          date: '2026-09-15'
+        })
+      ).status
     ).toBe(409)
   })
 })

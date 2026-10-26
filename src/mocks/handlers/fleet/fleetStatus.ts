@@ -106,7 +106,10 @@ export function liveFleetStatus(db: MockDatabase, language: MockLanguage): Fleet
       orderNos:
         immobilized || !trip
           ? []
-          : db.transportOrders.all().filter((order) => order.tripNo === trip.no).map((order) => order.no),
+          : db.transportOrders
+              .all()
+              .filter((order) => order.tripNo === trip.no)
+              .map((order) => order.no),
       mission,
       location: trip?.status === 'in_progress' ? nextSite : (sites.get(vehicle.homeSiteNo) ?? ''),
       immobilizationReason: immobilized ? statusReason(result.cause, vehicle, language) : '',

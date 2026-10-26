@@ -25,5 +25,8 @@ export function requestPlace(db: MockDatabase, deliveryPointNo: string): Place {
 
 export function visibleTo(db: MockDatabase, userCode: string, place: Place): boolean {
   const perimeter = db.perimeters.find(userCode)
-  return inPerimeter(perimeter ? { depotNos: perimeter.depotNos, regions: perimeter.regions } : null, place)
+  return inPerimeter(
+    perimeter ? { depotNos: perimeter.depotNos, regions: perimeter.regions } : null,
+    place
+  )
 }

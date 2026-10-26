@@ -64,13 +64,13 @@ defineExpose(expose)
 </script>
 
 <template>
-  <div class="px-4 sm:px-6 lg:px-8 py-6">
+  <div class="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6">
     <FormSection
       v-model:open="expandedSections.schedule"
       :title="t('planning.transportOrders.form.schedule')"
       :summary="[initialData.routeName]"
     >
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 min-w-0">
+      <div class="space-y-3 min-w-0">
         <BaseFormField
           field="routeTemplateNo"
           :label="t('planning.transportOrders.form.routeTemplateNo')"
@@ -101,8 +101,9 @@ defineExpose(expose)
         >
           <FormInput :model-value="arrivalLabel" disabled />
         </BaseFormField>
+      </div>
+      <div class="space-y-3 min-w-0">
         <BaseFormField
-          class="md:col-span-2"
           field="comment"
           :label="t('planning.transportOrders.form.comment')"
         >

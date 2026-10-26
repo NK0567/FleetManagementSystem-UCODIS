@@ -5,12 +5,18 @@ import {
   receivedQuantityDecision,
   type GapQualification
 } from '@/modules/planning/execution/domain/execution'
-import { lineOutOfTour, linesConfirmed } from '@/modules/planning/customer-confirmations/domain/confirmation'
+import {
+  lineOutOfTour,
+  linesConfirmed
+} from '@/modules/planning/customer-confirmations/domain/confirmation'
 import { loadingReady } from '@/modules/planning/loading/domain/loading'
 import { transportOrderStatus } from '@/modules/planning/transport-orders/domain/transportOrder'
 import { nowIsoDateTime } from '@/utils/date'
 import type { MockDatabase } from '../../db/database'
-import type { TransportOrderLineRow, TransportOrderRow } from '../../fixtures/planning/transportOrders'
+import type {
+  TransportOrderLineRow,
+  TransportOrderRow
+} from '../../fixtures/planning/transportOrders'
 import { readBody, routeParam, stampModified } from '../../http/crudResource'
 import { conflict, unprocessable } from '../../http/errors'
 import { readNumber, readString } from '../../http/input'
@@ -89,7 +95,11 @@ export function registerExecutionHandlers(router: MockRouter, db: MockDatabase):
 
   const lineAction = (
     name: string,
-    apply: (order: TransportOrderRow, line: TransportOrderLineRow, request: MockRequest) => TransportOrderLineRow
+    apply: (
+      order: TransportOrderRow,
+      line: TransportOrderLineRow,
+      request: MockRequest
+    ) => TransportOrderLineRow
   ) =>
     router.post(
       `/planning/transport-orders/:no/lines/:lineNo/${name}`,
@@ -106,7 +116,13 @@ export function registerExecutionHandlers(router: MockRouter, db: MockDatabase):
           order,
           { lines: order.lines.map((item) => (item.lineNo === lineNo ? next : item)) },
           request,
-          name === 'declare' ? 'declared' : name === 'refuse' ? 'refused' : name === 'qualify' ? 'qualified' : 'postponed',
+          name === 'declare'
+            ? 'declared'
+            : name === 'refuse'
+              ? 'refused'
+              : name === 'qualify'
+                ? 'qualified'
+                : 'postponed',
           String(lineNo)
         )
         const updated = db.transportOrders.findOrFail(order.no)
@@ -114,7 +130,7 @@ export function registerExecutionHandlers(router: MockRouter, db: MockDatabase):
       }
     )
 
-  lineAction('declare', (order, line, request) => {
+  lineAction('declare', (_order, line, request) => {
     if (lineOutOfTour(line) || line.refusalAt || line.declaredAt) {
       throw conflict(PLANNING_MESSAGES.executionLineSettled)
     }
@@ -123,7 +139,11 @@ export function registerExecutionHandlers(router: MockRouter, db: MockDatabase):
     const justification = readString(body, 'justification')
     const loaded = line.loadedQuantity ?? line.quantity
     const point = db.deliveryPoints.findOrFail(line.deliveryPointNo)
-    const applicable = applicableTolerance(db.quantityTolerances.all(), point.customerNo, line.productNo)
+    const applicable = applicableTolerance(
+      db.quantityTolerances.all(),
+      point.customerNo,
+      line.productNo
+    )
     const decision = receivedQuantityDecision(
       loaded,
       received,
@@ -143,7 +163,7 @@ export function registerExecutionHandlers(router: MockRouter, db: MockDatabase):
     }
   })
 
-  lineAction('refuse', (order, line, request) => {
+  lineAction('refuse', (_order, line, request) => {
     if (line.declaredAt || line.refusalAt || lineOutOfTour(line)) {
       throw conflict(PLANNING_MESSAGES.executionLineSettled)
     }
@@ -156,7 +176,7 @@ export function registerExecutionHandlers(router: MockRouter, db: MockDatabase):
     }
   })
 
-  lineAction('postpone', (order, line, request) => {
+  lineAction('postpone', (_order, line, request) => {
     if (line.declaredAt || line.refusalAt || lineOutOfTour(line)) {
       throw conflict(PLANNING_MESSAGES.executionLineSettled)
     }
@@ -172,7 +192,7 @@ export function registerExecutionHandlers(router: MockRouter, db: MockDatabase):
     }
   })
 
-  lineAction('qualify', (order, line, request) => {
+  lineAction('qualify', (_order, line, request) => {
     if (line.quantityGap === null || line.quantityGap === 0) {
       throw conflict(PLANNING_MESSAGES.executionNoGap)
     }

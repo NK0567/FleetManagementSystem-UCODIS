@@ -66,7 +66,12 @@ export const MODULE_TOGGLE_CATALOG: readonly ModuleToggleDefinition[] = [
     features: ['VEHICLECHECK', 'VEHICLECHECKPOINT']
   },
   { no: 'delivery-requests', group: 'planning', order: 310, features: ['DELIVERYREQUEST'] },
-  { no: 'customer-confirmation', group: 'planning', order: 320, features: ['CUSTOMERCONFIRMATION'] },
+  {
+    no: 'customer-confirmation',
+    group: 'planning',
+    order: 320,
+    features: ['CUSTOMERCONFIRMATION']
+  },
   { no: 'loading-control', group: 'planning', order: 330, features: ['LOADING'] },
   { no: 'delivery-quality', group: 'planning', order: 340, features: ['DELIVERYQUALITY'] },
   { no: 'customer-billing', group: 'planning', order: 350, features: ['CUSTOMERBILLING'] },

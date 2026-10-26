@@ -54,7 +54,10 @@ function blocksOf(db: MockDatabase, order: TransportOrderRow) {
   })
 }
 
-function vehicleOf(db: MockDatabase, order: TransportOrderRow): { vehicle: string; trailer: string } {
+function vehicleOf(
+  db: MockDatabase,
+  order: TransportOrderRow
+): { vehicle: string; trailer: string } {
   if (order.means === 'carrier') return { vehicle: order.carrierVehiclePlate, trailer: '' }
   const trip = order.tripNo ? db.trips.find(order.tripNo) : undefined
   const plate = (no: string | null | undefined) => (no ? (db.vehicles.find(no)?.plate ?? '') : '')
@@ -68,10 +71,19 @@ function placesOf(db: MockDatabase, order: TransportOrderRow): string {
     .join('; ')
 }
 
-function save(db: MockDatabase, order: TransportOrderRow, patch: Partial<TransportOrderRow>, request: MockRequest, detail: string): void {
+function save(
+  db: MockDatabase,
+  order: TransportOrderRow,
+  patch: Partial<TransportOrderRow>,
+  request: MockRequest,
+  detail: string
+): void {
   db.transportOrders.update(order.no, {
     ...patch,
-    events: [...order.events, { at: nowIsoDateTime(), by: sessionUser(request).code, kind: 'closed', detail }],
+    events: [
+      ...order.events,
+      { at: nowIsoDateTime(), by: sessionUser(request).code, kind: 'closed', detail }
+    ],
     ...stampModified(request)
   })
 }
@@ -95,8 +107,10 @@ export function closingApi(db: MockDatabase, order: TransportOrderRow) {
 }
 
 export function registerClosingHandlers(router: MockRouter, db: MockDatabase): void {
-  router.get('/planning/transport-orders/:no/closing', { feature: FEATURE, action: 'read' }, (request) =>
-    ok(closingApi(db, db.transportOrders.findOrFail(routeParam(request, 'no'))))
+  router.get(
+    '/planning/transport-orders/:no/closing',
+    { feature: FEATURE, action: 'read' },
+    (request) => ok(closingApi(db, db.transportOrders.findOrFail(routeParam(request, 'no'))))
   )
 
   router.post(
@@ -161,8 +175,15 @@ export function registerClosingHandlers(router: MockRouter, db: MockDatabase): v
       const order = db.transportOrders.findOrFail(routeParam(request, 'no'))
       if (order.closedAt) throw conflict(PLANNING_MESSAGES.closingDone)
       const blocks = blocksOf(db, order)
-      if (blocks.length) throw unprocessable(PLANNING_MESSAGES.closingBlocked, { blocks: blocks.join(', ') })
-      save(db, order, { closedAt: nowIsoDateTime(), closedBy: sessionUser(request).code }, request, order.no)
+      if (blocks.length)
+        throw unprocessable(PLANNING_MESSAGES.closingBlocked, { blocks: blocks.join(', ') })
+      save(
+        db,
+        order,
+        { closedAt: nowIsoDateTime(), closedBy: sessionUser(request).code },
+        request,
+        order.no
+      )
       return ok({ status: 'closed' })
     }
   )

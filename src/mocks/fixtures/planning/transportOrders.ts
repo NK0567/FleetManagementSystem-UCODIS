@@ -6,7 +6,10 @@ import {
   emptyFollowUp,
   type LineFollowUp
 } from '@/modules/planning/customer-confirmations/domain/confirmation'
-import { emptyQuality, type QualityFields } from '@/modules/planning/delivery-quality/domain/quality'
+import {
+  emptyQuality,
+  type QualityFields
+} from '@/modules/planning/delivery-quality/domain/quality'
 import { emptyDossier, type OrderDossier } from '@/modules/planning/closing/domain/closing'
 import type { CollectionDefinition, MockRow } from '../../db/collection'
 import { seedAudit } from '../seedAudit'

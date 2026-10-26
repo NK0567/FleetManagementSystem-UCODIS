@@ -58,7 +58,8 @@ function scoreFacts(db: MockDatabase, asOf: string): Map<string, ScoreFacts> {
     const own = driverNo ? facts.get(driverNo) : undefined
     if (!own) continue
     own.openDisputes += order.lines.filter(
-      (line) => line.receptionContestedAt && !line.contestHandledAt && inPeriod(line.receptionContestedAt)
+      (line) =>
+        line.receptionContestedAt && !line.contestHandledAt && inPeriod(line.receptionContestedAt)
     ).length
   }
   const deviationTypes = new Map(db.deviationTypes.all().map((type) => [type.no, type]))

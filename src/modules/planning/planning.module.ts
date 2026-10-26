@@ -64,7 +64,11 @@ export function registerPlanningModule(): void {
         menuKey: 'carrierInvoice'
       },
       { labelKey: 'nav.fuelTours', to: '/planning/fuel-tours', menuKey: 'fuelTour' },
-      { labelKey: 'nav.planningDashboard', to: '/planning/dashboard', menuKey: 'planningDashboard' },
+      {
+        labelKey: 'nav.planningDashboard',
+        to: '/planning/dashboard',
+        menuKey: 'planningDashboard'
+      },
       { labelKey: 'nav.transportReports', to: '/planning/reports', menuKey: 'transportReport' },
       {
         labelKey: 'nav.deliveryRequests',

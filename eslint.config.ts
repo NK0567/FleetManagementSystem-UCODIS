@@ -13,6 +13,7 @@ export default defineConfigWithVueTs(
     '**/dist/**',
     '**/coverage/**',
     'legacy/**',
+    'migration/**',
     'src/typed-router.d.ts',
     'src/components.d.ts'
   ]),

@@ -45,7 +45,8 @@ export function receivedLitres(
   const unloaded = measures.filter((measure) => measure.volumeL > 0)
   if (!unloaded.length) return null
   const at15 = unloaded.map((measure) => volumeAt15(measure, method, expansionCoefficient))
-  if (at15.every((value) => value !== null)) return at15.reduce((sum, value) => sum + (value ?? 0), 0)
+  if (at15.every((value) => value !== null))
+    return at15.reduce((sum, value) => sum + (value ?? 0), 0)
   return unloaded.reduce((sum, measure) => sum + measure.volumeL, 0)
 }
 
