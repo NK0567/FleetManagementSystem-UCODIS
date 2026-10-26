@@ -62,6 +62,7 @@ import { optionalReference, requireReference, unknownReference } from '../../htt
 import { ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
 import { sessionUser, type MockRequest } from '../../http/types'
+import { orderPlace, visibleTo } from './perimeter'
 import { buildTrip } from '../fleet/trips'
 import { equipmentApi } from '../fleet/vehicles'
 import { employeeNames, vehiclePlates } from '../fleet/links'
@@ -84,7 +85,7 @@ export function nextTransportOrderNo(db: MockDatabase): string {
   )
 }
 
-export function transportOrdersApi(db: MockDatabase): TransportOrderApi[] {
+export function transportOrdersApi(db: MockDatabase, userCode?: string): TransportOrderApi[] {
   const routes = new Map(db.routeTemplates.all().map((route) => [route.no, route]))
   const trips = new Map(db.trips.all().map((trip) => [trip.no, trip]))
   const points = new Map(db.deliveryPoints.all().map((point) => [point.no, point]))
@@ -95,7 +96,10 @@ export function transportOrdersApi(db: MockDatabase): TransportOrderApi[] {
   const plates = vehiclePlates(db)
   const names = employeeNames(db)
 
-  return db.transportOrders.all().map((row) => {
+  return db.transportOrders
+    .all()
+    .filter((row) => !userCode || visibleTo(db, userCode, orderPlace(db, row)))
+    .map((row) => {
     const trip = row.tripNo ? trips.get(row.tripNo) : undefined
     const routeNo = trip?.routeTemplateNo ?? row.routeTemplateNo
     const route = routeNo ? routes.get(routeNo) : undefined
@@ -553,7 +557,7 @@ export function registerTransportOrdersHandlers(router: MockRouter, db: MockData
     basePath: BASE_PATH,
     feature: 'TRANSPORTORDER',
     collection: db.transportOrders,
-    list: () => transportOrdersApi(db),
+    list: (request) => transportOrdersApi(db, sessionUser(request).code),
     searchColumns: ['no', 'routeName', 'recipientSummary', 'carrierName', 'tripNo'],
     optionFields: { status: 'transportOrderStatus', means: 'transportMeans' },
     create: (input, request) => {

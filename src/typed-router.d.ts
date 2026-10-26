@@ -955,6 +955,13 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/planning/dashboard/': RouteRecordInfo<
+      '/planning/dashboard/',
+      '/planning/dashboard',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/planning/delivery-points/': RouteRecordInfo<
       '/planning/delivery-points/',
       '/planning/delivery-points',
@@ -1058,6 +1065,13 @@ declare module 'vue-router/auto-routes' {
       '/planning/reasons/:id',
       { id: ParamValue<true> },
       { id: ParamValue<false> },
+      | never
+    >,
+    '/planning/reports/': RouteRecordInfo<
+      '/planning/reports/',
+      '/planning/reports',
+      Record<never, never>,
+      Record<never, never>,
       | never
     >,
     '/planning/settings': RouteRecordInfo<
@@ -2171,6 +2185,14 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | 'id'
     }
+    'src/pages/planning/dashboard/index.vue': {
+      routes:
+        | '/planning/dashboard/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
     'src/pages/planning/delivery-points/index.vue': {
       routes:
         | '/planning/delivery-points/'
@@ -2290,6 +2312,14 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | 'id'
+    }
+    'src/pages/planning/reports/index.vue': {
+      routes:
+        | '/planning/reports/'
+      views:
+        | never
+      pathParamNames:
+        | never
     }
     'src/pages/planning/settings.vue': {
       routes:

@@ -35,6 +35,7 @@ import { requireReference } from '../../http/references'
 import { ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
 import { sessionUser } from '../../http/types'
+import { requestPlace, visibleTo } from './perimeter'
 import { PLANNING_MESSAGES } from './messages'
 import { readReason } from './planningReasons'
 import { planningSettings } from './settings'
@@ -56,13 +57,16 @@ type Entry = Pick<
   | 'volumeM3'
 >
 
-export function deliveryRequestsApi(db: MockDatabase): DeliveryRequestApi[] {
+export function deliveryRequestsApi(db: MockDatabase, userCode?: string): DeliveryRequestApi[] {
   const today = todayIso()
   const customers = new Map(db.customers.all().map((customer) => [customer.no, customer.name]))
   const points = new Map(db.deliveryPoints.all().map((point) => [point.no, point]))
   const products = new Map(db.products.all().map((product) => [product.no, product]))
   const reasons = new Map(db.planningReasons.all().map((reason) => [reason.no, reason.name]))
-  return db.deliveryRequests.all().map((row) => {
+  return db.deliveryRequests
+    .all()
+    .filter((row) => !userCode || visibleTo(db, userCode, requestPlace(db, row.deliveryPointNo)))
+    .map((row) => {
     const point = points.get(row.deliveryPointNo)
     const product = products.get(row.productNo)
     return {
@@ -190,7 +194,7 @@ export function registerDeliveryRequestsHandlers(router: MockRouter, db: MockDat
     basePath: BASE_PATH,
     feature: 'DELIVERYREQUEST',
     collection: db.deliveryRequests,
-    list: () => deliveryRequestsApi(db),
+    list: (request) => deliveryRequestsApi(db, sessionUser(request).code),
     searchColumns: ['no', 'ordererName', 'deliveryPointName', 'externalReference'],
     optionFields: { freightPayer: 'freightPayer', status: 'deliveryRequestStatus' },
     create: (input, request) => {

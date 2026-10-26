@@ -110,7 +110,9 @@ const PLANNING_OPERATIONS = [
   'DELIVERYQUALITY',
   'CUSTOMERBILLING',
   'CARRIERINVOICE',
-  'FUELTOUR'
+  'FUELTOUR',
+  'PLANNINGDASHBOARD',
+  'TRANSPORTREPORT'
 ]
 /** Planning rights replace the old role lists of the planning settings. */
 const PLANNING_MANAGEMENT: Record<string, Grant> = {

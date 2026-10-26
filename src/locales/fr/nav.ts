@@ -91,5 +91,7 @@ export default {
   'nav.customerBilling': 'Facturation client',
   'nav.carrierInvoices': 'Factures transporteurs',
   'nav.fuelTours': 'Tournées carburant',
+  'nav.planningDashboard': 'Tableau de bord',
+  'nav.transportReports': 'Rapports transport',
   'nav.deliveryRequests': 'Demandes de livraison'
 }

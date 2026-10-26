@@ -78,11 +78,12 @@ import { deliveryRequestsCollection } from '../fixtures/planning/deliveryRequest
 import { transportOrdersCollection } from '../fixtures/planning/transportOrders'
 import { carrierInvoicesCollection } from '../fixtures/planning/carrierInvoices'
 import { fuelToursCollection } from '../fixtures/planning/fuelTours'
+import { perimetersCollection } from '../fixtures/planning/perimeters'
 import { createCollection, type CollectionContext } from './collection'
 import { clearStoredCollections } from './storage'
 
 /** Bump when fixtures change shape: every collection is then reseeded. */
-export const MOCK_SEED_VERSION = 48
+export const MOCK_SEED_VERSION = 49
 
 export function createDatabase(
   context: CollectionContext = {
@@ -169,7 +170,8 @@ export function createDatabase(
     deliveryRequests: createCollection(deliveryRequestsCollection, context),
     transportOrders: createCollection(transportOrdersCollection, context),
     carrierInvoices: createCollection(carrierInvoicesCollection, context),
-    fuelTours: createCollection(fuelToursCollection, context)
+    fuelTours: createCollection(fuelToursCollection, context),
+    perimeters: createCollection(perimetersCollection, context)
   }
 
   return {

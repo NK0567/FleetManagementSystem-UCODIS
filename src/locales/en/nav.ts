@@ -91,5 +91,7 @@ export default {
   'nav.customerBilling': 'Customer billing',
   'nav.carrierInvoices': 'Carrier invoices',
   'nav.fuelTours': 'Fuel tours',
+  'nav.planningDashboard': 'Dashboard',
+  'nav.transportReports': 'Transport reports',
   'nav.deliveryRequests': 'Delivery requests'
 }
