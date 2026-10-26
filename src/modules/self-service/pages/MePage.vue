@@ -95,6 +95,9 @@ onMounted(async () => {
           </li>
         </ul>
       </div>
+      <router-link class="text-primary underline block" to="/me/tour">
+        {{ t('selfService.tour.title') }}
+      </router-link>
       <router-link class="text-primary underline" to="/me/absences">
         {{ t('selfService.profile.absences') }}
       </router-link>

@@ -12,6 +12,7 @@ import { registerFleetHandlers } from './handlers/fleet'
 import { registerMaintenanceHandlers } from './handlers/maintenance'
 import { registerPlanningHandlers } from './handlers/planning'
 import { registerSelfServiceHandlers } from './handlers/selfService/profile'
+import { registerTourHandlers } from './handlers/selfService/tour'
 import { createMockAdapter } from './http/adapter'
 import { createMockRouter } from './http/router'
 
@@ -36,6 +37,7 @@ export function createMockServer(context?: CollectionContext) {
   registerMaintenanceHandlers(router, db)
   registerPlanningHandlers(router, db)
   registerSelfServiceHandlers(router, db)
+  registerTourHandlers(router, db)
 
   return { db, router }
 }

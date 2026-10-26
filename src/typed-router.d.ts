@@ -934,6 +934,20 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/me/checklist': RouteRecordInfo<
+      '/me/checklist',
+      '/me/checklist',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/me/tour': RouteRecordInfo<
+      '/me/tour',
+      '/me/tour',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/planning/carrier-invoices/': RouteRecordInfo<
       '/planning/carrier-invoices/',
       '/planning/carrier-invoices',
@@ -2170,6 +2184,22 @@ declare module 'vue-router/auto-routes' {
     'src/pages/me/absences.vue': {
       routes:
         | '/me/absences'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/me/checklist.vue': {
+      routes:
+        | '/me/checklist'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/me/tour.vue': {
+      routes:
+        | '/me/tour'
       views:
         | never
       pathParamNames:

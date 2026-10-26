@@ -13,6 +13,8 @@ export function registerSelfServiceModule(): void {
     order: MY_SPACE_ORDER,
     subItems: [
       { labelKey: 'nav.myProfile', to: '/me', menuKey: 'mySpace' },
+      { labelKey: 'nav.myTour', to: '/me/tour', menuKey: 'mySpace' },
+      { labelKey: 'nav.myChecklist', to: '/me/checklist', menuKey: 'mySpace' },
       { labelKey: 'nav.myAbsences', to: '/me/absences', menuKey: 'mySpace' }
     ]
   })

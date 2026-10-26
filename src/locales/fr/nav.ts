@@ -77,6 +77,8 @@ export default {
   'nav.purchaseRequests': "Demandes d'achat",
   'nav.mySpace': 'Mon espace',
   'nav.myProfile': 'Mon profil',
+  'nav.myTour': 'Ma tournée',
+  'nav.myChecklist': 'Ma check-list',
   'nav.myAbsences': 'Mes absences',
   'nav.planning': 'Planification',
   'nav.planningReasons': 'Motifs',

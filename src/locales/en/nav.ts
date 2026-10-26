@@ -77,6 +77,8 @@ export default {
   'nav.purchaseRequests': 'Purchase requests',
   'nav.mySpace': 'My space',
   'nav.myProfile': 'My profile',
+  'nav.myTour': 'My tour',
+  'nav.myChecklist': 'My checklist',
   'nav.myAbsences': 'My absences',
   'nav.planning': 'Planning',
   'nav.planningReasons': 'Reasons',
