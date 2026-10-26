@@ -58,6 +58,7 @@ export const PLANNING_OPTION_SETS: Record<string, Record<string, LocalizedText>>
     confirmed: { fr: 'Confirmé', en: 'Confirmed' },
     ready: { fr: 'Prêt', en: 'Ready' },
     in_progress: { fr: 'En cours', en: 'In progress' },
+    delivered: { fr: 'Livré', en: 'Delivered' },
     cancelled: { fr: 'Annulé', en: 'Cancelled' }
   },
   transportMeans: {

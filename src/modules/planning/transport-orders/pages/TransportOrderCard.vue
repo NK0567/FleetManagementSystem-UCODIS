@@ -9,6 +9,7 @@ import { useListCellFormatters } from '@/composables/useListCellFormatters'
 import { usePermissions } from '@/composables/usePermissions'
 import { formatNumber } from '@/utils/format'
 import type { TransportOrderAction } from '../api/transportOrderApi'
+import { transportOrderApi } from '../api/transportOrderApi'
 import TransportOrderForm from '../components/TransportOrderForm.vue'
 import { canCancel, canEditLines, canPlan } from '../domain/transportOrder'
 import { transportOrderService } from '../services/transportOrderService'
@@ -68,7 +69,9 @@ const pageTitle = computed(() =>
 const acting = ref(false)
 const planning = ref(false)
 const editingLines = ref(false)
+const declaring = ref(false)
 const cancelling = ref(false)
+const receivedQuantity = ref<number | null>(null)
 const dialogError = ref<string | null>(null)
 
 async function refresh(updated: Awaited<ReturnType<typeof transportOrderService.act>>) {
@@ -110,6 +113,38 @@ async function saveLines(lines: TransportOrderLineInput[]) {
   } catch (error) {
     dialogError.value = apiErrorMessage(error, t('planning.transportOrders.saveError'))
     saveError.value = dialogError.value
+  } finally {
+    acting.value = false
+  }
+}
+
+async function depart() {
+  const no = item.value?.no
+  if (!no) return
+  acting.value = true
+  saveError.value = null
+  try {
+    await transportOrderApi.depart(no)
+    await refresh(await transportOrderService.getById(no))
+  } catch (error) {
+    saveError.value = apiErrorMessage(error, t('planning.transportOrders.saveError'))
+  } finally {
+    acting.value = false
+  }
+}
+
+async function declare() {
+  const current = item.value
+  const line = current?.lines.find((item) => !item.declaredAt && !item.refusalAt && !item.returnedAt)
+  if (!current || !line || receivedQuantity.value === null) return
+  acting.value = true
+  saveError.value = null
+  try {
+    await transportOrderApi.declareLine(current.no, line.lineNo, receivedQuantity.value)
+    await refresh(await transportOrderService.getById(current.no))
+    declaring.value = false
+  } catch (error) {
+    saveError.value = apiErrorMessage(error, t('planning.transportOrders.saveError'))
   } finally {
     acting.value = false
   }
@@ -182,6 +217,24 @@ const buttonClass =
       >
         <ListTree class="w-5 h-5 text-primary" />
         {{ t('planning.transportOrders.action.lines') }}
+      </button>
+      <button
+        v-if="canExecute && item.means === 'carrier' && item.status === 'ready'"
+        type="button"
+        :class="buttonClass"
+        :disabled="acting"
+        @click="depart"
+      >
+        {{ t('planning.transportOrders.action.depart') }}
+      </button>
+      <button
+        v-if="canExecute && item.status === 'in_progress'"
+        type="button"
+        :class="buttonClass"
+        :disabled="acting"
+        @click="((receivedQuantity = null), (declaring = true))"
+      >
+        {{ t('planning.transportOrders.action.declare') }}
       </button>
       <button
         v-if="canExecute && canCancel(item.status)"
@@ -363,6 +416,16 @@ const buttonClass =
     @confirm="saveLines"
     @cancel="editingLines = false"
   />
+  <ConfirmDialog
+    :open="declaring"
+    :title="t('planning.transportOrders.action.declare')"
+    :confirm-disabled="receivedQuantity === null"
+    :loading="acting"
+    @confirm="declare"
+    @cancel="declaring = false"
+  >
+    <FormInput v-model="receivedQuantity" type="number" :min="0" />
+  </ConfirmDialog>
   <PlanningReasonDialog
     :open="cancelling"
     :title="t('planning.transportOrders.action.cancel')"

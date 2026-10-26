@@ -29,6 +29,7 @@ import {
   trackingExpiry
 } from '@/modules/planning/customer-confirmations/domain/confirmation'
 import { loadingReady } from '@/modules/planning/loading/domain/loading'
+import { linesDelivered } from '@/modules/planning/execution/domain/execution'
 import { combinationCapacity, type LoadCapacity } from '@/modules/fleet/vehicles/domain/capacity'
 import { nowIsoDateTime, todayIso } from '@/utils/date'
 import type { MockDatabase } from '../../db/database'
@@ -157,7 +158,9 @@ export function transportOrdersApi(db: MockDatabase): TransportOrderApi[] {
         means: row.means,
         tripStatus: trip?.status ?? null,
         linesConfirmed: linesConfirmed(row.lines),
-        loadingReady: loadingReady(row.lines)
+        loadingReady: loadingReady(row.lines),
+        carrierDeparted: row.carrierDepartedAt !== null,
+        linesDelivered: linesDelivered(row.lines)
       }),
       createdAt: row.createdAt,
       createdBy: row.createdBy,
@@ -190,7 +193,9 @@ function statusOf(db: MockDatabase, row: TransportOrderRow) {
     means: row.means,
     tripStatus: trip?.status ?? null,
     linesConfirmed: linesConfirmed(row.lines),
-    loadingReady: loadingReady(row.lines)
+    loadingReady: loadingReady(row.lines),
+    carrierDeparted: row.carrierDepartedAt !== null,
+    linesDelivered: linesDelivered(row.lines)
   })
 }
 
@@ -526,9 +531,15 @@ function assertSchedule(order: TransportOrderRow): void {
 
 function blankCarrier(): Pick<
   TransportOrderRow,
-  'carrierNo' | 'carrierVehiclePlate' | 'carrierDriverName'
+  'carrierNo' | 'carrierVehiclePlate' | 'carrierDriverName' | 'carrierDepartedAt' | 'carrierArrivedAt'
 > {
-  return { carrierNo: null, carrierVehiclePlate: '', carrierDriverName: '' }
+  return {
+    carrierNo: null,
+    carrierVehiclePlate: '',
+    carrierDriverName: '',
+    carrierDepartedAt: null,
+    carrierArrivedAt: null
+  }
 }
 
 export function registerTransportOrdersHandlers(router: MockRouter, db: MockDatabase): void {

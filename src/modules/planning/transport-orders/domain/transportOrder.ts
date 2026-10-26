@@ -6,6 +6,7 @@ export const TRANSPORT_ORDER_STATUSES = [
   'confirmed',
   'ready',
   'in_progress',
+  'delivered',
   'cancelled'
 ] as const
 export type TransportOrderStatus = (typeof TRANSPORT_ORDER_STATUSES)[number]
@@ -19,6 +20,11 @@ export const TRANSPORT_ORDER_EVENT_KINDS = [
   'planned',
   'confirmed',
   'replanned',
+  'departed',
+  'declared',
+  'refused',
+  'postponed',
+  'qualified',
   'cancelled'
 ] as const
 export type TransportOrderEventKind = (typeof TRANSPORT_ORDER_EVENT_KINDS)[number]
@@ -35,6 +41,10 @@ export interface TransportOrderFacts {
   linesConfirmed?: boolean
   /** Every line still to load has been checked conforming. */
   loadingReady?: boolean
+  /** The carrier has been recorded as having left. Fleet departure is the trip status. */
+  carrierDeparted?: boolean
+  /** Every line is settled. */
+  linesDelivered?: boolean
 }
 
 /**
@@ -43,9 +53,11 @@ export interface TransportOrderFacts {
  */
 export function transportOrderStatus(order: TransportOrderFacts): TransportOrderStatus {
   if (order.cancelledAt) return 'cancelled'
-  if (order.means === 'fleet' && order.tripStatus && TRIP_DEPARTED.includes(order.tripStatus)) {
-    return 'in_progress'
-  }
+  const fleetDeparted =
+    order.means === 'fleet' && !!order.tripStatus && TRIP_DEPARTED.includes(order.tripStatus)
+  const departed = fleetDeparted || !!order.carrierDeparted
+  if (departed && order.linesDelivered) return 'delivered'
+  if (departed) return 'in_progress'
   if (order.means && order.linesConfirmed && order.loadingReady) return 'ready'
   if (order.means && order.linesConfirmed) return 'confirmed'
   if (order.means) return 'planned'
@@ -60,8 +72,9 @@ export const canEditLines = (status: TransportOrderStatus) =>
 /** The route and the departure belong to the trip once the order is planned. */
 export const canEditSchedule = (status: TransportOrderStatus) => status === 'draft'
 
-/** Allowed up to and including the road. Delivered and closed will narrow this later. */
-export const canCancel = (status: TransportOrderStatus) => status !== 'cancelled'
+/** Allowed up to and including the road. A delivered order stays. */
+export const canCancel = (status: TransportOrderStatus) =>
+  status !== 'cancelled' && status !== 'delivered'
 
 export interface LoadLine {
   weightKg: number | null

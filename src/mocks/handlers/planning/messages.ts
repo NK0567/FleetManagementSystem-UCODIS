@@ -292,5 +292,37 @@ export const PLANNING_MESSAGES = {
   loadingNotDeclared: {
     fr: 'L’entrepôt n’a pas encore déclaré le chargement de cette ligne.',
     en: 'The warehouse has not declared the loading of this line yet.'
+  },
+  executionNotCarrier: {
+    fr: 'Le départ et l’arrivée se saisissent pour un transporteur. Pour la flotte, ils sont sur le trajet.',
+    en: 'Departure and arrival are entered for a carrier. For the fleet, they belong to the trip.'
+  },
+  executionNotReady: {
+    fr: 'Le transporteur ne part qu’une fois l’ordre prêt.',
+    en: 'The carrier leaves only once the order is ready.'
+  },
+  executionNotOnTheRoad: {
+    fr: 'Une livraison se déclare une fois l’ordre en cours.',
+    en: 'A delivery is declared once the order is on the road.'
+  },
+  executionLineSettled: {
+    fr: 'Cette ligne est déjà réglée.',
+    en: 'This line is already settled.'
+  },
+  executionGapBlocked: {
+    fr: 'L’écart dépasse la tolérance : une justification est obligatoire.',
+    en: 'The gap exceeds the tolerance: a justification is required.'
+  },
+  executionNoGap: {
+    fr: 'Cette ligne n’a pas d’écart à qualifier.',
+    en: 'This line has no gap to qualify.'
+  },
+  executionGapQualified: {
+    fr: 'Cet écart est déjà qualifié.',
+    en: 'This gap is already qualified.'
+  },
+  executionGapKind: {
+    fr: 'Un gain qualifie un écart positif, une perte un écart négatif.',
+    en: 'A gain qualifies a positive gap, a loss a negative one.'
   }
 } satisfies Record<string, LocalizedText>

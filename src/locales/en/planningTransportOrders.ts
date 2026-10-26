@@ -55,6 +55,8 @@ export default {
   'planning.transportOrders.action.plan': 'Plan',
   'planning.transportOrders.action.lines': 'Edit lines',
   'planning.transportOrders.action.cancel': 'Cancel the order',
+  'planning.transportOrders.action.depart': 'Carrier departure',
+  'planning.transportOrders.action.declare': 'Declare the delivery',
   'planning.transportOrders.action.createFromRequests': 'Create an order',
   'planning.transportOrders.cancelledBecause': 'Cancelled: {reason}',
 
@@ -89,6 +91,11 @@ export default {
   'planning.transportOrders.history.planned': 'Planned',
   'planning.transportOrders.history.confirmed': 'Recipients confirmed',
   'planning.transportOrders.history.replanned': 'Line replanned',
+  'planning.transportOrders.history.postponed': 'Postponed',
+  'planning.transportOrders.history.qualified': 'Gap qualified',
+  'planning.transportOrders.history.departed': 'Departure',
+  'planning.transportOrders.history.declared': 'Delivery declared',
+  'planning.transportOrders.history.refused': 'Refused',
   'planning.transportOrders.history.cancelled': 'Cancelled',
 
   'planning.transportOrders.createDialog.title': 'Create an order from requests',

@@ -35,6 +35,8 @@ export interface TransportOrderRow extends MockRow {
   carrierNo: string | null
   carrierVehiclePlate: string
   carrierDriverName: string
+  carrierDepartedAt: string | null
+  carrierArrivedAt: string | null
   cancellationReasonNo: string | null
   cancellationComment: string
   cancelledAt: string | null
@@ -81,6 +83,8 @@ const SEED: Omit<TransportOrderRow, keyof typeof seedAudit>[] = [
     carrierNo: null,
     carrierVehiclePlate: '',
     carrierDriverName: '',
+    carrierDepartedAt: null,
+    carrierArrivedAt: null,
     cancellationReasonNo: null,
     cancellationComment: '',
     cancelledAt: null,
@@ -101,6 +105,8 @@ const SEED: Omit<TransportOrderRow, keyof typeof seedAudit>[] = [
     carrierNo: null,
     carrierVehiclePlate: '',
     carrierDriverName: '',
+    carrierDepartedAt: null,
+    carrierArrivedAt: null,
     cancellationReasonNo: null,
     cancellationComment: '',
     cancelledAt: null,
@@ -121,6 +127,8 @@ const SEED: Omit<TransportOrderRow, keyof typeof seedAudit>[] = [
     carrierNo: null,
     carrierVehiclePlate: '',
     carrierDriverName: '',
+    carrierDepartedAt: null,
+    carrierArrivedAt: null,
     cancellationReasonNo: null,
     cancellationComment: '',
     cancelledAt: null,
@@ -141,6 +149,8 @@ const SEED: Omit<TransportOrderRow, keyof typeof seedAudit>[] = [
     carrierNo: 'PRS-016',
     carrierVehiclePlate: '1234 TBA',
     carrierDriverName: 'Hery Rakoto',
+    carrierDepartedAt: null,
+    carrierArrivedAt: null,
     cancellationReasonNo: null,
     cancellationComment: '',
     cancelledAt: null,
@@ -161,6 +171,8 @@ const SEED: Omit<TransportOrderRow, keyof typeof seedAudit>[] = [
     carrierNo: null,
     carrierVehiclePlate: '',
     carrierDriverName: '',
+    carrierDepartedAt: null,
+    carrierArrivedAt: null,
     cancellationReasonNo: 'CXL-CUSTOMER',
     cancellationComment: 'Le client a reporté.',
     cancelledAt: '2026-09-03T11:00:00',

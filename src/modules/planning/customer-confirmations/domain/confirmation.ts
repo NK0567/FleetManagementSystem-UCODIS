@@ -20,6 +20,19 @@ export interface LineFollowUp {
   nonconformityAt: string | null
   nonconformityReasonNo: string | null
   nonconformityComment: string
+  declaredAt: string | null
+  declaredBy: string | null
+  receivedQuantity: number | null
+  quantityGap: number | null
+  gapQualification: 'gain' | 'loss' | null
+  gapComment: string
+  refusalAt: string | null
+  refusalReasonNo: string | null
+  refusalComment: string
+  postponedAt: string | null
+  postponementReasonNo: string | null
+  postponementComment: string
+  returnedAt: string | null
 }
 
 export function emptyFollowUp(): LineFollowUp {
@@ -39,7 +52,20 @@ export function emptyFollowUp(): LineFollowUp {
     conformingAt: null,
     nonconformityAt: null,
     nonconformityReasonNo: null,
-    nonconformityComment: ''
+    nonconformityComment: '',
+    declaredAt: null,
+    declaredBy: null,
+    receivedQuantity: null,
+    quantityGap: null,
+    gapQualification: null,
+    gapComment: '',
+    refusalAt: null,
+    refusalReasonNo: null,
+    refusalComment: '',
+    postponedAt: null,
+    postponementReasonNo: null,
+    postponementComment: '',
+    returnedAt: null
   }
 }
 
@@ -50,11 +76,12 @@ type TourLine = {
   unavailableAt: string | null
   replannedAt: string | null
   nonconformityAt?: string | null
+  returnedAt?: string | null
 }
 
 /** A line left the tour: the recipient is unavailable, the goods failed the loading check, or the delivery was sent back to the pool. */
 export function lineOutOfTour(line: TourLine): boolean {
-  return line.unavailableAt !== null || line.replannedAt !== null || !!line.nonconformityAt
+  return line.unavailableAt !== null || line.replannedAt !== null || !!line.nonconformityAt || !!line.returnedAt
 }
 
 export function confirmationState(line: TourLine): ConfirmationState {

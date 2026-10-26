@@ -55,6 +55,8 @@ export default {
   'planning.transportOrders.action.plan': 'Planifier',
   'planning.transportOrders.action.lines': 'Modifier les lignes',
   'planning.transportOrders.action.cancel': "Annuler l'ordre",
+  'planning.transportOrders.action.depart': 'Départ du transporteur',
+  'planning.transportOrders.action.declare': 'Déclarer la livraison',
   'planning.transportOrders.action.createFromRequests': 'Créer un ordre',
   'planning.transportOrders.cancelledBecause': 'Annulé : {reason}',
 
@@ -90,6 +92,11 @@ export default {
   'planning.transportOrders.history.planned': 'Planifié',
   'planning.transportOrders.history.confirmed': 'Destinataires confirmés',
   'planning.transportOrders.history.replanned': 'Ligne replanifiée',
+  'planning.transportOrders.history.postponed': 'Reportée',
+  'planning.transportOrders.history.qualified': 'Écart qualifié',
+  'planning.transportOrders.history.departed': 'Départ',
+  'planning.transportOrders.history.declared': 'Livraison déclarée',
+  'planning.transportOrders.history.refused': 'Refus',
   'planning.transportOrders.history.cancelled': 'Annulé',
 
   'planning.transportOrders.createDialog.title': 'Créer un ordre depuis des demandes',
