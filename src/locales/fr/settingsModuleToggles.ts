@@ -87,5 +87,8 @@ export default {
     'L’entrepôt déclare les quantités chargées et contrôle chaque ligne avant le départ.',
   'settings.moduleToggles.item.delivery-quality.label': 'Qualité de livraison',
   'settings.moduleToggles.item.delivery-quality.description':
-    'Protêts, parts de responsabilité, retenues sur la facture du transporteur et avoirs au client.'
+    'Protêts, parts de responsabilité, retenues sur la facture du transporteur et avoirs au client.',
+  'settings.moduleToggles.item.customer-billing.label': 'Facturation client',
+  'settings.moduleToggles.item.customer-billing.description':
+    'Valorise chaque livraison livrée et marque la facture : le montant et la référence ne changent plus.'
 }

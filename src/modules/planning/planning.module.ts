@@ -10,6 +10,7 @@ export function registerPlanningModule(): void {
     CUSTOMERCONFIRMATION: { to: '/planning/confirmations', menuKey: 'customerConfirmation' },
     LOADING: { to: '/planning/loading', menuKey: 'loading' },
     DELIVERYQUALITY: { to: '/planning/delivery-quality', menuKey: 'deliveryQuality' },
+    CUSTOMERBILLING: { to: '/planning/customer-billing', menuKey: 'customerBilling' },
     CUSTOMER: { to: '/planning/customers', menuKey: 'customer' },
     DELIVERYPOINT: { to: '/planning/delivery-points', menuKey: 'deliveryPoint' },
     PRODUCT: { to: '/planning/products', menuKey: 'product' },
@@ -42,6 +43,11 @@ export function registerPlanningModule(): void {
         labelKey: 'nav.deliveryQuality',
         to: '/planning/delivery-quality',
         menuKey: 'deliveryQuality'
+      },
+      {
+        labelKey: 'nav.customerBilling',
+        to: '/planning/customer-billing',
+        menuKey: 'customerBilling'
       },
       {
         labelKey: 'nav.deliveryRequests',

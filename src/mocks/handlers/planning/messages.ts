@@ -468,5 +468,37 @@ export const PLANNING_MESSAGES = {
   closingDates: {
     fr: 'La date de déchargement ne peut pas précéder la date de chargement.',
     en: 'The unloading date cannot be earlier than the loading date.'
+  },
+  billingNotDelivered: {
+    fr: 'Cette livraison n’a pas eu lieu.',
+    en: 'This delivery did not take place.'
+  },
+  billingInternal: {
+    fr: 'Le fret est à la charge d’un service interne : rien à facturer.',
+    en: 'The freight is paid by an internal department: nothing to invoice.'
+  },
+  billingReception: {
+    fr: 'La livraison se facture une fois la réception attestée.',
+    en: 'The delivery is invoiced once the reception is attested.'
+  },
+  billingGap: {
+    fr: 'Qualifiez l’écart de quantité avant de facturer.',
+    en: 'Qualify the quantity gap before invoicing.'
+  },
+  billingContestation: {
+    fr: 'Traitez la contestation avant de facturer.',
+    en: 'Handle the contestation before invoicing.'
+  },
+  billingTariff: {
+    fr: 'Aucun tarif de ce client ne s’applique à cette livraison.',
+    en: 'No tariff of this customer applies to this delivery.'
+  },
+  billingInvoiced: {
+    fr: 'Cette livraison est déjà facturée.',
+    en: 'This delivery is already invoiced.'
+  },
+  billingReference: {
+    fr: 'Cette référence est déjà utilisée par une facture ou un avoir.',
+    en: 'This reference is already used by an invoice or a credit note.'
   }
 } satisfies Record<string, LocalizedText>

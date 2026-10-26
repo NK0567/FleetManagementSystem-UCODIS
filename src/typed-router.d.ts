@@ -927,6 +927,13 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/planning/customer-billing/': RouteRecordInfo<
+      '/planning/customer-billing/',
+      '/planning/customer-billing',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/planning/customers/': RouteRecordInfo<
       '/planning/customers/',
       '/planning/customers',
@@ -2113,6 +2120,14 @@ declare module 'vue-router/auto-routes' {
     'src/pages/planning/confirmations/index.vue': {
       routes:
         | '/planning/confirmations/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/planning/customer-billing/index.vue': {
+      routes:
+        | '/planning/customer-billing/'
       views:
         | never
       pathParamNames:

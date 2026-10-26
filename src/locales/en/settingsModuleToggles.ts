@@ -87,5 +87,8 @@ export default {
     'The warehouse declares loaded quantities and checks each line before departure.',
   'settings.moduleToggles.item.delivery-quality.label': 'Delivery quality',
   'settings.moduleToggles.item.delivery-quality.description':
-    'Protest notes, responsibility shares, withholdings on the carrier invoice and credit notes to the customer.'
+    'Protest notes, responsibility shares, withholdings on the carrier invoice and credit notes to the customer.',
+  'settings.moduleToggles.item.customer-billing.label': 'Customer billing',
+  'settings.moduleToggles.item.customer-billing.description':
+    'Prices each delivered line and marks the invoice: the amount and the reference no longer change.'
 }

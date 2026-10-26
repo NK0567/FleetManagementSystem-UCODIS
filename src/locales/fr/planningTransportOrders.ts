@@ -111,6 +111,7 @@ export default {
   'planning.transportOrders.history.protest_closed': 'Protêt clôturé',
   'planning.transportOrders.history.responsibility_set': 'Responsabilité établie',
   'planning.transportOrders.history.credit_issued': 'Avoir émis',
+  'planning.transportOrders.history.invoiced': 'Facturée',
   'planning.transportOrders.history.closed': 'Clôturé',
   'planning.transportOrders.action.close': 'Clôturer',
   'planning.transportOrders.action.debriefing': 'Enregistrer le débriefing',

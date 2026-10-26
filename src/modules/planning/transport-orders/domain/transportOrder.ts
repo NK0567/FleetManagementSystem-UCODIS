@@ -38,6 +38,7 @@ export const TRANSPORT_ORDER_EVENT_KINDS = [
   'protest_closed',
   'responsibility_set',
   'credit_issued',
+  'invoiced',
   'closed',
   'cancelled'
 ] as const

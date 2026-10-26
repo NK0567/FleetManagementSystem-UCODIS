@@ -63,6 +63,7 @@ declare module 'vue' {
     CreateModalShell: typeof import('./components/shared/CreateModalShell.vue')['default']
     CreateTransportOrderDialog: typeof import('./modules/planning/transport-orders/components/CreateTransportOrderDialog.vue')['default']
     CsvImportDialog: typeof import('./components/shared/CsvImportDialog.vue')['default']
+    CustomerBillingPage: typeof import('./modules/planning/customer-billing/pages/CustomerBillingPage.vue')['default']
     CustomerCard: typeof import('./modules/planning/customers/pages/CustomerCard.vue')['default']
     CustomerCreateModal: typeof import('./modules/planning/customers/pages/CustomerCreateModal.vue')['default']
     CustomerForm: typeof import('./modules/planning/customers/components/CustomerForm.vue')['default']

@@ -61,6 +61,11 @@ export interface QualityFields {
   creditIssuedBy: string | null
   customerInvoicedAt: string | null
   carrierInvoiceValidatedAt: string | null
+  invoiceCustomerNo: string | null
+  invoiceReference: string | null
+  invoiceAmount: number | null
+  invoiceFlatShare: number | null
+  invoiceTariffNo: string | null
 }
 
 export function emptyQuality(): QualityFields {
@@ -71,7 +76,12 @@ export function emptyQuality(): QualityFields {
     creditIssuedAt: null,
     creditIssuedBy: null,
     customerInvoicedAt: null,
-    carrierInvoiceValidatedAt: null
+    carrierInvoiceValidatedAt: null,
+    invoiceCustomerNo: null,
+    invoiceReference: null,
+    invoiceAmount: null,
+    invoiceFlatShare: null,
+    invoiceTariffNo: null
   }
 }
 

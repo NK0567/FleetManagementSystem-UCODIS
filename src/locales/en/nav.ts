@@ -88,5 +88,6 @@ export default {
   'nav.customerConfirmations': 'Confirmations',
   'nav.loading': 'Loading',
   'nav.deliveryQuality': 'Delivery quality',
+  'nav.customerBilling': 'Customer billing',
   'nav.deliveryRequests': 'Delivery requests'
 }

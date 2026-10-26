@@ -110,6 +110,7 @@ export default {
   'planning.transportOrders.history.protest_closed': 'Protest closed',
   'planning.transportOrders.history.responsibility_set': 'Responsibility set',
   'planning.transportOrders.history.credit_issued': 'Credit note issued',
+  'planning.transportOrders.history.invoiced': 'Invoiced',
   'planning.transportOrders.history.closed': 'Closed',
   'planning.transportOrders.action.close': 'Close',
   'planning.transportOrders.action.debriefing': 'Save the debriefing',

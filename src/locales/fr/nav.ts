@@ -88,5 +88,6 @@ export default {
   'nav.customerConfirmations': 'Confirmations',
   'nav.loading': 'Chargement',
   'nav.deliveryQuality': 'Qualité de livraison',
+  'nav.customerBilling': 'Facturation client',
   'nav.deliveryRequests': 'Demandes de livraison'
 }

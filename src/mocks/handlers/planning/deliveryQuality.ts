@@ -330,9 +330,12 @@ export function registerDeliveryQualityHandlers(router: MockRouter, db: MockData
       if (!credit) throw conflict(PLANNING_MESSAGES.qualityCreditMissing)
       if (line.creditIssuedAt) throw conflict(PLANNING_MESSAGES.qualityCreditIssued)
       const reference = readString(readBody(request), 'reference', { required: true })
+      const key = reference.toLowerCase()
       const taken = db.transportOrders.all().some((item) =>
         item.lines.some(
-          (other) => other.creditReference && other.creditReference.toLowerCase() === reference.toLowerCase()
+          (other) =>
+            (other.creditReference && other.creditReference.toLowerCase() === key) ||
+            (other.invoiceReference && other.invoiceReference.toLowerCase() === key)
         )
       )
       if (taken) throw conflict(PLANNING_MESSAGES.qualityCreditReference)
