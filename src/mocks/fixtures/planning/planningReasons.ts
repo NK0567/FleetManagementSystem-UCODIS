@@ -140,6 +140,24 @@ const SEED: Omit<PlanningReasonRow, keyof typeof seedAudit>[] = [
     name: 'Produit manquant',
     kind: 'contestation',
     active: true
+  },
+  {
+    no: 'PRT-DAMAGE',
+    name: 'Marchandise abîmée',
+    kind: 'protest',
+    active: true
+  },
+  {
+    no: 'PRT-SHORT',
+    name: 'Quantité manquante',
+    kind: 'protest',
+    active: true
+  },
+  {
+    no: 'PRT-DELAY',
+    name: 'Retard de livraison',
+    kind: 'protest',
+    active: true
   }
 ]
 

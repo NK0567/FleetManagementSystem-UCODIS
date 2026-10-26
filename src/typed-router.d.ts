@@ -955,6 +955,13 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/planning/delivery-quality/': RouteRecordInfo<
+      '/planning/delivery-quality/',
+      '/planning/delivery-quality',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/planning/delivery-requests/': RouteRecordInfo<
       '/planning/delivery-requests/',
       '/planning/delivery-requests',
@@ -2142,6 +2149,14 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | 'id'
+    }
+    'src/pages/planning/delivery-quality/index.vue': {
+      routes:
+        | '/planning/delivery-quality/'
+      views:
+        | never
+      pathParamNames:
+        | never
     }
     'src/pages/planning/delivery-requests/index.vue': {
       routes:

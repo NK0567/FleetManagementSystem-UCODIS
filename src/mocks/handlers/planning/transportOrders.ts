@@ -30,6 +30,7 @@ import {
 } from '@/modules/planning/customer-confirmations/domain/confirmation'
 import { loadingReady } from '@/modules/planning/loading/domain/loading'
 import { linesDelivered } from '@/modules/planning/execution/domain/execution'
+import { emptyQuality } from '@/modules/planning/delivery-quality/domain/quality'
 import { combinationCapacity, type LoadCapacity } from '@/modules/fleet/vehicles/domain/capacity'
 import { nowIsoDateTime, todayIso } from '@/utils/date'
 import type { MockDatabase } from '../../db/database'
@@ -314,7 +315,8 @@ function resolveLines(
         productNo: request.productNo,
         quantity: request.quantity,
         weightKg: request.weightKg,
-        ...emptyFollowUp()
+        ...emptyFollowUp(),
+        ...emptyQuality()
       }
     }
     assertActiveGoods(db, raw.deliveryPointNo, raw.productNo)
@@ -325,7 +327,8 @@ function resolveLines(
       productNo: raw.productNo,
       quantity: raw.quantity,
       weightKg: raw.weightKg,
-      ...emptyFollowUp()
+      ...emptyFollowUp(),
+      ...emptyQuality()
     }
   })
 }

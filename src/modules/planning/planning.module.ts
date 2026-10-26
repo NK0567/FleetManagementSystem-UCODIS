@@ -9,6 +9,7 @@ export function registerPlanningModule(): void {
     TRANSPORTORDER: { to: '/planning/transport-orders', menuKey: 'transportOrder' },
     CUSTOMERCONFIRMATION: { to: '/planning/confirmations', menuKey: 'customerConfirmation' },
     LOADING: { to: '/planning/loading', menuKey: 'loading' },
+    DELIVERYQUALITY: { to: '/planning/delivery-quality', menuKey: 'deliveryQuality' },
     CUSTOMER: { to: '/planning/customers', menuKey: 'customer' },
     DELIVERYPOINT: { to: '/planning/delivery-points', menuKey: 'deliveryPoint' },
     PRODUCT: { to: '/planning/products', menuKey: 'product' },
@@ -37,6 +38,11 @@ export function registerPlanningModule(): void {
         menuKey: 'customerConfirmation'
       },
       { labelKey: 'nav.loading', to: '/planning/loading', menuKey: 'loading' },
+      {
+        labelKey: 'nav.deliveryQuality',
+        to: '/planning/delivery-quality',
+        menuKey: 'deliveryQuality'
+      },
       {
         labelKey: 'nav.deliveryRequests',
         to: '/planning/delivery-requests',

@@ -106,6 +106,11 @@ export default {
   'planning.transportOrders.history.handed_back': 'Marchandise remise',
   'planning.transportOrders.history.return_received': 'Retour réceptionné',
   'planning.transportOrders.history.remainder': 'Reliquat replanifié',
+  'planning.transportOrders.history.protest_prepared': 'Protêt préparé',
+  'planning.transportOrders.history.protest_issued': 'Protêt émis',
+  'planning.transportOrders.history.protest_closed': 'Protêt clôturé',
+  'planning.transportOrders.history.responsibility_set': 'Responsabilité établie',
+  'planning.transportOrders.history.credit_issued': 'Avoir émis',
   'planning.transportOrders.history.cancelled': 'Annulé',
 
   'planning.transportOrders.createDialog.title': 'Créer un ordre depuis des demandes',

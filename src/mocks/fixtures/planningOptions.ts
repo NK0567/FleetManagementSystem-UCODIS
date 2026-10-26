@@ -8,7 +8,8 @@ export const PLANNING_OPTION_SETS: Record<string, Record<string, LocalizedText>>
     unavailability: { fr: 'Indisponibilité du destinataire', en: 'Recipient unavailable' },
     nonconformity: { fr: 'Non-conformité au chargement', en: 'Loading nonconformity' },
     postponement: { fr: 'Report de livraison', en: 'Delivery postponed' },
-    contestation: { fr: 'Contestation de réception', en: 'Reception contested' }
+    contestation: { fr: 'Contestation de réception', en: 'Reception contested' },
+    protest: { fr: 'Protêt', en: 'Protest note' }
   },
   customerNature: {
     external: { fr: 'Externe', en: 'External' },

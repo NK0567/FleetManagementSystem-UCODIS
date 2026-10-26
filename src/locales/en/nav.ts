@@ -87,5 +87,6 @@ export default {
   'nav.transportOrders': 'Transport orders',
   'nav.customerConfirmations': 'Confirmations',
   'nav.loading': 'Loading',
+  'nav.deliveryQuality': 'Delivery quality',
   'nav.deliveryRequests': 'Delivery requests'
 }

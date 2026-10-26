@@ -84,5 +84,8 @@ export default {
     'The call agent confirms deliveries, records unavailability and sends a line back to the requests waiting to be planned.',
   'settings.moduleToggles.item.loading-control.label': 'Loading control',
   'settings.moduleToggles.item.loading-control.description':
-    'The warehouse declares loaded quantities and checks each line before departure.'
+    'The warehouse declares loaded quantities and checks each line before departure.',
+  'settings.moduleToggles.item.delivery-quality.label': 'Delivery quality',
+  'settings.moduleToggles.item.delivery-quality.description':
+    'Protest notes, responsibility shares, withholdings on the carrier invoice and credit notes to the customer.'
 }

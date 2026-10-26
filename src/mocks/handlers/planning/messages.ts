@@ -368,5 +368,77 @@ export const PLANNING_MESSAGES = {
   receptionRemainderTaken: {
     fr: 'Ce reliquat est déjà replanifié.',
     en: 'This remainder is already replanned.'
+  },
+  qualityNotVisited: {
+    fr: 'Un protêt porte sur une livraison où le conducteur est passé.',
+    en: 'A protest note covers a delivery the driver has reached.'
+  },
+  qualityFollowUpClosed: {
+    fr: 'Le suivi de cette ligne est clos.',
+    en: 'The follow-up of this line is closed.'
+  },
+  qualityQuantity: {
+    fr: 'La quantité en cause doit être positive et au plus égale à la quantité de la ligne.',
+    en: 'The quantity at issue must be positive and at most the quantity of the line.'
+  },
+  qualityProtestIssued: {
+    fr: 'Une note émise ne se modifie plus.',
+    en: 'An issued note can no longer be changed.'
+  },
+  qualityProtestNotIssued: {
+    fr: 'Seule une note émise se clôture.',
+    en: 'Only an issued note can be closed.'
+  },
+  qualityNoFact: {
+    fr: 'Aucun fait n’est enregistré sur cette livraison.',
+    en: 'No fact is recorded on this delivery.'
+  },
+  qualityShareDuplicate: {
+    fr: 'Un même acteur ne figure qu’une fois.',
+    en: 'The same actor appears only once.'
+  },
+  qualityExternalMeans: {
+    fr: 'Le transporteur externe ne répond que d’une expédition qui lui a été confiée.',
+    en: 'The external carrier answers only for an expedition entrusted to them.'
+  },
+  qualityInternalMeans: {
+    fr: 'Le transporteur interne ne répond pas d’une expédition confiée à un transporteur.',
+    en: 'The internal carrier does not answer for an expedition entrusted to a carrier.'
+  },
+  qualitySharePercent: {
+    fr: 'La part de chaque acteur est un pourcentage positif.',
+    en: 'Each actor’s share is a positive percentage.'
+  },
+  qualityShareTotal: {
+    fr: 'Les parts doivent totaliser 100 %.',
+    en: 'The shares must add up to 100%.'
+  },
+  qualityImpactDuplicate: {
+    fr: 'Un même impact ne se saisit qu’une fois.',
+    en: 'The same impact is entered only once.'
+  },
+  qualityImpactAmount: {
+    fr: 'Le montant d’un impact est positif.',
+    en: 'An impact amount is positive.'
+  },
+  qualityWithholding: {
+    fr: 'Une retenue ne vise que le transporteur externe responsable.',
+    en: 'A withholding applies only to the responsible external carrier.'
+  },
+  qualityFrozen: {
+    fr: 'Les parts sont figées : le client est facturé ou la facture du transporteur est validée.',
+    en: 'The shares are frozen: the customer is invoiced or the carrier invoice is validated.'
+  },
+  qualityCreditMissing: {
+    fr: 'Cette livraison n’a pas d’avoir à émettre.',
+    en: 'This delivery has no credit note to issue.'
+  },
+  qualityCreditIssued: {
+    fr: 'Cet avoir est déjà émis : son montant ne change plus.',
+    en: 'This credit note is already issued: its amount no longer changes.'
+  },
+  qualityCreditReference: {
+    fr: 'Cette référence d’avoir est déjà utilisée.',
+    en: 'This credit note reference is already used.'
   }
 } satisfies Record<string, LocalizedText>

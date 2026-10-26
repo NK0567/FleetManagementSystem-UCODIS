@@ -73,6 +73,7 @@ declare module 'vue' {
     DeliveryPointCreateModal: typeof import('./modules/planning/delivery-points/pages/DeliveryPointCreateModal.vue')['default']
     DeliveryPointForm: typeof import('./modules/planning/delivery-points/components/DeliveryPointForm.vue')['default']
     DeliveryPointsList: typeof import('./modules/planning/delivery-points/pages/DeliveryPointsList.vue')['default']
+    DeliveryQualityPage: typeof import('./modules/planning/delivery-quality/pages/DeliveryQualityPage.vue')['default']
     DeliveryRequestCard: typeof import('./modules/planning/delivery-requests/pages/DeliveryRequestCard.vue')['default']
     DeliveryRequestCreateModal: typeof import('./modules/planning/delivery-requests/pages/DeliveryRequestCreateModal.vue')['default']
     DeliveryRequestForm: typeof import('./modules/planning/delivery-requests/components/DeliveryRequestForm.vue')['default']

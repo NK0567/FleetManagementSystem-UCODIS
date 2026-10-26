@@ -32,6 +32,11 @@ export const TRANSPORT_ORDER_EVENT_KINDS = [
   'handed_back',
   'return_received',
   'remainder',
+  'protest_prepared',
+  'protest_issued',
+  'protest_closed',
+  'responsibility_set',
+  'credit_issued',
   'cancelled'
 ] as const
 export type TransportOrderEventKind = (typeof TRANSPORT_ORDER_EVENT_KINDS)[number]

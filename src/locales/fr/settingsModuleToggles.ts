@@ -84,5 +84,8 @@ export default {
     'L’agent d’appels confirme les livraisons, note les indisponibilités et renvoie une ligne vers les demandes à planifier.',
   'settings.moduleToggles.item.loading-control.label': 'Contrôle du chargement',
   'settings.moduleToggles.item.loading-control.description':
-    'L’entrepôt déclare les quantités chargées et contrôle chaque ligne avant le départ.'
+    'L’entrepôt déclare les quantités chargées et contrôle chaque ligne avant le départ.',
+  'settings.moduleToggles.item.delivery-quality.label': 'Qualité de livraison',
+  'settings.moduleToggles.item.delivery-quality.description':
+    'Protêts, parts de responsabilité, retenues sur la facture du transporteur et avoirs au client.'
 }
