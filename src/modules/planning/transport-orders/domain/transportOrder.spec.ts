@@ -2,10 +2,13 @@ import { describe, expect, it } from 'vitest'
 import { combinationCapacity } from '@/modules/fleet/vehicles/domain/capacity'
 import {
   canCancel,
+  canDeclareLine,
   canEditLines,
   canEditSchedule,
+  canHandBackLine,
   canPlan,
   loadIssue,
+  orderLineState,
   pointIssue,
   transportOrderStatus
 } from './transportOrder'
@@ -84,5 +87,42 @@ describe('what a combination can take', () => {
     expect(pointIssue([station], 'TANKER', false)?.code).toBe('pumpRequired')
     expect(pointIssue([station], 'SEMI-TRAILER', true)?.code).toBe('vehicleTypeRefused')
     expect(pointIssue([station], 'TANKER', true)).toBeNull()
+  })
+})
+
+describe('order line state', () => {
+  const line = {
+    declaredAt: null,
+    refusalAt: null,
+    postponedAt: null,
+    returnedAt: null,
+    handedBackAt: null,
+    warehouseReceivedAt: null
+  }
+  const at = '2026-09-04T11:00:00'
+
+  it('reads where the line stands', () => {
+    expect(orderLineState(line)).toBe('pending')
+    expect(orderLineState({ ...line, declaredAt: at })).toBe('declared')
+    expect(orderLineState({ ...line, postponedAt: at })).toBe('postponed')
+    expect(orderLineState({ ...line, postponedAt: at, returnedAt: at })).toBe('returned')
+    expect(orderLineState({ ...line, refusalAt: at })).toBe('refused')
+    expect(orderLineState({ ...line, refusalAt: at, handedBackAt: at })).toBe('handed_back')
+  })
+
+  it('declares only a line still on the road', () => {
+    expect(canDeclareLine('in_progress', line)).toBe(true)
+    expect(canDeclareLine('ready', line)).toBe(false)
+    expect(canDeclareLine('in_progress', { ...line, declaredAt: at })).toBe(false)
+    expect(canDeclareLine('in_progress', { ...line, refusalAt: at })).toBe(false)
+    expect(canDeclareLine('in_progress', { ...line, returnedAt: at })).toBe(false)
+  })
+
+  it('hands back goods coming back, once', () => {
+    expect(canHandBackLine(line)).toBe(false)
+    expect(canHandBackLine({ ...line, refusalAt: at })).toBe(true)
+    expect(canHandBackLine({ ...line, returnedAt: at })).toBe(true)
+    expect(canHandBackLine({ ...line, refusalAt: at, handedBackAt: at })).toBe(false)
+    expect(canHandBackLine({ ...line, returnedAt: at, warehouseReceivedAt: at })).toBe(false)
   })
 })

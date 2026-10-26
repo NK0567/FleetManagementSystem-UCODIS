@@ -2,8 +2,10 @@
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { apiErrorMessage } from '@/core/api/apiError'
+import { formatDateTime } from '@/utils/format'
 import { tripService, type ResourceAvailabilityApi, type TripApi } from '@/modules/fleet/trips'
 import { transportOrderService } from '../services/transportOrderService'
+import type { Choice } from './ChoiceSelect.vue'
 import type { TransportOrderApi } from '../types/transportOrder.types'
 
 const props = defineProps<{
@@ -47,9 +49,22 @@ const confirmDisabled = computed(() => {
   return !carrierNo.value
 })
 
-function labelOf(item: ResourceAvailabilityApi): string {
-  return item.available ? item.label : `${item.label} — ${item.reasons.join(', ')}`
+function choicesOf(items: ResourceAvailabilityApi[]): Choice[] {
+  return items.map((item) => ({
+    value: item.no,
+    label: item.available ? item.label : `${item.label} — ${item.reasons.join(', ')}`,
+    disabled: !item.available
+  }))
 }
+
+const tripChoices = computed<Choice[]>(() =>
+  trips.value.map((trip) => ({
+    value: trip.no,
+    label: [trip.no, trip.routeName, trip.vehiclePlate, formatDateTime(trip.plannedDeparture)]
+      .filter(Boolean)
+      .join(' · ')
+  }))
+)
 
 watch(
   () => props.open,
@@ -79,13 +94,17 @@ watch(
         loadError.value = apiErrorMessage(error, t('planning.transportOrders.saveError'))
       }
     }
-    const page = await tripService.getAll({
-      page: 1,
-      pageSize: 100,
-      filters: [{ field: 'status', valueType: 'string', value: 'planned' }],
-      sortBy: 'plannedDeparture'
-    })
-    trips.value = page.data.items
+    try {
+      const page = await tripService.getAll({
+        page: 1,
+        pageSize: 100,
+        filters: [{ field: 'status', valueType: 'string', value: 'planned' }],
+        sortBy: 'plannedDeparture'
+      })
+      trips.value = page.data.items
+    } catch (error) {
+      loadError.value = apiErrorMessage(error, t('planning.transportOrders.saveError'))
+    }
   }
 )
 
@@ -123,70 +142,57 @@ function confirm() {
     @confirm="confirm"
     @cancel="emit('cancel')"
   >
-    <p v-if="error || loadError" class="mb-3 text-sm text-destructive">{{ error || loadError }}</p>
-    <div class="space-y-3 text-sm">
-      <div class="flex flex-col gap-1">
-        <label v-for="choice in MODES" :key="choice.id" class="flex items-center gap-2">
-          <input v-model="mode" type="radio" :value="choice.id" />
+    <FormAlerts class="mb-3" :error="error || loadError" @clear:error="loadError = null" />
+    <div class="space-y-3">
+      <nav
+        class="flex flex-wrap gap-1 border-b border-border"
+        :aria-label="t('planning.transportOrders.plan.mode')"
+      >
+        <button
+          v-for="choice in MODES"
+          :key="choice.id"
+          type="button"
+          class="cursor-pointer px-3 py-2 text-sm border-b-2 -mb-px transition"
+          :class="
+            mode === choice.id
+              ? 'border-primary text-card-foreground font-medium'
+              : 'border-transparent text-muted-foreground hover:text-card-foreground'
+          "
+          @click="mode = choice.id"
+        >
           {{ t(choice.label) }}
-        </label>
-      </div>
+        </button>
+      </nav>
       <template v-if="mode === 'new'">
-        <p v-if="!scheduleReady" class="text-muted-foreground">
+        <p v-if="!scheduleReady" class="text-sm text-muted-foreground">
           {{ t('planning.transportOrders.plan.needsSchedule') }}
         </p>
         <template v-else>
           <BaseFormField :label="t('planning.transportOrders.plan.vehicle')" required>
-            <select
+            <ChoiceSelect
               v-model="vehicleNo"
-              class="w-full border border-border rounded px-2 py-1.5 bg-card"
-            >
-              <option value="" disabled>{{ t('planning.transportOrders.plan.pick') }}</option>
-              <option
-                v-for="item in vehicles"
-                :key="item.no"
-                :value="item.no"
-                :disabled="!item.available"
-              >
-                {{ labelOf(item) }}
-              </option>
-            </select>
+              :choices="choicesOf(vehicles)"
+              :placeholder="t('planning.transportOrders.plan.pick')"
+            />
           </BaseFormField>
           <BaseFormField :label="t('planning.transportOrders.plan.trailer')">
-            <select
+            <ChoiceSelect
               v-model="trailerNo"
-              class="w-full border border-border rounded px-2 py-1.5 bg-card"
-            >
-              <option value="">{{ t('planning.transportOrders.plan.none') }}</option>
-              <option
-                v-for="item in trailers"
-                :key="item.no"
-                :value="item.no"
-                :disabled="!item.available"
-              >
-                {{ labelOf(item) }}
-              </option>
-            </select>
+              :choices="choicesOf(trailers)"
+              :placeholder="t('planning.transportOrders.plan.none')"
+              clearable
+            />
           </BaseFormField>
           <BaseFormField :label="t('planning.transportOrders.plan.driver')" required>
-            <select
+            <ChoiceSelect
               v-model="driverNo"
-              class="w-full border border-border rounded px-2 py-1.5 bg-card"
-            >
-              <option value="" disabled>{{ t('planning.transportOrders.plan.pick') }}</option>
-              <option
-                v-for="item in drivers"
-                :key="item.no"
-                :value="item.no"
-                :disabled="!item.available"
-              >
-                {{ labelOf(item) }}
-              </option>
-            </select>
+              :choices="choicesOf(drivers)"
+              :placeholder="t('planning.transportOrders.plan.pick')"
+            />
           </BaseFormField>
           <p
             v-if="resources.length && !vehicles.some((item) => item.available)"
-            class="text-muted-foreground"
+            class="text-sm text-muted-foreground"
           >
             {{ t('planning.transportOrders.plan.noMeans') }}
           </p>
@@ -197,12 +203,11 @@ function confirm() {
         :label="t('planning.transportOrders.plan.trip')"
         required
       >
-        <select v-model="tripNo" class="w-full border border-border rounded px-2 py-1.5 bg-card">
-          <option value="" disabled>{{ t('planning.transportOrders.plan.pick') }}</option>
-          <option v-for="trip in trips" :key="trip.no" :value="trip.no">
-            {{ trip.no }} · {{ trip.routeName }} · {{ trip.vehiclePlate }}
-          </option>
-        </select>
+        <ChoiceSelect
+          v-model="tripNo"
+          :choices="tripChoices"
+          :placeholder="t('planning.transportOrders.plan.pick')"
+        />
       </BaseFormField>
       <template v-else>
         <BaseFormField :label="t('planning.transportOrders.form.carrier')" required>

@@ -1,10 +1,13 @@
+import type { FileMeta } from '@/types/file.types'
+import type { ClosingBlock, OrderDebriefing } from '@/modules/planning/closing/domain/closing'
 import type {
+  OrderLineState,
   TransportMeans,
   TransportOrderEventKind,
   TransportOrderStatus
 } from '../domain/transportOrder'
 
-export type { TransportMeans, TransportOrderEventKind, TransportOrderStatus }
+export type { OrderLineState, TransportMeans, TransportOrderEventKind, TransportOrderStatus }
 
 export interface TransportOrderLineApi {
   lineNo: number
@@ -91,3 +94,25 @@ export type TransportOrderSearchColumn =
   | 'carrierName'
   | 'tripNo'
   | 'no,routeName,recipientSummary,carrierName,tripNo'
+
+export interface TransportOrderDocumentApi {
+  kind: string
+  fileNo: string
+  file: FileMeta | null
+}
+
+/** The closing dossier: what still blocks it, its documents and the debriefing. */
+export interface TransportOrderClosingApi {
+  blocks: ClosingBlock[]
+  requiredDocuments: string[]
+  documents: TransportOrderDocumentApi[]
+  debriefing: OrderDebriefing | null
+  derived: { vehicle: string; trailer: string; places: string; gainLoss: string }
+}
+
+export interface DebriefingInput {
+  voucherNo: string
+  loadedAt: string
+  unloadedAt: string
+  observations: string
+}

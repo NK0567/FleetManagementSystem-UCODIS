@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useEntityForm } from '@/composables/useEntityForm'
 import { useFormValidationUi } from '@/composables/useFormValidationUi'
+import { formatDateTime } from '@/utils/format'
 import type { TransportOrderApi } from '../types/transportOrder.types'
 
 const props = withDefaults(
@@ -55,9 +56,7 @@ const { hasValidationError } = useFormValidationUi({
   fieldValues: () => ({ ...draft })
 })
 
-const arrivalLabel = computed(() =>
-  (props.initialData.plannedArrival ?? '').replace('T', ' ').slice(0, 16)
-)
+const arrivalLabel = computed(() => formatDateTime(props.initialData.plannedArrival))
 
 const scheduleDisabled = computed(() => props.disabled || props.scheduleLocked)
 
@@ -100,10 +99,7 @@ defineExpose(expose)
           v-if="!isNew && initialData.plannedArrival"
           :label="t('planning.transportOrders.form.plannedArrival')"
         >
-          <FormInput
-            :model-value="arrivalLabel"
-            disabled
-          />
+          <FormInput :model-value="arrivalLabel" disabled />
         </BaseFormField>
         <BaseFormField
           class="md:col-span-2"

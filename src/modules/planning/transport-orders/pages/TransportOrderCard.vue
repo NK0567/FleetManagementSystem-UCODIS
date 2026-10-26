@@ -1,21 +1,23 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Ban, CalendarClock, ListTree } from '@lucide/vue'
+import { Ban, CalendarClock, ListTree, Lock, Truck } from '@lucide/vue'
 import { apiErrorMessage } from '@/core/api/apiError'
-import { fileApi } from '@/core/api/fileApi'
 import type { CardOpenMode } from '@/composables/cardOpenMode'
 import { useEntityCard } from '@/composables/useEntityCard'
-import { useListCellFormatters } from '@/composables/useListCellFormatters'
 import { usePermissions } from '@/composables/usePermissions'
-import { formatNumber } from '@/utils/format'
-import type { TransportOrderAction } from '../api/transportOrderApi'
-import { transportOrderApi } from '../api/transportOrderApi'
+import type { OrderLineAction, OrderLineChoice } from '../components/OrderLineDialog.vue'
 import TransportOrderForm from '../components/TransportOrderForm.vue'
-import { canCancel, canEditLines, canPlan } from '../domain/transportOrder'
+import { canCancel, canEditLines, canEditSchedule, canPlan } from '../domain/transportOrder'
 import { transportOrderService } from '../services/transportOrderService'
 import { useTransportOrderStore } from '../stores/transportOrderStore'
-import type { TransportOrderLineInput } from '../types/transportOrder.types'
+import type {
+  DebriefingInput,
+  TransportOrderApi,
+  TransportOrderClosingApi,
+  TransportOrderLineApi,
+  TransportOrderLineInput
+} from '../types/transportOrder.types'
 
 const props = defineProps<{
   transportOrderNo: string
@@ -27,7 +29,6 @@ const emit = defineEmits<{ close: []; create: [] }>()
 const { t } = useI18n()
 const store = useTransportOrderStore()
 const { canUpdate, canInsert, canExecute } = usePermissions('TRANSPORTORDER')
-const { formatDateTime } = useListCellFormatters()
 const formRef = ref<InstanceType<typeof TransportOrderForm> | null>(null)
 
 const {
@@ -70,28 +71,32 @@ const pageTitle = computed(() =>
 const acting = ref(false)
 const planning = ref(false)
 const editingLines = ref(false)
-const declaring = ref(false)
 const cancelling = ref(false)
-const remaining = ref(false)
-const remainderDate = ref('')
-const voucherNo = ref('')
-const documentKind = ref('loading_list')
-const closing = ref<{ blocks: string[]; documents: { kind: string }[] } | null>(null)
-const receivedQuantity = ref<number | null>(null)
+const lineAction = ref<OrderLineAction | null>(null)
+const actionLine = ref<TransportOrderLineApi | null>(null)
+const closing = ref<TransportOrderClosingApi | null>(null)
 const dialogError = ref<string | null>(null)
 
-async function refresh(updated: Awaited<ReturnType<typeof transportOrderService.act>>) {
-  store.setCurrentItem(updated)
-  await store.fetchItems(store.pagination.page, store.pagination.limit)
-}
+const expandedSections = ref({
+  means: true,
+  lines: true,
+  closing: true,
+  history: false,
+  audit: false
+})
 
-async function run(action: TransportOrderAction, body: Record<string, unknown> = {}) {
+/** Runs one server step, then reloads the order, the list and the closing dossier. */
+async function perform(step: (no: string) => Promise<TransportOrderApi | void>): Promise<boolean> {
   const no = item.value?.no
   if (!no) return false
   acting.value = true
   saveError.value = null
+  dialogError.value = null
   try {
-    await refresh(await transportOrderService.act(no, action, body))
+    const updated = await step(no)
+    store.setCurrentItem(updated ?? (await transportOrderService.getById(no)))
+    await store.fetchItems(store.pagination.page, store.pagination.limit)
+    await loadClosing()
     return true
   } catch (error) {
     saveError.value = apiErrorMessage(error, t('planning.transportOrders.saveError'))
@@ -102,182 +107,90 @@ async function run(action: TransportOrderAction, body: Record<string, unknown> =
   }
 }
 
-async function plan(body: Record<string, unknown>) {
-  dialogError.value = null
-  if (await run('plan', body)) planning.value = false
-}
-
-async function saveLines(lines: TransportOrderLineInput[]) {
-  const no = item.value?.no
-  if (!no) return
-  acting.value = true
-  dialogError.value = null
-  saveError.value = null
-  try {
-    await refresh(await transportOrderService.replaceLines(no, lines))
-    editingLines.value = false
-  } catch (error) {
-    dialogError.value = apiErrorMessage(error, t('planning.transportOrders.saveError'))
-    saveError.value = dialogError.value
-  } finally {
-    acting.value = false
-  }
-}
-
-async function depart() {
-  const no = item.value?.no
-  if (!no) return
-  acting.value = true
-  saveError.value = null
-  try {
-    await transportOrderApi.depart(no)
-    await refresh(await transportOrderService.getById(no))
-  } catch (error) {
-    saveError.value = apiErrorMessage(error, t('planning.transportOrders.saveError'))
-  } finally {
-    acting.value = false
-  }
-}
-
-async function declare() {
+async function loadClosing() {
   const current = item.value
-  const line = current?.lines.find((item) => !item.declaredAt && !item.refusalAt && !item.returnedAt)
-  if (!current || !line || receivedQuantity.value === null) return
-  acting.value = true
-  saveError.value = null
-  try {
-    await transportOrderApi.declareLine(current.no, line.lineNo, receivedQuantity.value)
-    await refresh(await transportOrderService.getById(current.no))
-    declaring.value = false
-  } catch (error) {
-    saveError.value = apiErrorMessage(error, t('planning.transportOrders.saveError'))
-  } finally {
-    acting.value = false
+  if (!current || (current.status !== 'delivered' && current.status !== 'closed')) {
+    closing.value = null
+    return
   }
-}
-
-function lineToHandBack() {
-  return item.value?.lines.find(
-    (line) => (line.refusalAt || line.returnedAt) && !line.handedBackAt && !line.warehouseReceivedAt
-  )
-}
-
-function lineToReplan() {
-  return item.value?.lines.find((line) => {
-    if (!line.declaredAt || line.receivedQuantity === null || line.remainderAt) return false
-    return (line.loadedQuantity ?? line.quantity) - line.receivedQuantity > 0
-  })
-}
-
-async function handBack() {
-  const current = item.value
-  const line = lineToHandBack()
-  if (!current || !line) return
-  acting.value = true
-  saveError.value = null
   try {
-    await transportOrderApi.handBack(current.no, line.lineNo)
-    await refresh(await transportOrderService.getById(current.no))
-  } catch (error) {
-    saveError.value = apiErrorMessage(error, t('planning.transportOrders.saveError'))
-  } finally {
-    acting.value = false
-  }
-}
-
-async function saveRemainder() {
-  const current = item.value
-  const line = lineToReplan()
-  if (!current || !line || !remainderDate.value) return
-  acting.value = true
-  saveError.value = null
-  try {
-    await transportOrderApi.remainder(current.no, line.lineNo, remainderDate.value)
-    await refresh(await transportOrderService.getById(current.no))
-    remaining.value = false
-  } catch (error) {
-    saveError.value = apiErrorMessage(error, t('planning.transportOrders.saveError'))
-  } finally {
-    acting.value = false
-  }
-}
-
-async function loadClosing(no: string) {
-  try {
-    closing.value = (await transportOrderApi.closing(no)).data.data
+    closing.value = await transportOrderService.closing(current.no)
   } catch (error) {
     saveError.value = apiErrorMessage(error, t('planning.transportOrders.saveError'))
   }
 }
 
 watch(
-  () => item.value?.no,
-  (no) => {
-    if (!no || (item.value?.status !== 'delivered' && item.value?.status !== 'closed')) {
-      closing.value = null
-      return
-    }
-    void loadClosing(no)
-  }
+  () => [item.value?.no, item.value?.status],
+  () => void loadClosing(),
+  { immediate: true }
 )
 
-async function attachDocument(event: Event) {
-  const current = item.value
-  const input = event.target as HTMLInputElement
-  const file = input.files?.[0]
-  if (!current || !file) return
-  acting.value = true
-  saveError.value = null
-  try {
-    const uploaded = (await fileApi.upload(file)).data.data
-    await transportOrderApi.attachDocument(current.no, documentKind.value, uploaded.no)
-    await loadClosing(current.no)
-  } catch (error) {
-    saveError.value = apiErrorMessage(error, t('planning.transportOrders.saveError'))
-  } finally {
-    acting.value = false
-    input.value = ''
-  }
+async function plan(body: Record<string, unknown>) {
+  if (await perform((no) => transportOrderService.act(no, 'plan', body))) planning.value = false
 }
 
-async function saveDebriefing() {
-  const current = item.value
-  if (!current || !voucherNo.value.trim()) return
-  acting.value = true
-  saveError.value = null
-  try {
-    await transportOrderApi.saveDebriefing(current.no, voucherNo.value)
-    await loadClosing(current.no)
-  } catch (error) {
-    saveError.value = apiErrorMessage(error, t('planning.transportOrders.saveError'))
-  } finally {
-    acting.value = false
-  }
-}
-
-async function closeOrder() {
-  const current = item.value
-  if (!current) return
-  acting.value = true
-  saveError.value = null
-  try {
-    await transportOrderApi.close(current.no)
-    await refresh(await transportOrderService.getById(current.no))
-    await loadClosing(current.no)
-  } catch (error) {
-    saveError.value = apiErrorMessage(error, t('planning.transportOrders.saveError'))
-  } finally {
-    acting.value = false
+async function saveLines(lines: TransportOrderLineInput[]) {
+  if (await perform((no) => transportOrderService.replaceLines(no, lines))) {
+    editingLines.value = false
   }
 }
 
 async function cancel(choice: { reasonNo: string; comment: string }) {
-  if (await run('cancel', choice)) cancelling.value = false
+  if (await perform((no) => transportOrderService.act(no, 'cancel', choice))) {
+    cancelling.value = false
+  }
 }
 
-function weightOf(value: number | null): string {
-  return formatNumber(value, 1)
+const depart = () => perform((no) => transportOrderService.depart(no))
+const closeOrder = () => perform((no) => transportOrderService.close(no))
+const attachDocument = (kind: string, fileNo: string) =>
+  perform((no) => transportOrderService.attachDocument(no, kind, fileNo))
+const saveDebriefing = (debriefing: DebriefingInput) =>
+  perform((no) => transportOrderService.saveDebriefing(no, debriefing))
+
+function openLineAction(action: OrderLineAction, line: TransportOrderLineApi) {
+  actionLine.value = line
+  lineAction.value = action
 }
+
+async function confirmLineAction(choice: OrderLineChoice) {
+  const line = actionLine.value
+  if (!line) return
+  const done = await perform((no) => {
+    if (choice.action === 'declare') {
+      return transportOrderService.declareLine(
+        no,
+        line.lineNo,
+        choice.receivedQuantity,
+        choice.justification
+      )
+    }
+    if (choice.action === 'remainder') {
+      return transportOrderService.remainder(no, line.lineNo, choice.date)
+    }
+    return transportOrderService.handBack(no, line.lineNo)
+  })
+  if (done) lineAction.value = null
+}
+
+const linesSummary = computed(() =>
+  item.value ? [t('planning.transportOrders.lines.count', item.value.lineCount)] : []
+)
+const meansSummary = computed(() => {
+  const order = item.value
+  if (!order?.means) return [t('planning.transportOrders.means.none')]
+  return order.means === 'carrier'
+    ? [order.carrierName, order.carrierVehiclePlate]
+    : [order.tripNo, order.vehiclePlate, order.driverName]
+})
+
+/** What still blocks the closing, read out; empty when nothing does. */
+const closingBlocked = computed(() =>
+  (closing.value?.blocks ?? [])
+    .map((block) => t(`planning.transportOrders.closing.block.${block}`))
+    .join(', ')
+)
 
 const buttonClass =
   'cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed'
@@ -292,8 +205,8 @@ const buttonClass =
     :error-msg="errorMsg"
     :has-data="!!item"
     :is-edit-mode="isEditMode"
-    :is-saving="isSaving"
-    :actions-disabled="isLoading || isSaving"
+    :is-saving="isSaving || acting"
+    :actions-disabled="isLoading || isSaving || acting"
     :save-error="saveError"
     :save-success="saveSuccess"
     :save-success-message="t('planning.transportOrders.saveSuccess')"
@@ -346,42 +259,18 @@ const buttonClass =
         :disabled="acting"
         @click="depart"
       >
+        <Truck class="w-5 h-5 text-primary" />
         {{ t('planning.transportOrders.action.depart') }}
-      </button>
-      <button
-        v-if="canExecute && item.status === 'in_progress'"
-        type="button"
-        :class="buttonClass"
-        :disabled="acting"
-        @click="((receivedQuantity = null), (declaring = true))"
-      >
-        {{ t('planning.transportOrders.action.declare') }}
-      </button>
-      <button
-        v-if="canExecute && lineToHandBack()"
-        type="button"
-        :class="buttonClass"
-        :disabled="acting"
-        @click="handBack"
-      >
-        {{ t('planning.transportOrders.action.handBack') }}
-      </button>
-      <button
-        v-if="canExecute && lineToReplan()"
-        type="button"
-        :class="buttonClass"
-        :disabled="acting"
-        @click="((remainderDate = ''), (remaining = true))"
-      >
-        {{ t('planning.transportOrders.action.remainder') }}
       </button>
       <button
         v-if="canExecute && item.status === 'delivered'"
         type="button"
         :class="buttonClass"
-        :disabled="acting"
+        :disabled="acting || !!closingBlocked"
+        :title="closingBlocked || undefined"
         @click="closeOrder"
       >
+        <Lock class="w-5 h-5 text-primary" />
         {{ t('planning.transportOrders.action.close') }}
       </button>
       <button
@@ -397,7 +286,18 @@ const buttonClass =
     </template>
     <template #form>
       <div class="min-h-0 flex flex-col h-full">
-        <div class="flex-1 min-h-0 overflow-y-auto">
+        <div class="sticky top-0 z-20 shrink-0 pt-1 px-6">
+          <LoadingBar
+            v-if="isLoading || isSaving || acting"
+            :height="2"
+            bar-color="var(--color-primary)"
+            track-color="rgba(0,0,0,0.2)"
+          />
+        </div>
+        <div
+          class="flex-1 min-h-0 overflow-y-auto transition-opacity duration-200"
+          :class="isSaving ? 'opacity-60 pointer-events-none select-none' : ''"
+        >
           <div
             v-if="item?.cancelledAt"
             class="mx-6 mt-4 rounded border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm"
@@ -417,148 +317,61 @@ const buttonClass =
             ref="formRef"
             :initial-data="item ?? {}"
             :disabled="!isEditMode || isSaving"
-            :schedule-locked="item?.status !== 'draft'"
+            :schedule-locked="!!item && !canEditSchedule(item.status)"
             :validation-errors="validationErrors"
           />
-          <div v-if="item" class="px-4 sm:px-6 lg:px-8 pb-8 space-y-6 text-sm">
-            <section>
-              <h3 class="font-medium text-card-foreground mb-2">
-                {{ t('planning.transportOrders.form.means') }}
-              </h3>
-              <p v-if="!item.means" class="text-muted-foreground">
-                {{ t('planning.transportOrders.means.none') }}
-              </p>
-              <dl v-else-if="item.means === 'fleet'" class="grid grid-cols-2 gap-x-3 gap-y-2">
-                <dt class="text-muted-foreground">
-                  {{ t('planning.transportOrders.col.tripNo') }}
-                </dt>
-                <dd>
-                  <router-link
-                    v-if="item.tripNo"
-                    :to="`/fleet/trips/${item.tripNo}`"
-                    class="text-primary hover:underline"
-                  >
-                    {{ item.tripNo }}
-                  </router-link>
-                </dd>
-                <dt class="text-muted-foreground">
-                  {{ t('planning.transportOrders.form.vehicle') }}
-                </dt>
-                <dd>{{ item.vehiclePlate || '—' }}</dd>
-                <dt class="text-muted-foreground">
-                  {{ t('planning.transportOrders.form.trailer') }}
-                </dt>
-                <dd>{{ item.trailerPlate || '—' }}</dd>
-                <dt class="text-muted-foreground">
-                  {{ t('planning.transportOrders.form.driver') }}
-                </dt>
-                <dd>{{ item.driverName || '—' }}</dd>
-              </dl>
-              <dl v-else class="grid grid-cols-2 gap-x-3 gap-y-2">
-                <dt class="text-muted-foreground">
-                  {{ t('planning.transportOrders.form.carrier') }}
-                </dt>
-                <dd>{{ item.carrierName }}</dd>
-                <dt class="text-muted-foreground">
-                  {{ t('planning.transportOrders.form.carrierVehicle') }}
-                </dt>
-                <dd>{{ item.carrierVehiclePlate || '—' }}</dd>
-                <dt class="text-muted-foreground">
-                  {{ t('planning.transportOrders.form.carrierDriver') }}
-                </dt>
-                <dd>{{ item.carrierDriverName || '—' }}</dd>
-              </dl>
-            </section>
-            <section>
-              <h3 class="font-medium text-card-foreground mb-2">
-                {{ t('planning.transportOrders.form.lines') }}
-                <span class="font-normal text-muted-foreground">
-                  · {{ t('planning.transportOrders.lines.count', item.lineCount) }}
-                </span>
-              </h3>
-              <p v-if="!item.lines.length" class="text-muted-foreground">
-                {{ t('planning.transportOrders.lines.empty') }}
-              </p>
-              <table v-else class="w-full text-left">
-                <thead class="text-xs text-muted-foreground">
-                  <tr>
-                    <th class="py-1 pr-2 font-medium">
-                      {{ t('planning.transportOrders.lines.col.request') }}
-                    </th>
-                    <th class="py-1 pr-2 font-medium">
-                      {{ t('planning.transportOrders.lines.col.point') }}
-                    </th>
-                    <th class="py-1 pr-2 font-medium">
-                      {{ t('planning.transportOrders.lines.col.product') }}
-                    </th>
-                    <th class="py-1 pr-2 font-medium text-right">
-                      {{ t('planning.transportOrders.lines.col.quantity') }}
-                    </th>
-                    <th class="py-1 font-medium text-right">
-                      {{ t('planning.transportOrders.lines.col.weight') }}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="line in item.lines" :key="line.lineNo" class="border-t border-border">
-                    <td class="py-1.5 pr-2">
-                      <router-link
-                        v-if="line.deliveryRequestNo"
-                        :to="`/planning/delivery-requests/${line.deliveryRequestNo}`"
-                        class="text-primary hover:underline"
-                      >
-                        {{ line.deliveryRequestNo }}
-                      </router-link>
-                      <span v-else>—</span>
-                    </td>
-                    <td class="py-1.5 pr-2">
-                      {{ line.deliveryPointName }}
-                      <span v-if="line.recipientName" class="text-muted-foreground">
-                        · {{ line.recipientName }}
-                      </span>
-                    </td>
-                    <td class="py-1.5 pr-2">{{ line.productName }}</td>
-                    <td class="py-1.5 pr-2 text-right">
-                      {{ formatNumber(line.quantity, 1) }} {{ line.unit }}
-                    </td>
-                    <td class="py-1.5 text-right">{{ weightOf(line.weightKg) }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </section>
-            <section v-if="closing">
-              <h3 class="font-medium text-card-foreground mb-2">
-                {{ t('planning.transportOrders.closing.blocks') }}
-              </h3>
-              <p class="text-muted-foreground">{{ closing.blocks.join(', ') || '—' }}</p>
-              <p v-if="closing.documents.length" class="text-muted-foreground mt-1">
-                {{ closing.documents.map((document) => document.kind).join(', ') }}
-              </p>
-              <div v-if="canExecute && item?.status === 'delivered'" class="mt-2 flex flex-wrap items-center gap-2">
-                <FormInput v-model="documentKind" :placeholder="t('planning.transportOrders.closing.kind')" />
-                <input type="file" :disabled="acting" @change="attachDocument" />
-                <FormInput v-model="voucherNo" :placeholder="t('planning.transportOrders.closing.voucher')" />
-                <button type="button" :class="buttonClass" :disabled="acting" @click="saveDebriefing">
-                  {{ t('planning.transportOrders.action.debriefing') }}
-                </button>
+          <div v-if="item" class="px-4 sm:px-6 lg:px-8 pb-6">
+            <FormSection
+              v-model:open="expandedSections.means"
+              :title="t('planning.transportOrders.form.means')"
+              :summary="meansSummary"
+            >
+              <div class="xl:col-span-2 min-w-0">
+                <TransportOrderMeansPanel :order="item" />
               </div>
-            </section>
-            <section>
-              <h3 class="font-medium text-card-foreground mb-2">
-                {{ t('planning.transportOrders.form.history') }}
-              </h3>
-              <ul class="space-y-1">
-                <li
-                  v-for="event in item.events"
-                  :key="`${event.at}-${event.kind}-${event.detail}`"
-                  class="text-muted-foreground"
-                >
-                  <span class="text-card-foreground">{{ formatDateTime(event.at) }}</span>
-                  · {{ event.by }} · {{ t(`planning.transportOrders.history.${event.kind}`) }}
-                  <span v-if="event.detail"> · {{ event.detail }}</span>
-                </li>
-              </ul>
-            </section>
+            </FormSection>
+            <FormSection
+              v-model:open="expandedSections.lines"
+              :title="t('planning.transportOrders.form.lines')"
+              :summary="linesSummary"
+            >
+              <div class="xl:col-span-2 min-w-0">
+                <TransportOrderLinesTable
+                  :lines="item.lines"
+                  :status="item.status"
+                  :total-weight-kg="item.totalWeightKg"
+                  :can-act="canExecute && !isEditMode"
+                  :busy="acting"
+                  @declare="(line) => openLineAction('declare', line)"
+                  @hand-back="(line) => openLineAction('handBack', line)"
+                  @remainder="(line) => openLineAction('remainder', line)"
+                />
+              </div>
+            </FormSection>
+            <FormSection
+              v-if="closing"
+              v-model:open="expandedSections.closing"
+              :title="t('planning.transportOrders.closing.title')"
+              :summary="[closingBlocked || t('planning.transportOrders.closing.ready')]"
+            >
+              <TransportOrderClosingPanel
+                :closing="closing"
+                :editable="canExecute && item.status === 'delivered'"
+                :busy="acting"
+                @attach="attachDocument"
+                @debrief="saveDebriefing"
+              />
+            </FormSection>
+            <FormSection
+              v-model:open="expandedSections.history"
+              :title="t('planning.transportOrders.form.history')"
+              :summary="[]"
+            >
+              <div class="xl:col-span-2 min-w-0">
+                <TransportOrderHistory :events="item.events" />
+              </div>
+            </FormSection>
+            <AuditFormSection v-model:open="expandedSections.audit" :record="item" />
           </div>
         </div>
       </div>
@@ -581,26 +394,13 @@ const buttonClass =
     @confirm="saveLines"
     @cancel="editingLines = false"
   />
-  <ConfirmDialog
-    :open="declaring"
-    :title="t('planning.transportOrders.action.declare')"
-    :confirm-disabled="receivedQuantity === null"
+  <OrderLineDialog
+    :action="lineAction"
+    :line="actionLine"
     :loading="acting"
-    @confirm="declare"
-    @cancel="declaring = false"
-  >
-    <FormInput v-model="receivedQuantity" type="number" :min="0" />
-  </ConfirmDialog>
-  <ConfirmDialog
-    :open="remaining"
-    :title="t('planning.transportOrders.action.remainder')"
-    :confirm-disabled="!remainderDate"
-    :loading="acting"
-    @confirm="saveRemainder"
-    @cancel="remaining = false"
-  >
-    <FormInput v-model="remainderDate" type="date" />
-  </ConfirmDialog>
+    @confirm="confirmLineAction"
+    @cancel="lineAction = null"
+  />
   <PlanningReasonDialog
     :open="cancelling"
     :title="t('planning.transportOrders.action.cancel')"

@@ -1,44 +1,53 @@
 import httpClient from '@/core/api/httpClient'
 import { createCrudApi, resourcePath } from '@/core/factories'
 import type { AvailabilityApi } from '@/modules/fleet/trips'
+import type { OrderDebriefing } from '@/modules/planning/closing/domain/closing'
 import type { SingleResponse } from '@/types/api-response.types'
-import type { TransportOrderApi, TransportOrderLineInput } from '../types/transportOrder.types'
+import type {
+  DebriefingInput,
+  TransportOrderApi,
+  TransportOrderClosingApi,
+  TransportOrderLineInput
+} from '../types/transportOrder.types'
 
 const basePath = '/planning/transport-orders'
 
 export type TransportOrderAction = 'plan' | 'cancel'
 
+const orderPath = (no: string) => resourcePath(basePath, no)
+const linePath = (no: string, lineNo: number) => `${orderPath(no)}/lines/${lineNo}`
+
 export const transportOrderApi = {
   ...createCrudApi<TransportOrderApi>({ basePath }),
   replaceLines: (no: string, lines: TransportOrderLineInput[]) =>
-    httpClient.put<SingleResponse<TransportOrderApi>>(`${resourcePath(basePath, no)}/lines`, {
-      lines
-    }),
+    httpClient.put<SingleResponse<TransportOrderApi>>(`${orderPath(no)}/lines`, { lines }),
   act: (no: string, action: TransportOrderAction, body: Record<string, unknown> = {}) =>
-    httpClient.post<SingleResponse<TransportOrderApi>>(
-      `${resourcePath(basePath, no)}/${action}`,
-      body
+    httpClient.post<SingleResponse<TransportOrderApi>>(`${orderPath(no)}/${action}`, body),
+  depart: (no: string) =>
+    httpClient.post<SingleResponse<{ status: string }>>(`${orderPath(no)}/depart`, {}),
+  declareLine: (no: string, lineNo: number, receivedQuantity: number, justification = '') =>
+    httpClient.post<SingleResponse<{ status: string; delivered: boolean }>>(
+      `${linePath(no, lineNo)}/declare`,
+      { receivedQuantity, justification }
     ),
-  depart: (no: string) => httpClient.post(`${resourcePath(basePath, no)}/depart`, {}),
-  declareLine: (no: string, lineNo: number, receivedQuantity: number) =>
-    httpClient.post(`${resourcePath(basePath, no)}/lines/${lineNo}/declare`, { receivedQuantity }),
   handBack: (no: string, lineNo: number) =>
-    httpClient.post(`${resourcePath(basePath, no)}/lines/${lineNo}/hand-back`, {}),
-  closing: (no: string) =>
-    httpClient.get<
-      SingleResponse<{
-        blocks: string[]
-        documents: { kind: string; fileNo: string }[]
-        debriefing: { voucherNo: string } | null
-      }>
-    >(`${resourcePath(basePath, no)}/closing`),
-  attachDocument: (no: string, kind: string, fileNo: string) =>
-    httpClient.post(`${resourcePath(basePath, no)}/documents`, { kind, fileNo }),
-  saveDebriefing: (no: string, voucherNo: string) =>
-    httpClient.post(`${resourcePath(basePath, no)}/debriefing`, { voucherNo }),
-  close: (no: string) => httpClient.post(`${resourcePath(basePath, no)}/close`, {}),
+    httpClient.post<SingleResponse<{ handedBack: boolean }>>(
+      `${linePath(no, lineNo)}/hand-back`,
+      {}
+    ),
   remainder: (no: string, lineNo: number, date: string) =>
-    httpClient.post(`${resourcePath(basePath, no)}/lines/${lineNo}/remainder`, { date }),
+    httpClient.post<SingleResponse<unknown>>(`${linePath(no, lineNo)}/remainder`, { date }),
+  closing: (no: string) =>
+    httpClient.get<SingleResponse<TransportOrderClosingApi>>(`${orderPath(no)}/closing`),
+  attachDocument: (no: string, kind: string, fileNo: string) =>
+    httpClient.post<SingleResponse<{ kind: string; fileNo: string }>>(
+      `${orderPath(no)}/documents`,
+      { kind, fileNo }
+    ),
+  saveDebriefing: (no: string, debriefing: DebriefingInput) =>
+    httpClient.post<SingleResponse<OrderDebriefing>>(`${orderPath(no)}/debriefing`, debriefing),
+  close: (no: string) =>
+    httpClient.post<SingleResponse<{ status: string }>>(`${orderPath(no)}/close`, {}),
   availability: (from: string, to: string) =>
     httpClient.get<SingleResponse<AvailabilityApi>>('/fleet/availability', {
       params: { from, to }

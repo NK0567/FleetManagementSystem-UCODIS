@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
+import { ListChecks } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
@@ -13,6 +14,7 @@ import type { TransportOrderApi, TransportOrderSearchColumn } from '../types/tra
 const { t } = useI18n()
 const store = useTransportOrderStore()
 const { formatDateTime, formatDecimal, optionLabel } = useListCellFormatters()
+const creatingFromRequests = ref(false)
 
 const searchColumnOptions = computed<{ value: TransportOrderSearchColumn; label: string }[]>(() => [
   {
@@ -117,9 +119,10 @@ const detailKeys = [
   'status',
   'routeName',
   'plannedDeparture',
+  'plannedArrival',
   'means',
-  'recipientSummary',
-  'lineCount'
+  'lineCount',
+  'totalWeightKg'
 ]
 const detailColumns = computed(() =>
   detailKeys
@@ -186,6 +189,12 @@ const {
   exportFileBaseName: 'transport-orders',
   exportApi: transportOrderApi.exportExcel
 })
+
+function onCreatedFromRequests(no: string) {
+  creatingFromRequests.value = false
+  void store.fetchItems(store.pagination.page, store.pagination.limit)
+  openFromList(no)
+}
 </script>
 
 <template>
@@ -230,6 +239,16 @@ const {
             :set-column-order="setColumnOrder"
             :reset-preferences="resetPreferences"
           />
+        </template>
+        <template v-if="canInsert" #extra-actions>
+          <button
+            type="button"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
+            @click="creatingFromRequests = true"
+          >
+            <ListChecks class="w-4 h-4 text-primary" />
+            {{ t('planning.transportOrders.createDialog.title') }}
+          </button>
         </template>
       </ListPageToolbar>
 
@@ -281,6 +300,14 @@ const {
           <ListDetailsPanel v-if="store.selectedItem" :record-no="store.selectedItem.no">
             <template #details>
               <div class="px-4 py-4 space-y-4 flex-1 overflow-y-auto text-sm">
+                <div>
+                  <p class="text-xs text-muted-foreground font-semibold mb-1">
+                    {{ t('planning.transportOrders.col.recipientSummary') }}
+                  </p>
+                  <p class="font-semibold text-primary">
+                    {{ store.selectedItem.recipientSummary || '—' }}
+                  </p>
+                </div>
                 <dl class="grid grid-cols-2 gap-x-3 gap-y-2">
                   <template v-for="column in detailColumns" :key="column.sortKey">
                     <dt class="text-xs text-muted-foreground">{{ column.label }}</dt>
@@ -327,6 +354,11 @@ const {
       v-if="showCreateModal"
       @close="showCreateModal = false"
       @created="onCreated"
+    />
+    <CreateTransportOrderDialog
+      :open="creatingFromRequests"
+      @close="creatingFromRequests = false"
+      @created="onCreatedFromRequests"
     />
   </div>
 </template>

@@ -1,4 +1,5 @@
 import type { LoadCapacity } from '@/modules/fleet/vehicles/domain/capacity'
+import { returnExpected } from '@/modules/planning/reception/domain/reception'
 
 export const TRANSPORT_ORDER_STATUSES = [
   'draft',
@@ -149,3 +150,38 @@ export function pointIssue(
   }
   return null
 }
+
+export type OrderLineState =
+  | 'pending'
+  | 'declared'
+  | 'refused'
+  | 'postponed'
+  | 'returned'
+  | 'handed_back'
+
+export interface OrderLineFacts {
+  declaredAt: string | null
+  refusalAt: string | null
+  postponedAt: string | null
+  returnedAt: string | null
+  handedBackAt: string | null
+  warehouseReceivedAt: string | null
+}
+
+/** Where a line stands on the road. Goods back at the warehouse win over the reason they came back. */
+export function orderLineState(line: OrderLineFacts): OrderLineState {
+  if (line.handedBackAt || line.warehouseReceivedAt) return 'handed_back'
+  if (line.refusalAt) return 'refused'
+  if (line.returnedAt) return 'returned'
+  if (line.postponedAt) return 'postponed'
+  if (line.declaredAt) return 'declared'
+  return 'pending'
+}
+
+/** A line still to declare while the order is on the road. */
+export const canDeclareLine = (status: TransportOrderStatus, line: OrderLineFacts) =>
+  status === 'in_progress' && !line.declaredAt && !line.refusalAt && !line.returnedAt
+
+/** Goods coming back that the driver has not handed to the warehouse yet. */
+export const canHandBackLine = (line: OrderLineFacts) =>
+  returnExpected(line) && !line.handedBackAt && !line.warehouseReceivedAt

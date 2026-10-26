@@ -123,5 +123,56 @@ export default {
   'planning.transportOrders.createDialog.title': 'Create an order from requests',
   'planning.transportOrders.createDialog.hint':
     'The ticked requests become the lines of the order. An expired request is refused when the setting blocks it.',
-  'planning.transportOrders.createDialog.empty': 'No request is waiting.'
+  'planning.transportOrders.createDialog.empty': 'No request is waiting.',
+
+  'planning.transportOrders.lines.col.state': 'State',
+  'planning.transportOrders.lines.col.received': 'Received',
+  'planning.transportOrders.lines.col.actions': 'Actions',
+  'planning.transportOrders.lines.total': 'Total',
+  'planning.transportOrders.lines.state.pending': 'To deliver',
+  'planning.transportOrders.lines.state.declared': 'Delivered',
+  'planning.transportOrders.lines.state.refused': 'Refused',
+  'planning.transportOrders.lines.state.postponed': 'Postponed',
+  'planning.transportOrders.lines.state.returned': 'Coming back',
+  'planning.transportOrders.lines.state.handed_back': 'Handed back',
+  'planning.transportOrders.lines.manual': 'No request',
+  'planning.transportOrders.lines.declareHint': '{point} · {product}: {quantity} {unit} loaded.',
+  'planning.transportOrders.lines.receivedQuantity': 'Received quantity ({unit})',
+  'planning.transportOrders.lines.justification': 'Gap justification',
+  'planning.transportOrders.lines.justificationHint':
+    'Required when the gap is outside the tolerance.',
+  'planning.transportOrders.lines.handBackHint':
+    'The goods of {point} · {product} go back to the warehouse.',
+  'planning.transportOrders.lines.remainderDate': 'Wanted date for the remainder',
+  'planning.transportOrders.lines.remainderHint':
+    '{quantity} {unit} not received become a new request.',
+  'planning.transportOrders.means.trip': 'Fleet trip',
+  'planning.transportOrders.means.noneHint': 'Plan the order to give it a vehicle or a carrier.',
+  'planning.transportOrders.closing.title': 'Closing',
+  'planning.transportOrders.closing.ready': 'Nothing blocks the closing.',
+  'planning.transportOrders.closing.closed': 'Order closed.',
+  'planning.transportOrders.closing.block.not_delivered': 'Not every line is delivered',
+  'planning.transportOrders.closing.block.reception': 'Reception not attested',
+  'planning.transportOrders.closing.block.contestation': 'Contestation open',
+  'planning.transportOrders.closing.block.protest': 'Protest open',
+  'planning.transportOrders.closing.block.gap': 'Gap not qualified',
+  'planning.transportOrders.closing.block.document': 'Required document missing',
+  'planning.transportOrders.closing.documents': 'Documents',
+  'planning.transportOrders.closing.noDocuments': 'No document filed.',
+  'planning.transportOrders.closing.required': 'Required documents: {kinds}',
+  'planning.transportOrders.closing.kindHint':
+    'Lowercase letters, digits and _ (e.g. delivery_note).',
+  'planning.transportOrders.closing.debriefing': 'Debriefing',
+  'planning.transportOrders.closing.loadedAt': 'Loaded on',
+  'planning.transportOrders.closing.unloadedAt': 'Unloaded on',
+  'planning.transportOrders.closing.observations': 'Observations',
+  'planning.transportOrders.closing.savedBy': 'Saved on {at} by {by}',
+  'planning.transportOrders.closing.vehicle': 'Vehicle',
+  'planning.transportOrders.closing.places': 'Places',
+  'planning.transportOrders.closing.gainLoss': 'Gains and losses',
+  'planning.transportOrders.history.empty': 'No event.',
+  'planning.transportOrders.plan.mode': 'Planning mode',
+  'planning.transportOrders.createDialog.picked':
+    'No request ticked | One request ticked | {n} requests ticked',
+  'planning.transportOrders.createDialog.departure': 'Planned departure'
 }

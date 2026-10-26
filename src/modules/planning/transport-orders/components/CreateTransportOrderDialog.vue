@@ -16,6 +16,7 @@ const requests = ref<DeliveryRequestApi[]>([])
 const picked = ref<string[]>([])
 const routeTemplateNo = ref('')
 const plannedDeparture = ref('')
+const loadingRequests = ref(false)
 const loading = ref(false)
 const error = ref<string | null>(null)
 
@@ -24,22 +25,24 @@ watch(
   async (open) => {
     if (!open) return
     error.value = null
-    const page = await deliveryRequestService.getAll({
-      page: 1,
-      pageSize: 200,
-      sortBy: 'desiredDate'
-    })
-    requests.value = page.data.items.filter(
-      (request) => request.status === 'pending' || request.status === 'expired'
-    )
+    picked.value = []
+    loadingRequests.value = true
+    try {
+      const page = await deliveryRequestService.getAll({
+        page: 1,
+        pageSize: 200,
+        sortBy: 'desiredDate'
+      })
+      requests.value = page.data.items.filter(
+        (request) => request.status === 'pending' || request.status === 'expired'
+      )
+    } catch (cause) {
+      error.value = apiErrorMessage(cause, t('planning.transportOrders.createError'))
+    } finally {
+      loadingRequests.value = false
+    }
   }
 )
-
-function toggle(no: string) {
-  picked.value = picked.value.includes(no)
-    ? picked.value.filter((item) => item !== no)
-    : [...picked.value, no]
-}
 
 async function confirm() {
   loading.value = true
@@ -68,43 +71,37 @@ async function confirm() {
     :confirm-label="t('planning.transportOrders.action.createFromRequests')"
     :confirm-disabled="!picked.length"
     :loading="loading"
-    panel-class="max-w-lg"
+    panel-class="max-w-2xl"
     @confirm="confirm"
     @cancel="emit('close')"
   >
-    <p class="text-sm text-muted-foreground mb-3">
-      {{ t('planning.transportOrders.createDialog.hint') }}
-    </p>
-    <p v-if="error" class="mb-3 text-sm text-destructive">{{ error }}</p>
-    <div class="grid grid-cols-1 gap-2 mb-3">
-      <ReferenceLookup
-        v-model="routeTemplateNo"
-        reference-key="routeTemplates"
-        :modal-title="t('planning.transportOrders.form.routeTemplateNo')"
-        detail-path="/fleet/route-templates"
-      />
-      <FormInput v-model="plannedDeparture" type="datetime-local" />
-    </div>
-    <div class="max-h-64 overflow-y-auto text-sm">
-      <p v-if="!requests.length" class="text-muted-foreground">
-        {{ t('planning.transportOrders.createDialog.empty') }}
+    <div class="space-y-3">
+      <p class="text-sm text-muted-foreground">
+        {{ t('planning.transportOrders.createDialog.hint') }}
       </p>
-      <label
-        v-for="request in requests"
-        :key="request.no"
-        class="flex items-start gap-2 py-1 cursor-pointer"
-      >
-        <input
-          type="checkbox"
-          class="mt-1"
-          :checked="picked.includes(request.no)"
-          @change="toggle(request.no)"
-        />
-        <span>
-          <span class="font-medium">{{ request.no }}</span>
-          · {{ request.deliveryPointName }} · {{ request.quantity }} {{ request.unit }}
-        </span>
-      </label>
+      <FormAlerts :error="error" @clear:error="error = null" />
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <BaseFormField :label="t('planning.transportOrders.form.routeTemplateNo')">
+          <ReferenceLookup
+            v-model="routeTemplateNo"
+            reference-key="routeTemplates"
+            :modal-title="t('planning.transportOrders.form.routeTemplateNo')"
+            detail-path="/fleet/route-templates"
+          />
+        </BaseFormField>
+        <BaseFormField :label="t('planning.transportOrders.createDialog.departure')">
+          <FormInput v-model="plannedDeparture" type="datetime-local" />
+        </BaseFormField>
+      </div>
+      <RequestPickerTable
+        v-model="picked"
+        :requests="requests"
+        :loading="loadingRequests"
+        :empty-message="t('planning.transportOrders.createDialog.empty')"
+      />
+      <p class="text-xs text-muted-foreground text-right">
+        {{ t('planning.transportOrders.createDialog.picked', picked.length) }}
+      </p>
     </div>
   </ConfirmDialog>
 </template>
