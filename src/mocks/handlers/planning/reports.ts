@@ -11,12 +11,39 @@ import type { MockDatabase } from '../../db/database'
 import type { TransportOrderRow } from '../../fixtures/planning/transportOrders'
 import { ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
-import { sessionUser } from '../../http/types'
+import { sessionUser, type MockRequest } from '../../http/types'
+import { customerBillingApi } from './customerBilling'
 import { orderPlace, visibleTo } from './perimeter'
 import { planningSettings } from './settings'
 
-function visibleOrders(db: MockDatabase, userCode: string): TransportOrderRow[] {
-  return db.transportOrders.all().filter((order) => visibleTo(db, userCode, orderPlace(db, order)))
+export interface ReportPeriod {
+  from: string
+  to: string
+}
+
+const DASHBOARD_CARRIERS = 5
+
+function periodOf(request: MockRequest): ReportPeriod {
+  const read = (key: string) => (typeof request.query[key] === 'string' ? String(request.query[key]) : '')
+  return { from: read('from'), to: read('to') }
+}
+
+/** An order belongs to the period of its planned departure; an empty bound does not filter. */
+function inPeriod(order: TransportOrderRow, period: ReportPeriod): boolean {
+  const day = (order.plannedDeparture ?? '').slice(0, 10)
+  if (!period.from && !period.to) return true
+  if (!day) return false
+  return (!period.from || day >= period.from) && (!period.to || day <= period.to)
+}
+
+function visibleOrders(
+  db: MockDatabase,
+  userCode: string,
+  period: ReportPeriod = { from: '', to: '' }
+): TransportOrderRow[] {
+  return db.transportOrders
+    .all()
+    .filter((order) => inPeriod(order, period) && visibleTo(db, userCode, orderPlace(db, order)))
 }
 
 export function planningDashboard(db: MockDatabase, userCode: string) {
@@ -39,17 +66,39 @@ export function planningDashboard(db: MockDatabase, userCode: string) {
       if (line.receptionContestedAt) contested += 1
     }
   }
+  const orderNos = new Set(orders.map((order) => order.no))
+  const toInvoice = customerBillingApi(db).filter(
+    (row) => orderNos.has(row.orderNo) && !row.reference && !row.issue
+  )
+  const invoicesToCheck = db.carrierInvoices
+    .all()
+    .filter(
+      (invoice) =>
+        !invoice.validatedAt &&
+        !invoice.refusedAt &&
+        invoice.orderNos.some((no) => orderNos.has(no))
+    ).length
+  const carriers = carrierReport(db, userCode)
+    .sort((left, right) => right.orders - left.orders)
+    .slice(0, DASHBOARD_CARRIERS)
   return {
     orders: orders.length,
     punctuality: punctualityRate(onTime, arrived),
     confirmation: confirmationRate(attested, declared),
-    contestation: contestationRate(contested, declared)
+    contestation: contestationRate(contested, declared),
+    lines: { declared, attested, contested, onTime, arrived },
+    toInvoice: toInvoice.length,
+    toInvoiceAmount: toInvoice.reduce((sum, row) => sum + (row.amount ?? 0), 0),
+    invoicesToCheck,
+    carriers
   }
 }
 
-export function carrierReport(db: MockDatabase, userCode: string) {
+export function carrierReport(db: MockDatabase, userCode: string, period?: ReportPeriod) {
   const figures = new Map<string, CarrierFigures>()
-  for (const order of visibleOrders(db, userCode)) {
+  const orders = visibleOrders(db, userCode, period)
+  const orderNos = new Set(orders.map((order) => order.no))
+  for (const order of orders) {
     if (order.means !== 'carrier' || !order.carrierNo) continue
     const row = figures.get(order.carrierNo) ?? {
       carrierNo: order.carrierNo,
@@ -74,13 +123,16 @@ export function carrierReport(db: MockDatabase, userCode: string) {
     figures.set(order.carrierNo, row)
   }
   for (const invoice of db.carrierInvoices.all()) {
-    if (invoice.refusedAt) continue
+    if (invoice.refusedAt || !invoice.orderNos.some((no) => orderNos.has(no))) continue
     const row = figures.get(invoice.carrierNo)
     if (!row) continue
     row.invoices += 1
     if (invoice.validatedAt && invoice.agreedAmount === null) row.withoutTariff += 1
   }
-  return [...figures.values()].map(carrierIndicators)
+  return [...figures.values()].map((row) => ({
+    ...carrierIndicators(row),
+    carrierName: db.providers.find(row.carrierNo)?.name ?? null
+  }))
 }
 
 export function registerReportHandlers(router: MockRouter, db: MockDatabase): void {
@@ -88,6 +140,6 @@ export function registerReportHandlers(router: MockRouter, db: MockDatabase): vo
     ok(planningDashboard(db, sessionUser(request).code))
   )
   router.get('/planning/reports/carriers', { feature: 'TRANSPORTREPORT', action: 'read' }, (request) =>
-    ok(carrierReport(db, sessionUser(request).code))
+    ok(carrierReport(db, sessionUser(request).code, periodOf(request)))
   )
 }

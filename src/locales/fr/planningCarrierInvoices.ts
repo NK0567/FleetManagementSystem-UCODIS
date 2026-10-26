@@ -14,5 +14,22 @@ export default {
   'planning.carrierInvoices.reason': 'Motif',
   'planning.carrierInvoices.status.to_check': 'À contrôler',
   'planning.carrierInvoices.status.validated': 'Validée',
-  'planning.carrierInvoices.status.refused': 'Refusée'
+  'planning.carrierInvoices.status.refused': 'Refusée',
+  'planning.carrierInvoices.list': 'Factures reçues',
+  'planning.carrierInvoices.carrier': 'Transporteur',
+  'planning.carrierInvoices.date': 'Date de facture',
+  'planning.carrierInvoices.ordersHint': 'TR-2026-0004, TR-2026-0005',
+  'planning.carrierInvoices.agreed': 'Montant convenu',
+  'planning.carrierInvoices.gap': 'Écart',
+  'planning.carrierInvoices.statusLabel': 'État',
+  'planning.carrierInvoices.withholding': 'Retenues : {amount}',
+  'planning.carrierInvoices.untariffed': 'Sans tarif : motif requis',
+  'planning.carrierInvoices.refuse': 'Refuser',
+  'planning.carrierInvoices.kpi.toCheck': 'À contrôler',
+  'planning.carrierInvoices.kpi.amountSub': 'Montant : {amount}',
+  'planning.carrierInvoices.kpi.untariffed': 'Sans tarif',
+  'planning.carrierInvoices.kpi.untariffedSub': 'À valider avec un motif',
+  'planning.carrierInvoices.kpi.validated': 'Validées',
+  'planning.carrierInvoices.kpi.refused': 'Refusées',
+  'planning.carrierInvoices.kpi.refusedSub': 'Leurs ordres peuvent être refacturés'
 }

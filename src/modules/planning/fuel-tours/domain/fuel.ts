@@ -1,3 +1,14 @@
+export const FUEL_TOUR_STATES = ['draft', 'validated', 'cancelled'] as const
+export type FuelTourState = (typeof FUEL_TOUR_STATES)[number]
+
+export function fuelTourState(tour: {
+  validatedAt: string | null
+  cancelledAt: string | null
+}): FuelTourState {
+  if (tour.cancelledAt) return 'cancelled'
+  return tour.validatedAt ? 'validated' : 'draft'
+}
+
 export const VOLUME15_METHODS = ['coefficient', 'typed'] as const
 export type Volume15Method = (typeof VOLUME15_METHODS)[number]
 

@@ -89,6 +89,7 @@ function view(db: MockDatabase, invoice: CarrierInvoiceRow) {
   const live = agreedTotal(orders.map((order) => agreedOf(db, order)))
   return {
     ...invoice,
+    carrierName: db.providers.find(invoice.carrierNo)?.name ?? null,
     status: carrierInvoiceStatus(invoice),
     agreedAmount: invoice.validatedAt ? invoice.agreedAmount : live.total,
     withholdingAmount: invoice.validatedAt ? invoice.withholdingAmount : live.withholding,

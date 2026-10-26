@@ -53,7 +53,19 @@ function slotsOf(db: MockDatabase, compartments: FuelCompartmentRow[]): PlanSlot
 }
 
 export function registerFuelTourHandlers(router: MockRouter, db: MockDatabase): void {
-  router.get('/planning/fuel-tours', { feature: FEATURE, action: 'read' }, () => ok(db.fuelTours.all()))
+  router.get('/planning/fuel-tours', { feature: FEATURE, action: 'read' }, () =>
+    ok(
+      db.fuelTours.all().map((tour) => ({
+        ...tour,
+        depotName: db.sites.find(tour.depotNo)?.name ?? null,
+        bls: tour.bls.map((bl) => ({
+          ...bl,
+          vehiclePlate: db.vehicles.find(bl.vehicleNo)?.plate ?? null,
+          productName: db.products.find(bl.productNo)?.name ?? null
+        }))
+      }))
+    )
+  )
 
   router.post('/planning/fuel-tours', { feature: FEATURE, action: 'execute' }, (request) => {
     const body = readBody(request)

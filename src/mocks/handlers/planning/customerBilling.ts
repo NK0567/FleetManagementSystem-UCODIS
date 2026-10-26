@@ -93,6 +93,20 @@ function referenceTaken(db: MockDatabase, reference: string): boolean {
   )
 }
 
+function lineLabels(db: MockDatabase, line: TransportOrderLineRow, customerNo: string | null) {
+  const product = db.products.find(line.productNo)
+  return {
+    customerName: customerNo ? (db.customers.find(customerNo)?.name ?? null) : null,
+    deliveryPointNo: line.deliveryPointNo,
+    deliveryPointName: db.deliveryPoints.find(line.deliveryPointNo)?.name ?? null,
+    productNo: line.productNo,
+    productName: product?.name ?? null,
+    unit: product?.unit ?? null,
+    quantity: line.receivedQuantity ?? line.quantity,
+    declaredAt: line.declaredAt
+  }
+}
+
 export function customerBillingApi(db: MockDatabase) {
   const rows = []
   for (const order of db.transportOrders.all()) {
@@ -104,6 +118,7 @@ export function customerBillingApi(db: MockDatabase) {
           orderNo: order.no,
           lineNo: line.lineNo,
           customerNo: line.invoiceCustomerNo,
+          ...lineLabels(db, line, line.invoiceCustomerNo),
           amount: line.invoiceAmount,
           tariffNo: line.invoiceTariffNo,
           reference: line.invoiceReference,
@@ -116,6 +131,7 @@ export function customerBillingApi(db: MockDatabase) {
         orderNo: order.no,
         lineNo: line.lineNo,
         customerNo: priced.customerNo ?? null,
+        ...lineLabels(db, line, priced.customerNo ?? null),
         amount: priced.amount ?? null,
         tariffNo: priced.tariffNo ?? null,
         reference: null,

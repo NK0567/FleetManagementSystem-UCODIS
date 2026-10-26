@@ -14,5 +14,22 @@ export default {
   'planning.carrierInvoices.reason': 'Reason',
   'planning.carrierInvoices.status.to_check': 'To check',
   'planning.carrierInvoices.status.validated': 'Validated',
-  'planning.carrierInvoices.status.refused': 'Refused'
+  'planning.carrierInvoices.status.refused': 'Refused',
+  'planning.carrierInvoices.list': 'Received invoices',
+  'planning.carrierInvoices.carrier': 'Carrier',
+  'planning.carrierInvoices.date': 'Invoice date',
+  'planning.carrierInvoices.ordersHint': 'TR-2026-0004, TR-2026-0005',
+  'planning.carrierInvoices.agreed': 'Agreed amount',
+  'planning.carrierInvoices.gap': 'Gap',
+  'planning.carrierInvoices.statusLabel': 'State',
+  'planning.carrierInvoices.withholding': 'Withholdings: {amount}',
+  'planning.carrierInvoices.untariffed': 'No tariff: reason required',
+  'planning.carrierInvoices.refuse': 'Refuse',
+  'planning.carrierInvoices.kpi.toCheck': 'To check',
+  'planning.carrierInvoices.kpi.amountSub': 'Amount: {amount}',
+  'planning.carrierInvoices.kpi.untariffed': 'Without tariff',
+  'planning.carrierInvoices.kpi.untariffedSub': 'To validate with a reason',
+  'planning.carrierInvoices.kpi.validated': 'Validated',
+  'planning.carrierInvoices.kpi.refused': 'Refused',
+  'planning.carrierInvoices.kpi.refusedSub': 'Their orders can be invoiced again'
 }
