@@ -45,5 +45,8 @@ export default {
   'fleet.routeTemplates.stops.add': 'Ajouter un arrêt',
   'fleet.routeTemplates.stops.duration': 'Durée prévue : {duration}',
   'fleet.routeTemplates.stops.invalid':
-    'Les arrêts sont incohérents : au moins deux arrêts, un départ en premier, un site par arrêt, jamais deux fois le même site à la suite.'
+    'Les arrêts sont incohérents : au moins deux arrêts, un départ en premier, un site par arrêt, jamais deux fois le même site à la suite.',
+  'fleet.routeTemplates.form.fuelReferenceL100': 'Consommation de référence (L/100 km)',
+  'fleet.routeTemplates.form.fuelReferenceL100Hint':
+    'Prime sur celle du type de véhicule pour les trajets de cet itinéraire.'
 }

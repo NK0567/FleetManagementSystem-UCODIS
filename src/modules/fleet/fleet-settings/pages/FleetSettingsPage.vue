@@ -5,7 +5,9 @@ import { usePermissions } from '@/composables/usePermissions'
 import { useUnsavedChangesRouteGuard } from '@/composables/useUnsavedChangesRouteGuard'
 import { formatDateTime } from '@/utils/format'
 import {
+  FLEET_SETTING_FIELDS,
   FLEET_SETTINGS_SECTIONS,
+  settingsSectionIssues,
   type FleetSettings,
   type FleetSettingsSection
 } from '../domain/fleetSettings'
@@ -24,7 +26,17 @@ function setDirty(section: FleetSettingsSection, dirty: boolean) {
 }
 
 function saveSection(section: FleetSettingsSection) {
-  return (values: FleetSettings[FleetSettingsSection]) => store.saveSection(section, values)
+  return (values: Record<string, unknown>) =>
+    store.saveSection(section, values as unknown as FleetSettings[FleetSettingsSection])
+}
+
+function validate(section: FleetSettingsSection) {
+  return (values: Record<string, unknown>) =>
+    settingsSectionIssues(section, values as unknown as FleetSettings[FleetSettingsSection])
+}
+
+function sectionValues(section: FleetSettingsSection): Record<string, unknown> {
+  return (store.settings?.[section] ?? {}) as unknown as Record<string, unknown>
 }
 
 onMounted(() => void store.fetchSettings())
@@ -50,11 +62,14 @@ onMounted(() => void store.fetchSettings())
     <LoadingSpinner v-if="store.loading" :text="t('common.loading')" />
 
     <template v-else-if="store.settings">
-      <FleetSettingsSectionCard
+      <SettingsSectionCard
         v-for="section in FLEET_SETTINGS_SECTIONS"
         :key="section"
+        label-prefix="fleet.settings"
         :section="section"
-        :values="store.settings[section]"
+        :fields="FLEET_SETTING_FIELDS[section]"
+        :validate="validate(section)"
+        :values="sectionValues(section)"
         :can-edit="canUpdate"
         :saving="store.savingSection === section"
         :save="saveSection(section)"

@@ -67,5 +67,9 @@ export default {
   'fleet.trips.dialog.startKm': 'Kilométrage au départ (dernier relevé par défaut)',
   'fleet.trips.dialog.endKm': "Kilométrage à l'arrivée",
   'fleet.trips.dialog.startWas': 'Au départ : {km} km.',
-  'fleet.trips.dialog.cancelReason': "Motif de l'annulation"
+  'fleet.trips.dialog.cancelReason': "Motif de l'annulation",
+  'fleet.trips.needsAuthorization': "Le départ doit d'abord être accordé.",
+  'fleet.trips.form.authorization': 'Autorisation de départ',
+  'fleet.trips.form.noAuthorization': "Aucune demande pour l'instant.",
+  'fleet.trips.deviationsToQualify': 'Écarts encore à qualifier sur ce trajet : {count}.'
 }

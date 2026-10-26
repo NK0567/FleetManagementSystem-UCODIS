@@ -28,6 +28,60 @@ import fleetDrivers from './fleetDrivers'
 import fleetRouteTemplates from './fleetRouteTemplates'
 import fleetTrips from './fleetTrips'
 import fleetFleetStatus from './fleetFleetStatus'
+import fleetDocumentTypes from './fleetDocumentTypes'
+import fleetDocuments from './fleetDocuments'
+import fleetMissingDocuments from './fleetMissingDocuments'
+import fleetCompanyDocuments from './fleetCompanyDocuments'
+import fleetInsurancePolicies from './fleetInsurancePolicies'
+import fleetClaims from './fleetClaims'
+import fleetInfractionTypes from './fleetInfractionTypes'
+import fleetInfractions from './fleetInfractions'
+import fleetTrainings from './fleetTrainings'
+import fleetCheckPoints from './fleetCheckPoints'
+import fleetInspections from './fleetInspections'
+import fleetRoadChecklists from './fleetRoadChecklists'
+import fleetDepartureAuthorizations from './fleetDepartureAuthorizations'
+import fleetDeviationTypes from './fleetDeviationTypes'
+import fleetRouteDeviations from './fleetRouteDeviations'
+import fleetAlertRules from './fleetAlertRules'
+import fleetAlerts from './fleetAlerts'
+import fleetFuelGapCauses from './fleetFuelGapCauses'
+import fleetFuelRefills from './fleetFuelRefills'
+import fleetFuelConsumption from './fleetFuelConsumption'
+import fleetFuelCards from './fleetFuelCards'
+import fleetLiveMap from './fleetLiveMap'
+import fleetDashboard from './fleetDashboard'
+import fleetReports from './fleetReports'
+import maintenanceSettings from './maintenanceSettings'
+import fleetFuelCardTransactions from './fleetFuelCardTransactions'
+import fleetTelematicsEventTypes from './fleetTelematicsEventTypes'
+import fleetTelematicsEvents from './fleetTelematicsEvents'
+import maintenanceCompetences from './maintenanceCompetences'
+import maintenanceFailureCodes from './maintenanceFailureCodes'
+import maintenanceDowntimeCodes from './maintenanceDowntimeCodes'
+import maintenanceMissionTypes from './maintenanceMissionTypes'
+import maintenanceTechnicians from './maintenanceTechnicians'
+import maintenanceDowntimes from './maintenanceDowntimes'
+import maintenanceWorkOrders from './maintenanceWorkOrders'
+import maintenanceMaintenancePlans from './maintenanceMaintenancePlans'
+import maintenanceServiceDue from './maintenanceServiceDue'
+import maintenanceWorkshopLoad from './maintenanceWorkshopLoad'
+import maintenanceReliability from './maintenanceReliability'
+import maintenanceStockItems from './maintenanceStockItems'
+import maintenancePurchaseRequests from './maintenancePurchaseRequests'
+import maintenanceVehicleCheckPoints from './maintenanceVehicleCheckPoints'
+import maintenanceVehicleChecks from './maintenanceVehicleChecks'
+import maintenanceMobileInterventions from './maintenanceMobileInterventions'
+import maintenanceTyreLayouts from './maintenanceTyreLayouts'
+import maintenanceTyres from './maintenanceTyres'
+import planningReasons from './planningReasons'
+import planningSettings from './planningSettings'
+import planningCustomers from './planningCustomers'
+import planningDeliveryPoints from './planningDeliveryPoints'
+import planningProducts from './planningProducts'
+import planningProductCompatibilities from './planningProductCompatibilities'
+import planningQuantityTolerances from './planningQuantityTolerances'
+import planningTransportTariffs from './planningTransportTariffs'
 export default {
   ...common,
   ...auth,
@@ -57,5 +111,59 @@ export default {
   ...fleetDrivers,
   ...fleetRouteTemplates,
   ...fleetTrips,
-  ...fleetFleetStatus
+  ...fleetFleetStatus,
+  ...fleetDocumentTypes,
+  ...fleetDocuments,
+  ...fleetMissingDocuments,
+  ...fleetCompanyDocuments,
+  ...fleetInsurancePolicies,
+  ...fleetClaims,
+  ...fleetInfractionTypes,
+  ...fleetInfractions,
+  ...fleetTrainings,
+  ...fleetCheckPoints,
+  ...fleetInspections,
+  ...fleetRoadChecklists,
+  ...fleetDepartureAuthorizations,
+  ...fleetDeviationTypes,
+  ...fleetRouteDeviations,
+  ...fleetAlertRules,
+  ...fleetAlerts,
+  ...fleetFuelGapCauses,
+  ...fleetFuelRefills,
+  ...fleetFuelConsumption,
+  ...fleetFuelCards,
+  ...fleetLiveMap,
+  ...fleetDashboard,
+  ...fleetReports,
+  ...maintenanceSettings,
+  ...fleetFuelCardTransactions,
+  ...fleetTelematicsEventTypes,
+  ...fleetTelematicsEvents,
+  ...maintenanceCompetences,
+  ...maintenanceFailureCodes,
+  ...maintenanceDowntimeCodes,
+  ...maintenanceMissionTypes,
+  ...maintenanceTechnicians,
+  ...maintenanceDowntimes,
+  ...maintenanceWorkOrders,
+  ...maintenanceMaintenancePlans,
+  ...maintenanceServiceDue,
+  ...maintenanceWorkshopLoad,
+  ...maintenanceReliability,
+  ...maintenanceStockItems,
+  ...maintenancePurchaseRequests,
+  ...maintenanceVehicleCheckPoints,
+  ...maintenanceVehicleChecks,
+  ...maintenanceMobileInterventions,
+  ...maintenanceTyreLayouts,
+  ...maintenanceTyres,
+  ...planningReasons,
+  ...planningSettings,
+  ...planningCustomers,
+  ...planningDeliveryPoints,
+  ...planningProducts,
+  ...planningProductCompatibilities,
+  ...planningQuantityTolerances,
+  ...planningTransportTariffs
 }

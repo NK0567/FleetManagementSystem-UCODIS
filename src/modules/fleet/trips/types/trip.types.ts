@@ -1,3 +1,4 @@
+import type { DepartureDecision } from '@/modules/fleet/departure-authorizations/domain/departure'
 import type { StopRole } from '@/modules/fleet/route-templates'
 import type { TripStatus } from '../domain/trip'
 
@@ -44,6 +45,13 @@ export interface TripApi {
   stops: TripStopApi[]
   stopCount: number
   passedStopCount: number
+  /** They keep the trip from being closed. */
+  deviationsToQualify: number
+  /** Off when the departures module is turned off. */
+  authorizationRequired: boolean
+  /** The departure request that decides whether the trip may leave. */
+  authorizationNo: string | null
+  authorizationDecision: DepartureDecision | null
   createdAt: string
   createdBy: string
   modifiedAt: string

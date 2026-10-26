@@ -7,4 +7,13 @@ export {
   type DriverFacts,
   type IneligibilityReason
 } from './domain/driver'
-export type { DriverApi, DriverSearchColumn } from './types/driver.types'
+export type { DriverApi, DriverScoreApi, DriverSearchColumn } from './types/driver.types'
+export {
+  SCORE_FAMILIES,
+  familyScores,
+  overallScore,
+  type DriverScoreSettings,
+  type FamilyScore,
+  type ScoreFacts,
+  type ScoreFamily
+} from './domain/driverScore'

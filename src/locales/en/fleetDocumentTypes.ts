@@ -1,0 +1,50 @@
+export default {
+  'fleet.documentTypes.title': 'Document types',
+  'fleet.documentTypes.card': 'Document type card',
+  'fleet.documentTypes.new': 'New document type',
+  'fleet.documentTypes.loadingList': 'Loading document types…',
+  'fleet.documentTypes.noResults': 'No document type.',
+  'fleet.documentTypes.noSearchResults': 'No document type matches "{query}".',
+  'fleet.documentTypes.saveSuccess': 'Document type saved.',
+  'fleet.documentTypes.saveError': 'The document type could not be saved.',
+  'fleet.documentTypes.createError': 'The document type could not be created.',
+  'fleet.documentTypes.deleteError': 'The document type could not be deleted.',
+  'fleet.documentTypes.confirmDelete': 'Delete the document type',
+  'fleet.documentTypes.confirmDeleteMsg': 'The "{name}" type will be permanently deleted.',
+
+  'fleet.documentTypes.search.all': 'Code or name',
+
+  'fleet.documentTypes.col.no': 'Code',
+  'fleet.documentTypes.col.name': 'Name',
+  'fleet.documentTypes.col.target': 'Applies to',
+  'fleet.documentTypes.col.personScope': 'People concerned',
+  'fleet.documentTypes.col.mandatory': 'Mandatory',
+  'fleet.documentTypes.col.active': 'Active',
+  'fleet.documentTypes.col.validity': 'Validity',
+  'fleet.documentTypes.col.durationMonths': 'Usual duration (months)',
+  'fleet.documentTypes.col.noticeDays': 'Notice (days)',
+  'fleet.documentTypes.col.documentCount': 'Documents',
+
+  'fleet.documentTypes.form.general': 'General',
+  'fleet.documentTypes.form.lifetime': 'Validity and notice',
+  'fleet.documentTypes.form.no': 'Code',
+  'fleet.documentTypes.form.name': 'Name',
+  'fleet.documentTypes.form.target': 'Applies to',
+  'fleet.documentTypes.form.personScope': 'People concerned',
+  'fleet.documentTypes.form.mandatory': 'Mandatory',
+  'fleet.documentTypes.form.active': 'Active',
+  'fleet.documentTypes.form.validity': 'Validity',
+  'fleet.documentTypes.form.durationMonths': 'Usual duration (months)',
+  'fleet.documentTypes.form.durationMonthsHint': 'Suggests the end date of a new document.',
+  'fleet.documentTypes.form.noticeDays': 'Notice before the end (days)',
+  'fleet.documentTypes.form.noticeDaysHint':
+    'When empty, the default notice of the fleet settings applies.',
+  'fleet.documentTypes.form.documentCount': 'Documents of this type',
+  'fleet.documentTypes.form.scope': 'Concerns',
+  'fleet.documentTypes.form.mandatoryHint':
+    'A missing or expired mandatory document immobilises the vehicle or makes the driver ineligible.',
+  'fleet.documentTypes.form.vehicleTypesHint':
+    'No type ticked: the document applies to every vehicle.',
+  'fleet.documentTypes.form.vehicleTypeCount': '{n} vehicle type | {n} vehicle types',
+  'fleet.documentTypes.form.allVehicleTypes': 'Every vehicle'
+}

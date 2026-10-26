@@ -1,11 +1,9 @@
 import { driverIneligibility } from '@/modules/fleet/drivers/domain/driver'
 import { plannedSchedule } from '@/modules/fleet/route-templates/domain/routeTemplate'
 import {
-  OPEN_TRIP_STATUSES,
   canApply,
   kmGapPercent,
   nextStopIndex,
-  windowsOverlap,
   type TripAction
 } from '@/modules/fleet/trips/domain/trip'
 import type { TripApi } from '@/modules/fleet/trips/types/trip.types'
@@ -15,22 +13,31 @@ import { nextNo } from '../../db/numbering'
 import type { TripRow } from '../../fixtures/fleet/trips'
 import { readBody, registerCrudResource, routeParam, stampModified } from '../../http/crudResource'
 import { conflict, unprocessable } from '../../http/errors'
-import { invalidField, readNumber, readString } from '../../http/input'
+import { readDateTime, readNumber, readString } from '../../http/input'
 import { optionalReference, requireReference } from '../../http/references'
 import { ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
 import { sessionUser, type MockRequest } from '../../http/types'
 import type { MockLanguage } from '../../i18n'
 import { assertUsable } from './couplings'
+import { createAvailability, unavailabilityError } from './availability'
 import { driverFacts, ineligibilityText } from './drivers'
 import { employeeNames, vehiclePlates } from './links'
 import { FLEET_MESSAGES } from './messages'
-import { plannedArrival, tripWindow } from './tripIndex'
+import { plannedArrival } from './tripIndex'
+import { tripAuthorization } from './departureAuthorizations'
+import { deviationsToQualify } from './routeDeviations'
+import { disabledFeatures } from '../../auth/permissions'
 
 const BASE_PATH = '/fleet/trips'
-const DATE_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/
+
+/** With the departures module turned off, trips leave without an authorization. */
+function authorizationRequired(db: MockDatabase): boolean {
+  return !disabledFeatures(db.moduleToggles.all()).has('DEPARTUREAUTHORIZATION')
+}
 
 export function tripsApi(db: MockDatabase): TripApi[] {
+  const required = authorizationRequired(db)
   const routes = new Map(db.routeTemplates.all().map((route) => [route.no, route.name]))
   const sites = new Map(db.sites.all().map((site) => [site.no, site]))
   const plates = vehiclePlates(db)
@@ -50,6 +57,7 @@ export function tripsApi(db: MockDatabase): TripApi[] {
       }
     })
     const arrival = plannedArrival(trip)
+    const authorization = tripAuthorization(db, trip.no)
     const distanceKm =
       trip.startOdometerKm !== null && trip.endOdometerKm !== null
         ? trip.endOdometerKm - trip.startOdometerKm
@@ -85,6 +93,10 @@ export function tripsApi(db: MockDatabase): TripApi[] {
       stops,
       stopCount: stops.length,
       passedStopCount: stops.filter((stop) => stop.passedAt !== null).length,
+      deviationsToQualify: deviationsToQualify(db, trip.no),
+      authorizationRequired: required,
+      authorizationNo: authorization?.no ?? null,
+      authorizationDecision: authorization?.decision ?? null,
       createdAt: trip.createdAt,
       createdBy: trip.createdBy,
       modifiedAt: trip.modifiedAt,
@@ -94,12 +106,9 @@ export function tripsApi(db: MockDatabase): TripApi[] {
 }
 
 function readDeparture(input: Record<string, unknown>): string {
-  const value = readString(input, 'plannedDeparture', { required: true })
-  if (!DATE_TIME.test(value) || Number.isNaN(new Date(value).getTime())) {
-    throw invalidField('plannedDeparture')
-  }
+  const value = readDateTime(input, 'plannedDeparture', { required: true }) ?? ''
   if (value.slice(0, 10) < todayIso()) throw unprocessable(FLEET_MESSAGES.departureInPast)
-  return value.length === 16 ? `${value}:00` : value
+  return value
 }
 
 type Plan = Pick<
@@ -109,7 +118,7 @@ type Plan = Pick<
 
 /**
  * Checks that the vehicle, the trailer and the driver can take the trip: fit for the road,
- * eligible, and not held by another open trip at the same time.
+ * eligible over the whole trip, and not held by another open trip at the same time.
  */
 function assertResourcesFree(
   db: MockDatabase,
@@ -117,44 +126,17 @@ function assertResourcesFree(
   language: MockLanguage,
   except?: string
 ): void {
-  const vehicle = db.vehicles.findOrFail(plan.vehicleNo)
-  if (!db.vehicleTypes.findOrFail(vehicle.vehicleTypeNo).motorized) {
-    throw unprocessable(FLEET_MESSAGES.notMotorized)
-  }
-  assertUsable(db, vehicle, language)
-  if (plan.trailerNo) {
-    const trailer = db.vehicles.findOrFail(plan.trailerNo)
-    if (db.vehicleTypes.findOrFail(trailer.vehicleTypeNo).couplingRole !== 'towed') {
-      throw unprocessable(FLEET_MESSAGES.notATrailer)
-    }
-    assertUsable(db, trailer, language)
-  }
-  const employee = db.employees.findOrFail(plan.driverNo)
-  const reasons = driverIneligibility(driverFacts(db, employee, plan.plannedDeparture.slice(0, 10)))
-  if (reasons.length) {
-    throw unprocessable(FLEET_MESSAGES.driverNotEligible, {
-      reasons: ineligibilityText(language, reasons)
-    })
-  }
-
-  const window = { start: plan.plannedDeparture, end: plannedArrival(plan) }
-  const plates = vehiclePlates(db)
-  const names = employeeNames(db)
-  for (const other of db.trips.all()) {
-    if (other.no === except || !OPEN_TRIP_STATUSES.includes(other.status)) continue
-    if (!windowsOverlap(window, tripWindow(other))) continue
-    const held = [other.vehicleNo, other.trailerNo]
-    const busy = [plan.vehicleNo, plan.trailerNo].find((no) => no && held.includes(no))
-    if (busy) {
-      throw conflict(FLEET_MESSAGES.resourceBusy, { name: plates.get(busy) ?? busy, no: other.no })
-    }
-    if (other.driverNo === plan.driverNo) {
-      throw conflict(FLEET_MESSAGES.resourceBusy, {
-        name: names.get(plan.driverNo) ?? plan.driverNo,
-        no: other.no
-      })
-    }
-  }
+  const availability = createAvailability(
+    db,
+    { start: plan.plannedDeparture, end: plannedArrival(plan) },
+    language
+  )
+  const [first] = [
+    ...availability.vehicleUnavailability(plan.vehicleNo, 'motorized', except),
+    ...(plan.trailerNo ? availability.vehicleUnavailability(plan.trailerNo, 'towed', except) : []),
+    ...availability.driverUnavailability(plan.driverNo, except)
+  ]
+  if (first) throw unavailabilityError(language, first)
 }
 
 function assertAllowed(trip: TripRow, action: TripAction): void {
@@ -240,6 +222,9 @@ export function registerTripsHandlers(router: MockRouter, db: MockDatabase): voi
 
   action('start', (trip, request) => {
     assertAllowed(trip, 'start')
+    if (authorizationRequired(db) && tripAuthorization(db, trip.no)?.decision !== 'granted') {
+      throw conflict(FLEET_MESSAGES.tripNeedsAuthorization)
+    }
     const vehicle = db.vehicles.findOrFail(trip.vehicleNo)
     const others = db.trips
       .all()
@@ -317,6 +302,8 @@ export function registerTripsHandlers(router: MockRouter, db: MockDatabase): voi
 
   action('close', (trip, request) => {
     assertAllowed(trip, 'close')
+    const pending = deviationsToQualify(db, trip.no)
+    if (pending) throw conflict(FLEET_MESSAGES.tripDeviationsToQualify, { count: pending })
     db.trips.update(trip.no, {
       status: 'closed',
       closedAt: nowIsoDateTime(),

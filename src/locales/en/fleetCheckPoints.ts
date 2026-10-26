@@ -1,0 +1,40 @@
+export default {
+  'fleet.checkPoints.title': 'Check points',
+  'fleet.checkPoints.card': 'Check point card',
+  'fleet.checkPoints.new': 'New check point',
+  'fleet.checkPoints.loadingList': 'Loading check points…',
+  'fleet.checkPoints.noResults': 'No check point.',
+  'fleet.checkPoints.noSearchResults': 'No point matches "{query}".',
+  'fleet.checkPoints.saveSuccess': 'Check point saved.',
+  'fleet.checkPoints.saveError': 'The check point could not be saved.',
+  'fleet.checkPoints.createError': 'The check point could not be created.',
+  'fleet.checkPoints.deleteError': 'The check point could not be deleted.',
+  'fleet.checkPoints.confirmDelete': 'Delete the check point',
+  'fleet.checkPoints.confirmDeleteMsg': 'The "{name}" point will be permanently deleted.',
+
+  'fleet.checkPoints.search.all': 'Code or label',
+
+  'fleet.checkPoints.col.no': 'Code',
+  'fleet.checkPoints.col.label': 'Label',
+  'fleet.checkPoints.col.scope': 'Concerns',
+  'fleet.checkPoints.col.blocking': 'Blocking',
+  'fleet.checkPoints.col.sortOrder': 'Order',
+  'fleet.checkPoints.col.active': 'Active',
+
+  'fleet.checkPoints.form.general': 'General',
+  'fleet.checkPoints.form.no': 'Code',
+  'fleet.checkPoints.form.label': 'Label',
+  'fleet.checkPoints.form.scope': 'Concerns',
+  'fleet.checkPoints.form.scopeHint':
+    'Vehicle: road checklist. Driver: check on the departure request.',
+  'fleet.checkPoints.form.blocking': 'Blocking',
+  'fleet.checkPoints.form.blockingHint': 'An anomaly on this point prevents the departure.',
+  'fleet.checkPoints.form.sortOrder': 'Order',
+  'fleet.checkPoints.form.active': 'Active',
+  'fleet.checkPoints.results.point': 'Point',
+  'fleet.checkPoints.results.result': 'Result',
+  'fleet.checkPoints.results.comment': 'Comment',
+  'fleet.checkPoints.results.blocking': 'blocking',
+  'fleet.checkPoints.issue.incomplete': 'Fill in every check point.',
+  'fleet.checkPoints.issue.commentRequired': 'Explain every anomaly found.'
+}

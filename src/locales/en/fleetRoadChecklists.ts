@@ -1,0 +1,32 @@
+export default {
+  'fleet.roadChecklists.title': 'Road checklists',
+  'fleet.roadChecklists.card': 'Checklist card',
+  'fleet.roadChecklists.new': 'New checklist',
+  'fleet.roadChecklists.loadingList': 'Loading checklists…',
+  'fleet.roadChecklists.noResults': 'No checklist.',
+  'fleet.roadChecklists.noSearchResults': 'No checklist matches "{query}".',
+  'fleet.roadChecklists.saveSuccess': 'Checklist saved.',
+  'fleet.roadChecklists.saveError': 'The checklist could not be saved.',
+  'fleet.roadChecklists.createError': 'The checklist could not be recorded.',
+
+  'fleet.roadChecklists.search.all': 'No., trip or vehicle',
+
+  'fleet.roadChecklists.col.no': 'No.',
+  'fleet.roadChecklists.col.tripNo': 'Trip',
+  'fleet.roadChecklists.col.stage': 'Stage',
+  'fleet.roadChecklists.col.takenAt': 'Date and time',
+  'fleet.roadChecklists.col.vehiclePlate': 'Vehicle',
+  'fleet.roadChecklists.col.anomalyCount': 'Anomalies',
+  'fleet.roadChecklists.col.blocking': 'Blocking',
+
+  'fleet.roadChecklists.form.general': 'Reading',
+  'fleet.roadChecklists.form.results': 'Points checked',
+  'fleet.roadChecklists.form.no': 'No.',
+  'fleet.roadChecklists.form.tripNo': 'Trip',
+  'fleet.roadChecklists.form.stage': 'Stage',
+  'fleet.roadChecklists.form.takenAt': 'Date and time',
+  'fleet.roadChecklists.anomalies': 'No anomaly | {n} anomaly | {n} anomalies',
+  'fleet.roadChecklists.form.takenBy': 'Taken by',
+  'fleet.roadChecklists.form.resultsHint':
+    'An anomaly on a blocking point keeps the vehicle from leaving.'
+}

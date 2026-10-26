@@ -13,8 +13,10 @@ import { registerListResource } from '../../http/crudResource'
 import type { MockRouter } from '../../http/router'
 import { localize, type LocalizedText, type MockLanguage } from '../../i18n'
 import { activeLinks, vehiclePlates } from './links'
+import { driverScoresApi } from './driverScores'
 import { FLEET_MESSAGES } from './messages'
 import { tripIndex } from './tripIndex'
+import { documentCompliance, gapsText } from './documentCompliance'
 
 const REASON_TEXTS: Record<IneligibilityReason, LocalizedText> = {
   not_on_staff: FLEET_MESSAGES.reasonNotOnStaff,
@@ -60,13 +62,14 @@ export function isOnLeave(db: MockDatabase, employee: EmployeeRow, day: string):
 export function driverFacts(db: MockDatabase, employee: EmployeeRow, day: string): DriverFacts {
   const position = db.jobPositions.find(employee.jobPositionNo)
   const trips = tripIndex(db)
+  const gaps = documentCompliance(db).persons.get(employee.no)
   return {
     onStaff: isOnStaff(employee.status),
     suspended: employee.status === 'suspended',
     positionDrives: !!position?.drives,
     drivingAuthorized: employee.drivingAuthorized,
     onLeave: isOnLeave(db, employee, day),
-    documentsCompliant: null,
+    documentsCompliant: gaps ? gaps.length === 0 : null,
     onTrip: trips.onRoadByDriver.has(employee.no),
     tripPlanned: trips.plannedTodayByDriver.has(employee.no)
   }
@@ -79,6 +82,8 @@ export function driversApi(db: MockDatabase, language: MockLanguage = 'fr'): Dri
   const positions = new Map(db.jobPositions.all().map((position) => [position.no, position.name]))
   const sites = new Map(db.sites.all().map((site) => [site.no, site.name]))
   const history = db.driverAssignments.all()
+  const compliance = documentCompliance(db).persons
+  const scores = new Map(driverScoresApi(db).map((score) => [score.driverNo, score]))
 
   return driverEmployees(db).map((employee) => {
     const facts = driverFacts(db, employee, today)
@@ -99,6 +104,8 @@ export function driversApi(db: MockDatabase, language: MockLanguage = 'fr'): Dri
       assignedSince: assignment?.startDate ?? null,
       availability: driverAvailability(facts),
       eligible: reasons.length === 0,
+      documentsCompliant: facts.documentsCompliant !== false,
+      documentGaps: gapsText(db, compliance.get(employee.no) ?? [], language),
       ineligibilityReasons: ineligibilityText(language, reasons),
       assignments: history
         .filter((row) => row.employeeNo === employee.no)
@@ -110,6 +117,8 @@ export function driversApi(db: MockDatabase, language: MockLanguage = 'fr'): Dri
           startDate: row.startDate,
           endDate: row.endDate
         })),
+      score: scores.get(employee.no)?.score ?? 100,
+      scoreDelta: scores.get(employee.no)?.delta ?? 0,
       modifiedAt: employee.modifiedAt,
       modifiedBy: employee.modifiedBy
     }

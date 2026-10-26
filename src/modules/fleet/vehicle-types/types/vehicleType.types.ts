@@ -8,6 +8,8 @@ export interface VehicleTypeApi {
   couplingRole: CouplingRole
   carriesGoods: boolean
   hasCompartments: boolean
+  /** Usual consumption of a vehicle of this type, in L/100 km; the fleet default otherwise. */
+  fuelReferenceL100: number | null
   active: boolean
   vehicleCount: number
   createdAt: string

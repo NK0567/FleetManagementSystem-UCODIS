@@ -32,6 +32,7 @@ const { draft, isRequired, expose } = useEntityForm({
     name: '',
     recurring: false,
     estimatedDistanceKm: 0,
+    fuelReferenceL100: null as number | null,
     active: true,
     stops: [
       { siteNo: '', role: 'departure', plannedIntervalMin: 0, breakMin: 0 },
@@ -119,6 +120,18 @@ defineExpose(expose)
           />
           <p class="text-xs text-muted-foreground mt-1">
             {{ t('fleet.routeTemplates.form.estimatedDistanceKmHint') }}
+          </p>
+        </BaseFormField>
+        <BaseFormField :label="t('fleet.routeTemplates.form.fuelReferenceL100')">
+          <FormInput
+            v-model="draft.fuelReferenceL100"
+            type="number"
+            :min="1"
+            :max="100"
+            :disabled="disabled"
+          />
+          <p class="text-xs text-muted-foreground mt-1">
+            {{ t('fleet.routeTemplates.form.fuelReferenceL100Hint') }}
           </p>
         </BaseFormField>
         <BaseFormField :label="t('fleet.routeTemplates.form.active')">

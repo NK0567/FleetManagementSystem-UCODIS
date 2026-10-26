@@ -12,6 +12,8 @@ export interface RouteTemplateApi {
   name: string
   recurring: boolean
   estimatedDistanceKm: number
+  /** Usual consumption on this route, in L/100 km; it comes first when judging a refill period. */
+  fuelReferenceL100: number | null
   active: boolean
   stops: RouteStop[]
   stopPoints: RouteStopPoint[]

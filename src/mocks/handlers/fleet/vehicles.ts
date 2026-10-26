@@ -43,6 +43,7 @@ import { activeLinks, coupledWith, employeeNames } from './links'
 import { tripIndex } from './tripIndex'
 import { statusReason, vehicleStatuses } from './vehicleState'
 import { fileMetaOf, filesMetaOf, releaseFiles } from '../files'
+import { documentCompliance, gapsText } from './documentCompliance'
 import { IMAGE_FILE_TYPES } from '@/utils/fileRules'
 
 const BASE_PATH = '/fleet/vehicles'
@@ -92,6 +93,7 @@ export function vehiclesApi(db: MockDatabase, language: MockLanguage = 'fr'): Ve
   const types = new Map(db.vehicleTypes.all().map((type) => [type.no, type]))
   const sites = new Map(db.sites.all().map((site) => [site.no, site.name]))
   const statuses = vehicleStatuses(db)
+  const compliance = documentCompliance(db).vehicles
   const links = activeLinks(db)
   const names = employeeNames(db)
   const plates = new Map(db.vehicles.all().map((vehicle) => [vehicle.no, vehicle.plate]))
@@ -125,7 +127,9 @@ export function vehiclesApi(db: MockDatabase, language: MockLanguage = 'fr'): Ve
       hasTracker: owned.has('tracker'),
       hasCamera: owned.has('camera'),
       hasPump: owned.has('pump'),
-      photos: filesMetaOf(db, vehicle.photoFileNos)
+      photos: filesMetaOf(db, vehicle.photoFileNos),
+      documentsCompliant: (compliance.get(vehicle.no) ?? []).length === 0,
+      documentGaps: gapsText(db, compliance.get(vehicle.no) ?? [], language)
     }
   })
 }

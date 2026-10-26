@@ -46,5 +46,8 @@ export default {
   'fleet.routeTemplates.stops.add': 'Add a stop',
   'fleet.routeTemplates.stops.duration': 'Planned duration: {duration}',
   'fleet.routeTemplates.stops.invalid':
-    'The stops are inconsistent: at least two stops, a departure first, a site on each stop, never the same site twice in a row.'
+    'The stops are inconsistent: at least two stops, a departure first, a site on each stop, never the same site twice in a row.',
+  'fleet.routeTemplates.form.fuelReferenceL100': 'Reference consumption (L/100 km)',
+  'fleet.routeTemplates.form.fuelReferenceL100Hint':
+    'Takes precedence over the vehicle type for trips on this route.'
 }

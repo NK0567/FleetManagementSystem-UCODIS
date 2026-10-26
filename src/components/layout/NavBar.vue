@@ -26,6 +26,14 @@ function isRouteMatch(to?: string): boolean {
   return current === target || current.startsWith(`${target}/`)
 }
 
+/** Among sibling entries, only the closest match is active (`/a/b` wins over `/a`). */
+function isSubItemActive(menu: NavMenuItem, to?: string): boolean {
+  if (!to || !isRouteMatch(to)) return false
+  return !menu.subItems.some(
+    (item) => !!item.to && item.to.length > to.length && isRouteMatch(item.to)
+  )
+}
+
 function isMenuActive(menu: NavMenuItem): boolean {
   if (menu.to && isRouteMatch(menu.to)) return true
   return menu.subItems.some((item) => !!item.to && isRouteMatch(item.to))
@@ -302,7 +310,7 @@ watch(openMenuIndex, async (idx) => {
                             :class="[
                               'block min-w-0 px-4 py-2 text-sm text-gray-700 hover:bg-primary hover:text-white transition-colors whitespace-nowrap',
                               dropdownTruncate ? 'truncate' : '',
-                              isRouteMatch(item.to) ? 'nav-sub-link--active' : ''
+                              isSubItemActive(menu, item.to) ? 'nav-sub-link--active' : ''
                             ]"
                             @click="closeMenu"
                           >

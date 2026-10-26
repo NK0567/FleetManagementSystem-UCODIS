@@ -35,6 +35,9 @@ const FLEET_REFERENCE = [
   'SITETYPE',
   'DOCUMENTTYPE',
   'INFRACTIONTYPE',
+  'CHECKPOINT',
+  'ALERTRULE',
+  'FUELGAPCAUSE',
   'TELEMATICSEVENTTYPE',
   'DEVIATIONTYPE',
   'ROUTETEMPLATE',
@@ -67,6 +70,50 @@ const FLEET_OPERATIONS = [
   'TELEMATICS',
   'FLEETREPORT'
 ]
+const MAINTENANCE_REFERENCE = [
+  'TECHNICIAN',
+  'COMPETENCE',
+  'FAILURECODE',
+  'DOWNTIMECODE',
+  'MISSIONTYPE',
+  'MAINTENANCEPLAN',
+  'VEHICLECHECKPOINT',
+  'TYRELAYOUT'
+]
+const MAINTENANCE_OPERATIONS = [
+  'MAINTENANCEDASHBOARD',
+  'WORKORDER',
+  'SERVICEDUE',
+  'DOWNTIME',
+  'WORKSHOPLOAD',
+  'VEHICLECHECK',
+  'MOBILEINTERVENTION',
+  'TYRE',
+  'PURCHASEREQUEST',
+  'STOCKITEM',
+  'RELIABILITY'
+]
+const PLANNING_REFERENCE = [
+  'PLANNINGREASON',
+  'CUSTOMER',
+  'DELIVERYPOINT',
+  'PRODUCT',
+  'PRODUCTCOMPATIBILITY',
+  'QUANTITYTOLERANCE',
+  'TRANSPORTTARIFF'
+]
+const PLANNING_OPERATIONS: string[] = []
+/** Planning rights replace the old role lists of the planning settings. */
+const PLANNING_MANAGEMENT: Record<string, Grant> = {
+  ...grant([...PLANNING_REFERENCE, ...PLANNING_OPERATIONS], FULL),
+  PLANNINGSETTINGS: allRecords(['read', 'update'])
+}
+/** Execute covers what commits the workshop: validating or refusing a closing, cancelling, adjusting stock. */
+const MAINTENANCE_MANAGEMENT: Record<string, Grant> = {
+  ...grant([...MAINTENANCE_REFERENCE, ...MAINTENANCE_OPERATIONS], FULL),
+  MAINTENANCESETTINGS: allRecords(['read', 'update'])
+}
+
 /** Vehicles are removed from the park through an action, never deleted. */
 const FLEET_MANAGEMENT: Record<string, Grant> = {
   ...grant([...FLEET_REFERENCE, ...FLEET_OPERATIONS], FULL),
@@ -101,6 +148,8 @@ export const ROLE_PERMISSIONS: Record<UserProfileCode, Record<string, Grant>> = 
     LEAVEREQUEST: allRecords(['read', 'insert', 'execute', 'export']),
     LEAVEBALANCE: READ_EXPORT,
     ...FLEET_MANAGEMENT,
+    ...MAINTENANCE_MANAGEMENT,
+    ...PLANNING_MANAGEMENT,
     MODULETOGGLE: allRecords(['read', 'update'])
   },
   FLEET_MANAGER: {
@@ -111,22 +160,37 @@ export const ROLE_PERMISSIONS: Record<UserProfileCode, Record<string, Grant>> = 
     ORGUNIT: READ_EXPORT,
     LEAVEREQUEST: allRecords(['read', 'insert', 'execute', 'export']),
     LEAVEBALANCE: READ_EXPORT,
-    ...FLEET_MANAGEMENT
+    ...FLEET_MANAGEMENT,
+    ...MAINTENANCE_MANAGEMENT,
+    ...PLANNING_MANAGEMENT
   },
   MANAGEMENT: {
     ...grant([...HR_READ_FEATURES, 'HRDASHBOARD', 'LEAVEREQUEST'], READ_EXPORT),
     ...grant([...FLEET_REFERENCE, ...FLEET_OPERATIONS], READ_EXPORT),
+    ...grant([...MAINTENANCE_REFERENCE, ...MAINTENANCE_OPERATIONS], READ_EXPORT),
     FLEETSETTINGS: READ,
+    ...grant([...PLANNING_REFERENCE, ...PLANNING_OPERATIONS], READ_EXPORT),
+    MAINTENANCESETTINGS: READ,
+    PLANNINGSETTINGS: READ,
     MYPLANNING: READ
   },
   MAINTENANCE_TECHNICIAN: {
     ...backOffice,
     ...grant(['VEHICLETYPE', 'EQUIPMENTTYPE', 'COUPLING', 'DOCUMENT', 'FLEETSTATUS'], READ),
-    ...grant(['ROADCHECKLIST', 'INSPECTION'], allRecords(['read', 'insert', 'update']))
+    ...grant(['ROADCHECKLIST', 'INSPECTION'], allRecords(['read', 'insert', 'update'])),
+    CHECKPOINT: READ,
+    ALERT: allRecords(['read', 'update']),
+    ...grant([...MAINTENANCE_REFERENCE, 'MAINTENANCESETTINGS', 'WORKSHOPLOAD', 'STOCKITEM'], READ),
+    ...grant(['MAINTENANCEDASHBOARD', 'RELIABILITY'], READ),
+    ...grant(
+      ['WORKORDER', 'SERVICEDUE', 'VEHICLECHECK', 'MOBILEINTERVENTION', 'TYRE'],
+      allRecords(['read', 'insert', 'update'])
+    ),
+    ...grant(['DOWNTIME', 'PURCHASEREQUEST'], allRecords(['read', 'insert']))
   },
-  CUSTOMER_SERVICE: backOffice,
-  SALES: backOffice,
-  DEPOT: backOffice,
+  CUSTOMER_SERVICE: { ...backOffice, ...grant(PLANNING_REFERENCE, READ) },
+  SALES: { ...backOffice, ...grant(PLANNING_REFERENCE, READ) },
+  DEPOT: { ...backOffice, ...grant(PLANNING_REFERENCE, READ) },
   DRIVER: {},
   DRIVER_ASSISTANT: {}
 }

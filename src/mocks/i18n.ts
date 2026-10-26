@@ -21,6 +21,18 @@ export function localize(language: MockLanguage, text: LocalizedText, params?: M
 }
 
 export const COMMON_MESSAGES = {
+  importEmpty: {
+    fr: 'Le fichier ne contient aucune ligne à importer.',
+    en: 'The file holds no line to import.'
+  },
+  importTooLarge: {
+    fr: 'Un import est limité à {max} lignes : découpez le fichier.',
+    en: 'An import is limited to {max} lines: split the file.'
+  },
+  importUnknownPlate: {
+    fr: "Aucun véhicule ne porte l'immatriculation « {plate} ».",
+    en: 'No vehicle has the plate "{plate}".'
+  },
   fileMissing: { fr: 'Aucun fichier reçu.', en: 'No file received.' },
   fileType: {
     fr: 'Ce type de fichier est refusé : seuls les PDF et les images (PNG, JPEG, WEBP) sont acceptés.',
@@ -62,6 +74,26 @@ export const COMMON_MESSAGES = {
     fr: "L'espace de stockage du navigateur est plein : la modification n'a pas été enregistrée.",
     en: 'The browser storage is full: the change was not saved.'
   },
+  settingRequired: {
+    fr: 'Le réglage « {field} » est obligatoire.',
+    en: 'The "{field}" setting is required.'
+  },
+  settingOutOfRange: {
+    fr: 'Le réglage « {field} » doit être compris entre {min} et {max}.',
+    en: 'The "{field}" setting must be between {min} and {max}.'
+  },
+  settingInvalidTime: {
+    fr: "Le réglage « {field} » n'est pas une heure valide (HH:MM).",
+    en: 'The "{field}" setting is not a valid time (HH:MM).'
+  },
+  settingTooLong: {
+    fr: 'Le réglage « {field} » dépasse {max} caractères.',
+    en: 'The "{field}" setting is longer than {max} characters.'
+  },
+  settingInvalidChoice: {
+    fr: "La valeur du réglage « {field} » n'est pas proposée.",
+    en: 'The value of the "{field}" setting is not one of the choices.'
+  },
   unexpected: { fr: 'Une erreur inattendue est survenue.', en: 'An unexpected error occurred.' },
   yes: { fr: 'Oui', en: 'Yes' },
   no: { fr: 'Non', en: 'No' }
@@ -71,4 +103,11 @@ export const COMMON_MESSAGES = {
 export function localizeDay(isoDay: string): string {
   const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(isoDay)
   return match ? `${match[3]}/${match[2]}/${match[1]}` : isoDay
+}
+
+const NUMBER_LOCALES: Record<MockLanguage, string> = { fr: 'fr-FR', en: 'en-GB' }
+
+/** A number as the server writes it in messages, with the separators of the language. */
+export function localizeNumber(language: MockLanguage, value: number): string {
+  return new Intl.NumberFormat(NUMBER_LOCALES[language], { maximumFractionDigits: 1 }).format(value)
 }

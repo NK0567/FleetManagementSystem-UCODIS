@@ -45,7 +45,10 @@ describe('fleet settings endpoints', () => {
   })
 
   it('answers 404 for an unknown section', async () => {
-    const response = await call(server, 'put', '/fleet/settings/fuel', { as: 'ADM001', body: {} })
+    const response = await call(server, 'put', '/fleet/settings/weather', {
+      as: 'ADM001',
+      body: {}
+    })
     expect(response.status).toBe(404)
   })
 

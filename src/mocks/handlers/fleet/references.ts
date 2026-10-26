@@ -30,6 +30,16 @@ function vehiclesOfKind(db: MockDatabase, kind: VehicleKind): ReferenceItem[] {
     })
 }
 
+function documentTypesFor(
+  db: MockDatabase,
+  target: 'vehicle' | 'person' | 'company'
+): ReferenceItem[] {
+  return db.documentTypes
+    .all()
+    .filter((type) => type.target === target)
+    .map((type) => ({ code: type.no, description: type.name, active: type.active }))
+}
+
 /** Fleet lists served by GET /reference/all for selects, lookups and filters. */
 export function fleetReferenceData(db: MockDatabase): Record<string, ReferenceItem[]> {
   return {
@@ -53,9 +63,67 @@ export function fleetReferenceData(db: MockDatabase): Record<string, ReferenceIt
       description: employeeFullName(employee),
       active: driverIneligibility(driverFacts(db, employee, todayIso())).length === 0
     })),
+    vehicles: db.vehicles
+      .all()
+      .filter((vehicle) => !vehicle.removal)
+      .map((vehicle) => ({
+        code: vehicle.no,
+        description: `${vehicle.plate} · ${vehicle.make} ${vehicle.model}`
+      })),
+    documentTypes: db.documentTypes
+      .all()
+      .map((type) => ({ code: type.no, description: type.name, active: type.active })),
+    vehicleDocumentTypes: documentTypesFor(db, 'vehicle'),
+    personDocumentTypes: documentTypesFor(db, 'person'),
+    companyDocumentTypes: documentTypesFor(db, 'company'),
     routeTemplates: db.routeTemplates
       .all()
       .map((route) => ({ code: route.no, description: route.name, active: route.active })),
+    openTrips: db.trips
+      .all()
+      .filter((trip) => trip.status !== 'closed' && trip.status !== 'cancelled')
+      .map((trip) => ({
+        code: trip.no,
+        description: `${trip.no} · ${trip.plannedDeparture.slice(0, 10)}`
+      })),
+    plannedTrips: db.trips
+      .all()
+      .filter((trip) => trip.status === 'planned')
+      .map((trip) => ({
+        code: trip.no,
+        description: `${trip.no} · ${trip.plannedDeparture.slice(0, 16).replace('T', ' ')}`
+      })),
+    deviationTypes: db.deviationTypes
+      .all()
+      .map((type) => ({ code: type.no, description: type.name, active: type.active })),
+    fuelGapCauses: db.fuelGapCauses
+      .all()
+      .map((cause) => ({ code: cause.no, description: cause.name, active: cause.active })),
+    infractionTypes: db.infractionTypes
+      .all()
+      .map((type) => ({ code: type.no, description: type.name, active: type.active })),
+    telematicsEventTypes: db.telematicsEventTypes
+      .all()
+      .map((type) => ({ code: type.no, description: type.name, active: type.active })),
+    fuelSuppliers: db.providers
+      .all()
+      .filter((provider) => provider.providerType === 'fuel_supplier')
+      .map((provider) => ({
+        code: provider.no,
+        description: provider.name,
+        active: provider.authorized
+      })),
+    fuelCards: db.fuelCards
+      .all()
+      .map((card) => ({ code: card.no, description: card.number, active: !card.blockedAt })),
+    insurers: db.providers
+      .all()
+      .filter((provider) => provider.providerType === 'insurer')
+      .map((provider) => ({
+        code: provider.no,
+        description: provider.name,
+        active: provider.authorized
+      })),
     providers: db.providers.all().map((provider) => ({
       code: provider.no,
       description: provider.name,

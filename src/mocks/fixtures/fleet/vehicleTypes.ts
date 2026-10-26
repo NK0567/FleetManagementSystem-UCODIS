@@ -8,6 +8,7 @@ export interface VehicleTypeRow extends MockRow {
   couplingRole: CouplingRole
   carriesGoods: boolean
   hasCompartments: boolean
+  fuelReferenceL100: number | null
   active: boolean
 }
 
@@ -19,6 +20,7 @@ const SEED: Omit<VehicleTypeRow, keyof typeof seedAudit>[] = [
     couplingRole: 'tows',
     carriesGoods: false,
     hasCompartments: false,
+    fuelReferenceL100: 37,
     active: true
   },
   {
@@ -28,6 +30,7 @@ const SEED: Omit<VehicleTypeRow, keyof typeof seedAudit>[] = [
     couplingRole: 'towed',
     carriesGoods: true,
     hasCompartments: false,
+    fuelReferenceL100: null,
     active: true
   },
   {
@@ -37,6 +40,7 @@ const SEED: Omit<VehicleTypeRow, keyof typeof seedAudit>[] = [
     couplingRole: 'towed',
     carriesGoods: true,
     hasCompartments: true,
+    fuelReferenceL100: null,
     active: true
   },
   {
@@ -46,6 +50,7 @@ const SEED: Omit<VehicleTypeRow, keyof typeof seedAudit>[] = [
     couplingRole: 'towed',
     carriesGoods: true,
     hasCompartments: false,
+    fuelReferenceL100: null,
     active: true
   }
 ]

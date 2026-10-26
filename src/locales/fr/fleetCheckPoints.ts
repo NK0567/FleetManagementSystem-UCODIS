@@ -1,0 +1,40 @@
+export default {
+  'fleet.checkPoints.title': 'Points de contrôle',
+  'fleet.checkPoints.card': 'Fiche point de contrôle',
+  'fleet.checkPoints.new': 'Nouveau point de contrôle',
+  'fleet.checkPoints.loadingList': 'Chargement des points de contrôle…',
+  'fleet.checkPoints.noResults': 'Aucun point de contrôle.',
+  'fleet.checkPoints.noSearchResults': 'Aucun point ne correspond à « {query} ».',
+  'fleet.checkPoints.saveSuccess': 'Point de contrôle enregistré.',
+  'fleet.checkPoints.saveError': "Le point de contrôle n'a pas pu être enregistré.",
+  'fleet.checkPoints.createError': "Le point de contrôle n'a pas pu être créé.",
+  'fleet.checkPoints.deleteError': "Le point de contrôle n'a pas pu être supprimé.",
+  'fleet.checkPoints.confirmDelete': 'Supprimer le point de contrôle',
+  'fleet.checkPoints.confirmDeleteMsg': 'Le point « {name} » sera définitivement supprimé.',
+
+  'fleet.checkPoints.search.all': 'Code ou libellé',
+
+  'fleet.checkPoints.col.no': 'Code',
+  'fleet.checkPoints.col.label': 'Libellé',
+  'fleet.checkPoints.col.scope': 'Concerne',
+  'fleet.checkPoints.col.blocking': 'Bloquant',
+  'fleet.checkPoints.col.sortOrder': 'Ordre',
+  'fleet.checkPoints.col.active': 'Actif',
+
+  'fleet.checkPoints.form.general': 'Général',
+  'fleet.checkPoints.form.no': 'Code',
+  'fleet.checkPoints.form.label': 'Libellé',
+  'fleet.checkPoints.form.scope': 'Concerne',
+  'fleet.checkPoints.form.scopeHint':
+    'Véhicule : check-list de route. Conducteur : contrôle à la demande de départ.',
+  'fleet.checkPoints.form.blocking': 'Bloquant',
+  'fleet.checkPoints.form.blockingHint': 'Une anomalie sur ce point empêche le départ.',
+  'fleet.checkPoints.form.sortOrder': 'Ordre',
+  'fleet.checkPoints.form.active': 'Actif',
+  'fleet.checkPoints.results.point': 'Point',
+  'fleet.checkPoints.results.result': 'Résultat',
+  'fleet.checkPoints.results.comment': 'Commentaire',
+  'fleet.checkPoints.results.blocking': 'bloquant',
+  'fleet.checkPoints.issue.incomplete': 'Renseignez tous les points de contrôle.',
+  'fleet.checkPoints.issue.commentRequired': 'Expliquez chaque anomalie relevée.'
+}

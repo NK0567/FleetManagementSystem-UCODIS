@@ -196,13 +196,14 @@ defineExpose(expose)
       </div>
     </FormSection>
 
-    <SiteGeofenceMap
+    <MapPointPicker
       v-if="expandedSections.geofence"
       v-model:latitude="draft.latitude"
       v-model:longitude="draft.longitude"
       class="mb-6"
       :radius-m="draft.radiusM ?? initialData.effectiveRadiusM ?? null"
-      :label="draft.name"
+      :label="draft.name || t('fleet.sites.map.center')"
+      :hint="disabled ? t('fleet.sites.map.readOnlyHint') : t('fleet.sites.map.editHint')"
       :disabled="disabled"
     />
 

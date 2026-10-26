@@ -118,6 +118,7 @@ const expandedSections = ref({
   specifications: true,
   acquisition: false,
   status: true,
+  documents: true,
   photos: false,
   equipment: true,
   history: false,
@@ -414,6 +415,23 @@ defineExpose(expose)
               </p>
             </BaseFormField>
           </template>
+        </div>
+      </FormSection>
+
+      <FormSection
+        v-model:open="expandedSections.documents"
+        :title="t('fleet.vehicles.form.documents')"
+        :summary="[
+          initialData.documentsCompliant ? '' : t('fleet.vehicles.form.documentsNotCompliant')
+        ]"
+      >
+        <div class="xl:col-span-2 min-w-0">
+          <SubjectDocumentsPanel
+            v-if="initialData.no"
+            target="vehicle"
+            :subject-no="initialData.no"
+            :gaps="initialData.documentGaps"
+          />
         </div>
       </FormSection>
 

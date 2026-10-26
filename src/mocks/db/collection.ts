@@ -11,8 +11,14 @@ export interface AuditFields {
 
 export type MockRow = { no: string } & AuditFields
 
-/** A date field of the row, or of each item of one of its lists: "stops[].passedAt". */
-export type DateFieldPath<T> = (keyof T & string) | `${keyof T & string}[].${string}`
+/**
+ * A date field of the row, of each item of one of its lists ("stops[].passedAt"), or of one of
+ * its objects ("qualification.at").
+ */
+export type DateFieldPath<T> =
+  | (keyof T & string)
+  | `${keyof T & string}[].${string}`
+  | `${keyof T & string}.${string}`
 
 export interface CollectionDefinition<T extends MockRow> {
   name: string
@@ -52,8 +58,12 @@ function shiftDates<T extends MockRow>(rows: T[], fields: readonly string[], day
     for (const field of fields) {
       const [list, itemField] = field.split('[].')
       const items = shifted[list ?? '']
+      const [owner, ownField] = field.split('.')
+      const object = shifted[owner ?? '']
       if (itemField && Array.isArray(items)) {
         for (const item of items) shiftField(item as Record<string, unknown>, itemField, days)
+      } else if (!itemField && ownField && object && typeof object === 'object') {
+        shiftField(object as Record<string, unknown>, ownField, days)
       } else {
         shiftField(shifted, field, days)
       }

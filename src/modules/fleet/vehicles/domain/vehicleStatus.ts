@@ -1,8 +1,8 @@
 import type { VehicleStatus } from '../types/vehicle.types'
 
-/** Why a vehicle cannot leave: each module adds its own (documents, inspections, maintenance). */
+/** Why a vehicle cannot leave: each module adds its own (documents, inspections, downtimes, overdue services). */
 export interface Immobilization {
-  kind: 'document' | 'inspection' | 'maintenance'
+  kind: 'document' | 'inspection' | 'maintenance' | 'service'
   detail: string
 }
 

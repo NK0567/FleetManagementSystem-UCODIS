@@ -39,6 +39,7 @@ const { draft, isRequired, expose } = useEntityForm({
     couplingRole: 'none' as CouplingRole,
     carriesGoods: false,
     hasCompartments: false,
+    fuelReferenceL100: null as number | null,
     active: true
   }),
   createOnly: ['no'],
@@ -116,6 +117,21 @@ defineExpose(expose)
       <div class="space-y-3 min-w-0">
         <BaseFormField :label="t('fleet.vehicleTypes.form.carriesGoods')">
           <ToggleSwitch v-model="draft.carriesGoods" :disabled="disabled" />
+        </BaseFormField>
+        <BaseFormField
+          v-if="draft.motorized"
+          :label="t('fleet.vehicleTypes.form.fuelReferenceL100')"
+        >
+          <FormInput
+            v-model="draft.fuelReferenceL100"
+            type="number"
+            :min="1"
+            :max="100"
+            :disabled="disabled"
+          />
+          <p class="text-xs text-muted-foreground mt-1">
+            {{ t('fleet.vehicleTypes.form.fuelReferenceL100Hint') }}
+          </p>
         </BaseFormField>
         <BaseFormField :label="t('fleet.vehicleTypes.form.hasCompartments')">
           <ToggleSwitch v-model="draft.hasCompartments" :disabled="disabled" />

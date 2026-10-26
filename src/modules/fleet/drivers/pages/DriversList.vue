@@ -41,6 +41,14 @@ const tableColumns = computed<TableColumn[]>(() => [
     minW: '130px',
     formatter: optionLabel('driverAvailability')
   },
+  { sortKey: 'score', label: t('fleet.drivers.col.score'), minW: '90px', align: 'right' },
+  {
+    sortKey: 'scoreDelta',
+    label: t('fleet.drivers.col.scoreDelta'),
+    minW: '110px',
+    align: 'right',
+    defaultHidden: true
+  },
   {
     sortKey: 'eligible',
     label: t('fleet.drivers.col.eligible'),

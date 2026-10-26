@@ -45,6 +45,69 @@ declare module 'vue-router/auto-routes' {
       { path: ParamValue<false> },
       | never
     >,
+    '/fleet/alert-rules/': RouteRecordInfo<
+      '/fleet/alert-rules/',
+      '/fleet/alert-rules',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/alert-rules/[id]': RouteRecordInfo<
+      '/fleet/alert-rules/[id]',
+      '/fleet/alert-rules/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/alerts/': RouteRecordInfo<
+      '/fleet/alerts/',
+      '/fleet/alerts',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/check-points/': RouteRecordInfo<
+      '/fleet/check-points/',
+      '/fleet/check-points',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/check-points/[id]': RouteRecordInfo<
+      '/fleet/check-points/[id]',
+      '/fleet/check-points/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/claims/': RouteRecordInfo<
+      '/fleet/claims/',
+      '/fleet/claims',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/claims/[id]': RouteRecordInfo<
+      '/fleet/claims/[id]',
+      '/fleet/claims/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/company-documents/': RouteRecordInfo<
+      '/fleet/company-documents/',
+      '/fleet/company-documents',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/company-documents/[id]': RouteRecordInfo<
+      '/fleet/company-documents/[id]',
+      '/fleet/company-documents/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/fleet/couplings/': RouteRecordInfo<
       '/fleet/couplings/',
       '/fleet/couplings',
@@ -57,6 +120,76 @@ declare module 'vue-router/auto-routes' {
       '/fleet/couplings/:id',
       { id: ParamValue<true> },
       { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/dashboard': RouteRecordInfo<
+      '/fleet/dashboard',
+      '/fleet/dashboard',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/departure-authorizations/': RouteRecordInfo<
+      '/fleet/departure-authorizations/',
+      '/fleet/departure-authorizations',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/departure-authorizations/[id]': RouteRecordInfo<
+      '/fleet/departure-authorizations/[id]',
+      '/fleet/departure-authorizations/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/deviation-types/': RouteRecordInfo<
+      '/fleet/deviation-types/',
+      '/fleet/deviation-types',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/deviation-types/[id]': RouteRecordInfo<
+      '/fleet/deviation-types/[id]',
+      '/fleet/deviation-types/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/document-types/': RouteRecordInfo<
+      '/fleet/document-types/',
+      '/fleet/document-types',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/document-types/[id]': RouteRecordInfo<
+      '/fleet/document-types/[id]',
+      '/fleet/document-types/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/documents/': RouteRecordInfo<
+      '/fleet/documents/',
+      '/fleet/documents',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/documents/[id]': RouteRecordInfo<
+      '/fleet/documents/[id]',
+      '/fleet/documents/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/documents/missing': RouteRecordInfo<
+      '/fleet/documents/missing',
+      '/fleet/documents/missing',
+      Record<never, never>,
+      Record<never, never>,
       | never
     >,
     '/fleet/driver-assignments/': RouteRecordInfo<
@@ -108,6 +241,125 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/fleet/fuel-cards/': RouteRecordInfo<
+      '/fleet/fuel-cards/',
+      '/fleet/fuel-cards',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/fuel-cards/[id]': RouteRecordInfo<
+      '/fleet/fuel-cards/[id]',
+      '/fleet/fuel-cards/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/fuel-cards/transactions': RouteRecordInfo<
+      '/fleet/fuel-cards/transactions',
+      '/fleet/fuel-cards/transactions',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/fuel-consumption/': RouteRecordInfo<
+      '/fleet/fuel-consumption/',
+      '/fleet/fuel-consumption',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/fuel-gap-causes/': RouteRecordInfo<
+      '/fleet/fuel-gap-causes/',
+      '/fleet/fuel-gap-causes',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/fuel-gap-causes/[id]': RouteRecordInfo<
+      '/fleet/fuel-gap-causes/[id]',
+      '/fleet/fuel-gap-causes/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/fuel-refills/': RouteRecordInfo<
+      '/fleet/fuel-refills/',
+      '/fleet/fuel-refills',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/fuel-refills/[id]': RouteRecordInfo<
+      '/fleet/fuel-refills/[id]',
+      '/fleet/fuel-refills/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/infraction-types/': RouteRecordInfo<
+      '/fleet/infraction-types/',
+      '/fleet/infraction-types',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/infraction-types/[id]': RouteRecordInfo<
+      '/fleet/infraction-types/[id]',
+      '/fleet/infraction-types/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/infractions/': RouteRecordInfo<
+      '/fleet/infractions/',
+      '/fleet/infractions',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/infractions/[id]': RouteRecordInfo<
+      '/fleet/infractions/[id]',
+      '/fleet/infractions/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/inspections/': RouteRecordInfo<
+      '/fleet/inspections/',
+      '/fleet/inspections',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/inspections/[id]': RouteRecordInfo<
+      '/fleet/inspections/[id]',
+      '/fleet/inspections/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/insurance-policies/': RouteRecordInfo<
+      '/fleet/insurance-policies/',
+      '/fleet/insurance-policies',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/insurance-policies/[id]': RouteRecordInfo<
+      '/fleet/insurance-policies/[id]',
+      '/fleet/insurance-policies/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/live-map': RouteRecordInfo<
+      '/fleet/live-map',
+      '/fleet/live-map',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/fleet/providers/': RouteRecordInfo<
       '/fleet/providers/',
       '/fleet/providers',
@@ -118,6 +370,41 @@ declare module 'vue-router/auto-routes' {
     '/fleet/providers/[id]': RouteRecordInfo<
       '/fleet/providers/[id]',
       '/fleet/providers/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/reports': RouteRecordInfo<
+      '/fleet/reports',
+      '/fleet/reports',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/road-checklists/': RouteRecordInfo<
+      '/fleet/road-checklists/',
+      '/fleet/road-checklists',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/road-checklists/[id]': RouteRecordInfo<
+      '/fleet/road-checklists/[id]',
+      '/fleet/road-checklists/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/route-deviations/': RouteRecordInfo<
+      '/fleet/route-deviations/',
+      '/fleet/route-deviations',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/route-deviations/[id]': RouteRecordInfo<
+      '/fleet/route-deviations/[id]',
+      '/fleet/route-deviations/:id',
       { id: ParamValue<true> },
       { id: ParamValue<false> },
       | never
@@ -167,6 +454,48 @@ declare module 'vue-router/auto-routes' {
     '/fleet/sites/[id]': RouteRecordInfo<
       '/fleet/sites/[id]',
       '/fleet/sites/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/telematics-event-types/': RouteRecordInfo<
+      '/fleet/telematics-event-types/',
+      '/fleet/telematics-event-types',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/telematics-event-types/[id]': RouteRecordInfo<
+      '/fleet/telematics-event-types/[id]',
+      '/fleet/telematics-event-types/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/telematics-events/': RouteRecordInfo<
+      '/fleet/telematics-events/',
+      '/fleet/telematics-events',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/telematics-events/[id]': RouteRecordInfo<
+      '/fleet/telematics-events/[id]',
+      '/fleet/telematics-events/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/trainings/': RouteRecordInfo<
+      '/fleet/trainings/',
+      '/fleet/trainings',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/trainings/[id]': RouteRecordInfo<
+      '/fleet/trainings/[id]',
+      '/fleet/trainings/:id',
       { id: ParamValue<true> },
       { id: ParamValue<false> },
       | never
@@ -346,6 +675,356 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/maintenance/competences/': RouteRecordInfo<
+      '/maintenance/competences/',
+      '/maintenance/competences',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/competences/[id]': RouteRecordInfo<
+      '/maintenance/competences/[id]',
+      '/maintenance/competences/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/maintenance/dashboard': RouteRecordInfo<
+      '/maintenance/dashboard',
+      '/maintenance/dashboard',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/downtime-codes/': RouteRecordInfo<
+      '/maintenance/downtime-codes/',
+      '/maintenance/downtime-codes',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/downtime-codes/[id]': RouteRecordInfo<
+      '/maintenance/downtime-codes/[id]',
+      '/maintenance/downtime-codes/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/maintenance/downtimes/': RouteRecordInfo<
+      '/maintenance/downtimes/',
+      '/maintenance/downtimes',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/downtimes/[id]': RouteRecordInfo<
+      '/maintenance/downtimes/[id]',
+      '/maintenance/downtimes/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/maintenance/failure-codes/': RouteRecordInfo<
+      '/maintenance/failure-codes/',
+      '/maintenance/failure-codes',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/failure-codes/[id]': RouteRecordInfo<
+      '/maintenance/failure-codes/[id]',
+      '/maintenance/failure-codes/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/maintenance/maintenance-plans/': RouteRecordInfo<
+      '/maintenance/maintenance-plans/',
+      '/maintenance/maintenance-plans',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/maintenance-plans/[id]': RouteRecordInfo<
+      '/maintenance/maintenance-plans/[id]',
+      '/maintenance/maintenance-plans/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/maintenance/mission-types/': RouteRecordInfo<
+      '/maintenance/mission-types/',
+      '/maintenance/mission-types',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/mission-types/[id]': RouteRecordInfo<
+      '/maintenance/mission-types/[id]',
+      '/maintenance/mission-types/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/maintenance/mobile-interventions/': RouteRecordInfo<
+      '/maintenance/mobile-interventions/',
+      '/maintenance/mobile-interventions',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/mobile-interventions/[id]': RouteRecordInfo<
+      '/maintenance/mobile-interventions/[id]',
+      '/maintenance/mobile-interventions/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/maintenance/purchase-requests/': RouteRecordInfo<
+      '/maintenance/purchase-requests/',
+      '/maintenance/purchase-requests',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/purchase-requests/[id]': RouteRecordInfo<
+      '/maintenance/purchase-requests/[id]',
+      '/maintenance/purchase-requests/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/maintenance/reliability/': RouteRecordInfo<
+      '/maintenance/reliability/',
+      '/maintenance/reliability',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/service-due/': RouteRecordInfo<
+      '/maintenance/service-due/',
+      '/maintenance/service-due',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/settings': RouteRecordInfo<
+      '/maintenance/settings',
+      '/maintenance/settings',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/stock-items/': RouteRecordInfo<
+      '/maintenance/stock-items/',
+      '/maintenance/stock-items',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/stock-items/[id]': RouteRecordInfo<
+      '/maintenance/stock-items/[id]',
+      '/maintenance/stock-items/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/maintenance/technicians/': RouteRecordInfo<
+      '/maintenance/technicians/',
+      '/maintenance/technicians',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/technicians/[id]': RouteRecordInfo<
+      '/maintenance/technicians/[id]',
+      '/maintenance/technicians/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/maintenance/tyre-layouts/': RouteRecordInfo<
+      '/maintenance/tyre-layouts/',
+      '/maintenance/tyre-layouts',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/tyre-layouts/[id]': RouteRecordInfo<
+      '/maintenance/tyre-layouts/[id]',
+      '/maintenance/tyre-layouts/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/maintenance/tyres/': RouteRecordInfo<
+      '/maintenance/tyres/',
+      '/maintenance/tyres',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/tyres/[id]': RouteRecordInfo<
+      '/maintenance/tyres/[id]',
+      '/maintenance/tyres/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/maintenance/vehicle-check-points/': RouteRecordInfo<
+      '/maintenance/vehicle-check-points/',
+      '/maintenance/vehicle-check-points',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/vehicle-check-points/[id]': RouteRecordInfo<
+      '/maintenance/vehicle-check-points/[id]',
+      '/maintenance/vehicle-check-points/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/maintenance/vehicle-checks/': RouteRecordInfo<
+      '/maintenance/vehicle-checks/',
+      '/maintenance/vehicle-checks',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/vehicle-checks/[id]': RouteRecordInfo<
+      '/maintenance/vehicle-checks/[id]',
+      '/maintenance/vehicle-checks/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/maintenance/work-orders/': RouteRecordInfo<
+      '/maintenance/work-orders/',
+      '/maintenance/work-orders',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/maintenance/work-orders/[id]': RouteRecordInfo<
+      '/maintenance/work-orders/[id]',
+      '/maintenance/work-orders/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/maintenance/workshop-load/': RouteRecordInfo<
+      '/maintenance/workshop-load/',
+      '/maintenance/workshop-load',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/planning/customers/': RouteRecordInfo<
+      '/planning/customers/',
+      '/planning/customers',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/planning/customers/[id]': RouteRecordInfo<
+      '/planning/customers/[id]',
+      '/planning/customers/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/planning/delivery-points/': RouteRecordInfo<
+      '/planning/delivery-points/',
+      '/planning/delivery-points',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/planning/delivery-points/[id]': RouteRecordInfo<
+      '/planning/delivery-points/[id]',
+      '/planning/delivery-points/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/planning/product-compatibilities/': RouteRecordInfo<
+      '/planning/product-compatibilities/',
+      '/planning/product-compatibilities',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/planning/product-compatibilities/[id]': RouteRecordInfo<
+      '/planning/product-compatibilities/[id]',
+      '/planning/product-compatibilities/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/planning/products/': RouteRecordInfo<
+      '/planning/products/',
+      '/planning/products',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/planning/products/[id]': RouteRecordInfo<
+      '/planning/products/[id]',
+      '/planning/products/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/planning/quantity-tolerances/': RouteRecordInfo<
+      '/planning/quantity-tolerances/',
+      '/planning/quantity-tolerances',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/planning/quantity-tolerances/[id]': RouteRecordInfo<
+      '/planning/quantity-tolerances/[id]',
+      '/planning/quantity-tolerances/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/planning/reasons/': RouteRecordInfo<
+      '/planning/reasons/',
+      '/planning/reasons',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/planning/reasons/[id]': RouteRecordInfo<
+      '/planning/reasons/[id]',
+      '/planning/reasons/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/planning/settings': RouteRecordInfo<
+      '/planning/settings',
+      '/planning/settings',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/planning/transport-tariffs/': RouteRecordInfo<
+      '/planning/transport-tariffs/',
+      '/planning/transport-tariffs',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/planning/transport-tariffs/[id]': RouteRecordInfo<
+      '/planning/transport-tariffs/[id]',
+      '/planning/transport-tariffs/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/settings/module-toggles': RouteRecordInfo<
       '/settings/module-toggles',
       '/settings/module-toggles',
@@ -382,6 +1061,78 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | 'path'
     }
+    'src/pages/fleet/alert-rules/index.vue': {
+      routes:
+        | '/fleet/alert-rules/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/alert-rules/[id].vue': {
+      routes:
+        | '/fleet/alert-rules/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/alerts/index.vue': {
+      routes:
+        | '/fleet/alerts/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/check-points/index.vue': {
+      routes:
+        | '/fleet/check-points/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/check-points/[id].vue': {
+      routes:
+        | '/fleet/check-points/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/claims/index.vue': {
+      routes:
+        | '/fleet/claims/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/claims/[id].vue': {
+      routes:
+        | '/fleet/claims/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/company-documents/index.vue': {
+      routes:
+        | '/fleet/company-documents/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/company-documents/[id].vue': {
+      routes:
+        | '/fleet/company-documents/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
     'src/pages/fleet/couplings/index.vue': {
       routes:
         | '/fleet/couplings/'
@@ -397,6 +1148,86 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | 'id'
+    }
+    'src/pages/fleet/dashboard.vue': {
+      routes:
+        | '/fleet/dashboard'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/departure-authorizations/index.vue': {
+      routes:
+        | '/fleet/departure-authorizations/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/departure-authorizations/[id].vue': {
+      routes:
+        | '/fleet/departure-authorizations/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/deviation-types/index.vue': {
+      routes:
+        | '/fleet/deviation-types/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/deviation-types/[id].vue': {
+      routes:
+        | '/fleet/deviation-types/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/document-types/index.vue': {
+      routes:
+        | '/fleet/document-types/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/document-types/[id].vue': {
+      routes:
+        | '/fleet/document-types/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/documents/index.vue': {
+      routes:
+        | '/fleet/documents/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/documents/[id].vue': {
+      routes:
+        | '/fleet/documents/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/documents/missing.vue': {
+      routes:
+        | '/fleet/documents/missing'
+      views:
+        | never
+      pathParamNames:
+        | never
     }
     'src/pages/fleet/driver-assignments/index.vue': {
       routes:
@@ -454,6 +1285,142 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
+    'src/pages/fleet/fuel-cards/index.vue': {
+      routes:
+        | '/fleet/fuel-cards/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/fuel-cards/[id].vue': {
+      routes:
+        | '/fleet/fuel-cards/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/fuel-cards/transactions.vue': {
+      routes:
+        | '/fleet/fuel-cards/transactions'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/fuel-consumption/index.vue': {
+      routes:
+        | '/fleet/fuel-consumption/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/fuel-gap-causes/index.vue': {
+      routes:
+        | '/fleet/fuel-gap-causes/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/fuel-gap-causes/[id].vue': {
+      routes:
+        | '/fleet/fuel-gap-causes/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/fuel-refills/index.vue': {
+      routes:
+        | '/fleet/fuel-refills/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/fuel-refills/[id].vue': {
+      routes:
+        | '/fleet/fuel-refills/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/infraction-types/index.vue': {
+      routes:
+        | '/fleet/infraction-types/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/infraction-types/[id].vue': {
+      routes:
+        | '/fleet/infraction-types/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/infractions/index.vue': {
+      routes:
+        | '/fleet/infractions/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/infractions/[id].vue': {
+      routes:
+        | '/fleet/infractions/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/inspections/index.vue': {
+      routes:
+        | '/fleet/inspections/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/inspections/[id].vue': {
+      routes:
+        | '/fleet/inspections/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/insurance-policies/index.vue': {
+      routes:
+        | '/fleet/insurance-policies/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/insurance-policies/[id].vue': {
+      routes:
+        | '/fleet/insurance-policies/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/live-map.vue': {
+      routes:
+        | '/fleet/live-map'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
     'src/pages/fleet/providers/index.vue': {
       routes:
         | '/fleet/providers/'
@@ -465,6 +1432,46 @@ declare module 'vue-router/auto-routes' {
     'src/pages/fleet/providers/[id].vue': {
       routes:
         | '/fleet/providers/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/reports.vue': {
+      routes:
+        | '/fleet/reports'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/road-checklists/index.vue': {
+      routes:
+        | '/fleet/road-checklists/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/road-checklists/[id].vue': {
+      routes:
+        | '/fleet/road-checklists/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/route-deviations/index.vue': {
+      routes:
+        | '/fleet/route-deviations/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/route-deviations/[id].vue': {
+      routes:
+        | '/fleet/route-deviations/[id]'
       views:
         | never
       pathParamNames:
@@ -521,6 +1528,54 @@ declare module 'vue-router/auto-routes' {
     'src/pages/fleet/sites/[id].vue': {
       routes:
         | '/fleet/sites/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/telematics-event-types/index.vue': {
+      routes:
+        | '/fleet/telematics-event-types/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/telematics-event-types/[id].vue': {
+      routes:
+        | '/fleet/telematics-event-types/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/telematics-events/index.vue': {
+      routes:
+        | '/fleet/telematics-events/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/telematics-events/[id].vue': {
+      routes:
+        | '/fleet/telematics-events/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/trainings/index.vue': {
+      routes:
+        | '/fleet/trainings/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/trainings/[id].vue': {
+      routes:
+        | '/fleet/trainings/[id]'
       views:
         | never
       pathParamNames:
@@ -725,6 +1780,406 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | never
+    }
+    'src/pages/maintenance/competences/index.vue': {
+      routes:
+        | '/maintenance/competences/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/competences/[id].vue': {
+      routes:
+        | '/maintenance/competences/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/maintenance/dashboard.vue': {
+      routes:
+        | '/maintenance/dashboard'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/downtime-codes/index.vue': {
+      routes:
+        | '/maintenance/downtime-codes/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/downtime-codes/[id].vue': {
+      routes:
+        | '/maintenance/downtime-codes/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/maintenance/downtimes/index.vue': {
+      routes:
+        | '/maintenance/downtimes/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/downtimes/[id].vue': {
+      routes:
+        | '/maintenance/downtimes/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/maintenance/failure-codes/index.vue': {
+      routes:
+        | '/maintenance/failure-codes/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/failure-codes/[id].vue': {
+      routes:
+        | '/maintenance/failure-codes/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/maintenance/maintenance-plans/index.vue': {
+      routes:
+        | '/maintenance/maintenance-plans/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/maintenance-plans/[id].vue': {
+      routes:
+        | '/maintenance/maintenance-plans/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/maintenance/mission-types/index.vue': {
+      routes:
+        | '/maintenance/mission-types/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/mission-types/[id].vue': {
+      routes:
+        | '/maintenance/mission-types/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/maintenance/mobile-interventions/index.vue': {
+      routes:
+        | '/maintenance/mobile-interventions/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/mobile-interventions/[id].vue': {
+      routes:
+        | '/maintenance/mobile-interventions/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/maintenance/purchase-requests/index.vue': {
+      routes:
+        | '/maintenance/purchase-requests/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/purchase-requests/[id].vue': {
+      routes:
+        | '/maintenance/purchase-requests/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/maintenance/reliability/index.vue': {
+      routes:
+        | '/maintenance/reliability/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/service-due/index.vue': {
+      routes:
+        | '/maintenance/service-due/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/settings.vue': {
+      routes:
+        | '/maintenance/settings'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/stock-items/index.vue': {
+      routes:
+        | '/maintenance/stock-items/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/stock-items/[id].vue': {
+      routes:
+        | '/maintenance/stock-items/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/maintenance/technicians/index.vue': {
+      routes:
+        | '/maintenance/technicians/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/technicians/[id].vue': {
+      routes:
+        | '/maintenance/technicians/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/maintenance/tyre-layouts/index.vue': {
+      routes:
+        | '/maintenance/tyre-layouts/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/tyre-layouts/[id].vue': {
+      routes:
+        | '/maintenance/tyre-layouts/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/maintenance/tyres/index.vue': {
+      routes:
+        | '/maintenance/tyres/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/tyres/[id].vue': {
+      routes:
+        | '/maintenance/tyres/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/maintenance/vehicle-check-points/index.vue': {
+      routes:
+        | '/maintenance/vehicle-check-points/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/vehicle-check-points/[id].vue': {
+      routes:
+        | '/maintenance/vehicle-check-points/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/maintenance/vehicle-checks/index.vue': {
+      routes:
+        | '/maintenance/vehicle-checks/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/vehicle-checks/[id].vue': {
+      routes:
+        | '/maintenance/vehicle-checks/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/maintenance/work-orders/index.vue': {
+      routes:
+        | '/maintenance/work-orders/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/maintenance/work-orders/[id].vue': {
+      routes:
+        | '/maintenance/work-orders/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/maintenance/workshop-load/index.vue': {
+      routes:
+        | '/maintenance/workshop-load/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/planning/customers/index.vue': {
+      routes:
+        | '/planning/customers/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/planning/customers/[id].vue': {
+      routes:
+        | '/planning/customers/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/planning/delivery-points/index.vue': {
+      routes:
+        | '/planning/delivery-points/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/planning/delivery-points/[id].vue': {
+      routes:
+        | '/planning/delivery-points/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/planning/product-compatibilities/index.vue': {
+      routes:
+        | '/planning/product-compatibilities/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/planning/product-compatibilities/[id].vue': {
+      routes:
+        | '/planning/product-compatibilities/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/planning/products/index.vue': {
+      routes:
+        | '/planning/products/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/planning/products/[id].vue': {
+      routes:
+        | '/planning/products/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/planning/quantity-tolerances/index.vue': {
+      routes:
+        | '/planning/quantity-tolerances/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/planning/quantity-tolerances/[id].vue': {
+      routes:
+        | '/planning/quantity-tolerances/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/planning/reasons/index.vue': {
+      routes:
+        | '/planning/reasons/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/planning/reasons/[id].vue': {
+      routes:
+        | '/planning/reasons/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/planning/settings.vue': {
+      routes:
+        | '/planning/settings'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/planning/transport-tariffs/index.vue': {
+      routes:
+        | '/planning/transport-tariffs/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/planning/transport-tariffs/[id].vue': {
+      routes:
+        | '/planning/transport-tariffs/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
     }
     'src/pages/settings/module-toggles.vue': {
       routes:

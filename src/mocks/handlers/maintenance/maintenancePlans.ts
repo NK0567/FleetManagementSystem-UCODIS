@@ -1,0 +1,173 @@
+import {
+  OPERATION_NATURES,
+  operationIssues,
+  type MaintenanceOperation,
+  type OperationNature
+} from '@/modules/maintenance/maintenance-plans/domain/maintenancePlan'
+import type { MaintenancePlanApi } from '@/modules/maintenance/maintenance-plans/types/maintenancePlan.types'
+import type { AuditFields } from '../../db/collection'
+import type { MockDatabase } from '../../db/database'
+import { nextNo } from '../../db/numbering'
+import type { MaintenancePlanRow } from '../../fixtures/maintenance/maintenancePlans'
+import { readBody, registerCrudResource, routeParam, stampCreated } from '../../http/crudResource'
+import { conflict, unprocessable } from '../../http/errors'
+import {
+  invalidField,
+  readAll,
+  readBoolean,
+  readPatch,
+  readString,
+  readStringList,
+  type FieldReaders
+} from '../../http/input'
+import { created } from '../../http/responses'
+import type { MockRouter } from '../../http/router'
+import { MAINTENANCE_MESSAGES } from './messages'
+
+type Fields = Omit<MaintenancePlanRow, 'no' | keyof AuditFields>
+
+export function maintenancePlansApi(db: MockDatabase): MaintenancePlanApi[] {
+  const plates = new Map(db.vehicles.all().map((vehicle) => [vehicle.no, vehicle.plate]))
+  return db.maintenancePlans.all().map((row) => ({
+    ...row,
+    vehiclePlates: row.vehicleNos.map((no) => plates.get(no) ?? no).join(', '),
+    vehicleCount: row.vehicleNos.length,
+    operationCount: row.operations.length
+  }))
+}
+
+/** The active plan each vehicle follows. */
+export function planByVehicle(db: MockDatabase): Map<string, MaintenancePlanRow> {
+  return new Map(
+    db.maintenancePlans
+      .all()
+      .filter((plan) => plan.active)
+      .flatMap((plan) => plan.vehicleNos.map((vehicleNo) => [vehicleNo, plan] as const))
+  )
+}
+
+function operationNos(db: MockDatabase): string[] {
+  return db.maintenancePlans
+    .all()
+    .flatMap((plan) => plan.operations.map((operation) => operation.no))
+}
+
+/** Operation numbers are unique across plans and never reused, so passages stay with their operation. */
+function readOperations(db: MockDatabase, input: Record<string, unknown>): MaintenanceOperation[] {
+  const raw = input.operations
+  if (raw == null) return []
+  if (!Array.isArray(raw)) throw invalidField('operations')
+  const taken = operationNos(db)
+  const subsystems = new Set(
+    db.failureCodes
+      .all()
+      .filter((code) => code.kind === 'subsystem')
+      .map((code) => code.no)
+  )
+  return raw.map((item: unknown, index) => {
+    if (!item || typeof item !== 'object') throw invalidField('operations')
+    const line = item as Record<string, unknown>
+    const interval = (field: string) =>
+      line[field] == null || line[field] === '' ? null : Number(line[field])
+    const nature = OPERATION_NATURES.includes(line.nature as OperationNature)
+      ? (line.nature as OperationNature)
+      : 'check'
+    const operation = {
+      label: typeof line.label === 'string' ? line.label.trim() : '',
+      subsystemNo: typeof line.subsystemNo === 'string' ? line.subsystemNo : '',
+      nature,
+      intervalKm: interval('intervalKm'),
+      intervalDays: interval('intervalDays')
+    }
+    if (operationIssues(operation).length > 0 || !subsystems.has(operation.subsystemNo)) {
+      throw unprocessable(MAINTENANCE_MESSAGES.invalidOperation, { line: index + 1 })
+    }
+    let no = typeof line.no === 'string' ? line.no : ''
+    if (!no) {
+      no = nextNo(taken, 'OP-', 3)
+      taken.push(no)
+    }
+    return { no, ...operation }
+  })
+}
+
+export function registerMaintenancePlansHandlers(router: MockRouter, db: MockDatabase): void {
+  const readers: FieldReaders<Fields> = {
+    name: (input) => readString(input, 'name', { required: true }),
+    provisional: (input) => readBoolean(input, 'provisional'),
+    active: (input) => readBoolean(input, 'active', true),
+    source: (input) => readString(input, 'source'),
+    vehicleNos: (input) => {
+      const nos = [...new Set(readStringList(input, 'vehicleNos'))]
+      for (const no of nos) {
+        if (!db.vehicles.exists(no)) throw invalidField('vehicleNos')
+      }
+      return nos
+    },
+    operations: (input) => readOperations(db, input)
+  }
+
+  /** A vehicle follows one active plan at most, or its due dates would contradict each other. */
+  function assertVehiclesFree(plan: Pick<Fields, 'active' | 'vehicleNos'>, no?: string) {
+    if (!plan.active) return
+    const taken = planByVehicle(db)
+    for (const vehicleNo of plan.vehicleNos) {
+      const other = taken.get(vehicleNo)
+      if (other && other.no !== no) {
+        const plate = db.vehicles.find(vehicleNo)?.plate ?? vehicleNo
+        throw conflict(MAINTENANCE_MESSAGES.vehicleHasPlan, { plate, plan: other.name })
+      }
+    }
+  }
+
+  const newNo = () =>
+    nextNo(
+      db.maintenancePlans.all().map((row) => row.no),
+      'PE-',
+      3
+    )
+
+  registerCrudResource(router, {
+    basePath: '/maintenance/maintenance-plans',
+    feature: 'MAINTENANCEPLAN',
+    collection: db.maintenancePlans,
+    list: () => maintenancePlansApi(db),
+    searchColumns: ['no', 'name', 'vehiclePlates'],
+    create: (input) => {
+      const fields = readAll(input, readers)
+      assertVehiclesFree(fields)
+      return { no: newNo(), ...fields }
+    },
+    update: (existing, input) => {
+      const patch = readPatch(input, readers)
+      assertVehiclesFree({ ...existing, ...patch }, existing.no)
+      return patch
+    },
+    remove: (existing) => {
+      if (existing.vehicleNos.length) throw conflict(MAINTENANCE_MESSAGES.planHasVehicles)
+    }
+  })
+
+  // A copy starts with no vehicle and new operation numbers: passages belong to the original.
+  router.post(
+    '/maintenance/maintenance-plans/:no/duplicate',
+    { feature: 'MAINTENANCEPLAN', action: 'insert' },
+    (request) => {
+      const source = db.maintenancePlans.findOrFail(routeParam(request, 'no'))
+      const name = readString(readBody(request), 'name', { required: true })
+      const taken = operationNos(db)
+      const operations = source.operations.map((operation) => {
+        const no = nextNo(taken, 'OP-', 3)
+        taken.push(no)
+        return { ...operation, no }
+      })
+      const copy = db.maintenancePlans.insert(
+        stampCreated(
+          { ...structuredClone(source), no: newNo(), name, vehicleNos: [], operations },
+          request
+        )
+      )
+      return created(maintenancePlansApi(db).find((plan) => plan.no === copy.no))
+    }
+  )
+}

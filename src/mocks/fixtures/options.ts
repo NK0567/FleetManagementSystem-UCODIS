@@ -3,6 +3,8 @@ import type { UserProfileCode } from '@/types/auth.types'
 import { localize, type LocalizedText, type MockLanguage } from '../i18n'
 import { FLEET_OPTION_SETS } from './fleetOptions'
 import { HR_OPTION_SETS } from './hrOptions'
+import { MAINTENANCE_OPTION_SETS } from './maintenanceOptions'
+import { PLANNING_OPTION_SETS } from './planningOptions'
 
 interface OptionDefinition {
   value: string | number
@@ -28,7 +30,9 @@ function fromRecord(record: Record<string, LocalizedText>): OptionDefinition[] {
 const OPTION_RECORDS: Record<string, Record<string, LocalizedText>> = {
   userProfile,
   ...HR_OPTION_SETS,
-  ...FLEET_OPTION_SETS
+  ...FLEET_OPTION_SETS,
+  ...MAINTENANCE_OPTION_SETS,
+  ...PLANNING_OPTION_SETS
 }
 
 /** Enumerations served by GET /options/all. */

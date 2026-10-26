@@ -97,6 +97,7 @@ export default {
   'fleet.vehicles.odometerSource.trip': 'End of trip',
   'fleet.vehicles.odometerSource.refill': 'Refill',
   'fleet.vehicles.odometerSource.removal': 'Removal',
+  'fleet.vehicles.odometerSource.work_order': 'Work order',
   'fleet.vehicles.compartment': 'Compartment {no}',
   'fleet.vehicles.addCompartment': 'Add a compartment',
   'fleet.vehicles.removeCompartment': 'Remove the compartment',
@@ -134,5 +135,7 @@ export default {
   'fleet.vehicles.col.coupledVehiclePlate': 'Coupled with',
   'fleet.vehicles.photoError': 'The photo could not be saved.',
   'fleet.vehicles.form.photos': 'Photos',
-  'fleet.vehicles.form.photoCount': 'No photo | 1 photo | {count} photos'
+  'fleet.vehicles.form.photoCount': 'No photo | 1 photo | {count} photos',
+  'fleet.vehicles.form.documents': 'Documents',
+  'fleet.vehicles.form.documentsNotCompliant': 'Not compliant'
 }

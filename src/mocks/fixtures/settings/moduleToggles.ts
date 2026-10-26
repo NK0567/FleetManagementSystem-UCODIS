@@ -22,10 +22,15 @@ export const MODULE_TOGGLE_CATALOG: readonly ModuleToggleDefinition[] = [
     no: 'fuel',
     group: 'fleet',
     order: 50,
-    features: ['FUELREFILL', 'FUELCONSUMPTION', 'FUELCARD']
+    features: ['FUELREFILL', 'FUELCONSUMPTION', 'FUELCARD', 'FUELGAPCAUSE']
   },
   { no: 'fleet-status', group: 'fleet', order: 60, features: ['FLEETSTATUS'] },
-  { no: 'checks', group: 'fleet', order: 70, features: ['ROADCHECKLIST', 'INSPECTION'] },
+  {
+    no: 'checks',
+    group: 'fleet',
+    order: 70,
+    features: ['ROADCHECKLIST', 'INSPECTION', 'CHECKPOINT']
+  },
   { no: 'departures', group: 'fleet', order: 80, features: ['DEPARTUREAUTHORIZATION'] },
   { no: 'insurance', group: 'fleet', order: 90, features: ['INSURANCEPOLICY', 'CLAIM'] },
   { no: 'documents', group: 'fleet', order: 100, features: ['DOCUMENT', 'COMPANYDOCUMENT'] },
@@ -33,11 +38,33 @@ export const MODULE_TOGGLE_CATALOG: readonly ModuleToggleDefinition[] = [
   { no: 'fleet-drivers', group: 'fleet', order: 120, features: ['DRIVER'] },
   { no: 'sites', group: 'fleet', order: 130, features: ['SITE'] },
   { no: 'workshop-load', group: 'maintenance', order: 210, features: ['WORKSHOPLOAD'] },
-  { no: 'service-due', group: 'maintenance', order: 220, features: ['SERVICEDUE'] },
+  {
+    no: 'service-due',
+    group: 'maintenance',
+    order: 220,
+    features: ['SERVICEDUE', 'MAINTENANCEPLAN']
+  },
   { no: 'downtimes', group: 'maintenance', order: 230, features: ['DOWNTIME'] },
   { no: 'reliability', group: 'maintenance', order: 240, features: ['RELIABILITY'] },
-  { no: 'mobile-team', group: 'maintenance', order: 250, features: ['MOBILEINTERVENTION'] },
-  { no: 'purchasing', group: 'maintenance', order: 260, features: ['PURCHASEREQUEST', 'STOCKITEM'] }
+  {
+    no: 'mobile-team',
+    group: 'maintenance',
+    order: 250,
+    features: ['MOBILEINTERVENTION', 'MISSIONTYPE']
+  },
+  {
+    no: 'purchasing',
+    group: 'maintenance',
+    order: 260,
+    features: ['PURCHASEREQUEST', 'STOCKITEM']
+  },
+  { no: 'tyres', group: 'maintenance', order: 270, features: ['TYRE', 'TYRELAYOUT'] },
+  {
+    no: 'vehicle-checks',
+    group: 'maintenance',
+    order: 280,
+    features: ['VEHICLECHECK', 'VEHICLECHECKPOINT']
+  }
 ]
 
 export const moduleTogglesCollection: CollectionDefinition<ModuleToggleRow> = {

@@ -1,0 +1,50 @@
+export default {
+  'fleet.documentTypes.title': 'Types de documents',
+  'fleet.documentTypes.card': 'Fiche type de document',
+  'fleet.documentTypes.new': 'Nouveau type de document',
+  'fleet.documentTypes.loadingList': 'Chargement des types de documents…',
+  'fleet.documentTypes.noResults': 'Aucun type de document.',
+  'fleet.documentTypes.noSearchResults': 'Aucun type de document ne correspond à « {query} ».',
+  'fleet.documentTypes.saveSuccess': 'Type de document enregistré.',
+  'fleet.documentTypes.saveError': "Le type de document n'a pas pu être enregistré.",
+  'fleet.documentTypes.createError': "Le type de document n'a pas pu être créé.",
+  'fleet.documentTypes.deleteError': "Le type de document n'a pas pu être supprimé.",
+  'fleet.documentTypes.confirmDelete': 'Supprimer le type de document',
+  'fleet.documentTypes.confirmDeleteMsg': 'Le type « {name} » sera définitivement supprimé.',
+
+  'fleet.documentTypes.search.all': 'Code ou libellé',
+
+  'fleet.documentTypes.col.no': 'Code',
+  'fleet.documentTypes.col.name': 'Libellé',
+  'fleet.documentTypes.col.target': 'Concerne',
+  'fleet.documentTypes.col.personScope': 'Personnes concernées',
+  'fleet.documentTypes.col.mandatory': 'Obligatoire',
+  'fleet.documentTypes.col.active': 'Actif',
+  'fleet.documentTypes.col.validity': 'Validité',
+  'fleet.documentTypes.col.durationMonths': 'Durée habituelle (mois)',
+  'fleet.documentTypes.col.noticeDays': 'Préavis (jours)',
+  'fleet.documentTypes.col.documentCount': 'Documents',
+
+  'fleet.documentTypes.form.general': 'Général',
+  'fleet.documentTypes.form.lifetime': 'Validité et préavis',
+  'fleet.documentTypes.form.no': 'Code',
+  'fleet.documentTypes.form.name': 'Libellé',
+  'fleet.documentTypes.form.target': 'Concerne',
+  'fleet.documentTypes.form.personScope': 'Personnes concernées',
+  'fleet.documentTypes.form.mandatory': 'Obligatoire',
+  'fleet.documentTypes.form.active': 'Actif',
+  'fleet.documentTypes.form.validity': 'Validité',
+  'fleet.documentTypes.form.durationMonths': 'Durée habituelle (mois)',
+  'fleet.documentTypes.form.durationMonthsHint': "Propose la date de fin d'un nouveau document.",
+  'fleet.documentTypes.form.noticeDays': "Préavis avant l'échéance (jours)",
+  'fleet.documentTypes.form.noticeDaysHint':
+    'Laissé vide, le préavis par défaut des réglages de la flotte s’applique.',
+  'fleet.documentTypes.form.documentCount': 'Documents de ce type',
+  'fleet.documentTypes.form.scope': 'Concerne',
+  'fleet.documentTypes.form.mandatoryHint':
+    'Un document obligatoire manquant ou expiré immobilise le véhicule ou rend le conducteur inapte.',
+  'fleet.documentTypes.form.vehicleTypesHint':
+    'Aucun type coché : le document concerne tous les véhicules.',
+  'fleet.documentTypes.form.vehicleTypeCount': '{n} type de véhicule | {n} types de véhicules',
+  'fleet.documentTypes.form.allVehicleTypes': 'Tous les véhicules'
+}

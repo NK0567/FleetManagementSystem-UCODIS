@@ -1,8 +1,11 @@
+import { vi } from 'vitest'
+import { DEMO_REFERENCE_DATE } from './clock'
 import { createMockServer, type MockServer } from './index'
 import type { RawMockRequest } from './http/router'
 
 /** Fresh in-memory backend for specs, pinned to the demo reference date. */
 export function createTestServer(): MockServer {
+  vi.setSystemTime(new Date(`${DEMO_REFERENCE_DATE}T10:00:00`))
   localStorage.clear()
   return createMockServer({ seedVersion: 1, dayOffset: 0 })
 }

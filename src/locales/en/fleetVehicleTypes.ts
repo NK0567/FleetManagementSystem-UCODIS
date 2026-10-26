@@ -38,5 +38,8 @@ export default {
   'fleet.vehicleTypes.col.vehicleCount': 'Vehicles',
   'fleet.vehicleTypes.form.vehicleCount': 'Vehicles of this type',
   'fleet.vehicleTypes.form.structureFrozen':
-    'Vehicles use this type: only the name and the activation can still change.'
+    'Vehicles use this type: only the name and the activation can still change.',
+  'fleet.vehicleTypes.form.fuelReferenceL100': 'Reference consumption (L/100 km)',
+  'fleet.vehicleTypes.form.fuelReferenceL100Hint':
+    'Left empty, the default reference of the settings applies.'
 }

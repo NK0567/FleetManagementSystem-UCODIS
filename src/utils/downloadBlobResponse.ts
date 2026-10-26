@@ -30,6 +30,11 @@ export function downloadBlobResponse(
   const fileName =
     fileNameFromContentDisposition(response.headers['content-disposition']) ??
     `${fallbackFileName}.xlsx`
+  saveBlob(blob, fileName)
+}
+
+/** Hands a file built in the browser to the user. */
+export function saveBlob(blob: Blob, fileName: string): void {
   const url = URL.createObjectURL(blob)
   const anchor = document.createElement('a')
   anchor.href = url
