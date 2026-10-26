@@ -920,6 +920,27 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/planning/reasons/': RouteRecordInfo<
+      '/planning/reasons/',
+      '/planning/reasons',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/planning/reasons/[id]': RouteRecordInfo<
+      '/planning/reasons/[id]',
+      '/planning/reasons/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/planning/settings': RouteRecordInfo<
+      '/planning/settings',
+      '/planning/settings',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/settings/module-toggles': RouteRecordInfo<
       '/settings/module-toggles',
       '/settings/module-toggles',
@@ -1951,6 +1972,30 @@ declare module 'vue-router/auto-routes' {
     'src/pages/maintenance/workshop-load/index.vue': {
       routes:
         | '/maintenance/workshop-load/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/planning/reasons/index.vue': {
+      routes:
+        | '/planning/reasons/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/planning/reasons/[id].vue': {
+      routes:
+        | '/planning/reasons/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/planning/settings.vue': {
+      routes:
+        | '/planning/settings'
       views:
         | never
       pathParamNames:

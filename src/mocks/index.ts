@@ -10,6 +10,7 @@ import { registerModuleToggleHandlers } from './handlers/settings/moduleToggles'
 import { registerHrHandlers } from './handlers/hr'
 import { registerFleetHandlers } from './handlers/fleet'
 import { registerMaintenanceHandlers } from './handlers/maintenance'
+import { registerPlanningHandlers } from './handlers/planning'
 import { createMockAdapter } from './http/adapter'
 import { createMockRouter } from './http/router'
 
@@ -32,6 +33,7 @@ export function createMockServer(context?: CollectionContext) {
   registerHrHandlers(router, db)
   registerFleetHandlers(router, db)
   registerMaintenanceHandlers(router, db)
+  registerPlanningHandlers(router, db)
 
   return { db, router }
 }

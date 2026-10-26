@@ -74,6 +74,8 @@ import maintenanceVehicleChecks from './maintenanceVehicleChecks'
 import maintenanceMobileInterventions from './maintenanceMobileInterventions'
 import maintenanceTyreLayouts from './maintenanceTyreLayouts'
 import maintenanceTyres from './maintenanceTyres'
+import planningReasons from './planningReasons'
+import planningSettings from './planningSettings'
 export default {
   ...common,
   ...auth,
@@ -149,5 +151,7 @@ export default {
   ...maintenanceVehicleChecks,
   ...maintenanceMobileInterventions,
   ...maintenanceTyreLayouts,
-  ...maintenanceTyres
+  ...maintenanceTyres,
+  ...planningReasons,
+  ...planningSettings
 }

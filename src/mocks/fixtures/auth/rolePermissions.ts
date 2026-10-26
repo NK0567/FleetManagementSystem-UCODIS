@@ -93,6 +93,13 @@ const MAINTENANCE_OPERATIONS = [
   'STOCKITEM',
   'RELIABILITY'
 ]
+const PLANNING_REFERENCE = ['PLANNINGREASON']
+const PLANNING_OPERATIONS: string[] = []
+/** Planning rights replace the old role lists of the planning settings. */
+const PLANNING_MANAGEMENT: Record<string, Grant> = {
+  ...grant([...PLANNING_REFERENCE, ...PLANNING_OPERATIONS], FULL),
+  PLANNINGSETTINGS: allRecords(['read', 'update'])
+}
 /** Execute covers what commits the workshop: validating or refusing a closing, cancelling, adjusting stock. */
 const MAINTENANCE_MANAGEMENT: Record<string, Grant> = {
   ...grant([...MAINTENANCE_REFERENCE, ...MAINTENANCE_OPERATIONS], FULL),
@@ -134,6 +141,7 @@ export const ROLE_PERMISSIONS: Record<UserProfileCode, Record<string, Grant>> = 
     LEAVEBALANCE: READ_EXPORT,
     ...FLEET_MANAGEMENT,
     ...MAINTENANCE_MANAGEMENT,
+    ...PLANNING_MANAGEMENT,
     MODULETOGGLE: allRecords(['read', 'update'])
   },
   FLEET_MANAGER: {
@@ -145,14 +153,17 @@ export const ROLE_PERMISSIONS: Record<UserProfileCode, Record<string, Grant>> = 
     LEAVEREQUEST: allRecords(['read', 'insert', 'execute', 'export']),
     LEAVEBALANCE: READ_EXPORT,
     ...FLEET_MANAGEMENT,
-    ...MAINTENANCE_MANAGEMENT
+    ...MAINTENANCE_MANAGEMENT,
+    ...PLANNING_MANAGEMENT
   },
   MANAGEMENT: {
     ...grant([...HR_READ_FEATURES, 'HRDASHBOARD', 'LEAVEREQUEST'], READ_EXPORT),
     ...grant([...FLEET_REFERENCE, ...FLEET_OPERATIONS], READ_EXPORT),
     ...grant([...MAINTENANCE_REFERENCE, ...MAINTENANCE_OPERATIONS], READ_EXPORT),
     FLEETSETTINGS: READ,
+    ...grant([...PLANNING_REFERENCE, ...PLANNING_OPERATIONS], READ_EXPORT),
     MAINTENANCESETTINGS: READ,
+    PLANNINGSETTINGS: READ,
     MYPLANNING: READ
   },
   MAINTENANCE_TECHNICIAN: {
@@ -169,9 +180,9 @@ export const ROLE_PERMISSIONS: Record<UserProfileCode, Record<string, Grant>> = 
     ),
     ...grant(['DOWNTIME', 'PURCHASEREQUEST'], allRecords(['read', 'insert']))
   },
-  CUSTOMER_SERVICE: backOffice,
-  SALES: backOffice,
-  DEPOT: backOffice,
+  CUSTOMER_SERVICE: { ...backOffice, PLANNINGREASON: READ },
+  SALES: { ...backOffice, PLANNINGREASON: READ },
+  DEPOT: { ...backOffice, PLANNINGREASON: READ },
   DRIVER: {},
   DRIVER_ASSISTANT: {}
 }

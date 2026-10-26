@@ -86,6 +86,14 @@ export const COMMON_MESSAGES = {
     fr: "Le réglage « {field} » n'est pas une heure valide (HH:MM).",
     en: 'The "{field}" setting is not a valid time (HH:MM).'
   },
+  settingTooLong: {
+    fr: 'Le réglage « {field} » dépasse {max} caractères.',
+    en: 'The "{field}" setting is longer than {max} characters.'
+  },
+  settingInvalidChoice: {
+    fr: "La valeur du réglage « {field} » n'est pas proposée.",
+    en: 'The value of the "{field}" setting is not one of the choices.'
+  },
   unexpected: { fr: 'Une erreur inattendue est survenue.', en: 'An unexpected error occurred.' },
   yes: { fr: 'Oui', en: 'Yes' },
   no: { fr: 'Non', en: 'No' }

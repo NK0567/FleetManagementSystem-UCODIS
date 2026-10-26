@@ -29,7 +29,7 @@ const emit = defineEmits<{ 'update:dirty': [dirty: boolean] }>()
 
 const { t } = useI18n()
 
-type Draft = Record<string, string | number | null>
+type Draft = Record<string, string | number | boolean | null>
 const draft = ref<Draft | null>(null)
 const isEditing = computed(() => draft.value !== null)
 const shown = computed<Draft>(() => draft.value ?? ({ ...props.values } as Draft))
@@ -38,11 +38,18 @@ function toValues(values: Draft): Values {
   const result: Values = {}
   for (const field of props.fields) {
     const raw = values[field.key]
-    if (field.kind === 'time') result[field.key] = String(raw ?? '').trim()
-    else if (raw === '' || raw == null) result[field.key] = null
+    if (field.kind === 'boolean') result[field.key] = raw === true
+    else if (field.kind === 'time' || field.kind === 'text' || field.kind === 'choice') {
+      result[field.key] = String(raw ?? '').trim()
+    } else if (raw === '' || raw == null) result[field.key] = null
     else result[field.key] = Number(raw)
   }
   return result
+}
+
+function inputValue(key: string): string | number | null {
+  const value = shown.value[key]
+  return typeof value === 'boolean' ? null : (value ?? null)
 }
 
 const issues = computed(() => (draft.value ? props.validate(toValues(draft.value)) : []))
@@ -54,14 +61,14 @@ watch(isDirty, (dirty) => emit('update:dirty', dirty))
 
 function issueText(issue: SectionIssue): string {
   const field = props.fields.find((item) => item.key === issue.field)
-  if (issue.code === 'outOfRange' && field && field.kind !== 'time') {
+  if (issue.code === 'outOfRange' && field && 'unit' in field) {
     return t(`${props.labelPrefix}.issue.outOfRange`, {
       min: issue.min ?? 0,
       max: issue.max ?? 0,
       unit: t(`${props.labelPrefix}.unit.${field.unit}`)
     })
   }
-  return t(`${props.labelPrefix}.issue.${issue.code}`)
+  return t(`${props.labelPrefix}.issue.${issue.code}`, { max: issue.max ?? 0 })
 }
 
 const issueMessages = computed(
@@ -125,16 +132,41 @@ async function submit() {
         :key="field.key"
         :field="field.key"
         :label="t(`${labelPrefix}.field.${section}.${field.key}`)"
-        :required="field.kind === 'number'"
+        :required="field.kind === 'number' || field.kind === 'text'"
       >
-        <div class="flex items-center gap-2">
+        <ToggleSwitch
+          v-if="field.kind === 'boolean'"
+          :model-value="shown[field.key] === true"
+          :disabled="!isEditing || saving"
+          @update:model-value="shown[field.key] = $event"
+        />
+        <div v-else-if="field.kind === 'choice'" class="w-72 max-w-full">
+          <OptionsSelect
+            :model-value="String(shown[field.key] ?? '')"
+            :options-key="field.optionsKey"
+            :disabled="!isEditing || saving"
+            :invalid="issueMessages.has(field.key)"
+            @update:model-value="shown[field.key] = String($event)"
+          />
+        </div>
+        <div v-else-if="field.kind === 'text'" class="w-72 max-w-full">
+          <FormInput
+            :model-value="inputValue(field.key)"
+            :maxlength="field.maxLength"
+            :disabled="!isEditing || saving"
+            :invalid="issueMessages.has(field.key)"
+            @update:model-value="shown[field.key] = $event"
+          />
+        </div>
+        <div v-else class="flex items-center gap-2">
           <div class="w-36 shrink-0">
             <FormInput
-              v-model="shown[field.key]"
+              :model-value="inputValue(field.key)"
               :type="field.kind === 'time' ? 'time' : 'text'"
               :numeric-only="field.kind !== 'time'"
               :disabled="!isEditing || saving"
               :invalid="issueMessages.has(field.key)"
+              @update:model-value="shown[field.key] = $event"
             />
           </div>
           <span v-if="field.kind !== 'time'" class="text-sm text-muted-foreground">

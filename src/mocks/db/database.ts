@@ -66,11 +66,13 @@ import { vehicleChecksCollection } from '../fixtures/maintenance/vehicleChecks'
 import { mobileInterventionsCollection } from '../fixtures/maintenance/mobileInterventions'
 import { tyreLayoutsCollection } from '../fixtures/maintenance/tyreLayouts'
 import { tyresCollection } from '../fixtures/maintenance/tyres'
+import { planningSettingsCollection } from '../fixtures/planning/settings'
+import { planningReasonsCollection } from '../fixtures/planning/planningReasons'
 import { createCollection, type CollectionContext } from './collection'
 import { clearStoredCollections } from './storage'
 
 /** Bump when fixtures change shape: every collection is then reseeded. */
-export const MOCK_SEED_VERSION = 32
+export const MOCK_SEED_VERSION = 33
 
 export function createDatabase(
   context: CollectionContext = {
@@ -93,6 +95,7 @@ export function createDatabase(
     leaveBalanceAdjustments: createCollection(leaveBalanceAdjustmentsCollection, context),
     fleetSettings: createCollection(fleetSettingsCollection, context),
     maintenanceSettings: createCollection(maintenanceSettingsCollection, context),
+    planningSettings: createCollection(planningSettingsCollection, context),
     vehicleTypes: createCollection(vehicleTypesCollection, context),
     equipmentTypes: createCollection(equipmentTypesCollection, context),
     siteTypes: createCollection(siteTypesCollection, context),
@@ -145,7 +148,8 @@ export function createDatabase(
     vehicleChecks: createCollection(vehicleChecksCollection, context),
     mobileInterventions: createCollection(mobileInterventionsCollection, context),
     tyreLayouts: createCollection(tyreLayoutsCollection, context),
-    tyres: createCollection(tyresCollection, context)
+    tyres: createCollection(tyresCollection, context),
+    planningReasons: createCollection(planningReasonsCollection, context)
   }
 
   return {

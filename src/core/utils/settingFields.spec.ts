@@ -7,6 +7,12 @@ const fields: SettingField[] = [
   { key: 'opensAt', kind: 'time' }
 ]
 
+const otherFields: SettingField[] = [
+  { key: 'unit', kind: 'text', maxLength: 5 },
+  { key: 'strict', kind: 'boolean' },
+  { key: 'payer', kind: 'choice', optionsKey: 'payer', values: ['orderer', 'recipient'] }
+]
+
 describe('settingFieldIssues', () => {
   it('requires numbers, bounds them, leaves optional ones empty and checks times', () => {
     expect(settingFieldIssues(fields, { stations: 2, cap: null, opensAt: '07:30' })).toEqual([])
@@ -14,6 +20,19 @@ describe('settingFieldIssues', () => {
       { field: 'stations', code: 'required' },
       { field: 'cap', code: 'outOfRange', min: 0, max: 100 },
       { field: 'opensAt', code: 'invalidTime' }
+    ])
+  })
+
+  it('requires texts within their length and choices among their values', () => {
+    expect(
+      settingFieldIssues(otherFields, { unit: 'box', strict: true, payer: 'orderer' })
+    ).toEqual([])
+    expect(settingFieldIssues(otherFields, { unit: ' ', strict: false, payer: 'x' })).toEqual([
+      { field: 'unit', code: 'required' },
+      { field: 'payer', code: 'invalidChoice' }
+    ])
+    expect(settingFieldIssues(otherFields, { unit: 'pallets', payer: 'recipient' })).toEqual([
+      { field: 'unit', code: 'tooLong', max: 5 }
     ])
   })
 })

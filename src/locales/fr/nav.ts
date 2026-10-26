@@ -74,5 +74,8 @@ export default {
   'nav.maintenancePlans': "Plans d'entretien",
   'nav.downtimes': 'Indisponibilités',
   'nav.stockItems': 'Stock de pièces',
-  'nav.purchaseRequests': "Demandes d'achat"
+  'nav.purchaseRequests': "Demandes d'achat",
+  'nav.planning': 'Planification',
+  'nav.planningReasons': 'Motifs',
+  'nav.planningSettings': 'Réglages planification'
 }
