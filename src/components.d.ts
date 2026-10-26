@@ -165,6 +165,7 @@ declare module 'vue' {
     FuelRefillCreateModal: typeof import('./modules/fleet/fuel-refills/pages/FuelRefillCreateModal.vue')['default']
     FuelRefillForm: typeof import('./modules/fleet/fuel-refills/components/FuelRefillForm.vue')['default']
     FuelRefillsList: typeof import('./modules/fleet/fuel-refills/pages/FuelRefillsList.vue')['default']
+    FuelToursPage: typeof import('./modules/planning/fuel-tours/pages/FuelToursPage.vue')['default']
     HistoryImportDialog: typeof import('./modules/maintenance/work-orders/components/HistoryImportDialog.vue')['default']
     HrDashboardPage: typeof import('./modules/hr/dashboard/pages/HrDashboardPage.vue')['default']
     InfractionCard: typeof import('./modules/fleet/infractions/pages/InfractionCard.vue')['default']

@@ -93,5 +93,8 @@ export default {
     'Prices each delivered line and marks the invoice: the amount and the reference no longer change.',
   'settings.moduleToggles.item.carrier-invoices.label': 'Carrier invoices',
   'settings.moduleToggles.item.carrier-invoices.description':
-    'One invoice can cover several orders. The agreed amount, net of withholdings, is frozen at validation.'
+    'One invoice can cover several orders. The agreed amount, net of withholdings, is frozen at validation.',
+  'settings.moduleToggles.item.fuel-distribution.label': 'Fuel distribution',
+  'settings.moduleToggles.item.fuel-distribution.description':
+    'Tours, compartments, pickup vouchers, BSL and delivery notes.'
 }

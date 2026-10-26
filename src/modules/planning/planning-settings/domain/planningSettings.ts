@@ -9,6 +9,9 @@ export type ExpiredDateMode = (typeof EXPIRED_DATE_MODES)[number]
 export const OVER_TOLERANCE_MODES = ['flag', 'block'] as const
 export type OverToleranceMode = (typeof OVER_TOLERANCE_MODES)[number]
 
+export const VOLUME15_METHODS = ['coefficient', 'typed'] as const
+export type Volume15Method = (typeof VOLUME15_METHODS)[number]
+
 export interface ScheduleSettings {
   /** Prefilled departure time of a new order; empty leaves it to the planner. */
   defaultDepartureTime: string
@@ -36,6 +39,8 @@ export interface RequestSettings {
 
 export interface QuantitySettings {
   overToleranceMode: OverToleranceMode
+  /** coefficient computes V15; typed keeps only the value entered on the measure. */
+  volume15Method: Volume15Method
 }
 
 export interface BillingSettings {
@@ -104,6 +109,12 @@ export const PLANNING_SETTING_FIELDS: Record<PlanningSettingsSection, readonly F
       kind: 'choice',
       optionsKey: 'overToleranceMode',
       values: OVER_TOLERANCE_MODES
+    },
+    {
+      key: 'volume15Method',
+      kind: 'choice',
+      optionsKey: 'volume15Method',
+      values: VOLUME15_METHODS
     }
   ],
   billing: [
@@ -133,7 +144,7 @@ export const DEFAULT_PLANNING_SETTINGS: PlanningSettings = {
     externalReferenceRequired: false,
     expiredDateMode: 'alert'
   },
-  quantities: { overToleranceMode: 'flag' },
+  quantities: { overToleranceMode: 'flag', volume15Method: 'coefficient' },
   billing: { defaultFreightPayer: 'orderer', carrierInvoiceToleranceAmount: 0 },
   closing: { requiredDocuments: 'loading_list,delivery_note' }
 }

@@ -93,5 +93,8 @@ export default {
     'Valorise chaque livraison livrée et marque la facture : le montant et la référence ne changent plus.',
   'settings.moduleToggles.item.carrier-invoices.label': 'Factures transporteurs',
   'settings.moduleToggles.item.carrier-invoices.description':
-    'Une facture peut couvrir plusieurs ordres. Le montant convenu, retenues déduites, est figé à la validation.'
+    'Une facture peut couvrir plusieurs ordres. Le montant convenu, retenues déduites, est figé à la validation.',
+  'settings.moduleToggles.item.fuel-distribution.label': 'Distribution de carburant',
+  'settings.moduleToggles.item.fuel-distribution.description':
+    'Tournées, compartiments, bon d’enlèvement, BSL et bons de livraison.'
 }

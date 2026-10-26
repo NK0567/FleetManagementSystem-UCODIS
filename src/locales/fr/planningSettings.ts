@@ -35,6 +35,7 @@ export default {
   'planning.settings.section.quantities.hint':
     'Ce qui se passe quand la quantité reçue sort de la tolérance. Les tolérances elles-mêmes se règlent par client et par produit.',
   'planning.settings.field.quantities.overToleranceMode': 'Hors tolérance',
+  'planning.settings.field.quantities.volume15Method': 'Volume à 15 °C',
 
   'planning.settings.section.billing': 'Facturation',
   'planning.settings.section.billing.hint':

@@ -72,6 +72,10 @@ export const PLANNING_OPTION_SETS: Record<string, Record<string, LocalizedText>>
     alert: { fr: 'Alerter seulement', en: 'Alert only' },
     block: { fr: "Bloquer l'exécution", en: 'Block execution' }
   },
+  volume15Method: {
+    coefficient: { fr: 'Coefficient de dilatation', en: 'Expansion coefficient' },
+    typed: { fr: 'Valeur saisie seule', en: 'Typed value only' }
+  },
   overToleranceMode: {
     flag: { fr: 'Signaler seulement', en: 'Flag only' },
     block: { fr: 'Bloquer la saisie', en: 'Block the entry' }

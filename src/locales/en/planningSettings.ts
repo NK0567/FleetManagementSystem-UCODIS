@@ -35,6 +35,7 @@ export default {
   'planning.settings.section.quantities.hint':
     'What happens when the received quantity falls outside the tolerance. The tolerances themselves are set per customer and per product.',
   'planning.settings.field.quantities.overToleranceMode': 'Outside tolerance',
+  'planning.settings.field.quantities.volume15Method': 'Volume at 15 °C',
 
   'planning.settings.section.billing': 'Billing',
   'planning.settings.section.billing.hint':

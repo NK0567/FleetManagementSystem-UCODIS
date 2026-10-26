@@ -90,5 +90,6 @@ export default {
   'nav.deliveryQuality': 'Qualité de livraison',
   'nav.customerBilling': 'Facturation client',
   'nav.carrierInvoices': 'Factures transporteurs',
+  'nav.fuelTours': 'Tournées carburant',
   'nav.deliveryRequests': 'Demandes de livraison'
 }

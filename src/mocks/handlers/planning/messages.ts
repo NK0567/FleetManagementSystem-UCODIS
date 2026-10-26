@@ -540,5 +540,65 @@ export const PLANNING_MESSAGES = {
   carrierInvoiceReason: {
     fr: 'Sans tarif, la validation exige un motif.',
     en: 'Without a tariff, validation requires a reason.'
+  },
+  fuelDepot: {
+    fr: 'Le dépôt doit être un site de type dépôt, actif.',
+    en: 'The depot must be an active depot site.'
+  },
+  fuelDate: {
+    fr: 'La date de la tournée ne peut pas être passée.',
+    en: 'The tour date cannot be in the past.'
+  },
+  fuelValidity: {
+    fr: 'La validité ne peut pas précéder la date de la tournée.',
+    en: 'The validity cannot be earlier than the tour date.'
+  },
+  fuelRequests: {
+    fr: 'Choisissez au moins une demande de carburant.',
+    en: 'Choose at least one fuel request.'
+  },
+  fuelRequest: {
+    fr: 'La demande doit porter sur un carburant encore à planifier.',
+    en: 'The request must be a fuel that is still to plan.'
+  },
+  fuelTourClosed: {
+    fr: 'Cette tournée est déjà validée.',
+    en: 'This tour is already validated.'
+  },
+  fuelPlan: {
+    fr: 'Le plan dépasse un compartiment, un produit ou la demande.',
+    en: 'The plan exceeds a compartment, a product or the request.'
+  },
+  fuelCompartment: {
+    fr: 'Ce véhicule n’a pas ce compartiment.',
+    en: 'This vehicle does not have that compartment.'
+  },
+  fuelLeftToLoad: {
+    fr: 'Il reste du carburant à charger.',
+    en: 'Some fuel is still left to load.'
+  },
+  fuelVoucher: {
+    fr: 'Le bon d’enlèvement n’est pas dans l’état attendu.',
+    en: 'The pickup voucher is not in the expected state.'
+  },
+  fuelBsl: {
+    fr: 'Ce numéro de BSL est déjà utilisé.',
+    en: 'This BSL number is already used.'
+  },
+  fuelEmpty: {
+    fr: 'Un compartiment vide exige un motif.',
+    en: 'An empty compartment requires a reason.'
+  },
+  fuelMeasure: {
+    fr: 'La mesure dépasse le volume prévu dans le compartiment.',
+    en: 'The measure exceeds the volume planned in the compartment.'
+  },
+  fuelBl: {
+    fr: 'Ce bon de livraison ne peut plus être modifié.',
+    en: 'This delivery note can no longer be changed.'
+  },
+  fuelDeviation: {
+    fr: 'La déviation exige le même produit, un volume couvert et une demande encore libre.',
+    en: 'A deviation needs the same product, a covered volume and a request that is still free.'
   }
 } satisfies Record<string, LocalizedText>
