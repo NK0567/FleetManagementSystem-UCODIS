@@ -1,108 +1,160 @@
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { apiErrorMessage } from '@/core/api/apiError'
-import httpClient from '@/core/api/httpClient'
-import type { SingleResponse } from '@/types/api-response.types'
-
-interface ProfileDocument {
-  no: string
-  name: string
-  number: string
-  expiryDate: string | null
-  state: string
-}
-
-interface ProfileBalance {
-  leaveTypeNo: string
-  leaveTypeName: string
-  remainingDays: number
-}
-
-interface LeaveTypeChoice {
-  no: string
-  name: string
-}
-
-export interface MyProfile {
-  employeeNo: string
-  fullName: string
-  phone: string
-  jobPositionName: string
-  siteName: string
-  mayDeclare: boolean
-  eligible: boolean
-  ineligibilityReasons: string
-  documentGaps: string
-  documents: ProfileDocument[]
-  leaveTypes: LeaveTypeChoice[]
-  balances: ProfileBalance[]
-}
+import {
+  Briefcase,
+  CalendarDays,
+  ChevronRight,
+  ClipboardCheck,
+  FileText,
+  MapPin,
+  Phone,
+  Route,
+  TriangleAlert
+} from '@lucide/vue'
+import { formatDate } from '@/utils/format'
+import MyLeaveBalances from '../components/MyLeaveBalances.vue'
+import { useMySpaceStore } from '../stores/mySpaceStore'
 
 const { t } = useI18n()
-const profile = ref<MyProfile | null>(null)
-const error = ref<string | null>(null)
+const store = useMySpaceStore()
 
-onMounted(async () => {
-  try {
-    profile.value = (await httpClient.get<SingleResponse<MyProfile>>('/me')).data.data
-  } catch (cause) {
-    error.value = apiErrorMessage(cause, t('selfService.profile.loadError'))
-  }
-})
+const initials = computed(() =>
+  (store.profile?.fullName ?? '')
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('')
+)
+
+const shortcuts = computed(() => [
+  { to: '/me/tour', icon: Route, label: t('selfService.tour.title') },
+  { to: '/me/checklist', icon: ClipboardCheck, label: t('selfService.checklist.title') },
+  { to: '/me/absences', icon: CalendarDays, label: t('selfService.profile.absences') }
+])
+
+onMounted(() => void store.fetchProfile())
 </script>
 
 <template>
-  <div class="h-full flex flex-col bg-white">
-    <header class="px-4 py-3 border-b border-border">
-      <h1 class="text-lg font-semibold">{{ t('selfService.profile.title') }}</h1>
+  <div class="px-2 py-4 space-y-4 w-full max-w-3xl mx-auto">
+    <header>
+      <h1 class="text-xl font-semibold text-card-foreground">
+        {{ t('selfService.profile.title') }}
+      </h1>
       <p class="text-sm text-muted-foreground">{{ t('selfService.profile.subtitle') }}</p>
     </header>
-    <FormAlerts class="mx-4 mt-3" :error="error" @clear:error="error = null" />
-    <div v-if="profile" class="p-4 space-y-4 text-sm">
-      <div>
-        <p class="font-semibold">{{ profile.fullName }}</p>
-        <p>{{ profile.jobPositionName }} · {{ profile.siteName }}</p>
-        <p>{{ profile.phone }}</p>
-        <p v-if="profile.eligible">{{ t('selfService.profile.eligible') }}</p>
-        <p v-else>
-          {{ t('selfService.profile.notEligible', { reasons: profile.ineligibilityReasons }) }}
-        </p>
-        <p v-if="profile.documentGaps">
-          {{ t('selfService.profile.gaps', { gaps: profile.documentGaps }) }}
-        </p>
-      </div>
-      <div>
-        <h2 class="font-semibold mb-1">{{ t('selfService.profile.documents') }}</h2>
-        <p v-if="profile.documents.length === 0">{{ t('selfService.profile.noDocument') }}</p>
-        <ul v-else class="space-y-1">
-          <li v-for="document in profile.documents" :key="document.no">
-            {{ document.name }} {{ document.number }}
-            <span v-if="document.expiryDate">· {{ document.expiryDate }}</span>
-            · {{ t(`selfService.document.${document.state}`) }}
+
+    <FormAlerts :error="store.error" @clear:error="store.clearError" />
+    <LoadingSpinner v-if="store.loading && !store.profile" :text="t('common.loading')" />
+
+    <template v-if="store.profile">
+      <section class="bg-card border border-border rounded p-4 space-y-3">
+        <div class="flex items-start gap-3">
+          <span
+            class="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center text-lg font-semibold shrink-0"
+          >
+            {{ initials }}
+          </span>
+          <div class="min-w-0 flex-1">
+            <p class="text-lg font-semibold text-card-foreground truncate">
+              {{ store.profile.fullName }}
+            </p>
+            <p class="text-xs text-muted-foreground">{{ store.profile.employeeNo }}</p>
+          </div>
+          <StatusPill
+            :label="
+              store.profile.eligible
+                ? t('selfService.profile.eligible')
+                : t('selfService.profile.notEligible')
+            "
+            :tone="store.profile.eligible ? 'success' : 'danger'"
+          />
+        </div>
+
+        <ul class="space-y-2 text-sm text-card-foreground">
+          <li v-if="store.profile.jobPositionName" class="flex items-center gap-2">
+            <Briefcase class="w-4 h-4 text-muted-foreground shrink-0" />
+            {{ store.profile.jobPositionName }}
+          </li>
+          <li v-if="store.profile.siteName" class="flex items-center gap-2">
+            <MapPin class="w-4 h-4 text-muted-foreground shrink-0" />
+            {{ store.profile.siteName }}
+          </li>
+          <li v-if="store.profile.phone" class="flex items-center gap-2">
+            <Phone class="w-4 h-4 text-muted-foreground shrink-0" />
+            <a :href="`tel:${store.profile.phone}`" class="text-primary hover:underline">
+              {{ store.profile.phone }}
+            </a>
           </li>
         </ul>
-      </div>
-      <div>
-        <h2 class="font-semibold mb-1">{{ t('selfService.profile.balances') }}</h2>
-        <ul class="space-y-1">
-          <li v-for="balance in profile.balances" :key="balance.leaveTypeNo">
-            {{
-              t(
-                'selfService.profile.balance',
-                { name: balance.leaveTypeName, count: balance.remainingDays },
-                balance.remainingDays
-              )
-            }}
+
+        <p
+          v-if="!store.profile.eligible && store.profile.ineligibilityReasons"
+          class="flex items-start gap-2 rounded bg-destructive/10 text-destructive px-3 py-2 text-sm"
+        >
+          <TriangleAlert class="w-4 h-4 mt-0.5 shrink-0" />
+          {{ t('selfService.profile.reasons', { reasons: store.profile.ineligibilityReasons }) }}
+        </p>
+        <p
+          v-if="store.profile.documentGaps"
+          class="flex items-start gap-2 rounded bg-warning-bg text-warning px-3 py-2 text-sm"
+        >
+          <TriangleAlert class="w-4 h-4 mt-0.5 shrink-0" />
+          {{ t('selfService.profile.gaps', { gaps: store.profile.documentGaps }) }}
+        </p>
+      </section>
+
+      <nav
+        class="grid grid-cols-1 sm:grid-cols-3 gap-3"
+        :aria-label="t('selfService.profile.shortcuts')"
+      >
+        <RouterLink
+          v-for="shortcut in shortcuts"
+          :key="shortcut.to"
+          :to="shortcut.to"
+          class="bg-card border border-border rounded p-4 min-h-14 flex items-center gap-3 hover:bg-accent transition"
+        >
+          <span class="p-2 rounded bg-primary/10 text-primary shrink-0">
+            <component :is="shortcut.icon" class="w-5 h-5" />
+          </span>
+          <span class="flex-1 text-sm font-medium text-card-foreground">{{ shortcut.label }}</span>
+          <ChevronRight class="w-4 h-4 text-muted-foreground shrink-0" />
+        </RouterLink>
+      </nav>
+
+      <section class="bg-card border border-border rounded">
+        <h2 class="px-4 py-3 border-b border-border text-sm font-semibold text-card-foreground">
+          {{ t('selfService.profile.documents') }}
+        </h2>
+        <p v-if="!store.profile.documents.length" class="p-4 text-sm text-muted-foreground">
+          {{ t('selfService.profile.noDocument') }}
+        </p>
+        <ul v-else class="divide-y divide-border">
+          <li
+            v-for="document in store.profile.documents"
+            :key="document.no"
+            class="px-4 py-3 flex items-center gap-3"
+          >
+            <FileText class="w-5 h-5 text-primary shrink-0" />
+            <div class="min-w-0 flex-1">
+              <p class="text-sm font-medium text-card-foreground truncate">{{ document.name }}</p>
+              <p class="text-xs text-muted-foreground truncate">
+                <span v-if="document.number">{{ document.number }} · </span>
+                {{
+                  document.expiryDate
+                    ? t('selfService.profile.expiresOn', { date: formatDate(document.expiryDate) })
+                    : t('selfService.profile.noExpiry')
+                }}
+              </p>
+            </div>
+            <DocumentStatePill :state="document.state" />
           </li>
         </ul>
-      </div>
-      <router-link class="text-primary underline block" to="/me/tour">
-        {{ t('selfService.tour.title') }}
-      </router-link>
-      <router-link class="text-primary underline" to="/me/absences">
-        {{ t('selfService.profile.absences') }}
-      </router-link>
-    </div>
+      </section>
+
+      <MyLeaveBalances :balances="store.profile.balances" />
+    </template>
   </div>
 </template>

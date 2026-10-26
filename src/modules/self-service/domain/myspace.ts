@@ -30,3 +30,8 @@ export function stopRank(city: string, stopCities: readonly string[]): number {
   const index = stopCities.findIndex((stopCity) => stopCity === city)
   return index === -1 ? stopCities.length : index
 }
+
+/** Half days count: anything but exactly zero or one day reads as plural. */
+export function dayPluralChoice(days: number): number {
+  return days === 0 || days === 1 ? days : 2
+}

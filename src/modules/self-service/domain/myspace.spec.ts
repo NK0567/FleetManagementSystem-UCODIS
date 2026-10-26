@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { mayDeclare, pickTour, stopRank } from './myspace'
+import { dayPluralChoice, mayDeclare, pickTour, stopRank } from './myspace'
 
 describe('mayDeclare', () => {
   it('lets the driver declare and keeps the assistant read-only', () => {
@@ -31,5 +31,11 @@ describe('stopRank', () => {
     const cities = ['Antananarivo', 'Moramanga', 'Toamasina']
     expect(stopRank('Toamasina', cities)).toBe(2)
     expect(stopRank('Fianarantsoa', cities)).toBe(3)
+  })
+})
+
+describe('dayPluralChoice', () => {
+  it('reads half days as plural', () => {
+    expect([0, 1, 0.5, 1.5, 12].map(dayPluralChoice)).toEqual([0, 1, 2, 2, 2])
   })
 })

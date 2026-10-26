@@ -1,2 +1,5 @@
 export { registerSelfServiceModule } from './selfService.module'
 export { mayDeclare, type FieldRole } from './domain/myspace'
+export { useMySpaceStore } from './stores/mySpaceStore'
+export { mySpaceService } from './services/mySpaceService'
+export type { MyProfileApi, MyTourApi } from './types/mySpace.types'
