@@ -137,6 +137,7 @@ export const FLEET_SETTING_FIELDS: Record<FleetSettingsSection, readonly Setting
     { key: 'weightRegulatory', kind: 'number', unit: 'points', min: 0, max: 100 },
     { key: 'weightDiscipline', kind: 'number', unit: 'points', min: 0, max: 100 },
     { key: 'weightEcoDriving', kind: 'number', unit: 'points', min: 0, max: 100 },
+    { key: 'weightDeliveryQuality', kind: 'number', unit: 'points', min: 0, max: 100 },
     { key: 'criticalPoints', kind: 'number', unit: 'points', min: 0, max: 100 },
     { key: 'majorPoints', kind: 'number', unit: 'points', min: 0, max: 100 },
     { key: 'minorPoints', kind: 'number', unit: 'points', min: 0, max: 100 },
@@ -144,6 +145,7 @@ export const FLEET_SETTING_FIELDS: Record<FleetSettingsSection, readonly Setting
     { key: 'stopOtherPoints', kind: 'number', unit: 'points', min: 0, max: 100 },
     { key: 'routeDeviationPoints', kind: 'number', unit: 'points', min: 0, max: 100 },
     { key: 'ecoEventPoints', kind: 'number', unit: 'points', min: 0, max: 100 },
+    { key: 'deliveryDisputePoints', kind: 'number', unit: 'points', min: 0, max: 100 },
     { key: 'missingDocumentCap', kind: 'number', unit: 'points', min: 0, max: 100 },
     { key: 'trainingThreshold', kind: 'number', unit: 'points', min: 0, max: 100 }
   ]
@@ -184,6 +186,7 @@ export const DEFAULT_FLEET_SETTINGS: FleetSettings = {
     weightRegulatory: 20,
     weightDiscipline: 15,
     weightEcoDriving: 10,
+    weightDeliveryQuality: 10,
     criticalPoints: 15,
     majorPoints: 8,
     minorPoints: 3,
@@ -191,6 +194,7 @@ export const DEFAULT_FLEET_SETTINGS: FleetSettings = {
     stopOtherPoints: 10,
     routeDeviationPoints: 20,
     ecoEventPoints: 5,
+    deliveryDisputePoints: 20,
     missingDocumentCap: 60,
     trainingThreshold: 70
   }

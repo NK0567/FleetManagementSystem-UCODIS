@@ -57,6 +57,8 @@ export default {
     'Aucune infraction saisie et retenue. | Une infraction saisie et retenue. | {n} infractions saisies et retenues.',
   'fleet.drivers.score.explain.ecoDriving':
     'Aucun ralenti prolongé ni conduite brusque relevé. | Un ralenti prolongé ou épisode de conduite brusque relevé. | {n} ralentis prolongés ou épisodes de conduite brusque relevés.',
+  'fleet.drivers.score.explain.deliveryQuality':
+    'Aucune livraison encore contestée. | Une livraison encore contestée. | {n} livraisons encore contestées.',
   'fleet.drivers.section.trips': 'Trajets',
   'fleet.drivers.section.fuel': 'Carburant',
   'fleet.drivers.section.compliance': 'Écarts, infractions et formations',

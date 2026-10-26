@@ -388,7 +388,8 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
     route: { fr: "Conformité d'itinéraire", en: 'Route compliance' },
     regulatory: { fr: 'Conformité réglementaire', en: 'Regulatory compliance' },
     discipline: { fr: 'Discipline', en: 'Discipline' },
-    ecoDriving: { fr: 'Écoconduite', en: 'Eco-driving' }
+    ecoDriving: { fr: 'Écoconduite', en: 'Eco-driving' },
+    deliveryQuality: { fr: 'Qualité de livraison', en: 'Delivery quality' }
   },
   liveSituation: {
     moving: { fr: 'En route', en: 'On the road' },

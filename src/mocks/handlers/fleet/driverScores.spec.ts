@@ -33,6 +33,19 @@ async function setScoreSettings(values: Record<string, number>) {
 }
 
 describe('driver scores', () => {
+  it('lowers the delivery quality mark for an open contestation on the driver’s trip', async () => {
+    const order = server.db.transportOrders.findOrFail('TR-2026-0003')
+    server.db.transportOrders.update(order.no, {
+      lines: order.lines.map((line) => ({
+        ...line,
+        declaredAt: '2026-09-04T08:00:00',
+        receptionContestedAt: '2026-09-04T11:00:00',
+        contestHandledAt: null
+      }))
+    })
+    expect(mark(await score('UCT-012'), 'deliveryQuality')).toBe(80)
+  })
+
   it('count only what was confirmed: unjustified deviations, upheld infractions', async () => {
     const jaona = await score('UCT-013')
     expect(jaona).toMatchObject({ score: 93, threshold: 70, belowThreshold: false })

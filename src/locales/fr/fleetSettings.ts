@@ -75,6 +75,7 @@ export default {
   'fleet.settings.field.driverScore.weightRegulatory': 'Poids : conformité réglementaire',
   'fleet.settings.field.driverScore.weightDiscipline': 'Poids : discipline',
   'fleet.settings.field.driverScore.weightEcoDriving': 'Poids : écoconduite',
+  'fleet.settings.field.driverScore.weightDeliveryQuality': 'Poids : qualité de livraison',
   'fleet.settings.field.driverScore.criticalPoints': 'Points par fait critique ou grave',
   'fleet.settings.field.driverScore.majorPoints': 'Points par fait majeur',
   'fleet.settings.field.driverScore.minorPoints': 'Points par fait mineur',
@@ -84,6 +85,7 @@ export default {
   'fleet.settings.field.driverScore.routeDeviationPoints':
     "Points par écart d'itinéraire non justifié",
   'fleet.settings.field.driverScore.ecoEventPoints': 'Points par ralenti ou conduite brusque',
+  'fleet.settings.field.driverScore.deliveryDisputePoints': 'Points par livraison encore contestée',
   'fleet.settings.field.driverScore.missingDocumentCap': 'Note plafond si un document manque',
   'fleet.settings.field.driverScore.trainingThreshold': 'Seuil de formation'
 }

@@ -13,6 +13,8 @@ const settings: DriverScoreSettings = {
   weightRegulatory: 20,
   weightDiscipline: 15,
   weightEcoDriving: 10,
+  weightDeliveryQuality: 10,
+  deliveryDisputePoints: 20,
   criticalPoints: 15,
   majorPoints: 8,
   minorPoints: 3,
@@ -29,7 +31,8 @@ const clean: ScoreFacts = {
   confirmedBehaviours: [],
   manualInfractions: [],
   ecoEvents: 0,
-  documentsCompliant: true
+  documentsCompliant: true,
+  openDisputes: 0
 }
 
 const markOf = (facts: ScoreFacts, family: string) =>
@@ -57,6 +60,7 @@ describe('familyScores', () => {
   it('caps the regulatory mark while a document is missing, and never goes below 0', () => {
     expect(markOf({ ...clean, documentsCompliant: false }, 'regulatory')).toBe(60)
     expect(markOf({ ...clean, ecoEvents: 30 }, 'ecoDriving')).toBe(0)
+    expect(markOf({ ...clean, openDisputes: 2 }, 'deliveryQuality')).toBe(60)
   })
 
   it('leaves out a family weighted 0 and shares its weight among the others', () => {

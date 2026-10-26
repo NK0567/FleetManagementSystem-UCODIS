@@ -1,4 +1,11 @@
-export const SCORE_FAMILIES = ['safety', 'route', 'regulatory', 'discipline', 'ecoDriving'] as const
+export const SCORE_FAMILIES = [
+  'safety',
+  'route',
+  'regulatory',
+  'discipline',
+  'ecoDriving',
+  'deliveryQuality'
+] as const
 export type ScoreFamily = (typeof SCORE_FAMILIES)[number]
 
 export type ScoreSeverity = 'minor' | 'major' | 'critical'
@@ -11,6 +18,7 @@ export interface DriverScoreSettings {
   weightRegulatory: number
   weightDiscipline: number
   weightEcoDriving: number
+  weightDeliveryQuality: number
   /** Points lost per confirmed behaviour or upheld infraction, by severity. */
   criticalPoints: number
   majorPoints: number
@@ -20,6 +28,8 @@ export interface DriverScoreSettings {
   stopOtherPoints: number
   routeDeviationPoints: number
   ecoEventPoints: number
+  /** Points lost per delivery whose contestation is still open. */
+  deliveryDisputePoints: number
   /** Highest regulatory mark while a mandatory document is missing or out of date. */
   missingDocumentCap: number
   /** Below this score, a training is called for. */
@@ -37,6 +47,8 @@ export interface ScoreFacts {
   /** Habits the units measure (idling, harsh driving) that no infraction took up. */
   ecoEvents: number
   documentsCompliant: boolean
+  /** Deliveries on the driver's trips whose contestation is still open. */
+  openDisputes: number
 }
 
 export interface FamilyScore {
@@ -52,7 +64,8 @@ const WEIGHT_OF: Record<ScoreFamily, keyof DriverScoreSettings> = {
   route: 'weightRoute',
   regulatory: 'weightRegulatory',
   discipline: 'weightDiscipline',
-  ecoDriving: 'weightEcoDriving'
+  ecoDriving: 'weightEcoDriving',
+  deliveryQuality: 'weightDeliveryQuality'
 }
 
 function severityPoints(severities: ScoreSeverity[], settings: DriverScoreSettings): number {
@@ -95,6 +108,10 @@ export function familyScores(facts: ScoreFacts, settings: DriverScoreSettings): 
     ecoDriving: {
       mark: mark(facts.ecoEvents * settings.ecoEventPoints),
       events: facts.ecoEvents
+    },
+    deliveryQuality: {
+      mark: mark(facts.openDisputes * settings.deliveryDisputePoints),
+      events: facts.openDisputes
     }
   }
   const active = SCORE_FAMILIES.filter((family) => settings[WEIGHT_OF[family]] > 0)

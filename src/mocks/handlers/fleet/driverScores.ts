@@ -44,13 +44,23 @@ function scoreFacts(db: MockDatabase, asOf: string): Map<string, ScoreFacts> {
       confirmedBehaviours: [],
       manualInfractions: [],
       ecoEvents: 0,
-      documentsCompliant: (compliance.get(employee.no) ?? []).length === 0
+      documentsCompliant: (compliance.get(employee.no) ?? []).length === 0,
+      openDisputes: 0
     })
   }
   const since = addDays(asOf, -fleetSettings(db).driverScore.periodDays)
   const inPeriod = (at: string) => at.slice(0, 10) > since && at.slice(0, 10) <= asOf
 
   const tripDrivers = new Map(db.trips.all().map((trip) => [trip.no, trip.driverNo]))
+  for (const order of db.transportOrders.all()) {
+    if (!order.tripNo) continue
+    const driverNo = tripDrivers.get(order.tripNo)
+    const own = driverNo ? facts.get(driverNo) : undefined
+    if (!own) continue
+    own.openDisputes += order.lines.filter(
+      (line) => line.receptionContestedAt && !line.contestHandledAt && inPeriod(line.receptionContestedAt)
+    ).length
+  }
   const deviationTypes = new Map(db.deviationTypes.all().map((type) => [type.no, type]))
   for (const deviation of routeDeviationsApi(db)) {
     const own = facts.get(tripDrivers.get(deviation.tripNo) ?? '')

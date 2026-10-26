@@ -11,6 +11,8 @@ export interface FleetStatusApi {
   state: FleetState
   stateGroup: FleetStateGroup
   tripNo: string | null
+  /** Transport orders carried by the trip. */
+  orderNos: string[]
   mission: string
   location: string
   immobilizationReason: string

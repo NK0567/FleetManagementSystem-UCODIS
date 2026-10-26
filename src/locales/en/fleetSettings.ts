@@ -73,6 +73,7 @@ export default {
   'fleet.settings.field.driverScore.weightRegulatory': 'Weight: regulatory compliance',
   'fleet.settings.field.driverScore.weightDiscipline': 'Weight: discipline',
   'fleet.settings.field.driverScore.weightEcoDriving': 'Weight: eco-driving',
+  'fleet.settings.field.driverScore.weightDeliveryQuality': 'Weight: delivery quality',
   'fleet.settings.field.driverScore.criticalPoints': 'Points per critical or serious fact',
   'fleet.settings.field.driverScore.majorPoints': 'Points per major fact',
   'fleet.settings.field.driverScore.minorPoints': 'Points per minor fact',
@@ -80,6 +81,7 @@ export default {
   'fleet.settings.field.driverScore.stopOtherPoints': 'Points per other unjustified stop or rest',
   'fleet.settings.field.driverScore.routeDeviationPoints': 'Points per unjustified route deviation',
   'fleet.settings.field.driverScore.ecoEventPoints': 'Points per idling or harsh driving',
+  'fleet.settings.field.driverScore.deliveryDisputePoints': 'Points per delivery still contested',
   'fleet.settings.field.driverScore.missingDocumentCap': 'Highest mark while a document is missing',
   'fleet.settings.field.driverScore.trainingThreshold': 'Training threshold'
 }

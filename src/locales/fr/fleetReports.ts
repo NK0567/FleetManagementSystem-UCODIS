@@ -16,6 +16,8 @@ export default {
   'fleet.reports.kind.audit': 'Audit',
 
   'fleet.reports.section.summary.indicators': 'Indicateurs de la période',
+  'fleet.reports.section.summary.orders': 'Ordres liés aux trajets',
+  'fleet.reports.col.orderNos': 'Ordres',
   'fleet.reports.section.fuel.byVehicle': 'Par véhicule',
   'fleet.reports.section.fuel.byMonth': 'Par mois',
   'fleet.reports.section.fuel.gaps': 'Écarts de consommation',

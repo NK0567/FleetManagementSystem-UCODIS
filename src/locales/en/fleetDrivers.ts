@@ -55,6 +55,8 @@ export default {
     'Mandatory documents in order. | A mandatory document is missing or out of date: the mark is capped. | Mandatory documents missing or out of date: the mark is capped.',
   'fleet.drivers.score.explain.discipline':
     'No infraction recorded and upheld. | One infraction recorded and upheld. | {n} infractions recorded and upheld.',
+  'fleet.drivers.score.explain.deliveryQuality':
+    'No delivery still contested. | One delivery still contested. | {n} deliveries still contested.',
   'fleet.drivers.score.explain.ecoDriving':
     'No long idling or harsh driving recorded. | One long idling or harsh driving episode recorded. | {n} long idlings or harsh driving episodes recorded.',
   'fleet.drivers.section.trips': 'Trips',

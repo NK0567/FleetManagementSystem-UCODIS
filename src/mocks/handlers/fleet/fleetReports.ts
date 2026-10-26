@@ -160,6 +160,23 @@ function summary(scope: ReportScope): ReportSection[] {
         { key: 'value', type: 'measure' }
       ],
       rows: indicators.map(([indicator, value, unit]) => ({ indicator, value, unit }))
+    },
+    {
+      key: 'orders',
+      columns: [
+        { key: 'tripNo', type: 'text' },
+        { key: 'orderNos', type: 'text' }
+      ],
+      rows: trips
+        .map((trip) => ({
+          tripNo: trip.no,
+          orderNos: scope.db.transportOrders
+            .all()
+            .filter((order) => order.tripNo === trip.no)
+            .map((order) => order.no)
+            .join(', ')
+        }))
+        .filter((row) => row.orderNos !== '')
     }
   ]
 }
