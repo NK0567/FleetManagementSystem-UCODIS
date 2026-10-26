@@ -920,6 +920,34 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/planning/customers/': RouteRecordInfo<
+      '/planning/customers/',
+      '/planning/customers',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/planning/customers/[id]': RouteRecordInfo<
+      '/planning/customers/[id]',
+      '/planning/customers/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/planning/delivery-points/': RouteRecordInfo<
+      '/planning/delivery-points/',
+      '/planning/delivery-points',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/planning/delivery-points/[id]': RouteRecordInfo<
+      '/planning/delivery-points/[id]',
+      '/planning/delivery-points/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/planning/reasons/': RouteRecordInfo<
       '/planning/reasons/',
       '/planning/reasons',
@@ -1976,6 +2004,38 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | never
+    }
+    'src/pages/planning/customers/index.vue': {
+      routes:
+        | '/planning/customers/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/planning/customers/[id].vue': {
+      routes:
+        | '/planning/customers/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/planning/delivery-points/index.vue': {
+      routes:
+        | '/planning/delivery-points/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/planning/delivery-points/[id].vue': {
+      routes:
+        | '/planning/delivery-points/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
     }
     'src/pages/planning/reasons/index.vue': {
       routes:

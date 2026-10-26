@@ -76,6 +76,8 @@ import maintenanceTyreLayouts from './maintenanceTyreLayouts'
 import maintenanceTyres from './maintenanceTyres'
 import planningReasons from './planningReasons'
 import planningSettings from './planningSettings'
+import planningCustomers from './planningCustomers'
+import planningDeliveryPoints from './planningDeliveryPoints'
 export default {
   ...common,
   ...auth,
@@ -153,5 +155,7 @@ export default {
   ...maintenanceTyreLayouts,
   ...maintenanceTyres,
   ...planningReasons,
-  ...planningSettings
+  ...planningSettings,
+  ...planningCustomers,
+  ...planningDeliveryPoints
 }

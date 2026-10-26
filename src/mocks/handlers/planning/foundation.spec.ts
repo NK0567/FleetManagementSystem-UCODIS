@@ -65,3 +65,66 @@ describe('planning reasons', () => {
     ).toBe(400)
   })
 })
+
+describe('customers and delivery points', () => {
+  it('keep names unique and channels backed by a contact', async () => {
+    const base = {
+      name: 'Score Ivandry',
+      isRecipient: true,
+      nature: 'external',
+      phone: '034 00 000 00',
+      notificationChannel: 'sms'
+    }
+    expect(
+      (await send('post', '/planning/customers', { ...base, name: ' shoprite MAHAJANGA ' })).status
+    ).toBe(409)
+    expect(
+      (await send('post', '/planning/customers', { ...base, isRecipient: false })).status
+    ).toBe(422)
+    expect(
+      (await send('post', '/planning/customers', { ...base, notificationChannel: 'email' })).status
+    ).toBe(422)
+    expect((await send('post', '/planning/customers', base, 'COM001')).status).toBe(403)
+    const created = await send('post', '/planning/customers', base)
+    expect(created.status).toBe(201)
+    expect(created.data.data).toMatchObject({ no: 'CLI-011', deliveryPointCount: 0 })
+  })
+
+  it('place points on a recipient and refuse to drop a customer that has some', async () => {
+    const point = { name: 'Quai 2', customerNo: 'CLI-004', latitude: -18.9, longitude: 47.5 }
+    expect((await send('post', '/planning/delivery-points', point)).status).toBe(422)
+    expect(
+      (
+        await send('post', '/planning/delivery-points', {
+          ...point,
+          customerNo: 'CLI-001',
+          latitude: null
+        })
+      ).status
+    ).toBe(400)
+    expect(
+      (
+        await send('post', '/planning/delivery-points', {
+          ...point,
+          customerNo: 'CLI-001',
+          acceptedVehicleTypeNos: ['ROCKET']
+        })
+      ).status
+    ).toBe(400)
+    const created = await send('post', '/planning/delivery-points', {
+      ...point,
+      customerNo: 'CLI-001'
+    })
+    expect(created.data.data).toMatchObject({
+      no: 'DP-014',
+      customerName: 'Jumbo Score Tanjombato'
+    })
+    expect((await send('delete', '/planning/customers/CLI-001')).status).toBe(409)
+    expect(
+      (await send('patch', '/planning/customers/CLI-001', { isRecipient: false, isOrderer: true }))
+        .status
+    ).toBe(409)
+    const customer = await call(server, 'get', '/planning/customers/CLI-010', { as: 'COM001' })
+    expect(customer.data.data).toMatchObject({ deliveryPointCount: 5 })
+  })
+})

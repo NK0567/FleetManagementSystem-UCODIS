@@ -5,6 +5,8 @@ const PLANNING_MENU_ORDER = 35
 
 export function registerPlanningModule(): void {
   registerFeatureRoutes({
+    CUSTOMER: { to: '/planning/customers', menuKey: 'customer' },
+    DELIVERYPOINT: { to: '/planning/delivery-points', menuKey: 'deliveryPoint' },
     PLANNINGREASON: { to: '/planning/reasons', menuKey: 'planningReason' },
     PLANNINGSETTINGS: { to: '/planning/settings', menuKey: 'planningSettings' }
   })
@@ -13,6 +15,12 @@ export function registerPlanningModule(): void {
     labelKey: 'nav.planning',
     order: PLANNING_MENU_ORDER,
     subItems: [
+      { labelKey: 'nav.customers', to: '/planning/customers', menuKey: 'customer' },
+      {
+        labelKey: 'nav.deliveryPoints',
+        to: '/planning/delivery-points',
+        menuKey: 'deliveryPoint'
+      },
       { labelKey: 'nav.planningReasons', to: '/planning/reasons', menuKey: 'planningReason' },
       { labelKey: 'nav.planningSettings', to: '/planning/settings', menuKey: 'planningSettings' }
     ]

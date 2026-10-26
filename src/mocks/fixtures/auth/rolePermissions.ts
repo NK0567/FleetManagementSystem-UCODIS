@@ -93,7 +93,7 @@ const MAINTENANCE_OPERATIONS = [
   'STOCKITEM',
   'RELIABILITY'
 ]
-const PLANNING_REFERENCE = ['PLANNINGREASON']
+const PLANNING_REFERENCE = ['PLANNINGREASON', 'CUSTOMER', 'DELIVERYPOINT']
 const PLANNING_OPERATIONS: string[] = []
 /** Planning rights replace the old role lists of the planning settings. */
 const PLANNING_MANAGEMENT: Record<string, Grant> = {
@@ -180,9 +180,9 @@ export const ROLE_PERMISSIONS: Record<UserProfileCode, Record<string, Grant>> = 
     ),
     ...grant(['DOWNTIME', 'PURCHASEREQUEST'], allRecords(['read', 'insert']))
   },
-  CUSTOMER_SERVICE: { ...backOffice, PLANNINGREASON: READ },
-  SALES: { ...backOffice, PLANNINGREASON: READ },
-  DEPOT: { ...backOffice, PLANNINGREASON: READ },
+  CUSTOMER_SERVICE: { ...backOffice, ...grant(PLANNING_REFERENCE, READ) },
+  SALES: { ...backOffice, ...grant(PLANNING_REFERENCE, READ) },
+  DEPOT: { ...backOffice, ...grant(PLANNING_REFERENCE, READ) },
   DRIVER: {},
   DRIVER_ASSISTANT: {}
 }

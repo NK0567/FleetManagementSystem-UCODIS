@@ -1,35 +1,34 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
-import { useI18n } from 'vue-i18n'
-import type { MapCircle, MapMarker } from '@/components/shared/MapView.vue'
+import type { MapCircle, MapMarker } from './MapView.vue'
 
 const props = defineProps<{
-  radiusM: number | null
   label: string
+  hint: string
+  /** Draws a circle of this radius around the point. */
+  radiusM?: number | null
   disabled?: boolean
 }>()
 const latitude = defineModel<number | null>('latitude', { required: true })
 const longitude = defineModel<number | null>('longitude', { required: true })
 
-const { t } = useI18n()
-
-const hasCenter = computed(() => latitude.value != null && longitude.value != null)
+const hasPoint = computed(() => latitude.value != null && longitude.value != null)
 
 const markers = computed<MapMarker[]>(() =>
-  hasCenter.value
+  hasPoint.value
     ? [
         {
-          id: 'site',
+          id: 'point',
           latitude: latitude.value ?? 0,
           longitude: longitude.value ?? 0,
-          label: props.label || t('fleet.sites.map.center')
+          label: props.label
         }
       ]
     : []
 )
 
 const circles = computed<MapCircle[]>(() =>
-  hasCenter.value && props.radiusM
+  hasPoint.value && props.radiusM
     ? [
         {
           id: 'zone',
@@ -43,7 +42,7 @@ const circles = computed<MapCircle[]>(() =>
 
 const COORDINATE_DECIMALS = 10_000
 
-function placeCenter(lat: number, lng: number) {
+function placePoint(lat: number, lng: number) {
   if (props.disabled) return
   latitude.value = Math.round(lat * COORDINATE_DECIMALS) / COORDINATE_DECIMALS
   longitude.value = Math.round(lng * COORDINATE_DECIMALS) / COORDINATE_DECIMALS
@@ -52,9 +51,7 @@ function placeCenter(lat: number, lng: number) {
 
 <template>
   <div class="space-y-1">
-    <MapView :markers="markers" :circles="circles" height="280px" @map-click="placeCenter" />
-    <p class="text-xs text-muted-foreground">
-      {{ disabled ? t('fleet.sites.map.readOnlyHint') : t('fleet.sites.map.editHint') }}
-    </p>
+    <MapView :markers="markers" :circles="circles" height="280px" @map-click="placePoint" />
+    <p class="text-xs text-muted-foreground">{{ hint }}</p>
   </div>
 </template>

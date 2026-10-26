@@ -68,11 +68,13 @@ import { tyreLayoutsCollection } from '../fixtures/maintenance/tyreLayouts'
 import { tyresCollection } from '../fixtures/maintenance/tyres'
 import { planningSettingsCollection } from '../fixtures/planning/settings'
 import { planningReasonsCollection } from '../fixtures/planning/planningReasons'
+import { customersCollection } from '../fixtures/planning/customers'
+import { deliveryPointsCollection } from '../fixtures/planning/deliveryPoints'
 import { createCollection, type CollectionContext } from './collection'
 import { clearStoredCollections } from './storage'
 
 /** Bump when fixtures change shape: every collection is then reseeded. */
-export const MOCK_SEED_VERSION = 33
+export const MOCK_SEED_VERSION = 34
 
 export function createDatabase(
   context: CollectionContext = {
@@ -149,7 +151,9 @@ export function createDatabase(
     mobileInterventions: createCollection(mobileInterventionsCollection, context),
     tyreLayouts: createCollection(tyreLayoutsCollection, context),
     tyres: createCollection(tyresCollection, context),
-    planningReasons: createCollection(planningReasonsCollection, context)
+    planningReasons: createCollection(planningReasonsCollection, context),
+    customers: createCollection(customersCollection, context),
+    deliveryPoints: createCollection(deliveryPointsCollection, context)
   }
 
   return {

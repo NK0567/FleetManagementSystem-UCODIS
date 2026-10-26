@@ -9,6 +9,15 @@ export const PLANNING_OPTION_SETS: Record<string, Record<string, LocalizedText>>
     nonconformity: { fr: 'Non-conformité au chargement', en: 'Loading nonconformity' },
     postponement: { fr: 'Report de livraison', en: 'Delivery postponed' }
   },
+  customerNature: {
+    external: { fr: 'Externe', en: 'External' },
+    internal: { fr: 'Service interne', en: 'Internal department' }
+  },
+  notificationChannel: {
+    sms: { fr: 'SMS', en: 'SMS' },
+    email: { fr: 'E-mail', en: 'E-mail' },
+    sms_email: { fr: 'SMS et e-mail', en: 'SMS and e-mail' }
+  },
   freightPayer: {
     orderer: { fr: "Donneur d'ordre", en: 'Orderer' },
     recipient: { fr: 'Destinataire', en: 'Recipient' }
