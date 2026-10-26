@@ -56,6 +56,7 @@ export const PLANNING_OPTION_SETS: Record<string, Record<string, LocalizedText>>
     draft: { fr: 'Brouillon', en: 'Draft' },
     planned: { fr: 'Planifié', en: 'Planned' },
     confirmed: { fr: 'Confirmé', en: 'Confirmed' },
+    ready: { fr: 'Prêt', en: 'Ready' },
     in_progress: { fr: 'En cours', en: 'In progress' },
     cancelled: { fr: 'Annulé', en: 'Cancelled' }
   },

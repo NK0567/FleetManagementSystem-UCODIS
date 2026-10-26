@@ -85,6 +85,7 @@ import planningTransportTariffs from './planningTransportTariffs'
 import planningDeliveryRequests from './planningDeliveryRequests'
 import planningTransportOrders from './planningTransportOrders'
 import planningConfirmations from './planningConfirmations'
+import planningLoading from './planningLoading'
 export default {
   ...common,
   ...auth,
@@ -171,5 +172,6 @@ export default {
   ...planningTransportTariffs,
   ...planningDeliveryRequests,
   ...planningTransportOrders,
-  ...planningConfirmations
+  ...planningConfirmations,
+  ...planningLoading
 }

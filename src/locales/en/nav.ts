@@ -86,5 +86,6 @@ export default {
   'nav.transportTariffs': 'Transport tariffs',
   'nav.transportOrders': 'Transport orders',
   'nav.customerConfirmations': 'Confirmations',
+  'nav.loading': 'Loading',
   'nav.deliveryRequests': 'Delivery requests'
 }

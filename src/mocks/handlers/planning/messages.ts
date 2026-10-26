@@ -276,5 +276,21 @@ export const PLANNING_MESSAGES = {
   confirmationNeedsOrderer: {
     fr: 'Cette ligne n’a pas de donneur d’ordre : elle ne peut pas revenir dans les demandes.',
     en: 'This line has no orderer: it cannot go back to the requests.'
+  },
+  loadingClosed: {
+    fr: 'Le chargement se déclare une fois l’ordre confirmé, et avant qu’il soit prêt.',
+    en: 'Loading is declared once the order is confirmed, and before it is ready.'
+  },
+  loadingQuantityMissing: {
+    fr: 'Indiquez la quantité chargée de chaque ligne encore dans la tournée.',
+    en: 'Give the loaded quantity of every line still in the tour.'
+  },
+  loadingLineOut: {
+    fr: 'Cette ligne n’est plus à charger.',
+    en: 'This line is no longer to be loaded.'
+  },
+  loadingNotDeclared: {
+    fr: 'L’entrepôt n’a pas encore déclaré le chargement de cette ligne.',
+    en: 'The warehouse has not declared the loading of this line yet.'
   }
 } satisfies Record<string, LocalizedText>

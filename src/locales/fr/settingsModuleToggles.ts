@@ -81,5 +81,8 @@ export default {
     'Les commerciaux saisissent ou importent les demandes de leurs clients. Sans ce module, le planificateur crée ses ordres directement.',
   'settings.moduleToggles.item.customer-confirmation.label': 'Confirmation des destinataires',
   'settings.moduleToggles.item.customer-confirmation.description':
-    'L’agent d’appels confirme les livraisons, note les indisponibilités et renvoie une ligne vers les demandes à planifier.'
+    'L’agent d’appels confirme les livraisons, note les indisponibilités et renvoie une ligne vers les demandes à planifier.',
+  'settings.moduleToggles.item.loading-control.label': 'Contrôle du chargement',
+  'settings.moduleToggles.item.loading-control.description':
+    'L’entrepôt déclare les quantités chargées et contrôle chaque ligne avant le départ.'
 }

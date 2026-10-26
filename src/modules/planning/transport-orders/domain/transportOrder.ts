@@ -4,6 +4,7 @@ export const TRANSPORT_ORDER_STATUSES = [
   'draft',
   'planned',
   'confirmed',
+  'ready',
   'in_progress',
   'cancelled'
 ] as const
@@ -32,6 +33,8 @@ export interface TransportOrderFacts {
   tripStatus: string | null
   /** Every line still in the tour has been confirmed. */
   linesConfirmed?: boolean
+  /** Every line still to load has been checked conforming. */
+  loadingReady?: boolean
 }
 
 /**
@@ -43,6 +46,7 @@ export function transportOrderStatus(order: TransportOrderFacts): TransportOrder
   if (order.means === 'fleet' && order.tripStatus && TRIP_DEPARTED.includes(order.tripStatus)) {
     return 'in_progress'
   }
+  if (order.means && order.linesConfirmed && order.loadingReady) return 'ready'
   if (order.means && order.linesConfirmed) return 'confirmed'
   if (order.means) return 'planned'
   return 'draft'

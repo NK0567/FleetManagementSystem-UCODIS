@@ -28,6 +28,7 @@ import {
   opaqueToken,
   trackingExpiry
 } from '@/modules/planning/customer-confirmations/domain/confirmation'
+import { loadingReady } from '@/modules/planning/loading/domain/loading'
 import { combinationCapacity, type LoadCapacity } from '@/modules/fleet/vehicles/domain/capacity'
 import { nowIsoDateTime, todayIso } from '@/utils/date'
 import type { MockDatabase } from '../../db/database'
@@ -155,7 +156,8 @@ export function transportOrdersApi(db: MockDatabase): TransportOrderApi[] {
         cancelledAt: row.cancelledAt,
         means: row.means,
         tripStatus: trip?.status ?? null,
-        linesConfirmed: linesConfirmed(row.lines)
+        linesConfirmed: linesConfirmed(row.lines),
+        loadingReady: loadingReady(row.lines)
       }),
       createdAt: row.createdAt,
       createdBy: row.createdBy,
@@ -187,7 +189,8 @@ function statusOf(db: MockDatabase, row: TransportOrderRow) {
     cancelledAt: row.cancelledAt,
     means: row.means,
     tripStatus: trip?.status ?? null,
-    linesConfirmed: linesConfirmed(row.lines)
+    linesConfirmed: linesConfirmed(row.lines),
+    loadingReady: loadingReady(row.lines)
   })
 }
 

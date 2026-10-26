@@ -10,6 +10,7 @@ const TONES: Record<TransportOrderStatus, StatusTone> = {
   draft: 'neutral',
   planned: 'info',
   confirmed: 'success',
+  ready: 'success',
   in_progress: 'warning',
   cancelled: 'danger'
 }

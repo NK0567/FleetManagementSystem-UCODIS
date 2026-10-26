@@ -969,6 +969,13 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/planning/loading/': RouteRecordInfo<
+      '/planning/loading/',
+      '/planning/loading',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/planning/product-compatibilities/': RouteRecordInfo<
       '/planning/product-compatibilities/',
       '/planning/product-compatibilities',
@@ -2151,6 +2158,14 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | 'id'
+    }
+    'src/pages/planning/loading/index.vue': {
+      routes:
+        | '/planning/loading/'
+      views:
+        | never
+      pathParamNames:
+        | never
     }
     'src/pages/planning/product-compatibilities/index.vue': {
       routes:

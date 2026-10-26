@@ -102,7 +102,7 @@ const PLANNING_REFERENCE = [
   'QUANTITYTOLERANCE',
   'TRANSPORTTARIFF'
 ]
-const PLANNING_OPERATIONS = ['DELIVERYREQUEST', 'TRANSPORTORDER', 'CUSTOMERCONFIRMATION']
+const PLANNING_OPERATIONS = ['DELIVERYREQUEST', 'TRANSPORTORDER', 'CUSTOMERCONFIRMATION', 'LOADING']
 /** Planning rights replace the old role lists of the planning settings. */
 const PLANNING_MANAGEMENT: Record<string, Grant> = {
   ...grant([...PLANNING_REFERENCE, ...PLANNING_OPERATIONS], FULL),
@@ -198,7 +198,11 @@ export const ROLE_PERMISSIONS: Record<UserProfileCode, Record<string, Grant>> = 
     ...grant(PLANNING_REFERENCE, READ),
     DELIVERYREQUEST: allRecords(['read', 'insert', 'update', 'export'])
   },
-  DEPOT: { ...backOffice, ...grant(PLANNING_REFERENCE, READ) },
+  DEPOT: {
+    ...backOffice,
+    ...grant(PLANNING_REFERENCE, READ),
+    LOADING: allRecords(['read', 'update', 'execute'])
+  },
   DRIVER: {},
   DRIVER_ASSISTANT: {}
 }

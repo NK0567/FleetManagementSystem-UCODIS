@@ -205,6 +205,7 @@ declare module 'vue' {
     LiveMapPage: typeof import('./modules/fleet/live-map/pages/LiveMapPage.vue')['default']
     LiveSituationPill: typeof import('./modules/fleet/live-map/components/LiveSituationPill.vue')['default']
     LoadingBar: typeof import('./components/shared/LoadingBar.vue')['default']
+    LoadingPage: typeof import('./modules/planning/loading/pages/LoadingPage.vue')['default']
     LoadingSpinner: typeof import('./components/shared/LoadingSpinner.vue')['default']
     LockableFieldWrap: typeof import('./components/ui/LockableFieldWrap.vue')['default']
     MaintenanceDashboardPage: typeof import('./modules/maintenance/reliability/pages/MaintenanceDashboardPage.vue')['default']

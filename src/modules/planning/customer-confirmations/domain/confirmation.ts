@@ -15,6 +15,11 @@ export interface LineFollowUp {
   replannedAt: string | null
   trackingToken: string | null
   trackingExpiresOn: string | null
+  loadedQuantity: number | null
+  conformingAt: string | null
+  nonconformityAt: string | null
+  nonconformityReasonNo: string | null
+  nonconformityComment: string
 }
 
 export function emptyFollowUp(): LineFollowUp {
@@ -29,31 +34,39 @@ export function emptyFollowUp(): LineFollowUp {
     plannerProposedOn: null,
     replannedAt: null,
     trackingToken: null,
-    trackingExpiresOn: null
+    trackingExpiresOn: null,
+    loadedQuantity: null,
+    conformingAt: null,
+    nonconformityAt: null,
+    nonconformityReasonNo: null,
+    nonconformityComment: ''
   }
 }
 
 export type ConfirmationState = 'pending' | 'confirmed' | 'unavailable' | 'replanned'
 
-/** A line left the tour: the recipient is unavailable, or the delivery was sent back to the pool. */
-export function lineOutOfTour(line: Pick<LineFollowUp, 'unavailableAt' | 'replannedAt'>): boolean {
-  return line.unavailableAt !== null || line.replannedAt !== null
+type TourLine = {
+  confirmedAt?: string | null
+  unavailableAt: string | null
+  replannedAt: string | null
+  nonconformityAt?: string | null
 }
 
-export function confirmationState(
-  line: Pick<LineFollowUp, 'confirmedAt' | 'unavailableAt' | 'replannedAt'>
-): ConfirmationState {
+/** A line left the tour: the recipient is unavailable, the goods failed the loading check, or the delivery was sent back to the pool. */
+export function lineOutOfTour(line: TourLine): boolean {
+  return line.unavailableAt !== null || line.replannedAt !== null || !!line.nonconformityAt
+}
+
+export function confirmationState(line: TourLine): ConfirmationState {
   if (line.replannedAt) return 'replanned'
-  if (line.unavailableAt) return 'unavailable'
+  if (line.unavailableAt || line.nonconformityAt) return 'unavailable'
   if (line.confirmedAt) return 'confirmed'
   return 'pending'
 }
 
 /** Nothing left in the tour still waits for a yes. An empty tour counts as confirmed. */
-export function linesConfirmed(
-  lines: readonly Pick<LineFollowUp, 'confirmedAt' | 'unavailableAt' | 'replannedAt'>[]
-): boolean {
-  return lines.filter((line) => !lineOutOfTour(line)).every((line) => line.confirmedAt !== null)
+export function linesConfirmed(lines: readonly TourLine[]): boolean {
+  return lines.filter((line) => !lineOutOfTour(line)).every((line) => line.confirmedAt != null)
 }
 
 /**
