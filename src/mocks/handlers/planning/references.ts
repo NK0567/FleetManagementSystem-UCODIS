@@ -10,6 +10,15 @@ export function planningReferenceData(db: MockDatabase): Record<string, Referenc
   })
   return {
     ordererCustomers: customers.filter((customer) => customer.isOrderer).map(asItem),
+    billableCustomers: customers.filter((customer) => customer.nature === 'external').map(asItem),
+    carriers: db.providers
+      .all()
+      .filter((provider) => provider.providerType === 'carrier')
+      .map((provider) => ({
+        code: provider.no,
+        description: provider.name,
+        active: provider.authorized
+      })),
     recipientCustomers: customers.filter((customer) => customer.isRecipient).map(asItem),
     products: db.products
       .all()

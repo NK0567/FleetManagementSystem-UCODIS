@@ -26,6 +26,16 @@ export const PLANNING_OPTION_SETS: Record<string, Record<string, LocalizedText>>
     percent: { fr: '% du chargé', en: '% of loaded' },
     quantity: { fr: 'Unités du produit', en: 'Product units' }
   },
+  tariffTarget: {
+    customer: { fr: 'Client', en: 'Customer' },
+    carrier: { fr: 'Transporteur', en: 'Carrier' }
+  },
+  tariffBasis: {
+    route_template: { fr: 'Forfait par itinéraire', en: 'Flat rate per route' },
+    distance: { fr: 'Au kilomètre', en: 'Per kilometre' },
+    weight: { fr: 'À la tonne', en: 'Per tonne' },
+    quantity: { fr: "À l'unité de produit", en: 'Per product unit' }
+  },
   freightPayer: {
     orderer: { fr: "Donneur d'ordre", en: 'Orderer' },
     recipient: { fr: 'Destinataire', en: 'Recipient' }

@@ -13,6 +13,7 @@ export function registerPlanningModule(): void {
       menuKey: 'productCompatibility'
     },
     QUANTITYTOLERANCE: { to: '/planning/quantity-tolerances', menuKey: 'quantityTolerance' },
+    TRANSPORTTARIFF: { to: '/planning/transport-tariffs', menuKey: 'transportTariff' },
     PLANNINGREASON: { to: '/planning/reasons', menuKey: 'planningReason' },
     PLANNINGSETTINGS: { to: '/planning/settings', menuKey: 'planningSettings' }
   })
@@ -28,6 +29,11 @@ export function registerPlanningModule(): void {
         menuKey: 'deliveryPoint'
       },
       { labelKey: 'nav.products', to: '/planning/products', menuKey: 'product' },
+      {
+        labelKey: 'nav.transportTariffs',
+        to: '/planning/transport-tariffs',
+        menuKey: 'transportTariff'
+      },
       {
         labelKey: 'nav.productCompatibilities',
         to: '/planning/product-compatibilities',

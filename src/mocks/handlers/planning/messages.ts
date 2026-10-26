@@ -61,6 +61,34 @@ export const PLANNING_MESSAGES = {
     fr: 'La tolérance de l’entreprise s’applique quand aucune autre ne convient : modifiez sa valeur.',
     en: 'The company tolerance applies when no other one fits: change its value instead.'
   },
+  tariff_partyMissing: {
+    fr: 'Choisissez le client ou le transporteur de ce tarif.',
+    en: 'Choose the customer or the carrier of this tariff.'
+  },
+  tariff_routeNeeded: {
+    fr: 'Un forfait s’applique à un itinéraire : choisissez-le.',
+    en: 'A flat rate applies to a route template: choose it.'
+  },
+  tariffInternalCustomer: {
+    fr: 'Un service interne ne se facture pas : les tarifs clients visent les clients externes.',
+    en: 'An internal department is not billed: customer tariffs are for outside customers.'
+  },
+  tariffNotCarrier: {
+    fr: 'Ce prestataire n’est pas un transporteur.',
+    en: 'This provider is not a carrier.'
+  },
+  tariffCarrierNotAuthorized: {
+    fr: 'Ce transporteur n’est plus autorisé : son tarif ne peut pas être actif.',
+    en: 'This carrier is no longer authorized: its tariff cannot be active.'
+  },
+  tariffRouteInactive: {
+    fr: 'Cet itinéraire est désactivé : choisissez un itinéraire actif.',
+    en: 'This route template is inactive: choose an active one.'
+  },
+  tariffExists: {
+    fr: 'Le tarif {no} couvre déjà ce cas : modifiez-le plutôt.',
+    en: 'Tariff {no} already covers this case: change it instead.'
+  },
   deliveryPointCustomerNotRecipient: {
     fr: 'Un point de livraison appartient à un client destinataire actif.',
     en: 'A delivery point belongs to an active recipient customer.'

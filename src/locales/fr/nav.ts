@@ -82,5 +82,6 @@ export default {
   'nav.deliveryPoints': 'Points de livraison',
   'nav.products': 'Produits',
   'nav.productCompatibilities': 'Compatibilité des produits',
-  'nav.quantityTolerances': 'Tolérances de quantité'
+  'nav.quantityTolerances': 'Tolérances de quantité',
+  'nav.transportTariffs': 'Tarifs de transport'
 }

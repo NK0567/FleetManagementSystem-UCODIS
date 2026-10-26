@@ -171,3 +171,32 @@ describe('compatibilities and tolerances', () => {
     expect(company.data.data).toMatchObject({ scopeLabel: 'Whole company' })
   })
 })
+
+describe('transport tariffs', () => {
+  const path = '/planning/transport-tariffs'
+  const tariff = { target: 'customer', customerNo: 'CLI-005', basis: 'distance', price: 4_000 }
+
+  it('bill outside customers and authorized carriers only', async () => {
+    expect((await send('post', path, { ...tariff, customerNo: 'CLI-004' })).status).toBe(422)
+    const carrier = { target: 'carrier', carrierNo: 'PRS-001', basis: 'distance', price: 3_000 }
+    expect((await send('post', path, carrier)).status).toBe(422)
+    expect((await send('post', path, { ...tariff, customerNo: null })).status).toBe(422)
+    expect((await send('post', path, tariff, 'DIR001')).status).toBe(403)
+    const created = await send('post', path, { ...tariff, carrierNo: 'PRS-016' })
+    expect(created.data.data).toMatchObject({
+      no: 'TRF-007',
+      carrierNo: null,
+      partyName: 'Jumbo Score Antananarivo'
+    })
+  })
+
+  it('tie a flat rate to an active route and refuse the same grid twice', async () => {
+    const flat = { ...tariff, basis: 'route_template' }
+    expect((await send('post', path, flat)).status).toBe(422)
+    const created = await send('post', path, { ...flat, routeTemplateNo: 'TNR-MJN' })
+    expect(created.data.data).toMatchObject({ routeTemplateName: 'Antananarivo → Mahajanga (RN4)' })
+    expect((await send('post', path, { ...flat, routeTemplateNo: 'TNR-MJN' })).status).toBe(409)
+    const perKm = await send('patch', `${path}/TRF-003`, { basis: 'route_template' })
+    expect(perKm.status).toBe(422)
+  })
+})

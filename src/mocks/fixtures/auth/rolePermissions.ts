@@ -99,7 +99,8 @@ const PLANNING_REFERENCE = [
   'DELIVERYPOINT',
   'PRODUCT',
   'PRODUCTCOMPATIBILITY',
-  'QUANTITYTOLERANCE'
+  'QUANTITYTOLERANCE',
+  'TRANSPORTTARIFF'
 ]
 const PLANNING_OPERATIONS: string[] = []
 /** Planning rights replace the old role lists of the planning settings. */

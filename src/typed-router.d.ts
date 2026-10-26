@@ -1011,6 +1011,20 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/planning/transport-tariffs/': RouteRecordInfo<
+      '/planning/transport-tariffs/',
+      '/planning/transport-tariffs',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/planning/transport-tariffs/[id]': RouteRecordInfo<
+      '/planning/transport-tariffs/[id]',
+      '/planning/transport-tariffs/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/settings/module-toggles': RouteRecordInfo<
       '/settings/module-toggles',
       '/settings/module-toggles',
@@ -2150,6 +2164,22 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | never
+    }
+    'src/pages/planning/transport-tariffs/index.vue': {
+      routes:
+        | '/planning/transport-tariffs/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/planning/transport-tariffs/[id].vue': {
+      routes:
+        | '/planning/transport-tariffs/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
     }
     'src/pages/settings/module-toggles.vue': {
       routes:
