@@ -1,5 +1,7 @@
 export default {
   'nav.search': 'Rechercher',
+  'nav.layoutSidebar': 'Afficher le menu en barre latérale',
+  'nav.layoutTopbar': 'Afficher le menu en haut',
   'nav.settings': 'Paramètres',
   'nav.hr': 'Ressources humaines',
   'nav.employeeCategories': "Catégories d'employés",

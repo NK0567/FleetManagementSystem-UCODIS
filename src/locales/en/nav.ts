@@ -1,5 +1,7 @@
 export default {
   'nav.search': 'Search',
+  'nav.layoutSidebar': 'Show the menu as a sidebar',
+  'nav.layoutTopbar': 'Show the menu at the top',
   'nav.settings': 'Settings',
   'nav.hr': 'Human resources',
   'nav.employeeCategories': 'Employee categories',

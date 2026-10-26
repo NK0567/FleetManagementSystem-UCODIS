@@ -1,13 +1,31 @@
+<script lang="ts" setup>
+import { useNavLayout } from '@/composables/useNavLayout'
+
+const { mode } = useNavLayout()
+</script>
+
 <template>
   <div class="h-screen bg-white flex flex-col overflow-hidden">
     <TopBar />
 
     <div id="below-topbar" class="flex-1 flex flex-col min-h-0 relative">
-      <NavBar />
+      <template v-if="mode === 'sidebar'">
+        <ModuleBar class="hidden md:block" />
+        <NavBar class="md:hidden" />
+      </template>
+      <NavBar v-else />
 
-      <main class="flex-1 overflow-y-auto px-0 sm:px-2 md:px-4 lg:px-14 xl:px-16">
-        <slot />
-      </main>
+      <div class="flex-1 flex min-h-0">
+        <SideBar v-if="mode === 'sidebar'" class="hidden md:block" />
+        <main
+          class="flex-1 min-w-0 overflow-y-auto"
+          :class="
+            mode === 'sidebar' ? 'px-0 sm:px-2 md:px-4' : 'px-0 sm:px-2 md:px-4 lg:px-14 xl:px-16'
+          "
+        >
+          <slot />
+        </main>
+      </div>
     </div>
 
     <CommandPalette />

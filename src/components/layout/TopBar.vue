@@ -1,9 +1,10 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Globe, LogOut, Search, Settings } from '@lucide/vue'
+import { Globe, LogOut, PanelLeft, PanelTop, Search, Settings } from '@lucide/vue'
 import { useAuth } from '@/composables/useAuth'
 import { useCommandPalette } from '@/composables/useCommandPalette'
+import { useNavLayout } from '@/composables/useNavLayout'
 import { usePermissions } from '@/composables/usePermissions'
 import { appConfig } from '@/core/app/appConfig'
 import { SUPPORTED_LOCALES, type SupportedLocale } from '@/core/i18n'
@@ -16,6 +17,7 @@ const { t, locale } = useI18n()
 const userStore = useUserStore()
 const { logout } = useAuth()
 const { open: openPalette } = useCommandPalette()
+const { mode: navMode, toggleMode: toggleNavMode } = useNavLayout()
 const { canRead: canOpenSettings } = usePermissions('MODULETOGGLE')
 
 const userName = computed(() => userStore.user?.name ?? '')
@@ -73,6 +75,15 @@ function onConfirmLogout() {
           >
             Ctrl+K
           </span>
+        </button>
+        <button
+          type="button"
+          class="p-2 hover:bg-white/10 rounded"
+          :title="t(navMode === 'topbar' ? 'nav.layoutSidebar' : 'nav.layoutTopbar')"
+          @click="toggleNavMode"
+        >
+          <PanelLeft v-if="navMode === 'topbar'" class="w-4 h-4" />
+          <PanelTop v-else class="w-4 h-4" />
         </button>
         <RouterLink
           v-if="canOpenSettings"
