@@ -84,5 +84,6 @@ export default {
   'nav.productCompatibilities': 'Product compatibility',
   'nav.quantityTolerances': 'Quantity tolerances',
   'nav.transportTariffs': 'Transport tariffs',
+  'nav.transportOrders': 'Transport orders',
   'nav.deliveryRequests': 'Delivery requests'
 }

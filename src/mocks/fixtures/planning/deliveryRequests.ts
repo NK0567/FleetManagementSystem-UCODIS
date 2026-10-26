@@ -5,6 +5,43 @@ import type {
 import type { CollectionDefinition, MockRow } from '../../db/collection'
 import { seedAudit } from '../seedAudit'
 
+function request(
+  no: string,
+  ordererNo: string,
+  deliveryPointNo: string,
+  productNo: string,
+  quantity: number,
+  weightKg: number | null,
+  desiredDate: string,
+  transportOrderNo: string
+): Omit<DeliveryRequestRow, keyof typeof seedAudit> {
+  return {
+    no,
+    ordererNo,
+    deliveryPointNo,
+    productNo,
+    quantity,
+    weightKg,
+    volumeM3: null,
+    desiredDate,
+    validUntil: null,
+    externalReference: '',
+    freightPayer: 'orderer',
+    comment: '',
+    origin: 'planner',
+    parentNo: null,
+    rejectionReasonNo: null,
+    rejectionComment: '',
+    rejectedAt: null,
+    rejectedBy: null,
+    cancellationReasonNo: null,
+    cancellationComment: '',
+    cancelledAt: null,
+    cancelledBy: null,
+    transportOrderNo
+  }
+}
+
 export interface DeliveryRequestRow extends MockRow {
   ordererNo: string
   deliveryPointNo: string
@@ -181,7 +218,12 @@ const SEED: Omit<DeliveryRequestRow, keyof typeof seedAudit>[] = [
     cancelledAt: null,
     cancelledBy: null,
     transportOrderNo: null
-  }
+  },
+  request('DL-2026-0007', 'CLI-002', 'DP-002', 'PRD-001', 200, 3000, '2026-09-09', 'TR-2026-0001'),
+  request('DL-2026-0008', 'CLI-004', 'DP-001', 'PRD-002', 80, 1200, '2026-09-09', 'TR-2026-0001'),
+  request('DL-2026-0009', 'CLI-004', 'DP-003', 'PRD-003', 400, 6000, '2026-09-04', 'TR-2026-0002'),
+  request('DL-2026-0010', 'CLI-002', 'DP-006', 'PRD-001', 150, 2200, '2026-09-04', 'TR-2026-0003'),
+  request('DL-2026-0011', 'CLI-002', 'DP-005', 'PRD-004', 60, 600, '2026-09-08', 'TR-2026-0004')
 ]
 
 export const deliveryRequestsCollection: CollectionDefinition<DeliveryRequestRow> = {

@@ -152,5 +152,105 @@ export const PLANNING_MESSAGES = {
   deliveryPointCustomerNotRecipient: {
     fr: 'Un point de livraison appartient à un client destinataire actif.',
     en: 'A delivery point belongs to an active recipient customer.'
+  },
+  orderDepartureInPast: {
+    fr: 'Le départ ne peut pas être à une date passée.',
+    en: 'The departure cannot be on a past date.'
+  },
+  orderRouteInactive: {
+    fr: 'Cet itinéraire est désactivé.',
+    en: 'This route template is inactive.'
+  },
+  orderNotEditable: {
+    fr: 'Cet ordre ne se modifie plus.',
+    en: 'This order can no longer be changed.'
+  },
+  orderScheduleLocked: {
+    fr: 'L’itinéraire et l’heure se lisent sur le trajet une fois l’ordre planifié.',
+    en: 'Once the order is planned, the route and the time are read from the trip.'
+  },
+  orderLinesLocked: {
+    fr: 'Les lignes ne se modifient qu’en brouillon ou une fois planifié, avant le départ.',
+    en: 'Lines can be changed only while the order is a draft or planned, before departure.'
+  },
+  orderNotPlannable: {
+    fr: 'Seul un brouillon se planifie.',
+    en: 'Only a draft can be planned.'
+  },
+  orderNotCancellable: {
+    fr: 'Cet ordre ne peut plus être annulé.',
+    en: 'This order can no longer be cancelled.'
+  },
+  orderNeedsLines: {
+    fr: 'Ajoutez au moins une ligne avant de planifier.',
+    en: 'Add at least one line before planning.'
+  },
+  orderScheduleMissing: {
+    fr: 'Indiquez l’itinéraire et l’heure de départ avant de planifier.',
+    en: 'Set the route and the departure time before planning.'
+  },
+  orderRequestTaken: {
+    fr: 'La demande {no} est déjà sur un ordre.',
+    en: 'Request {no} is already on an order.'
+  },
+  orderRequestUnavailable: {
+    fr: 'La demande {no} n’est pas à planifier.',
+    en: 'Request {no} is not waiting to be planned.'
+  },
+  orderRequestExpired: {
+    fr: 'La demande {no} est expirée : le réglage interdit de la planifier.',
+    en: 'Request {no} has expired: the setting forbids planning it.'
+  },
+  orderRequestRepeated: {
+    fr: 'La demande {no} est citée deux fois.',
+    en: 'Request {no} is listed twice.'
+  },
+  orderPointInactive: {
+    fr: 'Ce point de livraison est désactivé.',
+    en: 'This delivery point is inactive.'
+  },
+  orderProductInactive: {
+    fr: 'Ce produit est désactivé.',
+    en: 'This product is inactive.'
+  },
+  orderNothingToCarry: {
+    fr: 'Cet ensemble ne porte rien : un tracteur a besoin de sa remorque, un porteur de sa propre charge.',
+    en: 'This combination carries nothing: a tractor needs its trailer, a rigid truck its own load.'
+  },
+  orderPayloadUnknown: {
+    fr: 'La charge utile de cet ensemble n’est pas connue.',
+    en: 'The payload of this combination is not known.'
+  },
+  orderOverWeight: {
+    fr: 'Le poids ({weightKg} kg) dépasse la charge utile ({maxLoadKg} kg).',
+    en: 'The weight ({weightKg} kg) exceeds the payload ({maxLoadKg} kg).'
+  },
+  orderOverFuel: {
+    fr: 'Le carburant ({liters} L) dépasse la citerne ({capacityL} L).',
+    en: 'The fuel ({liters} L) exceeds the tank ({capacityL} L).'
+  },
+  orderPumpRequired: {
+    fr: 'Le point {point} exige une pompe, et cet ensemble n’en a pas.',
+    en: 'Delivery point {point} requires a pump, and this combination has none.'
+  },
+  orderVehicleTypeRefused: {
+    fr: 'Le point {point} n’accepte pas ce type de véhicule.',
+    en: 'Delivery point {point} does not accept this vehicle type.'
+  },
+  orderProductsIncompatible: {
+    fr: '{productA} et {productB} ne voyagent pas ensemble.',
+    en: '{productA} and {productB} do not travel together.'
+  },
+  orderTripNotPlanned: {
+    fr: 'Seul un trajet encore planifié peut recevoir un ordre.',
+    en: 'Only a trip that is still planned can take an order.'
+  },
+  orderNotCarrier: {
+    fr: 'Ce prestataire n’est pas un transporteur.',
+    en: 'This provider is not a carrier.'
+  },
+  orderCarrierNotAuthorized: {
+    fr: 'Ce transporteur n’est plus autorisé.',
+    en: 'This carrier is no longer authorized.'
   }
 } satisfies Record<string, LocalizedText>

@@ -102,7 +102,7 @@ const PLANNING_REFERENCE = [
   'QUANTITYTOLERANCE',
   'TRANSPORTTARIFF'
 ]
-const PLANNING_OPERATIONS = ['DELIVERYREQUEST']
+const PLANNING_OPERATIONS = ['DELIVERYREQUEST', 'TRANSPORTORDER']
 /** Planning rights replace the old role lists of the planning settings. */
 const PLANNING_MANAGEMENT: Record<string, Grant> = {
   ...grant([...PLANNING_REFERENCE, ...PLANNING_OPERATIONS], FULL),

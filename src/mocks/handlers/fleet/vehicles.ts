@@ -64,7 +64,7 @@ type EditableFields = Omit<
   | 'photoFileNos'
 >
 
-function equipmentApi(db: MockDatabase): VehicleEquipmentApi[] {
+export function equipmentApi(db: MockDatabase): VehicleEquipmentApi[] {
   const types = new Map(db.equipmentTypes.all().map((type) => [type.no, type]))
   const today = todayIso()
   return db.vehicleEquipment.all().map((item) => {

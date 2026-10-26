@@ -1,11 +1,13 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import { Upload } from '@lucide/vue'
+import { Upload, Truck } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
 import { useListCellFormatters } from '@/composables/useListCellFormatters'
 import { useListPage } from '@/composables/useListPage'
+import { usePermissions } from '@/composables/usePermissions'
 import { getListCellDisplay } from '@/utils/listCellDisplay'
 import { deliveryRequestApi } from '../api/deliveryRequestApi'
 import { useDeliveryRequestStore } from '../stores/deliveryRequestStore'
@@ -15,9 +17,18 @@ import type {
 } from '../types/deliveryRequest.types'
 
 const { t } = useI18n()
+const router = useRouter()
 const importing = ref(false)
+const creatingOrder = ref(false)
+const { canInsert: canCreateOrder } = usePermissions('TRANSPORTORDER')
 const store = useDeliveryRequestStore()
 const { formatDateTime, formatDate, optionLabel, formatDecimal } = useListCellFormatters()
+
+function onOrderCreated(no: string) {
+  creatingOrder.value = false
+  void store.fetchItems(store.pagination.page, store.pagination.limit)
+  void router.push({ path: '/planning/transport-orders', query: { no } })
+}
 
 const searchColumnOptions = computed<{ value: DeliveryRequestSearchColumn; label: string }[]>(
   () => [
@@ -232,8 +243,18 @@ const {
             :reset-preferences="resetPreferences"
           />
         </template>
-        <template v-if="canInsert" #extra-actions>
+        <template v-if="canInsert || canCreateOrder" #extra-actions>
           <button
+            v-if="canCreateOrder"
+            type="button"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
+            @click="creatingOrder = true"
+          >
+            <Truck class="w-4 h-4 text-primary" />
+            {{ t('planning.transportOrders.action.createFromRequests') }}
+          </button>
+          <button
+            v-if="canInsert"
             type="button"
             class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
             @click="importing = true"
@@ -351,6 +372,11 @@ const {
       :open="importing"
       @close="importing = false"
       @imported="store.fetchItems(store.pagination.page, store.pagination.limit)"
+    />
+    <CreateTransportOrderDialog
+      :open="creatingOrder"
+      @close="creatingOrder = false"
+      @created="onOrderCreated"
     />
   </div>
 </template>

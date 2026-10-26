@@ -143,6 +143,51 @@ function assertAllowed(trip: TripRow, action: TripAction): void {
   if (!canApply(action, trip.status)) throw conflict(FLEET_MESSAGES.tripActionNotAllowed)
 }
 
+export interface TripPlan {
+  routeTemplateNo: string
+  vehicleNo: string
+  trailerNo: string | null
+  driverNo: string
+  plannedDeparture: string
+}
+
+/** A new planned trip: the route's stops, its reference distance, and means free over the window. */
+export function buildTrip(
+  db: MockDatabase,
+  plan: TripPlan,
+  language: MockLanguage
+): Omit<TripRow, 'createdAt' | 'createdBy' | 'modifiedAt' | 'modifiedBy'> {
+  const route = db.routeTemplates.findOrFail(plan.routeTemplateNo)
+  if (!route.active) throw unprocessable(FLEET_MESSAGES.inactiveRoute)
+  if (plan.plannedDeparture.slice(0, 10) < todayIso()) {
+    throw unprocessable(FLEET_MESSAGES.departureInPast)
+  }
+  const full: Plan = {
+    ...plan,
+    stops: route.stops.map((stop) => ({ ...stop, passedAt: null }))
+  }
+  assertResourcesFree(db, full, language)
+  return {
+    no: nextNo(
+      db.trips.all().map((trip) => trip.no),
+      'TRP-',
+      5
+    ),
+    ...full,
+    referenceKm: route.estimatedDistanceKm,
+    actualDeparture: null,
+    actualArrival: null,
+    startOdometerKm: null,
+    endOdometerKm: null,
+    status: 'planned',
+    cancelReason: '',
+    closedAt: null,
+    closedBy: null,
+    cancelledAt: null,
+    cancelledBy: null
+  }
+}
+
 export function registerTripsHandlers(router: MockRouter, db: MockDatabase): void {
   registerCrudResource(router, {
     basePath: BASE_PATH,
@@ -151,40 +196,18 @@ export function registerTripsHandlers(router: MockRouter, db: MockDatabase): voi
     list: () => tripsApi(db),
     searchColumns: ['no', 'vehiclePlate', 'driverName'],
     optionFields: { status: 'tripStatus' },
-    create: (input, request) => {
-      const route = db.routeTemplates.findOrFail(
-        requireReference(db.routeTemplates, input, 'routeTemplateNo')
-      )
-      if (!route.active) throw unprocessable(FLEET_MESSAGES.inactiveRoute)
-      const plan: Plan = {
-        routeTemplateNo: route.no,
-        vehicleNo: requireReference(db.vehicles, input, 'vehicleNo'),
-        trailerNo: optionalReference(db.vehicles, input, 'trailerNo'),
-        driverNo: requireReference(db.employees, input, 'driverNo'),
-        plannedDeparture: readDeparture(input),
-        stops: route.stops.map((stop) => ({ ...stop, passedAt: null }))
-      }
-      assertResourcesFree(db, plan, request.language)
-      return {
-        no: nextNo(
-          db.trips.all().map((trip) => trip.no),
-          'TRP-',
-          5
-        ),
-        ...plan,
-        referenceKm: route.estimatedDistanceKm,
-        actualDeparture: null,
-        actualArrival: null,
-        startOdometerKm: null,
-        endOdometerKm: null,
-        status: 'planned' as const,
-        cancelReason: '',
-        closedAt: null,
-        closedBy: null,
-        cancelledAt: null,
-        cancelledBy: null
-      }
-    },
+    create: (input, request) =>
+      buildTrip(
+        db,
+        {
+          routeTemplateNo: requireReference(db.routeTemplates, input, 'routeTemplateNo'),
+          vehicleNo: requireReference(db.vehicles, input, 'vehicleNo'),
+          trailerNo: optionalReference(db.vehicles, input, 'trailerNo'),
+          driverNo: requireReference(db.employees, input, 'driverNo'),
+          plannedDeparture: readDeparture(input)
+        },
+        request.language
+      ),
     update: (existing, input, request) => {
       assertAllowed(existing, 'edit')
       const plan: Plan = {

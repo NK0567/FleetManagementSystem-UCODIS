@@ -9,6 +9,7 @@ import { registerProductCompatibilitiesHandlers } from './productCompatibilities
 import { registerQuantityTolerancesHandlers } from './quantityTolerances'
 import { registerTransportTariffsHandlers } from './transportTariffs'
 import { registerDeliveryRequestsHandlers } from './deliveryRequests'
+import { registerTransportOrdersHandlers } from './transportOrders'
 
 export function registerPlanningHandlers(router: MockRouter, db: MockDatabase): void {
   registerPlanningSettingsHandlers(router, db)
@@ -20,4 +21,5 @@ export function registerPlanningHandlers(router: MockRouter, db: MockDatabase): 
   registerQuantityTolerancesHandlers(router, db)
   registerTransportTariffsHandlers(router, db)
   registerDeliveryRequestsHandlers(router, db)
+  registerTransportOrdersHandlers(router, db)
 }

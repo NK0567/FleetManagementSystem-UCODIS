@@ -32,7 +32,7 @@ describe('delivery requests', () => {
     const created = await send('post', path, { ...entry, externalReference: 'LPA-7000' })
     expect(created.status).toBe(201)
     expect(created.data.data).toMatchObject({
-      no: 'DL-2026-0007',
+      no: 'DL-2026-0012',
       status: 'pending',
       origin: 'request',
       freightPayer: 'orderer',
@@ -85,18 +85,18 @@ describe('delivery requests', () => {
     expect((await send('post', split, { quantity: 420 }, 'FLT001')).status).toBe(422)
     const part = await send('post', split, { quantity: 105 }, 'FLT001')
     expect(part.data.data).toMatchObject({
-      no: 'DL-2026-0007',
+      no: 'DL-2026-0012',
       parentNo: 'DL-2026-0001',
       quantity: 105,
       weightKg: 1575,
       externalReference: ''
     })
     expect(await get('DL-2026-0001')).toMatchObject({ quantity: 315, weightKg: 4725 })
-    const merge = `${path}/DL-2026-0007/merge`
+    const merge = `${path}/DL-2026-0012/merge`
     expect((await send('post', merge, {}, 'FLT001')).status).toBe(409)
     const merged = await send('post', `${path}/DL-2026-0001/merge`, {}, 'FLT001')
     expect(merged.data.data).toMatchObject({ quantity: 420, weightKg: 6300 })
-    expect((await call(server, 'get', `${path}/DL-2026-0007`, { as: 'FLT001' })).status).toBe(404)
+    expect((await call(server, 'get', `${path}/DL-2026-0012`, { as: 'FLT001' })).status).toBe(404)
   })
 
   it('import each line through the same checks as an entry', async () => {
@@ -110,6 +110,6 @@ describe('delivery requests', () => {
       rejected: number
     }
     expect(report).toMatchObject({ created: 1, rejected: 2 })
-    expect((await get('DL-2026-0007')).origin).toBe('import')
+    expect((await get('DL-2026-0012')).origin).toBe('import')
   })
 })

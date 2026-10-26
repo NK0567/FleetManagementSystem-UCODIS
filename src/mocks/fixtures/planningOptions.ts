@@ -52,6 +52,16 @@ export const PLANNING_OPTION_SETS: Record<string, Record<string, LocalizedText>>
     orderer: { fr: "Donneur d'ordre", en: 'Orderer' },
     recipient: { fr: 'Destinataire', en: 'Recipient' }
   },
+  transportOrderStatus: {
+    draft: { fr: 'Brouillon', en: 'Draft' },
+    planned: { fr: 'Planifié', en: 'Planned' },
+    in_progress: { fr: 'En cours', en: 'In progress' },
+    cancelled: { fr: 'Annulé', en: 'Cancelled' }
+  },
+  transportMeans: {
+    fleet: { fr: 'Flotte', en: 'Fleet' },
+    carrier: { fr: 'Transporteur', en: 'Carrier' }
+  },
   expiredDateMode: {
     alert: { fr: 'Alerter seulement', en: 'Alert only' },
     block: { fr: "Bloquer l'exécution", en: 'Block execution' }
