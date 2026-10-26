@@ -7,5 +7,9 @@ export default {
   'planning.loading.loadError': 'Le chargement n’a pas pu être affiché.',
   'planning.loading.saveError': 'Le chargement n’a pas pu être enregistré.',
   'planning.loading.declare': 'Déclarer',
-  'planning.loading.conform': 'Conforme'
+  'planning.loading.conform': 'Conforme',
+  'planning.loading.returnsTitle': 'Retours à réceptionner',
+  'planning.loading.returnsEmpty': 'Aucun retour en attente.',
+  'planning.loading.returns.receive': 'Réceptionner',
+  'planning.loading.returns.nonconform': 'Non conforme'
 }

@@ -57,6 +57,8 @@ export default {
   'planning.transportOrders.action.cancel': 'Cancel the order',
   'planning.transportOrders.action.depart': 'Carrier departure',
   'planning.transportOrders.action.declare': 'Declare the delivery',
+  'planning.transportOrders.action.handBack': 'Hand back to the warehouse',
+  'planning.transportOrders.action.remainder': 'Replan the remainder',
   'planning.transportOrders.action.createFromRequests': 'Create an order',
   'planning.transportOrders.cancelledBecause': 'Cancelled: {reason}',
 
@@ -96,6 +98,13 @@ export default {
   'planning.transportOrders.history.departed': 'Departure',
   'planning.transportOrders.history.declared': 'Delivery declared',
   'planning.transportOrders.history.refused': 'Refused',
+  'planning.transportOrders.history.reception_confirmed': 'Reception confirmed',
+  'planning.transportOrders.history.reception_contested': 'Reception contested',
+  'planning.transportOrders.history.contest_handled': 'Contestation handled',
+  'planning.transportOrders.history.satisfaction': 'Satisfaction',
+  'planning.transportOrders.history.handed_back': 'Goods handed back',
+  'planning.transportOrders.history.return_received': 'Return received',
+  'planning.transportOrders.history.remainder': 'Remainder replanned',
   'planning.transportOrders.history.cancelled': 'Cancelled',
 
   'planning.transportOrders.createDialog.title': 'Create an order from requests',

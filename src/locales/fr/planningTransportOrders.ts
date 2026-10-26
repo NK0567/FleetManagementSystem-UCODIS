@@ -57,6 +57,8 @@ export default {
   'planning.transportOrders.action.cancel': "Annuler l'ordre",
   'planning.transportOrders.action.depart': 'Départ du transporteur',
   'planning.transportOrders.action.declare': 'Déclarer la livraison',
+  'planning.transportOrders.action.handBack': 'Remettre à l’entrepôt',
+  'planning.transportOrders.action.remainder': 'Replanifier le reliquat',
   'planning.transportOrders.action.createFromRequests': 'Créer un ordre',
   'planning.transportOrders.cancelledBecause': 'Annulé : {reason}',
 
@@ -97,6 +99,13 @@ export default {
   'planning.transportOrders.history.departed': 'Départ',
   'planning.transportOrders.history.declared': 'Livraison déclarée',
   'planning.transportOrders.history.refused': 'Refus',
+  'planning.transportOrders.history.reception_confirmed': 'Réception confirmée',
+  'planning.transportOrders.history.reception_contested': 'Réception contestée',
+  'planning.transportOrders.history.contest_handled': 'Contestation traitée',
+  'planning.transportOrders.history.satisfaction': 'Satisfaction',
+  'planning.transportOrders.history.handed_back': 'Marchandise remise',
+  'planning.transportOrders.history.return_received': 'Retour réceptionné',
+  'planning.transportOrders.history.remainder': 'Reliquat replanifié',
   'planning.transportOrders.history.cancelled': 'Annulé',
 
   'planning.transportOrders.createDialog.title': 'Créer un ordre depuis des demandes',

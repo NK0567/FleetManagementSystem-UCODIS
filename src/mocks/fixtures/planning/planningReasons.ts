@@ -122,6 +122,24 @@ const SEED: Omit<PlanningReasonRow, keyof typeof seedAudit>[] = [
     name: 'Fin de journée atteinte',
     kind: 'postponement',
     active: true
+  },
+  {
+    no: 'CST-QUANTITY',
+    name: 'Quantité reçue contestée',
+    kind: 'contestation',
+    active: true
+  },
+  {
+    no: 'CST-DAMAGE',
+    name: "Marchandise abîmée à l'arrivée",
+    kind: 'contestation',
+    active: true
+  },
+  {
+    no: 'CST-MISSING',
+    name: 'Produit manquant',
+    kind: 'contestation',
+    active: true
   }
 ]
 

@@ -22,6 +22,10 @@ export const transportOrderApi = {
   depart: (no: string) => httpClient.post(`${resourcePath(basePath, no)}/depart`, {}),
   declareLine: (no: string, lineNo: number, receivedQuantity: number) =>
     httpClient.post(`${resourcePath(basePath, no)}/lines/${lineNo}/declare`, { receivedQuantity }),
+  handBack: (no: string, lineNo: number) =>
+    httpClient.post(`${resourcePath(basePath, no)}/lines/${lineNo}/hand-back`, {}),
+  remainder: (no: string, lineNo: number, date: string) =>
+    httpClient.post(`${resourcePath(basePath, no)}/lines/${lineNo}/remainder`, { date }),
   availability: (from: string, to: string) =>
     httpClient.get<SingleResponse<AvailabilityApi>>('/fleet/availability', {
       params: { from, to }

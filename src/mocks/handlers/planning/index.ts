@@ -13,6 +13,7 @@ import { registerTransportOrdersHandlers } from './transportOrders'
 import { registerConfirmationsHandlers } from './confirmations'
 import { registerLoadingHandlers } from './loading'
 import { registerExecutionHandlers } from './execution'
+import { registerReceptionHandlers } from './reception'
 
 export function registerPlanningHandlers(router: MockRouter, db: MockDatabase): void {
   registerPlanningSettingsHandlers(router, db)
@@ -28,4 +29,5 @@ export function registerPlanningHandlers(router: MockRouter, db: MockDatabase): 
   registerConfirmationsHandlers(router, db)
   registerLoadingHandlers(router, db)
   registerExecutionHandlers(router, db)
+  registerReceptionHandlers(router, db)
 }

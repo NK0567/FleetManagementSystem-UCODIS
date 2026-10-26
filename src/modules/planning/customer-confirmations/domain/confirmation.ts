@@ -33,6 +33,23 @@ export interface LineFollowUp {
   postponementReasonNo: string | null
   postponementComment: string
   returnedAt: string | null
+  receptionConfirmedAt: string | null
+  receptionConfirmedBy: string
+  receptionContestedAt: string | null
+  contestReasonNo: string | null
+  contestComment: string
+  contestHandledAt: string | null
+  contestHandledBy: string | null
+  contestNote: string
+  contestHandlingReasonNo: string | null
+  satisfactionScore: number | null
+  satisfactionComment: string
+  handedBackAt: string | null
+  warehouseReceivedAt: string | null
+  warehouseConforming: boolean | null
+  returnNonconformityReasonNo: string | null
+  remainderAt: string | null
+  remainderRequestNo: string | null
 }
 
 export function emptyFollowUp(): LineFollowUp {
@@ -65,7 +82,24 @@ export function emptyFollowUp(): LineFollowUp {
     postponedAt: null,
     postponementReasonNo: null,
     postponementComment: '',
-    returnedAt: null
+    returnedAt: null,
+    receptionConfirmedAt: null,
+    receptionConfirmedBy: '',
+    receptionContestedAt: null,
+    contestReasonNo: null,
+    contestComment: '',
+    contestHandledAt: null,
+    contestHandledBy: null,
+    contestNote: '',
+    contestHandlingReasonNo: null,
+    satisfactionScore: null,
+    satisfactionComment: '',
+    handedBackAt: null,
+    warehouseReceivedAt: null,
+    warehouseConforming: null,
+    returnNonconformityReasonNo: null,
+    remainderAt: null,
+    remainderRequestNo: null
   }
 }
 

@@ -7,5 +7,9 @@ export default {
   'planning.loading.loadError': 'Loading could not be displayed.',
   'planning.loading.saveError': 'Loading could not be saved.',
   'planning.loading.declare': 'Declare',
-  'planning.loading.conform': 'Conforming'
+  'planning.loading.conform': 'Conforming',
+  'planning.loading.returnsTitle': 'Returns to receive',
+  'planning.loading.returnsEmpty': 'No return is waiting.',
+  'planning.loading.returns.receive': 'Receive',
+  'planning.loading.returns.nonconform': 'Nonconforming'
 }

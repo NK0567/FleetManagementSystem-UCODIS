@@ -4,7 +4,8 @@ export const PLANNING_REASON_KINDS = [
   'delivery_refusal',
   'unavailability',
   'nonconformity',
-  'postponement'
+  'postponement',
+  'contestation'
 ] as const
 export type PlanningReasonKind = (typeof PLANNING_REASON_KINDS)[number]
 

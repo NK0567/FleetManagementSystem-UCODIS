@@ -25,6 +25,13 @@ export const TRANSPORT_ORDER_EVENT_KINDS = [
   'refused',
   'postponed',
   'qualified',
+  'reception_confirmed',
+  'reception_contested',
+  'contest_handled',
+  'satisfaction',
+  'handed_back',
+  'return_received',
+  'remainder',
   'cancelled'
 ] as const
 export type TransportOrderEventKind = (typeof TRANSPORT_ORDER_EVENT_KINDS)[number]

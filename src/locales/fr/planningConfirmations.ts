@@ -20,5 +20,17 @@ export default {
   'planning.confirmations.action.unavailable': 'Indisponible',
   'planning.confirmations.action.clientDate': 'Date du client',
   'planning.confirmations.action.propose': 'Proposer une date',
-  'planning.confirmations.action.accept': 'Accepter la date'
+  'planning.confirmations.action.accept': 'Accepter la date',
+  'planning.confirmations.receptionTitle': 'Réception des livraisons',
+  'planning.confirmations.receptionSubtitle':
+    'Après la déclaration, le destinataire confirme ou conteste. Une contestation se traite, puis la satisfaction se note de 1 à 5.',
+  'planning.confirmations.receptionEmpty': 'Aucune réception en attente.',
+  'planning.confirmations.reception.signer': 'Nom du signataire',
+  'planning.confirmations.reception.confirm': 'Confirmer la réception',
+  'planning.confirmations.reception.contest': 'Contester',
+  'planning.confirmations.reception.handle': 'Traiter',
+  'planning.confirmations.reception.score': 'Satisfaction',
+  'planning.confirmations.reception.state.awaiting': 'À confirmer',
+  'planning.confirmations.reception.state.contested': 'Contestée',
+  'planning.confirmations.reception.state.to_rate': 'À noter'
 }

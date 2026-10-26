@@ -20,5 +20,17 @@ export default {
   'planning.confirmations.action.unavailable': 'Unavailable',
   'planning.confirmations.action.clientDate': 'Client date',
   'planning.confirmations.action.propose': 'Propose a date',
-  'planning.confirmations.action.accept': 'Accept the date'
+  'planning.confirmations.action.accept': 'Accept the date',
+  'planning.confirmations.receptionTitle': 'Delivery reception',
+  'planning.confirmations.receptionSubtitle':
+    'After the declaration, the recipient confirms or contests. A contestation is handled, then satisfaction is scored from 1 to 5.',
+  'planning.confirmations.receptionEmpty': 'No reception is waiting.',
+  'planning.confirmations.reception.signer': 'Signer name',
+  'planning.confirmations.reception.confirm': 'Confirm reception',
+  'planning.confirmations.reception.contest': 'Contest',
+  'planning.confirmations.reception.handle': 'Handle',
+  'planning.confirmations.reception.score': 'Satisfaction',
+  'planning.confirmations.reception.state.awaiting': 'To confirm',
+  'planning.confirmations.reception.state.contested': 'Contested',
+  'planning.confirmations.reception.state.to_rate': 'To score'
 }

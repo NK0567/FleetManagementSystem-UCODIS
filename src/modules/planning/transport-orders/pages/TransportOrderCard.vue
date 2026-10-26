@@ -71,6 +71,8 @@ const planning = ref(false)
 const editingLines = ref(false)
 const declaring = ref(false)
 const cancelling = ref(false)
+const remaining = ref(false)
+const remainderDate = ref('')
 const receivedQuantity = ref<number | null>(null)
 const dialogError = ref<string | null>(null)
 
@@ -143,6 +145,52 @@ async function declare() {
     await transportOrderApi.declareLine(current.no, line.lineNo, receivedQuantity.value)
     await refresh(await transportOrderService.getById(current.no))
     declaring.value = false
+  } catch (error) {
+    saveError.value = apiErrorMessage(error, t('planning.transportOrders.saveError'))
+  } finally {
+    acting.value = false
+  }
+}
+
+function lineToHandBack() {
+  return item.value?.lines.find(
+    (line) => (line.refusalAt || line.returnedAt) && !line.handedBackAt && !line.warehouseReceivedAt
+  )
+}
+
+function lineToReplan() {
+  return item.value?.lines.find((line) => {
+    if (!line.declaredAt || line.receivedQuantity === null || line.remainderAt) return false
+    return (line.loadedQuantity ?? line.quantity) - line.receivedQuantity > 0
+  })
+}
+
+async function handBack() {
+  const current = item.value
+  const line = lineToHandBack()
+  if (!current || !line) return
+  acting.value = true
+  saveError.value = null
+  try {
+    await transportOrderApi.handBack(current.no, line.lineNo)
+    await refresh(await transportOrderService.getById(current.no))
+  } catch (error) {
+    saveError.value = apiErrorMessage(error, t('planning.transportOrders.saveError'))
+  } finally {
+    acting.value = false
+  }
+}
+
+async function saveRemainder() {
+  const current = item.value
+  const line = lineToReplan()
+  if (!current || !line || !remainderDate.value) return
+  acting.value = true
+  saveError.value = null
+  try {
+    await transportOrderApi.remainder(current.no, line.lineNo, remainderDate.value)
+    await refresh(await transportOrderService.getById(current.no))
+    remaining.value = false
   } catch (error) {
     saveError.value = apiErrorMessage(error, t('planning.transportOrders.saveError'))
   } finally {
@@ -235,6 +283,24 @@ const buttonClass =
         @click="((receivedQuantity = null), (declaring = true))"
       >
         {{ t('planning.transportOrders.action.declare') }}
+      </button>
+      <button
+        v-if="canExecute && lineToHandBack()"
+        type="button"
+        :class="buttonClass"
+        :disabled="acting"
+        @click="handBack"
+      >
+        {{ t('planning.transportOrders.action.handBack') }}
+      </button>
+      <button
+        v-if="canExecute && lineToReplan()"
+        type="button"
+        :class="buttonClass"
+        :disabled="acting"
+        @click="((remainderDate = ''), (remaining = true))"
+      >
+        {{ t('planning.transportOrders.action.remainder') }}
       </button>
       <button
         v-if="canExecute && canCancel(item.status)"
@@ -425,6 +491,16 @@ const buttonClass =
     @cancel="declaring = false"
   >
     <FormInput v-model="receivedQuantity" type="number" :min="0" />
+  </ConfirmDialog>
+  <ConfirmDialog
+    :open="remaining"
+    :title="t('planning.transportOrders.action.remainder')"
+    :confirm-disabled="!remainderDate"
+    :loading="acting"
+    @confirm="saveRemainder"
+    @cancel="remaining = false"
+  >
+    <FormInput v-model="remainderDate" type="date" />
   </ConfirmDialog>
   <PlanningReasonDialog
     :open="cancelling"

@@ -324,5 +324,49 @@ export const PLANNING_MESSAGES = {
   executionGapKind: {
     fr: 'Un gain qualifie un écart positif, une perte un écart négatif.',
     en: 'A gain qualifies a positive gap, a loss a negative one.'
+  },
+  receptionNotDeclared: {
+    fr: 'La réception se confirme une fois la livraison déclarée.',
+    en: 'Reception is confirmed once the delivery has been declared.'
+  },
+  receptionAlreadyConfirmed: {
+    fr: 'Cette réception est déjà confirmée.',
+    en: 'This reception is already confirmed.'
+  },
+  receptionContested: {
+    fr: 'Cette livraison est contestée : elle se traite, elle ne se confirme plus.',
+    en: 'This delivery is contested: it is handled, it is no longer confirmed.'
+  },
+  receptionNotContested: {
+    fr: 'Cette livraison n’est pas contestée.',
+    en: 'This delivery is not contested.'
+  },
+  receptionContestHandled: {
+    fr: 'Cette contestation est déjà traitée.',
+    en: 'This contestation is already handled.'
+  },
+  receptionSatisfactionClosed: {
+    fr: 'La satisfaction se note une fois, après la confirmation de réception.',
+    en: 'Satisfaction is recorded once, after the reception is confirmed.'
+  },
+  receptionNothingToReturn: {
+    fr: 'Cette ligne n’a pas de marchandise à rapporter.',
+    en: 'This line has no goods to bring back.'
+  },
+  receptionAlreadyHandedBack: {
+    fr: 'Cette marchandise est déjà remise.',
+    en: 'These goods have already been handed back.'
+  },
+  receptionReturnReceived: {
+    fr: 'Ce retour est déjà réceptionné.',
+    en: 'This return has already been received.'
+  },
+  receptionNoRemainder: {
+    fr: 'Cette livraison n’a pas de quantité restante à replanifier.',
+    en: 'This delivery has no remaining quantity to replan.'
+  },
+  receptionRemainderTaken: {
+    fr: 'Ce reliquat est déjà replanifié.',
+    en: 'This remainder is already replanned.'
   }
 } satisfies Record<string, LocalizedText>

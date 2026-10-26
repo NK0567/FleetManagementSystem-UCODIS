@@ -17,12 +17,17 @@ export interface TransportOrderLineApi {
   unit: string
   quantity: number
   weightKg: number | null
+  loadedQuantity: number | null
   declaredAt: string | null
   receivedQuantity: number | null
   quantityGap: number | null
   refusalAt: string | null
   postponedAt: string | null
   returnedAt: string | null
+  handedBackAt: string | null
+  warehouseReceivedAt: string | null
+  remainderAt: string | null
+  remainderRequestNo: string | null
 }
 
 /** What the lines action accepts: a request, or a line keyed without one. */
