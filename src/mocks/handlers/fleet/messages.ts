@@ -61,6 +61,10 @@ export const FLEET_MESSAGES = {
     fr: "Le départ prévu ne peut pas être avant aujourd'hui.",
     en: 'The planned departure cannot be before today.'
   },
+  windowEndBeforeStart: {
+    fr: 'La fin de la période précède son début.',
+    en: 'The end of the period comes before its start.'
+  },
   resourceBusy: {
     fr: '{name} est déjà pris sur un autre trajet à ce moment-là ({no}).',
     en: '{name} is already taken by another trip at that time ({no}).'

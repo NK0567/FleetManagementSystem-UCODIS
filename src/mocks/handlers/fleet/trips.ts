@@ -1,11 +1,9 @@
 import { driverIneligibility } from '@/modules/fleet/drivers/domain/driver'
 import { plannedSchedule } from '@/modules/fleet/route-templates/domain/routeTemplate'
 import {
-  OPEN_TRIP_STATUSES,
   canApply,
   kmGapPercent,
   nextStopIndex,
-  windowsOverlap,
   type TripAction
 } from '@/modules/fleet/trips/domain/trip'
 import type { TripApi } from '@/modules/fleet/trips/types/trip.types'
@@ -22,10 +20,11 @@ import type { MockRouter } from '../../http/router'
 import { sessionUser, type MockRequest } from '../../http/types'
 import type { MockLanguage } from '../../i18n'
 import { assertUsable } from './couplings'
+import { createAvailability, unavailabilityError } from './availability'
 import { driverFacts, ineligibilityText } from './drivers'
 import { employeeNames, vehiclePlates } from './links'
 import { FLEET_MESSAGES } from './messages'
-import { plannedArrival, tripWindow } from './tripIndex'
+import { plannedArrival } from './tripIndex'
 import { tripAuthorization } from './departureAuthorizations'
 import { deviationsToQualify } from './routeDeviations'
 import { disabledFeatures } from '../../auth/permissions'
@@ -119,7 +118,7 @@ type Plan = Pick<
 
 /**
  * Checks that the vehicle, the trailer and the driver can take the trip: fit for the road,
- * eligible, and not held by another open trip at the same time.
+ * eligible over the whole trip, and not held by another open trip at the same time.
  */
 function assertResourcesFree(
   db: MockDatabase,
@@ -127,44 +126,17 @@ function assertResourcesFree(
   language: MockLanguage,
   except?: string
 ): void {
-  const vehicle = db.vehicles.findOrFail(plan.vehicleNo)
-  if (!db.vehicleTypes.findOrFail(vehicle.vehicleTypeNo).motorized) {
-    throw unprocessable(FLEET_MESSAGES.notMotorized)
-  }
-  assertUsable(db, vehicle, language)
-  if (plan.trailerNo) {
-    const trailer = db.vehicles.findOrFail(plan.trailerNo)
-    if (db.vehicleTypes.findOrFail(trailer.vehicleTypeNo).couplingRole !== 'towed') {
-      throw unprocessable(FLEET_MESSAGES.notATrailer)
-    }
-    assertUsable(db, trailer, language)
-  }
-  const employee = db.employees.findOrFail(plan.driverNo)
-  const reasons = driverIneligibility(driverFacts(db, employee, plan.plannedDeparture.slice(0, 10)))
-  if (reasons.length) {
-    throw unprocessable(FLEET_MESSAGES.driverNotEligible, {
-      reasons: ineligibilityText(language, reasons)
-    })
-  }
-
-  const window = { start: plan.plannedDeparture, end: plannedArrival(plan) }
-  const plates = vehiclePlates(db)
-  const names = employeeNames(db)
-  for (const other of db.trips.all()) {
-    if (other.no === except || !OPEN_TRIP_STATUSES.includes(other.status)) continue
-    if (!windowsOverlap(window, tripWindow(other))) continue
-    const held = [other.vehicleNo, other.trailerNo]
-    const busy = [plan.vehicleNo, plan.trailerNo].find((no) => no && held.includes(no))
-    if (busy) {
-      throw conflict(FLEET_MESSAGES.resourceBusy, { name: plates.get(busy) ?? busy, no: other.no })
-    }
-    if (other.driverNo === plan.driverNo) {
-      throw conflict(FLEET_MESSAGES.resourceBusy, {
-        name: names.get(plan.driverNo) ?? plan.driverNo,
-        no: other.no
-      })
-    }
-  }
+  const availability = createAvailability(
+    db,
+    { start: plan.plannedDeparture, end: plannedArrival(plan) },
+    language
+  )
+  const [first] = [
+    ...availability.vehicleUnavailability(plan.vehicleNo, 'motorized', except),
+    ...(plan.trailerNo ? availability.vehicleUnavailability(plan.trailerNo, 'towed', except) : []),
+    ...availability.driverUnavailability(plan.driverNo, except)
+  ]
+  if (first) throw unavailabilityError(language, first)
 }
 
 function assertAllowed(trip: TripRow, action: TripAction): void {
