@@ -78,6 +78,7 @@ import planningReasons from './planningReasons'
 import planningSettings from './planningSettings'
 import planningCustomers from './planningCustomers'
 import planningDeliveryPoints from './planningDeliveryPoints'
+import planningProducts from './planningProducts'
 export default {
   ...common,
   ...auth,
@@ -157,5 +158,6 @@ export default {
   ...planningReasons,
   ...planningSettings,
   ...planningCustomers,
-  ...planningDeliveryPoints
+  ...planningDeliveryPoints,
+  ...planningProducts
 }

@@ -1,0 +1,40 @@
+export default {
+  'planning.products.title': 'Products',
+  'planning.products.card': 'Product card',
+  'planning.products.new': 'New product',
+  'planning.products.loadingList': 'Loading products…',
+  'planning.products.noResults': 'No product.',
+  'planning.products.noSearchResults': 'No product matches "{query}".',
+  'planning.products.saveSuccess': 'Product saved.',
+  'planning.products.saveError': 'The product could not be saved.',
+  'planning.products.createError': 'The product could not be created.',
+  'planning.products.deleteError': 'The product could not be deleted.',
+  'planning.products.confirmDelete': 'Delete the product',
+  'planning.products.confirmDeleteMsg': 'The "{name}" product will be permanently deleted.',
+
+  'planning.products.search.all': 'No., name or family',
+
+  'planning.products.col.no': 'No.',
+  'planning.products.col.name': 'Name',
+  'planning.products.col.family': 'Family',
+  'planning.products.col.unit': 'Unit',
+  'planning.products.col.active': 'Active',
+  'planning.products.col.isFuel': 'Fuel',
+  'planning.products.col.referenceDensity': 'Reference density (kg/L)',
+  'planning.products.col.expansionCoefficient': 'Expansion coefficient (/°C)',
+
+  'planning.products.form.general': 'General',
+  'planning.products.form.fuel': 'Fuel',
+  'planning.products.form.no': 'No.',
+  'planning.products.form.name': 'Name',
+  'planning.products.form.family': 'Family',
+  'planning.products.form.familyHint': 'Tariffs and compatibilities can target a whole family.',
+  'planning.products.form.unit': 'Unit',
+  'planning.products.form.active': 'Active',
+  'planning.products.form.isFuel': 'Fuel',
+  'planning.products.form.isFuelHint':
+    'A fuel is measured at 15 °C: its reference density is then required.',
+  'planning.products.form.referenceDensity': 'Reference density (kg/L)',
+  'planning.products.form.expansionCoefficient': 'Expansion coefficient (/°C)',
+  'planning.products.form.referenceDensityRequired': 'Give the reference density of the fuel.'
+}

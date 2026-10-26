@@ -128,3 +128,21 @@ describe('customers and delivery points', () => {
     expect(customer.data.data).toMatchObject({ deliveryPointCount: 5 })
   })
 })
+
+describe('products', () => {
+  it('keep names unique and fuels measured', async () => {
+    const product = { name: 'Gasoil premium', family: 'Carburant', unit: 'Litre', isFuel: true }
+    expect((await send('post', '/planning/products', product)).status).toBe(422)
+    expect((await send('post', '/planning/products', { ...product, name: 'GAZOLE' })).status).toBe(
+      409
+    )
+    expect(
+      (await send('post', '/planning/products', { ...product, referenceDensity: 0.84 }, 'DEP001'))
+        .status
+    ).toBe(403)
+    const created = await send('post', '/planning/products', { ...product, referenceDensity: 0.84 })
+    expect(created.data.data).toMatchObject({ no: 'PRD-009', referenceDensity: 0.84 })
+    const changed = await send('patch', '/planning/products/PRD-009', { isFuel: false })
+    expect(changed.data.data).toMatchObject({ isFuel: false, referenceDensity: null })
+  })
+})

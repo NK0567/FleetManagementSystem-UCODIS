@@ -948,6 +948,20 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/planning/products/': RouteRecordInfo<
+      '/planning/products/',
+      '/planning/products',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/planning/products/[id]': RouteRecordInfo<
+      '/planning/products/[id]',
+      '/planning/products/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/planning/reasons/': RouteRecordInfo<
       '/planning/reasons/',
       '/planning/reasons',
@@ -2032,6 +2046,22 @@ declare module 'vue-router/auto-routes' {
     'src/pages/planning/delivery-points/[id].vue': {
       routes:
         | '/planning/delivery-points/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/planning/products/index.vue': {
+      routes:
+        | '/planning/products/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/planning/products/[id].vue': {
+      routes:
+        | '/planning/products/[id]'
       views:
         | never
       pathParamNames:

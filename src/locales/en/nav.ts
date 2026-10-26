@@ -79,5 +79,6 @@ export default {
   'nav.planningReasons': 'Reasons',
   'nav.planningSettings': 'Planning settings',
   'nav.customers': 'Customers',
-  'nav.deliveryPoints': 'Delivery points'
+  'nav.deliveryPoints': 'Delivery points',
+  'nav.products': 'Products'
 }

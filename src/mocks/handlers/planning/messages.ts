@@ -25,6 +25,14 @@ export const PLANNING_MESSAGES = {
     fr: 'Ce client a des points de livraison : désactivez-le plutôt.',
     en: 'This customer has delivery points: deactivate it instead.'
   },
+  productNameTaken: {
+    fr: 'Le produit {no} porte déjà ce nom.',
+    en: 'Product {no} already has this name.'
+  },
+  productNeedsDensity: {
+    fr: 'Un carburant demande sa densité de référence, pour le calcul à 15 °C.',
+    en: 'A fuel needs its reference density, for the 15 °C calculation.'
+  },
   deliveryPointCustomerNotRecipient: {
     fr: 'Un point de livraison appartient à un client destinataire actif.',
     en: 'A delivery point belongs to an active recipient customer.'
