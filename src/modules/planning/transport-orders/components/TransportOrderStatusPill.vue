@@ -13,6 +13,7 @@ const TONES: Record<TransportOrderStatus, StatusTone> = {
   ready: 'success',
   in_progress: 'warning',
   delivered: 'success',
+  closed: 'neutral',
   cancelled: 'danger'
 }
 

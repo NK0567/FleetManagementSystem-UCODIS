@@ -24,6 +24,19 @@ export const transportOrderApi = {
     httpClient.post(`${resourcePath(basePath, no)}/lines/${lineNo}/declare`, { receivedQuantity }),
   handBack: (no: string, lineNo: number) =>
     httpClient.post(`${resourcePath(basePath, no)}/lines/${lineNo}/hand-back`, {}),
+  closing: (no: string) =>
+    httpClient.get<
+      SingleResponse<{
+        blocks: string[]
+        documents: { kind: string; fileNo: string }[]
+        debriefing: { voucherNo: string } | null
+      }>
+    >(`${resourcePath(basePath, no)}/closing`),
+  attachDocument: (no: string, kind: string, fileNo: string) =>
+    httpClient.post(`${resourcePath(basePath, no)}/documents`, { kind, fileNo }),
+  saveDebriefing: (no: string, voucherNo: string) =>
+    httpClient.post(`${resourcePath(basePath, no)}/debriefing`, { voucherNo }),
+  close: (no: string) => httpClient.post(`${resourcePath(basePath, no)}/close`, {}),
   remainder: (no: string, lineNo: number, date: string) =>
     httpClient.post(`${resourcePath(basePath, no)}/lines/${lineNo}/remainder`, { date }),
   availability: (from: string, to: string) =>

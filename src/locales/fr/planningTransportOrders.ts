@@ -111,6 +111,13 @@ export default {
   'planning.transportOrders.history.protest_closed': 'Protêt clôturé',
   'planning.transportOrders.history.responsibility_set': 'Responsabilité établie',
   'planning.transportOrders.history.credit_issued': 'Avoir émis',
+  'planning.transportOrders.history.closed': 'Clôturé',
+  'planning.transportOrders.action.close': 'Clôturer',
+  'planning.transportOrders.action.debriefing': 'Enregistrer le débriefing',
+  'planning.transportOrders.action.attach': 'Déposer',
+  'planning.transportOrders.closing.blocks': 'Blocages',
+  'planning.transportOrders.closing.voucher': 'N° de bon',
+  'planning.transportOrders.closing.kind': 'Type de document',
   'planning.transportOrders.history.cancelled': 'Annulé',
 
   'planning.transportOrders.createDialog.title': 'Créer un ordre depuis des demandes',

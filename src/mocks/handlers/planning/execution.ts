@@ -33,7 +33,8 @@ function statusOf(db: MockDatabase, order: TransportOrderRow) {
     linesConfirmed: linesConfirmed(order.lines),
     loadingReady: loadingReady(order.lines),
     carrierDeparted: order.carrierDepartedAt !== null || fleetDeparted,
-    linesDelivered: linesDelivered(order.lines)
+    linesDelivered: linesDelivered(order.lines),
+    closedAt: order.closedAt
   })
 }
 

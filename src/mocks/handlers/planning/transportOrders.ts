@@ -31,6 +31,7 @@ import {
 import { loadingReady } from '@/modules/planning/loading/domain/loading'
 import { linesDelivered } from '@/modules/planning/execution/domain/execution'
 import { emptyQuality } from '@/modules/planning/delivery-quality/domain/quality'
+import { emptyDossier } from '@/modules/planning/closing/domain/closing'
 import { combinationCapacity, type LoadCapacity } from '@/modules/fleet/vehicles/domain/capacity'
 import { nowIsoDateTime, todayIso } from '@/utils/date'
 import type { MockDatabase } from '../../db/database'
@@ -161,7 +162,8 @@ export function transportOrdersApi(db: MockDatabase): TransportOrderApi[] {
         linesConfirmed: linesConfirmed(row.lines),
         loadingReady: loadingReady(row.lines),
         carrierDeparted: row.carrierDepartedAt !== null,
-        linesDelivered: linesDelivered(row.lines)
+        linesDelivered: linesDelivered(row.lines),
+        closedAt: row.closedAt
       }),
       createdAt: row.createdAt,
       createdBy: row.createdBy,
@@ -196,7 +198,8 @@ function statusOf(db: MockDatabase, row: TransportOrderRow) {
     linesConfirmed: linesConfirmed(row.lines),
     loadingReady: loadingReady(row.lines),
     carrierDeparted: row.carrierDepartedAt !== null,
-    linesDelivered: linesDelivered(row.lines)
+    linesDelivered: linesDelivered(row.lines),
+    closedAt: row.closedAt
   })
 }
 
@@ -579,6 +582,7 @@ export function registerTransportOrdersHandlers(router: MockRouter, db: MockData
         means: null,
         tripNo: null,
         ...blankCarrier(),
+        ...emptyDossier(),
         cancellationReasonNo: null,
         cancellationComment: '',
         cancelledAt: null,

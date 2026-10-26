@@ -440,5 +440,33 @@ export const PLANNING_MESSAGES = {
   qualityCreditReference: {
     fr: 'Cette référence d’avoir est déjà utilisée.',
     en: 'This credit note reference is already used.'
+  },
+  closingBlocked: {
+    fr: 'La clôture est bloquée : {blocks}.',
+    en: 'Closing is blocked: {blocks}.'
+  },
+  closingDone: {
+    fr: 'Cet ordre est déjà clôturé.',
+    en: 'This order is already closed.'
+  },
+  closingDocumentTaken: {
+    fr: 'Ce document est déjà déposé.',
+    en: 'This document is already filed.'
+  },
+  closingDebriefingEarly: {
+    fr: 'La fiche de débriefing se remplit une fois l’ordre parti.',
+    en: 'The debriefing sheet is filled once the order has left.'
+  },
+  closingVoucher: {
+    fr: 'Indiquez le numéro de bon.',
+    en: 'Enter the voucher number.'
+  },
+  closingVehicle: {
+    fr: 'Le véhicule se lit sur le trajet : aucun n’est associé à cet ordre.',
+    en: 'The vehicle is read from the trip: none is linked to this order.'
+  },
+  closingDates: {
+    fr: 'La date de déchargement ne peut pas précéder la date de chargement.',
+    en: 'The unloading date cannot be earlier than the loading date.'
   }
 } satisfies Record<string, LocalizedText>

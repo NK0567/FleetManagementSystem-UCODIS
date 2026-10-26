@@ -1,7 +1,7 @@
 export default {
   'planning.settings.title': 'Réglages de la planification',
   'planning.settings.subtitle':
-    'Horaires, confirmation des destinataires, marchandises, demandes, contrôle des quantités et facturation.',
+    'Horaires, confirmation des destinataires, marchandises, demandes, contrôle des quantités, facturation et clôture.',
   'planning.settings.lastModified': 'Modifié le {date} par {user}',
   'planning.settings.loadError': "Les réglages de la planification n'ont pas pu être chargés.",
   'planning.settings.saveError': "Les réglages n'ont pas pu être enregistrés.",
@@ -42,6 +42,11 @@ export default {
   'planning.settings.field.billing.defaultFreightPayer': 'Fret à la charge de',
   'planning.settings.field.billing.carrierInvoiceToleranceAmount':
     'Écart toléré sur une facture transporteur',
+
+  'planning.settings.section.closing': 'Clôture',
+  'planning.settings.section.closing.hint':
+    'Documents à déposer avant de clôturer un ordre, séparés par des virgules. Un tiret n’en exige aucun.',
+  'planning.settings.field.closing.requiredDocuments': 'Documents obligatoires',
 
   'planning.settings.unit.kmh': 'km/h',
   'planning.settings.unit.min': 'min',

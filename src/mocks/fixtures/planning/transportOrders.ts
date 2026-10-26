@@ -7,6 +7,7 @@ import {
   type LineFollowUp
 } from '@/modules/planning/customer-confirmations/domain/confirmation'
 import { emptyQuality, type QualityFields } from '@/modules/planning/delivery-quality/domain/quality'
+import { emptyDossier, type OrderDossier } from '@/modules/planning/closing/domain/closing'
 import type { CollectionDefinition, MockRow } from '../../db/collection'
 import { seedAudit } from '../seedAudit'
 
@@ -26,7 +27,7 @@ export interface TransportOrderEventRow {
   detail: string
 }
 
-export interface TransportOrderRow extends MockRow {
+export interface TransportOrderRow extends MockRow, OrderDossier {
   routeTemplateNo: string | null
   plannedDeparture: string | null
   comment: string
@@ -70,7 +71,7 @@ const event = (at: string, kind: TransportOrderEventKind, detail = ''): Transpor
   detail
 })
 
-const SEED: Omit<TransportOrderRow, keyof typeof seedAudit>[] = [
+const SEED: Omit<TransportOrderRow, keyof typeof seedAudit | keyof OrderDossier>[] = [
   {
     no: 'TR-2026-0001',
     routeTemplateNo: 'TNR-ATS',
@@ -188,6 +189,6 @@ const SEED: Omit<TransportOrderRow, keyof typeof seedAudit>[] = [
 
 export const transportOrdersCollection: CollectionDefinition<TransportOrderRow> = {
   name: 'transport-orders',
-  seed: () => SEED.map((row) => ({ ...row, ...seedAudit })),
+  seed: () => SEED.map((row) => ({ ...row, ...emptyDossier(), ...seedAudit })),
   dateFields: ['plannedDeparture', 'cancelledAt', 'events[].at']
 }

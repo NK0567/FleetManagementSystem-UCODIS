@@ -1,7 +1,7 @@
 export default {
   'planning.settings.title': 'Planning settings',
   'planning.settings.subtitle':
-    'Times, recipient confirmation, goods, requests, quantity control and billing.',
+    'Times, recipient confirmation, goods, requests, quantity control, billing and closing.',
   'planning.settings.lastModified': 'Changed on {date} by {user}',
   'planning.settings.loadError': 'The planning settings could not be loaded.',
   'planning.settings.saveError': 'The settings could not be saved.',
@@ -42,6 +42,11 @@ export default {
   'planning.settings.field.billing.defaultFreightPayer': 'Freight paid by',
   'planning.settings.field.billing.carrierInvoiceToleranceAmount':
     'Gap accepted on a carrier invoice',
+
+  'planning.settings.section.closing': 'Closing',
+  'planning.settings.section.closing.hint':
+    'Documents to file before an order can be closed, separated by commas. A dash requires none.',
+  'planning.settings.field.closing.requiredDocuments': 'Mandatory documents',
 
   'planning.settings.unit.kmh': 'km/h',
   'planning.settings.unit.min': 'min',

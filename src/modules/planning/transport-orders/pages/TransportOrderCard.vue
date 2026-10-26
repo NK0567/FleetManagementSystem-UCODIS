@@ -1,8 +1,9 @@
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Ban, CalendarClock, ListTree } from '@lucide/vue'
 import { apiErrorMessage } from '@/core/api/apiError'
+import { fileApi } from '@/core/api/fileApi'
 import type { CardOpenMode } from '@/composables/cardOpenMode'
 import { useEntityCard } from '@/composables/useEntityCard'
 import { useListCellFormatters } from '@/composables/useListCellFormatters'
@@ -73,6 +74,9 @@ const declaring = ref(false)
 const cancelling = ref(false)
 const remaining = ref(false)
 const remainderDate = ref('')
+const voucherNo = ref('')
+const documentKind = ref('loading_list')
+const closing = ref<{ blocks: string[]; documents: { kind: string }[] } | null>(null)
 const receivedQuantity = ref<number | null>(null)
 const dialogError = ref<string | null>(null)
 
@@ -198,6 +202,75 @@ async function saveRemainder() {
   }
 }
 
+async function loadClosing(no: string) {
+  try {
+    closing.value = (await transportOrderApi.closing(no)).data.data
+  } catch (error) {
+    saveError.value = apiErrorMessage(error, t('planning.transportOrders.saveError'))
+  }
+}
+
+watch(
+  () => item.value?.no,
+  (no) => {
+    if (!no || (item.value?.status !== 'delivered' && item.value?.status !== 'closed')) {
+      closing.value = null
+      return
+    }
+    void loadClosing(no)
+  }
+)
+
+async function attachDocument(event: Event) {
+  const current = item.value
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!current || !file) return
+  acting.value = true
+  saveError.value = null
+  try {
+    const uploaded = (await fileApi.upload(file)).data.data
+    await transportOrderApi.attachDocument(current.no, documentKind.value, uploaded.no)
+    await loadClosing(current.no)
+  } catch (error) {
+    saveError.value = apiErrorMessage(error, t('planning.transportOrders.saveError'))
+  } finally {
+    acting.value = false
+    input.value = ''
+  }
+}
+
+async function saveDebriefing() {
+  const current = item.value
+  if (!current || !voucherNo.value.trim()) return
+  acting.value = true
+  saveError.value = null
+  try {
+    await transportOrderApi.saveDebriefing(current.no, voucherNo.value)
+    await loadClosing(current.no)
+  } catch (error) {
+    saveError.value = apiErrorMessage(error, t('planning.transportOrders.saveError'))
+  } finally {
+    acting.value = false
+  }
+}
+
+async function closeOrder() {
+  const current = item.value
+  if (!current) return
+  acting.value = true
+  saveError.value = null
+  try {
+    await transportOrderApi.close(current.no)
+    await refresh(await transportOrderService.getById(current.no))
+    await loadClosing(current.no)
+  } catch (error) {
+    saveError.value = apiErrorMessage(error, t('planning.transportOrders.saveError'))
+  } finally {
+    acting.value = false
+  }
+}
+
 async function cancel(choice: { reasonNo: string; comment: string }) {
   if (await run('cancel', choice)) cancelling.value = false
 }
@@ -301,6 +374,15 @@ const buttonClass =
         @click="((remainderDate = ''), (remaining = true))"
       >
         {{ t('planning.transportOrders.action.remainder') }}
+      </button>
+      <button
+        v-if="canExecute && item.status === 'delivered'"
+        type="button"
+        :class="buttonClass"
+        :disabled="acting"
+        @click="closeOrder"
+      >
+        {{ t('planning.transportOrders.action.close') }}
       </button>
       <button
         v-if="canExecute && canCancel(item.status)"
@@ -443,6 +525,23 @@ const buttonClass =
                   </tr>
                 </tbody>
               </table>
+            </section>
+            <section v-if="closing">
+              <h3 class="font-medium text-card-foreground mb-2">
+                {{ t('planning.transportOrders.closing.blocks') }}
+              </h3>
+              <p class="text-muted-foreground">{{ closing.blocks.join(', ') || '—' }}</p>
+              <p v-if="closing.documents.length" class="text-muted-foreground mt-1">
+                {{ closing.documents.map((document) => document.kind).join(', ') }}
+              </p>
+              <div v-if="canExecute && item?.status === 'delivered'" class="mt-2 flex flex-wrap items-center gap-2">
+                <FormInput v-model="documentKind" :placeholder="t('planning.transportOrders.closing.kind')" />
+                <input type="file" :disabled="acting" @change="attachDocument" />
+                <FormInput v-model="voucherNo" :placeholder="t('planning.transportOrders.closing.voucher')" />
+                <button type="button" :class="buttonClass" :disabled="acting" @click="saveDebriefing">
+                  {{ t('planning.transportOrders.action.debriefing') }}
+                </button>
+              </div>
             </section>
             <section>
               <h3 class="font-medium text-card-foreground mb-2">

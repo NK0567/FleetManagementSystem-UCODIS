@@ -51,7 +51,7 @@ function visited(db: MockDatabase, order: TransportOrderRow, line: TransportOrde
 
 function open(order: TransportOrderRow, line: TransportOrderLineRow): boolean {
   return followUpOpen(
-    { cancelled: order.cancelledAt !== null, closed: false },
+    { cancelled: order.cancelledAt !== null, closed: order.closedAt !== null },
     line.declaredAt !== null || line.refusalAt !== null
   )
 }

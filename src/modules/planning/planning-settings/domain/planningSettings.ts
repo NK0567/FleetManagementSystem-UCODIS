@@ -44,6 +44,11 @@ export interface BillingSettings {
   carrierInvoiceToleranceAmount: number
 }
 
+export interface ClosingSettings {
+  /** Comma-separated document kinds required before an order can be closed. A dash requires none. */
+  requiredDocuments: string
+}
+
 export interface PlanningSettings {
   schedule: ScheduleSettings
   confirmation: ConfirmationSettings
@@ -51,6 +56,7 @@ export interface PlanningSettings {
   requests: RequestSettings
   quantities: QuantitySettings
   billing: BillingSettings
+  closing: ClosingSettings
 }
 
 export type PlanningSettingsSection = keyof PlanningSettings
@@ -61,7 +67,8 @@ export const PLANNING_SETTINGS_SECTIONS = [
   'goods',
   'requests',
   'quantities',
-  'billing'
+  'billing',
+  'closing'
 ] as const
 
 export type PlanningSettingUnit = 'kmh' | 'min' | 'days' | 'amount'
@@ -113,7 +120,8 @@ export const PLANNING_SETTING_FIELDS: Record<PlanningSettingsSection, readonly F
       min: 0,
       max: 100_000_000
     }
-  ]
+  ],
+  closing: [{ key: 'requiredDocuments', kind: 'text', maxLength: 200 }]
 }
 
 export const DEFAULT_PLANNING_SETTINGS: PlanningSettings = {
@@ -126,7 +134,8 @@ export const DEFAULT_PLANNING_SETTINGS: PlanningSettings = {
     expiredDateMode: 'alert'
   },
   quantities: { overToleranceMode: 'flag' },
-  billing: { defaultFreightPayer: 'orderer', carrierInvoiceToleranceAmount: 0 }
+  billing: { defaultFreightPayer: 'orderer', carrierInvoiceToleranceAmount: 0 },
+  closing: { requiredDocuments: 'loading_list,delivery_note' }
 }
 
 export function isPlanningSettingsSection(value: string): value is PlanningSettingsSection {

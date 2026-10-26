@@ -110,6 +110,13 @@ export default {
   'planning.transportOrders.history.protest_closed': 'Protest closed',
   'planning.transportOrders.history.responsibility_set': 'Responsibility set',
   'planning.transportOrders.history.credit_issued': 'Credit note issued',
+  'planning.transportOrders.history.closed': 'Closed',
+  'planning.transportOrders.action.close': 'Close',
+  'planning.transportOrders.action.debriefing': 'Save the debriefing',
+  'planning.transportOrders.action.attach': 'File',
+  'planning.transportOrders.closing.blocks': 'Blocks',
+  'planning.transportOrders.closing.voucher': 'Voucher no.',
+  'planning.transportOrders.closing.kind': 'Document kind',
   'planning.transportOrders.history.cancelled': 'Cancelled',
 
   'planning.transportOrders.createDialog.title': 'Create an order from requests',

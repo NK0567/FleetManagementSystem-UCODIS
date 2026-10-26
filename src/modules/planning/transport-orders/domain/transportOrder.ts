@@ -7,6 +7,7 @@ export const TRANSPORT_ORDER_STATUSES = [
   'ready',
   'in_progress',
   'delivered',
+  'closed',
   'cancelled'
 ] as const
 export type TransportOrderStatus = (typeof TRANSPORT_ORDER_STATUSES)[number]
@@ -37,6 +38,7 @@ export const TRANSPORT_ORDER_EVENT_KINDS = [
   'protest_closed',
   'responsibility_set',
   'credit_issued',
+  'closed',
   'cancelled'
 ] as const
 export type TransportOrderEventKind = (typeof TRANSPORT_ORDER_EVENT_KINDS)[number]
@@ -46,6 +48,7 @@ const TRIP_DEPARTED = ['in_progress', 'completed', 'closed']
 
 export interface TransportOrderFacts {
   cancelledAt: string | null
+  closedAt?: string | null
   means: TransportMeans | null
   /** Status of the fleet trip, when the order has one. */
   tripStatus: string | null
@@ -65,6 +68,7 @@ export interface TransportOrderFacts {
  */
 export function transportOrderStatus(order: TransportOrderFacts): TransportOrderStatus {
   if (order.cancelledAt) return 'cancelled'
+  if (order.closedAt) return 'closed'
   const fleetDeparted =
     order.means === 'fleet' && !!order.tripStatus && TRIP_DEPARTED.includes(order.tripStatus)
   const departed = fleetDeparted || !!order.carrierDeparted
@@ -84,9 +88,9 @@ export const canEditLines = (status: TransportOrderStatus) =>
 /** The route and the departure belong to the trip once the order is planned. */
 export const canEditSchedule = (status: TransportOrderStatus) => status === 'draft'
 
-/** Allowed up to and including the road. A delivered order stays. */
+/** Allowed up to and including the road. A delivered or closed order stays. */
 export const canCancel = (status: TransportOrderStatus) =>
-  status !== 'cancelled' && status !== 'delivered'
+  status !== 'cancelled' && status !== 'delivered' && status !== 'closed'
 
 export interface LoadLine {
   weightKg: number | null
