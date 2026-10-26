@@ -21,7 +21,10 @@ import type { TransportOrderEventKind } from '@/modules/planning/transport-order
 import { nowIsoDateTime, todayIso } from '@/utils/date'
 import type { MockDatabase } from '../../db/database'
 import { nextNo } from '../../db/numbering'
-import type { TransportOrderLineRow, TransportOrderRow } from '../../fixtures/planning/transportOrders'
+import type {
+  TransportOrderLineRow,
+  TransportOrderRow
+} from '../../fixtures/planning/transportOrders'
 import { readBody, routeParam, stampModified } from '../../http/crudResource'
 import { conflict, unprocessable } from '../../http/errors'
 import { invalidField, readEnum, readNumber, readString } from '../../http/input'
@@ -66,7 +69,10 @@ function save(
 ): void {
   db.transportOrders.update(order.no, {
     lines,
-    events: [...order.events, { at: nowIsoDateTime(), by: sessionUser(request).code, kind, detail }],
+    events: [
+      ...order.events,
+      { at: nowIsoDateTime(), by: sessionUser(request).code, kind, detail }
+    ],
     ...stampModified(request)
   })
 }
@@ -103,7 +109,9 @@ function assertOpen(order: TransportOrderRow, line: TransportOrderLineRow): void
 }
 
 function nextProtestNo(db: MockDatabase): string {
-  const existing = db.transportOrders.all().flatMap((order) => order.lines.flatMap((line) => line.protests.map((note) => note.no)))
+  const existing = db.transportOrders
+    .all()
+    .flatMap((order) => order.lines.flatMap((line) => line.protests.map((note) => note.no)))
   return nextNo(existing, `NP-${todayIso().slice(0, 4)}-`, 4)
 }
 
@@ -143,7 +151,7 @@ const SHARE_MESSAGES = {
 
 export function deliveryQualityApi(db: MockDatabase) {
   const points = new Map(db.deliveryPoints.all().map((point) => [point.no, point]))
-  const products = new Map(db.products.all().map((product) => [product.no, product.name]))
+  const products = new Map(db.products.all().map((product) => [product.no, product]))
   const customers = new Map(db.customers.all().map((customer) => [customer.no, customer.name]))
   const rows = []
   for (const order of db.transportOrders.all()) {
@@ -155,7 +163,10 @@ export function deliveryQualityApi(db: MockDatabase) {
         orderNo: order.no,
         lineNo: line.lineNo,
         recipientName: customers.get(point?.customerNo ?? '') ?? '',
-        productName: products.get(line.productNo) ?? '',
+        deliveryPointName: point?.name ?? '',
+        productName: products.get(line.productNo)?.name ?? '',
+        unit: products.get(line.productNo)?.unit ?? '',
+        quantity: referenceOf(line),
         means: order.means,
         facts,
         protests: line.protests.map((note) => ({ ...note, status: protestStatus(note) })),
@@ -169,7 +180,9 @@ export function deliveryQualityApi(db: MockDatabase) {
 }
 
 export function registerDeliveryQualityHandlers(router: MockRouter, db: MockDatabase): void {
-  router.get('/planning/delivery-quality', { feature: FEATURE, action: 'read' }, () => ok(deliveryQualityApi(db)))
+  router.get('/planning/delivery-quality', { feature: FEATURE, action: 'read' }, () =>
+    ok(deliveryQualityApi(db))
+  )
 
   router.post(
     '/planning/transport-orders/:no/lines/:lineNo/protests',
@@ -195,7 +208,15 @@ export function registerDeliveryQualityHandlers(router: MockRouter, db: MockData
         closedAt: null,
         outcome: ''
       }
-      replace(db, order, line, { ...line, protests: [...line.protests, note] }, request, 'protest_prepared', note.no)
+      replace(
+        db,
+        order,
+        line,
+        { ...line, protests: [...line.protests, note] },
+        request,
+        'protest_prepared',
+        note.no
+      )
       return ok({ no: note.no })
     }
   )
@@ -209,11 +230,13 @@ export function registerDeliveryQualityHandlers(router: MockRouter, db: MockData
       const protestNo = routeParam(request, 'protestNo')
       const note = line.protests.find((item) => item.no === protestNo)
       if (!note) throw unprocessable(PLANNING_MESSAGES.confirmationLineMissing)
-      if (protestStatus(note) !== 'preparing') throw conflict(PLANNING_MESSAGES.qualityProtestIssued)
+      if (protestStatus(note) !== 'preparing')
+        throw conflict(PLANNING_MESSAGES.qualityProtestIssued)
       const body = readBody(request)
       const reason = readReason(db, body, 'protest')
       const quantity = readNumber(body, 'quantity', { required: true, min: 0 }) ?? 0
-      if (!protestQuantityAllowed(quantity, referenceOf(line))) throw unprocessable(PLANNING_MESSAGES.qualityQuantity)
+      if (!protestQuantityAllowed(quantity, referenceOf(line)))
+        throw unprocessable(PLANNING_MESSAGES.qualityQuantity)
       const next = { ...note, reasonNo: reason.reasonNo, comment: reason.comment, quantity }
       replace(
         db,
@@ -237,7 +260,8 @@ export function registerDeliveryQualityHandlers(router: MockRouter, db: MockData
       const protestNo = routeParam(request, 'protestNo')
       const note = line.protests.find((item) => item.no === protestNo)
       if (!note) throw unprocessable(PLANNING_MESSAGES.confirmationLineMissing)
-      if (protestStatus(note) !== 'preparing') throw conflict(PLANNING_MESSAGES.qualityProtestIssued)
+      if (protestStatus(note) !== 'preparing')
+        throw conflict(PLANNING_MESSAGES.qualityProtestIssued)
       const next = { ...note, issuedAt: nowIsoDateTime() }
       replace(
         db,
@@ -260,7 +284,8 @@ export function registerDeliveryQualityHandlers(router: MockRouter, db: MockData
       const protestNo = routeParam(request, 'protestNo')
       const note = line.protests.find((item) => item.no === protestNo)
       if (!note) throw unprocessable(PLANNING_MESSAGES.confirmationLineMissing)
-      if (protestStatus(note) !== 'issued') throw conflict(PLANNING_MESSAGES.qualityProtestNotIssued)
+      if (protestStatus(note) !== 'issued')
+        throw conflict(PLANNING_MESSAGES.qualityProtestNotIssued)
       const outcome = readString(readBody(request), 'outcome', { required: true })
       const next = { ...note, closedAt: nowIsoDateTime(), outcome }
       replace(
@@ -296,8 +321,11 @@ export function registerDeliveryQualityHandlers(router: MockRouter, db: MockData
       if (settled === 'amount') throw unprocessable(PLANNING_MESSAGES.qualityImpactAmount)
       if (settled === 'withholding') throw unprocessable(PLANNING_MESSAGES.qualityWithholding)
       const credit = settled.find((impact) => impact.type === 'customer_credit')?.amount ?? 0
-      const previous = line.responsibility?.impacts.find((impact) => impact.type === 'customer_credit')?.amount ?? 0
-      if (line.creditIssuedAt && credit !== previous) throw conflict(PLANNING_MESSAGES.qualityCreditIssued)
+      const previous =
+        line.responsibility?.impacts.find((impact) => impact.type === 'customer_credit')?.amount ??
+        0
+      if (line.creditIssuedAt && credit !== previous)
+        throw conflict(PLANNING_MESSAGES.qualityCreditIssued)
       replace(
         db,
         order,
@@ -326,24 +354,33 @@ export function registerDeliveryQualityHandlers(router: MockRouter, db: MockData
     { feature: FEATURE, action: 'execute' },
     (request) => {
       const { order, line } = findLine(db, request)
-      const credit = line.responsibility?.impacts.find((impact) => impact.type === 'customer_credit')
+      const credit = line.responsibility?.impacts.find(
+        (impact) => impact.type === 'customer_credit'
+      )
       if (!credit) throw conflict(PLANNING_MESSAGES.qualityCreditMissing)
       if (line.creditIssuedAt) throw conflict(PLANNING_MESSAGES.qualityCreditIssued)
       const reference = readString(readBody(request), 'reference', { required: true })
       const key = reference.toLowerCase()
-      const taken = db.transportOrders.all().some((item) =>
-        item.lines.some(
-          (other) =>
-            (other.creditReference && other.creditReference.toLowerCase() === key) ||
-            (other.invoiceReference && other.invoiceReference.toLowerCase() === key)
+      const taken = db.transportOrders
+        .all()
+        .some((item) =>
+          item.lines.some(
+            (other) =>
+              (other.creditReference && other.creditReference.toLowerCase() === key) ||
+              (other.invoiceReference && other.invoiceReference.toLowerCase() === key)
+          )
         )
-      )
       if (taken) throw conflict(PLANNING_MESSAGES.qualityCreditReference)
       replace(
         db,
         order,
         line,
-        { ...line, creditReference: reference, creditIssuedAt: nowIsoDateTime(), creditIssuedBy: sessionUser(request).code },
+        {
+          ...line,
+          creditReference: reference,
+          creditIssuedAt: nowIsoDateTime(),
+          creditIssuedBy: sessionUser(request).code
+        },
         request,
         'credit_issued',
         reference

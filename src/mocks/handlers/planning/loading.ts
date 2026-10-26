@@ -26,14 +26,23 @@ function statusOf(db: MockDatabase, order: TransportOrderRow) {
 
 export function registerLoadingHandlers(router: MockRouter, db: MockDatabase): void {
   router.get('/planning/loading', { feature: 'LOADING', action: 'read' }, () => {
+    const points = new Map(db.deliveryPoints.all().map((point) => [point.no, point]))
+    const products = new Map(db.products.all().map((product) => [product.no, product]))
+    const customers = new Map(db.customers.all().map((customer) => [customer.no, customer.name]))
     const rows = []
     for (const order of db.transportOrders.all()) {
       if (statusOf(db, order) !== 'confirmed') continue
       for (const line of order.lines.filter(stillToLoad)) {
+        const point = points.get(line.deliveryPointNo)
+        const product = products.get(line.productNo)
         rows.push({
           orderNo: order.no,
           lineNo: line.lineNo,
           productNo: line.productNo,
+          productName: product?.name ?? '',
+          unit: product?.unit ?? '',
+          deliveryPointName: point?.name ?? '',
+          recipientName: customers.get(point?.customerNo ?? '') ?? '',
           quantity: line.quantity,
           loadedQuantity: line.loadedQuantity,
           conformingAt: line.conformingAt
@@ -64,14 +73,22 @@ export function registerLoadingHandlers(router: MockRouter, db: MockDatabase): v
         throw unprocessable(PLANNING_MESSAGES.loadingQuantityMissing)
       }
       const lines = order.lines.map((line) =>
-        quantities.has(line.lineNo) ? { ...line, loadedQuantity: quantities.get(line.lineNo) ?? null } : line
+        quantities.has(line.lineNo)
+          ? { ...line, loadedQuantity: quantities.get(line.lineNo) ?? null }
+          : line
       )
       db.transportOrders.update(order.no, { lines, ...stampModified(request) })
       return ok(lines)
     }
   )
 
-  const check = (name: string, apply: (line: TransportOrderRow['lines'][number], request: MockRequest) => TransportOrderRow['lines'][number]) =>
+  const check = (
+    name: string,
+    apply: (
+      line: TransportOrderRow['lines'][number],
+      request: MockRequest
+    ) => TransportOrderRow['lines'][number]
+  ) =>
     router.post(
       `/planning/transport-orders/:no/lines/:lineNo/${name}`,
       { feature: 'LOADING', action: 'execute' },

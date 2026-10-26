@@ -8,7 +8,10 @@ import {
 } from '@/modules/planning/reception/domain/reception'
 import { nowIsoDateTime, todayIso } from '@/utils/date'
 import type { MockDatabase } from '../../db/database'
-import type { TransportOrderLineRow, TransportOrderRow } from '../../fixtures/planning/transportOrders'
+import type {
+  TransportOrderLineRow,
+  TransportOrderRow
+} from '../../fixtures/planning/transportOrders'
 import { readBody, routeParam, stampCreated, stampModified } from '../../http/crudResource'
 import { conflict, unprocessable } from '../../http/errors'
 import { invalidField, readDate, readString } from '../../http/input'
@@ -26,7 +29,9 @@ export interface ReceptionLineApi {
   orderNo: string
   lineNo: number
   recipientName: string
+  deliveryPointName: string
   productName: string
+  unit: string
   quantity: number
   receivedQuantity: number | null
   state: ReceptionState
@@ -37,6 +42,11 @@ export interface ReturnLineApi {
   orderNo: string
   lineNo: number
   productNo: string
+  productName: string
+  unit: string
+  quantity: number
+  recipientName: string
+  deliveryPointName: string
   handedBackAt: string | null
 }
 
@@ -50,7 +60,10 @@ function save(
 ): void {
   db.transportOrders.update(order.no, {
     lines,
-    events: [...order.events, { at: nowIsoDateTime(), by: sessionUser(request).code, kind, detail }],
+    events: [
+      ...order.events,
+      { at: nowIsoDateTime(), by: sessionUser(request).code, kind, detail }
+    ],
     ...stampModified(request)
   })
 }
@@ -74,7 +87,10 @@ function replaceLine(
   )
 }
 
-function findLine(db: MockDatabase, request: MockRequest): { order: TransportOrderRow; line: TransportOrderLineRow } {
+function findLine(
+  db: MockDatabase,
+  request: MockRequest
+): { order: TransportOrderRow; line: TransportOrderLineRow } {
   const order = db.transportOrders.findOrFail(routeParam(request, 'no'))
   const lineNo = Number(routeParam(request, 'lineNo'))
   const line = order.lines.find((item) => item.lineNo === lineNo)
@@ -98,7 +114,7 @@ export function receptionsApi(db: MockDatabase): ReceptionLineApi[] {
   const today = todayIso()
   const tacitDays = planningSettings(db).confirmation.tacitConfirmationDays
   const points = new Map(db.deliveryPoints.all().map((point) => [point.no, point]))
-  const products = new Map(db.products.all().map((product) => [product.no, product.name]))
+  const products = new Map(db.products.all().map((product) => [product.no, product]))
   const customers = new Map(db.customers.all().map((customer) => [customer.no, customer.name]))
   const rows: ReceptionLineApi[] = []
   for (const order of db.transportOrders.all()) {
@@ -110,7 +126,9 @@ export function receptionsApi(db: MockDatabase): ReceptionLineApi[] {
         orderNo: order.no,
         lineNo: line.lineNo,
         recipientName: customers.get(point?.customerNo ?? '') ?? '',
-        productName: products.get(line.productNo) ?? '',
+        deliveryPointName: point?.name ?? '',
+        productName: products.get(line.productNo)?.name ?? '',
+        unit: products.get(line.productNo)?.unit ?? '',
         quantity: line.quantity,
         receivedQuantity: line.receivedQuantity,
         state,
@@ -122,14 +140,24 @@ export function receptionsApi(db: MockDatabase): ReceptionLineApi[] {
 }
 
 export function returnsApi(db: MockDatabase): ReturnLineApi[] {
+  const points = new Map(db.deliveryPoints.all().map((point) => [point.no, point]))
+  const products = new Map(db.products.all().map((product) => [product.no, product]))
+  const customers = new Map(db.customers.all().map((customer) => [customer.no, customer.name]))
   const rows: ReturnLineApi[] = []
   for (const order of db.transportOrders.all()) {
     for (const line of order.lines) {
       if (!canReceiveReturn(line as ReceptionFacts)) continue
+      const point = points.get(line.deliveryPointNo)
+      const product = products.get(line.productNo)
       rows.push({
         orderNo: order.no,
         lineNo: line.lineNo,
         productNo: line.productNo,
+        productName: product?.name ?? '',
+        unit: product?.unit ?? '',
+        quantity: line.loadedQuantity ?? line.quantity,
+        recipientName: customers.get(point?.customerNo ?? '') ?? '',
+        deliveryPointName: point?.name ?? '',
         handedBackAt: line.handedBackAt
       })
     }
@@ -309,10 +337,13 @@ export function registerReceptionHandlers(router: MockRouter, db: MockDatabase):
       const body = readBody(request)
       const date = readDate(body, 'date', { required: true })
       if (!date) throw unprocessable(PLANNING_MESSAGES.receptionNoRemainder)
-      const source = line.deliveryRequestNo ? db.deliveryRequests.find(line.deliveryRequestNo) : undefined
+      const source = line.deliveryRequestNo
+        ? db.deliveryRequests.find(line.deliveryRequestNo)
+        : undefined
       const point = db.deliveryPoints.findOrFail(line.deliveryPointNo)
       const ordererNo =
-        source?.ordererNo ?? (db.customers.findOrFail(point.customerNo).isOrderer ? point.customerNo : '')
+        source?.ordererNo ??
+        (db.customers.findOrFail(point.customerNo).isOrderer ? point.customerNo : '')
       if (!ordererNo) throw unprocessable(PLANNING_MESSAGES.confirmationNeedsOrderer)
       const entry = {
         ordererNo,
@@ -333,7 +364,10 @@ export function registerReceptionHandlers(router: MockRouter, db: MockDatabase):
       checkDeliveryRequest(db, entry)
       const no = nextDeliveryRequestNo(db)
       db.deliveryRequests.insert(
-        stampCreated({ ...newDeliveryRequest(no, entry, 'planner'), parentNo: source?.no ?? null }, request)
+        stampCreated(
+          { ...newDeliveryRequest(no, entry, 'planner'), parentNo: source?.no ?? null },
+          request
+        )
       )
       replaceLine(
         db,
@@ -351,7 +385,8 @@ export function registerReceptionHandlers(router: MockRouter, db: MockDatabase):
 
 function readNumberScore(body: Record<string, unknown>): number {
   const raw = body.score
-  const score = typeof raw === 'number' ? raw : typeof raw === 'string' && raw.trim() !== '' ? Number(raw) : NaN
+  const score =
+    typeof raw === 'number' ? raw : typeof raw === 'string' && raw.trim() !== '' ? Number(raw) : NaN
   if (!Number.isInteger(score) || score < 1 || score > 5) throw invalidField('score')
   return score
 }

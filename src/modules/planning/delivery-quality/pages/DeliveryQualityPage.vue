@@ -1,171 +1,605 @@
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { apiErrorMessage } from '@/core/api/apiError'
-import httpClient from '@/core/api/httpClient'
-import { resourcePath } from '@/core/factories'
+import { FileWarning, HandCoins, ListChecks, Scale, Send, ShieldAlert } from '@lucide/vue'
+import type { StatusTone } from '@/components/ui/status-pill/StatusPill.vue'
 import { usePermissions } from '@/composables/usePermissions'
-import type { SingleResponse } from '@/types/api-response.types'
+import { reasonListKey } from '@/modules/planning/reasons/domain/reasonLists'
+import { useOptionsStore } from '@/stores/optionsStore'
+import { formatDate, formatNumber } from '@/utils/format'
+import {
+  QUALITY_ACTORS,
+  QUALITY_ORIGINS,
+  mainActor,
+  protestQuantityAllowed,
+  type ProtestStatus,
+  type QualityActor,
+  type QualityOrigin
+} from '../domain/quality'
+import { useDeliveryQualityStore } from '../stores/deliveryQualityStore'
+import type { ProtestRowApi, QualityRowApi } from '../types/deliveryQuality.types'
 
-interface ProtestRow {
-  no: string
-  quantity: number
-  status: 'preparing' | 'issued' | 'closed'
-  outcome: string
+type QualityTab = 'toQualify' | 'protests' | 'credits' | 'all'
+
+const TABS: QualityTab[] = ['toQualify', 'protests', 'credits', 'all']
+const PROTEST_TONES: Record<ProtestStatus, StatusTone> = {
+  preparing: 'warning',
+  issued: 'info',
+  closed: 'neutral'
 }
 
-interface QualityRow {
-  orderNo: string
-  lineNo: number
-  recipientName: string
-  productName: string
-  means: 'fleet' | 'carrier' | null
-  facts: string[]
-  protests: ProtestRow[]
-  responsibility: { impacts: { type: string; amount: number }[] } | null
-  creditReference: string | null
-}
+const buttonClass =
+  'cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed'
+const chipClass = (active: boolean) =>
+  active
+    ? 'border-primary bg-primary text-primary-foreground'
+    : 'border-border text-card-foreground hover:bg-accent'
 
 const { t } = useI18n()
+const store = useDeliveryQualityStore()
+const optionsStore = useOptionsStore()
 const { canExecute } = usePermissions('DELIVERYQUALITY')
-const rows = ref<QualityRow[]>([])
-const loading = ref(false)
-const error = ref<string | null>(null)
-const acting = ref(false)
-const quantity = ref<number | null>(null)
-const preparing = ref<QualityRow | null>(null)
-const outcome = ref('')
-const comment = ref('')
-const credit = ref<number | null>(null)
+
+const tab = ref<QualityTab>('toQualify')
+
+const preparing = ref<QualityRowApi | null>(null)
+const protest = ref<{ reasonNo: string; comment: string; quantity: number | null }>({
+  reasonNo: '',
+  comment: '',
+  quantity: null
+})
+const issuing = ref<{ row: QualityRowApi; note: ProtestRowApi } | null>(null)
+const closing = ref<{ row: QualityRowApi; note: ProtestRowApi } | null>(null)
+const qualifying = ref<QualityRowApi | null>(null)
+const responsibility = ref<{
+  origin: QualityOrigin
+  actor: QualityActor
+  comment: string
+  credit: number | null
+}>({ origin: 'transport', actor: 'logistics', comment: '', credit: null })
+const crediting = ref<QualityRowApi | null>(null)
 const reference = ref('')
 
-async function load() {
-  loading.value = true
-  error.value = null
-  try {
-    rows.value = (await httpClient.get<SingleResponse<QualityRow[]>>('/planning/delivery-quality')).data.data
-  } catch (cause) {
-    error.value = apiErrorMessage(cause, t('planning.quality.loadError'))
-  } finally {
-    loading.value = false
-  }
+const openProtests = (row: QualityRowApi) => row.protests.filter((note) => note.status !== 'closed')
+const creditOf = (row: QualityRowApi) =>
+  row.responsibility?.impacts.find((impact) => impact.type === 'customer_credit')?.amount ?? null
+const withholdingOf = (row: QualityRowApi) =>
+  row.responsibility?.impacts.find((impact) => impact.type === 'carrier_withholding')?.amount ??
+  null
+const creditPending = (row: QualityRowApi) => creditOf(row) !== null && !row.creditReference
+
+const matches: Record<QualityTab, (row: QualityRowApi) => boolean> = {
+  toQualify: (row) => row.facts.length > 0 && !row.responsibility,
+  protests: (row) => openProtests(row).length > 0,
+  credits: creditPending,
+  all: () => true
 }
 
-async function post(row: QualityRow, path: string, body: Record<string, unknown>) {
-  acting.value = true
-  error.value = null
-  try {
-    await httpClient.post(
-      `${resourcePath('/planning/transport-orders', row.orderNo)}/lines/${row.lineNo}/${path}`,
-      body
-    )
-    await load()
-    return true
-  } catch (cause) {
-    error.value = apiErrorMessage(cause, t('planning.quality.saveError'))
-    return false
-  } finally {
-    acting.value = false
+const countOf = (item: QualityTab) => store.rows.filter(matches[item]).length
+const visibleRows = computed(() => store.rows.filter(matches[tab.value]))
+const protestRows = computed(() =>
+  store.rows.flatMap((row) => row.protests.map((note) => ({ row, note })))
+)
+
+const kpis = computed(() => [
+  {
+    key: 'followed',
+    icon: ListChecks,
+    value: store.rows.length,
+    label: t('planning.quality.kpi.followed')
+  },
+  {
+    key: 'toQualify',
+    icon: ShieldAlert,
+    value: countOf('toQualify'),
+    label: t('planning.quality.kpi.toQualify')
+  },
+  {
+    key: 'protests',
+    icon: FileWarning,
+    value: store.rows.reduce((sum, row) => sum + openProtests(row).length, 0),
+    label: t('planning.quality.kpi.protests')
+  },
+  {
+    key: 'credits',
+    icon: HandCoins,
+    value: countOf('credits'),
+    label: t('planning.quality.kpi.credits')
   }
+])
+
+const keyOf = (row: { orderNo: string; lineNo: number }) => `${row.orderNo}-${row.lineNo}`
+const orderCard = (orderNo: string) => ({
+  path: '/planning/transport-orders',
+  query: { no: orderNo, cardMode: 'view' }
+})
+const meansLabel = (row: QualityRowApi) =>
+  row.means ? optionsStore.getOptionLabel('transportMeans', row.means) : '—'
+
+/** The fleet driver is only liable on fleet orders, the carrier only on subcontracted ones. */
+function actorAllowed(row: QualityRowApi, actor: QualityActor): boolean {
+  if (actor === 'external_carrier') return row.means === 'carrier'
+  if (actor === 'internal_carrier') return row.means === 'fleet'
+  return true
 }
 
-async function onPrepare(choice: { reasonNo: string; comment: string }) {
+const protestValid = computed(() => {
   const row = preparing.value
-  if (!row || quantity.value === null) return
-  if (await post(row, 'protests', { reasonNo: choice.reasonNo, comment: choice.comment, quantity: quantity.value })) {
-    preparing.value = null
+  const quantity = protest.value.quantity
+  return (
+    !!row &&
+    !!protest.value.reasonNo &&
+    typeof quantity === 'number' &&
+    protestQuantityAllowed(quantity, row.quantity)
+  )
+})
+
+function openPrepare(row: QualityRowApi) {
+  protest.value = { reasonNo: '', comment: '', quantity: null }
+  preparing.value = row
+}
+
+async function onPrepare() {
+  const row = preparing.value
+  if (!row || !protestValid.value) return
+  const body = {
+    reasonNo: protest.value.reasonNo,
+    comment: protest.value.comment.trim(),
+    quantity: Number(protest.value.quantity)
+  }
+  if (await store.prepareProtest(row, body)) preparing.value = null
+}
+
+async function onIssue() {
+  const pending = issuing.value
+  if (pending && (await store.issueProtest(pending.row, pending.note.no))) issuing.value = null
+}
+
+async function onClose(outcome: string) {
+  const pending = closing.value
+  if (pending && (await store.closeProtest(pending.row, pending.note.no, outcome))) {
+    closing.value = null
   }
 }
 
-async function setResponsibility(row: QualityRow) {
-  if (!comment.value.trim()) return
-  const actor = row.means === 'carrier' ? 'external_carrier' : 'internal_carrier'
-  const impacts = credit.value && credit.value > 0 ? [{ type: 'customer_credit', amount: credit.value }] : []
-  await post(row, 'responsibility', {
-    origin: 'transport',
-    comment: comment.value,
-    shares: [{ actor, percent: 100 }],
-    impacts
-  })
+function openResponsibility(row: QualityRowApi) {
+  const current = row.responsibility
+  const fallback: QualityActor =
+    row.means === 'carrier'
+      ? 'external_carrier'
+      : row.means === 'fleet'
+        ? 'internal_carrier'
+        : 'logistics'
+  responsibility.value = {
+    origin: current?.origin ?? 'transport',
+    actor: current ? mainActor(current.shares) : fallback,
+    comment: current?.comment ?? '',
+    credit: creditOf(row)
+  }
+  qualifying.value = row
 }
 
-onMounted(load)
+const responsibilityValid = computed(
+  () =>
+    !!qualifying.value &&
+    !!responsibility.value.comment.trim() &&
+    actorAllowed(qualifying.value, responsibility.value.actor)
+)
+
+async function onResponsibility() {
+  const row = qualifying.value
+  if (!row || !responsibilityValid.value) return
+  const credit = Number(responsibility.value.credit)
+  const body = {
+    origin: responsibility.value.origin,
+    comment: responsibility.value.comment.trim(),
+    shares: [{ actor: responsibility.value.actor, percent: 100 }],
+    impacts: credit > 0 ? [{ type: 'customer_credit' as const, amount: credit }] : []
+  }
+  if (await store.setResponsibility(row, body)) qualifying.value = null
+}
+
+function openCredit(row: QualityRowApi) {
+  reference.value = ''
+  crediting.value = row
+}
+
+async function onCredit() {
+  const row = crediting.value
+  if (!row || !reference.value.trim()) return
+  if (await store.issueCredit(row, reference.value.trim())) crediting.value = null
+}
+
+onMounted(() => void store.fetchRows())
 </script>
 
 <template>
-  <div class="h-full flex flex-col bg-white">
-    <header class="px-4 py-3 border-b border-border">
-      <h1 class="text-lg font-semibold">{{ t('planning.quality.title') }}</h1>
+  <div class="px-2 py-4 space-y-4">
+    <header>
+      <h1 class="text-xl font-semibold text-card-foreground">{{ t('planning.quality.title') }}</h1>
       <p class="text-sm text-muted-foreground">{{ t('planning.quality.subtitle') }}</p>
     </header>
-    <FormAlerts class="mx-4 mt-3" :error="error" @clear:error="error = null" />
-    <p v-if="loading" class="px-4 py-6 text-sm text-muted-foreground">{{ t('planning.quality.loading') }}</p>
-    <p v-else-if="!rows.length" class="px-4 py-6 text-sm text-muted-foreground">{{ t('planning.quality.empty') }}</p>
-    <div v-else class="flex-1 overflow-auto px-4 py-3 space-y-4">
-      <article v-for="row in rows" :key="`${row.orderNo}-${row.lineNo}`" class="border border-border rounded p-3 text-sm">
-        <p class="font-medium">{{ row.orderNo }} · {{ row.recipientName }} · {{ row.productName }}</p>
-        <p class="text-muted-foreground">
-          {{ row.facts.map((fact) => t(`planning.quality.fact.${fact}`)).join(', ') }}
-        </p>
-        <ul class="mt-2 space-y-1">
-          <li v-for="note in row.protests" :key="note.no">
-            {{ note.no }} · {{ note.quantity }} · {{ t(`planning.quality.status.${note.status}`) }}
-            <button
-              v-if="canExecute && note.status === 'preparing'"
-              type="button"
-              class="ml-2 px-2 py-1 border border-border rounded"
-              :disabled="acting"
-              @click="post(row, `protests/${note.no}/issue`, {})"
-            >
-              {{ t('planning.quality.issue') }}
-            </button>
-            <template v-else-if="canExecute && note.status === 'issued'">
-              <FormInput v-model="outcome" class="ml-2 inline-block w-40" :placeholder="t('planning.quality.outcome')" />
-              <button
-                type="button"
-                class="ml-2 px-2 py-1 border border-border rounded"
-                :disabled="acting || !outcome.trim()"
-                @click="post(row, `protests/${note.no}/close`, { outcome })"
-              >
-                {{ t('planning.quality.close') }}
-              </button>
-            </template>
-          </li>
-        </ul>
-        <div v-if="canExecute" class="mt-2 flex flex-wrap items-center gap-2">
-          <FormInput v-model="quantity" type="number" :min="0" :placeholder="t('planning.quality.quantity')" />
-          <button type="button" class="px-2 py-1 border border-border rounded" :disabled="acting" @click="preparing = row">
-            {{ t('planning.quality.prepare') }}
-          </button>
-          <FormInput v-model="comment" :placeholder="t('planning.quality.comment')" />
-          <FormInput v-model="credit" type="number" :min="0" :placeholder="t('planning.quality.credit')" />
-          <button type="button" class="px-2 py-1 border border-border rounded" :disabled="acting" @click="setResponsibility(row)">
-            {{ t('planning.quality.responsibility') }}
-          </button>
-          <FormInput
-            v-if="row.responsibility && !row.creditReference"
-            v-model="reference"
-            :placeholder="t('planning.quality.reference')"
-          />
-          <button
-            v-if="row.responsibility && !row.creditReference"
-            type="button"
-            class="px-2 py-1 border border-border rounded"
-            :disabled="acting || !reference.trim()"
-            @click="post(row, 'issue-credit', { reference })"
-          >
-            {{ t('planning.quality.issueCredit') }}
-          </button>
+
+    <FormAlerts :error="store.error" @clear:error="store.error = null" />
+    <LoadingBar v-if="store.loading" :height="2" bar-color="var(--color-primary)" />
+
+    <section class="grid grid-cols-2 xl:grid-cols-4 gap-3">
+      <div
+        v-for="kpi in kpis"
+        :key="kpi.key"
+        class="bg-card border border-border rounded p-4 flex items-start gap-3"
+      >
+        <span class="p-2 rounded bg-primary/10 text-primary shrink-0">
+          <component :is="kpi.icon" class="w-5 h-5" />
+        </span>
+        <div class="min-w-0">
+          <p class="text-xs text-muted-foreground">{{ kpi.label }}</p>
+          <p class="text-2xl font-semibold tabular-nums text-card-foreground">{{ kpi.value }}</p>
         </div>
-      </article>
-    </div>
+      </div>
+    </section>
+
+    <section class="bg-card border border-border rounded overflow-x-auto">
+      <h2 class="px-4 py-3 border-b border-border text-sm font-semibold text-card-foreground">
+        {{ t('planning.quality.linesTitle') }}
+      </h2>
+      <nav class="flex flex-wrap gap-1 px-2 border-b border-border">
+        <button
+          v-for="item in TABS"
+          :key="item"
+          type="button"
+          class="cursor-pointer px-3 py-2 text-sm border-b-2 -mb-px transition"
+          :class="
+            tab === item
+              ? 'border-primary text-card-foreground font-medium'
+              : 'border-transparent text-muted-foreground hover:text-card-foreground'
+          "
+          @click="tab = item"
+        >
+          {{ t(`planning.quality.tab.${item}`) }}
+          <span class="ml-1 text-xs tabular-nums text-muted-foreground">{{ countOf(item) }}</span>
+        </button>
+      </nav>
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-muted/40 text-xs text-muted-foreground">
+            <th class="px-3 py-2 font-semibold text-left">{{ t('planning.quality.col.order') }}</th>
+            <th class="px-3 py-2 font-semibold text-left">
+              {{ t('planning.quality.col.recipient') }}
+            </th>
+            <th class="px-3 py-2 font-semibold text-left">
+              {{ t('planning.quality.col.product') }}
+            </th>
+            <th class="px-3 py-2 font-semibold text-left">{{ t('planning.quality.col.facts') }}</th>
+            <th class="px-3 py-2 font-semibold text-left">
+              {{ t('planning.quality.col.responsibility') }}
+            </th>
+            <th class="px-3 py-2 font-semibold text-right">
+              {{ t('planning.quality.col.credit') }}
+            </th>
+            <th class="px-3 py-2 font-semibold text-right">
+              {{ t('planning.quality.col.actions') }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-if="!visibleRows.length">
+            <td colspan="7" class="px-3 py-4 text-muted-foreground">
+              {{ store.loading ? t('planning.quality.loading') : t('planning.quality.empty') }}
+            </td>
+          </tr>
+          <tr v-for="row in visibleRows" :key="keyOf(row)" class="border-t border-border align-top">
+            <td class="px-3 py-2 whitespace-nowrap">
+              <RouterLink :to="orderCard(row.orderNo)" class="text-primary hover:underline">
+                {{ row.orderNo }}
+              </RouterLink>
+              <span class="text-xs text-muted-foreground">
+                · {{ t('planning.quality.lineNo', { no: row.lineNo }) }}
+              </span>
+              <p class="text-xs text-muted-foreground">{{ meansLabel(row) }}</p>
+            </td>
+            <td class="px-3 py-2">
+              <p class="text-card-foreground">{{ row.recipientName || '—' }}</p>
+              <p class="text-xs text-muted-foreground">{{ row.deliveryPointName }}</p>
+            </td>
+            <td class="px-3 py-2">
+              <p>{{ row.productName || '—' }}</p>
+              <p class="text-xs text-muted-foreground tabular-nums">
+                {{ formatNumber(row.quantity) }} {{ row.unit }}
+              </p>
+            </td>
+            <td class="px-3 py-2">
+              <div v-if="row.facts.length" class="flex flex-wrap gap-1">
+                <StatusPill
+                  v-for="fact in row.facts"
+                  :key="fact"
+                  :label="t(`planning.quality.fact.${fact}`)"
+                  tone="warning"
+                />
+              </div>
+              <span v-else class="text-muted-foreground">—</span>
+            </td>
+            <td class="px-3 py-2">
+              <template v-if="row.responsibility">
+                <StatusPill
+                  :label="t(`planning.quality.actor.${mainActor(row.responsibility.shares)}`)"
+                  tone="info"
+                />
+                <p class="text-xs text-muted-foreground mt-1">
+                  {{ t(`planning.quality.origin.${row.responsibility.origin}`) }}
+                </p>
+              </template>
+              <StatusPill
+                v-else-if="row.facts.length"
+                :label="t('planning.quality.noResponsibility')"
+                tone="neutral"
+              />
+              <span v-else class="text-muted-foreground">—</span>
+            </td>
+            <td class="px-3 py-2 text-right tabular-nums whitespace-nowrap">
+              <p>{{ formatNumber(creditOf(row)) }}</p>
+              <p v-if="withholdingOf(row) !== null" class="text-xs text-muted-foreground">
+                {{
+                  t('planning.quality.withholding', { amount: formatNumber(withholdingOf(row)) })
+                }}
+              </p>
+              <p v-if="row.creditReference" class="text-xs text-muted-foreground">
+                {{ row.creditReference }} · {{ formatDate(row.creditIssuedAt) }}
+              </p>
+            </td>
+            <td class="px-3 py-2">
+              <div v-if="canExecute" class="flex flex-wrap justify-end gap-1">
+                <button
+                  type="button"
+                  :class="buttonClass"
+                  :disabled="store.acting"
+                  @click="openPrepare(row)"
+                >
+                  <FileWarning class="w-4 h-4 text-primary" />
+                  {{ t('planning.quality.prepare') }}
+                </button>
+                <button
+                  v-if="row.facts.length"
+                  type="button"
+                  :class="buttonClass"
+                  :disabled="store.acting"
+                  @click="openResponsibility(row)"
+                >
+                  <Scale class="w-4 h-4 text-primary" />
+                  {{ t('planning.quality.responsibility') }}
+                </button>
+                <button
+                  v-if="creditPending(row)"
+                  type="button"
+                  :class="buttonClass"
+                  :disabled="store.acting"
+                  @click="openCredit(row)"
+                >
+                  <HandCoins class="w-4 h-4 text-primary" />
+                  {{ t('planning.quality.issueCredit') }}
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="bg-card border border-border rounded overflow-x-auto">
+      <h2 class="px-4 py-3 border-b border-border text-sm font-semibold text-card-foreground">
+        {{ t('planning.quality.protestsTitle') }}
+      </h2>
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-muted/40 text-xs text-muted-foreground">
+            <th class="px-3 py-2 font-semibold text-left">
+              {{ t('planning.quality.col.protest') }}
+            </th>
+            <th class="px-3 py-2 font-semibold text-left">{{ t('planning.quality.col.order') }}</th>
+            <th class="px-3 py-2 font-semibold text-left">
+              {{ t('planning.quality.col.recipient') }}
+            </th>
+            <th class="px-3 py-2 font-semibold text-right">
+              {{ t('planning.quality.col.quantity') }}
+            </th>
+            <th class="px-3 py-2 font-semibold text-left">
+              {{ t('planning.quality.col.prepared') }}
+            </th>
+            <th class="px-3 py-2 font-semibold text-left">
+              {{ t('planning.quality.col.status') }}
+            </th>
+            <th class="px-3 py-2 font-semibold text-right">
+              {{ t('planning.quality.col.actions') }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-if="!protestRows.length">
+            <td colspan="7" class="px-3 py-4 text-muted-foreground">
+              {{ t('planning.quality.noProtest') }}
+            </td>
+          </tr>
+          <tr
+            v-for="{ row, note } in protestRows"
+            :key="note.no"
+            class="border-t border-border align-top"
+          >
+            <td class="px-3 py-2 whitespace-nowrap font-medium text-card-foreground">
+              {{ note.no }}
+            </td>
+            <td class="px-3 py-2 whitespace-nowrap">
+              <RouterLink :to="orderCard(row.orderNo)" class="text-primary hover:underline">
+                {{ row.orderNo }}
+              </RouterLink>
+              <span class="text-xs text-muted-foreground">
+                · {{ t('planning.quality.lineNo', { no: row.lineNo }) }}
+              </span>
+            </td>
+            <td class="px-3 py-2">
+              <p class="text-card-foreground">{{ row.recipientName || '—' }}</p>
+              <p class="text-xs text-muted-foreground">{{ row.productName }}</p>
+            </td>
+            <td class="px-3 py-2 text-right tabular-nums whitespace-nowrap">
+              {{ formatNumber(note.quantity) }} {{ row.unit }}
+            </td>
+            <td class="px-3 py-2 whitespace-nowrap text-muted-foreground">
+              {{ formatDate(note.preparedAt) }}
+            </td>
+            <td class="px-3 py-2">
+              <StatusPill
+                :label="t(`planning.quality.status.${note.status}`)"
+                :tone="PROTEST_TONES[note.status]"
+              />
+              <p v-if="note.outcome" class="text-xs text-muted-foreground mt-1">
+                {{ note.outcome }}
+              </p>
+            </td>
+            <td class="px-3 py-2">
+              <div v-if="canExecute" class="flex flex-wrap justify-end gap-1">
+                <button
+                  v-if="note.status === 'preparing'"
+                  type="button"
+                  :class="buttonClass"
+                  :disabled="store.acting"
+                  @click="issuing = { row, note }"
+                >
+                  <Send class="w-4 h-4 text-primary" />
+                  {{ t('planning.quality.issue') }}
+                </button>
+                <button
+                  v-else-if="note.status === 'issued'"
+                  type="button"
+                  :class="buttonClass"
+                  :disabled="store.acting"
+                  @click="closing = { row, note }"
+                >
+                  {{ t('planning.quality.close') }}
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
   </div>
-  <PlanningReasonDialog
+
+  <ConfirmDialog
     :open="preparing !== null"
     :title="t('planning.quality.prepare')"
-    kind="protest"
-    :loading="acting"
+    :confirm-disabled="!protestValid"
+    :loading="store.acting"
+    panel-class="max-w-md"
     @confirm="onPrepare"
     @cancel="preparing = null"
+  >
+    <div class="space-y-3">
+      <BaseFormField :label="t('planning.reasons.dialog.reason')" required>
+        <ReferenceLookup
+          v-model="protest.reasonNo"
+          :reference-key="reasonListKey('protest')"
+          :modal-title="t('planning.reasons.dialog.reason')"
+        />
+      </BaseFormField>
+      <BaseFormField :label="t('planning.quality.quantity')" required>
+        <FormInput v-model="protest.quantity" type="number" :min="0" />
+        <p class="text-xs text-muted-foreground mt-1">
+          {{
+            t('planning.quality.quantityHint', {
+              quantity: formatNumber(preparing?.quantity),
+              unit: preparing?.unit ?? ''
+            })
+          }}
+        </p>
+      </BaseFormField>
+      <BaseFormField :label="t('planning.reasons.dialog.comment')">
+        <FormTextarea v-model="protest.comment" :rows="3" :maxlength="500" />
+      </BaseFormField>
+    </div>
+  </ConfirmDialog>
+  <ConfirmDialog
+    :open="issuing !== null"
+    :title="t('planning.quality.issue')"
+    :message="issuing ? t('planning.quality.issueMessage', { no: issuing.note.no }) : ''"
+    :loading="store.acting"
+    @confirm="onIssue"
+    @cancel="issuing = null"
   />
+  <ReasonDialog
+    :open="closing !== null"
+    :title="t('planning.quality.close')"
+    :label="t('planning.quality.outcome')"
+    :min-length="1"
+    :loading="store.acting"
+    @confirm="onClose"
+    @cancel="closing = null"
+  />
+  <ConfirmDialog
+    :open="qualifying !== null"
+    :title="t('planning.quality.responsibility')"
+    :confirm-disabled="!responsibilityValid"
+    :loading="store.acting"
+    panel-class="max-w-lg"
+    @confirm="onResponsibility"
+    @cancel="qualifying = null"
+  >
+    <div class="space-y-3">
+      <BaseFormField :label="t('planning.quality.originLabel')" required>
+        <div class="flex flex-wrap gap-1">
+          <button
+            v-for="origin in QUALITY_ORIGINS"
+            :key="origin"
+            type="button"
+            class="cursor-pointer px-3 py-1.5 border rounded text-sm transition"
+            :class="chipClass(responsibility.origin === origin)"
+            @click="responsibility.origin = origin"
+          >
+            {{ t(`planning.quality.origin.${origin}`) }}
+          </button>
+        </div>
+      </BaseFormField>
+      <BaseFormField :label="t('planning.quality.actorLabel')" required>
+        <div class="flex flex-wrap gap-1">
+          <button
+            v-for="actor in QUALITY_ACTORS"
+            :key="actor"
+            type="button"
+            class="cursor-pointer px-3 py-1.5 border rounded text-sm transition disabled:opacity-50 disabled:cursor-not-allowed"
+            :class="chipClass(responsibility.actor === actor)"
+            :disabled="!qualifying || !actorAllowed(qualifying, actor)"
+            @click="responsibility.actor = actor"
+          >
+            {{ t(`planning.quality.actor.${actor}`) }}
+          </button>
+        </div>
+      </BaseFormField>
+      <BaseFormField :label="t('planning.quality.comment')" required>
+        <FormTextarea v-model="responsibility.comment" :rows="3" :maxlength="500" />
+      </BaseFormField>
+      <BaseFormField :label="t('planning.quality.credit')">
+        <FormInput
+          v-model="responsibility.credit"
+          type="number"
+          :min="0"
+          :disabled="!!qualifying?.creditIssuedAt"
+        />
+        <p class="text-xs text-muted-foreground mt-1">{{ t('planning.quality.creditHint') }}</p>
+      </BaseFormField>
+    </div>
+  </ConfirmDialog>
+  <ConfirmDialog
+    :open="crediting !== null"
+    :title="t('planning.quality.issueCredit')"
+    :confirm-disabled="!reference.trim()"
+    :loading="store.acting"
+    panel-class="max-w-md"
+    @confirm="onCredit"
+    @cancel="crediting = null"
+  >
+    <BaseFormField :label="t('planning.quality.reference')" required>
+      <FormInput v-model="reference" :maxlength="50" />
+    </BaseFormField>
+    <p v-if="crediting" class="text-xs text-muted-foreground mt-2">
+      {{ t('planning.quality.creditAmount', { amount: formatNumber(creditOf(crediting)) }) }}
+    </p>
+  </ConfirmDialog>
 </template>
