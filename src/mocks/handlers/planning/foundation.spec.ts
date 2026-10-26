@@ -146,3 +146,28 @@ describe('products', () => {
     expect(changed.data.data).toMatchObject({ isFuel: false, referenceDensity: null })
   })
 })
+
+describe('compatibilities and tolerances', () => {
+  it('refuse a rule on one product and a rule said twice', async () => {
+    const rule = { kind: 'together', productANo: 'PRD-007', productBNo: 'PRD-008' }
+    const path = '/planning/product-compatibilities'
+    expect((await send('post', path, { ...rule, productBNo: 'PRD-007' })).status).toBe(422)
+    expect((await send('post', path, rule)).status).toBe(409)
+    expect((await send('post', path, { ...rule, kind: 'succession' })).status).toBe(201)
+    expect((await send('post', path, rule, 'DIR001')).status).toBe(403)
+  })
+
+  it('keep one tolerance per scope and the company one for good', async () => {
+    const path = '/planning/quantity-tolerances'
+    const tolerance = { customerNo: 'CLI-002', productNo: null, value: 2, unit: 'percent' }
+    expect((await send('post', path, { ...tolerance, unit: 'quantity' })).status).toBe(422)
+    expect((await send('post', path, { ...tolerance, value: 120 })).status).toBe(422)
+    expect((await send('post', path, { ...tolerance, customerNo: 'CLI-001' })).status).toBe(409)
+    const created = await send('post', path, tolerance)
+    expect(created.data.data).toMatchObject({ no: 'TOL-004', scopeLabel: 'Leader Price Antsirabe' })
+    expect((await send('delete', `${path}/TOL-001`)).status).toBe(409)
+    expect((await send('delete', `${path}/TOL-004`)).status).toBe(200)
+    const company = await call(server, 'get', `${path}/TOL-001`, { as: 'COM001', language: 'en' })
+    expect(company.data.data).toMatchObject({ scopeLabel: 'Whole company' })
+  })
+})

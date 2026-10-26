@@ -948,6 +948,20 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/planning/product-compatibilities/': RouteRecordInfo<
+      '/planning/product-compatibilities/',
+      '/planning/product-compatibilities',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/planning/product-compatibilities/[id]': RouteRecordInfo<
+      '/planning/product-compatibilities/[id]',
+      '/planning/product-compatibilities/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/planning/products/': RouteRecordInfo<
       '/planning/products/',
       '/planning/products',
@@ -958,6 +972,20 @@ declare module 'vue-router/auto-routes' {
     '/planning/products/[id]': RouteRecordInfo<
       '/planning/products/[id]',
       '/planning/products/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/planning/quantity-tolerances/': RouteRecordInfo<
+      '/planning/quantity-tolerances/',
+      '/planning/quantity-tolerances',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/planning/quantity-tolerances/[id]': RouteRecordInfo<
+      '/planning/quantity-tolerances/[id]',
+      '/planning/quantity-tolerances/:id',
       { id: ParamValue<true> },
       { id: ParamValue<false> },
       | never
@@ -2051,6 +2079,22 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | 'id'
     }
+    'src/pages/planning/product-compatibilities/index.vue': {
+      routes:
+        | '/planning/product-compatibilities/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/planning/product-compatibilities/[id].vue': {
+      routes:
+        | '/planning/product-compatibilities/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
     'src/pages/planning/products/index.vue': {
       routes:
         | '/planning/products/'
@@ -2062,6 +2106,22 @@ declare module 'vue-router/auto-routes' {
     'src/pages/planning/products/[id].vue': {
       routes:
         | '/planning/products/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/planning/quantity-tolerances/index.vue': {
+      routes:
+        | '/planning/quantity-tolerances/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/planning/quantity-tolerances/[id].vue': {
+      routes:
+        | '/planning/quantity-tolerances/[id]'
       views:
         | never
       pathParamNames:

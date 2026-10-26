@@ -11,6 +11,9 @@ export function planningReferenceData(db: MockDatabase): Record<string, Referenc
   return {
     ordererCustomers: customers.filter((customer) => customer.isOrderer).map(asItem),
     recipientCustomers: customers.filter((customer) => customer.isRecipient).map(asItem),
+    products: db.products
+      .all()
+      .map((product) => ({ code: product.no, description: product.name, active: product.active })),
     deliveryPoints: db.deliveryPoints.all().map((point) => ({
       code: point.no,
       description: point.name,

@@ -79,6 +79,8 @@ import planningSettings from './planningSettings'
 import planningCustomers from './planningCustomers'
 import planningDeliveryPoints from './planningDeliveryPoints'
 import planningProducts from './planningProducts'
+import planningProductCompatibilities from './planningProductCompatibilities'
+import planningQuantityTolerances from './planningQuantityTolerances'
 export default {
   ...common,
   ...auth,
@@ -159,5 +161,7 @@ export default {
   ...planningSettings,
   ...planningCustomers,
   ...planningDeliveryPoints,
-  ...planningProducts
+  ...planningProducts,
+  ...planningProductCompatibilities,
+  ...planningQuantityTolerances
 }

@@ -18,6 +18,14 @@ export const PLANNING_OPTION_SETS: Record<string, Record<string, LocalizedText>>
     email: { fr: 'E-mail', en: 'E-mail' },
     sms_email: { fr: 'SMS et e-mail', en: 'SMS and e-mail' }
   },
+  productCompatibilityKind: {
+    together: { fr: 'Jamais ensemble', en: 'Never together' },
+    succession: { fr: 'Pas B après A sans nettoyage', en: 'No B after A without cleaning' }
+  },
+  toleranceUnit: {
+    percent: { fr: '% du chargé', en: '% of loaded' },
+    quantity: { fr: 'Unités du produit', en: 'Product units' }
+  },
   freightPayer: {
     orderer: { fr: "Donneur d'ordre", en: 'Orderer' },
     recipient: { fr: 'Destinataire', en: 'Recipient' }

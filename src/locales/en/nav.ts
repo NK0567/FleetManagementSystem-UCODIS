@@ -80,5 +80,7 @@ export default {
   'nav.planningSettings': 'Planning settings',
   'nav.customers': 'Customers',
   'nav.deliveryPoints': 'Delivery points',
-  'nav.products': 'Products'
+  'nav.products': 'Products',
+  'nav.productCompatibilities': 'Product compatibility',
+  'nav.quantityTolerances': 'Quantity tolerances'
 }

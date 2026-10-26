@@ -71,11 +71,13 @@ import { planningReasonsCollection } from '../fixtures/planning/planningReasons'
 import { customersCollection } from '../fixtures/planning/customers'
 import { deliveryPointsCollection } from '../fixtures/planning/deliveryPoints'
 import { productsCollection } from '../fixtures/planning/products'
+import { productCompatibilitiesCollection } from '../fixtures/planning/productCompatibilities'
+import { quantityTolerancesCollection } from '../fixtures/planning/quantityTolerances'
 import { createCollection, type CollectionContext } from './collection'
 import { clearStoredCollections } from './storage'
 
 /** Bump when fixtures change shape: every collection is then reseeded. */
-export const MOCK_SEED_VERSION = 35
+export const MOCK_SEED_VERSION = 36
 
 export function createDatabase(
   context: CollectionContext = {
@@ -155,7 +157,9 @@ export function createDatabase(
     planningReasons: createCollection(planningReasonsCollection, context),
     customers: createCollection(customersCollection, context),
     deliveryPoints: createCollection(deliveryPointsCollection, context),
-    products: createCollection(productsCollection, context)
+    products: createCollection(productsCollection, context),
+    productCompatibilities: createCollection(productCompatibilitiesCollection, context),
+    quantityTolerances: createCollection(quantityTolerancesCollection, context)
   }
 
   return {

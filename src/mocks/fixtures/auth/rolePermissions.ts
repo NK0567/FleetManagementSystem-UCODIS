@@ -93,7 +93,14 @@ const MAINTENANCE_OPERATIONS = [
   'STOCKITEM',
   'RELIABILITY'
 ]
-const PLANNING_REFERENCE = ['PLANNINGREASON', 'CUSTOMER', 'DELIVERYPOINT', 'PRODUCT']
+const PLANNING_REFERENCE = [
+  'PLANNINGREASON',
+  'CUSTOMER',
+  'DELIVERYPOINT',
+  'PRODUCT',
+  'PRODUCTCOMPATIBILITY',
+  'QUANTITYTOLERANCE'
+]
 const PLANNING_OPERATIONS: string[] = []
 /** Planning rights replace the old role lists of the planning settings. */
 const PLANNING_MANAGEMENT: Record<string, Grant> = {

@@ -8,6 +8,11 @@ export function registerPlanningModule(): void {
     CUSTOMER: { to: '/planning/customers', menuKey: 'customer' },
     DELIVERYPOINT: { to: '/planning/delivery-points', menuKey: 'deliveryPoint' },
     PRODUCT: { to: '/planning/products', menuKey: 'product' },
+    PRODUCTCOMPATIBILITY: {
+      to: '/planning/product-compatibilities',
+      menuKey: 'productCompatibility'
+    },
+    QUANTITYTOLERANCE: { to: '/planning/quantity-tolerances', menuKey: 'quantityTolerance' },
     PLANNINGREASON: { to: '/planning/reasons', menuKey: 'planningReason' },
     PLANNINGSETTINGS: { to: '/planning/settings', menuKey: 'planningSettings' }
   })
@@ -23,6 +28,16 @@ export function registerPlanningModule(): void {
         menuKey: 'deliveryPoint'
       },
       { labelKey: 'nav.products', to: '/planning/products', menuKey: 'product' },
+      {
+        labelKey: 'nav.productCompatibilities',
+        to: '/planning/product-compatibilities',
+        menuKey: 'productCompatibility'
+      },
+      {
+        labelKey: 'nav.quantityTolerances',
+        to: '/planning/quantity-tolerances',
+        menuKey: 'quantityTolerance'
+      },
       { labelKey: 'nav.planningReasons', to: '/planning/reasons', menuKey: 'planningReason' },
       { labelKey: 'nav.planningSettings', to: '/planning/settings', menuKey: 'planningSettings' }
     ]
