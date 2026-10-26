@@ -89,6 +89,66 @@ export const PLANNING_MESSAGES = {
     fr: 'Le tarif {no} couvre déjà ce cas : modifiez-le plutôt.',
     en: 'Tariff {no} already covers this case: change it instead.'
   },
+  reasonNotOffered: {
+    fr: 'Ce motif n’est pas proposé ici : choisissez-en un dans la liste.',
+    en: 'This reason is not offered here: choose one from the list.'
+  },
+  requestOrdererInvalid: {
+    fr: 'Le donneur d’ordre doit être un client actif qui passe des commandes.',
+    en: 'The orderer must be an active customer that places orders.'
+  },
+  requestPointInactive: {
+    fr: 'Ce point de livraison est désactivé.',
+    en: 'This delivery point is inactive.'
+  },
+  requestProductInactive: {
+    fr: 'Ce produit est désactivé.',
+    en: 'This product is inactive.'
+  },
+  request_desiredDateInPast: {
+    fr: 'La date souhaitée ne peut pas être passée.',
+    en: 'The desired date cannot be in the past.'
+  },
+  request_validityBeforeDesiredDate: {
+    fr: 'La validité ne peut pas finir avant la date souhaitée.',
+    en: 'The validity cannot end before the desired date.'
+  },
+  requestReferenceRequired: {
+    fr: 'Indiquez la référence du client ({label}).',
+    en: 'Give the customer reference ({label}).'
+  },
+  requestReferenceTaken: {
+    fr: 'Cette référence client est déjà celle de la demande {no}.',
+    en: 'This customer reference already belongs to request {no}.'
+  },
+  requestNotEditable: {
+    fr: 'Une demande planifiée ou annulée ne se modifie plus.',
+    en: 'A planned or cancelled request can no longer be changed.'
+  },
+  requestNotRejectable: {
+    fr: 'Seule une demande en attente ou expirée se rejette.',
+    en: 'Only a pending or expired request can be rejected.'
+  },
+  requestNotCancellable: {
+    fr: 'Une demande planifiée ou déjà annulée ne s’annule plus ici.',
+    en: 'A planned or already cancelled request cannot be cancelled here.'
+  },
+  requestNotSplittable: {
+    fr: 'Seule une demande en attente se fractionne.',
+    en: 'Only a pending request can be split.'
+  },
+  requestSplitTooLarge: {
+    fr: 'La part retirée doit être plus petite que la quantité de la demande.',
+    en: 'The part taken out must be smaller than the quantity of the request.'
+  },
+  requestNotMergeable: {
+    fr: 'On regroupe sur la demande d’origine, quand elle est encore en attente.',
+    en: 'Parts are merged into the original request, while it is still pending.'
+  },
+  requestNoPartToMerge: {
+    fr: 'Aucune part en attente à regrouper avec cette demande.',
+    en: 'No pending part to merge into this request.'
+  },
   deliveryPointCustomerNotRecipient: {
     fr: 'Un point de livraison appartient à un client destinataire actif.',
     en: 'A delivery point belongs to an active recipient customer.'

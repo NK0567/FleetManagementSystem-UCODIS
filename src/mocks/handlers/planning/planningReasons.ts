@@ -1,7 +1,11 @@
 import {
   PLANNING_REASON_KINDS,
-  type PlanningReasonApi
+  type PlanningReasonApi,
+  type PlanningReasonKind
 } from '@/modules/planning/reasons/types/planningReason.types'
+import { unprocessable } from '../../http/errors'
+import { requireReference } from '../../http/references'
+import { PLANNING_MESSAGES } from './messages'
 import type { AuditFields } from '../../db/collection'
 import type { MockDatabase } from '../../db/database'
 import type { PlanningReasonRow } from '../../fixtures/planning/planningReasons'
@@ -21,6 +25,19 @@ type Fields = Omit<PlanningReasonRow, 'no' | keyof AuditFields>
 
 export function planningReasonsApi(db: MockDatabase): PlanningReasonApi[] {
   return db.planningReasons.all()
+}
+
+/** A reason picked from the list of its kind, with an optional comment. */
+export function readReason(
+  db: MockDatabase,
+  input: Record<string, unknown>,
+  kind: PlanningReasonKind
+): { reasonNo: string; comment: string } {
+  const reasonNo = requireReference(db.planningReasons, input, 'reasonNo')
+  const reason = db.planningReasons.findOrFail(reasonNo)
+  if (reason.kind !== kind || !reason.active)
+    throw unprocessable(PLANNING_MESSAGES.reasonNotOffered)
+  return { reasonNo, comment: readString(input, 'comment') }
 }
 
 export function registerPlanningReasonsHandlers(router: MockRouter, db: MockDatabase): void {

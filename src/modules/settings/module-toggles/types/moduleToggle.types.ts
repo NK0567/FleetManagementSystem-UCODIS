@@ -1,4 +1,4 @@
-export type ModuleToggleGroup = 'fleet' | 'maintenance'
+export type ModuleToggleGroup = 'fleet' | 'maintenance' | 'planning'
 
 export interface ModuleToggleApi {
   no: string

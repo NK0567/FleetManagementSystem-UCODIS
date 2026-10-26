@@ -948,6 +948,20 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/planning/delivery-requests/': RouteRecordInfo<
+      '/planning/delivery-requests/',
+      '/planning/delivery-requests',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/planning/delivery-requests/[id]': RouteRecordInfo<
+      '/planning/delivery-requests/[id]',
+      '/planning/delivery-requests/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/planning/product-compatibilities/': RouteRecordInfo<
       '/planning/product-compatibilities/',
       '/planning/product-compatibilities',
@@ -2088,6 +2102,22 @@ declare module 'vue-router/auto-routes' {
     'src/pages/planning/delivery-points/[id].vue': {
       routes:
         | '/planning/delivery-points/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/planning/delivery-requests/index.vue': {
+      routes:
+        | '/planning/delivery-requests/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/planning/delivery-requests/[id].vue': {
+      routes:
+        | '/planning/delivery-requests/[id]'
       views:
         | never
       pathParamNames:

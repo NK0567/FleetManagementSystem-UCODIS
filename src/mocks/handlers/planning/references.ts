@@ -1,3 +1,5 @@
+import { reasonListKey } from '@/modules/planning/reasons/domain/reasonLists'
+import { PLANNING_REASON_KINDS } from '@/modules/planning/reasons/types/planningReason.types'
 import type { ReferenceItem } from '@/types/reference.types'
 import type { MockDatabase } from '../../db/database'
 
@@ -23,6 +25,15 @@ export function planningReferenceData(db: MockDatabase): Record<string, Referenc
     products: db.products
       .all()
       .map((product) => ({ code: product.no, description: product.name, active: product.active })),
+    ...Object.fromEntries(
+      PLANNING_REASON_KINDS.map((kind) => [
+        reasonListKey(kind),
+        db.planningReasons
+          .all()
+          .filter((reason) => reason.kind === kind)
+          .map((reason) => ({ code: reason.no, description: reason.name, active: reason.active }))
+      ])
+    ),
     deliveryPoints: db.deliveryPoints.all().map((point) => ({
       code: point.no,
       description: point.name,

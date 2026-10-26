@@ -74,5 +74,9 @@ export default {
     'Tyre tracking: mounting, pressure and wear readings, rotations, retreading and cost per kilometre.',
   'settings.moduleToggles.item.vehicle-checks.label': 'Vehicle checks',
   'settings.moduleToggles.item.vehicle-checks.description':
-    'Workshop checks before loading, on return from a trip and on receiving a new vehicle.'
+    'Workshop checks before loading, on return from a trip and on receiving a new vehicle.',
+  'settings.moduleToggles.group.planning': 'Planning',
+  'settings.moduleToggles.item.delivery-requests.label': 'Delivery requests',
+  'settings.moduleToggles.item.delivery-requests.description':
+    'Sales staff enter or import their customers’ requests. Without this module, the planner creates orders directly.'
 }

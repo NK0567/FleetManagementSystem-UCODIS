@@ -74,5 +74,9 @@ export default {
     "Suivi des pneus : montage, relevés de pression et d'usure, rotations, rechapage et coût au kilomètre.",
   'settings.moduleToggles.item.vehicle-checks.label': 'Contrôles véhicule',
   'settings.moduleToggles.item.vehicle-checks.description':
-    "Contrôles de l'atelier avant chargement, au retour de voyage et à la réception d'un véhicule neuf."
+    "Contrôles de l'atelier avant chargement, au retour de voyage et à la réception d'un véhicule neuf.",
+  'settings.moduleToggles.group.planning': 'Planification',
+  'settings.moduleToggles.item.delivery-requests.label': 'Demandes de livraison',
+  'settings.moduleToggles.item.delivery-requests.description':
+    'Les commerciaux saisissent ou importent les demandes de leurs clients. Sans ce module, le planificateur crée ses ordres directement.'
 }

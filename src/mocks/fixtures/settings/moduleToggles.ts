@@ -7,7 +7,7 @@ export interface ModuleToggleRow extends MockRow {
 
 export interface ModuleToggleDefinition {
   no: string
-  group: 'fleet' | 'maintenance'
+  group: 'fleet' | 'maintenance' | 'planning'
   order: number
   /** Features hidden from every profile while the toggle is off. */
   features: readonly string[]
@@ -64,7 +64,8 @@ export const MODULE_TOGGLE_CATALOG: readonly ModuleToggleDefinition[] = [
     group: 'maintenance',
     order: 280,
     features: ['VEHICLECHECK', 'VEHICLECHECKPOINT']
-  }
+  },
+  { no: 'delivery-requests', group: 'planning', order: 310, features: ['DELIVERYREQUEST'] }
 ]
 
 export const moduleTogglesCollection: CollectionDefinition<ModuleToggleRow> = {

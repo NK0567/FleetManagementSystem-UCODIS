@@ -36,6 +36,18 @@ export const PLANNING_OPTION_SETS: Record<string, Record<string, LocalizedText>>
     weight: { fr: 'À la tonne', en: 'Per tonne' },
     quantity: { fr: "À l'unité de produit", en: 'Per product unit' }
   },
+  deliveryRequestStatus: {
+    pending: { fr: 'En attente', en: 'Pending' },
+    planned: { fr: 'Planifiée', en: 'Planned' },
+    expired: { fr: 'Expirée', en: 'Expired' },
+    rejected: { fr: 'Rejetée', en: 'Rejected' },
+    cancelled: { fr: 'Annulée', en: 'Cancelled' }
+  },
+  deliveryRequestOrigin: {
+    request: { fr: 'Demande', en: 'Request' },
+    import: { fr: 'Import', en: 'Import' },
+    planner: { fr: 'Saisie par le planificateur', en: 'Keyed by the planner' }
+  },
   freightPayer: {
     orderer: { fr: "Donneur d'ordre", en: 'Orderer' },
     recipient: { fr: 'Destinataire', en: 'Recipient' }

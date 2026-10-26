@@ -25,5 +25,7 @@ export default {
   'planning.reasons.form.kind': 'List',
   'planning.reasons.form.kindHint':
     'When the reason is offered: cancellation, request rejection, refusal on delivery, and so on.',
-  'planning.reasons.form.active': 'Active'
+  'planning.reasons.form.active': 'Active',
+  'planning.reasons.dialog.reason': 'Reason',
+  'planning.reasons.dialog.comment': 'Comment'
 }
