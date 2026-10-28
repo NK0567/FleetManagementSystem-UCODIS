@@ -1,0 +1,37 @@
+export default {
+  'fleet.driverAssignments.title': 'Driver assignments',
+  'fleet.driverAssignments.card': 'Assignment card',
+  'fleet.driverAssignments.new': 'New assignment',
+  'fleet.driverAssignments.loadingList': 'Loading assignments…',
+  'fleet.driverAssignments.noResults': 'No assignment.',
+  'fleet.driverAssignments.noSearchResults': 'No assignment matches "{query}".',
+  'fleet.driverAssignments.saveSuccess': 'Assignment saved.',
+  'fleet.driverAssignments.saveError': 'The assignment could not be saved.',
+  'fleet.driverAssignments.createError': 'The assignment could not be created.',
+
+  'fleet.driverAssignments.search.all': 'No., driver or plate',
+
+  'fleet.driverAssignments.col.no': 'No.',
+  'fleet.driverAssignments.col.employeeNo': 'Driver',
+  'fleet.driverAssignments.col.vehicleNo': 'Vehicle',
+  'fleet.driverAssignments.col.startDate': 'Start',
+  'fleet.driverAssignments.col.endDate': 'End',
+  'fleet.driverAssignments.col.employeeName': 'Driver',
+  'fleet.driverAssignments.col.vehiclePlate': 'Vehicle',
+  'fleet.driverAssignments.col.coupledTrailerPlate': 'Coupled trailer',
+  'fleet.driverAssignments.col.state': 'State',
+  'fleet.driverAssignments.col.durationDays': 'Duration (days)',
+
+  'fleet.driverAssignments.form.general': 'General',
+  'fleet.driverAssignments.form.no': 'No.',
+  'fleet.driverAssignments.form.employeeNo': 'Driver',
+  'fleet.driverAssignments.form.vehicleNo': 'Vehicle',
+  'fleet.driverAssignments.form.startDate': 'Start',
+  'fleet.driverAssignments.form.endDate': 'End',
+  'fleet.driverAssignments.endError': 'The assignment could not be ended.',
+  'fleet.driverAssignments.action.end': 'End the assignment',
+  'fleet.driverAssignments.endHint': 'The driver and the vehicle become free again from this date.',
+  'fleet.driverAssignments.listView.active': 'Running',
+  'fleet.driverAssignments.listView.ended': 'Ended',
+  'fleet.driverAssignments.listView.all': 'All assignments'
+}

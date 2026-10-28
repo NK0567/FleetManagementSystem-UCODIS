@@ -1,0 +1,53 @@
+export default {
+  'hr.leaveRequests.title': 'Leave requests',
+  'hr.leaveRequests.card': 'Leave request',
+  'hr.leaveRequests.new': 'New leave request',
+  'hr.leaveRequests.loadingList': 'Loading requests…',
+  'hr.leaveRequests.noResults': 'No request.',
+  'hr.leaveRequests.noSearchResults': 'No request matches "{query}".',
+  'hr.leaveRequests.createSuccess': 'Request sent.',
+  'hr.leaveRequests.createError': 'The request could not be sent.',
+  'hr.leaveRequests.decisionError': 'The decision could not be saved.',
+
+  'hr.leaveRequests.listView.pending': 'Pending',
+  'hr.leaveRequests.listView.decided': 'Decided',
+  'hr.leaveRequests.listView.all': 'All',
+
+  'hr.leaveRequests.action.approve': 'Approve',
+  'hr.leaveRequests.action.sendBack': 'Send back',
+  'hr.leaveRequests.action.reject': 'Reject',
+
+  'hr.leaveRequests.search.all': 'No. or employee',
+
+  'hr.leaveRequests.col.no': 'No.',
+  'hr.leaveRequests.col.employeeName': 'Employee',
+  'hr.leaveRequests.col.orgUnitNo': 'Unit',
+  'hr.leaveRequests.col.leaveTypeName': 'Leave type',
+  'hr.leaveRequests.col.startDate': 'From',
+  'hr.leaveRequests.col.endDate': 'To',
+  'hr.leaveRequests.col.days': 'Days',
+  'hr.leaveRequests.col.status': 'Status',
+  'hr.leaveRequests.col.submittedAt': 'Sent on',
+  'hr.leaveRequests.col.reason': 'Reason',
+  'hr.leaveRequests.col.decidedAt': 'Decided on',
+  'hr.leaveRequests.col.decidedBy': 'Decided by',
+  'hr.leaveRequests.col.decisionComment': 'Decision comment',
+
+  'hr.leaveRequests.form.request': 'Request',
+  'hr.leaveRequests.form.decision': 'Decision',
+  'hr.leaveRequests.form.employeeNo': 'Employee',
+  'hr.leaveRequests.form.leaveTypeNo': 'Leave type',
+  'hr.leaveRequests.form.startDate': 'First day',
+  'hr.leaveRequests.form.endDate': 'Last day',
+  'hr.leaveRequests.form.endBeforeStart': 'The last day is before the first one',
+  'hr.leaveRequests.form.reason': 'Reason',
+  'hr.leaveRequests.form.days': 'Working days counted',
+  'hr.leaveRequests.form.dayCount': 'No day | {count} day | {count} days',
+  'hr.leaveRequests.form.available': 'Available balance',
+  'hr.leaveRequests.form.exceedsBalance':
+    'The request exceeds the available balance: it will be refused when sent.',
+  'hr.leaveRequests.form.status': 'Status',
+  'hr.leaveRequests.form.submittedAt': 'Sent on',
+  'hr.leaveRequests.form.decidedAt': 'Decision',
+  'hr.leaveRequests.form.decisionComment': 'Comment'
+}

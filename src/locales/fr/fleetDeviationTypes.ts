@@ -1,0 +1,40 @@
+export default {
+  'fleet.deviationTypes.title': "Types d'écarts",
+  'fleet.deviationTypes.card': "Fiche type d'écart",
+  'fleet.deviationTypes.new': "Nouveau type d'écart",
+  'fleet.deviationTypes.loadingList': "Chargement des types d'écarts…",
+  'fleet.deviationTypes.noResults': "Aucun type d'écart.",
+  'fleet.deviationTypes.noSearchResults': 'Aucun type ne correspond à « {query} ».',
+  'fleet.deviationTypes.saveSuccess': "Type d'écart enregistré.",
+  'fleet.deviationTypes.saveError': "Le type d'écart n'a pas pu être enregistré.",
+  'fleet.deviationTypes.createError': "Le type d'écart n'a pas pu être créé.",
+  'fleet.deviationTypes.deleteError': "Le type d'écart n'a pas pu être supprimé.",
+  'fleet.deviationTypes.confirmDelete': "Supprimer le type d'écart",
+  'fleet.deviationTypes.confirmDeleteMsg': 'Le type « {name} » sera définitivement supprimé.',
+
+  'fleet.deviationTypes.search.all': 'Code ou libellé',
+
+  'fleet.deviationTypes.col.no': 'Code',
+  'fleet.deviationTypes.col.name': 'Libellé',
+  'fleet.deviationTypes.col.category': 'Catégorie',
+  'fleet.deviationTypes.col.severity': 'Gravité',
+  'fleet.deviationTypes.col.threshold': 'Seuil',
+  'fleet.deviationTypes.col.unit': 'Unité',
+  'fleet.deviationTypes.col.autoDetected': 'Détecté par la télématique',
+  'fleet.deviationTypes.col.active': 'Actif',
+  'fleet.deviationTypes.col.deviationCount': 'Écarts',
+
+  'fleet.deviationTypes.form.general': 'Général',
+  'fleet.deviationTypes.form.no': 'Code',
+  'fleet.deviationTypes.form.name': 'Libellé',
+  'fleet.deviationTypes.form.category': 'Catégorie',
+  'fleet.deviationTypes.form.severity': 'Gravité',
+  'fleet.deviationTypes.form.threshold': 'Seuil',
+  'fleet.deviationTypes.form.thresholdHint': "Au-delà de ce seuil, l'écart est relevé.",
+  'fleet.deviationTypes.form.unit': 'Unité',
+  'fleet.deviationTypes.form.autoDetected': 'Détecté par la télématique',
+  'fleet.deviationTypes.form.autoDetectedHint':
+    'Les boîtiers embarqués relèvent cet écart sans saisie.',
+  'fleet.deviationTypes.form.active': 'Actif',
+  'fleet.deviationTypes.form.deviationCount': 'Écarts de ce type'
+}

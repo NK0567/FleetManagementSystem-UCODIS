@@ -1,0 +1,25 @@
+export default {
+  'fleet.dashboard.title': 'Tableau de bord flotte',
+  'fleet.dashboard.subtitle': "L'état du parc, des conducteurs et de la conformité aujourd'hui.",
+  'fleet.dashboard.loadError': "Le tableau de bord n'a pas pu être chargé.",
+  'fleet.dashboard.kpi.tractors': 'Tracteurs prêts',
+  'fleet.dashboard.kpi.trailers': 'Remorques prêtes',
+  'fleet.dashboard.kpi.readySub': 'Disponibles ou affectés, sans immobilisation',
+  'fleet.dashboard.kpi.drivers': 'Conducteurs disponibles',
+  'fleet.dashboard.kpi.driversSub': 'Ni en congé, ni en trajet, ni inéligibles',
+  'fleet.dashboard.kpi.documents': 'Documents à régulariser',
+  'fleet.dashboard.kpi.documentsSub': 'Expirés ou manquants · {expiring} à renouveler',
+  'fleet.dashboard.kpi.fuel': 'Carburant du mois',
+  'fleet.dashboard.kpi.fuelSub': 'Moyenne {average} L/100 km',
+  'fleet.dashboard.kpi.compliance': 'Trajets conformes',
+  'fleet.dashboard.kpi.complianceSub':
+    'Infractions en cours : {infractions} · sous le seuil de score : {drivers}',
+  'fleet.dashboard.movement': 'Situation des véhicules suivis',
+  'fleet.dashboard.openMap': 'Ouvrir la carte',
+  'fleet.dashboard.latestAlerts': 'Dernières alertes',
+  'fleet.dashboard.seeAll': 'Tout voir',
+  'fleet.dashboard.noAlert': 'Aucune alerte en cours.',
+  'fleet.dashboard.immobilized': 'Véhicules immobilisés',
+  'fleet.dashboard.noImmobilized': 'Aucun véhicule immobilisé.',
+  'fleet.dashboard.fleetByStatus': 'Répartition du parc'
+}

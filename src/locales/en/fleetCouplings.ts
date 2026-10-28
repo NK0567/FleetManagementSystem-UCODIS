@@ -1,0 +1,37 @@
+export default {
+  'fleet.couplings.title': 'Couplings',
+  'fleet.couplings.card': 'Coupling card',
+  'fleet.couplings.new': 'New coupling',
+  'fleet.couplings.loadingList': 'Loading couplings…',
+  'fleet.couplings.noResults': 'No coupling.',
+  'fleet.couplings.noSearchResults': 'No coupling matches "{query}".',
+  'fleet.couplings.saveSuccess': 'Coupling saved.',
+  'fleet.couplings.saveError': 'The coupling could not be saved.',
+  'fleet.couplings.createError': 'The coupling could not be created.',
+
+  'fleet.couplings.search.all': 'No. or plate',
+
+  'fleet.couplings.col.no': 'No.',
+  'fleet.couplings.col.tractorNo': 'Tractor',
+  'fleet.couplings.col.trailerNo': 'Trailer',
+  'fleet.couplings.col.startDate': 'Start',
+  'fleet.couplings.col.endDate': 'End',
+  'fleet.couplings.col.tractorPlate': 'Tractor',
+  'fleet.couplings.col.trailerPlate': 'Trailer',
+  'fleet.couplings.col.trailerTypeName': 'Trailer type',
+  'fleet.couplings.col.state': 'State',
+  'fleet.couplings.col.durationDays': 'Duration (days)',
+
+  'fleet.couplings.form.general': 'General',
+  'fleet.couplings.form.no': 'No.',
+  'fleet.couplings.form.tractorNo': 'Tractor',
+  'fleet.couplings.form.trailerNo': 'Trailer',
+  'fleet.couplings.form.startDate': 'Start',
+  'fleet.couplings.form.endDate': 'End',
+  'fleet.couplings.endError': 'The coupling could not be ended.',
+  'fleet.couplings.action.end': 'Uncouple',
+  'fleet.couplings.endHint': 'The tractor and the trailer become free again from this date.',
+  'fleet.couplings.listView.active': 'Running',
+  'fleet.couplings.listView.ended': 'Ended',
+  'fleet.couplings.listView.all': 'All couplings'
+}

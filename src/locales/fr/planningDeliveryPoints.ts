@@ -1,0 +1,50 @@
+export default {
+  'planning.deliveryPoints.title': 'Points de livraison',
+  'planning.deliveryPoints.card': 'Fiche point de livraison',
+  'planning.deliveryPoints.new': 'Nouveau point de livraison',
+  'planning.deliveryPoints.loadingList': 'Chargement des points de livraison…',
+  'planning.deliveryPoints.noResults': 'Aucun point de livraison.',
+  'planning.deliveryPoints.noSearchResults': 'Aucun point ne correspond à « {query} ».',
+  'planning.deliveryPoints.saveSuccess': 'Point de livraison enregistré.',
+  'planning.deliveryPoints.saveError': "Le point de livraison n'a pas pu être enregistré.",
+  'planning.deliveryPoints.createError': "Le point de livraison n'a pas pu être créé.",
+  'planning.deliveryPoints.deleteError': "Le point de livraison n'a pas pu être supprimé.",
+  'planning.deliveryPoints.confirmDelete': 'Supprimer le point de livraison',
+  'planning.deliveryPoints.confirmDeleteMsg': 'Le point « {name} » sera définitivement supprimé.',
+
+  'planning.deliveryPoints.search.all': 'N°, nom, client ou ville',
+
+  'planning.deliveryPoints.col.no': 'N°',
+  'planning.deliveryPoints.col.name': 'Nom',
+  'planning.deliveryPoints.col.customerNo': 'Client',
+  'planning.deliveryPoints.col.address': 'Adresse',
+  'planning.deliveryPoints.col.city': 'Ville',
+  'planning.deliveryPoints.col.latitude': 'Latitude',
+  'planning.deliveryPoints.col.longitude': 'Longitude',
+  'planning.deliveryPoints.col.pumpRequired': 'Pompe exigée',
+  'planning.deliveryPoints.col.acceptedVehicleTypeNos': 'Types de véhicules acceptés',
+  'planning.deliveryPoints.col.active': 'Actif',
+  'planning.deliveryPoints.col.customerName': 'Client',
+
+  'planning.deliveryPoints.form.general': 'Général',
+  'planning.deliveryPoints.form.location': 'Emplacement',
+  'planning.deliveryPoints.form.constraints': 'Contraintes de livraison',
+  'planning.deliveryPoints.form.no': 'N°',
+  'planning.deliveryPoints.form.name': 'Nom',
+  'planning.deliveryPoints.form.customerNo': 'Client',
+  'planning.deliveryPoints.form.address': 'Adresse',
+  'planning.deliveryPoints.form.city': 'Ville',
+  'planning.deliveryPoints.form.latitude': 'Latitude',
+  'planning.deliveryPoints.form.longitude': 'Longitude',
+  'planning.deliveryPoints.form.pumpRequired': 'Pompe exigée',
+  'planning.deliveryPoints.form.pumpRequiredHint':
+    'Le véhicule doit porter une pompe pour dépoter.',
+  'planning.deliveryPoints.form.acceptedVehicleTypeNos': 'Types de véhicules acceptés',
+  'planning.deliveryPoints.form.acceptedVehicleTypeNosHint':
+    'Aucun coché : tous les types sont acceptés.',
+  'planning.deliveryPoints.form.active': 'Actif',
+  'planning.deliveryPoints.map.point': 'Point de livraison',
+  'planning.deliveryPoints.map.editHint':
+    "Cliquez sur la carte pour placer le point de livraison : c'est là que le chauffeur est attendu.",
+  'planning.deliveryPoints.map.readOnlyHint': 'Le point montre où le chauffeur est attendu.'
+}

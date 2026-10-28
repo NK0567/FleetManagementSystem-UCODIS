@@ -1,0 +1,20 @@
+export default {
+  'maintenance.workshopLoad.title': 'Workshop load',
+  'maintenance.workshopLoad.subtitle': 'Open inside jobs, what is left of them and who does them.',
+  'maintenance.workshopLoad.loadError': 'The workshop load could not be loaded.',
+  'maintenance.workshopLoad.kpi.load': 'Planned load',
+  'maintenance.workshopLoad.kpi.loadSub': 'Capacity: {hours} h a day',
+  'maintenance.workshopLoad.kpi.occupancy': 'Occupancy',
+  'maintenance.workshopLoad.kpi.occupancySub': 'Over a {days}-day week',
+  'maintenance.workshopLoad.kpi.days': 'Days to clear',
+  'maintenance.workshopLoad.kpi.daysSub': 'At full capacity',
+  'maintenance.workshopLoad.kpi.unplanned': 'Unplanned',
+  'maintenance.workshopLoad.kpi.unplannedSub': 'Jobs with no date or technician',
+  'maintenance.workshopLoad.byTechnician': 'Load per technician',
+  'maintenance.workshopLoad.noTechnician': 'No active technician.',
+  'maintenance.workshopLoad.inactive': 'inactive',
+  'maintenance.workshopLoad.free': 'No job planned.',
+  'maintenance.workshopLoad.remaining': '{hours} h left',
+  'maintenance.workshopLoad.unplanned': 'Jobs to plan',
+  'maintenance.workshopLoad.noUnplanned': 'Everything is planned.'
+}

@@ -1,0 +1,382 @@
+<script lang="ts" setup>
+import { computed, ref } from 'vue'
+import { Upload, Truck } from '@lucide/vue'
+import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
+import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
+import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
+import { useListCellFormatters } from '@/composables/useListCellFormatters'
+import { useListPage } from '@/composables/useListPage'
+import { usePermissions } from '@/composables/usePermissions'
+import { getListCellDisplay } from '@/utils/listCellDisplay'
+import { deliveryRequestApi } from '../api/deliveryRequestApi'
+import { useDeliveryRequestStore } from '../stores/deliveryRequestStore'
+import type {
+  DeliveryRequestApi,
+  DeliveryRequestSearchColumn
+} from '../types/deliveryRequest.types'
+
+const { t } = useI18n()
+const router = useRouter()
+const importing = ref(false)
+const creatingOrder = ref(false)
+const { canInsert: canCreateOrder } = usePermissions('TRANSPORTORDER')
+const store = useDeliveryRequestStore()
+const { formatDateTime, formatDate, optionLabel, formatDecimal } = useListCellFormatters()
+
+function onOrderCreated(no: string) {
+  creatingOrder.value = false
+  void store.fetchItems(store.pagination.page, store.pagination.limit)
+  void router.push({ path: '/planning/transport-orders', query: { no } })
+}
+
+const searchColumnOptions = computed<{ value: DeliveryRequestSearchColumn; label: string }[]>(
+  () => [
+    {
+      value: 'no,ordererName,deliveryPointName,externalReference',
+      label: t('planning.deliveryRequests.search.all')
+    },
+    { value: 'no', label: t('planning.deliveryRequests.col.no') },
+    { value: 'ordererName', label: t('planning.deliveryRequests.col.ordererName') },
+    { value: 'deliveryPointName', label: t('planning.deliveryRequests.col.deliveryPointName') },
+    { value: 'externalReference', label: t('planning.deliveryRequests.col.externalReference') }
+  ]
+)
+
+const tableColumns = computed<TableColumn[]>(() => [
+  { sortKey: 'no', label: t('planning.deliveryRequests.col.no'), minW: '110px', cell: 'link' },
+  {
+    sortKey: 'desiredDate',
+    label: t('planning.deliveryRequests.col.desiredDate'),
+    minW: '130px',
+    formatter: formatDate
+  },
+  {
+    sortKey: 'validUntil',
+    label: t('planning.deliveryRequests.col.validUntil'),
+    minW: '130px',
+    defaultHidden: true,
+    formatter: formatDate
+  },
+  {
+    sortKey: 'externalReference',
+    label: t('planning.deliveryRequests.col.externalReference'),
+    minW: '150px'
+  },
+  {
+    sortKey: 'freightPayer',
+    label: t('planning.deliveryRequests.col.freightPayer'),
+    minW: '140px',
+    defaultHidden: true,
+    formatter: optionLabel('freightPayer')
+  },
+  {
+    sortKey: 'quantity',
+    label: t('planning.deliveryRequests.col.quantity'),
+    minW: '110px',
+    align: 'right',
+    formatter: formatDecimal
+  },
+  {
+    sortKey: 'weightKg',
+    label: t('planning.deliveryRequests.col.weightKg'),
+    minW: '110px',
+    align: 'right',
+    defaultHidden: true,
+    formatter: formatDecimal
+  },
+  {
+    sortKey: 'status',
+    label: t('planning.deliveryRequests.col.status'),
+    minW: '130px',
+    formatter: optionLabel('deliveryRequestStatus')
+  },
+  { sortKey: 'ordererName', label: t('planning.deliveryRequests.col.ordererName'), minW: '200px' },
+  {
+    sortKey: 'deliveryPointName',
+    label: t('planning.deliveryRequests.col.deliveryPointName'),
+    minW: '220px'
+  },
+  {
+    sortKey: 'recipientName',
+    label: t('planning.deliveryRequests.col.recipientName'),
+    minW: '200px',
+    defaultHidden: true
+  },
+  { sortKey: 'productName', label: t('planning.deliveryRequests.col.productName'), minW: '160px' },
+  { sortKey: 'unit', label: t('planning.deliveryRequests.col.unit'), minW: '90px' },
+  {
+    sortKey: 'modifiedAt',
+    label: t('common.audit.modifiedAt'),
+    minW: '150px',
+    defaultHidden: true,
+    formatter: formatDateTime
+  },
+  { sortKey: 'modifiedBy', label: t('common.audit.modifiedBy'), minW: '110px', defaultHidden: true }
+])
+
+const filterDefs: FilterFieldDef[] = [
+  {
+    field: 'freightPayer',
+    labelKey: 'planning.deliveryRequests.col.freightPayer',
+    valueType: 'string',
+    kind: 'option',
+    optionsKey: 'freightPayer'
+  }
+]
+
+const detailKeys = [
+  'status',
+  'ordererName',
+  'deliveryPointName',
+  'productName',
+  'quantity',
+  'desiredDate'
+]
+const detailColumns = computed(() =>
+  detailKeys
+    .map((key) => tableColumns.value.find((column) => column.sortKey === key))
+    .filter((column): column is TableColumn => !!column)
+)
+
+function detailValue(item: DeliveryRequestApi, column: TableColumn): string {
+  return getListCellDisplay(
+    (item as unknown as Record<string, unknown>)[column.sortKey],
+    item,
+    column
+  )
+}
+
+const {
+  canInsert,
+  showFilterPanel,
+  appliedFilterCount,
+  showDetailsPanel,
+  hideListContent,
+  showCardActions,
+  canViewSelected,
+  canEditSelected,
+  openSelectedView,
+  openSelectedEdit,
+  openFromList,
+  visibleColumns,
+  orderSortKeys,
+  visibleSortKeys,
+  pinnedSortKeys,
+  stickyColumnCount,
+  isColumnVisible,
+  isColumnPinned,
+  setColumnVisible,
+  setColumnPinned,
+  setColumnOrder,
+  setColumnWidth,
+  resetPreferences,
+  filterFields,
+  exportToExcel,
+  exporting,
+  exportError,
+  canExport,
+  cardNo,
+  showCard,
+  cardOpenMode,
+  closeCard,
+  showCreateModal,
+  showCreateSuccess,
+  openCreateModal,
+  onCreated,
+  createFromCard,
+  onSort,
+  onSearchColumnChange,
+  onUpdateUserFilters,
+  onReorderColumns
+} = useListPage<DeliveryRequestApi, DeliveryRequestSearchColumn>({
+  tableId: 'planning-delivery-requests',
+  feature: 'DELIVERYREQUEST',
+  store,
+  columns: tableColumns,
+  filterDefs,
+  exportFileBaseName: 'delivery-requests',
+  exportApi: deliveryRequestApi.exportExcel
+})
+</script>
+
+<template>
+  <div class="h-full flex flex-col bg-white">
+    <template v-if="!hideListContent">
+      <ListPageToolbar
+        :title="t('planning.deliveryRequests.title')"
+        :exporting="exporting"
+        :show-filter-panel="showFilterPanel"
+        :applied-filter-count="appliedFilterCount"
+        :show-export-excel="canExport"
+        :export-excel="exportToExcel"
+        :show-details-panel="showDetailsPanel"
+        :show-create="canInsert"
+        :show-card-actions="showCardActions"
+        :can-view-selected="canViewSelected"
+        :can-edit-selected="canEditSelected"
+        :show-list-view="false"
+        :search-column="store.searchColumn"
+        :search-query="store.searchQuery"
+        :column-options="searchColumnOptions"
+        :search-loading="store.loading"
+        @toggle-filter="showFilterPanel = !showFilterPanel"
+        @toggle-details="showDetailsPanel = !showDetailsPanel"
+        @create="openCreateModal"
+        @view="openSelectedView"
+        @edit="openSelectedEdit"
+        @search="store.search"
+        @clear="store.clearSearch()"
+        @update:search-column="onSearchColumnChange"
+      >
+        <template #column-picker>
+          <TableColumnPicker
+            :all-columns="tableColumns"
+            :order-sort-keys="orderSortKeys"
+            :visible-sort-keys="visibleSortKeys"
+            :pinned-sort-keys="pinnedSortKeys"
+            :is-column-visible="isColumnVisible"
+            :is-column-pinned="isColumnPinned"
+            :set-column-visible="setColumnVisible"
+            :set-column-pinned="setColumnPinned"
+            :set-column-order="setColumnOrder"
+            :reset-preferences="resetPreferences"
+          />
+        </template>
+        <template v-if="canInsert || canCreateOrder" #extra-actions>
+          <button
+            v-if="canCreateOrder"
+            type="button"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
+            @click="creatingOrder = true"
+          >
+            <Truck class="w-4 h-4 text-primary" />
+            {{ t('planning.transportOrders.action.createFromRequests') }}
+          </button>
+          <button
+            v-if="canInsert"
+            type="button"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
+            @click="importing = true"
+          >
+            <Upload class="w-4 h-4 text-primary" />
+            {{ t('planning.deliveryRequests.import.action') }}
+          </button>
+        </template>
+      </ListPageToolbar>
+
+      <FormAlerts class="mx-4" :error="exportError" @clear:error="exportError = null" />
+
+      <ListPageLayout
+        :filter-panel-open="showFilterPanel"
+        :table-columns="visibleColumns"
+        :sticky-column-count="stickyColumnCount"
+        :resizable="true"
+        :reorderable="true"
+        :on-reorder-columns="onReorderColumns"
+        :sort-by="store.sortBy"
+        :sort-direction="store.sortDirection"
+        :loading="store.loading"
+        :loading-text="t('planning.deliveryRequests.loadingList')"
+        :items="store.items"
+        row-key="no"
+        :selected-item="store.selectedItem"
+        :error="store.error"
+        :search-query="store.searchQuery"
+        :no-results-message="t('planning.deliveryRequests.noResults')"
+        :no-search-results-message="
+          t('planning.deliveryRequests.noSearchResults', { query: store.searchQuery })
+        "
+        :page="store.pagination.page"
+        :total-pages="store.pagination.totalPages"
+        :total="store.pagination.total"
+        :limit="store.pagination.limit"
+        :show-details-panel="showDetailsPanel && !!store.selectedItem"
+        @close-filter="showFilterPanel = false"
+        @reset-filters="store.resetFilters()"
+        @sort="onSort"
+        @update:width="setColumnWidth"
+        @update:page="store.changePage"
+        @update:limit="store.changeLimit"
+        @select-item="(item) => store.selectItem(item as DeliveryRequestApi)"
+        @row-dblclick="(item) => openFromList((item as DeliveryRequestApi).no)"
+        @primary-cell-click="(_item, value) => openFromList(String(value))"
+      >
+        <template #filter-panel>
+          <AdvancedFilterPanel
+            :fields="filterFields"
+            :model-value="store.userFilters"
+            @update:model-value="onUpdateUserFilters"
+          />
+        </template>
+        <template #details-panel>
+          <ListDetailsPanel v-if="store.selectedItem" :record-no="store.selectedItem.no">
+            <template #details>
+              <div class="px-4 py-4 space-y-4 flex-1 overflow-y-auto text-sm">
+                <div>
+                  <p class="text-xs text-muted-foreground font-semibold mb-1">
+                    {{ t('planning.deliveryRequests.col.deliveryPointName') }}
+                  </p>
+                  <p class="font-semibold text-primary">
+                    {{ store.selectedItem.deliveryPointName }}
+                  </p>
+                </div>
+                <dl class="grid grid-cols-2 gap-x-3 gap-y-2">
+                  <template v-for="column in detailColumns" :key="column.sortKey">
+                    <dt class="text-xs text-muted-foreground">{{ column.label }}</dt>
+                    <dd class="text-right font-medium text-card-foreground">
+                      {{ detailValue(store.selectedItem, column) }}
+                    </dd>
+                  </template>
+                </dl>
+              </div>
+            </template>
+            <template #footer>
+              <button
+                v-if="canViewSelected"
+                type="button"
+                class="flex-1 px-3 py-2 bg-primary text-primary-foreground text-sm rounded hover:opacity-90 transition font-medium"
+                @click="openSelectedView"
+              >
+                {{ t('common.view') }}
+              </button>
+              <button
+                v-if="canEditSelected"
+                type="button"
+                class="flex-1 px-3 py-2 border border-border text-card-foreground text-sm rounded hover:bg-accent transition font-medium"
+                @click="openSelectedEdit"
+              >
+                {{ t('common.edit') }}
+              </button>
+            </template>
+          </ListDetailsPanel>
+        </template>
+      </ListPageLayout>
+    </template>
+
+    <DeliveryRequestCard
+      v-if="showCard && cardNo"
+      :key="`${cardNo}-${cardOpenMode}`"
+      :delivery-request-no="cardNo"
+      :initial-open-mode="cardOpenMode"
+      :show-create-success="showCreateSuccess"
+      @close="closeCard"
+      @create="createFromCard"
+    />
+    <DeliveryRequestCreateModal
+      v-if="showCreateModal"
+      @close="showCreateModal = false"
+      @created="onCreated"
+    />
+    <RequestImportDialog
+      :open="importing"
+      @close="importing = false"
+      @imported="store.fetchItems(store.pagination.page, store.pagination.limit)"
+    />
+    <CreateTransportOrderDialog
+      :open="creatingOrder"
+      @close="creatingOrder = false"
+      @created="onOrderCreated"
+    />
+  </div>
+</template>

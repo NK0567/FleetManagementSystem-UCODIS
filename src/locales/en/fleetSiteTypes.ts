@@ -1,0 +1,42 @@
+export default {
+  'fleet.siteTypes.title': 'Site types',
+  'fleet.siteTypes.card': 'Site type card',
+  'fleet.siteTypes.new': 'New site type',
+  'fleet.siteTypes.loadingList': 'Loading site types…',
+  'fleet.siteTypes.noResults': 'No site type.',
+  'fleet.siteTypes.noSearchResults': 'No site type matches "{query}".',
+  'fleet.siteTypes.saveSuccess': 'Site type saved.',
+  'fleet.siteTypes.saveError': 'The site type could not be saved.',
+  'fleet.siteTypes.createError': 'The site type could not be created.',
+  'fleet.siteTypes.deleteError': 'The site type could not be deleted.',
+  'fleet.siteTypes.confirmDelete': 'Delete the site type',
+  'fleet.siteTypes.confirmDeleteMsg': 'The "{name}" type will be permanently deleted.',
+
+  'fleet.siteTypes.search.all': 'Code or name',
+
+  'fleet.siteTypes.col.no': 'Code',
+  'fleet.siteTypes.col.name': 'Name',
+  'fleet.siteTypes.col.defaultRadiusM': 'Default radius (m)',
+  'fleet.siteTypes.col.color': 'Map color',
+  'fleet.siteTypes.col.loadingDepot': 'Loading depot',
+  'fleet.siteTypes.col.restAllowed': 'Rest allowed',
+  'fleet.siteTypes.col.restricted': 'Restricted zone',
+  'fleet.siteTypes.col.active': 'Active',
+  'fleet.siteTypes.col.siteCount': 'Sites',
+
+  'fleet.siteTypes.form.general': 'General',
+  'fleet.siteTypes.form.no': 'Code',
+  'fleet.siteTypes.form.name': 'Name',
+  'fleet.siteTypes.form.defaultRadiusM': 'Default radius (m)',
+  'fleet.siteTypes.form.defaultRadiusMHint':
+    'Radius of the zone of a site of this type, when the site sets none.',
+  'fleet.siteTypes.form.color': 'Map color',
+  'fleet.siteTypes.form.loadingDepot': 'Loading depot',
+  'fleet.siteTypes.form.loadingDepotHint': 'Shipments leave from sites of this type.',
+  'fleet.siteTypes.form.restAllowed': 'Rest allowed',
+  'fleet.siteTypes.form.restAllowedHint': 'A long stop at a site of this type is not reported.',
+  'fleet.siteTypes.form.restricted': 'Restricted zone',
+  'fleet.siteTypes.form.restrictedHint': 'A vehicle entering a site of this type is reported.',
+  'fleet.siteTypes.form.active': 'Active',
+  'fleet.siteTypes.form.siteCount': 'Sites of this type'
+}

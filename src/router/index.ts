@@ -1,203 +1,51 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import { useAuthStore } from '../stores/auth'
-import { useParametresPlanificationStore } from '../stores/parametresPlanification'
-import LoginView from '../views/LoginView.vue'
-import TableauBordView from '../views/admin/TableauBordView.vue'
+import { createRouter, createWebHashHistory } from 'vue-router'
+import { routes } from 'vue-router/auto-routes'
+import { AUTH_TOKEN_STORAGE_KEY } from '@/core/api/httpClient'
+import { findFeatureForPath } from '@/core/navigation/featureRoutes'
+import { HOME_PATH, resolveLandingPath } from '@/core/navigation/landing'
+import { getNavMenus } from '@/core/navigation/moduleRegistry'
+import { useMenuPermissionsStore } from '@/stores/menuPermissions'
+import { useUserStore } from '@/stores/user'
 
-const dashboard = { requiresAuth: true, layout: 'dashboard' as const }
+export const LOGIN_PATH = '/login'
+const NOT_FOUND_ROUTE = '/[...path]'
 
+// Hash history: the app is served from an IIS virtual directory without URL rewriting.
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [
-    { path: '/', name: 'login', component: LoginView },
-
-    /* Espace client, public : aucun compte, un lien propre à chaque
-       ligne de livraison. Sans meta.requiresAuth ni layout dashboard,
-       pour rester accessible sans connexion et hors de la coquille
-       applicative. */
-    { path: '/suivi/:etapeId', name: 'suivi-livraison',
-      component: () => import('../views/public/SuiviLivraisonView.vue') },
-
-    /* Liste de chargement imprimable : accessible sans navigation dans
-       le tableau de bord, pour s'ouvrir proprement dans un nouvel
-       onglet destiné à l'impression. */
-    { path: '/chargement/:voyageId', name: 'liste-chargement',
-      component: () => import('../views/public/ListeChargementView.vue') },
-
-    /* Espace de l'ordonnateur (rôles réglés dans les paramètres de la
-       planification) et page de l'agent qui appelle les clients : chacun
-       n'est ouvert qu'à son rôle (voir la garde plus bas). */
-    { path: '/demandes-livraison', name: 'demandes-livraison',
-      component: () => import('../views/planification/DemandesLivraisonView.vue'), meta: dashboard },
-    { path: '/confirmations-clients', name: 'confirmations-clients',
-      component: () => import('../views/planification/ConfirmationsClientsView.vue'), meta: dashboard },
-
-    /* ══ MODULE ADMINISTRATION ═══════════════════════════════════
-       Même découpage que sur les autres projets bâtis sur le socle FMS : tableau de
-       bord, congés et absences, personnel, configuration.          */
-
-    { path: '/administration', name: 'admin-tableau-bord', component: TableauBordView, meta: dashboard },
-    { path: '/administration/planning', name: 'admin-planning',
-      component: () => import('../views/admin/PlanningView.vue'), meta: dashboard },
-
-    { path: '/administration/demandes', name: 'admin-demandes',
-      component: () => import('../views/admin/DemandesView.vue'), meta: dashboard },
-    { path: '/administration/soldes', name: 'admin-soldes',
-      component: () => import('../views/admin/SoldesView.vue'), meta: dashboard },
-
-    { path: '/administration/employes', name: 'admin-employes',
-      component: () => import('../views/admin/EmployeListView.vue'), meta: dashboard },
-    /* La fiche s'ouvre en superposition depuis la liste (double-clic).
-       L'ancienne adresse de détail redirige vers la liste.               */
-    { path: '/administration/employes/:id', redirect: { name: 'admin-employes' } },
-    { path: '/administration/entites', name: 'admin-entites',
-      component: () => import('../views/admin/EntiteListView.vue'), meta: dashboard },
-    { path: '/administration/organigramme', name: 'admin-organigramme',
-      component: () => import('../views/admin/OrganigrammeView.vue'), meta: dashboard },
-
-    { path: '/administration/calendrier', name: 'admin-calendrier',
-      component: () => import('../views/admin/CalendrierView.vue'), meta: dashboard },
-    { path: '/administration/classification', name: 'admin-classification',
-      component: () => import('../views/admin/ClassificationView.vue'), meta: dashboard },
-    { path: '/administration/parametres', name: 'admin-parametres',
-      component: () => import('../views/admin/ParametresModulesView.vue'), meta: dashboard },
-
-    /* ══ MODULE PLANIFICATION ════════════════════════════════════
-       Écran unique : tableau des ordres de transport, de leur création à
-       leur clôture. */
-    { path: '/planification', name: 'planification-kanban',
-      component: () => import('../views/planification/PlanificationView.vue'), meta: dashboard },
-
-    /* ══ MODULE FLOTTE ═══════════════════════════════════════════
-       Module 1 du cahier des charges, comme sur les projets de référence
-       (le socle FMS : onglet « Flotte », dossier views/fleet). Construit selon le
-       même principe que l'Administration : le tableau de bord et la fiche
-       véhicule d'abord, le reste (documents, contrôles, suivi temps réel)
-       ensuite. */
-    { path: '/flotte', name: 'flotte-tableau-bord',
-      component: () => import('../views/flotte/TableauBordView.vue'), meta: dashboard },
-    { path: '/flotte/carte', name: 'flotte-carte',
-      component: () => import('../views/flotte/CarteTempsReelView.vue'), meta: dashboard },
-    { path: '/flotte/rapports', name: 'flotte-rapports',
-      component: () => import('../views/flotte/RapportsView.vue'), meta: dashboard },
-    { path: '/flotte/vehicules', name: 'flotte-vehicules',
-      component: () => import('../views/flotte/VehiculeListView.vue'), meta: dashboard },
-    { path: '/flotte/attelages', name: 'flotte-attelages',
-      component: () => import('../views/flotte/AttelagesView.vue'), meta: dashboard },
-    { path: '/flotte/affectations', name: 'flotte-affectations',
-      component: () => import('../views/flotte/AffectationsView.vue'), meta: dashboard },
-    { path: '/flotte/telemetrie', name: 'flotte-telemetrie',
-      component: () => import('../views/flotte/TelemetrieView.vue'), meta: dashboard },
-    { path: '/flotte/etat', name: 'flotte-etat',
-      component: () => import('../views/flotte/EtatFlotteView.vue'), meta: dashboard },
-    { path: '/flotte/assurances', name: 'flotte-assurances',
-      component: () => import('../views/flotte/AssurancesView.vue'), meta: dashboard },
-    { path: '/flotte/documents-vehicule', name: 'flotte-documents-vehicule',
-      component: () => import('../views/flotte/DocumentsVehiculeView.vue'), meta: dashboard },
-    { path: '/flotte/documents-entreprise', name: 'flotte-documents-entreprise',
-      component: () => import('../views/flotte/DocumentsEntrepriseView.vue'), meta: dashboard },
-    { path: '/flotte/infractions', name: 'flotte-infractions',
-      component: () => import('../views/flotte/InfractionsView.vue'), meta: dashboard },
-    { path: '/flotte/formations', name: 'flotte-formations',
-      component: () => import('../views/flotte/FormationsView.vue'), meta: dashboard },
-    { path: '/flotte/alertes', name: 'flotte-alertes',
-      component: () => import('../views/flotte/AlertesView.vue'), meta: dashboard },
-    { path: '/flotte/conducteurs', name: 'flotte-conducteurs',
-      component: () => import('../views/flotte/ConducteursFlotteView.vue'), meta: dashboard },
-    { path: '/flotte/conducteurs/:id', name: 'flotte-conducteur-dashboard',
-      component: () => import('../views/flotte/ConducteurDashboardView.vue'), meta: dashboard },
-    { path: '/flotte/voyages', name: 'flotte-voyages',
-      component: () => import('../views/flotte/VoyagesView.vue'), meta: dashboard },
-    { path: '/flotte/conformite', name: 'flotte-conformite',
-      component: () => import('../views/flotte/ConformiteView.vue'), meta: dashboard },
-    { path: '/flotte/carburant', name: 'flotte-carburant',
-      component: () => import('../views/flotte/CarburantView.vue'), meta: dashboard },
-    { path: '/flotte/cartes-carburant', name: 'flotte-cartes-carburant',
-      component: () => import('../views/flotte/CartesCarburantView.vue'), meta: dashboard },
-    { path: '/flotte/controles', name: 'flotte-controles',
-      component: () => import('../views/flotte/ControlesView.vue'), meta: dashboard },
-    { path: '/flotte/departs', name: 'flotte-departs',
-      component: () => import('../views/flotte/DepartsView.vue'), meta: dashboard },
-    { path: '/flotte/prestataires', name: 'flotte-prestataires',
-      component: () => import('../views/flotte/PrestatairesView.vue'), meta: dashboard },
-    { path: '/flotte/sites', name: 'flotte-sites',
-      component: () => import('../views/flotte/SitesView.vue'), meta: dashboard },
-    { path: '/flotte/configuration', name: 'flotte-configuration',
-      component: () => import('../views/flotte/ConfigurationView.vue'), meta: dashboard },
-
-    /* ══ MODULE MAINTENANCE ══════════════════════════════════════
-       Module 3 du cahier des charges, copié à la lettre de la structure
-       du socle FMS (dossier views/maintenance), adapté au fret sec : pas de
-       sous-système ni de compétence « citerne ». */
-    { path: '/maintenance', name: 'maintenance-dashboard',
-      component: () => import('../views/maintenance/MaintenanceDashboardView.vue'), meta: dashboard },
-    { path: '/maintenance/ordres', name: 'maintenance-ordres',
-      component: () => import('../views/maintenance/MaintenanceListView.vue'), meta: dashboard },
-    { path: '/maintenance/plans', name: 'maintenance-plans',
-      component: () => import('../views/maintenance/PlansEntretienView.vue'), meta: dashboard },
-    { path: '/maintenance/atelier', name: 'maintenance-atelier',
-      component: () => import('../views/maintenance/AtelierView.vue'), meta: dashboard },
-    { path: '/maintenance/echeances', name: 'maintenance-echeances',
-      component: () => import('../views/maintenance/EcheancesView.vue'), meta: dashboard },
-    { path: '/maintenance/indisponibilites', name: 'maintenance-indisponibilites',
-      component: () => import('../views/maintenance/IndisponibilitesView.vue'), meta: dashboard },
-    { path: '/maintenance/controles', name: 'maintenance-controles',
-      component: () => import('../views/maintenance/ControlesVehiculeView.vue'), meta: dashboard },
-    { path: '/maintenance/pneumatiques', name: 'maintenance-pneumatiques',
-      component: () => import('../views/maintenance/PneumatiquesView.vue'), meta: dashboard },
-    { path: '/maintenance/equipe-mobile', name: 'maintenance-equipe-mobile',
-      component: () => import('../views/maintenance/EquipeMobileView.vue'), meta: dashboard },
-    { path: '/maintenance/fiabilite', name: 'maintenance-fiabilite',
-      component: () => import('../views/maintenance/FiabiliteView.vue'), meta: dashboard },
-    { path: '/maintenance/achats', name: 'maintenance-achats',
-      component: () => import('../views/maintenance/AchatsStockView.vue'), meta: dashboard },
-    { path: '/maintenance/parametres', name: 'maintenance-parametres',
-      component: () => import('../views/maintenance/ParametresAtelierView.vue'), meta: dashboard },
-
-    /* ══ ESPACE PERSONNEL (conducteur, aide conducteur) ══════════ */
-    { path: '/mon-espace', name: 'espace-accueil',
-      component: () => import('../views/espace/EspaceAccueilView.vue'), meta: dashboard },
-    { path: '/mon-espace/absences', name: 'espace-absences',
-      component: () => import('../views/espace/MesAbsencesView.vue'), meta: dashboard },
-    { path: '/mon-espace/checklist', name: 'espace-checklist',
-      component: () => import('../views/espace/MaChecklistView.vue'), meta: dashboard },
-    { path: '/mon-profil', name: 'mon-profil',
-      component: () => import('../views/espace/MonProfilView.vue'), meta: dashboard },
-
-    { path: '/:pathMatch(.*)*', redirect: '/' },
-  ],
+  history: createWebHashHistory(),
+  routes
 })
 
-/** Écran d'arrivée de chaque rôle à la connexion. */
-function accueil(): { name: string } {
-  const auth = useAuthStore()
-  if (!auth.cotéGestion) return { name: 'espace-accueil' }
-  if (useParametresPlanificationStore().estAgentAppels(auth.role)) return { name: 'confirmations-clients' }
-  if (useParametresPlanificationStore().peutEmettre(auth.role)) return { name: 'demandes-livraison' }
-  return { name: 'admin-tableau-bord' }
+/** A path can be opened when a page exists for it and its feature is readable. */
+function canOpen(path: string): boolean {
+  if (router.resolve(path).name === NOT_FOUND_ROUTE) return false
+  const feature = findFeatureForPath(path)
+  return !feature || useMenuPermissionsStore().can(feature)
 }
 
-router.beforeEach(to => {
-  const auth = useAuthStore()
+export function landingPath(): string {
+  return resolveLandingPath({
+    preferred: useUserStore().user?.landingRoute,
+    menus: getNavMenus(),
+    canOpen
+  })
+}
 
-  if (to.meta.requiresAuth && !auth.connecte) return { name: 'login' }
-
-  if (to.name === 'login' && auth.connecte) return accueil()
-
-  /* Le personnel roulant ne voit que son espace. */
-  if (auth.connecte && auth.cotéTerrain) {
-    const autorise = ['espace-accueil', 'espace-absences', 'espace-checklist', 'mon-profil']
-    if (!autorise.includes(String(to.name))) return { name: 'espace-accueil' }
+router.beforeEach(async (to) => {
+  if (!localStorage.getItem(AUTH_TOKEN_STORAGE_KEY)) {
+    return to.path === LOGIN_PATH ? true : LOGIN_PATH
   }
 
-  /* À l'inverse, le côté gestion n'a rien à faire dans l'espace terrain. */
-  if (auth.connecte && auth.cotéGestion && String(to.name).startsWith('espace-')) return accueil()
+  await useMenuPermissionsStore().ensureLoaded()
 
-  /* Demandes de livraison : rôles ordonnateurs seulement. */
-  if (auth.connecte && to.name === 'demandes-livraison' && !useParametresPlanificationStore().peutEmettre(auth.role)) return accueil()
+  if (to.path === LOGIN_PATH || to.path === HOME_PATH) {
+    const landing = landingPath()
+    return landing === to.path ? true : landing
+  }
+  if (!canOpen(to.path)) return HOME_PATH
 
-  /* Confirmations clients : l'agent qui appelle les clients seulement. */
-  if (auth.connecte && to.name === 'confirmations-clients' && !useParametresPlanificationStore().estAgentAppels(auth.role)) return accueil()
+  useUserStore().refreshProfile()
+  return true
 })
 
 export default router

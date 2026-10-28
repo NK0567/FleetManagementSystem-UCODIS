@@ -1,0 +1,91 @@
+export default {
+  'fleet.settings.title': 'Réglages de la flotte',
+  'fleet.settings.subtitle':
+    "Seuils et préavis utilisés par les contrôles de la flotte. Chaque section s'enregistre séparément.",
+  'fleet.settings.lastModified': 'Modifié le {date} par {user}',
+  'fleet.settings.loadError': "Les réglages de la flotte n'ont pas pu être chargés.",
+  'fleet.settings.saveError': "Les réglages n'ont pas pu être enregistrés.",
+
+  'fleet.settings.section.drivingTime': 'Temps de conduite et de repos',
+  'fleet.settings.section.drivingTime.hint':
+    'Limites réglementaires contrôlées avant un départ et pendant les trajets.',
+  'fleet.settings.section.geofencing': 'Sites et géorepères',
+  'fleet.settings.section.geofencing.hint':
+    "Rayon appliqué à un site lorsque ni le site ni son type n'en fixent un.",
+  'fleet.settings.section.documents': 'Documents',
+  'fleet.settings.section.documents.hint':
+    "Préavis appliqué à un type de document qui n'en fixe pas.",
+
+  'fleet.settings.field.drivingTime.continuousDrivingMaxMin': 'Conduite continue maximale',
+  'fleet.settings.field.drivingTime.breakAfterDrivingMin': 'Pause après conduite continue',
+  'fleet.settings.field.drivingTime.dailyDrivingMaxMin': 'Conduite journalière maximale',
+  'fleet.settings.field.drivingTime.dailyWorkMaxMin': 'Travail journalier maximal',
+  'fleet.settings.field.drivingTime.restBeforeDepartureMinH': 'Repos minimal avant un départ',
+  'fleet.settings.field.drivingTime.weeklyRestMinH': 'Repos hebdomadaire minimal',
+  'fleet.settings.field.drivingTime.weeklyDrivingMaxH': 'Conduite hebdomadaire maximale',
+  'fleet.settings.field.drivingTime.fortnightDrivingMaxH':
+    'Conduite maximale sur deux semaines (facultatif)',
+  'fleet.settings.field.drivingTime.nightBanStart': 'Conduite de nuit interdite à partir de',
+  'fleet.settings.field.drivingTime.nightBanEnd': "Conduite de nuit interdite jusqu'à",
+  'fleet.settings.field.geofencing.defaultSiteRadiusM': 'Rayon de site par défaut',
+  'fleet.settings.field.documents.defaultNoticeDays': 'Préavis par défaut',
+
+  'fleet.settings.unit.min': 'min',
+  'fleet.settings.unit.h': 'h',
+  'fleet.settings.unit.m': 'm',
+  'fleet.settings.unit.days': 'jours',
+
+  'fleet.settings.issue.required': 'Ce réglage est obligatoire.',
+  'fleet.settings.issue.outOfRange': 'Indiquez une valeur entre {min} et {max} {unit}.',
+  'fleet.settings.issue.invalidTime': 'Indiquez une heure au format HH:MM.',
+  'fleet.settings.issue.nightWindowIncomplete':
+    "Indiquez l'heure de début et l'heure de fin, ou laissez les deux vides.",
+  'fleet.settings.issue.nightWindowEmpty': "L'heure de fin doit différer de l'heure de début.",
+  'fleet.settings.section.safety': 'Sécurité',
+  'fleet.settings.section.safety.hint': 'Délais appliqués aux contrôles des véhicules.',
+  'fleet.settings.field.safety.recheckDelayDays': 'Délai de contre-visite',
+  'fleet.settings.field.safety.justificationDelayH': "Délai de justification d'un écart",
+  'fleet.settings.section.fuel': 'Carburant',
+  'fleet.settings.section.fuel.hint':
+    'Contrôles des pleins, références de consommation et retenues.',
+  'fleet.settings.field.fuel.refuelStartHour': 'Pleins autorisés à partir de',
+  'fleet.settings.field.fuel.refuelEndHour': "Pleins autorisés jusqu'à",
+  'fleet.settings.field.fuel.gpsGapMaxKm': 'Écart GPS toléré avec la station',
+  'fleet.settings.field.fuel.consumptionGapPct': 'Écart de consommation à qualifier',
+  'fleet.settings.field.fuel.defaultL100': 'Consommation de référence par défaut',
+  'fleet.settings.field.fuel.co2GramsPerL': 'Émission de CO₂ par litre',
+  'fleet.settings.field.fuel.deductionCapAmount': "Plafond d'une retenue",
+  'fleet.settings.field.fuel.matchingToleranceMin': 'Rapprochement carte : écart de temps',
+  'fleet.settings.field.fuel.matchingTolerancePct': 'Rapprochement carte : écart de volume',
+  'fleet.settings.unit.km': 'km',
+  'fleet.settings.unit.percent': '%',
+  'fleet.settings.unit.l100': 'L/100 km',
+  'fleet.settings.unit.gPerL': 'g/L',
+  'fleet.settings.unit.amount': 'Ar',
+  'fleet.settings.section.telematics': 'Télématique',
+  'fleet.settings.section.telematics.hint': 'Suivi des boîtiers embarqués.',
+  'fleet.settings.field.telematics.signalLossMin': 'Silence avant perte de signal',
+  'fleet.settings.unit.points': 'points',
+  'fleet.settings.section.driverScore': 'Score conducteur',
+  'fleet.settings.section.driverScore.hint':
+    'Pondération des familles (0 la désactive), points retirés par fait confirmé et seuil de formation.',
+  'fleet.settings.field.driverScore.periodDays': 'Période prise en compte',
+  'fleet.settings.field.driverScore.weightSafety': 'Poids : sécurité routière',
+  'fleet.settings.field.driverScore.weightRoute': "Poids : conformité d'itinéraire",
+  'fleet.settings.field.driverScore.weightRegulatory': 'Poids : conformité réglementaire',
+  'fleet.settings.field.driverScore.weightDiscipline': 'Poids : discipline',
+  'fleet.settings.field.driverScore.weightEcoDriving': 'Poids : écoconduite',
+  'fleet.settings.field.driverScore.weightDeliveryQuality': 'Poids : qualité de livraison',
+  'fleet.settings.field.driverScore.criticalPoints': 'Points par fait critique ou grave',
+  'fleet.settings.field.driverScore.majorPoints': 'Points par fait majeur',
+  'fleet.settings.field.driverScore.minorPoints': 'Points par fait mineur',
+  'fleet.settings.field.driverScore.stopCriticalPoints': 'Points par arrêt non justifié critique',
+  'fleet.settings.field.driverScore.stopOtherPoints':
+    'Points par autre arrêt ou repos non justifié',
+  'fleet.settings.field.driverScore.routeDeviationPoints':
+    "Points par écart d'itinéraire non justifié",
+  'fleet.settings.field.driverScore.ecoEventPoints': 'Points par ralenti ou conduite brusque',
+  'fleet.settings.field.driverScore.deliveryDisputePoints': 'Points par livraison encore contestée',
+  'fleet.settings.field.driverScore.missingDocumentCap': 'Note plafond si un document manque',
+  'fleet.settings.field.driverScore.trainingThreshold': 'Seuil de formation'
+}

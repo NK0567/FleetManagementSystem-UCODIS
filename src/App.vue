@@ -1,17 +1,56 @@
-<script setup lang="ts">
-import { RouterView } from 'vue-router'
-import DashboardLayout from './layouts/DashboardLayout.vue'
-import { useStatutsVehiculesStore } from './stores/statutsVehicules'
-import { useNomenclatureStore } from './stores/nomenclature'
+<script lang="ts" setup>
+import { onMounted, onUnmounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useAuth } from '@/composables/useAuth'
+import { useAppBootstrapStore } from '@/stores/appBootstrapStore'
+import { useOptionsStore } from '@/stores/optionsStore'
+import { useReferenceStore } from '@/stores/referenceStore'
+import { useUserStore } from '@/stores/user'
 
-/* Le statut des véhicules suit les faits enregistrés dès l'ouverture de l'application. */
-useStatutsVehiculesStore()
-useNomenclatureStore()
+const BOOTSTRAP_FALLBACK_MS = 1200
+
+const route = useRoute()
+const router = useRouter()
+const { initAuth } = useAuth()
+const userStore = useUserStore()
+const appBootstrap = useAppBootstrapStore()
+const optionsStore = useOptionsStore()
+const referenceStore = useReferenceStore()
+
+watch(
+  () => userStore.isAuthenticated,
+  (authenticated) => {
+    if (!authenticated) return
+    void optionsStore.fetchOptions()
+    void referenceStore.fetchAll()
+  },
+  { immediate: true }
+)
+
+// Pages without a deep-linked card never call finishAppReady: release the overlay after a delay.
+let bootstrapFallbackTimer: ReturnType<typeof setTimeout> | null = null
+
+function scheduleBootstrapFallback() {
+  if (bootstrapFallbackTimer) clearTimeout(bootstrapFallbackTimer)
+  if (!appBootstrap.active || appBootstrap.waitingForCard) return
+  bootstrapFallbackTimer = setTimeout(() => {
+    if (appBootstrap.active && !appBootstrap.waitingForCard) appBootstrap.finishAppReady()
+  }, BOOTSTRAP_FALLBACK_MS)
+}
+
+watch(() => route.fullPath, scheduleBootstrapFallback, { immediate: true })
+
+onMounted(() => {
+  void initAuth()
+  void router.isReady().then(scheduleBootstrapFallback)
+})
+
+onUnmounted(() => {
+  if (bootstrapFallbackTimer) clearTimeout(bootstrapFallbackTimer)
+})
 </script>
 
 <template>
-  <DashboardLayout v-if="$route.meta.layout === 'dashboard'">
-    <RouterView />
-  </DashboardLayout>
-  <RouterView v-else />
+  <RouterView />
+  <AppBootstrapOverlay />
 </template>

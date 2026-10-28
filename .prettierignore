@@ -1,0 +1,11 @@
+dist
+node_modules
+coverage
+legacy
+*.local
+.env
+.env.local
+.env.*.local
+pnpm-lock.yaml
+src/typed-router.d.ts
+src/components.d.ts

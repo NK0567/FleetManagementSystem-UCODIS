@@ -1,0 +1,53 @@
+export default {
+  'hr.leaveRequests.title': "Demandes d'absence",
+  'hr.leaveRequests.card': "Demande d'absence",
+  'hr.leaveRequests.new': "Nouvelle demande d'absence",
+  'hr.leaveRequests.loadingList': 'Chargement des demandes…',
+  'hr.leaveRequests.noResults': 'Aucune demande.',
+  'hr.leaveRequests.noSearchResults': 'Aucune demande ne correspond à « {query} ».',
+  'hr.leaveRequests.createSuccess': 'Demande envoyée.',
+  'hr.leaveRequests.createError': "La demande n'a pas pu être envoyée.",
+  'hr.leaveRequests.decisionError': "La décision n'a pas pu être enregistrée.",
+
+  'hr.leaveRequests.listView.pending': 'En attente',
+  'hr.leaveRequests.listView.decided': 'Traitées',
+  'hr.leaveRequests.listView.all': 'Toutes',
+
+  'hr.leaveRequests.action.approve': 'Approuver',
+  'hr.leaveRequests.action.sendBack': 'Retourner',
+  'hr.leaveRequests.action.reject': 'Refuser',
+
+  'hr.leaveRequests.search.all': 'N° ou employé',
+
+  'hr.leaveRequests.col.no': 'N°',
+  'hr.leaveRequests.col.employeeName': 'Employé',
+  'hr.leaveRequests.col.orgUnitNo': 'Entité',
+  'hr.leaveRequests.col.leaveTypeName': 'Type de congé',
+  'hr.leaveRequests.col.startDate': 'Du',
+  'hr.leaveRequests.col.endDate': 'Au',
+  'hr.leaveRequests.col.days': 'Jours',
+  'hr.leaveRequests.col.status': 'Statut',
+  'hr.leaveRequests.col.submittedAt': 'Envoyée le',
+  'hr.leaveRequests.col.reason': 'Motif',
+  'hr.leaveRequests.col.decidedAt': 'Décidée le',
+  'hr.leaveRequests.col.decidedBy': 'Décidée par',
+  'hr.leaveRequests.col.decisionComment': 'Commentaire de décision',
+
+  'hr.leaveRequests.form.request': 'Demande',
+  'hr.leaveRequests.form.decision': 'Décision',
+  'hr.leaveRequests.form.employeeNo': 'Employé',
+  'hr.leaveRequests.form.leaveTypeNo': 'Type de congé',
+  'hr.leaveRequests.form.startDate': 'Premier jour',
+  'hr.leaveRequests.form.endDate': 'Dernier jour',
+  'hr.leaveRequests.form.endBeforeStart': 'Le dernier jour précède le premier',
+  'hr.leaveRequests.form.reason': 'Motif',
+  'hr.leaveRequests.form.days': 'Jours ouvrés décomptés',
+  'hr.leaveRequests.form.dayCount': 'Aucun jour | {count} jour | {count} jours',
+  'hr.leaveRequests.form.available': 'Solde disponible',
+  'hr.leaveRequests.form.exceedsBalance':
+    'La demande dépasse le solde disponible : elle sera refusée à l’envoi.',
+  'hr.leaveRequests.form.status': 'Statut',
+  'hr.leaveRequests.form.submittedAt': 'Envoyée le',
+  'hr.leaveRequests.form.decidedAt': 'Décision',
+  'hr.leaveRequests.form.decisionComment': 'Commentaire'
+}

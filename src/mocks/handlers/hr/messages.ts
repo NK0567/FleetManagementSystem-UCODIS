@@ -1,0 +1,112 @@
+import type { LocalizedText } from '../../i18n'
+
+export const HR_MESSAGES = {
+  categoryInUse: {
+    fr: 'Des employés sont rattachés à cette catégorie : elle ne peut pas être supprimée.',
+    en: 'Employees belong to this category: it cannot be deleted.'
+  },
+  jobPositionInUse: {
+    fr: 'Des employés occupent cette fonction : elle ne peut pas être supprimée.',
+    en: 'Employees hold this position: it cannot be deleted.'
+  },
+  leaveTypeInUse: {
+    fr: 'Des demandes utilisent ce type de congé : il ne peut pas être supprimé.',
+    en: 'Requests use this leave type: it cannot be deleted.'
+  },
+  statutoryLeaveType: {
+    fr: 'Ce type de congé est imposé par la loi : il ne peut être ni désactivé ni supprimé.',
+    en: 'This leave type is required by law: it cannot be disabled or deleted.'
+  },
+  orgUnitHasChildren: {
+    fr: 'Cette entité a des sous-entités : rattachez-les ailleurs avant de la supprimer.',
+    en: 'This unit has sub-units: move them elsewhere before deleting it.'
+  },
+  orgUnitHasEmployees: {
+    fr: 'Des employés sont rattachés à cette entité : elle ne peut pas être supprimée.',
+    en: 'Employees belong to this unit: it cannot be deleted.'
+  },
+  orgUnitHasPositions: {
+    fr: 'Des fonctions sont rattachées à cette entité : rattachez-les ailleurs avant de la supprimer.',
+    en: 'Job positions belong to this unit: move them elsewhere before deleting it.'
+  },
+  orgUnitCycle: {
+    fr: "Une entité ne peut pas être rattachée à elle-même ni à l'une de ses sous-entités.",
+    en: 'A unit cannot be attached to itself or to one of its sub-units.'
+  },
+  orgUnitAlreadyValidated: {
+    fr: 'Cette entité est déjà validée.',
+    en: 'This unit is already validated.'
+  },
+  duplicateNationalId: {
+    fr: "Cette pièce d'identité est déjà enregistrée pour l'employé {no}.",
+    en: 'This identity document is already registered for employee {no}.'
+  },
+  employeeArchived: {
+    fr: 'Cet employé a quitté les effectifs : sa fiche ne peut plus être modifiée.',
+    en: 'This employee has left: the record can no longer be changed.'
+  },
+  sameEmployeeStatus: {
+    fr: "L'employé a déjà ce statut.",
+    en: 'The employee already has this status.'
+  },
+  positionDoesNotDrive: {
+    fr: "La fonction de cet employé ne comporte pas de conduite : aucune habilitation n'est nécessaire.",
+    en: "This employee's position involves no driving: no authorization is needed."
+  },
+  statusReasonRequired: {
+    fr: 'Indiquez le motif de ce changement de statut.',
+    en: 'Give the reason for this status change.'
+  },
+  incompleteWorkingWeek: {
+    fr: 'Le calendrier doit décrire chacun des sept jours de la semaine, une seule fois.',
+    en: 'The calendar must describe each of the seven weekdays, once.'
+  },
+  invalidWorkingDay: {
+    fr: 'Les horaires du jour {day} sont incohérents : vérifiez le début, la fin et la pause.',
+    en: 'The hours of day {day} are inconsistent: check the start, the end and the break.'
+  },
+  invalidPeriod: {
+    fr: 'La date de fin précède la date de début.',
+    en: 'The end date is before the start date.'
+  },
+  noWorkingDay: {
+    fr: 'La période choisie ne contient aucun jour ouvré.',
+    en: 'The chosen period contains no working day.'
+  },
+  leaveOverlap: {
+    fr: 'Une demande en attente ou approuvée couvre déjà une partie de cette période.',
+    en: 'A pending or approved request already covers part of this period.'
+  },
+  inactiveEmployee: {
+    fr: "Cet employé n'est plus en activité.",
+    en: 'This employee is no longer on staff.'
+  },
+  inactiveLeaveType: {
+    fr: "Ce type de congé n'est plus proposé.",
+    en: 'This leave type is no longer offered.'
+  },
+  insufficientBalance: {
+    fr: 'Le solde ne couvre pas cette demande : disponible {available} j, demandes en attente comprises.',
+    en: 'The balance does not cover this request: {available} d available, pending requests included.'
+  },
+  noticeTooShort: {
+    fr: 'Ce type de congé se demande avec un préavis de {days} j au moins.',
+    en: 'This leave type requires at least {days} d of notice.'
+  },
+  foreignEmployeeRequest: {
+    fr: 'Vous ne pouvez déposer une demande que pour vous-même.',
+    en: 'You can only submit a request for yourself.'
+  },
+  ownRequestDecision: {
+    fr: 'Vous ne pouvez pas décider de votre propre demande : une autre personne doit la traiter.',
+    en: 'You cannot decide on your own request: someone else must handle it.'
+  },
+  leaveNotPending: {
+    fr: "Cette demande a déjà été traitée : seule une demande en attente peut l'être.",
+    en: 'This request has already been decided: only a pending request can be.'
+  },
+  decisionCommentRequired: {
+    fr: 'Expliquez votre décision en au moins {min} caractères.',
+    en: 'Explain your decision in at least {min} characters.'
+  }
+} satisfies Record<string, LocalizedText>
