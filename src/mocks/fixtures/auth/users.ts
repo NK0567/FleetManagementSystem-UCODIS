@@ -40,7 +40,18 @@ export const MOCK_ACCOUNTS: readonly MockAccount[] = [
     employeeNo: 'UCT-002',
     orgUnitNo: 'FLT',
     language: 'fr',
-    landingRoute: '/hr',
+    landingRoute: '/fleet/dashboard',
+    active: true
+  },
+  {
+    code: 'RMT001',
+    password: DEMO_PASSWORD,
+    name: 'Lalaina Rasolondraibe',
+    email: 'l.rasolondraibe@ucodis.mg',
+    profile: 'MAINTENANCE_MANAGER',
+    orgUnitNo: 'MNT',
+    language: 'fr',
+    landingRoute: '/maintenance/dashboard',
     active: true
   },
   {
@@ -52,7 +63,7 @@ export const MOCK_ACCOUNTS: readonly MockAccount[] = [
     employeeNo: 'UCT-003',
     orgUnitNo: 'MNT',
     language: 'fr',
-    landingRoute: '/maintenance',
+    landingRoute: '/maintenance/work-orders',
     active: true
   },
   {
@@ -118,7 +129,7 @@ export const MOCK_ACCOUNTS: readonly MockAccount[] = [
     employeeNo: 'UCT-006',
     orgUnitNo: 'DEP',
     language: 'fr',
-    landingRoute: '/hr',
+    landingRoute: '/planning/loading',
     active: true
   },
   {
@@ -130,7 +141,7 @@ export const MOCK_ACCOUNTS: readonly MockAccount[] = [
     employeeNo: 'UCT-007',
     orgUnitNo: 'UCT',
     language: 'fr',
-    landingRoute: '/hr',
+    landingRoute: '/fleet/dashboard',
     active: true
   },
   {

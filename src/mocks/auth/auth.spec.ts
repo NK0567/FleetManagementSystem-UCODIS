@@ -23,7 +23,7 @@ describe('auth endpoints', () => {
     expect(response.status).toBe(200)
     expect(response.data.data).toMatchObject({
       accessToken: 'mock.FLT001',
-      user: { code: 'FLT001', profile: 'FLEET_MANAGER', landingRoute: '/hr' }
+      user: { code: 'FLT001', profile: 'FLEET_MANAGER', landingRoute: '/fleet/dashboard' }
     })
   })
 
@@ -89,5 +89,27 @@ describe('role permissions', () => {
       { no: 'trips', active: false, createdAt: '', createdBy: '', modifiedAt: '', modifiedBy: '' }
     ])
     expect([...disabled]).toEqual(['TRIP', 'ROUTETEMPLATE'])
+  })
+})
+
+describe('menus by role', () => {
+  const menus = (profile: Parameters<typeof permissionsFor>[0]) =>
+    permissionsFor(profile)
+      .filter((row) => row.read && row.menu)
+      .map((row) => row.feature)
+
+  it('shows each role its own work only', () => {
+    expect(menus('CUSTOMER_SERVICE').sort()).toEqual(
+      ['CUSTOMERCONFIRMATION', 'LEAVEBALANCE', 'LEAVEREQUEST', 'MYPLANNING'].sort()
+    )
+    expect(menus('DRIVER')).toEqual(['MYSPACE'])
+    expect(menus('PLANNER')).not.toContain('EMPLOYEE')
+    expect(menus('FLEET_MANAGER')).not.toContain('WORKORDER')
+    expect(menus('ADMIN')).not.toContain('CUSTOMERCONFIRMATION')
+  })
+
+  it('keeps the data a screen needs without putting it in the menus', () => {
+    const product = permissionsFor('CUSTOMER_SERVICE').find((row) => row.feature === 'PRODUCT')
+    expect(product).toMatchObject({ read: true, menu: false })
   })
 })

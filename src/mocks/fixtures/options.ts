@@ -14,6 +14,7 @@ interface OptionDefinition {
 const userProfile: Record<UserProfileCode, LocalizedText> = {
   ADMIN: { fr: 'Administrateur', en: 'Administrator' },
   FLEET_MANAGER: { fr: 'Responsable flotte', en: 'Fleet manager' },
+  MAINTENANCE_MANAGER: { fr: 'Responsable maintenance', en: 'Maintenance manager' },
   MAINTENANCE_TECHNICIAN: { fr: 'Maintenancier', en: 'Maintenance technician' },
   PLANNER: { fr: 'Planificateur', en: 'Planner' },
   DELIVERY_MANAGER: { fr: 'Responsable des livraisons', en: 'Delivery manager' },

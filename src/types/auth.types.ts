@@ -1,6 +1,7 @@
 export const USER_PROFILES = [
   'ADMIN',
   'FLEET_MANAGER',
+  'MAINTENANCE_MANAGER',
   'MAINTENANCE_TECHNICIAN',
   'PLANNER',
   'DELIVERY_MANAGER',
@@ -60,6 +61,8 @@ export interface UserPermissionRow {
   myOnly?: boolean
   /** Restricts lists to the records of the user's org unit. */
   myTeam?: boolean
+  /** False when the feature only serves the user's own screens and stays out of the menus. */
+  menu?: boolean
 }
 
 export type PermissionAction = 'insert' | 'update' | 'read' | 'delete' | 'execute' | 'export'

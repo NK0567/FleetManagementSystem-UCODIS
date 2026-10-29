@@ -1,3 +1,4 @@
+import { sessionUser } from '../../http/types'
 import { anomalies, blockingAnomalies } from '@/modules/fleet/check-points/domain/checkResult'
 import {
   CHECKLIST_STAGES,
@@ -34,6 +35,7 @@ export function roadChecklistsApi(db: MockDatabase): RoadChecklistApi[] {
       driverName: trip ? (names.get(trip.driverNo) ?? trip.driverNo) : '',
       signedAt: checklist.signedAt ?? null,
       signed: !!checklist.signedAt,
+      signedBy: checklist.signedBy ?? null,
       syncedAt: checklist.syncedAt ?? checklist.createdAt,
       capturedOffline: !!checklist.capturedOffline,
       anomalyCount: anomalies(checklist.results).length,
@@ -79,7 +81,7 @@ export function registerRoadChecklistsHandlers(router: MockRouter, db: MockDatab
     list: () => roadChecklistsApi(db),
     searchColumns: ['no', 'tripNo', 'vehiclePlate'],
     optionFields: { stage: 'checklistStage' },
-    create: (input) => {
+    create: (input, request) => {
       const tripNo = requireReference(db.trips, input, 'tripNo')
       const trip = db.trips.findOrFail(tripNo)
       if (trip.status === 'closed' || trip.status === 'cancelled') {
@@ -97,8 +99,10 @@ export function registerRoadChecklistsHandlers(router: MockRouter, db: MockDatab
         stage: readEnum(input, 'stage', CHECKLIST_STAGES, { required: true }) ?? 'departure',
         takenAt,
         results: readCheckResults(db, input, 'vehicle'),
-        // Entered from the office: it is on the server at once, and the driver did not sign it.
-        signedAt: null,
+        // Entered from the office: signed by the person who keys it, under his own name, as the
+        // fleet software of the market do; the driver signs only what he fills in himself.
+        signedAt: nowIsoDateTime(),
+        signedBy: sessionUser(request).name,
         syncedAt: nowIsoDateTime(),
         capturedOffline: false
       }

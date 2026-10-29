@@ -42,7 +42,7 @@ export function findFeatureForPath(path: string): string | undefined {
 export function buildUserMenu(rows: UserPermissionRow[]): UserMenu {
   const menu: UserMenu = {}
   for (const row of rows) {
-    if (!row.read) continue
+    if (!row.read || row.menu === false) continue
     const route = getFeatureRoute(row.feature)
     if (route) menu[route.menuKey] = true
   }

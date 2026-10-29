@@ -14,6 +14,8 @@ export interface RoadChecklistRow extends MockRow {
   results: CheckResult[]
   /** When the driver of the trip signed the checklist on his phone; null when unsigned. */
   signedAt?: string | null
+  /** Who signed it when it was keyed from the office, rather than by the driver. */
+  signedBy?: string | null
   /** When the checklist reached the server; taken without network, it arrives later. */
   syncedAt?: string | null
   capturedOffline?: boolean

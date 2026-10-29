@@ -1,6 +1,6 @@
 import { normalizeFeatureKey } from '@/core/navigation/featureRoutes'
 import type { PermissionAction, UserPermissionRow, UserProfileCode } from '@/types/auth.types'
-import { ROLE_PERMISSIONS } from '../fixtures/auth/rolePermissions'
+import { ROLE_MENUS, ROLE_PERMISSIONS } from '../fixtures/auth/rolePermissions'
 import { MODULE_TOGGLE_CATALOG, type ModuleToggleRow } from '../fixtures/settings/moduleToggles'
 
 export function disabledFeatures(toggles: readonly ModuleToggleRow[]): Set<string> {
@@ -16,6 +16,10 @@ export function permissionsFor(
   profile: UserProfileCode,
   disabled: ReadonlySet<string> = new Set()
 ): UserPermissionRow[] {
+  const menus = ROLE_MENUS[profile]
+  const inMenu = (feature: string) =>
+    menus === 'all' ||
+    menus.some((item) => normalizeFeatureKey(item) === normalizeFeatureKey(feature))
   return Object.entries(ROLE_PERMISSIONS[profile])
     .filter(([feature]) => !disabled.has(normalizeFeatureKey(feature)))
     .map(([feature, { actions, myOnly }]) => ({
@@ -26,6 +30,7 @@ export function permissionsFor(
       delete: actions.includes('delete'),
       execute: actions.includes('execute'),
       export: actions.includes('export'),
+      menu: inMenu(feature),
       ...(myOnly ? { myOnly } : {})
     }))
 }

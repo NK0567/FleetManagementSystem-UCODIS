@@ -274,6 +274,23 @@ describe('signature and synchronization of the road checklists', () => {
     expect(rows.find((row) => row.no === 'CKL-00002')).toMatchObject({ capturedOffline: true })
     expect(rows.find((row) => row.no === 'CKL-00003')?.signed).toBe(false)
   })
+
+  it('signs a checklist keyed from the office with the name of who keys it', async () => {
+    const page = (
+      await call(server, 'get', '/fleet/check-points', { as: 'FLT001', query: { pageSize: 100 } })
+    ).data.data as { items: { no: string; scope: string }[] }
+    const results = page.items
+      .filter((point) => point.scope === 'vehicle')
+      .map((point) => ({ pointNo: point.no, result: 'ok' }))
+    const created = await call(server, 'post', '/fleet/road-checklists', {
+      as: 'FLT001',
+      body: { tripNo: 'TRP-00007', stage: 'departure', takenAt: '2026-09-04T09:50', results }
+    })
+    expect(created.status).toBe(201)
+    const rows = listItems<RoadChecklistApi>(await get('/fleet/road-checklists', { pageSize: 200 }))
+    const row = rows.find((item) => item.no === (created.data.data as { no: string }).no)
+    expect(row).toMatchObject({ signed: true, signedBy: 'Hery Andriamalala' })
+  })
 })
 
 describe('provider import', () => {

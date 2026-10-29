@@ -18,6 +18,7 @@ export interface RoadChecklistApi {
   driverName: string
   /** When the driver of the trip signed it on his phone; null when unsigned. */
   signedAt: string | null
+  signedBy?: string | null
   signed: boolean
   /** When it reached the server. */
   syncedAt: string

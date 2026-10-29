@@ -194,6 +194,15 @@ export const ROLE_PERMISSIONS: Record<UserProfileCode, Record<string, Grant>> = 
     PLANNINGSETTINGS: READ,
     MYPLANNING: READ
   },
+  /* The maintenance manager plans the workshop, validates the closings and follows reliability
+   * (FLT01-US01, US02, US06, US07, US08, US11, US12, US13, US17, FLT04-US04, FLT07-US03). */
+  MAINTENANCE_MANAGER: {
+    ...backOffice,
+    ...MAINTENANCE_MANAGEMENT,
+    ...grant(['VEHICLETYPE', 'EQUIPMENTTYPE', 'COUPLING', 'DOCUMENT', 'FLEETSTATUS'], READ),
+    ...grant(['ROADCHECKLIST', 'INSPECTION', 'CHECKPOINT', 'PROVIDER', 'TELEMATICS'], READ),
+    ALERT: allRecords(['read', 'update'])
+  },
   MAINTENANCE_TECHNICIAN: {
     ...backOffice,
     ...grant(['VEHICLETYPE', 'EQUIPMENTTYPE', 'COUPLING', 'DOCUMENT', 'FLEETSTATUS'], READ),
@@ -218,6 +227,8 @@ export const ROLE_PERMISSIONS: Record<UserProfileCode, Record<string, Grant>> = 
     DELIVERYREQUEST: allRecords(['read', 'insert', 'update', 'execute', 'export']),
     TRANSPORTORDER: FULL,
     PLANNINGCALENDAR: READ,
+    /* He follows the position of the vehicles (TRS02-US01). */
+    LIVEMAP: READ,
     /* The « Confirmations destinataires » tab is the agent's alone (TRS01-US15): the planner
      * reads the answers on the order card. */
     LOADING: READ,
@@ -287,4 +298,63 @@ export const ROLE_PERMISSIONS: Record<UserProfileCode, Record<string, Grant>> = 
     LEAVEBALANCE: ownRecords(['read']),
     LEAVEREQUEST: ownRecords(['read', 'insert'])
   }
+}
+
+/**
+ * What each profile finds in its menus, from the actors of the user stories: a user sees his own
+ * work, nothing else. The other features a profile may read only serve its own screens (a product
+ * name, a vehicle in a list of choices) and stay out of the menus. The administrator configures
+ * everything and sees every menu.
+ */
+const PERSONAL = ['MYPLANNING', 'LEAVEREQUEST', 'LEAVEBALANCE']
+export const ROLE_MENUS: Record<UserProfileCode, readonly string[] | 'all'> = {
+  ADMIN: 'all',
+  FLEET_MANAGER: [
+    ...PERSONAL,
+    /* He decides the leave of his drivers and keeps the people of the FMS (FLT05-US08). */
+    'EMPLOYEE',
+    ...FLEET_OPERATIONS,
+    ...FLEET_REFERENCE,
+    'FLEETSETTINGS'
+  ],
+  MAINTENANCE_MANAGER: [
+    ...PERSONAL,
+    ...MAINTENANCE_OPERATIONS,
+    ...MAINTENANCE_REFERENCE,
+    'MAINTENANCESETTINGS'
+  ],
+  /* The technician diagnoses, links the parts, mounts and reads the tyres, records the vehicle
+   * checks and the tyres bought (FLT01-US04, US05, US09, US14, US15, US16). */
+  MAINTENANCE_TECHNICIAN: [...PERSONAL, 'WORKORDER', 'VEHICLECHECK', 'TYRE', 'STOCKITEM'],
+  PLANNER: [...PERSONAL, 'DELIVERYREQUEST', 'TRANSPORTORDER', 'PLANNINGCALENDAR', 'LIVEMAP'],
+  DELIVERY_MANAGER: [
+    ...PERSONAL,
+    'PLANNINGDASHBOARD',
+    'TRANSPORTREPORT',
+    'TRANSPORTORDER',
+    'LOADINGPLAN',
+    'LOADING',
+    'DELIVERYQUALITY',
+    'CUSTOMER',
+    'PRODUCT',
+    'PROVIDER'
+  ],
+  BILLING: [...PERSONAL, 'CUSTOMERBILLING', 'CARRIERINVOICE'],
+  CUSTOMER_SERVICE: [...PERSONAL, 'CUSTOMERCONFIRMATION'],
+  SALES: [...PERSONAL, 'DELIVERYREQUEST'],
+  DEPOT: [...PERSONAL, 'LOADING'],
+  /* The director reads the summaries and exports the reports (FLT07-US06, TRS08-US05). */
+  MANAGEMENT: [
+    ...PERSONAL,
+    'HRDASHBOARD',
+    'FLEETDASHBOARD',
+    'FLEETREPORT',
+    'MAINTENANCEDASHBOARD',
+    'RELIABILITY',
+    'PLANNINGDASHBOARD',
+    'TRANSPORTREPORT'
+  ],
+  /* The driver works from his own space only, where his absences are. */
+  DRIVER: ['MYSPACE'],
+  DRIVER_ASSISTANT: ['MYSPACE']
 }

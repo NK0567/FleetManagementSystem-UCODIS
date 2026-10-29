@@ -28,7 +28,7 @@ const { t } = useI18n()
 const signatureText = computed(() =>
   props.initialData.signedAt
     ? t('fleet.roadChecklists.signedBy', {
-        name: props.initialData.driverName ?? '',
+        name: props.initialData.signedBy || props.initialData.driverName || '',
         date: formatDateTime(props.initialData.signedAt)
       })
     : t('fleet.roadChecklists.unsigned')

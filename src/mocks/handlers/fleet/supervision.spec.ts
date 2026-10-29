@@ -74,7 +74,7 @@ describe('live map', () => {
 
   it('stays closed to the profiles without the map', async () => {
     expect((await get('/fleet/live/positions', {}, 'CND001')).status).toBe(403)
-    expect((await get('/fleet/live/positions', {}, 'PLN001')).status).toBe(403)
+    expect((await get('/fleet/live/positions', {}, 'COM001')).status).toBe(403)
   })
 })
 
