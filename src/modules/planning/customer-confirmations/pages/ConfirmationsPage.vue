@@ -408,6 +408,12 @@ onMounted(() => {
               <p class="text-card-foreground">
                 {{ optionsStore.getOptionLabel('notificationChannel', line.notificationChannel) }}
               </p>
+              <p
+                v-if="line.recipientContact && line.notificationChannel !== 'none'"
+                class="text-xs text-muted-foreground"
+              >
+                {{ line.recipientContact }}
+              </p>
               <a
                 v-if="line.trackingToken && line.notificationChannel !== 'none'"
                 :href="`#/suivi/${line.trackingToken}`"

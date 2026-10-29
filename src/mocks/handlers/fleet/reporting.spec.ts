@@ -39,7 +39,8 @@ describe('summary compared between periods and sites', () => {
       'indicator',
       'value',
       'compareValue',
-      'gap'
+      'gap',
+      'target'
     ])
     const trips = indicators.rows.find((row) => row.indicator === 'tripsFinished')
     expect(trips).toMatchObject({ value: 4, compareValue: 1, gap: 3 })

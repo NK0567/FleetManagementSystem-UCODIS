@@ -1,7 +1,6 @@
 export default {
   'planning.quality.title': 'Qualité de livraison',
-  'planning.quality.subtitle':
-    'Un protêt se prépare puis s’émet. La retenue du transporteur vaut l’avoir accordé multiplié par sa part. Les parts se figent dès que le transport est facturé ou que la facture du transporteur est validée.',
+  'planning.quality.subtitle': 'Protêts, retenues des transporteurs et avoirs.',
   'planning.quality.loading': 'Chargement du suivi qualité…',
   'planning.quality.empty': 'Aucune livraison à suivre.',
   'planning.quality.loadError': 'Le suivi qualité n’a pas pu être affiché.',

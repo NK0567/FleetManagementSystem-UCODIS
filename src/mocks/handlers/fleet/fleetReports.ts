@@ -14,7 +14,9 @@ import {
 import { isUsable } from '@/modules/fleet/vehicles/domain/vehicleStatus'
 import { isValidCalendarDateYmd } from '@/utils/calendarDate'
 import { averageAgeYears } from '@/modules/fleet/dashboard/domain/park'
-import { addDays, daysBetween, minutesBetween, todayIso } from '@/utils/date'
+import { downtimeDaysWithin } from '@/modules/maintenance/downtimes/domain/downtime'
+import type { IndicatorKey } from '@/modules/fleet/fleet-settings/domain/indicators'
+import { addDays, daysBetween, minutesBetween, nowIsoDateTime, todayIso } from '@/utils/date'
 import type { MockDatabase } from '../../db/database'
 import { routeParam } from '../../http/crudResource'
 import { notFound, unprocessable } from '../../http/errors'
@@ -34,6 +36,12 @@ import { SUPERVISION_MESSAGES } from './supervisionMessages'
 import { tripsApi } from './trips'
 import { alertsApi } from './alerts'
 import { tyresApi } from '../maintenance/tyres'
+import { workOrdersApi } from '../maintenance/workOrders'
+import { departureAuthorizationsApi } from './departureAuthorizations'
+import { documentCompliance } from './documentCompliance'
+import { tripDrivingTime } from './drivingTime'
+import { vehiclesAwaitingRecheck } from './inspections'
+import { indicatorsOf } from './settingsLists'
 import { vehicleStatuses } from './vehicleState'
 
 interface ReportScope {
@@ -109,6 +117,51 @@ function infractions(scope: ReportScope) {
     )
 }
 
+/** Maintenance work of the scope declared during the period, history imports left out. */
+function interventions(scope: ReportScope) {
+  return workOrdersApi(scope.db).filter(
+    (order) =>
+      scope.vehicles.has(order.vehicleNo) &&
+      order.status !== 'cancelled' &&
+      order.origin !== 'history' &&
+      within(scope, order.declaredAt)
+  )
+}
+
+/** Cost of the maintenance work of the scope validated during the period. */
+function maintenanceCost(scope: ReportScope): number {
+  return sum(
+    workOrdersApi(scope.db)
+      .filter(
+        (order) =>
+          scope.vehicles.has(order.vehicleNo) &&
+          order.status !== 'cancelled' &&
+          within(scope, order.validatedAt)
+      )
+      .map((order) => order.totalCost)
+  )
+}
+
+/** Days the vehicles of the scope were unavailable during the period. */
+function immobilizationDays(scope: ReportScope): number {
+  const now = nowIsoDateTime()
+  const from = `${scope.from}T00:00:00`
+  const to = `${scope.to}T23:59:59`
+  const days = scope.db.downtimes
+    .all()
+    .filter((downtime) => scope.vehicles.has(downtime.vehicleNo))
+    .map((downtime) => downtimeDaysWithin(downtime.startedAt, downtime.endedAt, now, from, to))
+  return Math.round(sum(days) * 10) / 10
+}
+
+/** The summary indicators read against a target set in the fleet settings. */
+const TARGETED: Partial<Record<string, IndicatorKey>> = {
+  availabilityToday: 'availabilityRate',
+  averageL100: 'fuelConsumption',
+  preventiveShare: 'preventiveShare',
+  averageDriverScore: 'driverScore'
+}
+
 /** The indicators of the summary for one scope: key, value and unit. */
 function summaryIndicators(scope: ReportScope): [string, ReportCell, string][] {
   const trips = finishedTrips(scope)
@@ -119,6 +172,7 @@ function summaryIndicators(scope: ReportScope): [string, ReportCell, string][] {
   const statuses = vehicleStatuses(scope.db)
   const vehicles = [...scope.vehicles]
   const scores = driverScoresApi(scope.db).filter((score) => scope.employees.has(score.driverNo))
+  const maintenance = interventions(scope)
   const indicators: [string, ReportCell, string][] = [
     ['tripsFinished', trips.length, 'count'],
     ['kmDriven', sum(trips.map((trip) => trip.distanceKm ?? 0)), 'km'],
@@ -134,6 +188,19 @@ function summaryIndicators(scope: ReportScope): [string, ReportCell, string][] {
     ['averageL100', averageLitersPer100(periods(scope)), 'l100'],
     ['co2Kg', Math.round((liters * fleetSettings(scope.db).fuel.co2GramsPerL) / 1000), 'kg'],
     ['refillAnomalies', fuel.filter((refill) => refill.status === 'anomaly').length, 'count'],
+    ['immobilizationDays', immobilizationDays(scope), 'days'],
+    ['maintenanceInterventions', maintenance.length, 'count'],
+    [
+      'preventiveShare',
+      maintenance.length
+        ? Math.round(
+            (maintenance.filter((order) => order.maintenanceType === 'preventive').length * 100) /
+              maintenance.length
+          )
+        : null,
+      'percent'
+    ],
+    ['maintenanceCost', maintenanceCost(scope), 'amount'],
     ['infractionsRecorded', recorded.length, 'count'],
     [
       'infractionsUpheld',
@@ -181,6 +248,13 @@ function summary(scope: ReportScope): ReportSection[] {
   const other = scope.compare
     ? new Map(summaryIndicators(scope.compare).map(([key, value]) => [key, value]))
     : null
+  const targets = new Map(
+    indicatorsOf(scope.db).map((indicator) => [indicator.key, indicator.target])
+  )
+  const targetOf = (indicator: string): ReportCell => {
+    const key = TARGETED[indicator]
+    return key ? (targets.get(key) ?? null) : null
+  }
   return [
     {
       key: 'indicators',
@@ -192,7 +266,8 @@ function summary(scope: ReportScope): ReportSection[] {
               { key: 'compareValue', type: 'measure' as const },
               { key: 'gap', type: 'measure' as const }
             ]
-          : [])
+          : []),
+        { key: 'target', type: 'measure' }
       ],
       rows: indicators.map(
         ([indicator, value, unit]): Record<string, ReportCell> =>
@@ -202,9 +277,10 @@ function summary(scope: ReportScope): ReportSection[] {
                 value,
                 unit,
                 compareValue: other.get(indicator) ?? null,
-                gap: difference(value, other.get(indicator) ?? null)
+                gap: difference(value, other.get(indicator) ?? null),
+                target: targetOf(indicator)
               }
-            : { indicator, value, unit }
+            : { indicator, value, unit, target: targetOf(indicator) }
       )
     },
     {
@@ -384,6 +460,7 @@ function driversReport(scope: ReportScope): ReportSection[] {
   const tripDrivers = new Map(scope.db.trips.all().map((trip) => [trip.no, trip.driverNo]))
   const recorded = infractions(scope)
   const trainings = scope.db.trainings.all()
+  const breaches = drivingTimeBreaches(scope)
   return [
     {
       key: 'byDriver',
@@ -394,6 +471,7 @@ function driversReport(scope: ReportScope): ReportSection[] {
         { key: 'km', type: 'integer' },
         { key: 'unjustifiedDeviations', type: 'integer' },
         { key: 'infractionsUpheld', type: 'integer' },
+        { key: 'drivingTimeBreaches', type: 'integer' },
         { key: 'trainingsPending', type: 'integer' }
       ],
       rows: driverScoresApi(scope.db)
@@ -412,6 +490,7 @@ function driversReport(scope: ReportScope): ReportSection[] {
             infractionsUpheld: recorded.filter(
               (infraction) => infraction.driverNo === score.driverNo && isUpheld(infraction.outcome)
             ).length,
+            drivingTimeBreaches: breaches.get(score.driverNo) ?? 0,
             trainingsPending: trainings.filter(
               (training) =>
                 training.employeeNo === score.driverNo && isPending(trainingStatus(training))
@@ -421,6 +500,18 @@ function driversReport(scope: ReportScope): ReportSection[] {
     },
     ...driverDashboard(scope)
   ]
+}
+
+/** Driving-time limits broken by each driver on the trips that left during the period. */
+function drivingTimeBreaches(scope: ReportScope): Map<string, number> {
+  const counts = new Map<string, number>()
+  for (const trip of scope.db.trips.all()) {
+    if (trip.status === 'cancelled' || !scope.vehicles.has(trip.vehicleNo)) continue
+    if (!within(scope, trip.actualDeparture ?? trip.plannedDeparture)) continue
+    const found = tripDrivingTime(scope.db, trip).breaches.length
+    if (found) counts.set(trip.driverNo, (counts.get(trip.driverNo) ?? 0) + found)
+  }
+  return counts
 }
 
 /** The Monday of the week of a day, or the day itself, as the key of a performance line. */
@@ -605,7 +696,12 @@ function auditReport(scope: ReportScope): ReportSection[] {
   const names = employeeNames(scope.db)
   const plates = vehiclePlates(scope.db)
   const tripRows = new Map(scope.db.trips.all().map((trip) => [trip.no, trip]))
+  const departures = departureAuthorizationsApi(scope.db, scope.request.language).filter(
+    (authorization) =>
+      scope.vehicles.has(authorization.vehicleNo) && within(scope, authorization.plannedDeparture)
+  )
   return [
+    complianceSummary(scope, departures),
     {
       key: 'documents',
       columns: [
@@ -658,6 +754,27 @@ function auditReport(scope: ReportScope): ReportSection[] {
         }))
     },
     {
+      key: 'departures',
+      columns: [
+        { key: 'authorizationNo', type: 'text' },
+        { key: 'plannedDeparture', type: 'date' },
+        { key: 'plate', type: 'text' },
+        { key: 'driverName', type: 'text' },
+        { key: 'decision', type: 'option', optionsKey: 'departureDecision' },
+        { key: 'failedChecks', type: 'integer' }
+      ],
+      rows: departures
+        .sort((a, b) => a.plannedDeparture.localeCompare(b.plannedDeparture))
+        .map((authorization) => ({
+          authorizationNo: authorization.no,
+          plannedDeparture: day(authorization.plannedDeparture),
+          plate: authorization.vehiclePlate,
+          driverName: authorization.driverName,
+          decision: authorization.decision,
+          failedChecks: authorization.checks.filter((check) => !check.ok).length
+        }))
+    },
+    {
       key: 'deviations',
       columns: [
         { key: 'tripNo', type: 'text' },
@@ -678,6 +795,90 @@ function auditReport(scope: ReportScope): ReportSection[] {
       })
     }
   ]
+}
+
+/**
+ * The audit at a glance: for each control, what is in order against the total and the rate.
+ * Documents and inspections are read as they stand today; departures and deviations over the
+ * period.
+ */
+function complianceSummary(
+  scope: ReportScope,
+  departures: ReturnType<typeof departureAuthorizationsApi>
+): ReportSection {
+  const compliance = documentCompliance(scope.db)
+  const vehicles = scopeVehicles(scope).map((vehicle) => vehicle.no)
+  const drivers = new Set(
+    scope.db.jobPositions
+      .all()
+      .filter((position) => position.drives)
+      .map((position) => position.no)
+  )
+  const people = scope.db.employees
+    .all()
+    .filter(
+      (employee) =>
+        scope.employees.has(employee.no) &&
+        drivers.has(employee.jobPositionNo) &&
+        compliance.persons.has(employee.no)
+    )
+    .map((employee) => employee.no)
+  const inspected = new Set(scope.db.inspections.all().map((inspection) => inspection.vehicleNo))
+  const awaiting = vehiclesAwaitingRecheck(scope.db)
+  const inspectedVehicles = vehicles.filter((no) => inspected.has(no))
+  const decided = departures.filter((authorization) => authorization.decision !== 'pending')
+  const trips = new Map(scope.db.trips.all().map((trip) => [trip.no, trip]))
+  const deviations = routeDeviationsApi(scope.db).filter((deviation) => {
+    const trip = trips.get(deviation.tripNo)
+    return (
+      !!trip &&
+      scope.vehicles.has(trip.vehicleNo) &&
+      deviation.nature !== 'to_qualify' &&
+      within(scope, deviation.detectedAt)
+    )
+  })
+  const line = (control: string, compliant: number, total: number) => ({
+    control,
+    compliant,
+    total,
+    rate: total ? Math.round((compliant * 1000) / total) / 10 : null
+  })
+  return {
+    key: 'compliance',
+    columns: [
+      { key: 'control', type: 'option', optionsKey: 'auditControl' },
+      { key: 'compliant', type: 'integer' },
+      { key: 'total', type: 'integer' },
+      { key: 'rate', type: 'percent' }
+    ],
+    rows: [
+      line(
+        'vehicleDocuments',
+        vehicles.filter((no) => !(compliance.vehicles.get(no) ?? []).length).length,
+        vehicles.length
+      ),
+      line(
+        'driverDocuments',
+        people.filter((no) => !(compliance.persons.get(no) ?? []).length).length,
+        people.length
+      ),
+      line(
+        'inspections',
+        inspectedVehicles.filter((no) => !awaiting.has(no)).length,
+        inspectedVehicles.length
+      ),
+      line(
+        'departures',
+        decided.filter((authorization) => authorization.decision === 'granted').length,
+        decided.length
+      ),
+      line(
+        'deviations',
+        deviations.filter((deviation) => deviation.nature !== 'unjustified').length,
+        deviations.length
+      )
+    ]
+  }
 }
 
 const BUILDERS: Record<ReportKind, (scope: ReportScope) => ReportSection[]> = {

@@ -1,7 +1,6 @@
 export default {
   'planning.confirmations.title': 'Recipient confirmation',
-  'planning.confirmations.subtitle':
-    'The call agent confirms each delivery, records that the recipient is unavailable, or keeps another date. A replanned line goes back to the requests, without keeping the means.',
+  'planning.confirmations.subtitle': 'Recipient availability before departure and delivery reception.',
   'planning.confirmations.loading': 'Loading the lines to confirm…',
   'planning.confirmations.empty': 'No line to confirm.',
   'planning.confirmations.loadError': 'The confirmations could not be loaded.',
@@ -104,7 +103,8 @@ export default {
   'planning.tracking.declared': 'The driver declares {quantity} {unit} delivered.',
   'planning.tracking.refused': 'Order refused. Reason: {reason}',
   'planning.tracking.received': 'Receipt confirmed by {name} on {date}.',
-  'planning.tracking.contested': 'Receipt contested ({reason}). The planner is handling your claim.',
+  'planning.tracking.contested':
+    'Receipt contested ({reason}). The planner is handling your claim.',
   'planning.tracking.receptionQuestion': 'Did you receive what is declared?',
   'planning.tracking.receiveConfirm': 'I confirm receipt',
   'planning.tracking.receiveContest': 'I contest',
@@ -116,9 +116,11 @@ export default {
   'planning.tracking.survey.comment': 'Your comment (optional)',
   'planning.tracking.survey.thanks': 'Thank you, your opinion is passed on.',
   'planning.tracking.messages.title': 'Messages received',
-  'planning.tracking.messages.planned': 'Your delivery is planned on {date}, vehicle {vehicle}, driver {driver}, estimated arrival {eta}. Follow it with this link.',
+  'planning.tracking.messages.planned':
+    'Your delivery is planned on {date}, vehicle {vehicle}, driver {driver}, estimated arrival {eta}. Follow it with this link.',
   'planning.tracking.messages.started': 'Your delivery is under way: vehicle {vehicle} has left.',
-  'planning.tracking.messages.declared': 'The driver declared your delivery: confirm or contest it from this link.',
+  'planning.tracking.messages.declared':
+    'The driver declared your delivery: confirm or contest it from this link.',
   'planning.tracking.messages.channel.sms': 'SMS',
   'planning.tracking.messages.channel.call': 'Call',
   'planning.tracking.messages.channel.email': 'E-mail',
@@ -137,9 +139,35 @@ export default {
   'planning.confirmations.answered.empty': 'No answer given yet.',
   'planning.confirmations.answered.origin.recipient': 'The recipient, through his link',
   'planning.confirmations.answered.origin.call': 'An agent, after a call',
-  'planning.confirmations.dateDialog.clientHint': 'The date stays proposed: the planner retains it on the order card.',
+  'planning.confirmations.dateDialog.clientHint':
+    'The date stays proposed: the planner retains it on the order card.',
   'planning.tracking.replannedOn': 'Your delivery is replanned: it will be delivered from {date}.',
   'planning.tracking.remainderOn': 'The missing products will be delivered from {date}.',
   'planning.tracking.nextDelivery': 'Follow this delivery and confirm your availability',
-  'planning.tracking.nextDeliveryLater': 'You will receive a new link as soon as this delivery is planned.'
+  'planning.tracking.nextDeliveryLater':
+    'You will receive a new link as soon as this delivery is planned.',
+  'planning.tracking.parts.title': 'Your order arrives in {count} deliveries',
+  'planning.tracking.parts.delivery': 'Delivery {no}',
+  'planning.tracking.parts.truck': 'truck {plate}',
+  'planning.tracking.parts.current': 'this page',
+  'planning.tracking.parts.follow': 'Follow',
+  'planning.tracking.parts.state.to_plan': 'to plan',
+  'planning.tracking.parts.state.planned': 'planned',
+  'planning.tracking.parts.state.on_the_way': 'on the way',
+  'planning.tracking.parts.state.declared': 'delivered, to confirm',
+  'planning.tracking.parts.state.received': 'receipt confirmed',
+  'planning.tracking.parts.state.refused': 'refused',
+  'planning.tracking.parts.state.to_replan': 'to replan',
+  'planning.tracking.parts.state.cancelled': 'cancelled',
+  'planning.tracking.cancelled': 'Delivery cancelled',
+  'planning.tracking.reasonIs': 'Reason: {reason}',
+  'planning.tracking.postponed': 'Delivery postponed',
+  'planning.tracking.postponedReturn':
+    'Your delivery is postponed: the goods go back to the warehouse',
+  'planning.tracking.replanQuestion': 'From which date can you be delivered?',
+  'planning.tracking.replanGiven': 'You gave {date}.',
+  'planning.tracking.giveDate': 'Give a date',
+  'planning.tracking.pendingConfirm': 'Receipt confirmed by {name}',
+  'planning.tracking.pendingContest': 'Contest recorded: {reason}',
+  'planning.tracking.pendingNetwork': 'Offline: recorded, will be sent'
 }

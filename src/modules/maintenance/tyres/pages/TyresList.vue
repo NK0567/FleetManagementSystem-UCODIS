@@ -1,6 +1,8 @@
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { CircleDot } from '@lucide/vue'
+import VehicleTyrePlan from '../components/VehicleTyrePlan.vue'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
 import { useListCellFormatters } from '@/composables/useListCellFormatters'
@@ -12,6 +14,7 @@ import type { TyreApi, TyreSearchColumn } from '../types/tyre.types'
 
 const { t } = useI18n()
 const store = useTyreStore()
+const showPlan = ref(false)
 const { formatDateTime, referenceLabel, formatInteger, formatDate, formatDecimal, optionLabel } =
   useListCellFormatters()
 
@@ -232,9 +235,25 @@ const {
             :reset-preferences="resetPreferences"
           />
         </template>
+        <template #extra-actions>
+          <button
+            type="button"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
+            :class="showPlan ? 'bg-accent' : ''"
+            :aria-pressed="showPlan"
+            @click="showPlan = !showPlan"
+          >
+            <CircleDot class="w-4 h-4 text-primary" />
+            {{ t('maintenance.tyres.plan.action') }}
+          </button>
+        </template>
       </ListPageToolbar>
 
       <FormAlerts class="mx-4" :error="exportError" @clear:error="exportError = null" />
+      <VehicleTyrePlan
+        v-if="showPlan"
+        @changed="store.fetchItems(store.pagination.page, store.pagination.limit)"
+      />
 
       <ListPageLayout
         :filter-panel-open="showFilterPanel"

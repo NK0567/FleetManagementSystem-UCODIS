@@ -22,6 +22,7 @@ import type { AuditFields } from '../../db/collection'
 import { HR_MESSAGES } from './messages'
 import { employeeCategoriesApi, jobPositionsApi } from './views'
 import { requireReference } from '../../http/references'
+import { codeOrName, registerReferenceImport } from './referenceImport'
 
 type Fields<Row> = Omit<Row, 'no' | keyof AuditFields>
 
@@ -33,6 +34,13 @@ export function registerEmployeeCategoryHandlers(router: MockRouter, db: MockDat
       readNumber(input, 'annualLeaveDays', { required: true, min: 0 }) ?? 0,
     active: (input) => readBoolean(input, 'active', true)
   }
+
+  registerReferenceImport(router, {
+    basePath: '/hr/employee-categories',
+    feature: 'EMPLOYEECATEGORY',
+    collection: db.employeeCategories,
+    build: (input) => ({ no: readCode(input), ...readAll(input, readers) })
+  })
 
   registerCrudResource(router, {
     basePath: '/hr/employee-categories',
@@ -102,6 +110,23 @@ export function registerJobPositionHandlers(router: MockRouter, db: MockDatabase
     defaultCategoryNo: (input) =>
       requireReference(db.employeeCategories, input, 'defaultCategoryNo')
   }
+
+  registerReferenceImport(router, {
+    basePath: '/hr/job-positions',
+    feature: 'JOBPOSITION',
+    collection: db.jobPositions,
+    build: (input) => ({
+      no: readCode(input),
+      ...readAll(
+        {
+          ...input,
+          orgUnitNo: codeOrName(db.orgUnits.all(), input.orgUnitNo),
+          defaultCategoryNo: codeOrName(db.employeeCategories.all(), input.defaultCategoryNo)
+        },
+        readers
+      )
+    })
+  })
 
   registerCrudResource(router, {
     basePath: '/hr/job-positions',

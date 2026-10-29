@@ -127,11 +127,17 @@ export function registerTyresHandlers(router: MockRouter, db: MockDatabase): voi
   router.get('/maintenance/tyres/positions', { feature: 'TYRE', action: 'read' }, (request) => {
     const vehicleNo = typeof request.query.vehicleNo === 'string' ? request.query.vehicleNo : ''
     const mounted = mountedTyres(db)
+    const tyres = new Map(tyresApi(db).map((tyre) => [tyre.no, tyre]))
     return ok(
-      vehiclePositions(db, vehicleNo).map((position) => ({
-        ...position,
-        tyreNo: mounted.get(`${vehicleNo} ${position.code}`)?.no ?? null
-      }))
+      vehiclePositions(db, vehicleNo).map((position) => {
+        const tyre = tyres.get(mounted.get(`${vehicleNo} ${position.code}`)?.no ?? '')
+        return {
+          ...position,
+          tyreNo: tyre?.no ?? null,
+          serialNumber: tyre?.serialNumber ?? null,
+          alert: tyre?.alert ?? null
+        }
+      })
     )
   })
 

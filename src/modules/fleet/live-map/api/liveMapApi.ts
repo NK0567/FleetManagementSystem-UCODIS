@@ -1,6 +1,11 @@
 import httpClient from '@/core/api/httpClient'
 import type { SingleResponse } from '@/types/api-response.types'
-import type { LivePositionApi, TrackHistoryApi, VehicleJournalApi } from '../types/liveMap.types'
+import type {
+  LivePositionApi,
+  OnboardReadingsApi,
+  TrackHistoryApi,
+  VehicleJournalApi
+} from '../types/liveMap.types'
 
 export const liveMapApi = {
   positions: () => httpClient.get<SingleResponse<LivePositionApi[]>>('/fleet/live/positions'),
@@ -13,6 +18,10 @@ export const liveMapApi = {
     httpClient.get<SingleResponse<VehicleJournalApi>>(
       `/fleet/telematics-journal/${encodeURIComponent(vehicleNo)}`,
       { params: { from, to } }
+    ),
+  readings: (vehicleNo: string) =>
+    httpClient.get<SingleResponse<OnboardReadingsApi>>(
+      `/fleet/telematics-readings/${encodeURIComponent(vehicleNo)}`
     ),
   simulation: () => httpClient.get<SingleResponse<SimulationState>>('/fleet/live/simulation'),
   setSimulation: (body: { active?: boolean; reset?: boolean }) =>

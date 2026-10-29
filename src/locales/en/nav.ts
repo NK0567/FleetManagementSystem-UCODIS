@@ -121,5 +121,6 @@ export default {
   'nav.inspectionItems': 'Inspection grid',
   'nav.fuelReferences': 'Reference consumptions',
   'nav.myVehicle': 'My vehicle',
-  'nav.providerTypes': 'Provider types'
+  'nav.providerTypes': 'Provider types',
+  'nav.stockMovements': 'Stock movements'
 }

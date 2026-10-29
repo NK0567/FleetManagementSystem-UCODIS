@@ -84,6 +84,9 @@ export interface DeliveryRequestRow extends MockRow {
   origin: DeliveryRequestOrigin
   /** The request a part was split from. */
   parentNo: string | null
+  /** The recipient's phone and e-mail for this order only; empty reads as his customer record. */
+  recipientPhone?: string
+  recipientEmail?: string
   rejectionReasonNo: string | null
   rejectionComment: string
   rejectedAt: string | null
@@ -257,7 +260,26 @@ const SEED: SeedRow[] = [
   request('DL-2026-0008', 'CLI-004', 'DP-001', 'PRD-002', 80, 1200, '2026-09-09', 'TR-2026-0001'),
   request('DL-2026-0009', 'CLI-004', 'DP-003', 'PRD-003', 400, 6000, '2026-09-04', 'TR-2026-0002'),
   request('DL-2026-0010', 'CLI-002', 'DP-006', 'PRD-001', 150, 2200, '2026-09-04', 'TR-2026-0003'),
-  request('DL-2026-0011', 'CLI-002', 'DP-005', 'PRD-004', 60, 600, '2026-09-08', 'TR-2026-0004'),
+  {
+    ...request(
+      'DL-2026-0011',
+      'CLI-002',
+      'DP-005',
+      'PRD-004',
+      60,
+      600,
+      '2026-09-08',
+      'TR-2026-0004'
+    ),
+    // The store manager receives this one himself: his own phone, not the customer's.
+    recipientPhone: '034 05 112 47'
+  },
+  // The rest of the same order, split off for another truck (TRS01-US06).
+  {
+    ...request('DL-2026-0013', 'CLI-002', 'DP-005', 'PRD-004', 40, 400, '2026-09-08', ''),
+    transportOrderNo: null,
+    parentNo: 'DL-2026-0011'
+  },
   {
     ...request('DL-2026-0012', 'CLI-002', 'DP-002', 'PRD-001', 120, 1800, '2026-09-09', ''),
     transportOrderNo: null,

@@ -21,6 +21,8 @@ export interface ConfirmationLineApi {
   trackingExpiresOn: string | null
   plannedDeparture: string | null
   notificationChannel: NotificationChannel
+  /** Where the link goes: the order's own phone or e-mail, else the customer record's. */
+  recipientContact: string
   preferredSlot: DeliverySlot
   /** The agent handling the line, if any: it is not offered to the others meanwhile. */
   agent: string | null
@@ -113,9 +115,38 @@ export interface TrackingApi {
   late: boolean
   satisfactionScore: number | null
   satisfactionComment: string
-  messages: { at: string; channel: string; kind: string }[]
+  messages: { at: string; channel: string; kind: string; to?: string }[]
   /** The day retained for what was not delivered or postponed, and the link of its new delivery
    * once planned (TRS01-US16, US17). */
   replannedOn: string | null
   nextTrackingToken: string | null
+  postponedAt: string | null
+  postponementReason: string
+  returnedAt: string | null
+  cancelledAt: string | null
+  cancellationReason: string
+  /** Out of the order once it left: he still gives or accepts a date (TRS01-US16). */
+  replanOpen: boolean
+  /** The deliveries of an order split into several trucks. */
+  parts: TrackingPartApi[]
+}
+
+export interface TrackingPartApi {
+  requestNo: string
+  quantity: number
+  unit: string
+  vehiclePlate: string
+  plannedDeparture: string | null
+  expectedArrival: string | null
+  state:
+    | 'to_plan'
+    | 'planned'
+    | 'on_the_way'
+    | 'declared'
+    | 'received'
+    | 'refused'
+    | 'to_replan'
+    | 'cancelled'
+  trackingToken: string | null
+  current: boolean
 }

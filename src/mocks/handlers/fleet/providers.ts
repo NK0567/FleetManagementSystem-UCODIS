@@ -11,7 +11,10 @@ import type { AuditFields } from '../../db/collection'
 import type { MockDatabase } from '../../db/database'
 import { nextNo } from '../../db/numbering'
 import type { ProviderRow } from '../../fixtures/fleet/providers'
-import { registerCrudResource } from '../../http/crudResource'
+import { readBody, registerCrudResource, stampCreated } from '../../http/crudResource'
+import { importRows } from '../../http/importRows'
+import { ok } from '../../http/responses'
+import { codeOrName } from '../hr/referenceImport'
 import { conflict, unprocessable } from '../../http/errors'
 import {
   invalidField,
@@ -165,4 +168,28 @@ export function registerProvidersHandlers(router: MockRouter, db: MockDatabase):
     },
     remove: () => undefined
   })
+
+  // Each line follows the rules of the form; a line naming a provider already known, or met
+  // earlier in the file, is refused and reported.
+  router.post('/fleet/providers/import', { feature: 'PROVIDER', action: 'insert' }, (request) =>
+    ok(
+      importRows(readBody(request).rows, request, (input) => {
+        const fields = readAll(
+          { ...input, providerType: codeOrName(db.providerTypes.all(), input.providerType) },
+          readers
+        )
+        assertTypeActive(fields.providerType)
+        assertValid(fields)
+        const row = {
+          no: nextNo(
+            db.providers.all().map((provider) => provider.no),
+            'PRS-',
+            3
+          ),
+          ...fields
+        }
+        return db.providers.insert(stampCreated(row, request)).no
+      })
+    )
+  )
 }

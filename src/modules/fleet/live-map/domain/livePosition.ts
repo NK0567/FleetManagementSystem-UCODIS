@@ -9,6 +9,7 @@ import {
 
 export const LIVE_SITUATIONS = [
   'moving',
+  'idling',
   'stopped',
   'parked',
   'immobilized',
@@ -109,11 +110,52 @@ export function liveSituation(facts: {
   signalLost: boolean
   onTrip: boolean
   moving: boolean
+  /** The engine runs, as read by the on-board computer. */
+  engineOn?: boolean
 }): LiveSituation {
   if (facts.signalLost) return 'signal_lost'
   if (facts.immobilized) return 'immobilized'
+  if (!facts.moving && facts.engineOn) return 'idling'
   if (!facts.onTrip) return 'parked'
   return facts.moving ? 'moving' : 'stopped'
+}
+
+/**
+ * Whether the engine runs at a moment of the trip: always while the vehicle drives; at a stop,
+ * only for the first minutes after it stopped, as long as the driver lets it run.
+ */
+export function engineRunning(
+  stops: readonly TrackedStop[],
+  arrivals: readonly string[],
+  at: string,
+  idleAtStopMin: number
+): boolean {
+  const fix = positionOnTrip(stops, arrivals, at)
+  if (fix.speedKmh > 0) return true
+  const arrival = fix.atStop !== null ? arrivals[fix.atStop] : undefined
+  if (!arrival || arrival > at) return false
+  return minutesBetween(arrival, at) < idleAtStopMin
+}
+
+/** Kilometres driven along the trip between two moments, measured every few minutes. */
+export function distanceDrivenKm(
+  stops: readonly TrackedStop[],
+  arrivals: readonly string[],
+  from: string,
+  to: string,
+  stepMin = 5
+): number {
+  if (!stops.length || from >= to) return 0
+  let total = 0
+  let previous: GeoPoint = positionOnTrip(stops, arrivals, from)
+  for (let at = addMinutes(from, stepMin); ; at = addMinutes(at, stepMin)) {
+    const moment = at < to ? at : to
+    const here = positionOnTrip(stops, arrivals, moment)
+    total += distanceKm(previous, here)
+    previous = here
+    if (moment === to) break
+  }
+  return total
 }
 
 const METRES_PER_DEGREE = 111_320

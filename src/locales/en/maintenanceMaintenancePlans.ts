@@ -68,5 +68,10 @@ export default {
   'maintenance.maintenancePlans.models.noVehicle': 'No vehicle of this model in the park yet.',
   'maintenance.maintenancePlans.models.inheritHint':
     'every vehicle of the model inherits the plan, including those that will join the park.',
-  'maintenance.maintenancePlans.operations.intervalHours': 'Every (engine hours)'
+  'maintenance.maintenancePlans.operations.intervalHours': 'Every (engine hours)',
+  'maintenance.maintenancePlans.coverage.modelsWithoutPlan': 'No model of the park without a maintenance plan. | One model of the park without a maintenance plan. | {count} models of the park without a maintenance plan.',
+  'maintenance.maintenancePlans.coverage.inactivePlans': 'No inactive plan for vehicles of the park. | One inactive plan for vehicles of the park. | {count} inactive plans for vehicles of the park.',
+  'maintenance.maintenancePlans.coverage.vehicles': '(no vehicle) | (1 vehicle) | ({count} vehicles)',
+  'maintenance.maintenancePlans.coverage.reactivate': 'Reactivate {name}',
+  'maintenance.maintenancePlans.coverage.error': 'The maintenance plan could not be saved.'
 }

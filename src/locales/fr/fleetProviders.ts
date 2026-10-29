@@ -98,5 +98,9 @@ export default {
   'fleet.providerTypes.form.noRole': 'Aucun : type propre à l’entreprise',
   'fleet.providerTypes.form.systemRoleHint': "Un type qui porte un rôle est celui que l'application cherche (ateliers, transporteurs…) : son rôle ne change pas et il ne se supprime pas.",
   'fleet.providerTypes.form.active': 'Actif',
-  'fleet.providerTypes.form.providerCount': 'Prestataires de ce type'
+  'fleet.providerTypes.form.providerCount': 'Prestataires de ce type',
+  'fleet.providers.import.action': 'Importer des prestataires',
+  'fleet.providers.import.title': 'Importer des prestataires',
+  'fleet.providers.import.hint': 'Chaque ligne suit les règles de la fiche : un prestataire déjà connu sous le même nom et le même type, ou présent deux fois dans le fichier, est refusé et signalé dans le rapport. Le type se donne par son code ou son nom.',
+  'fleet.providers.import.created': 'Aucun prestataire créé. | Un prestataire créé. | {n} prestataires créés.'
 }

@@ -41,6 +41,8 @@ export const TRANSPORT_ORDER_EVENT_KINDS = [
   'refused',
   'postponed',
   'qualified',
+  'correction',
+  'retried',
   'reception_confirmed',
   'reception_contested',
   'contest_handled',

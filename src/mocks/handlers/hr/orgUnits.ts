@@ -20,6 +20,18 @@ import type { OrgUnitRow } from '../../fixtures/hr/orgUnits'
 import { HR_MESSAGES } from './messages'
 import { optionalReference, requireReference } from '../../http/references'
 import { orgUnitsApi } from './views'
+import { codeOrName, registerReferenceImport } from './referenceImport'
+
+/** The words a file may use for the level of a unit. */
+const TYPE_WORDS: Record<string, string> = {
+  direction: 'directorate',
+  directorate: 'directorate',
+  service: 'department',
+  department: 'department',
+  equipe: 'team',
+  équipe: 'team',
+  team: 'team'
+}
 
 type EditableFields = Pick<OrgUnitRow, 'name' | 'type' | 'managerNo' | 'siteCode' | 'description'>
 
@@ -46,14 +58,8 @@ export function registerOrgUnitHandlers(router: MockRouter, db: MockDatabase): v
     return parentNo
   }
 
-  registerCrudResource(router, {
-    basePath: '/hr/org-units',
-    feature: 'ORGUNIT',
-    collection: db.orgUnits,
-    list: () => orgUnitsApi(db),
-    searchColumns: ['no', 'name'],
-    optionFields: { type: 'orgUnitType', status: 'orgUnitStatus' },
-    create: (input) => ({
+  function buildUnit(input: Record<string, unknown>) {
+    return {
       no: readCode(input),
       parentNo: readParent(input, null),
       ...readAll(input, readers),
@@ -61,7 +67,33 @@ export function registerOrgUnitHandlers(router: MockRouter, db: MockDatabase): v
       submittedAt: nowIso(),
       validatedAt: null,
       validatedBy: null
-    }),
+    }
+  }
+
+  registerReferenceImport(router, {
+    basePath: '/hr/org-units',
+    feature: 'ORGUNIT',
+    collection: db.orgUnits,
+    build: (input) => {
+      const type = typeof input.type === 'string' ? input.type.trim().toLowerCase() : ''
+      return buildUnit({
+        ...input,
+        type: TYPE_WORDS[type] ?? input.type,
+        parentNo: codeOrName(db.orgUnits.all(), input.parentNo) || null,
+        siteCode: codeOrName(db.sites.all(), input.siteCode),
+        managerNo: input.managerNo ? String(input.managerNo).trim() : null
+      })
+    }
+  })
+
+  registerCrudResource(router, {
+    basePath: '/hr/org-units',
+    feature: 'ORGUNIT',
+    collection: db.orgUnits,
+    list: () => orgUnitsApi(db),
+    searchColumns: ['no', 'name'],
+    optionFields: { type: 'orgUnitType', status: 'orgUnitStatus' },
+    create: buildUnit,
     update: (existing, input) => ({
       ...readPatch(input, readers),
       ...(has(input, 'parentNo') ? { parentNo: readParent(input, existing) } : {})

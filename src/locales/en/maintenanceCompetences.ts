@@ -23,5 +23,7 @@ export default {
   'maintenance.competences.form.no': 'Code',
   'maintenance.competences.form.name': 'Name',
   'maintenance.competences.form.active': 'Active',
-  'maintenance.competences.form.technicianCount': 'Technicians holding it'
+  'maintenance.competences.form.technicianCount': 'Technicians holding it',
+  'maintenance.competences.form.hourlyRate': 'Specialty hourly rate',
+  'maintenance.competences.col.hourlyRate': 'Hourly rate'
 }

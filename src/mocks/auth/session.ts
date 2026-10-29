@@ -8,10 +8,14 @@ export function issueToken(account: MockAccount): string {
   return `${TOKEN_PREFIX}${account.code}`
 }
 
-export function resolveToken(authorization: string | undefined): MockSessionUser | null {
+/** A switched-off account loses its open sessions at once: its token is no longer honoured. */
+export function resolveToken(
+  authorization: string | undefined,
+  lookup: (code: string) => MockAccount | undefined = findAccount
+): MockSessionUser | null {
   const token = authorization?.replace(/^Bearer\s+/i, '') ?? ''
   if (!token.startsWith(TOKEN_PREFIX)) return null
-  const account = findAccount(token.slice(TOKEN_PREFIX.length))
+  const account = lookup(token.slice(TOKEN_PREFIX.length))
   if (!account?.active) return null
   return {
     code: account.code,

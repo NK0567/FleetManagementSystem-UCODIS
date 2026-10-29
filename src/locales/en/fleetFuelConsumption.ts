@@ -44,5 +44,16 @@ export default {
     'Declared net monthly salary: {salary}; deduction allowed this month under labour law: {max} at most.',
   'fleet.fuelConsumption.form.monthlySalary': "Driver's net monthly salary",
   'fleet.fuelConsumption.form.monthlySalaryHint':
-    'With the other deductions of the month, the deduction cannot exceed the share of the salary set in the fleet settings under the applicable labour law.'
+    'With the other deductions of the month, the deduction cannot exceed the share of the salary set in the fleet settings under the applicable labour law.',
+  'fleet.fuelConsumption.emissions.title': 'Emissions and eco-driving by vehicle',
+  'fleet.fuelConsumption.emissions.summary': '{count} vehicle(s) · {tons} t of CO₂',
+  'fleet.fuelConsumption.emissions.loadError': 'The emissions could not be loaded.',
+  'fleet.fuelConsumption.emissions.empty': 'No refill recorded.',
+  'fleet.fuelConsumption.emissions.col.fuelType': 'Energy',
+  'fleet.fuelConsumption.emissions.col.liters': 'Litres',
+  'fleet.fuelConsumption.emissions.col.co2Kg': 'CO₂ emitted (kg)',
+  'fleet.fuelConsumption.emissions.col.gramsPerKm': 'g of CO₂ / km',
+  'fleet.fuelConsumption.emissions.col.ecoEvents': 'Eco-driving',
+  'fleet.fuelConsumption.emissions.ecoCount': '{count} event(s)',
+  'fleet.fuelConsumption.emissions.noEco': 'None'
 }

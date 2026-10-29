@@ -4,6 +4,7 @@ import {
   AlertTriangle,
   Archive,
   ClipboardCheck,
+  Clock,
   Columns3,
   Inbox,
   ListChecks,
@@ -20,6 +21,7 @@ import { useListCellFormatters } from '@/composables/useListCellFormatters'
 import { useListPage } from '@/composables/useListPage'
 import { getListCellDisplay } from '@/utils/listCellDisplay'
 import { transportOrderApi } from '../api/transportOrderApi'
+import { transportOrderService } from '../services/transportOrderService'
 import { useTransportOrderStore } from '../stores/transportOrderStore'
 import type { TransportOrderApi, TransportOrderSearchColumn } from '../types/transportOrder.types'
 
@@ -31,7 +33,22 @@ const store = useTransportOrderStore()
 const pendingRequests = ref(0)
 const expiredRequests = ref(0)
 const expiredOrders = computed(() => store.items.filter((item) => item.expired).length)
+/* Orders on the road whose estimated arrival is late (v57 « En retard »): a counter that filters. */
+const lateOrders = ref(0)
+async function loadLate() {
+  try {
+    const result = await transportOrderService.getAll({
+      page: 1,
+      pageSize: 1,
+      filters: [{ field: 'late', valueType: 'boolean', value: true }]
+    })
+    lateOrders.value = result?.data.meta.total ?? 0
+  } catch {
+    lateOrders.value = 0
+  }
+}
 async function loadWaiting() {
+  void loadLate()
   try {
     const [pending, expired] = await Promise.all(
       (['pending', 'expired'] as const).map((status) =>
@@ -91,6 +108,18 @@ const tableColumns = computed<TableColumn[]>(() => [
     minW: '160px',
     defaultHidden: true,
     formatter: formatDateTime
+  },
+  {
+    sortKey: 'expectedArrival',
+    label: t('planning.transportOrders.col.expectedArrival'),
+    minW: '190px',
+    formatter: formatDateTime
+  },
+  {
+    sortKey: 'depotName',
+    label: t('planning.transportOrders.col.depot'),
+    minW: '180px',
+    defaultHidden: true
   },
   { sortKey: 'routeName', label: t('planning.transportOrders.col.routeName'), minW: '240px' },
   {
@@ -167,6 +196,32 @@ const filterDefs: FilterFieldDef[] = [
     valueType: 'string',
     kind: 'option',
     optionsKey: 'transportMeans'
+  },
+  {
+    field: 'plannedDate',
+    labelKey: 'planning.transportOrders.col.plannedDate',
+    valueType: 'date',
+    kind: 'date'
+  },
+  {
+    field: 'depotSiteNo',
+    labelKey: 'planning.transportOrders.col.depot',
+    valueType: 'string',
+    kind: 'reference',
+    referenceKey: 'sites'
+  },
+  {
+    field: 'regions',
+    labelKey: 'planning.transportOrders.col.region',
+    valueType: 'string',
+    kind: 'reference',
+    referenceKey: 'planningRegions'
+  },
+  {
+    field: 'late',
+    labelKey: 'planning.transportOrders.view.late',
+    valueType: 'boolean',
+    kind: 'boolean'
   }
 ]
 
@@ -255,6 +310,16 @@ function toggleAwaitingClosing() {
     awaitingClosingView.value
       ? others
       : [...others, { field: 'awaitingClosing', valueType: 'boolean', value: true }]
+  )
+}
+
+const lateView = computed(() =>
+  store.userFilters.some((filter) => filter.field === 'late' && filter.value === true)
+)
+function toggleLate() {
+  const others = store.userFilters.filter((filter) => filter.field !== 'late')
+  onUpdateUserFilters(
+    lateView.value ? others : [...others, { field: 'late', valueType: 'boolean', value: true }]
   )
 }
 
@@ -420,6 +485,21 @@ function onCreatedFromRequests(no: string) {
           </span>
           <span class="font-semibold tabular-nums text-card-foreground">{{ pendingRequests }}</span>
         </button>
+        <button
+          type="button"
+          class="cursor-pointer inline-flex items-center gap-2 rounded border px-3 py-1.5"
+          :class="
+            lateView
+              ? 'border-destructive bg-destructive text-white'
+              : 'border-destructive/40 bg-card text-destructive hover:bg-destructive/5'
+          "
+          :aria-pressed="lateView"
+          @click="toggleLate"
+        >
+          <Clock class="w-4 h-4" />
+          {{ t('planning.transportOrders.view.late') }}
+          <span class="font-semibold tabular-nums">{{ lateOrders }}</span>
+        </button>
         <span
           v-if="expiredRequests || expiredOrders"
           class="inline-flex items-center gap-2 rounded border border-warning/50 bg-warning/10 px-3 py-1.5"
@@ -436,6 +516,7 @@ function onCreatedFromRequests(no: string) {
 
       <TransportOrdersBoard
         v-if="boardView"
+        :filters="store.userFilters"
         :search="store.searchQuery"
         :reload-key="boardReload"
         @open="openFromList"
@@ -493,6 +574,23 @@ function onCreatedFromRequests(no: string) {
               <span class="text-xs tabular-nums">{{
                 (item as TransportOrderApi).awaitingConfirmations
               }}</span>
+            </span>
+          </span>
+        </template>
+        <template #cell-expectedArrival="{ item, value }">
+          <span
+            class="inline-flex items-center gap-1.5 min-w-0"
+            :class="(item as TransportOrderApi).late ? 'text-destructive font-medium' : ''"
+          >
+            <span class="truncate">{{ value ? formatDateTime(value, item) : '' }}</span>
+            <span
+              v-if="(item as TransportOrderApi).delayMin"
+              class="text-xs tabular-nums shrink-0"
+              :class="(item as TransportOrderApi).late ? '' : 'text-muted-foreground'"
+            >
+              {{
+                t('planning.transportOrders.delay', { min: (item as TransportOrderApi).delayMin })
+              }}
             </span>
           </span>
         </template>

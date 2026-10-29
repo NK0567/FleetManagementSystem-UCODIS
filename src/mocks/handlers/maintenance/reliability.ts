@@ -118,9 +118,52 @@ export function reliabilityApi(db: MockDatabase, from: string, to: string): Reli
     byVehicle.set(order.vehiclePlate, { ...current, failures: current.failures + 1 })
   }
 
+  const fleetKm = [...kmByVehicle.values()].reduce((total, km) => total + km, 0)
+  const mobileTypes = new Map(db.missionTypes.all().map((type) => [type.no, type.isControl]))
+  // A breakdown handled on the road: a mobile team call that opened no order, or the order it opened.
+  const roadCalls = db.mobileInterventions
+    .all()
+    .filter(
+      (call) =>
+        mobileTypes.get(call.missionTypeNo) === false &&
+        !call.workOrderNo &&
+        call.departedAt >= fromAt &&
+        call.departedAt <= toAt
+    ).length
+  const roadOrders = failures.filter((order) => order.origin === 'mobile_team').length
+  const road = roadCalls + roadOrders
+  const workshop = failures.length - roadOrders
+  const plates = new Map(vehicles.map((vehicle) => [vehicle.no, vehicle.plate]))
+
   return {
     from,
     to,
+    mtbfBySubsystem: top(
+      count((order) => order.subsystemName || null),
+      (n) => n,
+      20
+    ).map(([name, failuresCount]) => ({
+      name,
+      failures: failuresCount,
+      mtbfKm: fleetKm ? Math.round(fleetKm / failuresCount) : null
+    })),
+    breakdownPlace: {
+      road,
+      workshop,
+      roadShare: road + workshop ? Math.round((road * 100) / (road + workshop)) : null
+    },
+    lostDaysPer10000Km: [...lostByVehicle]
+      .map(([vehicleNo, days]) => {
+        const km = kmByVehicle.get(vehicleNo) ?? 0
+        return {
+          plate: plates.get(vehicleNo) ?? vehicleNo,
+          km,
+          lostDays: Math.round(days * 100) / 100,
+          ratio: km ? Math.round(((days * 10_000) / km) * 100) / 100 : null
+        }
+      })
+      .filter((row) => row.km > 0)
+      .sort((a, b) => (b.ratio ?? 0) - (a.ratio ?? 0)),
     kpis: reliabilityKpis({
       orders: orders.map((order) => ({
         maintenanceType: order.maintenanceType,
@@ -131,7 +174,7 @@ export function reliabilityApi(db: MockDatabase, from: string, to: string): Reli
         validatedAt: order.validatedAt,
         totalCost: order.totalCost
       })),
-      fleetKm: [...kmByVehicle.values()].reduce((total, km) => total + km, 0),
+      fleetKm,
       lostDays,
       vehicleDays: vehicles.length * periodDays,
       from: fromAt,

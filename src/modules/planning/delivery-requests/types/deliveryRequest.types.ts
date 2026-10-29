@@ -79,6 +79,9 @@ export interface DeliveryRequestApi {
   confirmationRequired: boolean
   preferredSlot: DeliverySlot
   fullDeliveryRequired: boolean
+  /** The recipient's own phone and e-mail for this order; empty reads as his customer record. */
+  recipientPhone: string
+  recipientEmail: string
   origin: DeliveryRequestOrigin
   parentNo: string | null
   rejectionReasonNo: string | null

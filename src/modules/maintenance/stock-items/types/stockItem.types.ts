@@ -23,6 +23,28 @@ export interface StockItemApi {
 
 export type StockItemSearchColumn = 'no' | 'name' | 'no,name'
 
+export type StockMovementSearchColumn =
+  | 'itemNo'
+  | 'itemName'
+  | 'workOrderNo'
+  | 'reason'
+  | 'itemNo,itemName,workOrderNo,reason'
+
+/** The stock at a glance: how many references, how many to reorder, what the shelves are worth. */
+export interface StockSummaryApi {
+  itemCount: number
+  toReorderCount: number
+  totalValue: number
+}
+
+/** A parts supplier seen from the workshop: its references and its average delivery time. */
+export interface SupplierSupplyApi {
+  supplierNo: string
+  averageLeadTimeDays: number | null
+  receivedCount: number
+  items: Pick<StockItemApi, 'no' | 'name' | 'unitPrice' | 'stockQuantity' | 'status'>[]
+}
+
 export interface StockMovementApi {
   no: string
   itemNo: string

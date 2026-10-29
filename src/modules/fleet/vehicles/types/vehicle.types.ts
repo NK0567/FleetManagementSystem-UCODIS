@@ -114,6 +114,13 @@ export interface VehicleApi {
   statusCauseCode: string | null
   statusCauseCodeName: string
   driverNo: string | null
+  /** Motor vehicles only: whether a driver is assigned. */
+  driverAssignment: 'with_driver' | 'without_driver' | null
+  /** Vehicles that can be coupled only: whether they are coupled now. */
+  couplingState: 'coupled' | 'uncoupled' | null
+  /** The site the vehicle stands in now, from its last position; null outside every site. */
+  currentSiteNo: string | null
+  currentSiteName: string
   driverName: string
   coupledVehicleNo: string | null
   coupledVehiclePlate: string

@@ -141,3 +141,16 @@ export function lowEmissionShare(fuelTypes: readonly (string | null)[]) {
     sharePct: motorized.length ? Math.round((low.length / motorized.length) * 100) : null
   }
 }
+
+/** Telematics events of the behaviours that raise the consumption: they follow eco-driving. */
+export const ECO_DRIVING_EVENT_TYPES = ['HARSH-ACCEL', 'IDLING'] as const
+
+/** Grams of CO2 per kilometre over the measured periods; null without a distance. */
+export function co2GramsPerKm(
+  periods: readonly Pick<ConsumptionPeriod, 'km' | 'liters'>[],
+  co2GramsPerL: number
+): number | null {
+  const km = periods.reduce((total, period) => total + Math.max(0, period.km), 0)
+  const liters = periods.reduce((total, period) => total + period.liters, 0)
+  return km > 0 ? Math.round((liters * co2GramsPerL) / km) : null
+}

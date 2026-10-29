@@ -34,5 +34,6 @@ export default {
   'fleet.alerts.bell.seeAll': 'Voir le tableau des alertes',
   'fleet.alerts.col.notifications': 'Notifications envoyées',
   'fleet.alerts.notification.email': 'E-mail à {to}',
-  'fleet.alerts.notification.sms': 'SMS au {to}'
+  'fleet.alerts.notification.sms': 'SMS au {to}',
+  'fleet.alerts.averageHandling': 'Délai moyen de traitement : {hours} h sur {count} alerte(s) traitée(s)'
 }

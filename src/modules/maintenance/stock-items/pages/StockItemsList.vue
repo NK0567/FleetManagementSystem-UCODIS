@@ -1,19 +1,40 @@
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
 import { useListCellFormatters } from '@/composables/useListCellFormatters'
 import { useListPage } from '@/composables/useListPage'
+import { formatNumber } from '@/utils/format'
 import { getListCellDisplay } from '@/utils/listCellDisplay'
 import { stockItemApi } from '../api/stockItemApi'
+import { stockItemService } from '../services/stockItemService'
 import { useStockItemStore, type StockItemListView } from '../stores/stockItemStore'
-import type { StockItemApi, StockItemSearchColumn } from '../types/stockItem.types'
+import type { StockItemApi, StockItemSearchColumn, StockSummaryApi } from '../types/stockItem.types'
 
 const { t } = useI18n()
 const store = useStockItemStore()
 const { formatDateTime, referenceLabel, formatInteger, booleanLabel, optionLabel } =
   useListCellFormatters()
+
+const summary = ref<StockSummaryApi | null>(null)
+
+async function loadSummary() {
+  summary.value = await stockItemService.summary().catch(() => null)
+}
+
+onMounted(loadSummary)
+watch(() => store.items, loadSummary)
+
+const summaryText = computed(() =>
+  summary.value
+    ? t('maintenance.stockItems.summary', {
+        value: formatNumber(summary.value.totalValue),
+        items: summary.value.itemCount,
+        toReorder: summary.value.toReorderCount
+      })
+    : ''
+)
 
 const listViewOptions = computed<{ value: StockItemListView; label: string }[]>(() => [
   { value: 'toReorder', label: t('maintenance.stockItems.listView.toReorder') },
@@ -231,6 +252,7 @@ const {
         </template>
       </ListPageToolbar>
 
+      <p v-if="summaryText" class="mx-4 mt-2 text-xs text-muted-foreground">{{ summaryText }}</p>
       <FormAlerts class="mx-4" :error="exportError" @clear:error="exportError = null" />
 
       <ListPageLayout

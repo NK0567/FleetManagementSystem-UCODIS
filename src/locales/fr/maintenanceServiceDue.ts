@@ -43,5 +43,8 @@ export default {
   'maintenance.serviceDue.noHourMeter': 'Aucun relevé du compteur horaire pour ce véhicule.',
   'maintenance.serviceDue.action.recordHours': 'Relever le compteur horaire',
   'maintenance.serviceDue.form.hours': 'Heures moteur au passage',
-  'maintenance.serviceDue.form.engineHours': 'Heures moteur affichées'
+  'maintenance.serviceDue.form.engineHours': 'Heures moteur affichées',
+  'maintenance.serviceDue.summary.overdue': 'Aucune échéance dépassée | 1 échéance dépassée | {count} échéances dépassées',
+  'maintenance.serviceDue.summary.blocking': 'dont aucune bloquante | dont 1 bloquante | dont {count} bloquantes',
+  'maintenance.serviceDue.summary.dueSoon': 'Aucune proche du seuil | 1 proche du seuil | {count} proches du seuil'
 }

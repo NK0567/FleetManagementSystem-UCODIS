@@ -5,7 +5,9 @@ import {
 import { stockStatus } from '@/modules/maintenance/stock-items/domain/stock'
 import type {
   StockItemApi,
-  StockMovementApi
+  StockMovementApi,
+  StockSummaryApi,
+  SupplierSupplyApi
 } from '@/modules/maintenance/stock-items/types/stockItem.types'
 import type { AuditFields } from '../../db/collection'
 import type { MockDatabase } from '../../db/database'
@@ -104,6 +106,45 @@ export function registerStockItemsHandlers(router: MockRouter, db: MockDatabase)
     searchColumns: ['itemNo', 'itemName', 'workOrderNo', 'reason'],
     optionFields: { kind: 'stockMovementKind' }
   })
+
+  router.get('/maintenance/stock-items/summary', { feature: 'STOCKITEM', action: 'read' }, () => {
+    const items = stockItemsApi(db)
+    const summary: StockSummaryApi = {
+      itemCount: items.length,
+      toReorderCount: items.filter((item) => item.status === 'low' || item.status === 'out').length,
+      totalValue: items.reduce((total, item) => total + item.stockValue, 0)
+    }
+    return ok(summary)
+  })
+
+  /** What a supplier provides the workshop with, and how fast it delivers. */
+  router.get(
+    '/maintenance/suppliers/:no/supply',
+    { feature: 'STOCKITEM', action: 'read' },
+    (request) => {
+      const supplier = db.providers.findOrFail(routeParam(request, 'no'))
+      const received = db.purchaseRequests
+        .all()
+        .filter((row) => row.supplierNo === supplier.no && row.receivedAt && !row.cancelledAt)
+      const supply: SupplierSupplyApi = {
+        supplierNo: supplier.no,
+        averageLeadTimeDays: averageLeadTime(
+          received.map((row) => leadTimeDays(row.orderedAt, row.receivedAt))
+        ),
+        receivedCount: received.length,
+        items: stockItemsApi(db)
+          .filter((item) => item.supplierNo === supplier.no)
+          .map(({ no, name, unitPrice, stockQuantity, status }) => ({
+            no,
+            name,
+            unitPrice,
+            stockQuantity,
+            status
+          }))
+      }
+      return ok(supply)
+    }
+  )
 
   router.get(
     '/maintenance/stock-items/:no/movements',

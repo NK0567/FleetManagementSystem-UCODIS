@@ -85,6 +85,11 @@ const SEED: Omit<DowntimeCodeRow, keyof typeof seedAudit>[] = [
   }
 ]
 
+/** The causes the application proposes, which the workshop can come back to. */
+export function defaultDowntimeCodes(): Omit<DowntimeCodeRow, keyof typeof seedAudit>[] {
+  return SEED.map((row) => ({ ...row }))
+}
+
 export const downtimeCodesCollection: CollectionDefinition<DowntimeCodeRow> = {
   name: 'downtime-codes',
   seed: () => SEED.map((row) => ({ ...row, ...seedAudit }))

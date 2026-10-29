@@ -1,4 +1,5 @@
 import { createCrudService } from '@/core/factories'
+import type { ImportReport } from '@/core/utils/csvImport'
 import { orgUnitApi } from '../api/orgUnitApi'
 import type { OrgUnitApi, OrgUnitSearchColumn } from '../types/orgUnit.types'
 
@@ -9,6 +10,9 @@ const crudService = createCrudService<OrgUnitApi, OrgUnitSearchColumn>(orgUnitAp
 
 export const orgUnitService = {
   ...crudService,
+  async importRows(rows: Record<string, unknown>[]): Promise<ImportReport> {
+    return (await orgUnitApi.importRows(rows)).data.data
+  },
   async validate(no: string): Promise<OrgUnitApi> {
     return (await orgUnitApi.validate(no)).data.data
   },

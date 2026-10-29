@@ -6,7 +6,10 @@ import {
   type MaintenanceOperation,
   type OperationNature
 } from '@/modules/maintenance/maintenance-plans/domain/maintenancePlan'
-import type { MaintenancePlanApi } from '@/modules/maintenance/maintenance-plans/types/maintenancePlan.types'
+import type {
+  MaintenancePlanApi,
+  PlanCoverageApi
+} from '@/modules/maintenance/maintenance-plans/types/maintenancePlan.types'
 import type { AuditFields } from '../../db/collection'
 import type { MockDatabase } from '../../db/database'
 import { nextNo } from '../../db/numbering'
@@ -22,7 +25,7 @@ import {
   readStringList,
   type FieldReaders
 } from '../../http/input'
-import { created } from '../../http/responses'
+import { created, ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
 import { MAINTENANCE_MESSAGES } from './messages'
 
@@ -64,6 +67,43 @@ export function planByVehicle(db: MockDatabase): Map<string, MaintenancePlanRow>
       .filter((vehicle) => byModel.has(modelCode(vehicle)))
       .map((vehicle) => [vehicle.no, byModel.get(modelCode(vehicle))!] as const)
   )
+}
+
+/**
+ * The models of the park no plan covers, and the inactive plans some vehicles still depend on
+ * because no active plan has taken over their model.
+ */
+export function planCoverage(db: MockDatabase): PlanCoverageApi {
+  const plans = db.maintenancePlans.all()
+  const activeModels = new Set(
+    plans.filter((plan) => plan.active).flatMap((plan) => plan.modelCodes)
+  )
+  const anyModels = new Set(plans.flatMap((plan) => plan.modelCodes))
+  const counts = new Map<string, number>()
+  for (const vehicle of db.vehicles.all().filter((row) => !row.removal)) {
+    const code = modelCode(vehicle)
+    counts.set(code, (counts.get(code) ?? 0) + 1)
+  }
+  return {
+    modelsWithoutPlan: [...counts.entries()]
+      .filter(([code]) => !anyModels.has(code))
+      .map(([code, vehicleCount]) => ({
+        modelCode: code,
+        modelName: modelLabel(code),
+        vehicleCount
+      }))
+      .sort((a, b) => b.vehicleCount - a.vehicleCount || a.modelName.localeCompare(b.modelName)),
+    inactivePlansInUse: plans
+      .filter((plan) => !plan.active)
+      .map((plan) => ({
+        no: plan.no,
+        name: plan.name,
+        vehicleCount: plan.modelCodes
+          .filter((code) => !activeModels.has(code))
+          .reduce((total, code) => total + (counts.get(code) ?? 0), 0)
+      }))
+      .filter((plan) => plan.vehicleCount > 0)
+  }
 }
 
 function operationNos(db: MockDatabase): string[] {
@@ -173,6 +213,37 @@ export function registerMaintenancePlansHandlers(router: MockRouter, db: MockDat
       }
     }
   })
+
+  router.get(
+    '/maintenance/maintenance-plans/coverage',
+    { feature: 'MAINTENANCEPLAN', action: 'read' },
+    () => ok(planCoverage(db))
+  )
+
+  // One click from the coverage alert: an empty, provisional plan for the model, to fill in.
+  router.post(
+    '/maintenance/maintenance-plans/for-model',
+    { feature: 'MAINTENANCEPLAN', action: 'insert' },
+    (request) => {
+      const code = readString(readBody(request), 'modelCode', { required: true })
+      if (!db.vehicles.all().some((vehicle) => !vehicle.removal && modelCode(vehicle) === code)) {
+        throw invalidField('modelCode')
+      }
+      const fields: Fields = {
+        name: modelLabel(code),
+        provisional: true,
+        active: true,
+        source: '',
+        modelCodes: [code],
+        operations: []
+      }
+      assertModelsFree(fields)
+      const plan = db.maintenancePlans.insert(
+        stampCreated<MaintenancePlanRow>({ no: newNo(), ...fields }, request)
+      )
+      return created(maintenancePlansApi(db).find((row) => row.no === plan.no))
+    }
+  )
 
   // A copy starts with no model and new operation numbers: passages belong to the original.
   router.post(

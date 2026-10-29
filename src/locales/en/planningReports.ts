@@ -1,6 +1,6 @@
 export default {
   'planning.dashboard.title': 'Transport dashboard',
-  'planning.dashboard.subtitle': 'Where activity stands: orders by status, delays and alerts, orders without a transport order. Only the orders of the perimeter count.',
+  'planning.dashboard.subtitle': 'Orders by status, delays, alerts and waiting orders.',
   'planning.dashboard.loadError': 'The dashboard could not be displayed.',
   'planning.reports.title': 'Transport reports',
   'planning.reports.subtitle': 'Punctuality, costs, delivery quality, means and carriers, computed over the same orders of the perimeter.',

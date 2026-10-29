@@ -7,6 +7,8 @@ import type { DepartureAuthorizationApi } from '@/modules/fleet/departure-author
 import type { DocumentState } from '@/modules/fleet/documents'
 import type { StopRole } from '@/modules/fleet/route-templates'
 import type { TripStatus } from '@/modules/fleet/trips'
+import type { OverToleranceMode } from '@/modules/planning/planning-settings/domain/planningSettings'
+import type { ToleranceRule } from '@/modules/planning/quantity-tolerances/domain/quantityTolerance'
 
 export interface MyDocument {
   no: string
@@ -33,6 +35,14 @@ export interface MyProfileApi {
   fullName: string
   phone: string
   jobPositionName: string
+  /** What the position asks of him, from the HR positions. */
+  responsibilities: string[]
+  /** The driving limits in force (fleet settings), for a driver; null otherwise. */
+  drivingLimits: {
+    dailyDrivingMaxMin: number
+    dailyRestMinH: number
+    weeklyDrivingMaxH: number
+  } | null
   siteName: string
   /** The driver declares; the assistant only reads the tour. */
   mayDeclare: boolean
@@ -95,9 +105,14 @@ export interface MyChecklistInput {
   takenAt: string
   /** Departure, a stop along the trip or the arrival. */
   stage?: 'departure' | 'stop' | 'arrival'
+  /** Where the driver stopped to take it. */
+  location?: string
   /** The trip a checklist kept without network was taken for; the current one otherwise. */
   tripNo?: string
   results: Pick<CheckResult, 'pointNo' | 'result' | 'comment'>[]
+  /** The driver signs the checklist on his phone, at the moment given. */
+  signed?: boolean
+  signedAt?: string
 }
 
 /** A line of the driver's transport order, as he works it from his space. */
@@ -124,6 +139,13 @@ export interface MyOrderLineApi {
   receptionContestedAt: string | null
   isFuel: boolean
   undeliveredReasonNo: string | null
+  nonconformityReason: string
+  refusalByRecipient: boolean
+  /** Handed back or received at the warehouse: no correction any more. */
+  goodsBackAt: string | null
+  remainderAt: string | null
+  /** The loaded quantity (or volume at 15 °C) the delivered one is compared with, and its rule. */
+  tolerance: { loaded: number; loaded15L: number | null; rule: ToleranceRule | null }
 }
 
 export interface MyReturnApi {
@@ -144,6 +166,7 @@ export interface MyOrderApi {
   vehiclePlate: string
   trailerPlate: string
   compartmentPlan: CompartmentPlanApi | null
+  overToleranceMode: OverToleranceMode
   lines: MyOrderLineApi[]
   reasons: Record<'nonconformity' | 'postponement' | 'refusal', { no: string; name: string }[]>
 }

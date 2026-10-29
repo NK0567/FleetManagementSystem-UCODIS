@@ -6,7 +6,7 @@ import { readBody, registerListResource } from '../../http/crudResource'
 import { conflict, unprocessable } from '../../http/errors'
 import { readDate, readNumber } from '../../http/input'
 import { requireReference } from '../../http/references'
-import { created } from '../../http/responses'
+import { created, ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
 import { engineHoursByVehicle } from './engineHours'
 import { planByVehicle } from './maintenancePlans'
@@ -142,6 +142,16 @@ export function registerServiceDueHandlers(router: MockRouter, db: MockDatabase)
       return created(workOrdersApi(db).find((row) => row.no === order.no))
     }
   )
+
+  // Static path: the counters of the head of the list, not a due item.
+  router.get('/maintenance/service-due/summary', { feature: 'SERVICEDUE', action: 'read' }, () => {
+    const rows = serviceDueApi(db)
+    return ok({
+      overdue: rows.filter((row) => row.status === 'overdue' || row.status === 'blocking').length,
+      blocking: rows.filter((row) => row.status === 'blocking').length,
+      dueSoon: rows.filter((row) => row.status === 'due_soon').length
+    })
+  })
 
   registerListResource(router, {
     basePath: '/maintenance/service-due',

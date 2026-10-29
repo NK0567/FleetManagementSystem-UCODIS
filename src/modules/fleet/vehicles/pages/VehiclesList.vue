@@ -52,6 +52,12 @@ const tableColumns = computed<TableColumn[]>(() => [
   },
   { sortKey: 'homeSiteName', label: t('fleet.vehicles.col.homeSiteNo'), minW: '170px' },
   {
+    sortKey: 'currentSiteName',
+    label: t('fleet.vehicles.col.currentSiteNo'),
+    minW: '170px',
+    defaultHidden: true
+  },
+  {
     sortKey: 'year',
     label: t('fleet.vehicles.col.year'),
     minW: '90px',
@@ -185,6 +191,27 @@ const filterDefs: FilterFieldDef[] = [
     valueType: 'string',
     kind: 'reference',
     referenceKey: 'sites'
+  },
+  {
+    field: 'currentSiteNo',
+    labelKey: 'fleet.vehicles.col.currentSiteNo',
+    valueType: 'string',
+    kind: 'reference',
+    referenceKey: 'sites'
+  },
+  {
+    field: 'driverAssignment',
+    labelKey: 'fleet.vehicles.filter.driverAssignment',
+    valueType: 'string',
+    kind: 'option',
+    optionsKey: 'vehicleDriverAssignment'
+  },
+  {
+    field: 'couplingState',
+    labelKey: 'fleet.vehicles.filter.couplingState',
+    valueType: 'string',
+    kind: 'option',
+    optionsKey: 'vehicleCouplingState'
   },
   {
     field: 'fuelType',

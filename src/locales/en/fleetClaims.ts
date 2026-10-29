@@ -82,5 +82,6 @@ export default {
   'fleet.claims.form.workOrder': 'Work order {no}',
   'fleet.claims.form.downtimeCode': 'Unavailability code put on the vehicle: {code} · {name}',
   'fleet.claims.form.downtimeOpen': 'ongoing',
-  'fleet.claims.form.downtimeEnded': 'ended'
+  'fleet.claims.form.downtimeEnded': 'ended',
+  'fleet.claims.summary': '{claims} accident(s) and incident(s) · {rate} accident(s) per million km · damage {damage} Ar · left to pay {residual} Ar'
 }

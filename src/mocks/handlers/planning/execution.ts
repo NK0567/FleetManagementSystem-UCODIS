@@ -63,7 +63,7 @@ function save(
   order: TransportOrderRow,
   patch: Partial<TransportOrderRow>,
   request: MockRequest,
-  kind: 'departed' | 'declared' | 'refused' | 'postponed' | 'qualified',
+  kind: 'departed' | 'declared' | 'refused' | 'postponed' | 'qualified' | 'correction' | 'retried',
   detail: string
 ): void {
   db.transportOrders.update(order.no, {
@@ -74,6 +74,38 @@ function save(
     ],
     ...stampModified(request)
   })
+}
+
+/**
+ * What a delivered quantity is compared with, and the tolerance that applies to it: the loaded
+ * quantity, or for fuel the loaded volume at 15 °C, which neutralises the expansion (TRS03-US16).
+ */
+export function gapReference(
+  db: MockDatabase,
+  order: TransportOrderRow,
+  line: TransportOrderLineRow
+) {
+  const fuel = !!db.products.find(line.productNo)?.isFuel
+  const loaded15 = (order.pickup?.entries ?? [])
+    .filter((entry) => entry.lineNo === line.lineNo && entry.volume15L !== null)
+    .reduce((sum, entry) => sum + (entry.volume15L ?? 0), 0)
+  const point = db.deliveryPoints.findOrFail(line.deliveryPointNo)
+  const applicable = applicableTolerance(
+    db.quantityTolerances.all(),
+    point.customerNo,
+    line.productNo
+  )
+  return {
+    loaded: line.loadedQuantity ?? line.quantity,
+    loaded15L: fuel && loaded15 > 0 ? loaded15 : null,
+    rule: applicable?.rule ?? null
+  }
+}
+
+/** The points of an order in their execution order, without the lines out of the route. */
+export function routePoints(order: TransportOrderRow): string[] {
+  const route = order.lines.filter((item) => !item.unavailableAt && !item.replannedAt)
+  return [...new Set(route.map((item) => item.deliveryPointNo))]
 }
 
 /** A fleet order the signed-in driver is assigned to; any other is not his. */
@@ -264,24 +296,17 @@ export function registerExecutionHandlers(router: MockRouter, db: MockDatabase):
           measures?.deliveredVolumeL ??
           0
         // For fuel the gap is read at 15 °C, which neutralises the expansion (TRS03-US16).
-        const loaded15 = (order.pickup?.entries ?? [])
-          .filter((entry) => entry.lineNo === line.lineNo && entry.volume15L !== null)
-          .reduce((sum, entry) => sum + (entry.volume15L ?? 0), 0)
-        const compareLoaded =
-          fuel && loaded15 > 0 ? loaded15 : (line.loadedQuantity ?? line.quantity)
+        const reference = gapReference(db, order, line)
+        const compareLoaded = reference.loaded15L ?? reference.loaded
         const compareReceived =
-          fuel && measures?.volume15L != null && loaded15 > 0 ? measures.volume15L : received
-        const point = db.deliveryPoints.findOrFail(line.deliveryPointNo)
-        const applicable = applicableTolerance(
-          db.quantityTolerances.all(),
-          point.customerNo,
-          line.productNo
-        )
+          measures?.volume15L != null && reference.loaded15L !== null
+            ? measures.volume15L
+            : received
         const justification = readString(row, 'justification')
         const decision = receivedQuantityDecision(
           compareLoaded,
           compareReceived,
-          applicable?.rule ?? null,
+          reference.rule,
           planningSettings(db).quantities.overToleranceMode,
           justification
         )
@@ -391,6 +416,194 @@ export function registerExecutionHandlers(router: MockRouter, db: MockDatabase):
     }
   )
 
+  /* Corrections of an entry made by mistake, always with the reason (v57, TRS03-US05, US10). The
+   * non-conformity found at the loading check is withdrawn while the order is still being loaded
+   * and the line is not replanned: the line comes back to the check. */
+  router.post(
+    '/me/orders/:no/lines/:lineNo/cancel-nonconformity',
+    { feature: 'MYSPACE', action: 'execute' },
+    (request) => {
+      const order = driverOrder(db, routeParam(request, 'no'), request)
+      const lineNo = Number(routeParam(request, 'lineNo'))
+      const line = order.lines.find((item) => item.lineNo === lineNo)
+      if (!line?.nonconformityAt) throw conflict(PLANNING_MESSAGES.correctionNoNonconformity)
+      if (statusOf(db, order) !== 'confirmed')
+        throw conflict(PLANNING_MESSAGES.correctionLoadingOver)
+      if (line.replannedAt) throw conflict(PLANNING_MESSAGES.correctionReplanned)
+      const comment = readString(readBody(request), 'comment', { required: true })
+      save(
+        db,
+        order,
+        {
+          lines: order.lines.map((item) =>
+            item.lineNo === lineNo
+              ? {
+                  ...item,
+                  conformingAt: null,
+                  nonconformityAt: null,
+                  nonconformityReasonNo: null,
+                  nonconformityComment: ''
+                }
+              : item
+          )
+        },
+        request,
+        'correction',
+        `non-conformité ${lineNo} : ${comment}`
+      )
+      return ok({ status: statusOf(db, db.transportOrders.findOrFail(order.no)) })
+    }
+  )
+
+  /* The declaration of a point is withdrawn while the recipient has neither confirmed nor
+   * contested it and nothing undelivered was handed back or replanned: the point is to declare
+   * again. */
+  router.post(
+    '/me/orders/:no/points/:pointNo/cancel-declaration',
+    { feature: 'MYSPACE', action: 'execute' },
+    (request) => {
+      const order = driverOrder(db, routeParam(request, 'no'), request)
+      if (!onTheRoad(db, order)) throw conflict(PLANNING_MESSAGES.executionNotOnTheRoad)
+      const pointNo = routeParam(request, 'pointNo')
+      const declared = order.lines.filter(
+        (line) => line.deliveryPointNo === pointNo && line.declaredAt && !line.replannedAt
+      )
+      if (!declared.length) throw conflict(PLANNING_MESSAGES.correctionNotDeclared)
+      if (declared.some((line) => line.receptionConfirmedAt || line.receptionContestedAt)) {
+        throw conflict(PLANNING_MESSAGES.correctionReceptionAnswered)
+      }
+      if (declared.some((line) => line.handedBackAt || line.warehouseReceivedAt)) {
+        throw conflict(PLANNING_MESSAGES.correctionGoodsBack)
+      }
+      if (declared.some((line) => line.remainderAt)) {
+        throw conflict(PLANNING_MESSAGES.correctionReplanned)
+      }
+      const comment = readString(readBody(request), 'comment', { required: true })
+      const lineNos = new Set(declared.map((line) => line.lineNo))
+      save(
+        db,
+        order,
+        {
+          lines: order.lines.map((line) =>
+            lineNos.has(line.lineNo)
+              ? {
+                  ...line,
+                  declaredAt: null,
+                  declaredBy: null,
+                  receivedQuantity: null,
+                  quantityGap: null,
+                  gapQualification: null,
+                  gapComment: '',
+                  gapImputableToDriver: null,
+                  undeliveredReasonNo: null,
+                  undeliveredComment: '',
+                  deliveryMeasures: null
+                }
+              : line
+          )
+        },
+        request,
+        'correction',
+        `déclaration ${pointNo} : ${comment}`
+      )
+      return ok({ status: statusOf(db, db.transportOrders.findOrFail(order.no)) })
+    }
+  )
+
+  /* A refusal recorded by mistake is withdrawn while the driver is still on site: no later point
+   * is started, and the goods are not handed back. The recipient's own refusal stays his. */
+  router.post(
+    '/me/orders/:no/lines/:lineNo/cancel-refusal',
+    { feature: 'MYSPACE', action: 'execute' },
+    (request) => {
+      const order = driverOrder(db, routeParam(request, 'no'), request)
+      if (!onTheRoad(db, order)) throw conflict(PLANNING_MESSAGES.executionNotOnTheRoad)
+      const lineNo = Number(routeParam(request, 'lineNo'))
+      const line = order.lines.find((item) => item.lineNo === lineNo)
+      if (!line?.refusalAt || line.incident || !line.arrivedAt) {
+        throw conflict(PLANNING_MESSAGES.correctionNoRefusal)
+      }
+      if (line.refusalBy === 'recipient') {
+        throw conflict(PLANNING_MESSAGES.correctionRefusedByRecipient)
+      }
+      if (line.handedBackAt || line.warehouseReceivedAt) {
+        throw conflict(PLANNING_MESSAGES.correctionGoodsBack)
+      }
+      if (line.replannedAt) throw conflict(PLANNING_MESSAGES.correctionReplanned)
+      const points = routePoints(order)
+      const later = new Set(points.slice(points.indexOf(line.deliveryPointNo) + 1))
+      if (order.lines.some((item) => later.has(item.deliveryPointNo) && item.arrivedAt)) {
+        throw conflict(PLANNING_MESSAGES.correctionNextStarted)
+      }
+      const comment = readString(readBody(request), 'comment', { required: true })
+      save(
+        db,
+        order,
+        {
+          lines: order.lines.map((item) =>
+            item.lineNo === lineNo
+              ? {
+                  ...item,
+                  refusalAt: null,
+                  refusalReasonNo: null,
+                  refusalComment: '',
+                  refusalBy: null
+                }
+              : item
+          )
+        },
+        request,
+        'correction',
+        `refus ${lineNo} : ${comment}`
+      )
+      return ok({ status: statusOf(db, db.transportOrders.findOrFail(order.no)) })
+    }
+  )
+
+  /* A point simply postponed is retried at any time while the order runs (TRS03-US12): its lines
+   * are to deliver again; a postponement with return to the warehouse is not retried. */
+  router.post(
+    '/me/orders/:no/points/:pointNo/retry',
+    { feature: 'MYSPACE', action: 'execute' },
+    (request) => {
+      const order = driverOrder(db, routeParam(request, 'no'), request)
+      if (!onTheRoad(db, order)) throw conflict(PLANNING_MESSAGES.executionNotOnTheRoad)
+      const pointNo = routeParam(request, 'pointNo')
+      const retried = order.lines.filter(
+        (line) =>
+          line.deliveryPointNo === pointNo &&
+          line.postponedAt &&
+          !line.returnedAt &&
+          !line.declaredAt &&
+          !line.refusalAt &&
+          !lineOutOfTour(line)
+      )
+      if (!retried.length) throw conflict(PLANNING_MESSAGES.executionNothingToRetry)
+      const lineNos = new Set(retried.map((line) => line.lineNo))
+      save(
+        db,
+        order,
+        {
+          lines: order.lines.map((line) =>
+            lineNos.has(line.lineNo)
+              ? {
+                  ...line,
+                  postponedAt: null,
+                  postponementReasonNo: null,
+                  postponementComment: '',
+                  availableFrom: null
+                }
+              : line
+          )
+        },
+        request,
+        'retried',
+        pointNo
+      )
+      return ok({ status: statusOf(db, db.transportOrders.findOrFail(order.no)) })
+    }
+  )
+
   lineAction('declare', (_order, line, request) => {
     if (lineOutOfTour(line) || line.refusalAt || line.declaredAt) {
       throw conflict(PLANNING_MESSAGES.executionLineSettled)
@@ -433,7 +646,8 @@ export function registerExecutionHandlers(router: MockRouter, db: MockDatabase):
       ...line,
       refusalAt: nowIsoDateTime(),
       refusalReasonNo: reason.reasonNo,
-      refusalComment: reason.comment
+      refusalComment: reason.comment,
+      refusalBy: 'driver'
     }
   })
 

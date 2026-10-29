@@ -1,4 +1,5 @@
 import {
+  accidentsPerMillionKm,
   closureBlocks,
   indemnityIssues,
   INSURANCE_STATUSES,
@@ -12,7 +13,8 @@ import {
   CLAIM_NATURES,
   CLAIM_SEVERITIES,
   type ClaimApi,
-  type ClaimEvent
+  type ClaimEvent,
+  type ClaimSummaryApi
 } from '@/modules/fleet/claims/types/claim.types'
 import { coversDay } from '@/modules/fleet/insurance-policies/domain/insurancePolicy'
 import { employeeFullName } from '@/modules/hr/employees/domain/employee'
@@ -119,7 +121,35 @@ function historyEvent(
   return { at: nowIso(), by: sessionUser(request).code, kind, insuranceStatus, comment }
 }
 
+/** Accidents against the kilometres of the park, and what the claims cost and still cost. */
+export function claimSummary(db: MockDatabase): ClaimSummaryApi {
+  const claims = claimsApi(db)
+  const motorized = new Set(
+    db.vehicleTypes
+      .all()
+      .filter((type) => type.motorized)
+      .map((type) => type.no)
+  )
+  const fleetKm = db.vehicles
+    .all()
+    .filter((vehicle) => !vehicle.removal && motorized.has(vehicle.vehicleTypeNo))
+    .reduce((total, vehicle) => total + vehicle.odometerKm, 0)
+  const accidents = claims.filter((claim) => claim.nature === 'accident').length
+  return {
+    claims: claims.length,
+    accidents,
+    fleetKm,
+    accidentsPerMillionKm: accidentsPerMillionKm(accidents, fleetKm),
+    damageTotal: claims.reduce((total, claim) => total + (claim.damageAmount ?? 0), 0),
+    residualTotal: claims.reduce((total, claim) => total + claim.residualCost, 0)
+  }
+}
+
 export function registerClaimsHandlers(router: MockRouter, db: MockDatabase): void {
+  router.get('/fleet/claims/summary', { feature: 'CLAIM', action: 'read' }, () =>
+    ok(claimSummary(db))
+  )
+
   const readers: FieldReaders<EditableFields> = {
     occurredAt: (input) => {
       const value = readDateTime(input, 'occurredAt', { required: true }) ?? ''

@@ -11,7 +11,6 @@ import { descendantNos } from '@/modules/hr/org-units/domain/orgTree'
 import { countWorkingDays } from '@/modules/hr/working-calendar/domain/workingDays'
 import { todayIso } from '@/utils/date'
 import type { MockDatabase } from '../../db/database'
-import { MOCK_ACCOUNTS } from '../../fixtures/auth/users'
 import { WORKING_CALENDAR_NO } from '../../fixtures/hr/calendar'
 import type { EmployeeRow } from '../../fixtures/hr/employees'
 import type { LeaveRequestRow } from '../../fixtures/hr/leave'
@@ -79,7 +78,7 @@ export function employeesApi(db: MockDatabase): EmployeeApi[] {
   const categories = new Map(
     db.employeeCategories.all().map((category) => [category.no, category.name])
   )
-  const accounts = new Set(MOCK_ACCOUNTS.map((account) => account.employeeNo))
+  const accounts = new Set(db.userAccounts.all().map((account) => account.employeeNo))
   return db.employees.all().map((employee) => {
     const position = positions.get(employee.jobPositionNo)
     return {

@@ -1,6 +1,7 @@
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
 import { useListCellFormatters } from '@/composables/useListCellFormatters'
@@ -18,6 +19,12 @@ import type {
 
 const { t } = useI18n()
 const store = useTelematicsEventStore()
+const route = useRoute()
+// Coming from the map: the events of the chosen vehicle.
+onMounted(() => {
+  const plate = route.query.plate
+  if (typeof plate === 'string' && plate) void store.search(plate)
+})
 const { formatDateTime, optionLabel, formatDecimal } = useListCellFormatters()
 
 const listViewOptions = computed<{ value: TelematicsEventListView; label: string }[]>(() => [

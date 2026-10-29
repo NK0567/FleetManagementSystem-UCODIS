@@ -1,7 +1,6 @@
 export default {
   'planning.carrierInvoices.title': 'Factures transporteurs',
-  'planning.carrierInvoices.subtitle':
-    'Une facture groupe un ou plusieurs ordres du même transporteur. Elle se valide si le montant reste dans la tolérance du montant convenu, retenues déduites. Sans tarif, un motif est obligatoire.',
+  'planning.carrierInvoices.subtitle': 'Factures reçues des transporteurs externes.',
   'planning.carrierInvoices.loading': 'Chargement des factures…',
   'planning.carrierInvoices.empty': 'Aucune facture transporteur.',
   'planning.carrierInvoices.loadError': 'Les factures n’ont pas pu être affichées.',

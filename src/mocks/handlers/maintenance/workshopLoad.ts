@@ -6,6 +6,7 @@ import {
   remainingHours
 } from '@/modules/maintenance/workshop-load/domain/workshopLoad'
 import type {
+  CompetenceLoad,
   WorkshopJob,
   WorkshopLoadApi
 } from '@/modules/maintenance/workshop-load/types/workshopLoad.types'
@@ -34,13 +35,34 @@ function workshopJobs(db: MockDatabase): WorkshopJob[] {
       remainingHours: order.planning
         ? remainingHours(order.planning.estimatedHours, order.labourHours)
         : 0,
-      technicianNos: order.planning?.technicianNos ?? []
+      technicianNos: order.planning?.technicianNos ?? [],
+      competenceNo: order.diagnosis
+        ? (db.failureCodes.find(order.diagnosis.subsystemNo)?.competenceNo ?? null)
+        : null
     }))
     .sort(
       (a, b) =>
         SEVERITY_RANK[a.severity] - SEVERITY_RANK[b.severity] ||
         (a.plannedDate ?? '9999').localeCompare(b.plannedDate ?? '9999')
     )
+}
+
+/** Open inside jobs grouped by the competence they call for, the busiest first. */
+function competenceLoads(db: MockDatabase, jobs: WorkshopJob[]): CompetenceLoad[] {
+  const loads = new Map<string, CompetenceLoad>()
+  for (const job of jobs) {
+    if (!job.competenceNo) continue
+    const load = loads.get(job.competenceNo) ?? {
+      competenceNo: job.competenceNo,
+      name: db.competences.find(job.competenceNo)?.name ?? job.competenceNo,
+      jobCount: 0,
+      estimatedHours: 0
+    }
+    load.jobCount += 1
+    load.estimatedHours = Math.round((load.estimatedHours + (job.estimatedHours ?? 0)) * 100) / 100
+    loads.set(job.competenceNo, load)
+  }
+  return [...loads.values()].sort((a, b) => b.jobCount - a.jobCount || a.name.localeCompare(b.name))
 }
 
 export function workshopLoadApi(db: MockDatabase): WorkshopLoadApi {
@@ -77,7 +99,8 @@ export function workshopLoadApi(db: MockDatabase): WorkshopLoadApi {
     daysToAbsorb: daysToAbsorb(loadHours, capacity),
     unplannedCount: unplanned.length,
     technicians,
-    unplanned
+    unplanned,
+    competences: competenceLoads(db, jobs)
   }
 }
 

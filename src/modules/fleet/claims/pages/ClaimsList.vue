@@ -1,14 +1,16 @@
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
 import { useListCellFormatters } from '@/composables/useListCellFormatters'
 import { useListPage } from '@/composables/useListPage'
+import { formatNumber } from '@/utils/format'
 import { getListCellDisplay } from '@/utils/listCellDisplay'
 import { claimApi } from '../api/claimApi'
+import { claimService } from '../services/claimService'
 import { useClaimStore, type ClaimListView } from '../stores/claimStore'
-import type { ClaimApi, ClaimSearchColumn } from '../types/claim.types'
+import type { ClaimApi, ClaimSearchColumn, ClaimSummaryApi } from '../types/claim.types'
 
 const { t } = useI18n()
 const store = useClaimStore()
@@ -206,6 +208,15 @@ const {
   exportFileBaseName: 'claims',
   exportApi: claimApi.exportExcel
 })
+
+const summary = ref<ClaimSummaryApi | null>(null)
+
+async function loadSummary() {
+  summary.value = await claimService.summary().catch(() => null)
+}
+
+onMounted(loadSummary)
+watch(() => store.items, loadSummary)
 </script>
 
 <template>
@@ -255,6 +266,19 @@ const {
         </template>
       </ListPageToolbar>
 
+      <p v-if="summary" class="mx-4 mt-2 text-xs text-muted-foreground">
+        {{
+          t('fleet.claims.summary', {
+            claims: summary.claims,
+            rate:
+              summary.accidentsPerMillionKm === null
+                ? '-'
+                : formatNumber(summary.accidentsPerMillionKm, 2),
+            damage: formatNumber(summary.damageTotal),
+            residual: formatNumber(summary.residualTotal)
+          })
+        }}
+      </p>
       <FormAlerts class="mx-4" :error="exportError" @clear:error="exportError = null" />
 
       <ListPageLayout

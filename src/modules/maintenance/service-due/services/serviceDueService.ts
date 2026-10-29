@@ -1,10 +1,13 @@
 import { createCrudService } from '@/core/factories'
 import type { WorkOrderApi } from '@/modules/maintenance/work-orders'
-import { serviceDueApi, type PassageInput } from '../api/serviceDueApi'
+import { serviceDueApi, type PassageInput, type ServiceDueSummary } from '../api/serviceDueApi'
 import type { ServiceDueApi, ServiceDueSearchColumn } from '../types/serviceDue.types'
 
 export const serviceDueService = {
   ...createCrudService<ServiceDueApi, ServiceDueSearchColumn>(serviceDueApi),
+  async summary(): Promise<ServiceDueSummary> {
+    return (await serviceDueApi.summary()).data.data
+  },
   async recordPassage(passage: PassageInput): Promise<ServiceDueApi> {
     return (await serviceDueApi.recordPassage(passage)).data.data
   },

@@ -21,4 +21,10 @@ export interface MaintenancePlanApi {
   modifiedBy: string
 }
 
+/** Where the plans leave the park uncovered. */
+export interface PlanCoverageApi {
+  modelsWithoutPlan: { modelCode: string; modelName: string; vehicleCount: number }[]
+  inactivePlansInUse: { no: string; name: string; vehicleCount: number }[]
+}
+
 export type MaintenancePlanSearchColumn = 'no' | 'name' | 'no,name'

@@ -88,3 +88,22 @@ export function alertNotifications(
     ...(channels.sms ? channels.smsTo.map((to) => ({ channel: 'sms' as const, to })) : [])
   ].map((item) => ({ ...item, sentAt: since }))
 }
+
+/**
+ * Average time, in hours, from the moment a situation raised its alert to the moment someone
+ * handled it; null while no alert has been handled.
+ */
+export function averageHandlingHours(
+  alerts: readonly { since: string; handledAt: string | null }[]
+): number | null {
+  const delays = alerts
+    .filter((alert) => alert.handledAt)
+    .map(
+      (alert) =>
+        (new Date(alert.handledAt as string).getTime() - new Date(alert.since).getTime()) /
+        3_600_000
+    )
+    .filter((hours) => hours >= 0)
+  if (!delays.length) return null
+  return Math.round((delays.reduce((total, hours) => total + hours, 0) / delays.length) * 10) / 10
+}

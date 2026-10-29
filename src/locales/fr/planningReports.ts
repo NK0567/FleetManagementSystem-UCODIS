@@ -1,6 +1,6 @@
 export default {
   'planning.dashboard.title': 'Tableau de bord transport',
-  'planning.dashboard.subtitle': 'Où en est l’activité : ordres par statut, retards et alertes, commandes sans ordre de transport. Seuls les ordres du périmètre comptent.',
+  'planning.dashboard.subtitle': 'Ordres par statut, retards, alertes et commandes en attente.',
   'planning.dashboard.loadError': 'Le tableau de bord n’a pas pu être affiché.',
   'planning.reports.title': 'Rapports transport',
   'planning.reports.subtitle': 'Ponctualité, coûts, qualité de livraison, moyens et transporteurs, calculés sur les mêmes ordres du périmètre.',

@@ -150,7 +150,17 @@ export interface TransportOrderApi {
   routeTemplateNo: string | null
   routeName: string
   plannedDeparture: string | null
+  /** The day of the departure, for the period filter. */
+  plannedDate: string | null
   plannedArrival: string | null
+  /** The arrival estimated from the live position, its delay in minutes, flagged when late. */
+  expectedArrival: string | null
+  delayMin: number | null
+  late: boolean
+  /** The depot its route leaves from, and the regions of the sites it serves. */
+  depotSiteNo: string | null
+  depotName: string
+  regions: string[]
   comment: string
   lines: TransportOrderLineApi[]
   lineCount: number

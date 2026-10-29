@@ -88,5 +88,21 @@ export default {
   'maintenance.tyres.life.col.by': 'By',
   'maintenance.tyres.life.col.event': 'Event',
   'maintenance.tyres.life.col.detail': 'Detail',
-  'maintenance.tyres.life.noHistory': 'No event.'
+  'maintenance.tyres.life.noHistory': 'No event.',
+  'maintenance.tyres.plan.action': 'Vehicle plan',
+  'maintenance.tyres.plan.vehicle': 'Vehicle',
+  'maintenance.tyres.plan.front': 'Front',
+  'maintenance.tyres.plan.spares': 'Spares',
+  'maintenance.tyres.plan.free': 'Free position',
+  'maintenance.tyres.plan.alert.none': 'No alert',
+  'maintenance.tyres.plan.alert.rotation': 'Rotation due',
+  'maintenance.tyres.plan.alert.safety': 'Safety',
+  'maintenance.tyres.plan.noLayout': "This vehicle's type has no position layout.",
+  'maintenance.tyres.plan.loadError': 'The vehicle plan could not be loaded.',
+  'maintenance.tyres.plan.mountError': 'The tyre could not be mounted.',
+  'maintenance.tyres.plan.mountTitle': 'Mount a tyre at position {position}',
+  'maintenance.tyres.plan.mount': 'Mount',
+  'maintenance.tyres.plan.tyre': 'Tyre in stock',
+  'maintenance.tyres.plan.pickTyre': 'Pick a tyre',
+  'maintenance.tyres.plan.noStock': 'No tyre in stock.'
 }

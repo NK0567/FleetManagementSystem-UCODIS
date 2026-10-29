@@ -31,6 +31,7 @@ describe('fleet dashboard', () => {
       'VEH-005',
       'VEH-008',
       'VEH-009',
+      'VEH-018',
       'VEH-022',
       'VEH-024'
     ])

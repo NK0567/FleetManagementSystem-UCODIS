@@ -44,3 +44,9 @@ export interface InboxApi {
   requestCount: number
   requests: InboxRequest[]
 }
+
+/** How the alerts are dealt with, to measure their usefulness. */
+export interface AlertStatsApi {
+  handled: number
+  averageHandlingHours: number | null
+}

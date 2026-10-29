@@ -15,8 +15,7 @@ export default {
   'maintenance.settings.section.labour': 'Labour',
   'maintenance.settings.section.labour.hint':
     'Values the hours logged on the work orders of the workshop.',
-  'maintenance.settings.field.labour.hourlyRate': 'Hourly rate',
-
+  'maintenance.settings.field.labour.hourlyRate': 'Single hourly rate',
   'maintenance.settings.section.downtimeCost': 'Downtime cost',
   'maintenance.settings.section.downtimeCost.hint':
     'What a day without the vehicle costs. Costs per kind replace the average cost when set.',

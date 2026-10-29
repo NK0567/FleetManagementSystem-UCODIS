@@ -5,6 +5,7 @@ import type { CardOpenMode } from '@/composables/cardOpenMode'
 import { useEntityCard } from '@/composables/useEntityCard'
 import { usePermissions } from '@/composables/usePermissions'
 import ProviderForm from '../components/ProviderForm.vue'
+import SupplierSupplySection from '@/modules/maintenance/stock-items/components/SupplierSupplySection.vue'
 import { providerService } from '../services/providerService'
 import { useProviderStore } from '../stores/providerStore'
 
@@ -18,6 +19,7 @@ const emit = defineEmits<{ close: []; create: [] }>()
 const { t } = useI18n()
 const store = useProviderStore()
 const { canUpdate, canInsert } = usePermissions('PROVIDER')
+const { canRead: canReadStock } = usePermissions('STOCKITEM')
 const formRef = ref<InstanceType<typeof ProviderForm> | null>(null)
 
 const {
@@ -108,6 +110,7 @@ const pageTitle = computed(() =>
             :disabled="!isEditMode || isSaving"
             :validation-errors="validationErrors"
           />
+          <SupplierSupplySection v-if="canReadStock && item" :supplier-no="item.no" />
         </div>
       </div>
     </template>

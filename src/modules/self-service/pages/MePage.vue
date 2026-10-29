@@ -6,13 +6,15 @@ import {
   CalendarDays,
   ChevronRight,
   ClipboardCheck,
+  Clock,
   FileText,
+  ListChecks,
   MapPin,
   Phone,
   Route,
   TriangleAlert
 } from '@lucide/vue'
-import { formatDate } from '@/utils/format'
+import { formatDate, formatNumber } from '@/utils/format'
 import MyLeaveBalances from '../components/MyLeaveBalances.vue'
 import { useMySpaceStore } from '../stores/mySpaceStore'
 
@@ -33,6 +35,17 @@ const shortcuts = computed(() => [
   { to: '/me/checklist', icon: ClipboardCheck, label: t('selfService.checklist.title') },
   { to: '/me/absences', icon: CalendarDays, label: t('selfService.profile.absences') }
 ])
+
+/* The limits in force, as the fleet settings set them: driving per day, rest, driving per week. */
+const limits = computed(() => {
+  const value = store.profile?.drivingLimits
+  if (!value) return []
+  return [
+    { key: 'dailyDriving', hours: Math.round(value.dailyDrivingMaxMin / 6) / 10 },
+    { key: 'dailyRest', hours: value.dailyRestMinH },
+    { key: 'weeklyDriving', hours: value.weeklyDrivingMaxH }
+  ]
+})
 
 onMounted(() => void store.fetchProfile())
 </script>
@@ -152,6 +165,43 @@ onMounted(() => void store.fetchProfile())
             <DocumentStatePill :state="document.state" />
           </li>
         </ul>
+      </section>
+
+      <section
+        v-if="store.profile.responsibilities.length"
+        class="bg-card border border-border rounded"
+      >
+        <h2
+          class="px-4 py-3 border-b border-border text-sm font-semibold text-card-foreground flex items-center gap-2"
+        >
+          <ListChecks class="w-4 h-4 text-primary" />
+          {{ t('selfService.profile.responsibilities') }}
+        </h2>
+        <ul class="px-4 py-3 space-y-1.5 text-sm text-card-foreground list-disc list-inside">
+          <li v-for="(item, index) in store.profile.responsibilities" :key="index">{{ item }}</li>
+        </ul>
+      </section>
+
+      <section v-if="store.profile.drivingLimits" class="bg-card border border-border rounded">
+        <h2
+          class="px-4 py-3 border-b border-border text-sm font-semibold text-card-foreground flex items-center gap-2"
+        >
+          <Clock class="w-4 h-4 text-primary" /> {{ t('selfService.profile.limits.title') }}
+        </h2>
+        <div class="p-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div
+            v-for="limit in limits"
+            :key="limit.key"
+            class="rounded bg-muted/50 px-3 py-3 text-center"
+          >
+            <p class="text-2xl font-semibold text-card-foreground tabular-nums">
+              {{ formatNumber(limit.hours) }} h
+            </p>
+            <p class="text-xs text-muted-foreground mt-1">
+              {{ t(`selfService.profile.limits.${limit.key}`) }}
+            </p>
+          </div>
+        </div>
       </section>
 
       <MyLeaveBalances :balances="store.profile.balances" />

@@ -200,5 +200,8 @@ export default {
   'fleet.vehicles.import.title': 'Import vehicles',
   'fleet.vehicles.import.hint': 'Each line follows the rules of the record: a plate or VIN already known, or present twice in the file, is refused and reported. The type and the site are given by code or name; the compartments of a tanker are written 8000+8000+6000.',
   'fleet.vehicles.import.created': 'No vehicle created. | One vehicle created. | {n} vehicles created.',
-  'fleet.vehicles.form.noLink': 'None'
+  'fleet.vehicles.form.noLink': 'None',
+  'fleet.vehicles.col.currentSiteNo': 'Current site',
+  'fleet.vehicles.filter.driverAssignment': 'Assignment',
+  'fleet.vehicles.filter.couplingState': 'Coupling'
 }

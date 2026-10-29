@@ -214,7 +214,8 @@ export default {
   'planning.calendar.loadError': 'The calendar could not be loaded.',
   'planning.transportOrders.picker.recipient': 'Orders of {name}',
   'planning.transportOrders.picker.allRecipients': 'Back to all orders',
-  'planning.transportOrders.picker.fullDelivery': 'Order {no} requires a full delivery and is only partly taken (lines left out or a reduced quantity). You may go on, add its other lines or remove it.',
+  'planning.transportOrders.picker.fullDelivery':
+    'Order {no} requires a full delivery and is only partly taken (lines left out or a reduced quantity). You may go on, add its other lines or remove it.',
   'planning.transportOrders.picker.sameRecipient': 'See the other orders of this recipient',
   'planning.transportOrders.picker.line': 'Line {no}',
   'planning.transportOrders.lines.state.not_loaded': 'Not loaded',
@@ -268,7 +269,8 @@ export default {
   'planning.transportOrders.disputes.reason': 'Reason',
   'planning.transportOrders.disputes.outcome': 'Handling',
   'planning.transportOrders.disputes.note': 'How the contest was handled',
-  'planning.transportOrders.disputes.noteHint': 'For example: investigation, redelivery or credit note.',
+  'planning.transportOrders.disputes.noteHint':
+    'For example: investigation, redelivery or credit note.',
   'planning.transportOrders.disputes.handle': 'Handle the contest',
   'planning.transportOrders.disputes.markHandled': 'Mark handled',
   'planning.transportOrders.lines.done': 'None executed | 1 executed | {count} executed',
@@ -281,23 +283,28 @@ export default {
   'planning.transportOrders.board.empty': 'No order',
   'planning.transportOrders.loadError': 'The transport orders could not be loaded.',
   'planning.deliveryNote.plannedHint': "planned, opens at the driver's declaration",
-  'planning.deliveryNote.planned': "Planned: it opens at the driver's declaration and is signed by the recipient.",
+  'planning.deliveryNote.planned':
+    "Planned: it opens at the driver's declaration and is signed by the recipient.",
   'planning.transportOrders.history.recipients_notified': 'Recipients notified',
   'planning.transportOrders.satisfaction.title': 'Satisfaction',
   'planning.transportOrders.satisfaction.recipients': 'Recipients',
   'planning.transportOrders.satisfaction.orderers': 'Orderers',
   'planning.transportOrders.satisfaction.none': 'No answer yet.',
   'planning.transportOrders.lines.proposeSequence': 'Propose the order by proximity',
-  'planning.deliveryNote.measures': 'Delivered {volume} L at {temperature} °C, density {density}, that is {volume15} L at 15 °C',
+  'planning.deliveryNote.measures':
+    'Delivered {volume} L at {temperature} °C, density {density}, that is {volume15} L at 15 °C',
   'planning.transportOrders.history.pickup_vehicle_changed': 'Vehicle changed',
   'planning.transportOrders.history.pickup_site_changed': 'Pickup depot changed',
   'planning.transportOrders.history.note_cancelled': 'Note cancelled through an incident',
   'planning.transportOrders.history.note_deviated': 'Delivery deviated',
   'planning.transportOrders.returns.title': 'Returns',
   'planning.transportOrders.returns.reason': 'Reason for the return',
-  'planning.transportOrders.returns.conforming': 'Received conforming by the warehouse: ready to replan',
-  'planning.transportOrders.returns.nonconforming': 'Received nonconforming by the warehouse ({reason}), can still be replanned',
-  'planning.transportOrders.returns.handedBack': 'Brought back to the warehouse, waiting for the check',
+  'planning.transportOrders.returns.conforming':
+    'Received conforming by the warehouse: ready to replan',
+  'planning.transportOrders.returns.nonconforming':
+    'Received nonconforming by the warehouse ({reason}), can still be replanned',
+  'planning.transportOrders.returns.handedBack':
+    'Brought back to the warehouse, waiting for the check',
   'planning.transportOrders.returns.onBoard': 'Still in the vehicle',
   'planning.transportOrders.gaps.title': 'Quantity gaps',
   'planning.transportOrders.gaps.kind.gain': 'Gain',
@@ -335,7 +342,8 @@ export default {
   'planning.dossier.late': 'late',
   'planning.dossier.contested': 'Contested on {at}',
   'planning.dossier.confirmed': 'Confirmed on {at}',
-  'planning.dossier.notTracked': 'Order entrusted to an external carrier: its trip is not followed by the fleet.',
+  'planning.dossier.notTracked':
+    'Order entrusted to an external carrier: its trip is not followed by the fleet.',
   'planning.dossier.compliant': 'Trip compliant',
   'planning.dossier.notCompliant': 'Trip not compliant or deviations to qualify',
   'planning.dossier.stopsPassed': '{passed} stops passed out of {total}, {late} of them late',
@@ -409,17 +417,21 @@ export default {
   'planning.transportOrders.history.route_changed': 'Route changed on the road',
   'planning.transportOrders.history.rescheduled': 'Order rescheduled',
   'planning.transportOrders.form.transportMode': 'Transport mode',
-  'planning.transportOrders.form.transportModeHint': "Only the truck has means in the register: the company's fleet and the road carriers. The other modes open with their means.",
+  'planning.transportOrders.form.transportModeHint':
+    "Only the truck has means in the register: the company's fleet and the road carriers. The other modes open with their means.",
   'planning.transportOrders.gauge.title': 'Vehicle fill',
   'planning.transportOrders.gauge.weight': 'Weight',
   'planning.transportOrders.gauge.volume': 'Volume',
-  'planning.transportOrders.gauge.noVehicle': 'Choose a vehicle to compare the load with its capacity.',
+  'planning.transportOrders.gauge.noVehicle':
+    'Choose a vehicle to compare the load with its capacity.',
   'planning.transportOrders.gauge.unknown': 'Capacity not given on the vehicle.',
-  'planning.transportOrders.gauge.over': 'The load exceeds the capacity: remove lines from the order or choose another vehicle.',
+  'planning.transportOrders.gauge.over':
+    'The load exceeds the capacity: remove lines from the order or choose another vehicle.',
   'planning.transportOrders.replan.title': 'Remainders and lines to replan',
   'planning.transportOrders.replan.count': 'No line | One line | {n} lines',
   'planning.transportOrders.replan.remaindersTitle': 'Remainders to replan',
-  'planning.transportOrders.replan.remaindersHint': 'The product lines not delivered on a partial delivery and the deliveries postponed on site. The date chosen takes the line into the pending order of that day, with a weight estimated at the prorata.',
+  'planning.transportOrders.replan.remaindersHint':
+    'The product lines not delivered on a partial delivery and the deliveries postponed on site. The date chosen takes the line into the pending order of that day, with a weight estimated at the prorata.',
   'planning.transportOrders.replan.none': 'No line.',
   'planning.transportOrders.replan.left': 'Left to deliver',
   'planning.transportOrders.replan.weight': 'Estimated weight',
@@ -429,7 +441,8 @@ export default {
   'planning.transportOrders.replan.postponed': 'Postponement asked on site',
   'planning.transportOrders.replan.partial': 'Partial delivery',
   'planning.transportOrders.replan.unavailableTitle': 'Unavailable recipients',
-  'planning.transportOrders.replan.unavailableHint': 'The date the recipient proposes is accepted directly. A date you propose waits for his agreement on his tracking page.',
+  'planning.transportOrders.replan.unavailableHint':
+    'The date the recipient proposes is accepted directly. A date you propose waits for his agreement on his tracking page.',
   'planning.transportOrders.replan.recipientDate': "Recipient's date",
   'planning.transportOrders.replan.plannerDate': 'Date proposed',
   'planning.transportOrders.replan.noDate': 'No date given',
@@ -442,8 +455,10 @@ export default {
   'planning.transportOrders.replan.proposeTitle': 'Propose a date to the recipient',
   'planning.transportOrders.replan.chooseTitle': 'Replan the line',
   'planning.transportOrders.replan.date': 'Delivery date',
-  'planning.transportOrders.replan.proposeHint': 'The recipient sees this date on his tracking page: he accepts it, and the line is replanned, or gives his own back.',
-  'planning.transportOrders.replan.chooseHint': 'The line joins the pending order of that day, with the other lines replanned to the same date; you then give it a vehicle and a driver.',
+  'planning.transportOrders.replan.proposeHint':
+    'The recipient sees this date on his tracking page: he accepts it, and the line is replanned, or gives his own back.',
+  'planning.transportOrders.replan.chooseHint':
+    'The line joins the pending order of that day, with the other lines replanned to the same date; you then give it a vehicle and a driver.',
   'planning.transportOrders.routePlan.title': 'Forecast trip plan',
   'planning.transportOrders.routePlan.none': 'Choose a route template to get the trip plan.',
   'planning.transportOrders.routePlan.distance': 'Distance',
@@ -458,29 +473,36 @@ export default {
   'planning.transportOrders.routePlan.riskZones': 'Risk zones along the route',
   'planning.transportOrders.routePlan.noRisk': 'No risk zone of the site register nearby.',
   'planning.transportOrders.routePlan.fromRoute': '{km} km from the route',
-  'planning.transportOrders.routePlan.validated': 'Plan validated on {date}: its corridor is passed to the FMS',
+  'planning.transportOrders.routePlan.validated':
+    'Plan validated on {date}: its corridor is passed to the FMS',
   'planning.transportOrders.routePlan.notValidated': 'Plan not validated',
   'planning.transportOrders.routePlan.corridorWidth': 'Corridor width (km)',
   'planning.transportOrders.routePlan.validate': 'Validate the plan',
-  'planning.transportOrders.routePlan.corridorHint': 'The corridor is the band around the route the vehicle must stay in; the FMS uses it to detect a departure from the route. Simulation: the distance is the straight line increased by a road factor.',
+  'planning.transportOrders.routePlan.corridorHint':
+    'The corridor is the band around the route the vehicle must stay in; the FMS uses it to detect a departure from the route. Simulation: the distance is the straight line increased by a road factor.',
   'planning.transportOrders.routePlan.change': 'Change the route on the road',
   'planning.transportOrders.routePlan.newRoute': 'New route template',
   'planning.transportOrders.routePlan.reason': 'Reason for the change',
-  'planning.transportOrders.routePlan.changeHint': 'The driver is notified; the route followed until then stays in the history.',
+  'planning.transportOrders.routePlan.changeHint':
+    'The driver is notified; the route followed until then stays in the history.',
   'planning.transportOrders.routePlan.changeConfirm': 'Change the route',
   'planning.transportOrders.routePlan.history': 'Former routes',
   'planning.transportOrders.routePlan.mode': 'Transport mode: {mode}',
-  'planning.transportOrders.expired.alert': 'This order is past its date without being carried out: it has expired. Reschedule or cancel it.',
-  'planning.transportOrders.expired.blocked': 'This order is past its date without being carried out: it can no longer be loaded until rescheduled or cancelled.',
+  'planning.transportOrders.expired.alert':
+    'This order is past its date without being carried out: it has expired. Reschedule or cancel it.',
+  'planning.transportOrders.expired.blocked':
+    'This order is past its date without being carried out: it can no longer be loaded until rescheduled or cancelled.',
   'planning.transportOrders.expired.reschedule': 'Reschedule',
   'planning.transportOrders.proposal.title': 'Loading proposal',
-  'planning.transportOrders.proposal.hint': 'The orders of the day are shared between the free vehicles by destination, weight, volume, product families, compatibilities, equipment required and compartment rules. Correct it, run it again or clear it, then validate: each vehicle becomes a pending order.',
+  'planning.transportOrders.proposal.hint':
+    'The orders of the day are shared between the free vehicles by destination, weight, volume, product families, compatibilities, equipment required and compartment rules. Correct it, run it again or clear it, then validate: each vehicle becomes a pending order.',
   'planning.transportOrders.proposal.date': 'Delivery day',
   'planning.transportOrders.proposal.run': 'Propose',
   'planning.transportOrders.proposal.rerun': 'Run again',
   'planning.transportOrders.proposal.clear': 'Clear everything',
   'planning.transportOrders.proposal.remaining': 'Quantities still to load',
-  'planning.transportOrders.proposal.noVehicle': 'No vehicle is kept: add one or run the proposal again.',
+  'planning.transportOrders.proposal.noVehicle':
+    'No vehicle is kept: add one or run the proposal again.',
   'planning.transportOrders.proposal.empty': 'No order on this vehicle.',
   'planning.transportOrders.proposal.move': 'Move the order',
   'planning.transportOrders.proposal.compartments': 'Compartments',
@@ -493,17 +515,31 @@ export default {
   'planning.transportOrders.proposal.validate': 'Validate the proposal',
   'planning.transportOrders.proposal.error': 'The loading proposal could not be made.',
   'planning.transportOrders.waiting.label': 'Orders waiting for a transport order',
-  'planning.transportOrders.waiting.expired': 'Expired: {requests} orders, {orders} transport orders on this page',
+  'planning.transportOrders.waiting.expired':
+    'Expired: {requests} orders, {orders} transport orders on this page',
   'planning.transportOrders.picker.orderer': 'Orderer: {name}',
   'planning.transportOrders.picker.quantityTaken': 'Quantity taken',
   'planning.transportOrders.picker.totals': 'Orders ticked: {weight} kg, {volume} m³',
-  'planning.transportOrders.linesDialog.manualHint': 'A line keyed here is recorded as an order issued by the planner and attached to the order.',
+  'planning.transportOrders.linesDialog.manualHint':
+    'A line keyed here is recorded as an order issued by the planner and attached to the order.',
   'planning.transportOrders.linesDialog.orderer': 'Orderer',
-  'planning.transportOrders.linesDialog.ordererHint': 'Left empty, it is the recipient if he places his own orders.',
+  'planning.transportOrders.linesDialog.ordererHint':
+    'Left empty, it is the recipient if he places his own orders.',
   'planning.transportOrders.linesDialog.volume': 'Volume (m³)',
   'planning.transportOrders.plan.absent': 'absent',
   'planning.transportOrders.plan.absentFor': 'absent: {reason}',
-  'planning.transportOrders.plan.withheld': 'Not offered, administrative document expired: {vehicles}',
+  'planning.transportOrders.plan.withheld':
+    'Not offered, administrative document expired: {vehicles}',
   'planning.transportOrders.replan.refused': 'Refused by the recipient, back at the warehouse',
-  'planning.transportOrders.replan.returnNonconforming': 'Non-conforming on return: {reason}'
+  'planning.transportOrders.replan.returnNonconforming': 'Non-conforming on return: {reason}',
+  'planning.transportOrders.history.correction': "Driver's correction",
+  'planning.transportOrders.history.retried': 'Point retried',
+  'planning.transportOrders.col.expectedArrival': 'Estimated arrival',
+  'planning.transportOrders.col.depot': 'Depot',
+  'planning.transportOrders.col.region': 'Region',
+  'planning.transportOrders.col.plannedDate': 'Departure date',
+  'planning.transportOrders.view.late': 'Late',
+  'planning.transportOrders.delay': '+{min} min',
+  'planning.transportOrders.board.eta': 'Estimated arrival',
+  'planning.transportOrders.replan.proposedOn': 'Proposed to the recipient: {date}'
 }

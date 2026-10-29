@@ -2,6 +2,24 @@ import { nowIsoDateTime } from '@/utils/date'
 import type { MockDatabase } from '../../db/database'
 import type { TransportOrderLineRow } from '../../fixtures/planning/transportOrders'
 
+/**
+ * Where the recipient is reached: the phone or the e-mail given on the order (commande) itself,
+ * else those of his customer record; the e-mail for the e-mail channel, the phone otherwise.
+ */
+export function recipientContact(
+  db: MockDatabase,
+  requestNo: string | null,
+  deliveryPointNo: string,
+  channel: string
+): string {
+  const request = requestNo ? db.deliveryRequests.find(requestNo) : null
+  const point = db.deliveryPoints.find(deliveryPointNo)
+  const customer = point ? db.customers.find(point.customerNo) : undefined
+  return channel === 'email'
+    ? request?.recipientEmail || customer?.email || ''
+    : request?.recipientPhone || customer?.phone || ''
+}
+
 export type RecipientMessageKind = 'planned' | 'started' | 'declared'
 
 /**
@@ -28,9 +46,10 @@ export function messageRecipients(
       const customer = point ? db.customers.find(point.customerNo) : undefined
       const channel = request?.notificationChannel ?? customer?.notificationChannel ?? 'sms'
       if (channel === 'none') return line
+      const to = recipientContact(db, line.deliveryRequestNo, line.deliveryPointNo, channel)
       return {
         ...line,
-        recipientMessages: [...(line.recipientMessages ?? []), { at, channel, kind }]
+        recipientMessages: [...(line.recipientMessages ?? []), { at, channel, kind, to }]
       }
     })
   })

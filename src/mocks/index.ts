@@ -2,6 +2,8 @@ import type { AxiosInstance } from 'axios'
 import { disabledFeatures, hasPermission, permissionsFor } from './auth/permissions'
 import { registerAuthHandlers } from './auth/handlers'
 import { resolveToken } from './auth/session'
+import { accountOf } from './auth/accounts'
+import { registerSettingsHandlers } from './handlers/settings'
 import { createDatabase } from './db/database'
 import type { CollectionContext } from './db/collection'
 import { registerFileHandlers } from './handlers/files'
@@ -19,7 +21,7 @@ import { createMockRouter } from './http/router'
 export function createMockServer(context?: CollectionContext) {
   const db = createDatabase(context)
   const router = createMockRouter({
-    resolveUser: resolveToken,
+    resolveUser: (authorization) => resolveToken(authorization, (code) => accountOf(db, code)),
     can: (user, feature, action) =>
       hasPermission(
         permissionsFor(user.profile, disabledFeatures(db.moduleToggles.all())),
@@ -32,6 +34,7 @@ export function createMockServer(context?: CollectionContext) {
   registerSharedHandlers(router, db)
   registerFileHandlers(router, db)
   registerModuleToggleHandlers(router, db)
+  registerSettingsHandlers(router, db)
   registerHrHandlers(router, db)
   registerFleetHandlers(router, db)
   registerMaintenanceHandlers(router, db)

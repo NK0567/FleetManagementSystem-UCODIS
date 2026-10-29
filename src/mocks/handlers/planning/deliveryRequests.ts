@@ -86,6 +86,8 @@ type Entry = Pick<
   | 'confirmationRequired'
   | 'preferredSlot'
   | 'fullDeliveryRequired'
+  | 'recipientPhone'
+  | 'recipientEmail'
 >
 
 export function deliveryRequestsApi(
@@ -117,6 +119,8 @@ export function deliveryRequestsApi(
       return {
         ...row,
         kind: row.kind ?? 'sale',
+        recipientPhone: row.recipientPhone ?? '',
+        recipientEmail: row.recipientEmail ?? '',
         pickupPointNo: row.pickupPointNo ?? null,
         pickupPointName: points.get(row.pickupPointNo ?? '')?.name ?? '',
         content: row.content ?? '',
@@ -313,7 +317,7 @@ function pickEntry(entry: Entry): Entry {
   const { kind, pickupPointNo, content, unitCount, requiredEquipmentTypeNo } = entry
   const { ordererNo, deliveryPointNo, desiredDate, validUntil, externalReference } = entry
   const { freightPayer, comment, notificationChannel, confirmationRequired } = entry
-  const { preferredSlot, fullDeliveryRequired } = entry
+  const { preferredSlot, fullDeliveryRequired, recipientPhone, recipientEmail } = entry
   const lines = requestLines(entry)
   return {
     kind: kind ?? 'sale',
@@ -333,7 +337,9 @@ function pickEntry(entry: Entry): Entry {
     notificationChannel,
     confirmationRequired,
     preferredSlot,
-    fullDeliveryRequired
+    fullDeliveryRequired,
+    recipientPhone: recipientPhone ?? '',
+    recipientEmail: recipientEmail ?? ''
   }
 }
 
@@ -566,7 +572,22 @@ export function registerDeliveryRequestsHandlers(router: MockRouter, db: MockDat
       readEnum(input, 'notificationChannel', NOTIFICATION_CHANNELS) ?? 'sms',
     confirmationRequired: (input) => readBoolean(input, 'confirmationRequired', true),
     preferredSlot: (input) => readEnum(input, 'preferredSlot', DELIVERY_SLOTS) ?? 'any',
-    fullDeliveryRequired: (input) => readBoolean(input, 'fullDeliveryRequired', false)
+    fullDeliveryRequired: (input) => readBoolean(input, 'fullDeliveryRequired', false),
+    // Optional: the recipient's own contact for this order, else his customer record (v57).
+    recipientPhone: (input) => {
+      const value = readString(input, 'recipientPhone')
+      if (value.length > 30 || (value && !/^[+0-9 ().-]{6,}$/.test(value))) {
+        throw invalidField('recipientPhone')
+      }
+      return value
+    },
+    recipientEmail: (input) => {
+      const value = readString(input, 'recipientEmail')
+      if (value.length > 120 || (value && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value))) {
+        throw invalidField('recipientEmail')
+      }
+      return value
+    }
   }
   // The flat fields follow the lines: a change only ever goes through the lines.
   const patchReaders: Partial<FieldReaders<Entry>> = { ...readers }

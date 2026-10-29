@@ -36,6 +36,8 @@ export interface LineFollowUp {
   refusalAt: string | null
   refusalReasonNo: string | null
   refusalComment: string
+  /** Who recorded the refusal: the recipient from his link is never overruled by the driver. */
+  refusalBy?: 'driver' | 'recipient' | null
   postponedAt: string | null
   postponementReasonNo: string | null
   postponementComment: string
@@ -77,7 +79,7 @@ export interface LineFollowUp {
   /** The day from which the recipient can be delivered, given with a postponement (TRS03-US13). */
   availableFrom?: string | null
   /** Messages sent to the recipient on his channel as the delivery moves on (TRS02-US02). */
-  recipientMessages?: { at: string; channel: string; kind: string }[]
+  recipientMessages?: { at: string; channel: string; kind: string; to?: string }[]
   handedBackAt: string | null
   warehouseReceivedAt: string | null
   warehouseConforming: boolean | null

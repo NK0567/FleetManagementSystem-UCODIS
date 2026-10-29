@@ -88,5 +88,21 @@ export default {
   'maintenance.tyres.life.col.by': 'Par',
   'maintenance.tyres.life.col.event': 'Événement',
   'maintenance.tyres.life.col.detail': 'Détail',
-  'maintenance.tyres.life.noHistory': 'Aucun événement.'
+  'maintenance.tyres.life.noHistory': 'Aucun événement.',
+  'maintenance.tyres.plan.action': 'Plan du véhicule',
+  'maintenance.tyres.plan.vehicle': 'Véhicule',
+  'maintenance.tyres.plan.front': 'Avant',
+  'maintenance.tyres.plan.spares': 'Secours',
+  'maintenance.tyres.plan.free': 'Position libre',
+  'maintenance.tyres.plan.alert.none': 'Sans alerte',
+  'maintenance.tyres.plan.alert.rotation': 'Rotation due',
+  'maintenance.tyres.plan.alert.safety': 'Sécurité',
+  'maintenance.tyres.plan.noLayout': "Le type de ce véhicule n'a pas de plan de positions.",
+  'maintenance.tyres.plan.loadError': "Le plan du véhicule n'a pas pu être chargé.",
+  'maintenance.tyres.plan.mountError': "Le pneu n'a pas pu être monté.",
+  'maintenance.tyres.plan.mountTitle': 'Monter un pneu en position {position}',
+  'maintenance.tyres.plan.mount': 'Monter',
+  'maintenance.tyres.plan.tyre': 'Pneu en stock',
+  'maintenance.tyres.plan.pickTyre': 'Choisir un pneu',
+  'maintenance.tyres.plan.noStock': 'Aucun pneu en stock.'
 }

@@ -1,8 +1,13 @@
 import {
   confirmationState,
   firstArrivalMarked,
+  lineOutOfTour,
   linesConfirmed
 } from '@/modules/planning/customer-confirmations/domain/confirmation'
+import {
+  recipientDates,
+  replanCandidate
+} from '@/modules/planning/transport-orders/domain/replanning'
 import { transportOrderStatus } from '@/modules/planning/transport-orders/domain/transportOrder'
 import { addDays, nowIsoDateTime, todayIso } from '@/utils/date'
 import type { MockDatabase } from '../../db/database'
@@ -22,6 +27,7 @@ import { readReason } from './planningReasons'
 import { deliveryNoteOf } from './deliveryNotes'
 import type { DeliveryNoteApi } from '@/modules/planning/delivery-notes/types/deliveryNote.types'
 import { replanLine } from './replanning'
+import { CIRCUIT_MESSAGES } from './circuitMessages'
 
 /**
  * The link sent to the recipient by SMS, WhatsApp or e-mail (review of 22 October): without
@@ -74,13 +80,45 @@ export interface TrackingApi {
   satisfactionScore: number | null
   satisfactionComment: string
   /** The messages sent to him as his delivery moves on (TRS02-US02). */
-  messages: { at: string; channel: string; kind: string }[]
+  messages: { at: string; channel: string; kind: string; to?: string }[]
   /** His electronic delivery note, once the driver has declared (TRS05-US03). */
   deliveryNote: DeliveryNoteApi | null
   /** The day retained for what was not delivered or postponed, and its new link once planned
    * (TRS01-US16, US17). */
   replannedOn: string | null
   nextTrackingToken: string | null
+  /** Postponed on site, with its reason, and whether the goods went back to the warehouse. */
+  postponedAt: string | null
+  postponementReason: string
+  returnedAt: string | null
+  /** The whole order was cancelled, with its reason. */
+  cancelledAt: string | null
+  cancellationReason: string
+  /** Out of the order during the trip (postponed, a remainder) or after: he gives or accepts a
+   * date as before loading (TRS01-US16). */
+  replanOpen: boolean
+  /** An order delivered in several trucks: each of its deliveries, with its truck and its link. */
+  parts: TrackingPartApi[]
+}
+
+export interface TrackingPartApi {
+  requestNo: string
+  quantity: number
+  unit: string
+  vehiclePlate: string
+  plannedDeparture: string | null
+  expectedArrival: string | null
+  state:
+    | 'to_plan'
+    | 'planned'
+    | 'on_the_way'
+    | 'declared'
+    | 'received'
+    | 'refused'
+    | 'to_replan'
+    | 'cancelled'
+  trackingToken: string | null
+  current: boolean
 }
 
 function find(
@@ -110,6 +148,86 @@ function isOpen(db: MockDatabase, order: TransportOrderRow, line: TransportOrder
     firstArrival: firstArrivalMarked(order.lines)
   })
   return (status === 'planned' || status === 'confirmed') && !line.replannedAt
+}
+
+/** Out of his order once it left (postponed, a remainder, unavailable): he still gives or accepts
+ * a date, until one is retained (TRS01-US16, US17). */
+function replanOpen(db: MockDatabase, order: TransportOrderRow, line: TransportOrderLineRow) {
+  if (order.cancelledAt) return false
+  const status = statusOf(db, order)
+  if (status !== 'in_progress' && status !== 'completed') return false
+  const candidate = replanCandidate(line)
+  return !!candidate && recipientDates(candidate)
+}
+
+/** The deliveries of an order split into several parts, each in its own truck (TRS01-US06). */
+function orderParts(db: MockDatabase, current: TransportOrderLineRow): TrackingPartApi[] {
+  const request = current.deliveryRequestNo
+    ? db.deliveryRequests.find(current.deliveryRequestNo)
+    : undefined
+  if (!request) return []
+  const root = request.parentNo ?? request.no
+  const family = db.deliveryRequests
+    .all()
+    .filter(
+      (row) =>
+        (row.no === root || row.parentNo === root) && (!row.cancelledAt || row.no === request.no)
+    )
+  if (family.length < 2) return []
+  const orders = db.transportOrders.all()
+  return family.map((part) => {
+    let found: { order: TransportOrderRow; line: TransportOrderLineRow } | null = null
+    for (const order of orders) {
+      for (const line of order.lines) {
+        if (line.deliveryRequestNo === part.no && !line.replannedAt) found = { order, line }
+      }
+    }
+    const product = db.products.find(part.productNo)
+    const base = {
+      requestNo: part.no,
+      quantity: part.quantity,
+      unit: product?.unit ?? '',
+      current: found ? found.line.trackingToken === current.trackingToken : part.no === request.no
+    }
+    if (!found) {
+      return {
+        ...base,
+        vehiclePlate: '',
+        plannedDeparture: null,
+        expectedArrival: null,
+        state: part.cancelledAt ? 'cancelled' : 'to_plan',
+        trackingToken: null
+      }
+    }
+    const { order, line } = found
+    const status = statusOf(db, order)
+    const vehicle = vehicleOf(db, order)
+    const state: TrackingPartApi['state'] =
+      part.cancelledAt || order.cancelledAt
+        ? 'cancelled'
+        : line.receptionConfirmedAt
+          ? 'received'
+          : line.declaredAt
+            ? 'declared'
+            : line.refusalAt
+              ? 'refused'
+              : lineOutOfTour(line) || line.postponedAt
+                ? 'to_replan'
+                : status === 'in_progress'
+                  ? 'on_the_way'
+                  : status === 'draft'
+                    ? 'to_plan'
+                    : 'planned'
+    return {
+      ...base,
+      vehiclePlate: vehicle.vehiclePlate,
+      plannedDeparture: order.plannedDeparture,
+      expectedArrival:
+        state === 'planned' || state === 'on_the_way' ? vehicle.expectedArrival : null,
+      state,
+      trackingToken: line.trackingToken
+    }
+  })
 }
 
 /** The order's status as everywhere else in the application. */
@@ -190,7 +308,14 @@ function trackingApi(
     satisfactionComment: line.satisfactionComment,
     messages: line.recipientMessages ?? [],
     replannedOn: line.replannedOn ?? null,
-    nextTrackingToken: nextToken(db, order.no, line.lineNo)
+    nextTrackingToken: nextToken(db, order.no, line.lineNo),
+    postponedAt: line.postponedAt,
+    postponementReason: db.planningReasons.find(line.postponementReasonNo ?? '')?.name ?? '',
+    returnedAt: line.returnedAt,
+    cancelledAt: order.cancelledAt,
+    cancellationReason: db.planningReasons.find(order.cancellationReasonNo ?? '')?.name ?? '',
+    replanOpen: replanOpen(db, order, line),
+    parts: orderParts(db, line)
   }
 }
 
@@ -323,7 +448,8 @@ export function registerTrackingHandlers(router: MockRouter, db: MockDatabase): 
         ...line,
         refusalAt: nowIsoDateTime(),
         refusalReasonNo: reason.reasonNo,
-        refusalComment: reason.comment
+        refusalComment: reason.comment,
+        refusalBy: 'recipient'
       },
       'refused'
     )
@@ -355,7 +481,9 @@ export function registerTrackingHandlers(router: MockRouter, db: MockDatabase): 
    * taken into the pending order of that day at once (TRS01-US16). */
   router.post(`${base}/accept-proposal`, { public: true }, (request) => {
     const { order, line } = find(db, routeParam(request, 'token'))
-    if (!isOpen(db, order, line)) throw conflict(PLANNING_MESSAGES.confirmationClosed)
+    if (!isOpen(db, order, line) && !replanOpen(db, order, line)) {
+      throw conflict(PLANNING_MESSAGES.confirmationClosed)
+    }
     if (!line.plannerProposedOn) throw conflict(PLANNING_MESSAGES.confirmationDateMissing)
     const date = line.plannerProposedOn
     save(
@@ -371,6 +499,26 @@ export function registerTrackingHandlers(router: MockRouter, db: MockDatabase): 
 
   router.post(`${base}/unavailable`, { public: true }, (request) => {
     const { order, line } = find(db, routeParam(request, 'token'))
+    /* Once his line left the order (postponed, a remainder): he gives the day from which he can
+     * be delivered, or answers the planner's proposal with his own (TRS01-US16 CA01, CA03). */
+    if (!isOpen(db, order, line) && replanOpen(db, order, line)) {
+      const date = readDate(readBody(request), 'date', { required: true })!
+      if (date < todayIso()) throw unprocessable(CIRCUIT_MESSAGES.replanDateInPast)
+      save(
+        db,
+        order,
+        {
+          ...line,
+          availableOn: date,
+          clientProposedOn: date,
+          plannerProposedOn: null,
+          answerOrigin: 'link'
+        },
+        null
+      )
+      const updated = find(db, routeParam(request, 'token'))
+      return ok(trackingApi(db, updated.order, updated.line))
+    }
     if (!isOpen(db, order, line)) throw conflict(PLANNING_MESSAGES.confirmationClosed)
     const planned = (order.plannedDeparture ?? todayIso()).slice(0, 10)
     const body = readBody(request)

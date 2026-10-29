@@ -24,5 +24,7 @@ export default {
   'maintenance.competences.form.no': 'Code',
   'maintenance.competences.form.name': 'Libellé',
   'maintenance.competences.form.active': 'Active',
-  'maintenance.competences.form.technicianCount': 'Techniciens qui la détiennent'
+  'maintenance.competences.form.technicianCount': 'Techniciens qui la détiennent',
+  'maintenance.competences.form.hourlyRate': 'Tarif horaire de la spécialité',
+  'maintenance.competences.col.hourlyRate': 'Tarif horaire'
 }

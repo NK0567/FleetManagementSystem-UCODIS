@@ -6,6 +6,14 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
     towed: { fr: 'Est attelé à un tracteur', en: 'Is towed by a tractor' },
     none: { fr: "Ne s'attelle pas", en: 'Is not coupled' }
   },
+  vehicleDriverAssignment: {
+    with_driver: { fr: 'Avec un conducteur', en: 'With a driver' },
+    without_driver: { fr: 'Sans conducteur', en: 'Without a driver' }
+  },
+  vehicleCouplingState: {
+    coupled: { fr: 'Attelé', en: 'Coupled' },
+    uncoupled: { fr: 'Non attelé', en: 'Uncoupled' }
+  },
   equipmentCapability: {
     tracker: { fr: 'Boîtier de suivi', en: 'Tracker' },
     camera: { fr: 'Caméra', en: 'Camera' },
@@ -420,6 +428,25 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
     expired: { fr: 'Expiré', en: 'Expired' },
     missing: { fr: 'Manquant', en: 'Missing' }
   },
+  auditControl: {
+    vehicleDocuments: {
+      fr: 'Véhicules aux documents en règle',
+      en: 'Vehicles with their documents in order'
+    },
+    driverDocuments: {
+      fr: 'Conducteurs et aides aux pièces en règle',
+      en: 'Drivers and assistants with their papers in order'
+    },
+    inspections: {
+      fr: "Véhicules aptes à l'inspection périodique",
+      en: 'Vehicles fit at the periodic inspection'
+    },
+    departures: { fr: 'Départs autorisés sur la période', en: 'Departures granted in the period' },
+    deviations: {
+      fr: 'Écarts de trajet justifiés ou subis',
+      en: 'Trip deviations authorized or endured'
+    }
+  },
   scoreFamily: {
     safety: { fr: 'Sécurité routière', en: 'Road safety' },
     route: { fr: "Conformité d'itinéraire", en: 'Route compliance' },
@@ -430,6 +457,7 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
   },
   liveSituation: {
     moving: { fr: 'En route', en: 'On the road' },
+    idling: { fr: 'Allumé / Immobile', en: 'Engine on / Idle' },
     stopped: { fr: 'À un arrêt', en: 'At a stop' },
     parked: { fr: 'Stationné', en: 'Parked' },
     immobilized: { fr: 'Immobilisé', en: 'Immobilized' },

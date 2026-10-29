@@ -1,7 +1,6 @@
 export default {
   'planning.confirmations.title': 'Confirmation des destinataires',
-  'planning.confirmations.subtitle':
-    'L’agent d’appels confirme chaque livraison, note une indisponibilité ou retient une autre date. Une ligne replanifiée repart dans les commandes, sans reprendre les moyens.',
+  'planning.confirmations.subtitle': 'Disponibilité des destinataires avant le départ et réception des livraisons.',
   'planning.confirmations.loading': 'Chargement des lignes à confirmer…',
   'planning.confirmations.empty': 'Aucune ligne à confirmer.',
   'planning.confirmations.loadError': 'Les confirmations n’ont pas pu être chargées.',
@@ -105,21 +104,26 @@ export default {
   'planning.tracking.declared': 'Le conducteur déclare avoir livré {quantity} {unit}.',
   'planning.tracking.refused': 'Commande refusée. Motif : {reason}',
   'planning.tracking.received': 'Réception confirmée par {name} le {date}.',
-  'planning.tracking.contested': 'Réception contestée ({reason}). Le planificateur traite votre contestation.',
+  'planning.tracking.contested':
+    'Réception contestée ({reason}). Le planificateur traite votre contestation.',
   'planning.tracking.receptionQuestion': 'Avez-vous bien reçu ce qui est déclaré ?',
   'planning.tracking.receiveConfirm': 'Je confirme la réception',
   'planning.tracking.receiveContest': 'Je conteste',
   'planning.tracking.refuse': 'Refuser la commande',
   'planning.tracking.signer': 'Votre nom',
   'planning.tracking.survey.title': 'Votre avis sur la livraison',
-  'planning.tracking.survey.hint': 'Facultatif : donnez une note et, si vous le souhaitez, un commentaire.',
+  'planning.tracking.survey.hint':
+    'Facultatif : donnez une note et, si vous le souhaitez, un commentaire.',
   'planning.tracking.survey.score': 'Note',
   'planning.tracking.survey.comment': 'Votre commentaire (facultatif)',
   'planning.tracking.survey.thanks': 'Merci, votre avis est transmis.',
   'planning.tracking.messages.title': 'Messages reçus',
-  'planning.tracking.messages.planned': 'Votre livraison est planifiée le {date}, véhicule {vehicle}, conducteur {driver}, arrivée estimée {eta}. Suivez-la avec ce lien.',
-  'planning.tracking.messages.started': 'Votre livraison est en cours : le véhicule {vehicle} est parti.',
-  'planning.tracking.messages.declared': 'Le conducteur a déclaré votre livraison : confirmez-la ou contestez-la depuis ce lien.',
+  'planning.tracking.messages.planned':
+    'Votre livraison est planifiée le {date}, véhicule {vehicle}, conducteur {driver}, arrivée estimée {eta}. Suivez-la avec ce lien.',
+  'planning.tracking.messages.started':
+    'Votre livraison est en cours : le véhicule {vehicle} est parti.',
+  'planning.tracking.messages.declared':
+    'Le conducteur a déclaré votre livraison : confirmez-la ou contestez-la depuis ce lien.',
   'planning.tracking.messages.channel.sms': 'SMS',
   'planning.tracking.messages.channel.call': 'Appel',
   'planning.tracking.messages.channel.email': 'E-mail',
@@ -138,9 +142,36 @@ export default {
   'planning.confirmations.answered.empty': "Aucune réponse donnée pour l'instant.",
   'planning.confirmations.answered.origin.recipient': 'Le destinataire, par son lien',
   'planning.confirmations.answered.origin.call': 'Un agent, après un appel',
-  'planning.confirmations.dateDialog.clientHint': "La date reste proposée : le planificateur la retient sur la fiche de l'ordre.",
-  'planning.tracking.replannedOn': 'Votre livraison est replanifiée : elle vous sera livrée à partir du {date}.',
+  'planning.confirmations.dateDialog.clientHint':
+    "La date reste proposée : le planificateur la retient sur la fiche de l'ordre.",
+  'planning.tracking.replannedOn':
+    'Votre livraison est replanifiée : elle vous sera livrée à partir du {date}.',
   'planning.tracking.remainderOn': 'Les produits manquants vous seront livrés à partir du {date}.',
   'planning.tracking.nextDelivery': 'Suivre cette livraison et confirmer votre disponibilité',
-  'planning.tracking.nextDeliveryLater': 'Vous recevrez un nouveau lien dès que cette livraison sera planifiée.'
+  'planning.tracking.nextDeliveryLater':
+    'Vous recevrez un nouveau lien dès que cette livraison sera planifiée.',
+  'planning.tracking.parts.title': 'Votre commande arrive en {count} livraisons',
+  'planning.tracking.parts.delivery': 'Livraison {no}',
+  'planning.tracking.parts.truck': 'camion {plate}',
+  'planning.tracking.parts.current': 'cette page',
+  'planning.tracking.parts.follow': 'Suivre',
+  'planning.tracking.parts.state.to_plan': 'à planifier',
+  'planning.tracking.parts.state.planned': 'planifiée',
+  'planning.tracking.parts.state.on_the_way': 'en route',
+  'planning.tracking.parts.state.declared': 'livrée, à confirmer',
+  'planning.tracking.parts.state.received': 'réception confirmée',
+  'planning.tracking.parts.state.refused': 'refusée',
+  'planning.tracking.parts.state.to_replan': 'à replanifier',
+  'planning.tracking.parts.state.cancelled': 'annulée',
+  'planning.tracking.cancelled': 'Livraison annulée',
+  'planning.tracking.reasonIs': 'Motif : {reason}',
+  'planning.tracking.postponed': 'Livraison reportée',
+  'planning.tracking.postponedReturn':
+    'Votre livraison est reportée : la marchandise retourne à l’entrepôt',
+  'planning.tracking.replanQuestion': 'À partir de quelle date pouvez-vous être livré ?',
+  'planning.tracking.replanGiven': 'Vous avez indiqué le {date}.',
+  'planning.tracking.giveDate': 'Indiquer une date',
+  'planning.tracking.pendingConfirm': 'Réception confirmée par {name}',
+  'planning.tracking.pendingContest': 'Contestation enregistrée : {reason}',
+  'planning.tracking.pendingNetwork': 'Hors réseau : enregistré, sera transmis'
 }

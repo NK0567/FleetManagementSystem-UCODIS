@@ -21,16 +21,18 @@ const { formatDateTime, formatDecimal, formatInteger, optionLabel } = useListCel
 const listViewOptions = computed<{ value: WorkOrderListView; label: string }[]>(() => [
   { value: 'active', label: t('maintenance.workOrders.listView.active') },
   { value: 'awaiting_parts', label: t('maintenance.workOrders.listView.awaitingParts') },
+  { value: 'external', label: t('maintenance.workOrders.listView.external') },
   { value: 'to_validate', label: t('maintenance.workOrders.listView.toValidate') },
   { value: 'finished', label: t('maintenance.workOrders.listView.finished') },
   { value: 'all', label: t('maintenance.workOrders.listView.all') }
 ])
 
 const searchColumnOptions = computed<{ value: WorkOrderSearchColumn; label: string }[]>(() => [
-  { value: 'no,vehiclePlate,symptom', label: t('maintenance.workOrders.search.all') },
+  { value: 'no,vehiclePlate,symptom,providerName', label: t('maintenance.workOrders.search.all') },
   { value: 'no', label: t('maintenance.workOrders.col.no') },
   { value: 'vehiclePlate', label: t('maintenance.workOrders.col.vehiclePlate') },
-  { value: 'symptom', label: t('maintenance.workOrders.col.symptom') }
+  { value: 'symptom', label: t('maintenance.workOrders.col.symptom') },
+  { value: 'providerName', label: t('maintenance.workOrders.col.providerName') }
 ])
 
 const tableColumns = computed<TableColumn[]>(() => [
@@ -73,8 +75,7 @@ const tableColumns = computed<TableColumn[]>(() => [
   {
     sortKey: 'providerName',
     label: t('maintenance.workOrders.col.providerName'),
-    minW: '180px',
-    defaultHidden: true
+    minW: '180px'
   },
   {
     sortKey: 'subcontractingCost',
@@ -149,6 +150,18 @@ const filterDefs: FilterFieldDef[] = [
     valueType: 'string',
     kind: 'option',
     optionsKey: 'nomenclatureState'
+  },
+  {
+    field: 'providerName',
+    labelKey: 'maintenance.workOrders.col.providerName',
+    valueType: 'string',
+    kind: 'text'
+  },
+  {
+    field: 'atExternalWorkshop',
+    labelKey: 'maintenance.workOrders.listView.external',
+    valueType: 'boolean',
+    kind: 'boolean'
   }
 ]
 

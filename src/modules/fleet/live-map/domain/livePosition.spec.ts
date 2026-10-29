@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
+import { addMinutes } from '@/utils/date'
 import {
+  distanceDrivenKm,
   distanceToRouteM,
+  engineRunning,
   expectedArrivals,
   lastReport,
   liveSituation,
@@ -122,5 +125,30 @@ describe('corridor and recorded track', () => {
       { latitude: first.latitude, longitude: first.longitude, radiusM: 1_000 }
     ])
     expect(silent.length).toBeLessThan(track.length)
+  })
+})
+
+describe('engine and distance driven', () => {
+  const arrivals = expectedArrivals(stops)
+
+  it('shows a running engine standing still as idling', () => {
+    const base = { immobilized: false, signalLost: false, onTrip: false, moving: false }
+    expect(liveSituation({ ...base, engineOn: true })).toBe('idling')
+    expect(liveSituation({ ...base, onTrip: true, engineOn: true })).toBe('idling')
+    expect(liveSituation({ ...base, engineOn: false })).toBe('parked')
+    expect(liveSituation({ ...base, immobilized: true, engineOn: true })).toBe('immobilized')
+  })
+
+  it('runs the engine while driving and for the first minutes of a stop', () => {
+    expect(engineRunning(stops, arrivals, '2026-09-04T07:00:00', 10)).toBe(true)
+    const atStop = arrivals[1] as string
+    expect(engineRunning(stops, arrivals, atStop, 10)).toBe(true)
+    expect(engineRunning(stops, arrivals, addMinutes(atStop, 20), 10)).toBe(false)
+  })
+
+  it('adds up the kilometres along the road, nothing backwards', () => {
+    const driven = distanceDrivenKm(stops, arrivals, '2026-09-04T06:10:00', '2026-09-04T07:10:00')
+    expect(driven).toBeGreaterThan(0)
+    expect(distanceDrivenKm(stops, arrivals, '2026-09-04T07:10:00', '2026-09-04T06:10:00')).toBe(0)
   })
 })

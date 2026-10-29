@@ -17,5 +17,10 @@ export default {
   'maintenance.workshopLoad.free': 'Aucun travail planifié.',
   'maintenance.workshopLoad.remaining': 'reste {hours} h',
   'maintenance.workshopLoad.unplanned': 'Travaux à planifier',
-  'maintenance.workshopLoad.noUnplanned': 'Tout est planifié.'
+  'maintenance.workshopLoad.noUnplanned': 'Tout est planifié.',
+  'maintenance.workshopLoad.byCompetence': 'Compétences requises',
+  'maintenance.workshopLoad.noCompetence': 'Aucun travail diagnostiqué en attente.',
+  'maintenance.workshopLoad.competence': 'Compétence',
+  'maintenance.workshopLoad.jobCount': 'Interventions',
+  'maintenance.workshopLoad.estimatedHours': 'Heures estimées'
 }

@@ -7,15 +7,27 @@ import type { TripRow } from '../../fixtures/fleet/trips'
 import type { RoadChecklistRow } from '../../fixtures/fleet/roadChecklists'
 import { stampCreated, readBody } from '../../http/crudResource'
 import { conflict, notFound, unprocessable } from '../../http/errors'
-import { readDateTime, readEnum } from '../../http/input'
+import { invalidField, readDateTime, readEnum, readString } from '../../http/input'
 import { created, ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
 import { sessionUser } from '../../http/types'
 import { activeCheckPoints, readCheckResults } from '../fleet/checkPoints'
 import { FLEET_MESSAGES } from '../fleet/messages'
-import { toBringBack } from '../planning/execution'
+import { readDriverSignature } from '../fleet/roadChecklists'
+import { gapReference, toBringBack } from '../planning/execution'
+import { planningSettings } from '../planning/settings'
 import { transportOrdersApi } from '../planning/transportOrders'
 import { SELF_SERVICE_MESSAGES } from './messages'
+
+/** Longest name of a stopping place the phone may send. */
+const MAX_LOCATION = 120
+
+/** Where the driver took the checklist: optional, a short free text such as « Relais Moramanga ». */
+function readStopLocation(input: Record<string, unknown>): string {
+  const location = readString(input, 'location')
+  if (location.length > MAX_LOCATION) throw invalidField('location')
+  return location
+}
 
 function driverTrips(db: MockDatabase, employeeNo: string): TripRow[] {
   return db.trips.all().filter((trip) => trip.driverNo === employeeNo)
@@ -125,7 +137,18 @@ export function myOrders(db: MockDatabase, employeeNo: string) {
             receptionConfirmedAt: line.receptionConfirmedAt,
             receptionContestedAt: line.receptionContestedAt,
             isFuel: !!product?.isFuel,
-            undeliveredReasonNo: line.undeliveredReasonNo ?? null
+            undeliveredReasonNo: line.undeliveredReasonNo ?? null,
+            nonconformityReason: [
+              db.planningReasons.find(line.nonconformityReasonNo ?? '')?.name ?? '',
+              line.nonconformityComment
+            ]
+              .filter(Boolean)
+              .join(' · '),
+            refusalByRecipient: line.refusalBy === 'recipient',
+            goodsBackAt: line.handedBackAt ?? line.warehouseReceivedAt ?? null,
+            remainderAt: line.remainderAt ?? null,
+            // What the delivered quantity is compared with, to ask a justification (TRS03-US16).
+            tolerance: gapReference(db, row, line)
           }
         })
       return {
@@ -136,6 +159,7 @@ export function myOrders(db: MockDatabase, employeeNo: string) {
         vehiclePlate: order.vehiclePlate,
         trailerPlate: order.trailerPlate,
         compartmentPlan: order.compartmentPlan,
+        overToleranceMode: planningSettings(db).quantities.overToleranceMode,
         lines,
         reasons: {
           nonconformity: reasons('nonconformity'),
@@ -222,7 +246,9 @@ export function registerTourHandlers(router: MockRouter, db: MockDatabase): void
         tripNo: trip.no,
         stage: readEnum(input, 'stage', CHECKLIST_STAGES, { required: true }) ?? 'departure',
         takenAt,
-        results: readCheckResults(db, input, 'vehicle')
+        location: readStopLocation(input),
+        results: readCheckResults(db, input, 'vehicle'),
+        ...readDriverSignature(input, takenAt)
       },
       request
     )

@@ -1,7 +1,7 @@
 import httpClient from '@/core/api/httpClient'
 import { createCrudApi, resourcePath } from '@/core/factories'
 import type { SingleResponse } from '@/types/api-response.types'
-import type { AlertApi, InboxApi } from '../types/alert.types'
+import type { AlertApi, AlertStatsApi, InboxApi } from '../types/alert.types'
 
 const basePath = '/fleet/alerts'
 
@@ -11,5 +11,6 @@ export const alertApi = {
     httpClient.post<SingleResponse<AlertApi>>(`${resourcePath(basePath, no)}/acknowledge`),
   handle: (no: string, comment: string) =>
     httpClient.post<SingleResponse<AlertApi>>(`${resourcePath(basePath, no)}/handle`, { comment }),
+  stats: () => httpClient.get<SingleResponse<AlertStatsApi>>(`${basePath}/stats`),
   inbox: () => httpClient.get<SingleResponse<InboxApi>>('/inbox')
 }

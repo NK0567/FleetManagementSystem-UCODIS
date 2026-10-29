@@ -10,7 +10,7 @@ import { nextNo } from '../../db/numbering'
 import type { RoadChecklistRow } from '../../fixtures/fleet/roadChecklists'
 import { registerCrudResource } from '../../http/crudResource'
 import { conflict, unprocessable } from '../../http/errors'
-import { readDateTime, readEnum } from '../../http/input'
+import { readBoolean, readDateTime, readEnum } from '../../http/input'
 import { requireReference } from '../../http/references'
 import type { MockRouter } from '../../http/router'
 import { readCheckResults } from './checkPoints'
@@ -32,10 +32,32 @@ export function roadChecklistsApi(db: MockDatabase): RoadChecklistApi[] {
       vehicleNo: trip?.vehicleNo ?? '',
       vehiclePlate: trip ? (plates.get(trip.vehicleNo) ?? trip.vehicleNo) : '',
       driverName: trip ? (names.get(trip.driverNo) ?? trip.driverNo) : '',
+      signedAt: checklist.signedAt ?? null,
+      signed: !!checklist.signedAt,
+      syncedAt: checklist.syncedAt ?? checklist.createdAt,
+      capturedOffline: !!checklist.capturedOffline,
       anomalyCount: anomalies(checklist.results).length,
       blocking: blockingAnomalies(checklist.results).length > 0
     }
   })
+}
+
+/**
+ * What the phone of the driver sends with a checklist: his signature (when he signed it) and
+ * whether it was taken without network, kept on the phone and sent once the network came back.
+ */
+export function readDriverSignature(
+  input: Record<string, unknown>,
+  takenAt: string
+): Pick<RoadChecklistRow, 'signedAt' | 'syncedAt' | 'capturedOffline'> {
+  const now = nowIsoDateTime()
+  let signedAt: string | null = null
+  if (readBoolean(input, 'signed')) {
+    signedAt = readDateTime(input, 'signedAt') ?? now
+    if (signedAt > now) throw unprocessable(FLEET_MESSAGES.dateInFuture)
+    if (signedAt < takenAt) throw unprocessable(FLEET_MESSAGES.checklistSignedBeforeTaken)
+  }
+  return { signedAt, syncedAt: now, capturedOffline: typeof input.savedAt === 'string' }
 }
 
 /** The latest departure reading of a trip: the one a departure authorization relies on. */
@@ -74,7 +96,11 @@ export function registerRoadChecklistsHandlers(router: MockRouter, db: MockDatab
         tripNo,
         stage: readEnum(input, 'stage', CHECKLIST_STAGES, { required: true }) ?? 'departure',
         takenAt,
-        results: readCheckResults(db, input, 'vehicle')
+        results: readCheckResults(db, input, 'vehicle'),
+        // Entered from the office: it is on the server at once, and the driver did not sign it.
+        signedAt: null,
+        syncedAt: nowIsoDateTime(),
+        capturedOffline: false
       }
     }
   })

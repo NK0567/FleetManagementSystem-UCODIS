@@ -1,6 +1,8 @@
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import ReferenceImportDialog from '@/modules/hr/reference-import/ReferenceImportDialog.vue'
+import { Upload } from '@lucide/vue'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
 import { useListCellFormatters } from '@/composables/useListCellFormatters'
@@ -11,6 +13,7 @@ import { useJobPositionStore } from '../stores/jobPositionStore'
 import type { JobPositionApi, JobPositionSearchColumn } from '../types/jobPosition.types'
 
 const { t } = useI18n()
+const importing = ref(false)
 const store = useJobPositionStore()
 const { booleanLabel, formatInteger, formatDateTime, referenceLabel } = useListCellFormatters()
 
@@ -190,6 +193,16 @@ const {
             :reset-preferences="resetPreferences"
           />
         </template>
+        <template v-if="canInsert" #extra-actions>
+          <button
+            type="button"
+            class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
+            @click="importing = true"
+          >
+            <Upload class="w-4 h-4 text-primary" />
+            {{ t('hr.referenceImport.action') }}
+          </button>
+        </template>
       </ListPageToolbar>
 
       <FormAlerts
@@ -316,6 +329,13 @@ const {
       @cancel="itemToDelete = null"
     />
 
+    <ReferenceImportDialog
+      :open="importing"
+      kind="jobPositions"
+      :submit="jobPositionService.importRows"
+      @close="importing = false"
+      @imported="store.fetchItems(store.pagination.page, store.pagination.limit)"
+    />
     <JobPositionCard
       v-if="showCard && cardNo"
       :key="`${cardNo}-${cardOpenMode}`"

@@ -71,5 +71,10 @@ export default {
     "Aucun véhicule de ce modèle dans le parc pour l'instant.",
   'maintenance.maintenancePlans.models.inheritHint':
     'chaque véhicule du modèle hérite du plan, y compris ceux qui entreront dans le parc.',
-  'maintenance.maintenancePlans.operations.intervalHours': 'Toutes les (heures moteur)'
+  'maintenance.maintenancePlans.operations.intervalHours': 'Toutes les (heures moteur)',
+  'maintenance.maintenancePlans.coverage.modelsWithoutPlan': "Aucun modèle du parc sans plan d'entretien. | Un modèle du parc sans plan d'entretien. | {count} modèles du parc sans plan d'entretien.",
+  'maintenance.maintenancePlans.coverage.inactivePlans': 'Aucun plan inactif pour des véhicules du parc. | Un plan inactif pour des véhicules du parc. | {count} plans inactifs pour des véhicules du parc.',
+  'maintenance.maintenancePlans.coverage.vehicles': '(aucun véhicule) | (1 véhicule) | ({count} véhicules)',
+  'maintenance.maintenancePlans.coverage.reactivate': 'Réactiver {name}',
+  'maintenance.maintenancePlans.coverage.error': "Le plan d'entretien n'a pas pu être enregistré."
 }

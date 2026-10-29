@@ -75,6 +75,13 @@ export function matchesFilter(row: Row, filter: ApiListFilter): boolean {
   const rowValue = row[filter.field]
   const { value, valueType, operator = '=' } = filter
 
+  // A row holding several values (regions of an order) matches when one of them does.
+  if (Array.isArray(rowValue)) {
+    const matched = rowValue.some((item) =>
+      matchesFilter({ ...row, [filter.field]: item }, { ...filter, operator: '=' })
+    )
+    return operator === '<>' ? !matched : matched
+  }
   if (Array.isArray(value)) {
     const included = value.some((candidate) => equals(rowValue, candidate, valueType))
     return operator === '<>' ? !included : included

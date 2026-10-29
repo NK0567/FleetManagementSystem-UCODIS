@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { CalendarCheck, CalendarClock, CalendarPlus, ExternalLink } from '@lucide/vue'
 import { addDays, todayIso } from '@/utils/date'
 import { formatDate, formatNumber } from '@/utils/format'
-import { replanCandidate, type ReplanCandidate } from '../domain/replanning'
+import { recipientDates, replanCandidate, type ReplanCandidate } from '../domain/replanning'
 import type { TransportOrderLineApi } from '../types/transportOrder.types'
 
 /**
@@ -140,17 +140,39 @@ const buttonClass =
             </td>
             <td class="px-3 py-2 whitespace-nowrap">
               {{ row.candidate.recipientDate ? formatDate(row.candidate.recipientDate) : '' }}
+              <p
+                v-if="row.candidate.plannerDate && row.candidate.kind !== 'refused'"
+                class="text-xs text-muted-foreground"
+              >
+                {{
+                  t('planning.transportOrders.replan.proposedOn', {
+                    date: formatDate(row.candidate.plannerDate)
+                  })
+                }}
+              </p>
             </td>
             <td v-if="canReplan" class="px-3 py-2 text-right">
-              <button
-                type="button"
-                :class="buttonClass"
-                :disabled="busy"
-                @click="open(row, 'replan')"
-              >
-                <CalendarPlus class="w-3.5 h-3.5 text-primary" />
-                {{ t('planning.transportOrders.replan.choose') }}
-              </button>
+              <div class="inline-flex flex-wrap justify-end gap-1">
+                <button
+                  type="button"
+                  :class="buttonClass"
+                  :disabled="busy"
+                  @click="open(row, 'replan')"
+                >
+                  <CalendarPlus class="w-3.5 h-3.5 text-primary" />
+                  {{ t('planning.transportOrders.replan.choose') }}
+                </button>
+                <button
+                  v-if="recipientDates(row.candidate)"
+                  type="button"
+                  :class="buttonClass"
+                  :disabled="busy"
+                  @click="open(row, 'propose')"
+                >
+                  <CalendarClock class="w-3.5 h-3.5 text-primary" />
+                  {{ t('planning.transportOrders.replan.propose') }}
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>

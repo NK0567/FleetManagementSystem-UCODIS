@@ -151,6 +151,37 @@ onMounted(() => void store.fetchLoad())
 
       <section class="bg-card border border-border rounded">
         <h2 class="px-4 py-3 border-b border-border text-sm font-semibold text-card-foreground">
+          {{ t('maintenance.workshopLoad.byCompetence') }}
+        </h2>
+        <p v-if="!store.load.competences.length" class="p-4 text-sm text-muted-foreground">
+          {{ t('maintenance.workshopLoad.noCompetence') }}
+        </p>
+        <table v-else class="w-full text-sm">
+          <thead>
+            <tr class="text-left text-xs text-muted-foreground">
+              <th class="px-4 py-2 font-medium">{{ t('maintenance.workshopLoad.competence') }}</th>
+              <th class="px-4 py-2 font-medium text-right">
+                {{ t('maintenance.workshopLoad.jobCount') }}
+              </th>
+              <th class="px-4 py-2 font-medium text-right">
+                {{ t('maintenance.workshopLoad.estimatedHours') }}
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-border">
+            <tr v-for="competence in store.load.competences" :key="competence.competenceNo">
+              <td class="px-4 py-2 text-card-foreground">{{ competence.name }}</td>
+              <td class="px-4 py-2 text-right tabular-nums">{{ competence.jobCount }}</td>
+              <td class="px-4 py-2 text-right tabular-nums">
+                {{ formatNumber(competence.estimatedHours, 1) }} h
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="bg-card border border-border rounded">
+        <h2 class="px-4 py-3 border-b border-border text-sm font-semibold text-card-foreground">
           {{ t('maintenance.workshopLoad.unplanned') }}
         </h2>
         <p v-if="!store.load.unplanned.length" class="p-4 text-sm text-muted-foreground">

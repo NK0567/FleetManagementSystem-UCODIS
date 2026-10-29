@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
@@ -8,11 +8,11 @@ import { apiErrorMessage } from '@/core/api/apiError'
 import { useListCellFormatters } from '@/composables/useListCellFormatters'
 import { useListPage } from '@/composables/useListPage'
 import { usePermissions } from '@/composables/usePermissions'
-import { formatDateTime } from '@/utils/format'
+import { formatDateTime, formatNumber } from '@/utils/format'
 import { alertApi } from '../api/alertApi'
 import { alertService } from '../services/alertService'
 import { useAlertStore, type AlertListView } from '../stores/alertStore'
-import type { AlertApi, AlertSearchColumn } from '../types/alert.types'
+import type { AlertApi, AlertSearchColumn, AlertStatsApi } from '../types/alert.types'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -168,6 +168,15 @@ async function handle(comment: string) {
 function openRecord(alert: AlertApi) {
   void router.push({ path: alert.path, query: { no: alert.recordNo, cardMode: 'view' } })
 }
+
+const stats = ref<AlertStatsApi | null>(null)
+
+async function loadStats() {
+  stats.value = await alertService.stats().catch(() => null)
+}
+
+onMounted(loadStats)
+watch(() => store.items, loadStats)
 </script>
 
 <template>
@@ -211,6 +220,17 @@ function openRecord(alert: AlertApi) {
         </template>
       </ListPageToolbar>
 
+      <p v-if="stats" class="mx-4 mt-2 text-xs text-muted-foreground">
+        {{
+          t('fleet.alerts.averageHandling', {
+            hours:
+              stats.averageHandlingHours === null
+                ? '-'
+                : formatNumber(stats.averageHandlingHours, 1),
+            count: stats.handled
+          })
+        }}
+      </p>
       <FormAlerts class="mx-4" :error="exportError" @clear:error="exportError = null" />
       <FormAlerts class="mx-4" :error="actionError" @clear:error="actionError = null" />
 

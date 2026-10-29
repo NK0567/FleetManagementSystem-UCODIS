@@ -31,7 +31,7 @@ export function fleetSupervision(positions: readonly LivePositionApi[]): FleetSu
   return {
     onMission: positions.filter((position) => position.tripNo).map(row),
     stopped: positions
-      .filter((position) => position.situation === 'stopped' || position.situation === 'parked')
+      .filter((position) => ['stopped', 'idling', 'parked'].includes(position.situation))
       .map(row),
     inAlert: positions.filter((position) => position.alertCount > 0).map(row),
     outOfZone: positions.filter((position) => position.outOfZone).map(row)

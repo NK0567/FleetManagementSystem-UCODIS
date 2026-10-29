@@ -13,6 +13,7 @@ import { documentCompliance, gapsText } from '../fleet/documentCompliance'
 import { documentsApi } from '../fleet/documents'
 import { driverFacts, ineligibilityText } from '../fleet/drivers'
 import { leaveBalancesApi } from '../hr/views'
+import { fleetSettings } from '../fleet/settings'
 import { SELF_SERVICE_MESSAGES } from './messages'
 
 function fieldRole(profile: UserProfileCode): FieldRole {
@@ -28,11 +29,23 @@ export function myProfile(db: MockDatabase, user: MockSessionUser, language: Moc
   const gaps = documentCompliance(db).persons.get(employee.no) ?? []
   const position = db.jobPositions.find(employee.jobPositionNo)
   const site = db.sites.find(employee.siteCode)
+  const driving = fleetSettings(db).drivingTime
   return {
     employeeNo: employee.no,
     fullName: employeeFullName(employee),
     phone: employee.phone,
     jobPositionName: position?.name ?? '',
+    // What the position asks of him, from the HR positions (v57 « Ce que j'ai à faire »).
+    responsibilities: position?.responsibilities ?? [],
+    // The driving limits in force, from the fleet driving-time settings, for whoever drives.
+    drivingLimits:
+      user.profile === 'DRIVER'
+        ? {
+            dailyDrivingMaxMin: driving.dailyDrivingMaxMin,
+            dailyRestMinH: driving.restBeforeDepartureMinH,
+            weeklyDrivingMaxH: driving.weeklyDrivingMaxH
+          }
+        : null,
     siteName: site?.name ?? '',
     status: employee.status,
     mayDeclare: mayDeclare(fieldRole(user.profile)),

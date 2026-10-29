@@ -284,6 +284,115 @@ onMounted(() => void store.fetchReliability())
             </li>
           </ul>
         </section>
+
+        <section class="bg-card border border-border rounded">
+          <h2 class="px-4 py-3 border-b border-border text-sm font-semibold">
+            {{ t('maintenance.reliability.mtbfBySubsystem') }}
+          </h2>
+          <p
+            v-if="!store.reliability.mtbfBySubsystem.length"
+            class="p-4 text-sm text-muted-foreground"
+          >
+            {{ t('maintenance.reliability.noFailure') }}
+          </p>
+          <table v-else class="w-full text-sm">
+            <thead>
+              <tr class="text-left text-xs text-muted-foreground">
+                <th class="px-4 py-2 font-medium">{{ t('maintenance.reliability.subsystem') }}</th>
+                <th class="px-4 py-2 font-medium text-right">
+                  {{ t('maintenance.reliability.failures') }}
+                </th>
+                <th class="px-4 py-2 font-medium text-right">
+                  {{ t('maintenance.reliability.kpi.mtbfKm') }}
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-border">
+              <tr v-for="item in store.reliability.mtbfBySubsystem" :key="item.name">
+                <td class="px-4 py-2">{{ item.name }}</td>
+                <td class="px-4 py-2 text-right tabular-nums">{{ item.failures }}</td>
+                <td class="px-4 py-2 text-right tabular-nums">{{ dash(item.mtbfKm, ' km') }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="bg-card border border-border rounded">
+          <h2 class="px-4 py-3 border-b border-border text-sm font-semibold">
+            {{ t('maintenance.reliability.breakdownPlace') }}
+          </h2>
+          <div class="p-4 space-y-1">
+            <p
+              class="text-2xl font-semibold tabular-nums"
+              :class="
+                (store.reliability.breakdownPlace.roadShare ?? 0) > 30
+                  ? 'text-warning'
+                  : 'text-card-foreground'
+              "
+            >
+              {{ dash(store.reliability.breakdownPlace.roadShare, ' %') }}
+            </p>
+            <p class="text-sm text-muted-foreground">
+              {{
+                t('maintenance.reliability.breakdownPlaceLine', {
+                  road: store.reliability.breakdownPlace.road,
+                  workshop: store.reliability.breakdownPlace.workshop
+                })
+              }}
+            </p>
+          </div>
+        </section>
+
+        <section class="bg-card border border-border rounded">
+          <h2 class="px-4 py-3 border-b border-border text-sm font-semibold">
+            {{ t('maintenance.reliability.lostDaysPer10000Km') }}
+          </h2>
+          <p
+            v-if="!store.reliability.lostDaysPer10000Km.length"
+            class="p-4 text-sm text-muted-foreground"
+          >
+            {{ t('maintenance.reliability.noLostDays') }}
+          </p>
+          <table v-else class="w-full text-sm">
+            <thead>
+              <tr class="text-left text-xs text-muted-foreground">
+                <th class="px-4 py-2 font-medium">{{ t('maintenance.reliability.vehicle') }}</th>
+                <th class="px-4 py-2 font-medium text-right">
+                  {{ t('maintenance.reliability.kmRun') }}
+                </th>
+                <th class="px-4 py-2 font-medium text-right">
+                  {{ t('maintenance.reliability.daysLost') }}
+                </th>
+                <th class="px-4 py-2 font-medium text-right">
+                  {{ t('maintenance.reliability.per10000Km') }}
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-border">
+              <tr v-for="item in store.reliability.lostDaysPer10000Km" :key="item.plate">
+                <td class="px-4 py-2">{{ item.plate }}</td>
+                <td class="px-4 py-2 text-right tabular-nums">{{ formatNumber(item.km) }} km</td>
+                <td class="px-4 py-2 text-right tabular-nums">
+                  {{
+                    t('maintenance.reliability.daysValue', { days: formatNumber(item.lostDays, 1) })
+                  }}
+                </td>
+                <td
+                  class="px-4 py-2 text-right tabular-nums font-medium"
+                  :class="(item.ratio ?? 0) > 3 ? 'text-destructive' : ''"
+                >
+                  {{
+                    item.ratio === null
+                      ? dash(null)
+                      : t('maintenance.reliability.daysValue', {
+                          days: formatNumber(item.ratio, 1)
+                        })
+                  }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
       </div>
     </template>
   </div>

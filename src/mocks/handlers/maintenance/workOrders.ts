@@ -81,7 +81,16 @@ const SUBSYSTEM_KEYWORDS: SubsystemKeywords = {
 const MIN_TEXT = 10
 
 export function workOrdersApi(db: MockDatabase): WorkOrderApi[] {
-  const rate = maintenanceSettings(db).labour.hourlyRate
+  const defaultRate = maintenanceSettings(db).labour.hourlyRate
+  const skillOf = new Map(db.failureCodes.all().map((code) => [code.no, code.competenceNo]))
+  const skillRates = new Map(
+    db.competences.all().map((competence) => [competence.no, competence.hourlyRate ?? null])
+  )
+  /** The rate of the competence the diagnosed subsystem calls for, else the single rate. */
+  const rateOf = (row: WorkOrderRow) => {
+    const competenceNo = row.diagnosis ? skillOf.get(row.diagnosis.subsystemNo) : null
+    return (competenceNo ? skillRates.get(competenceNo) : null) ?? defaultRate
+  }
   const plates = new Map(db.vehicles.all().map((vehicle) => [vehicle.no, vehicle.plate]))
   const codes = new Map(db.failureCodes.all().map((code) => [code.no, code.name]))
   const providers = new Map(db.providers.all().map((provider) => [provider.no, provider.name]))
@@ -97,7 +106,7 @@ export function workOrdersApi(db: MockDatabase): WorkOrderApi[] {
   }
   return db.workOrders.all().map((row) => {
     const hours = labourHours(row.labour)
-    const labourCost = Math.round(hours * rate)
+    const labourCost = Math.round(hours * rateOf(row))
     const subcontracting = subcontractingCost(row.external)
     const received = row.parts.filter((part) => part.receivedAt)
     const partsCost = received.reduce((total, part) => total + part.quantity * part.unitPrice, 0)
@@ -113,6 +122,7 @@ export function workOrdersApi(db: MockDatabase): WorkOrderApi[] {
       labourHours: hours,
       labourCost,
       providerName: row.external ? (providers.get(row.external.providerNo) ?? '') : '',
+      atExternalWorkshop: isAtExternalWorkshop(row) && !row.validatedAt && !row.cancelledAt,
       subcontractingCost: subcontracting,
       partsCost,
       pendingPartCount: row.parts.length - received.length,
@@ -647,7 +657,7 @@ export function registerWorkOrdersHandlers(router: MockRouter, db: MockDatabase)
     feature: 'WORKORDER',
     collection: db.workOrders,
     list: () => workOrdersApi(db),
-    searchColumns: ['no', 'vehiclePlate', 'symptom'],
+    searchColumns: ['no', 'vehiclePlate', 'symptom', 'providerName'],
     optionFields: {
       maintenanceType: 'maintenanceType',
       severity: 'workOrderSeverity',

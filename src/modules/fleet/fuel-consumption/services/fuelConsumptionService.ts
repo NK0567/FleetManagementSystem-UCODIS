@@ -3,13 +3,17 @@ import { fuelConsumptionApi } from '../api/fuelConsumptionApi'
 import type {
   FuelConsumptionApi,
   FuelConsumptionSearchColumn,
-  FuelConsumptionSummary
+  FuelConsumptionSummary,
+  VehicleEmissionsApi
 } from '../types/fuelConsumption.types'
 
 export const fuelConsumptionService = {
   ...createCrudService<FuelConsumptionApi, FuelConsumptionSearchColumn>(fuelConsumptionApi),
   async summary(): Promise<FuelConsumptionSummary> {
     return (await fuelConsumptionApi.summary()).data.data
+  },
+  async emissions(): Promise<VehicleEmissionsApi[]> {
+    return (await fuelConsumptionApi.emissions()).data.data
   },
   async qualify(no: string, causeNo: string, comment: string): Promise<FuelConsumptionApi> {
     return (await fuelConsumptionApi.qualify(no, causeNo, comment)).data.data

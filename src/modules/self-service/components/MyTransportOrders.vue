@@ -8,11 +8,13 @@ import {
   CloudOff,
   MapPin,
   PackageCheck,
+  RotateCcw,
   Undo2,
   Wifi
 } from '@lucide/vue'
 import { apiErrorMessage } from '@/core/api/apiError'
 import { formatDateTime, formatNumber } from '@/utils/format'
+import { quantityGap } from '@/modules/planning/quantity-tolerances/domain/quantityTolerance'
 import { mySpaceApi } from '../api/mySpaceApi'
 import type { MyOrderApi, MyOrderLineApi, MyReturnApi } from '../types/mySpace.types'
 
@@ -50,6 +52,13 @@ type Operation =
       body: Record<string, unknown>
     }
   | { op: 'point'; orderNo: string; pointNo: string; lines: Record<string, unknown>[] }
+  | {
+      op: 'pointAction'
+      orderNo: string
+      pointNo: string
+      action: Parameters<typeof mySpaceApi.pointAction>[2]
+      body: Record<string, unknown>
+    }
   | { op: 'check'; orderNo: string; body: Record<string, unknown> }
 const QUEUE_KEY = 'selfService.pendingOperations'
 const readQueue = (): Operation[] => {
@@ -79,6 +88,14 @@ function send(operation: Operation): Promise<unknown> {
   }
   if (operation.op === 'point') {
     return mySpaceApi.declarePoint(operation.orderNo, operation.pointNo, operation.lines)
+  }
+  if (operation.op === 'pointAction') {
+    return mySpaceApi.pointAction(
+      operation.orderNo,
+      operation.pointNo,
+      operation.action,
+      operation.body
+    )
   }
   return mySpaceApi.check(operation.orderNo, operation.body)
 }
@@ -248,6 +265,69 @@ const canAct = (order: MyOrderApi, point: Point, line: MyOrderLineApi) =>
   !line.refusalAt &&
   !(line.postponedAt && line.returnedAt)
 const retry = (line: MyOrderLineApi) => !!line.postponedAt && !line.returnedAt
+const canRetry = (order: MyOrderApi, point: Point) =>
+  order.status === 'in_progress' &&
+  point.lines.some((line) => retry(line) && !notLoaded(line) && !line.declaredAt && !line.refusalAt)
+
+/* ---- Corrections of an entry made by mistake, with the reason: the non-conformity while the
+ * order is being loaded, the declaration while the recipient has not answered, the refusal while
+ * no later point is started. */
+type Correction =
+  | { kind: 'nonconformity' | 'refusal'; order: MyOrderApi; line: MyOrderLineApi }
+  | { kind: 'declaration'; order: MyOrderApi; point: Point }
+const correcting = ref<Correction | null>(null)
+const correctionComment = ref('')
+const canCancelNonconformity = (order: MyOrderApi, line: MyOrderLineApi) =>
+  order.status === 'confirmed' && !!line.nonconformityAt
+function canCancelDeclaration(order: MyOrderApi, point: Point): boolean {
+  const declared = point.lines.filter((line) => !!line.declaredAt)
+  return (
+    order.status === 'in_progress' &&
+    declared.length > 0 &&
+    declared.every(
+      (line) =>
+        !line.receptionConfirmedAt &&
+        !line.receptionContestedAt &&
+        !line.goodsBackAt &&
+        !line.remainderAt
+    )
+  )
+}
+function canCancelRefusal(order: MyOrderApi, point: Point, line: MyOrderLineApi): boolean {
+  if (order.status !== 'in_progress' || !line.refusalAt || !line.arrivedAt) return false
+  if (line.refusalByRecipient || line.goodsBackAt) return false
+  const points = pointsOf(order)
+  return points
+    .slice(points.findIndex((item) => item.no === point.no) + 1)
+    .every((item) => item.lines.every((other) => !other.arrivedAt))
+}
+function openCorrection(correction: Correction) {
+  correcting.value = correction
+  correctionComment.value = ''
+}
+async function confirmCorrection() {
+  const item = correcting.value
+  const comment = correctionComment.value.trim()
+  if (!item || !comment) return
+  const done = await run(
+    item.kind === 'declaration'
+      ? {
+          op: 'pointAction',
+          orderNo: item.order.no,
+          pointNo: item.point.no,
+          action: 'cancel-declaration',
+          body: { comment }
+        }
+      : {
+          op: 'line',
+          orderNo: item.order.no,
+          lineNo: item.line.lineNo,
+          action: item.kind === 'refusal' ? 'cancel-refusal' : 'cancel-nonconformity',
+          body: { comment }
+        }
+  )
+  if (done) correcting.value = null
+}
 
 function lineState(line: MyOrderLineApi): { label: string; tone: string } {
   if (notLoaded(line))
@@ -300,6 +380,7 @@ interface DeclareRow {
   volume15L: number | null
   reasonNo: string
   comment: string
+  justification: string
 }
 const declaring = ref<{ order: MyOrderApi; point: Point; rows: DeclareRow[] } | null>(null)
 const openLines = (point: Point) =>
@@ -323,15 +404,32 @@ function openDeclare(order: MyOrderApi, point: Point) {
       density: null,
       volume15L: null,
       reasonNo: '',
-      comment: ''
+      comment: '',
+      justification: ''
     }))
   }
 }
+/** The delivered quantity falls outside the tolerance: a justification goes with it (TRS03-US16). */
+function outsideTolerance(row: DeclareRow): boolean {
+  const reference = row.line.tolerance
+  if (!row.delivered || !reference.rule) return false
+  const received = row.line.isFuel
+    ? num(reference.loaded15L !== null ? row.volume15L : row.deliveredVolumeL)
+    : num(row.receivedQuantity)
+  if (!Number.isFinite(received)) return false
+  return quantityGap(reference.rule, reference.loaded15L ?? reference.loaded, received).outside
+}
+const justificationRequired = (order: MyOrderApi, row: DeclareRow) =>
+  order.overToleranceMode === 'block' && outsideTolerance(row)
 const num = (value: unknown) =>
   value === '' || value === null || value === undefined ? NaN : Number(value)
 const declareValid = computed(() => {
   const rows = declaring.value?.rows ?? []
   if (!rows.some((row) => row.delivered)) return false
+  const order = declaring.value!.order
+  if (rows.some((row) => justificationRequired(order, row) && !row.justification.trim())) {
+    return false
+  }
   return rows.every((row) =>
     !row.delivered
       ? !!row.reasonNo
@@ -356,9 +454,15 @@ async function confirmDeclare() {
             deliveredVolumeL: num(row.deliveredVolumeL),
             temperatureC: num(row.temperatureC),
             density: num(row.density),
-            volume15L: num(row.volume15L)
+            volume15L: num(row.volume15L),
+            justification: outsideTolerance(row) ? row.justification.trim() : ''
           }
-        : { lineNo: row.line.lineNo, delivered: true, receivedQuantity: num(row.receivedQuantity) }
+        : {
+            lineNo: row.line.lineNo,
+            delivered: true,
+            receivedQuantity: num(row.receivedQuantity),
+            justification: outsideTolerance(row) ? row.justification.trim() : ''
+          }
   )
   if (await run({ op: 'point', orderNo: item.order.no, pointNo: item.point.no, lines })) {
     declaring.value = null
@@ -512,6 +616,21 @@ onMounted(load)
               <span v-if="line.nonconformityAt" class="text-destructive">
                 · {{ t('selfService.orders.state.notLoaded') }}
               </span>
+              <span
+                v-if="line.nonconformityAt && line.nonconformityReason"
+                class="text-muted-foreground"
+              >
+                · {{ line.nonconformityReason }}
+              </span>
+              <button
+                v-if="canCancelNonconformity(order, line)"
+                type="button"
+                class="cursor-pointer text-xs text-muted-foreground underline hover:text-primary disabled:opacity-60"
+                :disabled="acting"
+                @click="openCorrection({ kind: 'nonconformity', order, line })"
+              >
+                {{ t('selfService.orders.cancelNonconformity') }}
+              </button>
             </li>
           </ul>
           <p v-if="awaitingWarehouse(group)" class="text-xs text-muted-foreground">
@@ -627,8 +746,48 @@ onMounted(load)
                   <Undo2 class="w-4 h-4 text-destructive" /> {{ t('selfService.orders.refuse') }}
                 </button>
               </div>
+              <button
+                v-if="canCancelRefusal(order, point, line)"
+                type="button"
+                class="mt-1 cursor-pointer text-xs text-muted-foreground underline hover:text-primary disabled:opacity-60"
+                :disabled="acting"
+                @click="openCorrection({ kind: 'refusal', order, line })"
+              >
+                {{ t('selfService.orders.cancelRefusal') }}
+              </button>
             </li>
           </ul>
+          <div
+            v-if="canRetry(order, point) || canCancelDeclaration(order, point)"
+            class="ml-10 flex flex-wrap items-center gap-3"
+          >
+            <button
+              v-if="canRetry(order, point)"
+              type="button"
+              :class="buttonClass"
+              :disabled="acting"
+              @click="
+                run({
+                  op: 'pointAction',
+                  orderNo: order.no,
+                  pointNo: point.no,
+                  action: 'retry',
+                  body: {}
+                })
+              "
+            >
+              <RotateCcw class="w-4 h-4 text-primary" /> {{ t('selfService.orders.retry') }}
+            </button>
+            <button
+              v-if="canCancelDeclaration(order, point)"
+              type="button"
+              class="cursor-pointer text-xs text-muted-foreground underline hover:text-primary disabled:opacity-60"
+              :disabled="acting"
+              @click="openCorrection({ kind: 'declaration', order, point })"
+            >
+              {{ t('selfService.orders.cancelDeclaration') }}
+            </button>
+          </div>
         </li>
       </ol>
     </section>
@@ -680,6 +839,13 @@ onMounted(load)
                 <FormInput v-model="row.volume15L" type="number" :min="0" />
               </BaseFormField>
             </div>
+            <BaseFormField
+              v-if="outsideTolerance(row)"
+              :label="t('selfService.orders.justification')"
+              :required="justificationRequired(declaring.order, row)"
+            >
+              <FormInput v-model="row.justification" :maxlength="200" />
+            </BaseFormField>
           </template>
           <template v-else>
             <BaseFormField :label="t('selfService.orders.undeliveredReason')" required>
@@ -706,6 +872,20 @@ onMounted(load)
           {{ t('selfService.orders.nothingDelivered') }}
         </p>
       </div>
+    </ConfirmDialog>
+
+    <ConfirmDialog
+      :open="!!correcting"
+      :title="correcting ? t(`selfService.orders.correction.${correcting.kind}`) : ''"
+      :confirm-label="t('common.save')"
+      :confirm-disabled="!correctionComment.trim()"
+      :loading="acting"
+      @confirm="confirmCorrection"
+      @cancel="correcting = null"
+    >
+      <BaseFormField v-if="correcting" :label="t('selfService.orders.correction.reason')" required>
+        <FormInput v-model="correctionComment" :maxlength="200" />
+      </BaseFormField>
     </ConfirmDialog>
 
     <ConfirmDialog

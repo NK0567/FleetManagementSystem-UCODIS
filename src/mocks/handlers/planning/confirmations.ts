@@ -26,6 +26,7 @@ import { PLANNING_MESSAGES } from './messages'
 import { readReason } from './planningReasons'
 import { planningSettings } from './settings'
 import { transportOrdersApi } from './transportOrders'
+import { recipientContact } from './recipientMessages'
 
 const FEATURE = 'CUSTOMERCONFIRMATION'
 
@@ -46,6 +47,8 @@ export interface ConfirmationLineApi {
   /** Planned departure of the order: the queue is worked from the earliest. */
   plannedDeparture: string | null
   notificationChannel: NotificationChannel
+  /** Where the link goes: the order's own phone or e-mail, else the customer record's. */
+  recipientContact: string
   preferredSlot: DeliverySlot
   agent: string | null
   takenAt: string | null
@@ -150,6 +153,12 @@ export function confirmationsApi(db: MockDatabase): ConfirmationLineApi[] {
         trackingExpiresOn: line.trackingExpiresOn,
         plannedDeparture: order.plannedDeparture,
         notificationChannel: source?.notificationChannel ?? 'sms',
+        recipientContact: recipientContact(
+          db,
+          line.deliveryRequestNo,
+          line.deliveryPointNo,
+          source?.notificationChannel ?? 'sms'
+        ),
         preferredSlot: source?.preferredSlot ?? 'any',
         agent: line.confirmationAgent ?? null,
         takenAt: line.confirmationTakenAt ?? null,

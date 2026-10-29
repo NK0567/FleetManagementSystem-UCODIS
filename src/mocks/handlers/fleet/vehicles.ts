@@ -43,6 +43,7 @@ import { sessionUser, type MockRequest } from '../../http/types'
 import type { MockLanguage } from '../../i18n'
 import { FLEET_MESSAGES } from './messages'
 import { activeLinks, coupledWith, employeeNames } from './links'
+import { livePositions } from './livePositions'
 import { tripIndex } from './tripIndex'
 import { statusCauseCode, statusReason, vehicleStatuses } from './vehicleState'
 import { fileMetaOf, filesMetaOf, releaseFiles } from '../files'
@@ -101,6 +102,8 @@ export function vehiclesApi(db: MockDatabase, language: MockLanguage = 'fr'): Ve
   const names = employeeNames(db)
   const plates = new Map(db.vehicles.all().map((vehicle) => [vehicle.no, vehicle.plate]))
   const working = equipmentApi(db).filter((item) => item.state === 'operational')
+  // Where each tracked vehicle stands now, from its last position.
+  const places = new Map(livePositions(db).map((position) => [position.vehicleNo, position]))
   const capabilities = (vehicleNo: string) =>
     new Set(working.filter((item) => item.vehicleNo === vehicleNo).map((item) => item.capability))
 
@@ -132,6 +135,11 @@ export function vehiclesApi(db: MockDatabase, language: MockLanguage = 'fr'): Ve
       statusCauseCodeName: causeCode.name,
       driverNo: assignment?.employeeNo ?? null,
       driverName: assignment ? (names.get(assignment.employeeNo) ?? '') : '',
+      driverAssignment: type?.motorized ? (assignment ? 'with_driver' : 'without_driver') : null,
+      couplingState:
+        (type?.couplingRole ?? 'none') === 'none' ? null : coupledNo ? 'coupled' : 'uncoupled',
+      currentSiteNo: places.get(vehicle.no)?.placeNo ?? null,
+      currentSiteName: places.get(vehicle.no)?.placeName ?? '',
       coupledVehicleNo: coupledNo,
       coupledVehiclePlate: coupledNo ? (plates.get(coupledNo) ?? '') : '',
       hasTracker: owned.has('tracker'),

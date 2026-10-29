@@ -68,9 +68,15 @@ export function replanCandidate(line: ReplanFacts): ReplanCandidate | null {
     weightKg: share(line.weightKg, left, reference),
     volumeM3: share(line.volumeM3, left, reference),
     recipientDate: line.availableOn,
-    plannerDate: null
+    plannerDate: line.plannerProposedOn
   }
 }
+
+/**
+ * The recipient answers a date on his page for a line out of his order: unavailable before
+ * loading, postponed on site with the goods brought back, or a remainder (TRS01-US16, US17).
+ */
+export const recipientDates = (candidate: ReplanCandidate) => candidate.kind !== 'refused'
 
 /**
  * The date the planner may retain at once: the recipient's own for an unavailability (the normal

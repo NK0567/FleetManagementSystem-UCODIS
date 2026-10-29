@@ -98,5 +98,9 @@ export default {
   'fleet.providerTypes.form.noRole': 'None: a type of the company',
   'fleet.providerTypes.form.systemRoleHint': 'A type with a role is the one the application looks for (garages, carriers…): its role does not change and it cannot be deleted.',
   'fleet.providerTypes.form.active': 'Active',
-  'fleet.providerTypes.form.providerCount': 'Providers of this type'
+  'fleet.providerTypes.form.providerCount': 'Providers of this type',
+  'fleet.providers.import.action': 'Import providers',
+  'fleet.providers.import.title': 'Import providers',
+  'fleet.providers.import.hint': 'Each line follows the rules of the form: a provider already known under the same name and type, or present twice in the file, is refused and reported. The type is given by its code or its name.',
+  'fleet.providers.import.created': 'No provider created. | One provider created. | {n} providers created.'
 }

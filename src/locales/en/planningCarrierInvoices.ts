@@ -1,7 +1,6 @@
 export default {
   'planning.carrierInvoices.title': 'Carrier invoices',
-  'planning.carrierInvoices.subtitle':
-    'An invoice groups one or more orders of the same carrier. It is validated when the amount stays within the tolerance of the agreed amount, net of withholdings. Without a tariff, a reason is required.',
+  'planning.carrierInvoices.subtitle': 'Invoices received from external carriers.',
   'planning.carrierInvoices.loading': 'Loading the invoices…',
   'planning.carrierInvoices.empty': 'No carrier invoice.',
   'planning.carrierInvoices.loadError': 'The invoices could not be displayed.',

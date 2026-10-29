@@ -87,5 +87,8 @@ export default {
   'fleet.trips.drivingTime.breach.continuous': 'Continuous driving of {driven}, beyond {limit} without a long enough break.',
   'fleet.trips.drivingTime.breach.daily': 'Driving of {driven} on {day}, beyond {limit} a day.',
   'fleet.trips.drivingTime.breach.weekly': 'Driving of {driven} over seven days, beyond {limit} a week.',
-  'fleet.trips.drivingTime.breach.night': 'Night driving, not allowed, on {day}: {driven}.'
+  'fleet.trips.drivingTime.breach.night': 'Night driving, not allowed, on {day}: {driven}.',
+  'fleet.trips.col.missedStopCount': 'Missed stops',
+  'fleet.trips.filter.hasMissedStops': 'Missed stop(s)',
+  'fleet.trips.missedStopsSummary': '{stops} missed stop(s) on {trips} trip(s)'
 }

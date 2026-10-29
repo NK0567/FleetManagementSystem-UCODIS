@@ -57,6 +57,24 @@ const tableColumns = computed<TableColumn[]>(() => [
     formatter: booleanLabel
   },
   {
+    sortKey: 'signed',
+    label: t('fleet.roadChecklists.col.signed'),
+    minW: '100px',
+    formatter: booleanLabel
+  },
+  {
+    sortKey: 'syncedAt',
+    label: t('fleet.roadChecklists.col.syncedAt'),
+    minW: '150px',
+    formatter: formatDateTime
+  },
+  {
+    sortKey: 'capturedOffline',
+    label: t('fleet.roadChecklists.col.capturedOffline'),
+    minW: '120px',
+    formatter: booleanLabel
+  },
+  {
     sortKey: 'modifiedAt',
     label: t('common.audit.modifiedAt'),
     minW: '150px',
@@ -80,10 +98,22 @@ const filterDefs: FilterFieldDef[] = [
     valueType: 'string',
     kind: 'option',
     optionsKey: 'checklistStage'
+  },
+  {
+    field: 'signed',
+    labelKey: 'fleet.roadChecklists.col.signed',
+    valueType: 'boolean',
+    kind: 'boolean'
+  },
+  {
+    field: 'capturedOffline',
+    labelKey: 'fleet.roadChecklists.col.capturedOffline',
+    valueType: 'boolean',
+    kind: 'boolean'
   }
 ]
 
-const detailKeys = ['tripNo', 'vehiclePlate', 'anomalyCount', 'blocking']
+const detailKeys = ['tripNo', 'vehiclePlate', 'anomalyCount', 'blocking', 'signed', 'syncedAt']
 const detailColumns = computed(() =>
   detailKeys
     .map((key) => tableColumns.value.find((column) => column.sortKey === key))

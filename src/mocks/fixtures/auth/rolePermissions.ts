@@ -167,7 +167,12 @@ export const ROLE_PERMISSIONS: Record<UserProfileCode, Record<string, Grant>> = 
     ...FLEET_MANAGEMENT,
     ...MAINTENANCE_MANAGEMENT,
     ...PLANNING_MANAGEMENT,
-    MODULETOGGLE: allRecords(['read', 'update'])
+    MODULETOGGLE: allRecords(['read', 'update']),
+    /* The company identity, the sign-in accounts and the activity log stay with the administrator;
+     * accounts are switched off, never deleted. */
+    COMPANYSETTINGS: allRecords(['read', 'update']),
+    USERACCOUNT: allRecords(['read', 'insert', 'update', 'execute', 'export']),
+    ACTIVITYLOG: READ_EXPORT
   },
   FLEET_MANAGER: {
     ...grant(HR_SETTINGS, EDIT),

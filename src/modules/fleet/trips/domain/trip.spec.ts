@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { canApply, kmGapPercent, nextStopIndex, windowsOverlap } from './trip'
+import { canApply, kmGapPercent, missedStopCount, nextStopIndex, windowsOverlap } from './trip'
 
 describe('canApply', () => {
   it('follows the life of a trip', () => {
@@ -44,5 +44,15 @@ describe('nextStopIndex', () => {
   it('points to the first stop not passed, never to the last one', () => {
     expect(nextStopIndex([{ passedAt: 'x' }, { passedAt: null }, { passedAt: null }])).toBe(1)
     expect(nextStopIndex([{ passedAt: 'x' }, { passedAt: 'x' }, { passedAt: null }])).toBeNull()
+  })
+})
+
+describe('missedStopCount', () => {
+  const at = '2026-09-04T08:00:00'
+  it('counts a stop left behind, and every unpassed stop once the trip has arrived', () => {
+    const stops = [{ passedAt: at }, { passedAt: null }, { passedAt: at }, { passedAt: null }]
+    expect(missedStopCount(stops, 'in_progress')).toBe(1)
+    expect(missedStopCount(stops, 'completed')).toBe(2)
+    expect(missedStopCount([{ passedAt: at }, { passedAt: null }], 'in_progress')).toBe(0)
   })
 })

@@ -84,4 +84,7 @@ export interface TyrePositionSlot {
   side: string | null
   spare: boolean
   tyreNo: string | null
+  /** The tyre mounted there, if any, and what it calls for. */
+  serialNumber?: string | null
+  alert?: TyreAlert | null
 }

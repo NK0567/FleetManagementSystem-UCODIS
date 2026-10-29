@@ -8,6 +8,7 @@ const props = defineProps<{ situation: LiveSituation }>()
 
 const TONES: Record<LiveSituation, StatusTone> = {
   moving: 'success',
+  idling: 'primary',
   stopped: 'info',
   parked: 'neutral',
   immobilized: 'danger',

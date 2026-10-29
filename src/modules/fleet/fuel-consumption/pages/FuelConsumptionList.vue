@@ -10,6 +10,7 @@ import { usePermissions } from '@/composables/usePermissions'
 import { useUserStore } from '@/stores/user'
 import { formatDateTime, formatNumber } from '@/utils/format'
 import { fuelConsumptionApi } from '../api/fuelConsumptionApi'
+import FuelEmissionsPanel from '../components/FuelEmissionsPanel.vue'
 import { fuelConsumptionService } from '../services/fuelConsumptionService'
 import {
   useFuelConsumptionStore,
@@ -308,6 +309,7 @@ async function confirm() {
           })
         }}
       </p>
+      <FuelEmissionsPanel />
       <FormAlerts class="mx-4" :error="exportError" @clear:error="exportError = null" />
       <FormAlerts class="mx-4" :error="actionError" @clear:error="actionError = null" />
 

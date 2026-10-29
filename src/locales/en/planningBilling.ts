@@ -1,7 +1,6 @@
 export default {
   'planning.billing.title': 'Transport billing',
-  'planning.billing.subtitle':
-    'The amount comes from the tariff of the one who pays the freight, the orderer or the recipient. A route flat rate is counted once and split across its deliveries. Marking the invoice freezes the amount.',
+  'planning.billing.subtitle': 'Amounts to invoice for each delivery.',
   'planning.billing.loading': 'Loading the deliveries to invoice…',
   'planning.billing.empty': 'No delivery to invoice.',
   'planning.billing.loadError': 'Billing could not be displayed.',

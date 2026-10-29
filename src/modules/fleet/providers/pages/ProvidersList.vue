@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RefreshCw } from '@lucide/vue'
+import { RefreshCw, Upload } from '@lucide/vue'
 import { apiErrorMessage } from '@/core/api/apiError'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
@@ -9,6 +9,7 @@ import { useListCellFormatters } from '@/composables/useListCellFormatters'
 import { useListPage } from '@/composables/useListPage'
 import { getListCellDisplay } from '@/utils/listCellDisplay'
 import { providerApi } from '../api/providerApi'
+import ProviderImportDialog from '../components/ProviderImportDialog.vue'
 import { providerService } from '../services/providerService'
 import { useProviderStore } from '../stores/providerStore'
 import type { ProviderApi, ProviderSearchColumn } from '../types/provider.types'
@@ -156,6 +157,7 @@ const {
   deleteErrorFallback: t('fleet.providers.deleteError')
 })
 
+const importing = ref(false)
 const syncing = ref(false)
 const syncError = ref<string | null>(null)
 const syncMessage = ref<string | null>(null)
@@ -235,6 +237,14 @@ async function synchronize() {
           >
             <RefreshCw class="w-4 h-4 text-primary" />
             {{ t('fleet.providers.sync.action') }}
+          </button>
+          <button
+            type="button"
+            class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
+            @click="importing = true"
+          >
+            <Upload class="w-4 h-4 text-primary" />
+            {{ t('fleet.providers.import.action') }}
           </button>
         </template>
       </ListPageToolbar>
@@ -369,6 +379,11 @@ async function synchronize() {
       v-if="showCreateModal"
       @close="showCreateModal = false"
       @created="onCreated"
+    />
+    <ProviderImportDialog
+      :open="importing"
+      @close="importing = false"
+      @imported="store.fetchItems(store.pagination.page, store.pagination.limit)"
     />
   </div>
 </template>

@@ -4,7 +4,9 @@ import { badRequest, MockHttpError } from '../http/errors'
 import { ok } from '../http/responses'
 import type { MockRouter } from '../http/router'
 import { sessionUser } from '../http/types'
-import { findAccount, MOCK_ACCOUNTS, type MockAccount } from '../fixtures/auth/users'
+import type { MockAccount } from '../fixtures/auth/users'
+import { recordActivity } from '../handlers/settings/activityLog'
+import { accountOf, toAccount } from './accounts'
 import { disabledFeatures, permissionsFor } from './permissions'
 import { issueToken } from './session'
 
@@ -44,18 +46,24 @@ export function registerAuthHandlers(router: MockRouter, db: MockDatabase) {
     const password = typeof body.userPassword === 'string' ? body.userPassword : ''
     if (!userCode.trim() || !password) throw badRequest(MESSAGES.missingCredentials)
 
-    const account = findAccount(userCode)
+    const account = accountOf(db, userCode)
     if (!account || account.password !== password) {
       throw new MockHttpError(401, MESSAGES.invalidCredentials)
     }
     if (!account.active) throw new MockHttpError(403, MESSAGES.inactiveAccount)
 
+    recordActivity(db, {
+      by: account.code,
+      action: 'login',
+      entity: 'user-accounts',
+      recordNo: account.code
+    })
     const data: LoginResponseData = { accessToken: issueToken(account), user: toUser(account) }
     return ok(data)
   })
 
   router.get('/auth/profile', {}, (request) => {
-    const account = findAccount(sessionUser(request).code)
+    const account = accountOf(db, sessionUser(request).code)
     if (!account) throw new MockHttpError(401, MESSAGES.invalidCredentials)
     return ok(toUser(account))
   })
@@ -65,9 +73,11 @@ export function registerAuthHandlers(router: MockRouter, db: MockDatabase) {
   )
 
   router.get('/auth/demo-accounts', { public: true }, () => {
-    const accounts: DemoAccount[] = MOCK_ACCOUNTS.filter((account) => account.active).map(
-      ({ code, name, profile, password }) => ({ code, name, profile, password })
-    )
+    const accounts: DemoAccount[] = db.userAccounts
+      .all()
+      .map(toAccount)
+      .filter((account) => account.active)
+      .map(({ code, name, profile, password }) => ({ code, name, profile, password }))
     return ok(accounts)
   })
 }

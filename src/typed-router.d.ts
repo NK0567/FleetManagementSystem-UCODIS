@@ -871,6 +871,13 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/maintenance/stock-items/movements': RouteRecordInfo<
+      '/maintenance/stock-items/movements',
+      '/maintenance/stock-items/movements',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/maintenance/technicians/': RouteRecordInfo<
       '/maintenance/technicians/',
       '/maintenance/technicians',
@@ -1191,6 +1198,27 @@ declare module 'vue-router/auto-routes' {
       '/planning/transport-tariffs/:id',
       { id: ParamValue<true> },
       { id: ParamValue<false> },
+      | never
+    >,
+    '/settings/accounts': RouteRecordInfo<
+      '/settings/accounts',
+      '/settings/accounts',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/settings/activity-log': RouteRecordInfo<
+      '/settings/activity-log',
+      '/settings/activity-log',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/settings/company': RouteRecordInfo<
+      '/settings/company',
+      '/settings/company',
+      Record<never, never>,
+      Record<never, never>,
       | never
     >,
     '/settings/module-toggles': RouteRecordInfo<
@@ -2180,6 +2208,14 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | 'id'
     }
+    'src/pages/maintenance/stock-items/movements.vue': {
+      routes:
+        | '/maintenance/stock-items/movements'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
     'src/pages/maintenance/technicians/index.vue': {
       routes:
         | '/maintenance/technicians/'
@@ -2547,6 +2583,30 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | 'id'
+    }
+    'src/pages/settings/accounts.vue': {
+      routes:
+        | '/settings/accounts'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/settings/activity-log.vue': {
+      routes:
+        | '/settings/activity-log'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/settings/company.vue': {
+      routes:
+        | '/settings/company'
+      views:
+        | never
+      pathParamNames:
+        | never
     }
     'src/pages/settings/module-toggles.vue': {
       routes:

@@ -84,6 +84,17 @@ const SEED: Omit<DowntimeRow, keyof typeof seedAudit>[] = [
     endedAt: null,
     endedBy: null,
     endComment: ''
+  },
+  {
+    no: 'IND-00007',
+    vehicleNo: 'VEH-018',
+    downtimeCodeNo: 'PNN',
+    origin: 'work_order',
+    startedAt: at(-3, '09:00'),
+    comment: 'OT-2026-0006 · Traverse du châssis fissurée, semi-remorque au garage.',
+    endedAt: null,
+    endedBy: null,
+    endComment: ''
   }
 ]
 

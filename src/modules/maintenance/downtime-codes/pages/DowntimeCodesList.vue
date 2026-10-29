@@ -1,6 +1,9 @@
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { RotateCcw } from '@lucide/vue'
+import { apiErrorMessage } from '@/core/api/apiError'
+import { usePermissions } from '@/composables/usePermissions'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
 import { useListCellFormatters } from '@/composables/useListCellFormatters'
@@ -13,6 +16,25 @@ import type { DowntimeCodeApi, DowntimeCodeSearchColumn } from '../types/downtim
 
 const { t } = useI18n()
 const store = useDowntimeCodeStore()
+const { canExecute } = usePermissions('DOWNTIMECODE')
+const confirmingReset = ref(false)
+const resetting = ref(false)
+const resetError = ref<string | null>(null)
+
+async function resetCodes() {
+  resetting.value = true
+  resetError.value = null
+  try {
+    await downtimeCodeApi.reset()
+    confirmingReset.value = false
+    await store.fetchItems(1, store.pagination.limit)
+  } catch (cause) {
+    resetError.value = apiErrorMessage(cause, t('maintenance.downtimeCodes.resetError'))
+    confirmingReset.value = false
+  } finally {
+    resetting.value = false
+  }
+}
 const { formatDateTime, optionLabel, booleanLabel } = useListCellFormatters()
 
 const searchColumnOptions = computed<{ value: DowntimeCodeSearchColumn; label: string }[]>(() => [
@@ -188,12 +210,32 @@ const {
             :reset-preferences="resetPreferences"
           />
         </template>
+        <template v-if="canExecute" #extra-actions>
+          <button
+            type="button"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
+            @click="confirmingReset = true"
+          >
+            <RotateCcw class="w-4 h-4 text-primary" />
+            {{ t('maintenance.downtimeCodes.reset') }}
+          </button>
+        </template>
       </ListPageToolbar>
 
       <FormAlerts
         class="mx-4"
-        :error="deleteError ?? exportError"
-        @clear:error="deleteError = exportError = null"
+        :error="resetError ?? deleteError ?? exportError"
+        @clear:error="resetError = deleteError = exportError = null"
+      />
+      <ConfirmDialog
+        :open="confirmingReset"
+        :title="t('maintenance.downtimeCodes.reset')"
+        :message="t('maintenance.downtimeCodes.resetConfirm')"
+        :confirm-label="t('maintenance.downtimeCodes.reset')"
+        destructive
+        :loading="resetting"
+        @confirm="resetCodes"
+        @cancel="confirmingReset = false"
       />
 
       <ListPageLayout

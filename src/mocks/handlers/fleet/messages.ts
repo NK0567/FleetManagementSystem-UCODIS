@@ -505,6 +505,10 @@ export const FLEET_MESSAGES = {
     fr: 'Ce trajet est clôturé ou annulé : il ne reçoit plus de check-list.',
     en: 'This trip is closed or cancelled: it takes no more checklists.'
   },
+  checklistSignedBeforeTaken: {
+    fr: 'La check-list ne peut pas être signée avant d’avoir été remplie.',
+    en: 'The checklist cannot be signed before it was filled in.'
+  },
   inspectionFindingsRequired: {
     fr: 'Décrivez les défauts relevés.',
     en: 'Describe the findings.'

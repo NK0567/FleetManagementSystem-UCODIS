@@ -1,10 +1,11 @@
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useEntityForm, type FormValidationError } from '@/composables/useEntityForm'
 import { useFormValidationUi } from '@/composables/useFormValidationUi'
 import { checkIssues, checkPointService, type CheckResult } from '@/modules/fleet/check-points'
 import { nowIsoDateTime } from '@/utils/date'
+import { formatDateTime } from '@/utils/format'
 import type { ChecklistStage, RoadChecklistApi } from '../types/roadChecklist.types'
 
 const props = withDefaults(
@@ -23,6 +24,23 @@ const props = withDefaults(
 )
 
 const { t } = useI18n()
+
+const signatureText = computed(() =>
+  props.initialData.signedAt
+    ? t('fleet.roadChecklists.signedBy', {
+        name: props.initialData.driverName ?? '',
+        date: formatDateTime(props.initialData.signedAt)
+      })
+    : t('fleet.roadChecklists.unsigned')
+)
+
+const syncText = computed(() => {
+  if (!props.initialData.syncedAt) return ''
+  const date = formatDateTime(props.initialData.syncedAt)
+  return props.initialData.capturedOffline
+    ? t('fleet.roadChecklists.syncedOffline', { date })
+    : t('fleet.roadChecklists.syncedOnline', { date })
+})
 
 const { draft, isRequired, expose } = useEntityForm({
   initialData: () => props.initialData,
@@ -127,6 +145,12 @@ defineExpose(expose)
         </BaseFormField>
         <BaseFormField v-if="!isNew" :label="t('fleet.roadChecklists.form.takenBy')">
           <FormInput :model-value="initialData.createdBy" disabled />
+        </BaseFormField>
+        <BaseFormField v-if="!isNew" :label="t('fleet.roadChecklists.form.signature')">
+          <FormInput :model-value="signatureText" disabled />
+        </BaseFormField>
+        <BaseFormField v-if="!isNew" :label="t('fleet.roadChecklists.form.sync')">
+          <FormInput :model-value="syncText" disabled />
         </BaseFormField>
       </div>
     </FormSection>

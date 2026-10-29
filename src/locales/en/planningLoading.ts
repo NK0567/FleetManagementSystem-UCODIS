@@ -1,7 +1,6 @@
 export default {
   'planning.loading.title': 'Loading',
-  'planning.loading.subtitle':
-    'The TMS hands the loading order to the warehouse and records its confirmation: loaded quantities, then a check of each line. A line found not conforming stays in the order as not loaded, and its outcome is drawn at the end of the order. The order is ready once all the other lines conform.',
+  'planning.loading.subtitle': 'Orders to load, loading confirmation and driver check.',
   'planning.loading.loading': 'Loading the lines to check…',
   'planning.loading.empty': 'No line to load.',
   'planning.loading.loadError': 'Loading could not be displayed.',

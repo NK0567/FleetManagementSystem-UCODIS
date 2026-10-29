@@ -1,7 +1,7 @@
 import httpClient from '@/core/api/httpClient'
 import { createCrudApi, resourcePath } from '@/core/factories'
 import type { SingleResponse } from '@/types/api-response.types'
-import type { TripApi } from '../types/trip.types'
+import type { TripApi, TripSummaryApi } from '../types/trip.types'
 
 const basePath = '/fleet/trips'
 
@@ -10,6 +10,7 @@ const action = (no: string, name: string, body: Record<string, unknown> = {}) =>
 
 export const tripApi = {
   ...createCrudApi<TripApi>({ basePath }),
+  summary: () => httpClient.get<SingleResponse<TripSummaryApi>>(`${basePath}/summary`),
   start: (no: string, startOdometerKm: number | null) => action(no, 'start', { startOdometerKm }),
   passStop: (no: string) => action(no, 'pass-stop'),
   complete: (no: string, endOdometerKm: number) => action(no, 'complete', { endOdometerKm }),

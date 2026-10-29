@@ -14,8 +14,16 @@ export interface PassageInput {
   date: string
 }
 
+/** How many due items are past their point, and how many come close to it. */
+export interface ServiceDueSummary {
+  overdue: number
+  blocking: number
+  dueSoon: number
+}
+
 export const serviceDueApi = {
   ...createCrudApi<ServiceDueApi>({ basePath }),
+  summary: () => httpClient.get<SingleResponse<ServiceDueSummary>>(`${basePath}/summary`),
   recordPassage: (passage: PassageInput) =>
     httpClient.post<SingleResponse<ServiceDueApi>>(`${basePath}/passages`, passage),
   recordEngineHours: (vehicleNo: string, hours: number) =>

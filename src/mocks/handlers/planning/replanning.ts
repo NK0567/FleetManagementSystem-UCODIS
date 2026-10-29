@@ -7,6 +7,7 @@ import { emptyQuality } from '@/modules/planning/delivery-quality/domain/quality
 import { emptyDossier } from '@/modules/planning/closing/domain/closing'
 import {
   plannerRetains,
+  recipientDates,
   replanCandidate,
   type ReplanCandidate
 } from '@/modules/planning/transport-orders/domain/replanning'
@@ -222,7 +223,10 @@ export function proposeReplanDate(
   const order = db.transportOrders.findOrFail(orderNo)
   const line = order.lines.find((item) => item.lineNo === lineNo)
   const candidate = line ? replanCandidate(line) : null
-  if (!line || candidate?.kind !== 'unavailable') throw conflict(CIRCUIT_MESSAGES.replanNotOpen)
+  // Before loading as after a postponement or a remainder, the recipient agrees (TRS01-US16).
+  if (!line || !candidate || !recipientDates(candidate)) {
+    throw conflict(CIRCUIT_MESSAGES.replanNotOpen)
+  }
   db.transportOrders.update(order.no, {
     lines: order.lines.map((item) =>
       item.lineNo === lineNo ? { ...item, plannerProposedOn: date } : item

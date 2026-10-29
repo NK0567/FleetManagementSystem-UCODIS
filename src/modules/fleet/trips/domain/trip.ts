@@ -41,3 +41,19 @@ export function nextStopIndex(stops: readonly { passedAt: string | null }[]): nu
   const index = stops.findIndex((stop) => stop.passedAt === null)
   return index === -1 || index === stops.length - 1 ? null : index
 }
+
+/**
+ * Stops the vehicle went past without serving them: a stop left behind once a later one is
+ * passed, and, once the trip has reached its destination, every stop never passed.
+ */
+export function missedStopCount(
+  stops: readonly { passedAt: string | null }[],
+  status: TripStatus
+): number {
+  const finished = status === 'completed' || status === 'closed'
+  return stops.filter(
+    (stop, index) =>
+      stop.passedAt === null &&
+      (finished || stops.slice(index + 1).some((later) => later.passedAt !== null))
+  ).length
+}

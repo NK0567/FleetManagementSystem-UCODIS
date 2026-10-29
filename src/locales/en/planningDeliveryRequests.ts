@@ -59,14 +59,16 @@ export default {
     'It goes into a new request; this one keeps the rest of the {quantity}.',
   'planning.deliveryRequests.import.action': 'Import',
   'planning.deliveryRequests.import.title': 'Import delivery requests',
-  'planning.deliveryRequests.import.hint': "One line per order, with the codes of the orderer, the delivery point and the product, the weight and, if need be, the kind of order (sale, transfer, return), the pickup place, the content, the number of units and the recipient's preferences. Each line goes through the same checks as an entry.",
+  'planning.deliveryRequests.import.hint':
+    "One line per order, with the codes of the orderer, the delivery point and the product, the weight and, if need be, the kind of order (sale, transfer, return), the pickup place, the content, the number of units and the recipient's preferences. Each line goes through the same checks as an entry.",
   'planning.deliveryRequests.import.created':
     'No request created. | One request created. | {n} requests created.',
   'planning.deliveryRequests.lines.title': 'Product lines',
   'planning.deliveryRequests.lines.count': 'No line | {n} line | {n} lines',
   'planning.deliveryRequests.lines.add': 'Add a line',
   'planning.deliveryRequests.lines.remove': 'Remove the line',
-  'planning.deliveryRequests.lines.incomplete': 'Each line needs a product, a quantity and a weight',
+  'planning.deliveryRequests.lines.incomplete':
+    'Each line needs a product, a quantity and a weight',
   'planning.deliveryRequests.preferences.title': "Recipient's preferences",
   'planning.deliveryRequests.preferences.hint':
     "Copied from the recipient's record. They apply to this order only and stay editable until it is planned.",
@@ -88,20 +90,26 @@ export default {
   'planning.deliveryRequests.counter.rejected': 'Rejected',
   'planning.deliveryRequests.counter.delivered': 'Delivered',
   'planning.deliveryRequests.survey.open': 'Give my opinion',
-  'planning.deliveryRequests.survey.hint': 'Your opinion on the execution of your order, once the transport order is completed.',
+  'planning.deliveryRequests.survey.hint':
+    'Your opinion on the execution of your order, once the transport order is completed.',
   'planning.deliveryRequests.survey.orderScore': 'Order respected',
   'planning.deliveryRequests.survey.delayScore': 'Delays respected',
   'planning.deliveryRequests.survey.qualityScore': 'Expected quality',
   'planning.deliveryRequests.survey.comment': 'Comment',
   'planning.deliveryRequests.survey.answered': 'Your opinion on the execution',
   'planning.deliveryRequests.form.kind': 'Kind of order',
-  'planning.deliveryRequests.form.kindHint.sale': 'A sale delivered to the recipient, picked up at a depot.',
-  'planning.deliveryRequests.form.kindHint.transfer': 'A transfer from a depot to another site of the company.',
-  'planning.deliveryRequests.form.kindHint.return': "A return of goods, picked up at the recipient's and delivered to a depot of the company.",
+  'planning.deliveryRequests.form.kindHint.sale':
+    'A sale delivered to the recipient, picked up at a depot.',
+  'planning.deliveryRequests.form.kindHint.transfer':
+    'A transfer from a depot to another site of the company.',
+  'planning.deliveryRequests.form.kindHint.return':
+    "A return of goods, picked up at the recipient's and delivered to a depot of the company.",
   'planning.deliveryRequests.form.pickupPointNo': 'Pickup place',
-  'planning.deliveryRequests.form.externalReferenceHint': "The order's reference in our management system: it follows the delivery to the vehicle.",
+  'planning.deliveryRequests.form.externalReferenceHint':
+    "The order's reference in our management system: it follows the delivery to the vehicle.",
   'planning.deliveryRequests.form.requiredEquipment': 'Equipment required on the vehicle',
-  'planning.deliveryRequests.form.requiredEquipmentHint': 'A discharge pump for instance: only a vehicle fitted with it can be planned.',
+  'planning.deliveryRequests.form.requiredEquipmentHint':
+    'A discharge pump for instance: only a vehicle fitted with it can be planned.',
   'planning.deliveryRequests.form.content': 'Content',
   'planning.deliveryRequests.form.unitCount': 'Number of units ({unit})',
   'planning.deliveryRequests.col.kind': 'Kind',
@@ -109,15 +117,22 @@ export default {
   'planning.deliveryRequests.col.pickupPointName': 'Pickup place',
   'planning.deliveryRequests.col.content': 'Content',
   'planning.deliveryRequests.intake.sync': 'Synchronise the management system',
-  'planning.deliveryRequests.intake.synced': 'No new order received from the management system. | One order received from the management system. | {n} orders received from the management system.',
+  'planning.deliveryRequests.intake.synced':
+    'No new order received from the management system. | One order received from the management system. | {n} orders received from the management system.',
   'planning.deliveryRequests.intake.api': 'Orderers API',
   'planning.deliveryRequests.intake.apiTitle': 'External orderers API',
-  'planning.deliveryRequests.intake.apiHint': "External orderers, a delivery platform for instance, send their own orders to this address, with their key. Simulation: the demo key is « demo- » followed by the orderer's number; the order received goes through the same checks as an entry.",
+  'planning.deliveryRequests.intake.apiHint':
+    "External orderers, a delivery platform for instance, send their own orders to this address, with their key. Simulation: the demo key is « demo- » followed by the orderer's number; the order received goes through the same checks as an entry.",
   'planning.deliveryRequests.intake.apiOrderer': 'Orderer sending',
   'planning.deliveryRequests.intake.apiBody': 'Order sent',
   'planning.deliveryRequests.intake.apiSend': 'Send through the API',
   'planning.deliveryRequests.intake.apiSent': 'Order {no} received through the API.',
   'planning.deliveryRequests.intake.apiInvalid': 'The content sent is not valid JSON.',
-  'planning.deliveryRequests.intake.serviceClosed': 'The company does not take orders transmitted by a service: you follow your past orders here.',
-  'planning.deliveryRequests.intake.manualClosed': 'The company does not allow the planner to key an order himself.'
+  'planning.deliveryRequests.intake.serviceClosed':
+    'The company does not take orders transmitted by a service: you follow your past orders here.',
+  'planning.deliveryRequests.intake.manualClosed':
+    'The company does not allow the planner to key an order himself.',
+  'planning.deliveryRequests.form.recipientPhone': "Recipient's phone",
+  'planning.deliveryRequests.form.recipientEmail': "Recipient's e-mail",
+  'planning.deliveryRequests.form.contactFallback': 'Otherwise the one of the customer record'
 }

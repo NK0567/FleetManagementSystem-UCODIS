@@ -202,5 +202,8 @@ export default {
   'fleet.vehicles.import.title': 'Importer des véhicules',
   'fleet.vehicles.import.hint': "Chaque ligne suit les règles de la fiche : une immatriculation ou un VIN déjà connu, ou présent deux fois dans le fichier, est refusé et signalé dans le rapport. Le type et le site se donnent par leur code ou leur nom ; les compartiments d'une citerne s'écrivent 8000+8000+6000.",
   'fleet.vehicles.import.created': 'Aucun véhicule créé. | Un véhicule créé. | {n} véhicules créés.',
-  'fleet.vehicles.form.noLink': 'Aucun'
+  'fleet.vehicles.form.noLink': 'Aucun',
+  'fleet.vehicles.col.currentSiteNo': 'Site actuel',
+  'fleet.vehicles.filter.driverAssignment': 'Affectation',
+  'fleet.vehicles.filter.couplingState': 'Attelage'
 }

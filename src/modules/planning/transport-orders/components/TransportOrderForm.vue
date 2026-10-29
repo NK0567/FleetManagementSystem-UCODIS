@@ -112,9 +112,6 @@ defineExpose(expose)
             :disabled-values="['rail', 'sea', 'air']"
             @update:model-value="draft.transportMode = String($event) as TransportMode"
           />
-          <p class="text-xs text-muted-foreground mt-1">
-            {{ t('planning.transportOrders.form.transportModeHint') }}
-          </p>
         </BaseFormField>
         <BaseFormField field="comment" :label="t('planning.transportOrders.form.comment')">
           <FormTextarea v-model="draft.comment" :disabled="disabled" :maxlength="500" />

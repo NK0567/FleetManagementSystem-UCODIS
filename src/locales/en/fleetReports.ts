@@ -122,5 +122,22 @@ export default {
   'fleet.reports.section.drivers.assignments': 'Current assignments',
   'fleet.reports.section.drivers.alerts': 'Open alerts on the drivers',
   'fleet.reports.indicator.averageFleetAge': 'Average age of the fleet',
-  'fleet.reports.unit.years': 'years'
+  'fleet.reports.unit.years': 'years',
+  'fleet.reports.indicator.immobilizationDays': 'Days of immobilization',
+  'fleet.reports.indicator.maintenanceInterventions': 'Maintenance interventions',
+  'fleet.reports.indicator.preventiveShare': 'Share of preventive maintenance',
+  'fleet.reports.indicator.maintenanceCost': 'Maintenance cost',
+  'fleet.reports.unit.days': 'd',
+  'fleet.reports.col.target': 'Target',
+  'fleet.reports.col.drivingTimeBreaches': 'Driving-time breaches',
+  'fleet.reports.section.audit.compliance': 'Compliance summary',
+  'fleet.reports.section.audit.departures': 'Pre-departure checks of the period',
+  'fleet.reports.col.control': 'Check',
+  'fleet.reports.col.compliant': 'Compliant',
+  'fleet.reports.col.total': 'Total',
+  'fleet.reports.col.rate': 'Rate',
+  'fleet.reports.col.authorizationNo': 'Authorization',
+  'fleet.reports.col.plannedDeparture': 'Planned departure',
+  'fleet.reports.col.decision': 'Decision',
+  'fleet.reports.col.failedChecks': 'Failed checks'
 }

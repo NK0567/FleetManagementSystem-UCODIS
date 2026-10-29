@@ -45,6 +45,9 @@ export interface TripApi {
   stops: TripStopApi[]
   stopCount: number
   passedStopCount: number
+  /** Stops gone past without being served. */
+  missedStopCount: number
+  hasMissedStops: boolean
   /** They keep the trip from being closed. */
   deviationsToQualify: number
   /** Off when the departures module is turned off. */
@@ -59,3 +62,9 @@ export interface TripApi {
 }
 
 export type TripSearchColumn = 'no' | 'vehiclePlate' | 'driverName' | 'no,vehiclePlate,driverName'
+
+/** What the trips left behind them, for the indicator of the list. */
+export interface TripSummaryApi {
+  missedStops: number
+  tripsWithMissedStops: number
+}

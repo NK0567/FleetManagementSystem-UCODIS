@@ -243,6 +243,38 @@ const SEED: Seed[] = [
       finalAmount: 4_800_000
     },
     history: []
+  },
+  {
+    ...open,
+    no: 'OT-2026-0006',
+    vehicleNo: 'VEH-018',
+    maintenanceType: 'corrective',
+    severity: 'major',
+    origin: 'workshop_finding',
+    symptom: 'Fissure sur une traverse du châssis, au droit de la béquille avant.',
+    declaredAt: at(-3, '09:00'),
+    declaredBy: 'FLT001',
+    odometerKmAtOpening: null,
+    diagnosis: {
+      subsystemNo: 'CHASSIS',
+      modeNo: 'BREAKAGE',
+      causeNo: 'ENVIRONMENT',
+      by: 'MNT001',
+      at: at(-3, '11:00')
+    },
+    labour: [],
+    startedAt: at(-2, '08:00'),
+    downtimeNo: 'IND-00007',
+    external: {
+      providerNo: 'PRS-001',
+      handedOverAt: at(-2, '08:00'),
+      expectedReturnOn: day(2),
+      quoteAmount: 1_850_000,
+      progress: 'Traverse déposée, soudure et renfort en cours.',
+      returnedAt: null,
+      finalAmount: null
+    },
+    history: []
   }
 ]
 

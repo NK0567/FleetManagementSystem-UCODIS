@@ -18,6 +18,17 @@ export const mySpaceApi = {
       `/me/orders/${encodeURIComponent(orderNo)}/points/${encodeURIComponent(pointNo)}/declare`,
       { lines }
     ),
+  /** Withdraw a declaration made by mistake, or retry a point simply postponed. */
+  pointAction: (
+    orderNo: string,
+    pointNo: string,
+    action: 'cancel-declaration' | 'retry',
+    body: Record<string, unknown> = {}
+  ) =>
+    httpClient.post<SingleResponse<unknown>>(
+      `/me/orders/${encodeURIComponent(orderNo)}/points/${encodeURIComponent(pointNo)}/${action}`,
+      body
+    ),
   check: (orderNo: string, body: Record<string, unknown>) =>
     httpClient.post<SingleResponse<unknown>>(
       `/me/orders/${encodeURIComponent(orderNo)}/check`,
@@ -26,7 +37,14 @@ export const mySpaceApi = {
   lineAction: (
     orderNo: string,
     lineNo: number,
-    action: 'arrive' | 'declare' | 'postpone' | 'refuse' | 'hand-back',
+    action:
+      | 'arrive'
+      | 'declare'
+      | 'postpone'
+      | 'refuse'
+      | 'hand-back'
+      | 'cancel-nonconformity'
+      | 'cancel-refusal',
     body: Record<string, unknown> = {}
   ) =>
     httpClient.post<SingleResponse<unknown>>(

@@ -10,10 +10,19 @@ export interface RoadChecklistApi {
   tripNo: string
   stage: ChecklistStage
   takenAt: string
+  /** Where the driver stopped to take it. */
+  location?: string
   results: CheckResult[]
   vehicleNo: string
   vehiclePlate: string
   driverName: string
+  /** When the driver of the trip signed it on his phone; null when unsigned. */
+  signedAt: string | null
+  signed: boolean
+  /** When it reached the server. */
+  syncedAt: string
+  /** Taken without network and sent once the network came back. */
+  capturedOffline: boolean
   anomalyCount: number
   /** An anomaly on a blocking point keeps the vehicle from leaving. */
   blocking: boolean

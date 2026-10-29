@@ -27,5 +27,8 @@ export default {
   'maintenance.downtimeCodes.form.systemRole': 'Automatic role',
   'maintenance.downtimeCodes.form.systemRoleHint':
     'The cause the application picks on its own for a breakdown, a service, an accident, an expired document, a re-inspection or an overdue service. One code per role.',
-  'maintenance.downtimeCodes.form.active': 'Active'
+  'maintenance.downtimeCodes.form.active': 'Active',
+  'maintenance.downtimeCodes.reset': 'Back to the proposed causes',
+  'maintenance.downtimeCodes.resetConfirm': 'The proposed causes get their name, family and role back. The causes added since are deleted, except those already used on a downtime.',
+  'maintenance.downtimeCodes.resetError': 'The proposed causes could not be restored.'
 }

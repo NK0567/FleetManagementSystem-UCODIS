@@ -1,7 +1,6 @@
 export default {
   'planning.quality.title': 'Delivery quality',
-  'planning.quality.subtitle':
-    'A protest note is prepared, then issued. The carrier withholding is the credit granted times the carrier share. Shares freeze once the transport is invoiced or the carrier invoice is validated.',
+  'planning.quality.subtitle': 'Protest notes, carrier deductions and credit notes.',
   'planning.quality.loading': 'Loading the quality follow-up…',
   'planning.quality.empty': 'No delivery to follow up.',
   'planning.quality.loadError': 'The quality follow-up could not be displayed.',

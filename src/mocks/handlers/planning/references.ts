@@ -40,6 +40,17 @@ export function planningReferenceData(db: MockDatabase): Record<string, Referenc
       active: point.active,
       parentCode: point.customerNo
     })),
+    // The regions of the sites, to filter the transport orders by the places they serve.
+    planningRegions: [
+      ...new Set(
+        db.sites
+          .all()
+          .map((site) => site.region)
+          .filter(Boolean)
+      )
+    ]
+      .sort((a, b) => a.localeCompare(b))
+      .map((region) => ({ code: region, description: region, active: true })),
     // The loading depots, where an order is picked up (TRS01-US02, TRS07-US02).
     depotPoints: db.deliveryPoints
       .all()

@@ -1,8 +1,9 @@
 <script lang="ts" setup>
-import { computed, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { List, ListTree, Network } from '@lucide/vue'
+import ReferenceImportDialog from '@/modules/hr/reference-import/ReferenceImportDialog.vue'
+import { List, ListTree, Network, Upload } from '@lucide/vue'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
 import { useListCellFormatters } from '@/composables/useListCellFormatters'
@@ -16,6 +17,7 @@ const VIEWS = ['list', 'tree', 'chart'] as const
 type OrgUnitView = (typeof VIEWS)[number]
 
 const { t } = useI18n()
+const importing = ref(false)
 const route = useRoute()
 const router = useRouter()
 const store = useOrgUnitStore()
@@ -252,6 +254,16 @@ watch(
             :reset-preferences="resetPreferences"
           />
         </template>
+        <template v-if="canInsert" #extra-actions>
+          <button
+            type="button"
+            class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
+            @click="importing = true"
+          >
+            <Upload class="w-4 h-4 text-primary" />
+            {{ t('hr.referenceImport.action') }}
+          </button>
+        </template>
       </ListPageToolbar>
 
       <FormAlerts
@@ -380,6 +392,13 @@ watch(
       @cancel="itemToDelete = null"
     />
 
+    <ReferenceImportDialog
+      :open="importing"
+      kind="orgUnits"
+      :submit="orgUnitService.importRows"
+      @close="importing = false"
+      @imported="store.fetchItems(store.pagination.page, store.pagination.limit)"
+    />
     <OrgUnitCard
       v-if="showCard && cardNo"
       :key="`${cardNo}-${cardOpenMode}`"

@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { ClipboardCheck, PhoneCall, Truck } from '@lucide/vue'
+import { ClipboardCheck, Clock, PhoneCall, Truck } from '@lucide/vue'
+import type { ListFilter } from '@/core/types/crud.types'
 import { apiErrorMessage } from '@/core/api/apiError'
 import { useOptionsStore } from '@/stores/optionsStore'
 import { formatDateTime } from '@/utils/format'
@@ -15,7 +16,7 @@ import type { TransportOrderApi } from '../types/transportOrder.types'
  * cancelled). A card opens the order; an order in progress whose lines are all dealt with
  * shows that it awaits completion.
  */
-const props = defineProps<{ search?: string; reloadKey?: number }>()
+const props = defineProps<{ search?: string; reloadKey?: number; filters?: ListFilter[] }>()
 const emit = defineEmits<{ open: [no: string] }>()
 const { t } = useI18n()
 const optionsStore = useOptionsStore()
@@ -37,7 +38,10 @@ const TONES: Record<TransportOrderStatus, string> = {
 async function load() {
   loading.value = true
   try {
-    orders.value = (await transportOrderService.getAll({ page: 1, pageSize: 500 })).data.items
+    // The same filters as the list: period, depot, region, late (v57).
+    orders.value = (
+      await transportOrderService.getAll({ page: 1, pageSize: 500, filters: props.filters ?? [] })
+    ).data.items
     error.value = null
   } catch (cause) {
     error.value = apiErrorMessage(cause, t('planning.transportOrders.loadError'))
@@ -47,6 +51,7 @@ async function load() {
 }
 onMounted(load)
 watch(() => props.reloadKey, load)
+watch(() => props.filters, load, { deep: true })
 
 const matches = (order: TransportOrderApi) => {
   const q = (props.search ?? '').trim().toLowerCase()
@@ -143,6 +148,20 @@ const meansOf = (order: TransportOrderApi) =>
               <span class="flex items-center gap-1 text-xs text-muted-foreground">
                 <Truck class="w-3.5 h-3.5 shrink-0" />
                 <span class="truncate">{{ meansOf(order) }}</span>
+              </span>
+              <span
+                v-if="order.status === 'in_progress' && order.expectedArrival"
+                class="flex items-center gap-1 text-xs"
+                :class="order.late ? 'text-destructive font-medium' : 'text-muted-foreground'"
+              >
+                <Clock class="w-3.5 h-3.5 shrink-0" />
+                <span class="truncate">
+                  {{ t('planning.transportOrders.board.eta') }}
+                  {{ formatDateTime(order.expectedArrival) }}
+                  <template v-if="order.delayMin">
+                    · {{ t('planning.transportOrders.delay', { min: order.delayMin }) }}
+                  </template>
+                </span>
               </span>
               <span class="block text-xs text-muted-foreground">
                 {{ t('planning.transportOrders.lines.count', order.lineCount) }}

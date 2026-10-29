@@ -88,7 +88,9 @@ const { draft, isRequired, expose } = useEntityForm({
     notificationChannel: 'sms' as NotificationChannel,
     confirmationRequired: true,
     preferredSlot: 'any' as DeliverySlot,
-    fullDeliveryRequired: false
+    fullDeliveryRequired: false,
+    recipientPhone: '',
+    recipientEmail: ''
   }),
   required: ['ordererNo', 'deliveryPointNo', 'desiredDate', 'freightPayer', 'lines'],
   labelOf: (field) =>
@@ -480,6 +482,24 @@ defineExpose(expose)
             options-key="deliverySlot"
             :disabled="disabled"
             @update:model-value="draft.preferredSlot = String($event) as DeliverySlot"
+          />
+        </BaseFormField>
+        <BaseFormField :label="t('planning.deliveryRequests.form.recipientPhone')">
+          <FormInput
+            v-model="draft.recipientPhone"
+            type="tel"
+            :maxlength="30"
+            :placeholder="t('planning.deliveryRequests.form.contactFallback')"
+            :disabled="disabled"
+          />
+        </BaseFormField>
+        <BaseFormField :label="t('planning.deliveryRequests.form.recipientEmail')">
+          <FormInput
+            v-model="draft.recipientEmail"
+            type="email"
+            :maxlength="120"
+            :placeholder="t('planning.deliveryRequests.form.contactFallback')"
+            :disabled="disabled"
           />
         </BaseFormField>
       </div>

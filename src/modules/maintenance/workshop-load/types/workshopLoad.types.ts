@@ -15,6 +15,8 @@ export interface WorkshopJob {
   loggedHours: number
   remainingHours: number
   technicianNos: string[]
+  /** The competence the diagnosed subsystem calls for, null before the diagnosis. */
+  competenceNo: string | null
 }
 
 export interface TechnicianLoad {
@@ -26,6 +28,14 @@ export interface TechnicianLoad {
   jobs: WorkshopJob[]
 }
 
+/** Open inside jobs that call for a competence, and the hours estimated for them. */
+export interface CompetenceLoad {
+  competenceNo: string
+  name: string
+  jobCount: number
+  estimatedHours: number
+}
+
 export interface WorkshopLoadApi {
   capacityHoursPerDay: number
   workingDaysPerWeek: number
@@ -35,4 +45,5 @@ export interface WorkshopLoadApi {
   unplannedCount: number
   technicians: TechnicianLoad[]
   unplanned: WorkshopJob[]
+  competences: CompetenceLoad[]
 }

@@ -7,6 +7,7 @@ import {
   readAll,
   readBoolean,
   readCode,
+  readNumber,
   readPatch,
   readString,
   type FieldReaders
@@ -20,6 +21,7 @@ type Fields = Omit<CompetenceRow, 'no' | keyof AuditFields>
 export function competencesApi(db: MockDatabase): CompetenceApi[] {
   return db.competences.all().map((row) => ({
     ...row,
+    hourlyRate: row.hourlyRate ?? null,
     technicianCount: db.technicians
       .all()
       .filter((technician) => technician.competences.includes(row.no)).length
@@ -29,7 +31,8 @@ export function competencesApi(db: MockDatabase): CompetenceApi[] {
 export function registerCompetencesHandlers(router: MockRouter, db: MockDatabase): void {
   const readers: FieldReaders<Fields> = {
     name: (input) => readString(input, 'name', { required: true }),
-    active: (input) => readBoolean(input, 'active', true)
+    active: (input) => readBoolean(input, 'active', true),
+    hourlyRate: (input) => readNumber(input, 'hourlyRate', { min: 0, max: 1_000_000 })
   }
 
   registerCrudResource(router, {

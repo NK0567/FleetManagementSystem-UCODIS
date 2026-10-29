@@ -43,6 +43,11 @@ export function indemnityIssues(
   return []
 }
 
+/** Accidents for every million kilometres the park has run; null without a distance. */
+export function accidentsPerMillionKm(accidents: number, fleetKm: number): number | null {
+  return fleetKm > 0 ? Math.round((accidents / fleetKm) * 1_000_000 * 100) / 100 : null
+}
+
 export function residualCost(damage: number | null, indemnity: number | null): number {
   return Math.max(0, (damage ?? 0) - (indemnity ?? 0))
 }

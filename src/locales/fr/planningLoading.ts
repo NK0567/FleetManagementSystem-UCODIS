@@ -1,7 +1,6 @@
 export default {
   'planning.loading.title': 'Chargement',
-  'planning.loading.subtitle':
-    "Le TMS remet l'ordre de chargement à l'entrepôt et enregistre sa confirmation : quantités chargées, puis contrôle de chaque ligne. Une ligne non conforme reste dans l'ordre avec le statut « non chargée » et ses suites sont tirées à la fin de l'ordre. L'ordre passe prêt quand toutes les autres lignes sont conformes.",
+  'planning.loading.subtitle': 'Ordres à charger, confirmation du chargement et contrôle du conducteur.',
   'planning.loading.loading': 'Chargement des lignes à contrôler…',
   'planning.loading.empty': 'Aucune ligne à charger.',
   'planning.loading.loadError': 'Le chargement n’a pas pu être affiché.',

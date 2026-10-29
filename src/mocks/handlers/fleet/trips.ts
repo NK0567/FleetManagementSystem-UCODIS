@@ -3,6 +3,7 @@ import { plannedSchedule } from '@/modules/fleet/route-templates/domain/routeTem
 import {
   canApply,
   kmGapPercent,
+  missedStopCount,
   nextStopIndex,
   type TripAction
 } from '@/modules/fleet/trips/domain/trip'
@@ -93,6 +94,8 @@ export function tripsApi(db: MockDatabase): TripApi[] {
       stops,
       stopCount: stops.length,
       passedStopCount: stops.filter((stop) => stop.passedAt !== null).length,
+      missedStopCount: missedStopCount(stops, trip.status),
+      hasMissedStops: missedStopCount(stops, trip.status) > 0,
       deviationsToQualify: deviationsToQualify(db, trip.no),
       authorizationRequired: required,
       authorizationNo: authorization?.no ?? null,
@@ -213,6 +216,14 @@ export function buildTrip(
 }
 
 export function registerTripsHandlers(router: MockRouter, db: MockDatabase): void {
+  router.get(`${BASE_PATH}/summary`, { feature: 'TRIP', action: 'read' }, () => {
+    const trips = tripsApi(db).filter((trip) => trip.status !== 'cancelled')
+    return ok({
+      missedStops: trips.reduce((total, trip) => total + trip.missedStopCount, 0),
+      tripsWithMissedStops: trips.filter((trip) => trip.hasMissedStops).length
+    })
+  })
+
   registerCrudResource(router, {
     basePath: BASE_PATH,
     feature: 'TRIP',

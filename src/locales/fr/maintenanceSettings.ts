@@ -15,8 +15,7 @@ export default {
   'maintenance.settings.section.labour': "Main-d'œuvre",
   'maintenance.settings.section.labour.hint':
     "Valorise les heures pointées sur les ordres de travail de l'atelier.",
-  'maintenance.settings.field.labour.hourlyRate': 'Taux horaire',
-
+  'maintenance.settings.field.labour.hourlyRate': 'Tarif horaire unique',
   'maintenance.settings.section.downtimeCost': "Coût d'immobilisation",
   'maintenance.settings.section.downtimeCost.hint':
     'Ce que coûte une journée sans le véhicule. Les coûts par type remplacent le coût moyen quand ils sont renseignés.',

@@ -1,8 +1,17 @@
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { CalendarClock, CircleCheck, CircleX, PackageCheck, TriangleAlert } from '@lucide/vue'
+import {
+  CalendarClock,
+  CircleCheck,
+  CircleX,
+  Clock,
+  CloudOff,
+  PackageCheck,
+  TriangleAlert,
+  Wifi
+} from '@lucide/vue'
 import logo from '@/assets/logo-ucodis.png'
 import { apiErrorMessage } from '@/core/api/apiError'
 import { appConfig } from '@/core/app/appConfig'
@@ -71,8 +80,63 @@ async function sendSurvey() {
   }
 }
 
+/* ---- Without network (TRS03-US18): the confirmation or the contest of the receipt is kept on
+ * the device and sent by itself as soon as the connection is back, without doing it again. The
+ * demonstration has a switch to cut the network; the real device follows its own connection. */
+type PendingReception = {
+  kind: 'receive-confirm' | 'receive-contest'
+  body: Record<string, unknown>
+  label: string
+}
+const pendingKey = computed(() => `planning.tracking.pending.${token.value}`)
+function readPending(): PendingReception | null {
+  try {
+    return JSON.parse(localStorage.getItem(pendingKey.value) ?? 'null') as PendingReception | null
+  } catch {
+    return null
+  }
+}
+const pendingReception = ref<PendingReception | null>(null)
+const offline = ref(false)
+function keepPending(value: PendingReception | null) {
+  pendingReception.value = value
+  try {
+    if (value) localStorage.setItem(pendingKey.value, JSON.stringify(value))
+    else localStorage.removeItem(pendingKey.value)
+  } catch {
+    /* kept in memory only */
+  }
+}
+async function sendPending() {
+  const item = pendingReception.value
+  if (!item || offline.value) return
+  try {
+    tracking.value = await confirmationService.answer(token.value, item.kind, item.body)
+  } catch (cause) {
+    error.value = apiErrorMessage(cause, t('planning.tracking.saveError'))
+  }
+  keepPending(null)
+}
+function toggleNetwork() {
+  offline.value = !offline.value
+  if (!offline.value) void sendPending()
+}
+
 async function sendActing() {
   if (!acting.value) return
+  if (offline.value && acting.value !== 'refuse') {
+    const reason = actingReasons.value?.find((item) => item.no === reasonNo.value)?.name ?? ''
+    keepPending({
+      kind: acting.value,
+      body:
+        acting.value === 'receive-confirm'
+          ? { signer: signer.value }
+          : { reasonNo: reasonNo.value, comment: comment.value },
+      label: acting.value === 'receive-confirm' ? signer.value.trim() : reason
+    })
+    acting.value = null
+    return
+  }
   sending.value = true
   error.value = null
   try {
@@ -101,6 +165,8 @@ async function load() {
   } finally {
     loading.value = false
   }
+  pendingReception.value = readPending()
+  if (pendingReception.value && !offline.value) void sendPending()
 }
 
 async function answer(kind: 'confirm' | 'unavailable' | 'accept-proposal') {
@@ -111,7 +177,9 @@ async function answer(kind: 'confirm' | 'unavailable' | 'accept-proposal') {
       token.value,
       kind,
       kind === 'unavailable'
-        ? { date: date.value || null, reasonNo: reasonNo.value, comment: comment.value }
+        ? replanMode.value
+          ? { date: date.value }
+          : { date: date.value || null, reasonNo: reasonNo.value, comment: comment.value }
         : {}
     )
     askingDate.value = false
@@ -122,14 +190,25 @@ async function answer(kind: 'confirm' | 'unavailable' | 'accept-proposal') {
   }
 }
 
+/* Once his line left the order, he only gives the day from which he can be delivered. */
+const replanMode = computed(
+  () => !!tracking.value && !tracking.value.open && tracking.value.replanOpen
+)
+const answering = computed(
+  () => !!tracking.value && (tracking.value.open || tracking.value.replanOpen)
+)
+
 function startUnavailable() {
-  date.value = tracking.value?.proposedDate ?? ''
+  date.value = replanMode.value
+    ? (tracking.value?.availableOn ?? '')
+    : (tracking.value?.proposedDate ?? '')
   reasonNo.value = ''
   comment.value = ''
   askingDate.value = true
 }
 
 onMounted(load)
+watch(token, load)
 </script>
 
 <template>
@@ -140,6 +219,19 @@ onMounted(load)
         <p class="text-sm text-muted-foreground">{{ t('planning.tracking.title') }}</p>
       </header>
 
+      <button
+        type="button"
+        class="cursor-pointer inline-flex items-center gap-1.5 px-3 h-8 rounded border text-sm transition"
+        :class="
+          offline
+            ? 'border-warning text-warning bg-warning/10'
+            : 'border-border text-muted-foreground hover:bg-accent'
+        "
+        @click="toggleNetwork"
+      >
+        <component :is="offline ? CloudOff : Wifi" class="w-4 h-4" />
+        {{ offline ? t('selfService.offline.on') : t('selfService.offline.off') }}
+      </button>
       <LoadingSpinner v-if="loading" :text="t('common.loading')" />
       <FormAlerts :error="error" @clear:error="error = null" />
 
@@ -171,6 +263,44 @@ onMounted(load)
             <dd>{{ t(`planning.tracking.slots.${tracking.preferredSlot}`) }}</dd>
           </template>
         </dl>
+
+        <div v-if="tracking.parts.length" class="rounded border border-border px-3 py-2 space-y-1">
+          <p class="font-medium">
+            {{ t('planning.tracking.parts.title', { count: tracking.parts.length }) }}
+          </p>
+          <div
+            v-for="(part, index) in tracking.parts"
+            :key="part.requestNo"
+            class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs border-t border-border pt-1 first-of-type:border-t-0"
+          >
+            <span class="font-medium">
+              {{ t('planning.tracking.parts.delivery', { no: index + 1 }) }}
+            </span>
+            <span class="flex-1 min-w-0 text-muted-foreground">
+              {{ formatNumber(part.quantity) }} {{ part.unit }}
+              <template v-if="part.vehiclePlate">
+                · {{ t('planning.tracking.parts.truck', { plate: part.vehiclePlate }) }}
+              </template>
+              <template v-if="part.plannedDeparture">
+                · {{ formatDate(part.plannedDeparture) }}
+              </template>
+              <template v-if="part.expectedArrival">
+                · {{ t('planning.tracking.eta') }} {{ formatDateTime(part.expectedArrival) }}
+              </template>
+              · {{ t(`planning.tracking.parts.state.${part.state}`) }}
+            </span>
+            <span v-if="part.current" class="text-primary">
+              {{ t('planning.tracking.parts.current') }}
+            </span>
+            <a
+              v-else-if="part.trackingToken"
+              :href="`#/suivi/${part.trackingToken}`"
+              class="text-primary hover:underline"
+            >
+              {{ t('planning.tracking.parts.follow') }}
+            </a>
+          </div>
+        </div>
 
         <ol class="grid grid-cols-4 gap-1 text-[11px] leading-tight text-center">
           <li v-for="(step, index) in STEPS" :key="step" class="space-y-1">
@@ -268,6 +398,7 @@ onMounted(load)
             <span class="text-muted-foreground">
               {{ formatDateTime(message.at) }} ·
               {{ t(`planning.tracking.messages.channel.${message.channel}`) }}
+              <template v-if="message.to"> · {{ message.to }}</template>
             </span>
             <br />
             {{
@@ -281,6 +412,36 @@ onMounted(load)
           </p>
         </div>
 
+        <div
+          v-if="tracking.cancelledAt"
+          class="flex items-start gap-2 rounded bg-destructive/10 px-3 py-2"
+        >
+          <CircleX class="w-5 h-5 text-destructive shrink-0" />
+          <div>
+            <p class="font-medium">{{ t('planning.tracking.cancelled') }}</p>
+            <p v-if="tracking.cancellationReason">
+              {{ t('planning.tracking.reasonIs', { reason: tracking.cancellationReason }) }}
+            </p>
+          </div>
+        </div>
+        <div
+          v-else-if="tracking.postponedAt && !tracking.declaredAt && !tracking.refusedAt"
+          class="flex items-start gap-2 rounded bg-warning/10 px-3 py-2"
+        >
+          <Clock class="w-5 h-5 text-warning shrink-0" />
+          <div>
+            <p class="font-medium">
+              {{
+                tracking.returnedAt
+                  ? t('planning.tracking.postponedReturn')
+                  : t('planning.tracking.postponed')
+              }}
+            </p>
+            <p v-if="tracking.postponementReason">
+              {{ t('planning.tracking.reasonIs', { reason: tracking.postponementReason }) }}
+            </p>
+          </div>
+        </div>
         <div
           v-if="tracking.refusedAt"
           class="flex items-start gap-2 rounded bg-destructive/10 px-3 py-2"
@@ -310,7 +471,22 @@ onMounted(load)
           <p>{{ t('planning.tracking.contested', { reason: tracking.contestReason }) }}</p>
         </div>
 
-        <div v-if="!acting && (canAnswerReception || canRefuse)" class="flex flex-col gap-2">
+        <div
+          v-if="pendingReception && canAnswerReception"
+          class="rounded border border-border px-3 py-2 space-y-1"
+        >
+          <p class="font-medium">
+            {{
+              pendingReception.kind === 'receive-confirm'
+                ? t('planning.tracking.pendingConfirm', { name: pendingReception.label })
+                : t('planning.tracking.pendingContest', { reason: pendingReception.label })
+            }}
+          </p>
+          <p class="text-xs text-muted-foreground flex items-center gap-1.5">
+            <CloudOff class="w-4 h-4" /> {{ t('planning.tracking.pendingNetwork') }}
+          </p>
+        </div>
+        <div v-else-if="!acting && (canAnswerReception || canRefuse)" class="flex flex-col gap-2">
           <p v-if="canAnswerReception">{{ t('planning.tracking.receptionQuestion') }}</p>
           <template v-if="canAnswerReception">
             <button
@@ -425,10 +601,10 @@ onMounted(load)
 
         <div
           v-if="
-            tracking.open &&
+            answering &&
             !askingDate &&
             tracking.plannerProposedOn &&
-            tracking.state !== 'confirmed'
+            (replanMode || tracking.state !== 'confirmed')
           "
           class="rounded border border-primary/30 bg-primary/5 px-3 py-2 space-y-2"
         >
@@ -460,6 +636,28 @@ onMounted(load)
           </div>
         </div>
 
+        <div
+          v-if="replanMode && !askingDate && !tracking.plannerProposedOn"
+          class="rounded border border-primary/30 bg-primary/5 px-3 py-2 space-y-2"
+        >
+          <p>{{ t('planning.tracking.replanQuestion') }}</p>
+          <p v-if="tracking.availableOn" class="text-xs">
+            {{ t('planning.tracking.replanGiven', { date: formatDate(tracking.availableOn) }) }}
+          </p>
+          <button
+            type="button"
+            class="cursor-pointer inline-flex items-center gap-2 px-3 py-2 rounded border border-border text-sm hover:bg-accent"
+            @click="startUnavailable"
+          >
+            <CalendarClock class="w-4 h-4 text-primary" />
+            {{
+              tracking.availableOn
+                ? t('planning.tracking.changeDate')
+                : t('planning.tracking.giveDate')
+            }}
+          </button>
+        </div>
+
         <template v-if="tracking.open && !askingDate">
           <p v-if="tracking.state === 'pending'">{{ t('planning.tracking.question') }}</p>
           <div class="flex flex-col gap-2">
@@ -489,7 +687,7 @@ onMounted(load)
         </template>
 
         <div v-if="askingDate" class="space-y-2">
-          <BaseFormField :label="t('planning.tracking.reason')" required>
+          <BaseFormField v-if="!replanMode" :label="t('planning.tracking.reason')" required>
             <select
               v-model="reasonNo"
               class="w-full h-9 px-2 text-sm border border-border rounded bg-background"
@@ -500,12 +698,12 @@ onMounted(load)
               </option>
             </select>
           </BaseFormField>
-          <BaseFormField :label="t('planning.tracking.comment')">
+          <BaseFormField v-if="!replanMode" :label="t('planning.tracking.comment')">
             <FormInput v-model="comment" :maxlength="200" />
           </BaseFormField>
-          <BaseFormField :label="t('planning.tracking.newDate')">
+          <BaseFormField :label="t('planning.tracking.newDate')" :required="replanMode">
             <DateFormInput v-model="date" />
-            <p class="text-xs text-muted-foreground mt-1">
+            <p v-if="!replanMode" class="text-xs text-muted-foreground mt-1">
               {{ t('planning.tracking.newDateHint', { date: formatDate(tracking.proposedDate) }) }}
             </p>
           </BaseFormField>
@@ -513,7 +711,7 @@ onMounted(load)
             <button
               type="button"
               class="cursor-pointer flex-1 px-4 py-2.5 rounded bg-primary text-primary-foreground font-medium disabled:opacity-60"
-              :disabled="sending || !reasonNo"
+              :disabled="sending || (replanMode ? !date : !reasonNo)"
               @click="answer('unavailable')"
             >
               {{ t('planning.tracking.send') }}

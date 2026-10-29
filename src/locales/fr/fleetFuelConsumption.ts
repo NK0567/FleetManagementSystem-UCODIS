@@ -45,5 +45,16 @@ export default {
     'Salaire mensuel net déclaré : {salary} ; retenue possible ce mois-ci selon le droit du travail : {max} au plus.',
   'fleet.fuelConsumption.form.monthlySalary': 'Salaire mensuel net du conducteur',
   'fleet.fuelConsumption.form.monthlySalaryHint':
-    'Avec les autres retenues du mois, la retenue ne peut dépasser la part du salaire fixée dans les réglages de la flotte selon le droit du travail applicable.'
+    'Avec les autres retenues du mois, la retenue ne peut dépasser la part du salaire fixée dans les réglages de la flotte selon le droit du travail applicable.',
+  'fleet.fuelConsumption.emissions.title': 'Émissions et écoconduite par véhicule',
+  'fleet.fuelConsumption.emissions.summary': '{count} véhicule(s) · {tons} t de CO₂',
+  'fleet.fuelConsumption.emissions.loadError': "Les émissions n'ont pas pu être chargées.",
+  'fleet.fuelConsumption.emissions.empty': 'Aucun plein enregistré.',
+  'fleet.fuelConsumption.emissions.col.fuelType': 'Énergie',
+  'fleet.fuelConsumption.emissions.col.liters': 'Litres',
+  'fleet.fuelConsumption.emissions.col.co2Kg': 'CO₂ émis (kg)',
+  'fleet.fuelConsumption.emissions.col.gramsPerKm': 'g de CO₂ / km',
+  'fleet.fuelConsumption.emissions.col.ecoEvents': 'Écoconduite',
+  'fleet.fuelConsumption.emissions.ecoCount': '{count} événement(s)',
+  'fleet.fuelConsumption.emissions.noEco': 'Aucun'
 }

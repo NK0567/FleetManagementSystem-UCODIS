@@ -77,6 +77,8 @@ import type { MockRouter } from '../../http/router'
 import { sessionUser, type MockRequest } from '../../http/types'
 import { localize, toMockLanguage, type MockLanguage } from '../../i18n'
 import { orderPlace, visibleTo } from './perimeter'
+import { etaFrom } from './eta'
+import { livePositions } from '../fleet/livePositions'
 import { notifyDriver } from './notifications'
 import { messageRecipients } from './recipientMessages'
 import { buildTrip, overlapWarnings } from '../fleet/trips'
@@ -183,12 +185,26 @@ export function transportOrdersApi(db: MockDatabase, userCode?: string): Transpo
       }, 0)
       const capacity = capacityOfOrder(db, row, trip)
       const status = statusOf(db, row)
+      const arrival = arrivalOf(departure, route?.stops, trip)
+      // The depot is where its route leaves from; the regions are those of the sites it serves.
+      const depotSiteNo =
+        route?.stops.find((stop) => stop.role === 'departure')?.siteNo ??
+        route?.stops[0]?.siteNo ??
+        null
       return {
         no: row.no,
         routeTemplateNo: routeNo,
         routeName: route?.name ?? '',
         plannedDeparture: departure,
-        plannedArrival: arrivalOf(departure, route?.stops, trip),
+        plannedDate: departure ? departure.slice(0, 10) : null,
+        plannedArrival: arrival,
+        // Without the live position, the estimate is the plan; the list adds the delay (TRS02-US01).
+        expectedArrival: arrival,
+        delayMin: null,
+        late: false,
+        depotSiteNo,
+        depotName: depotSiteNo ? (db.sites.find(depotSiteNo)?.name ?? '') : '',
+        regions: [...new Set(orderPlace(db, row).regions)],
         comment: row.comment,
         lines,
         lineCount: lines.length,
@@ -275,6 +291,17 @@ function arrivalOf(
   if (trip) return plannedArrival(trip)
   if (!departure || !stops?.length) return null
   return plannedSchedule(departure, stops).at(-1) ?? departure
+}
+
+/** The estimated arrival and the delay from the live position of the vehicle (TRS02-US01). */
+function withEta(db: MockDatabase, orders: TransportOrderApi[]): TransportOrderApi[] {
+  if (!orders.some((order) => order.tripNo)) return orders
+  const positions = new Map(livePositions(db).map((position) => [position.tripNo, position]))
+  return orders.map((order) => {
+    const position = order.tripNo ? positions.get(order.tripNo) : undefined
+    if (!position || order.status !== 'in_progress') return order
+    return { ...order, ...etaFrom(order.plannedArrival, position.delayMin ?? null) }
+  })
 }
 
 function oneOf(db: MockDatabase, no: string): TransportOrderApi {
@@ -1147,7 +1174,7 @@ export function registerTransportOrdersHandlers(router: MockRouter, db: MockData
     basePath: BASE_PATH,
     feature: 'TRANSPORTORDER',
     collection: db.transportOrders,
-    list: (request) => transportOrdersApi(db, sessionUser(request).code),
+    list: (request) => withEta(db, transportOrdersApi(db, sessionUser(request).code)),
     searchColumns: ['no', 'routeName', 'recipientSummary', 'carrierName', 'tripNo'],
     optionFields: { status: 'transportOrderStatus', means: 'transportMeans' },
     create: (input, request) => {

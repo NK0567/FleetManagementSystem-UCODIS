@@ -121,5 +121,6 @@ export default {
   'nav.inspectionItems': "Grille d'inspection",
   'nav.fuelReferences': 'Consommations de référence',
   'nav.myVehicle': 'Mon véhicule',
-  'nav.providerTypes': 'Types de prestataires'
+  'nav.providerTypes': 'Types de prestataires',
+  'nav.stockMovements': 'Mouvements de stock'
 }

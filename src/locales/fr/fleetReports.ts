@@ -123,5 +123,22 @@ export default {
   'fleet.reports.section.drivers.assignments': 'Affectations en cours',
   'fleet.reports.section.drivers.alerts': 'Alertes en cours sur les conducteurs',
   'fleet.reports.indicator.averageFleetAge': 'Âge moyen de la flotte',
-  'fleet.reports.unit.years': 'ans'
+  'fleet.reports.unit.years': 'ans',
+  'fleet.reports.indicator.immobilizationDays': "Jours d'immobilisation",
+  'fleet.reports.indicator.maintenanceInterventions': 'Interventions de maintenance',
+  'fleet.reports.indicator.preventiveShare': 'Part de maintenance préventive',
+  'fleet.reports.indicator.maintenanceCost': 'Coût de maintenance',
+  'fleet.reports.unit.days': 'j',
+  'fleet.reports.col.target': 'Cible',
+  'fleet.reports.col.drivingTimeBreaches': 'Dépassements de temps',
+  'fleet.reports.section.audit.compliance': 'Synthèse de conformité',
+  'fleet.reports.section.audit.departures': 'Contrôles avant départ de la période',
+  'fleet.reports.col.control': 'Contrôle',
+  'fleet.reports.col.compliant': 'Conformes',
+  'fleet.reports.col.total': 'Total',
+  'fleet.reports.col.rate': 'Taux',
+  'fleet.reports.col.authorizationNo': 'Autorisation',
+  'fleet.reports.col.plannedDeparture': 'Départ prévu',
+  'fleet.reports.col.decision': 'Décision',
+  'fleet.reports.col.failedChecks': 'Contrôles non conformes'
 }

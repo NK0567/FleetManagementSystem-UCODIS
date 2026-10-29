@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
@@ -10,7 +10,7 @@ import { useListPage } from '@/composables/useListPage'
 import { usePermissions } from '@/composables/usePermissions'
 import { todayIso } from '@/utils/date'
 import { formatDate, formatNumber } from '@/utils/format'
-import { serviceDueApi } from '../api/serviceDueApi'
+import { serviceDueApi, type ServiceDueSummary } from '../api/serviceDueApi'
 import { needsService } from '../domain/serviceDue'
 import { serviceDueService } from '../services/serviceDueService'
 import { useServiceDueStore, type ServiceDueListView } from '../stores/serviceDueStore'
@@ -22,6 +22,15 @@ const store = useServiceDueStore()
 const { canInsert } = usePermissions('SERVICEDUE')
 const { canInsert: canOpenOrder } = usePermissions('WORKORDER')
 const { optionLabel, formatInteger, formatDate: formatDateCell } = useListCellFormatters()
+
+const summary = ref<ServiceDueSummary | null>(null)
+
+async function loadSummary() {
+  summary.value = await serviceDueService.summary().catch(() => null)
+}
+
+onMounted(loadSummary)
+watch(() => store.items, loadSummary)
 
 const listViewOptions = computed<{ value: ServiceDueListView; label: string }[]>(() => [
   { value: 'toPlan', label: t('maintenance.serviceDue.listView.toPlan') },
@@ -301,6 +310,29 @@ const interval = (due: ServiceDueApi) =>
         </template>
       </ListPageToolbar>
 
+      <div v-if="summary" class="mx-4 mt-2 flex flex-wrap gap-2 text-xs">
+        <span
+          class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 font-medium"
+          :class="
+            summary.overdue
+              ? 'bg-destructive/10 text-destructive'
+              : 'bg-accent text-muted-foreground'
+          "
+        >
+          {{ t('maintenance.serviceDue.summary.overdue', summary.overdue) }}
+          <template v-if="summary.blocking">
+            · {{ t('maintenance.serviceDue.summary.blocking', summary.blocking) }}
+          </template>
+        </span>
+        <span
+          class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 font-medium"
+          :class="
+            summary.dueSoon ? 'bg-warning-bg text-warning' : 'bg-accent text-muted-foreground'
+          "
+        >
+          {{ t('maintenance.serviceDue.summary.dueSoon', summary.dueSoon) }}
+        </span>
+      </div>
       <FormAlerts class="mx-4" :error="exportError" @clear:error="exportError = null" />
       <FormAlerts class="mx-4" :error="actionError" @clear:error="actionError = null" />
 

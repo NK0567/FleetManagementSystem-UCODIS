@@ -2,7 +2,22 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import { BellRing, Check, History, MapPinOff, Pause, Play, RotateCcw, Truck, X } from '@lucide/vue'
+import {
+  Bell,
+  BellRing,
+  Check,
+  Fuel,
+  History,
+  MapPinOff,
+  Pause,
+  Play,
+  RotateCcw,
+  Search,
+  Truck,
+  X
+} from '@lucide/vue'
+import { alertService } from '@/modules/fleet/alerts/services/alertService'
+import type { AlertApi } from '@/modules/fleet/alerts/types/alert.types'
 import { liveMapApi, type SimulationState } from '../api/liveMapApi'
 import type { MapCircle, MapMarker, MapPolyline } from '@/components/shared/MapView.vue'
 import { apiErrorMessage } from '@/core/api/apiError'
@@ -21,6 +36,7 @@ const REPLAY_STEP_MS = 250
 /** Leaflet draws in SVG attributes, which cannot read CSS variables. */
 const SITUATION_COLORS: Record<LiveSituation, string> = {
   moving: '#16a34a',
+  idling: '#ca8a04',
   stopped: '#2563eb',
   parked: '#64748b',
   immobilized: '#dc2626',
@@ -35,18 +51,46 @@ const route = useRoute()
 const router = useRouter()
 const optionsStore = useOptionsStore()
 const { canRead: canReadVehicle } = usePermissions('VEHICLE')
+const { canRead: canReadAlerts } = usePermissions('ALERT')
+
+/** A gauge at a quarter or below is shown as low. */
+const LOW_FUEL_PCT = 25
 
 const positions = ref<LivePositionApi[]>([])
 const loading = ref(true)
 const error = ref<string | null>(null)
 const situation = ref<LiveSituation | null>(null)
 const flag = ref<Flag | null>(null)
+const search = ref('')
 const selectedNo = ref<string | null>(null)
 const cardNo = ref<string | null>(null)
 const fitKey = ref(0)
 let timer: ReturnType<typeof setInterval> | null = null
 
+/* ── Alerts in progress, listed from the floating button over the map ── */
+const ALERT_PAGE_SIZE = 100
+const alerts = ref<AlertApi[]>([])
+const alertTotal = ref(0)
+const alertsOpen = ref(false)
+
+async function loadAlerts() {
+  if (!canReadAlerts.value) return
+  try {
+    const page = await alertService.getAll({
+      pageSize: ALERT_PAGE_SIZE,
+      sortBy: 'since',
+      sortDirection: 'DESC',
+      filters: [{ field: 'status', valueType: 'string', value: ['new', 'acknowledged'] }]
+    })
+    alerts.value = page.data.items
+    alertTotal.value = page.data.meta.total
+  } catch {
+    /* the map works without the alerts */
+  }
+}
+
 async function refresh() {
+  void loadAlerts()
   try {
     positions.value = await liveMapService.positions()
     // The server moves its clock ten minutes at each refresh while the simulation runs.
@@ -120,9 +164,19 @@ const flagCounts = computed(() => [
   }
 ])
 
+const matchesSearch = (position: LivePositionApi) => {
+  const query = search.value.trim().toLowerCase()
+  if (!query) return true
+  return [position.plate, position.driverName, position.make, position.model]
+    .join(' ')
+    .toLowerCase()
+    .includes(query)
+}
+
 const visible = computed(() =>
   positions.value.filter(
     (position) =>
+      matchesSearch(position) &&
       (!situation.value || position.situation === situation.value) &&
       (flag.value !== 'alert' || position.alertCount > 0) &&
       (flag.value !== 'outOfZone' || position.outOfZone)
@@ -298,11 +352,14 @@ function toggleFlag(value: Flag) {
   fitKey.value++
 }
 
-/** A click on a vehicle, in the list or on the map, opens its card and keeps it selected. */
+/** A click on a vehicle, in the list or on the map, shows its information over the map. */
 function openVehicle(no: string) {
-  if (selectedNo.value !== no && historyOpen.value) closeHistory()
+  if (selectedNo.value === no) {
+    unselect()
+    return
+  }
+  if (historyOpen.value) closeHistory()
   selectedNo.value = no
-  if (canReadVehicle.value) cardNo.value = no
 }
 
 function unselect() {
@@ -402,6 +459,18 @@ function delayLabel(minutes: number | null) {
 
     <div v-else class="grid gap-4 lg:grid-cols-[320px_1fr]">
       <aside class="space-y-2 lg:max-h-[640px] lg:overflow-y-auto">
+        <div class="relative">
+          <Search
+            class="w-4 h-4 text-muted-foreground absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+          />
+          <input
+            v-model="search"
+            type="search"
+            class="w-full h-9 pl-8 pr-2 border border-border rounded text-sm bg-card"
+            :placeholder="t('fleet.liveMap.searchPlaceholder')"
+            :aria-label="t('fleet.liveMap.searchPlaceholder')"
+          />
+        </div>
         <p v-if="!visible.length" class="text-sm text-muted-foreground">
           {{ t('fleet.liveMap.noVehicle') }}
         </p>
@@ -449,19 +518,222 @@ function delayLabel(minutes: number | null) {
             </template>
             <template v-else>{{ position.placeName }}</template>
           </p>
+          <div
+            v-if="position.fuelLevelPct !== null"
+            class="flex items-center gap-2 mt-1"
+            :title="t('fleet.liveMap.fuel')"
+          >
+            <Fuel class="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+            <div class="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
+              <div
+                class="h-full rounded-full"
+                :class="position.fuelLevelPct <= LOW_FUEL_PCT ? 'bg-destructive' : 'bg-primary'"
+                :style="{ width: `${position.fuelLevelPct}%` }"
+              />
+            </div>
+            <span
+              class="text-xs tabular-nums"
+              :class="
+                position.fuelLevelPct <= LOW_FUEL_PCT ? 'text-destructive' : 'text-card-foreground'
+              "
+            >
+              {{ position.fuelLevelPct }} %
+            </span>
+          </div>
         </button>
       </aside>
 
       <div class="space-y-4 min-w-0">
-        <MapView
-          :markers="markers"
-          :polylines="polylines"
-          :circles="circles"
-          :selected-id="selectedNo"
-          :fit-key="fitKey"
-          height="460px"
-          @marker-click="openVehicle"
-        />
+        <div class="relative">
+          <MapView
+            :markers="markers"
+            :polylines="polylines"
+            :circles="circles"
+            :selected-id="selectedNo"
+            :fit-key="fitKey"
+            height="460px"
+            @marker-click="openVehicle"
+          />
+          <div
+            v-if="selected"
+            class="absolute top-3 right-3 z-[1000] w-[22rem] max-w-[calc(100%-1.5rem)] rounded-lg border border-border bg-card/95 shadow-lg p-3 space-y-2"
+          >
+            <div class="flex items-start gap-3">
+              <div
+                class="w-9 h-9 rounded flex items-center justify-center shrink-0"
+                :style="{
+                  background: `${SITUATION_COLORS[selected.situation]}22`,
+                  color: SITUATION_COLORS[selected.situation]
+                }"
+              >
+                <Truck class="w-5 h-5" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2">
+                  <span class="font-semibold text-card-foreground">{{ selected.plate }}</span>
+                  <LiveSituationPill :situation="selected.situation" class="ml-auto" />
+                </div>
+                <p class="text-xs text-muted-foreground truncate">
+                  {{
+                    [`${selected.make} ${selected.model}`.trim(), selected.driverName]
+                      .filter(Boolean)
+                      .join(' · ')
+                  }}
+                </p>
+              </div>
+              <button
+                type="button"
+                class="cursor-pointer text-muted-foreground hover:text-card-foreground"
+                :aria-label="t('common.close')"
+                @click="unselect"
+              >
+                <X class="w-4 h-4" />
+              </button>
+            </div>
+            <p class="text-xs text-muted-foreground">
+              {{ t('fleet.liveMap.speed', { speed: selected.speedKmh }) }} ·
+              {{ selected.engineOn ? t('fleet.liveMap.engineOn') : t('fleet.liveMap.engineOff') }}
+              <template v-if="selected.fuelLevelPct !== null">
+                · {{ t('fleet.liveMap.fuelLevel', { pct: selected.fuelLevelPct }) }}
+              </template>
+              <template v-if="selected.delayMin !== null">
+                · {{ delayLabel(selected.delayMin) }}
+              </template>
+            </p>
+            <p v-if="selected.alertCount || selected.outOfZone" class="text-xs text-destructive">
+              <RouterLink v-if="selected.alertCount" to="/fleet/alerts" class="hover:underline">
+                {{ t('fleet.liveMap.alertCount', { count: selected.alertCount }) }}
+              </RouterLink>
+              <template v-if="selected.alertCount && selected.outOfZone"> · </template>
+              <template v-if="selected.outOfZone">
+                {{
+                  selected.corridorGapM !== null
+                    ? t('fleet.liveMap.outOfCorridor', {
+                        km: formatNumber(selected.corridorGapM / 1000, 1)
+                      })
+                    : t('fleet.liveMap.outOfSites')
+                }}
+              </template>
+            </p>
+            <div class="flex flex-wrap gap-2 pt-1">
+              <button
+                v-if="canReadVehicle"
+                type="button"
+                class="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded bg-primary text-primary-foreground hover:opacity-90"
+                @click="cardNo = selected.vehicleNo"
+              >
+                <Truck class="w-3.5 h-3.5" /> {{ t('fleet.liveMap.openCard') }}
+              </button>
+              <button
+                type="button"
+                class="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded border transition"
+                :class="
+                  historyOpen
+                    ? 'border-primary bg-primary/5 text-primary'
+                    : 'border-border text-card-foreground hover:bg-accent'
+                "
+                @click="toggleHistory"
+              >
+                <History class="w-3.5 h-3.5" /> {{ t('fleet.liveMap.history.button') }}
+              </button>
+              <RouterLink
+                :to="{ path: '/fleet/telematics-events', query: { plate: selected.plate } }"
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded border border-border text-card-foreground hover:bg-accent"
+              >
+                {{ t('fleet.liveMap.events') }}
+              </RouterLink>
+            </div>
+          </div>
+          <div
+            v-if="selected && selected.stops.length && !historyOpen"
+            class="absolute top-3 left-14 z-[1000] w-72 max-w-[calc(100%-5rem)] max-h-[calc(100%-1.5rem)] overflow-y-auto rounded-lg border border-border bg-card/95 shadow-lg p-3"
+          >
+            <p class="text-xs font-semibold text-card-foreground mb-2">
+              {{ selected.routeName || t('fleet.liveMap.stop') }}
+            </p>
+            <ol class="space-y-1.5">
+              <li
+                v-for="(stop, index) in selected.stops"
+                :key="index"
+                class="flex items-start gap-2 text-xs"
+              >
+                <Check v-if="stop.passed" class="w-3.5 h-3.5 mt-0.5 text-primary shrink-0" />
+                <span
+                  v-else
+                  class="w-3.5 h-3.5 mt-0.5 rounded-full border border-border shrink-0"
+                />
+                <span class="flex-1 min-w-0 text-card-foreground">{{ stop.siteName }}</span>
+                <span class="text-muted-foreground tabular-nums">{{ time(stop.plannedAt) }}</span>
+                <span
+                  class="tabular-nums"
+                  :class="
+                    stop.expectedAt > stop.plannedAt ? 'text-destructive' : 'text-card-foreground'
+                  "
+                >
+                  {{ time(stop.expectedAt) }}
+                </span>
+              </li>
+            </ol>
+          </div>
+          <div
+            v-if="canReadAlerts"
+            class="absolute right-4 bottom-4 z-[1000] flex flex-col items-end gap-2 max-w-[calc(100%-2rem)]"
+          >
+            <div
+              v-if="alertsOpen"
+              class="w-80 max-w-full max-h-80 overflow-y-auto rounded border border-border bg-card shadow-lg"
+            >
+              <div
+                class="sticky top-0 flex items-center justify-between gap-2 px-3 py-2 border-b border-border bg-card"
+              >
+                <span class="text-sm font-semibold text-card-foreground">
+                  {{ t('fleet.liveMap.alerts.title') }}
+                </span>
+                <RouterLink to="/fleet/alerts" class="text-xs text-primary hover:underline">
+                  {{ t('fleet.liveMap.alerts.all', { count: alertTotal }) }}
+                </RouterLink>
+              </div>
+              <p v-if="!alerts.length" class="px-3 py-4 text-sm text-muted-foreground">
+                {{ t('fleet.liveMap.alerts.empty') }}
+              </p>
+              <RouterLink
+                v-for="alert in alerts"
+                :key="alert.no"
+                to="/fleet/alerts"
+                class="flex items-start gap-2 px-3 py-2 border-b border-border last:border-b-0 hover:bg-accent"
+              >
+                <BellRing
+                  class="w-4 h-4 shrink-0 mt-0.5"
+                  :class="alert.severity === 'critical' ? 'text-destructive' : 'text-primary'"
+                />
+                <span class="min-w-0">
+                  <span class="block text-sm font-medium text-card-foreground">
+                    {{ alert.subject }}
+                  </span>
+                  <span class="block text-xs text-muted-foreground">{{ alert.detail }}</span>
+                </span>
+              </RouterLink>
+            </div>
+            <button
+              type="button"
+              class="cursor-pointer relative w-12 h-12 rounded-full shadow-lg flex items-center justify-center text-white"
+              :class="alertTotal ? 'bg-destructive' : 'bg-primary'"
+              :title="t('fleet.liveMap.alerts.button', { count: alertTotal })"
+              :aria-label="t('fleet.liveMap.alerts.button', { count: alertTotal })"
+              :aria-expanded="alertsOpen"
+              @click="alertsOpen = !alertsOpen"
+            >
+              <X v-if="alertsOpen" class="w-5 h-5" />
+              <Bell v-else class="w-5 h-5" />
+              <span
+                v-if="alertTotal && !alertsOpen"
+                class="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-card text-destructive text-xs font-bold flex items-center justify-center border border-destructive"
+              >
+                {{ alertTotal > 99 ? '99+' : alertTotal }}
+              </span>
+            </button>
+          </div>
+        </div>
 
         <section
           v-if="historyOpen && selected"
@@ -558,108 +830,6 @@ function delayLabel(minutes: number | null) {
               }}
             </p>
           </template>
-        </section>
-
-        <section v-if="selected" class="rounded border border-border p-4 space-y-3">
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <h2 class="font-semibold text-card-foreground">
-              {{ selected.plate }}
-              <span v-if="selected.routeName" class="font-normal text-muted-foreground">
-                · {{ selected.routeName }}
-              </span>
-            </h2>
-            <div class="flex flex-wrap items-center gap-2">
-              <RouterLink
-                v-if="selected.tripNo"
-                :to="{ path: '/fleet/trips', query: { no: selected.tripNo, cardMode: 'view' } }"
-                class="text-sm text-primary hover:underline"
-              >
-                {{ selected.tripNo }}
-              </RouterLink>
-              <button
-                v-if="canReadVehicle"
-                type="button"
-                class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded bg-primary text-primary-foreground hover:opacity-90"
-                @click="cardNo = selected.vehicleNo"
-              >
-                <Truck class="w-4 h-4" /> {{ t('fleet.liveMap.openCard') }}
-              </button>
-              <button
-                type="button"
-                class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded border transition"
-                :class="
-                  historyOpen
-                    ? 'border-primary bg-primary/5 text-primary'
-                    : 'border-border text-card-foreground hover:bg-accent'
-                "
-                @click="toggleHistory"
-              >
-                <History class="w-4 h-4" /> {{ t('fleet.liveMap.history.button') }}
-              </button>
-              <button
-                type="button"
-                class="cursor-pointer text-muted-foreground hover:text-card-foreground"
-                :aria-label="t('common.close')"
-                @click="unselect"
-              >
-                <X class="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-          <p class="text-xs text-muted-foreground">
-            {{ t('fleet.liveMap.reportedAt', { date: formatDateTime(selected.reportedAt) }) }}
-            · {{ t('fleet.liveMap.speed', { speed: selected.speedKmh }) }} ·
-            {{ optionsStore.getOptionLabel('liveSituation', selected.situation) }}
-            <template v-if="selected.delayMin !== null">
-              · {{ delayLabel(selected.delayMin) }}
-            </template>
-          </p>
-          <p v-if="selected.alertCount || selected.outOfZone" class="text-xs text-destructive">
-            <template v-if="selected.alertCount">
-              {{ t('fleet.liveMap.alertCount', { count: selected.alertCount }) }}
-            </template>
-            <template v-if="selected.alertCount && selected.outOfZone"> · </template>
-            <template v-if="selected.outOfZone">
-              {{
-                selected.corridorGapM !== null
-                  ? t('fleet.liveMap.outOfCorridor', {
-                      km: formatNumber(selected.corridorGapM / 1000, 1)
-                    })
-                  : t('fleet.liveMap.outOfSites')
-              }}
-            </template>
-          </p>
-          <table v-if="selected.stops.length" class="w-full text-sm">
-            <thead class="text-xs text-muted-foreground">
-              <tr>
-                <th class="text-left font-normal py-1">{{ t('fleet.liveMap.stop') }}</th>
-                <th class="text-right font-normal py-1">{{ t('fleet.liveMap.planned') }}</th>
-                <th class="text-right font-normal py-1">{{ t('fleet.liveMap.expected') }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="(stop, index) in selected.stops"
-                :key="index"
-                class="border-t border-border"
-              >
-                <td class="py-1 text-card-foreground">
-                  <Check v-if="stop.passed" class="inline w-4 h-4 text-primary" />
-                  {{ stop.siteName }}
-                </td>
-                <td class="py-1 text-right text-muted-foreground">{{ time(stop.plannedAt) }}</td>
-                <td
-                  class="py-1 text-right"
-                  :class="
-                    stop.expectedAt > stop.plannedAt ? 'text-destructive' : 'text-card-foreground'
-                  "
-                >
-                  {{ time(stop.expectedAt) }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <p v-else class="text-sm text-muted-foreground">{{ t('fleet.liveMap.noTrip') }}</p>
         </section>
       </div>
     </div>

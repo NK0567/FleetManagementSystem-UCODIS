@@ -4,6 +4,8 @@ import { seedAudit } from '../seedAudit'
 export interface CompetenceRow extends MockRow {
   name: string
   active: boolean
+  /** Hourly labour rate of this specialty; the workshop's single rate applies when empty. */
+  hourlyRate?: number | null
 }
 
 const SEED: Omit<CompetenceRow, keyof typeof seedAudit>[] = [
@@ -15,7 +17,8 @@ const SEED: Omit<CompetenceRow, keyof typeof seedAudit>[] = [
   {
     no: 'ELECTRICAL',
     name: 'Électricité',
-    active: true
+    active: true,
+    hourlyRate: 12_000
   },
   {
     no: 'TYRES',
@@ -25,7 +28,8 @@ const SEED: Omit<CompetenceRow, keyof typeof seedAudit>[] = [
   {
     no: 'TANKER',
     name: 'Citerne et équipements de chargement',
-    active: true
+    active: true,
+    hourlyRate: 15_000
   }
 ]
 

@@ -130,6 +130,8 @@ export interface WorkOrderApi {
   /** Imported orders only: whether a person still has to confirm the subsystem. */
   nomenclatureState: 'to_confirm' | 'confirmed' | null
   providerName: string
+  /** Handed over to an outside garage and not back yet, on an order still running. */
+  atExternalWorkshop: boolean
   subcontractingCost: number
   totalCost: number
   status: WorkOrderStatus
@@ -140,4 +142,9 @@ export interface WorkOrderApi {
   modifiedBy: string
 }
 
-export type WorkOrderSearchColumn = 'no' | 'vehiclePlate' | 'symptom' | 'no,vehiclePlate,symptom'
+export type WorkOrderSearchColumn =
+  | 'no'
+  | 'vehiclePlate'
+  | 'symptom'
+  | 'providerName'
+  | 'no,vehiclePlate,symptom,providerName'

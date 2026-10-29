@@ -1,6 +1,9 @@
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { Plus, TriangleAlert } from '@lucide/vue'
+import { apiErrorMessage } from '@/core/api/apiError'
+import { usePermissions } from '@/composables/usePermissions'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
 import { useListCellFormatters } from '@/composables/useListCellFormatters'
 import { useListPage } from '@/composables/useListPage'
@@ -10,11 +13,48 @@ import { maintenancePlanService } from '../services/maintenancePlanService'
 import { useMaintenancePlanStore } from '../stores/maintenancePlanStore'
 import type {
   MaintenancePlanApi,
-  MaintenancePlanSearchColumn
+  MaintenancePlanSearchColumn,
+  PlanCoverageApi
 } from '../types/maintenancePlan.types'
 
 const { t } = useI18n()
 const store = useMaintenancePlanStore()
+const { canUpdate: canUpdatePlan } = usePermissions('MAINTENANCEPLAN')
+const coverage = ref<PlanCoverageApi | null>(null)
+const coverageWorking = ref(false)
+const coverageError = ref<string | null>(null)
+
+async function loadCoverage() {
+  coverage.value = await maintenancePlanService.coverage().catch(() => null)
+}
+
+onMounted(loadCoverage)
+watch(() => store.items, loadCoverage)
+
+async function createForModel(code: string) {
+  coverageWorking.value = true
+  coverageError.value = null
+  try {
+    onCreated(await maintenancePlanService.createForModel(code))
+  } catch (error) {
+    coverageError.value = apiErrorMessage(error, t('maintenance.maintenancePlans.coverage.error'))
+  } finally {
+    coverageWorking.value = false
+  }
+}
+
+async function reactivate(no: string) {
+  coverageWorking.value = true
+  coverageError.value = null
+  try {
+    await maintenancePlanService.update(no, { active: true })
+    await store.fetchItems(store.pagination.page, store.pagination.limit)
+  } catch (error) {
+    coverageError.value = apiErrorMessage(error, t('maintenance.maintenancePlans.coverage.error'))
+  } finally {
+    coverageWorking.value = false
+  }
+}
 const { formatDateTime, booleanLabel, formatInteger } = useListCellFormatters()
 
 const searchColumnOptions = computed<{ value: MaintenancePlanSearchColumn; label: string }[]>(
@@ -187,9 +227,78 @@ const {
 
       <FormAlerts
         class="mx-4"
-        :error="deleteError ?? exportError"
-        @clear:error="deleteError = exportError = null"
+        :error="coverageError ?? deleteError ?? exportError"
+        @clear:error="coverageError = deleteError = exportError = null"
       />
+      <div
+        v-if="coverage && (coverage.modelsWithoutPlan.length || coverage.inactivePlansInUse.length)"
+        class="mx-4 mt-2 flex items-start gap-2.5 rounded border border-warning/30 bg-warning/10 px-3 py-2.5 text-warning"
+      >
+        <TriangleAlert class="w-4 h-4 shrink-0 mt-0.5" />
+        <div class="flex-1 min-w-0 space-y-2">
+          <template v-if="coverage.modelsWithoutPlan.length">
+            <p class="text-xs font-medium">
+              {{
+                t(
+                  'maintenance.maintenancePlans.coverage.modelsWithoutPlan',
+                  coverage.modelsWithoutPlan.length
+                )
+              }}
+            </p>
+            <div class="flex flex-wrap gap-1.5">
+              <component
+                :is="canInsert ? 'button' : 'span'"
+                v-for="model in coverage.modelsWithoutPlan"
+                :key="model.modelCode"
+                :type="canInsert ? 'button' : undefined"
+                class="inline-flex items-center gap-1 rounded-full border border-warning/30 bg-card px-2.5 py-1 text-xs font-medium"
+                :class="canInsert ? 'cursor-pointer hover:bg-warning/10 disabled:opacity-60' : ''"
+                :disabled="canInsert ? coverageWorking : undefined"
+                @click="canInsert && createForModel(model.modelCode)"
+              >
+                <Plus v-if="canInsert" class="w-3 h-3" />
+                {{ model.modelName }}
+                <span class="opacity-70">
+                  {{ t('maintenance.maintenancePlans.coverage.vehicles', model.vehicleCount) }}
+                </span>
+              </component>
+            </div>
+          </template>
+          <template v-if="coverage.inactivePlansInUse.length">
+            <p class="text-xs font-medium">
+              {{
+                t(
+                  'maintenance.maintenancePlans.coverage.inactivePlans',
+                  coverage.inactivePlansInUse.length
+                )
+              }}
+            </p>
+            <div class="flex flex-wrap gap-1.5">
+              <component
+                :is="canUpdatePlan ? 'button' : 'span'"
+                v-for="plan in coverage.inactivePlansInUse"
+                :key="plan.no"
+                :type="canUpdatePlan ? 'button' : undefined"
+                class="inline-flex items-center gap-1 rounded-full border border-warning/30 bg-card px-2.5 py-1 text-xs font-medium"
+                :class="
+                  canUpdatePlan ? 'cursor-pointer hover:bg-warning/10 disabled:opacity-60' : ''
+                "
+                :disabled="canUpdatePlan ? coverageWorking : undefined"
+                @click="canUpdatePlan && reactivate(plan.no)"
+              >
+                {{
+                  canUpdatePlan
+                    ? t('maintenance.maintenancePlans.coverage.reactivate', { name: plan.name })
+                    : plan.name
+                }}
+                <span class="opacity-70">
+                  {{ t('maintenance.maintenancePlans.coverage.vehicles', plan.vehicleCount) }}
+                </span>
+              </component>
+            </div>
+          </template>
+        </div>
+      </div>
 
       <ListPageLayout
         :filter-panel-open="showFilterPanel"

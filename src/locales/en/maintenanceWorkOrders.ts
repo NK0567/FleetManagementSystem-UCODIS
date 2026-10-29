@@ -140,5 +140,6 @@ export default {
   'maintenance.workOrders.progress.nomenclaturePending':
     'Imported history "{source}": proposed mapping {name}, to confirm.',
   'maintenance.workOrders.progress.nomenclatureConfirmed':
-    'Mapping with the nomenclature confirmed by {by} on {date}.'
+    'Mapping with the nomenclature confirmed by {by} on {date}.',
+  'maintenance.workOrders.listView.external': 'At an outside garage'
 }

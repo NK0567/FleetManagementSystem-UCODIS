@@ -29,7 +29,8 @@ const { draft, isRequired, expose } = useEntityForm({
   empty: () => ({
     no: '',
     name: '',
-    active: true
+    active: true,
+    hourlyRate: null as number | null
   }),
   createOnly: ['no'],
   required: ['no', 'name'],
@@ -47,7 +48,7 @@ const expandedSections = ref({ general: true, audit: false })
 const { hasValidationError } = useFormValidationUi({
   validationErrors: () => props.validationErrors,
   expandedSections,
-  fieldSections: { no: 'general', name: 'general' },
+  fieldSections: { no: 'general', name: 'general', hourlyRate: 'general' },
   fieldValues: () => ({ ...draft })
 })
 
@@ -85,6 +86,16 @@ defineExpose(expose)
         </BaseFormField>
       </div>
       <div class="space-y-3 min-w-0">
+        <BaseFormField field="hourlyRate" :label="t('maintenance.competences.form.hourlyRate')">
+          <FormInput
+            v-model="draft.hourlyRate"
+            type="number"
+            :min="0"
+            :step="1000"
+            :disabled="disabled"
+            :invalid="hasValidationError('hourlyRate')"
+          />
+        </BaseFormField>
         <BaseFormField :label="t('maintenance.competences.form.active')">
           <ToggleSwitch v-model="draft.active" :disabled="disabled" />
         </BaseFormField>

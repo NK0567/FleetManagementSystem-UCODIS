@@ -57,8 +57,8 @@ describe('work orders', () => {
       vehiclePlate: '4028 TBA',
       subsystemName: 'Électricité et électronique',
       labourHours: 5,
-      labourCost: 50_000,
-      totalCost: 50_000
+      labourCost: 60_000,
+      totalCost: 60_000
     })
     expect((await order('OT-2026-0003')).status).toBe('diagnosed')
     expect((await order('OT-2026-0001')).status).toBe('closed')
@@ -70,7 +70,7 @@ describe('work orders', () => {
     expect((await declare({}, 'DIR001')).status).toBe(403)
     const created = (await declare({}, 'MNT001')).data.data as WorkOrderApi
     expect(created).toMatchObject({
-      no: 'OT-2026-0006',
+      no: 'OT-2026-0007',
       status: 'open',
       declaredBy: 'MNT001',
       odometerKmAtOpening: 201_300

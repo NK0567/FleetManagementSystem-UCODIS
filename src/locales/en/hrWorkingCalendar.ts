@@ -1,7 +1,6 @@
 export default {
   'hr.workingCalendar.title': 'Working calendar',
-  'hr.workingCalendar.subtitle':
-    "The company's working days and hours. They drive the leave day count and everyone's schedule.",
+  'hr.workingCalendar.subtitle': 'Company working days and hours.',
   'hr.workingCalendar.lastModified': 'Modified on {date} by {user}',
   'hr.workingCalendar.loadError': 'The working calendar could not be loaded.',
   'hr.workingCalendar.saveError': 'The working calendar could not be saved.',

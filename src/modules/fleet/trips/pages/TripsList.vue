@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
@@ -7,8 +7,9 @@ import { useListCellFormatters } from '@/composables/useListCellFormatters'
 import { useListPage } from '@/composables/useListPage'
 import { getListCellDisplay } from '@/utils/listCellDisplay'
 import { tripApi } from '../api/tripApi'
+import { tripService } from '../services/tripService'
 import { useTripStore, type TripListView } from '../stores/tripStore'
-import type { TripApi, TripSearchColumn } from '../types/trip.types'
+import type { TripApi, TripSearchColumn, TripSummaryApi } from '../types/trip.types'
 
 const { t } = useI18n()
 const store = useTripStore()
@@ -74,6 +75,13 @@ const tableColumns = computed<TableColumn[]>(() => [
     formatter: (value, item) => `${formatInteger(value, item)} / ${(item as TripApi).stopCount}`
   },
   {
+    sortKey: 'missedStopCount',
+    label: t('fleet.trips.col.missedStopCount'),
+    minW: '110px',
+    align: 'right',
+    formatter: formatInteger
+  },
+  {
     sortKey: 'distanceKm',
     label: t('fleet.trips.col.distanceKm'),
     minW: '110px',
@@ -133,6 +141,12 @@ const filterDefs: FilterFieldDef[] = [
     valueType: 'string',
     kind: 'reference',
     referenceKey: 'drivers'
+  },
+  {
+    field: 'hasMissedStops',
+    labelKey: 'fleet.trips.filter.hasMissedStops',
+    valueType: 'boolean',
+    kind: 'boolean'
   }
 ]
 
@@ -202,6 +216,23 @@ const {
   exportFileBaseName: 'trips',
   exportApi: tripApi.exportExcel
 })
+
+const summary = ref<TripSummaryApi | null>(null)
+
+async function loadSummary() {
+  summary.value = await tripService.summary().catch(() => null)
+}
+
+onMounted(loadSummary)
+watch(() => store.items, loadSummary)
+
+/** The indicator opens the trips that left a stop behind. */
+function showMissedStops() {
+  onUpdateUserFilters([
+    ...store.userFilters.filter((filter) => filter.field !== 'hasMissedStops'),
+    { field: 'hasMissedStops', valueType: 'boolean', value: true }
+  ])
+}
 </script>
 
 <template>
@@ -251,6 +282,21 @@ const {
         </template>
       </ListPageToolbar>
 
+      <p v-if="summary" class="mx-4 mt-2 text-xs text-muted-foreground">
+        <button
+          type="button"
+          class="cursor-pointer hover:underline"
+          :class="summary.missedStops ? 'text-destructive font-medium' : ''"
+          @click="showMissedStops"
+        >
+          {{
+            t('fleet.trips.missedStopsSummary', {
+              stops: summary.missedStops,
+              trips: summary.tripsWithMissedStops
+            })
+          }}
+        </button>
+      </p>
       <FormAlerts class="mx-4" :error="exportError" @clear:error="exportError = null" />
 
       <ListPageLayout

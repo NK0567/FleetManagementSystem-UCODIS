@@ -10,6 +10,7 @@ import { todayIso } from '@/utils/date'
 import { formatNumber } from '@/utils/format'
 import VehicleForm from '../components/VehicleForm.vue'
 import VehicleOwnershipSection from '../components/VehicleOwnershipSection.vue'
+import VehicleOnboardReadings from '@/modules/fleet/live-map/components/VehicleOnboardReadings.vue'
 import VehicleTelematicsJournal from '@/modules/fleet/live-map/components/VehicleTelematicsJournal.vue'
 import { vehicleService } from '../services/vehicleService'
 import { useVehicleStore } from '../stores/vehicleStore'
@@ -266,6 +267,7 @@ const dialogTitle = computed(() => (dialog.value ? t(`fleet.vehicles.action.${di
           />
           <VehicleOwnershipSection v-if="item && canReadCosts" :vehicle-no="item.no" />
           <VehicleCostSection v-if="item && canReadCosts" :vehicle-no="item.no" />
+          <VehicleOnboardReadings v-if="item && canReadTelematics" :vehicle-no="item.no" />
           <VehicleTelematicsJournal v-if="item && canReadTelematics" :vehicle-no="item.no" />
         </div>
       </div>

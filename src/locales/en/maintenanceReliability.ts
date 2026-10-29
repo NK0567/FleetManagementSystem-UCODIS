@@ -84,5 +84,17 @@ export default {
   'maintenance.reliability.lostRatio': 'Human over technical ratio',
   'maintenance.reliability.days': '{days} d',
   'maintenance.reliability.byMode': 'Most frequent failure modes',
-  'maintenance.reliability.byCause': 'Most frequent root causes'
+  'maintenance.reliability.byCause': 'Most frequent root causes',
+  'maintenance.reliability.mtbfBySubsystem': 'MTBF by subsystem',
+  'maintenance.reliability.subsystem': 'Subsystem',
+  'maintenance.reliability.failures': 'Failures',
+  'maintenance.reliability.breakdownPlace': 'Breakdowns on the road or at the workshop',
+  'maintenance.reliability.breakdownPlaceLine': '{road} roadside repair(s), {workshop} breakdown(s) handled at the workshop',
+  'maintenance.reliability.lostDaysPer10000Km': 'Days lost per 10,000 km',
+  'maintenance.reliability.noLostDays': 'No day lost on a vehicle that ran in the period.',
+  'maintenance.reliability.vehicle': 'Vehicle',
+  'maintenance.reliability.kmRun': 'Km run',
+  'maintenance.reliability.daysLost': 'Days lost',
+  'maintenance.reliability.per10000Km': 'Per 10,000 km',
+  'maintenance.reliability.daysValue': '{days} d'
 }

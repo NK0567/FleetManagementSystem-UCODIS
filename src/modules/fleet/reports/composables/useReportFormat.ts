@@ -18,7 +18,7 @@ export interface ReportTable {
 }
 
 const NUMERIC = new Set(['integer', 'decimal', 'percent', 'amount', 'measure'])
-const DECIMAL_UNITS = new Set(['l100', 'years'])
+const DECIMAL_UNITS = new Set(['l100', 'years', 'days'])
 
 const asNumber = (value: ReportCell) => (typeof value === 'number' ? value : null)
 

@@ -33,6 +33,12 @@ export interface ReliabilityApi extends MaintenanceSteering {
   byCause: NamedCount[]
   lostDaysByFamily: { family: string; days: number; cost: number }[]
   topVehicles: { plate: string; failures: number; cost: number }[]
+  /** Fleet km of the period over the failures of each subsystem. */
+  mtbfBySubsystem: { name: string; failures: number; mtbfKm: number | null }[]
+  /** Breakdowns handled on the road by the mobile team against those brought to the workshop. */
+  breakdownPlace: { road: number; workshop: number; roadShare: number | null }
+  /** Days a vehicle was lost in the period for every 10 000 km it ran in it. */
+  lostDaysPer10000Km: { plate: string; km: number; lostDays: number; ratio: number | null }[]
 }
 
 export interface MaintenanceDashboardApi extends Pick<

@@ -1,6 +1,8 @@
 import {
   averageLitersPer100,
+  co2GramsPerKm,
   consumptionPeriods,
+  ECO_DRIVING_EVENT_TYPES,
   consumptionReference,
   deductionIssues,
   excessCost,
@@ -13,7 +15,8 @@ import {
 import type {
   FuelConsumptionApi,
   FuelConsumptionSummary,
-  FuelGapFile
+  FuelGapFile,
+  VehicleEmissionsApi
 } from '@/modules/fleet/fuel-consumption/types/fuelConsumption.types'
 import { employeeFullName } from '@/modules/hr/employees/domain/employee'
 import { nowIso } from '../../clock'
@@ -31,6 +34,7 @@ import { FLEET_MESSAGES } from './messages'
 import { fuelRefillsApi } from './fuelRefills'
 import { vehicleReference } from './fuelReferences'
 import { fleetSettings } from './settings'
+import { telematicsEventsApi } from './telematicsEvents'
 
 const DEDUCTION_MESSAGES: Record<DeductionIssue, (typeof FLEET_MESSAGES)['gapClosed']> = {
   causeNotChargeable: FLEET_MESSAGES.gapDeductionCause,
@@ -147,6 +151,50 @@ export function fuelSummary(db: MockDatabase, language: MockLanguage): FuelConsu
   }
 }
 
+/**
+ * Emissions of each vehicle that took fuel: CO2 from the litres put in its tank, grams per km
+ * over its measured periods, and the events of the behaviours that raised its consumption.
+ */
+export function fuelEmissionsApi(db: MockDatabase, language: MockLanguage): VehicleEmissionsApi[] {
+  const co2PerL = fleetSettings(db).fuel.co2GramsPerL
+  const vehicles = new Map(db.vehicles.all().map((vehicle) => [vehicle.no, vehicle]))
+  const refills = fuelRefillsApi(db, language)
+  const periods = fuelConsumptionApi(db)
+  const ecoTypes = new Set<string>(ECO_DRIVING_EVENT_TYPES)
+  const events = telematicsEventsApi(db).filter((event) => ecoTypes.has(event.eventTypeNo))
+  return [...new Set(refills.map((refill) => refill.vehicleNo))]
+    .map((vehicleNo) => {
+      const liters = refills
+        .filter((refill) => refill.vehicleNo === vehicleNo)
+        .reduce((total, refill) => total + refill.liters, 0)
+      const vehicle = vehicles.get(vehicleNo)
+      return {
+        vehicleNo,
+        vehiclePlate: vehicle?.plate ?? vehicleNo,
+        fuelType: vehicle?.fuelType ?? null,
+        liters: Math.round(liters),
+        co2Kg: Math.round((liters * co2PerL) / 1000),
+        co2GramsPerKm: co2GramsPerKm(
+          periods.filter((period) => period.vehicleNo === vehicleNo),
+          co2PerL
+        ),
+        ecoEvents: events
+          .filter((event) => event.vehicleNo === vehicleNo)
+          .sort((a, b) => b.occurredAt.localeCompare(a.occurredAt))
+          .map((event) => ({
+            no: event.no,
+            eventTypeName: event.eventTypeName,
+            occurredAt: event.occurredAt,
+            value: event.value,
+            unit: event.unit,
+            siteName: event.siteName,
+            driverName: event.driverName
+          }))
+      }
+    })
+    .sort((a, b) => b.co2Kg - a.co2Kg || a.vehiclePlate.localeCompare(b.vehiclePlate))
+}
+
 export function registerFuelConsumptionHandlers(router: MockRouter, db: MockDatabase): void {
   function periodOf(request: MockRequest) {
     const period = fuelConsumptionApi(db).find((row) => row.no === routeParam(request, 'no'))
@@ -176,6 +224,12 @@ export function registerFuelConsumptionHandlers(router: MockRouter, db: MockData
     '/fleet/fuel-consumption/summary',
     { feature: 'FUELCONSUMPTION', action: 'read' },
     (request) => ok(fuelSummary(db, request.language))
+  )
+
+  router.get(
+    '/fleet/fuel-consumption/emissions',
+    { feature: 'FUELCONSUMPTION', action: 'read' },
+    (request) => ok(fuelEmissionsApi(db, request.language))
   )
 
   registerListResource(router, {

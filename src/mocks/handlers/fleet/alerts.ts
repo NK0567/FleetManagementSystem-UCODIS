@@ -2,6 +2,7 @@ import { anomalies, blockingAnomalies } from '@/modules/fleet/check-points/domai
 import {
   alertNotifications,
   alertStatus,
+  averageHandlingHours,
   isEscalated,
   isVisibleTo,
   type AlertCategory,
@@ -390,6 +391,14 @@ export function registerAlertsHandlers(router: MockRouter, db: MockDatabase): vo
     }
     return ok(alertsApi(db, request).find((row) => row.no === alert.no))
   }
+
+  router.get('/fleet/alerts/stats', { feature: 'ALERT', action: 'read' }, (request) => {
+    const alerts = alertsApi(db, request)
+    return ok({
+      handled: alerts.filter((alert) => alert.handledAt).length,
+      averageHandlingHours: averageHandlingHours(alerts)
+    })
+  })
 
   registerListResource(router, {
     basePath: '/fleet/alerts',

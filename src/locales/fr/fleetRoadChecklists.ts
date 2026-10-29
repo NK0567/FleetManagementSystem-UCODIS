@@ -28,5 +28,14 @@ export default {
   'fleet.roadChecklists.anomalies': 'Aucune anomalie | {n} anomalie | {n} anomalies',
   'fleet.roadChecklists.form.takenBy': 'Relevé par',
   'fleet.roadChecklists.form.resultsHint':
-    'Une anomalie sur un point bloquant empêche le départ du véhicule.'
+    'Une anomalie sur un point bloquant empêche le départ du véhicule.',
+  'fleet.roadChecklists.col.signed': 'Signée',
+  'fleet.roadChecklists.col.syncedAt': 'Synchronisée le',
+  'fleet.roadChecklists.col.capturedOffline': 'Saisie hors réseau',
+  'fleet.roadChecklists.form.signature': 'Signature du conducteur',
+  'fleet.roadChecklists.form.sync': 'Synchronisation',
+  'fleet.roadChecklists.signedBy': 'Signée par {name} le {date}',
+  'fleet.roadChecklists.unsigned': 'Non signée',
+  'fleet.roadChecklists.syncedOnline': 'Synchronisée le {date}',
+  'fleet.roadChecklists.syncedOffline': 'Saisie hors réseau, synchronisée le {date}'
 }

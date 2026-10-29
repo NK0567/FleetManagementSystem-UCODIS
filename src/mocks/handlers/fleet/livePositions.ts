@@ -29,6 +29,7 @@ import { routeDeviationsApi } from './routeDeviations'
 import { fleetSettings } from './settings'
 import { sitesApi } from './sites'
 import { SUPERVISION_MESSAGES } from './supervisionMessages'
+import { onboardReader, onboardReadings } from './onboardReadings'
 import { telematicsEventsApi } from './telematicsEvents'
 import { tripSpan, tripTrack, type TripTrackStop } from './tripTracking'
 import { vehicleStatuses } from './vehicleState'
@@ -136,6 +137,10 @@ export function livePositions(db: MockDatabase, request?: MockRequest): LivePosi
       }
       const report = lastReport(track, now, DEAD_ZONES)
       const signalLost = minutesBetween(report.at, now) >= signalLossMin
+      // The engine and the gauge as the unit read them when it last reported.
+      const onboard = onboardReader(db, vehicle, trip)(report.at)
+      const immobilized =
+        status === 'in_maintenance' || status === 'immobilized' || status === 'out_of_service'
       const next = fix?.nextStop != null ? stops[fix.nextStop] : undefined
       const lastStop = stops.at(-1)
       const driverNo = trip?.driverNo ?? links.assignmentByVehicle.get(vehicle.no)?.employeeNo
@@ -148,19 +153,24 @@ export function livePositions(db: MockDatabase, request?: MockRequest): LivePosi
       return {
         vehicleNo: vehicle.no,
         plate: vehicle.plate,
+        make: vehicle.make,
+        model: vehicle.model,
         driverName: driverNo ? (names.get(driverNo) ?? driverNo) : '',
         tripNo: trip?.no ?? null,
         routeName: trip ? (routes.get(trip.routeTemplateNo) ?? '') : '',
         situation: liveSituation({
-          immobilized:
-            status === 'in_maintenance' || status === 'immobilized' || status === 'out_of_service',
+          immobilized,
           signalLost,
           onTrip: !!trip,
-          moving: !!fix && fix.speedKmh > 0
+          moving: !!fix && fix.speedKmh > 0,
+          engineOn: !immobilized && onboard.engineOn
         }),
+        engineOn: !immobilized && onboard.engineOn,
+        fuelLevelPct: onboard.fuelLevelPct,
         ...report.position,
         speedKmh: signalLost ? 0 : (fix?.speedKmh ?? 0),
         reportedAt: report.at,
+        placeNo: place?.no ?? null,
         placeName: place?.name ?? '',
         nextStopName: next?.siteName ?? '',
         nextStopExpectedAt: fix?.nextStop != null ? (arrivals[fix.nextStop] ?? null) : null,
@@ -325,6 +335,27 @@ export function registerLivePositionsHandlers(router: MockRouter, db: MockDataba
       const { from, to } = readPeriod(request)
       detectRouteDeviations(db, simulatedNow())
       return ok(vehicleJournal(db, routeParam(request, 'vehicleNo'), from, to))
+    }
+  )
+
+  router.get(
+    '/fleet/telematics-readings/:vehicleNo',
+    { feature: 'TELEMATICS', action: 'read' },
+    (request) => {
+      const vehicle = db.vehicles.findOrFail(routeParam(request, 'vehicleNo'))
+      const position = livePositions(db).find((row) => row.vehicleNo === vehicle.no)
+      const trip = db.trips
+        .all()
+        .find((row) => row.status === 'in_progress' && row.vehicleNo === vehicle.no)
+      return ok(
+        onboardReadings(
+          db,
+          vehicle,
+          trip,
+          position?.reportedAt ?? null,
+          position?.situation === 'signal_lost'
+        )
+      )
     }
   )
 

@@ -1,7 +1,6 @@
 export default {
   'planning.billing.title': 'Facturation du transport',
-  'planning.billing.subtitle':
-    "Le montant vient du tarif de celui qui paie le fret, l'ordonnateur ou le destinataire. Un forfait de trajet est compté une fois et partagé entre ses livraisons. Marquer la facture fige le montant.",
+  'planning.billing.subtitle': 'Montants à facturer pour chaque livraison.',
   'planning.billing.loading': 'Chargement des livraisons à facturer…',
   'planning.billing.empty': 'Aucune livraison à facturer.',
   'planning.billing.loadError': 'La facturation n’a pas pu être affichée.',

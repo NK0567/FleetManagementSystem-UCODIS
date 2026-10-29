@@ -485,6 +485,46 @@ export const PLANNING_MESSAGES = {
     fr: 'Cette ligne est déjà réglée.',
     en: 'This line is already settled.'
   },
+  correctionNoNonconformity: {
+    fr: 'Cette ligne n’a pas de non-conformité à annuler.',
+    en: 'This line has no nonconformity to cancel.'
+  },
+  correctionLoadingOver: {
+    fr: 'La non-conformité ne s’annule que tant que l’ordre est en cours de chargement.',
+    en: 'A nonconformity is cancelled only while the order is being loaded.'
+  },
+  correctionReplanned: {
+    fr: 'Cette livraison est déjà replanifiée : elle ne se corrige plus.',
+    en: 'This delivery is already replanned: it can no longer be corrected.'
+  },
+  correctionNotDeclared: {
+    fr: 'Ce point n’a pas de livraison déclarée à annuler.',
+    en: 'This point has no declared delivery to cancel.'
+  },
+  correctionReceptionAnswered: {
+    fr: 'Le destinataire a déjà confirmé ou contesté sa réception : la déclaration ne s’annule plus.',
+    en: 'The recipient has already confirmed or contested the receipt: the declaration can no longer be cancelled.'
+  },
+  correctionGoodsBack: {
+    fr: 'La marchandise est déjà remise à l’entrepôt : elle ne se corrige plus.',
+    en: 'The goods are already handed back to the warehouse: they can no longer be corrected.'
+  },
+  correctionNoRefusal: {
+    fr: 'Cette ligne n’a pas de refus à annuler.',
+    en: 'This line has no refusal to cancel.'
+  },
+  correctionRefusedByRecipient: {
+    fr: 'Le destinataire a refusé lui-même depuis son lien : ce refus ne s’annule pas à sa place.',
+    en: 'The recipient refused from his own link: this refusal is not cancelled on his behalf.'
+  },
+  correctionNextStarted: {
+    fr: 'Le point suivant est déjà commencé : le refus ne s’annule plus.',
+    en: 'The next point has already started: the refusal can no longer be cancelled.'
+  },
+  executionNothingToRetry: {
+    fr: 'Ce point n’a pas de livraison reportée à retenter.',
+    en: 'This point has no postponed delivery to retry.'
+  },
   executionGapBlocked: {
     fr: 'L’écart dépasse la tolérance : une justification est obligatoire.',
     en: 'The gap exceeds the tolerance: a justification is required.'

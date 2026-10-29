@@ -1,5 +1,5 @@
 import type { MockDatabase } from '../../db/database'
-import { MOCK_ACCOUNTS } from '../../fixtures/auth/users'
+import { toAccount } from '../../auth/accounts'
 import { readBody, routeParam, stampModified } from '../../http/crudResource'
 import { notFound, unprocessable } from '../../http/errors'
 import { invalidField } from '../../http/input'
@@ -24,8 +24,10 @@ export interface PerimeterOptionsApi {
 }
 
 function perimetersApi(db: MockDatabase): UserPerimeterApi[] {
-  return MOCK_ACCOUNTS.filter((account) => account.active && account.profile !== 'DRIVER').map(
-    (account) => {
+  const accounts = db.userAccounts.all().map(toAccount)
+  return accounts
+    .filter((account) => account.active && account.profile !== 'DRIVER')
+    .map((account) => {
       const row = db.perimeters.find(account.code)
       return {
         code: account.code,
@@ -34,8 +36,7 @@ function perimetersApi(db: MockDatabase): UserPerimeterApi[] {
         depotNos: row?.depotNos ?? [],
         regions: row?.regions ?? []
       }
-    }
-  )
+    })
 }
 
 function optionsApi(db: MockDatabase): PerimeterOptionsApi {
@@ -73,7 +74,7 @@ export function registerPerimeterAdminHandlers(router: MockRouter, db: MockDatab
     { feature: 'PLANNINGSETTINGS', action: 'update' },
     (request) => {
       const code = routeParam(request, 'code')
-      if (!MOCK_ACCOUNTS.some((account) => account.code === code)) {
+      if (!db.userAccounts.find(code)) {
         throw notFound(CIRCUIT_MESSAGES.perimeterUnknownUser)
       }
       const body = readBody(request)

@@ -1,3 +1,4 @@
+import type { FuelType } from '@/modules/fleet/vehicles/types/vehicle.types'
 import type { FuelGapStatus, ReferenceSource } from '../domain/consumption'
 
 /** What was decided about a consumption gap, kept under the stable key of its period. */
@@ -60,3 +61,26 @@ export interface FuelConsumptionSummary {
 }
 
 export type FuelConsumptionSearchColumn = 'vehiclePlate' | 'driverName' | 'vehiclePlate,driverName'
+
+/** An event of the vehicle that raised its consumption (harsh acceleration, long idling). */
+export interface EcoDrivingEvent {
+  no: string
+  eventTypeName: string
+  occurredAt: string
+  value: number | null
+  unit: string | null
+  siteName: string
+  driverName: string
+}
+
+/** What a vehicle emitted, from the litres put in its tank, and how it was driven. */
+export interface VehicleEmissionsApi {
+  vehicleNo: string
+  vehiclePlate: string
+  fuelType: FuelType | null
+  liters: number
+  co2Kg: number
+  /** Over the full-to-full periods measured; null without a distance. */
+  co2GramsPerKm: number | null
+  ecoEvents: EcoDrivingEvent[]
+}

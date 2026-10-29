@@ -25,7 +25,9 @@ const store = useMySpaceStore()
 
 const takenAt = ref(nowIsoDateTime().slice(0, 16))
 const stage = ref<NonNullable<MyChecklistInput['stage']>>('stop')
+const location = ref('')
 const results = ref<CheckResult[]>([])
+const signed = ref(false)
 const STAGES = ['departure', 'stop', 'arrival'] as const
 
 const syncError = ref<string | null>(null)
@@ -57,6 +59,8 @@ function resetResults() {
     comment: ''
   }))
   takenAt.value = nowIsoDateTime().slice(0, 16)
+  location.value = ''
+  signed.value = false
 }
 
 watch(() => store.tour?.tripNo, resetResults)
@@ -96,8 +100,10 @@ async function submit() {
   const input: MyChecklistInput = {
     takenAt: takenAt.value,
     stage: stage.value,
+    ...(location.value.trim() && { location: location.value.trim() }),
     tripNo: store.tour?.tripNo,
-    results: results.value.map(({ pointNo, result, comment }) => ({ pointNo, result, comment }))
+    results: results.value.map(({ pointNo, result, comment }) => ({ pointNo, result, comment })),
+    ...(signed.value && { signed: true, signedAt: nowIsoDateTime() })
   }
   // Without network the checklist stays on the phone and leaves as soon as the network is back.
   if (!offline.online.value && store.tour) {
@@ -210,6 +216,14 @@ onMounted(async () => {
           <BaseFormField field="takenAt" :label="t('selfService.checklist.takenAt')" required>
             <FormInput v-model="takenAt" type="datetime-local" class="h-11" :invalid="!takenAt" />
           </BaseFormField>
+          <BaseFormField field="location" :label="t('selfService.checklist.location')">
+            <FormInput
+              v-model="location"
+              class="h-11"
+              :maxlength="120"
+              :placeholder="t('selfService.checklist.locationPlaceholder')"
+            />
+          </BaseFormField>
           <BaseFormField :label="t('selfService.checklist.stage')" required>
             <div class="grid grid-cols-3 gap-2" role="group">
               <button
@@ -301,6 +315,13 @@ onMounted(async () => {
             />
           </div>
         </section>
+
+        <label
+          class="bg-card border border-border rounded p-4 flex items-center gap-3 text-sm text-card-foreground"
+        >
+          <input v-model="signed" type="checkbox" class="h-5 w-5 accent-primary" />
+          {{ t('selfService.checklist.sign', { name: store.profile.fullName }) }}
+        </label>
 
         <p
           v-if="blocking"

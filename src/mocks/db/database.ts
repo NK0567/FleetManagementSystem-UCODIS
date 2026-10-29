@@ -1,5 +1,8 @@
 import { demoDayOffset } from '../clock'
 import { moduleTogglesCollection } from '../fixtures/settings/moduleToggles'
+import { userAccountsCollection } from '../fixtures/settings/userAccounts'
+import { activityLogCollection } from '../fixtures/settings/activityLog'
+import { companySettingsCollection } from '../fixtures/settings/company'
 import { orgUnitsCollection } from '../fixtures/hr/orgUnits'
 import { employeeCategoriesCollection } from '../fixtures/hr/employeeCategories'
 import { leaveTypesCollection } from '../fixtures/hr/leaveTypes'
@@ -89,7 +92,7 @@ import { createCollection, type CollectionContext } from './collection'
 import { clearStoredCollections } from './storage'
 
 /** Bump when fixtures change shape: every collection is then reseeded. */
-export const MOCK_SEED_VERSION = 58
+export const MOCK_SEED_VERSION = 59
 
 export function createDatabase(
   context: CollectionContext = {
@@ -101,6 +104,9 @@ export function createDatabase(
   const collections = {
     files: createCollection(filesCollection, context),
     moduleToggles: createCollection(moduleTogglesCollection, context),
+    userAccounts: createCollection(userAccountsCollection, context),
+    activityLog: createCollection(activityLogCollection, context),
+    companySettings: createCollection(companySettingsCollection, context),
     orgUnits: createCollection(orgUnitsCollection, context),
     employeeCategories: createCollection(employeeCategoriesCollection, context),
     leaveTypes: createCollection(leaveTypesCollection, context),

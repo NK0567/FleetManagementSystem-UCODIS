@@ -10,6 +10,16 @@ import { transportOrdersApi } from './transportOrders'
 /** Above this delay the arrival is flagged late. */
 const LATE_AFTER_MIN = 15
 
+/** The planned arrival shifted by the delay taken, flagged above the margin. */
+export function etaFrom(plannedArrival: string | null, delayMin: number | null) {
+  return {
+    expectedArrival:
+      plannedArrival && delayMin ? addMinutes(plannedArrival, delayMin) : plannedArrival,
+    delayMin,
+    late: delayMin !== null && delayMin > LATE_AFTER_MIN
+  }
+}
+
 /**
  * The estimated arrival follows the position of the vehicle (TRS02-US01): the planned arrival
  * shifted by the delay the vehicle has taken on its route, with the delay flagged.
@@ -20,13 +30,7 @@ export function orderEta(db: MockDatabase, order: TransportOrderRow) {
   const trip = order.tripNo ? db.trips.find(order.tripNo) : undefined
   const position = trip ? livePositions(db).find((row) => row.tripNo === trip.no) : undefined
   const delayMin = position?.delayMin ?? null
-  return {
-    plannedArrival: planned,
-    expectedArrival: planned && delayMin ? addMinutes(planned, delayMin) : planned,
-    delayMin,
-    late: delayMin !== null && delayMin > LATE_AFTER_MIN,
-    tracked: !!position
-  }
+  return { plannedArrival: planned, ...etaFrom(planned, delayMin), tracked: !!position }
 }
 
 export function registerEtaHandlers(router: MockRouter, db: MockDatabase): void {

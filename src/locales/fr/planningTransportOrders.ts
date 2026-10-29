@@ -216,7 +216,8 @@ export default {
   'planning.calendar.loadError': "Le calendrier n'a pas pu être chargé.",
   'planning.transportOrders.picker.recipient': 'Commandes de {name}',
   'planning.transportOrders.picker.allRecipients': 'Revenir à toutes les commandes',
-  'planning.transportOrders.picker.fullDelivery': "La commande {no} exige une livraison complète et n'est prise qu'en partie (lignes en moins ou quantité réduite). Vous pouvez continuer, ajouter ses autres lignes ou la retirer.",
+  'planning.transportOrders.picker.fullDelivery':
+    "La commande {no} exige une livraison complète et n'est prise qu'en partie (lignes en moins ou quantité réduite). Vous pouvez continuer, ajouter ses autres lignes ou la retirer.",
   'planning.transportOrders.picker.sameRecipient': 'Voir les autres commandes de ce destinataire',
   'planning.transportOrders.picker.line': 'Ligne {no}',
   'planning.transportOrders.lines.state.not_loaded': 'Non chargée',
@@ -263,7 +264,8 @@ export default {
   'planning.transportOrders.disputes.line': 'Ligne {no}',
   'planning.transportOrders.disputes.open': 'À traiter',
   'planning.transportOrders.disputes.handled': 'Traitée',
-  'planning.transportOrders.disputes.openCount': 'Aucune à traiter | 1 à traiter | {count} à traiter',
+  'planning.transportOrders.disputes.openCount':
+    'Aucune à traiter | 1 à traiter | {count} à traiter',
   'planning.transportOrders.disputes.allHandled': 'Toutes traitées',
   'planning.transportOrders.disputes.declared': 'Déclarée par le conducteur',
   'planning.transportOrders.disputes.contested': 'Contestée le',
@@ -283,22 +285,26 @@ export default {
   'planning.transportOrders.board.empty': 'Aucun ordre',
   'planning.transportOrders.loadError': 'Les ordres de transport n’ont pas pu être chargés.',
   'planning.deliveryNote.plannedHint': 'prévu, s’ouvre à la déclaration du conducteur',
-  'planning.deliveryNote.planned': 'Prévu : il s’ouvrira à la déclaration du conducteur et sera signé par le destinataire.',
+  'planning.deliveryNote.planned':
+    'Prévu : il s’ouvrira à la déclaration du conducteur et sera signé par le destinataire.',
   'planning.transportOrders.history.recipients_notified': 'Destinataires notifiés',
   'planning.transportOrders.satisfaction.title': 'Satisfaction',
   'planning.transportOrders.satisfaction.recipients': 'Destinataires',
   'planning.transportOrders.satisfaction.orderers': 'Ordonnateurs',
   'planning.transportOrders.satisfaction.none': 'Pas encore de réponse.',
   'planning.transportOrders.lines.proposeSequence': 'Proposer l’ordre par proximité',
-  'planning.deliveryNote.measures': 'Dépoté {volume} L à {temperature} °C, densité {density}, soit {volume15} L à 15 °C',
+  'planning.deliveryNote.measures':
+    'Dépoté {volume} L à {temperature} °C, densité {density}, soit {volume15} L à 15 °C',
   'planning.transportOrders.history.pickup_vehicle_changed': 'Véhicule changé',
   'planning.transportOrders.history.pickup_site_changed': 'Dépôt de chargement changé',
   'planning.transportOrders.history.note_cancelled': 'Bon annulé par un incident',
   'planning.transportOrders.history.note_deviated': 'Livraison déviée',
   'planning.transportOrders.returns.title': 'Retours',
   'planning.transportOrders.returns.reason': 'Motif du retour',
-  'planning.transportOrders.returns.conforming': 'Réceptionné conforme par l’entrepôt : prêt à replanifier',
-  'planning.transportOrders.returns.nonconforming': 'Réceptionné non conforme par l’entrepôt ({reason}), replanifiable quand même',
+  'planning.transportOrders.returns.conforming':
+    'Réceptionné conforme par l’entrepôt : prêt à replanifier',
+  'planning.transportOrders.returns.nonconforming':
+    'Réceptionné non conforme par l’entrepôt ({reason}), replanifiable quand même',
   'planning.transportOrders.returns.handedBack': 'Rapporté à l’entrepôt, en attente de contrôle',
   'planning.transportOrders.returns.onBoard': 'Encore dans le véhicule',
   'planning.transportOrders.gaps.title': 'Écarts de quantité',
@@ -337,7 +343,8 @@ export default {
   'planning.dossier.late': 'en retard',
   'planning.dossier.contested': 'Contestée le {at}',
   'planning.dossier.confirmed': 'Confirmée le {at}',
-  'planning.dossier.notTracked': 'Ordre confié à un transporteur externe : son trajet n’est pas suivi par la flotte.',
+  'planning.dossier.notTracked':
+    'Ordre confié à un transporteur externe : son trajet n’est pas suivi par la flotte.',
   'planning.dossier.compliant': 'Trajet conforme',
   'planning.dossier.notCompliant': 'Trajet non conforme ou écarts à qualifier',
   'planning.dossier.stopsPassed': '{passed} étapes passées sur {total}, dont {late} en retard',
@@ -411,17 +418,21 @@ export default {
   'planning.transportOrders.history.route_changed': 'Itinéraire modifié en route',
   'planning.transportOrders.history.rescheduled': 'Ordre reprogrammé',
   'planning.transportOrders.form.transportMode': 'Mode de transport',
-  'planning.transportOrders.form.transportModeHint': "Seul le camion dispose de moyens dans le référentiel : la flotte de l'entreprise et les transporteurs routiers. Les autres modes s'ouvriront avec leurs moyens.",
+  'planning.transportOrders.form.transportModeHint':
+    "Seul le camion dispose de moyens dans le référentiel : la flotte de l'entreprise et les transporteurs routiers. Les autres modes s'ouvriront avec leurs moyens.",
   'planning.transportOrders.gauge.title': 'Remplissage du véhicule',
   'planning.transportOrders.gauge.weight': 'Poids',
   'planning.transportOrders.gauge.volume': 'Volume',
-  'planning.transportOrders.gauge.noVehicle': 'Choisissez un véhicule pour comparer la charge à sa capacité.',
+  'planning.transportOrders.gauge.noVehicle':
+    'Choisissez un véhicule pour comparer la charge à sa capacité.',
   'planning.transportOrders.gauge.unknown': 'Capacité non renseignée sur le véhicule.',
-  'planning.transportOrders.gauge.over': "La charge dépasse la capacité : retirez des lignes de l'ordre ou choisissez un autre véhicule.",
+  'planning.transportOrders.gauge.over':
+    "La charge dépasse la capacité : retirez des lignes de l'ordre ou choisissez un autre véhicule.",
   'planning.transportOrders.replan.title': 'Reliquats et lignes à replanifier',
   'planning.transportOrders.replan.count': 'Aucune ligne | Une ligne | {n} lignes',
   'planning.transportOrders.replan.remaindersTitle': 'Reliquats à replanifier',
-  'planning.transportOrders.replan.remaindersHint': "Les lignes de produit non livrées d'une livraison partielle et les livraisons reportées sur place. La date choisie reprend la ligne dans l'ordre en attente de ce jour, avec un poids estimé au prorata.",
+  'planning.transportOrders.replan.remaindersHint':
+    "Les lignes de produit non livrées d'une livraison partielle et les livraisons reportées sur place. La date choisie reprend la ligne dans l'ordre en attente de ce jour, avec un poids estimé au prorata.",
   'planning.transportOrders.replan.none': 'Aucune ligne.',
   'planning.transportOrders.replan.left': 'Reste à livrer',
   'planning.transportOrders.replan.weight': 'Poids estimé',
@@ -431,7 +442,8 @@ export default {
   'planning.transportOrders.replan.postponed': 'Report demandé sur place',
   'planning.transportOrders.replan.partial': 'Livraison partielle',
   'planning.transportOrders.replan.unavailableTitle': 'Destinataires indisponibles',
-  'planning.transportOrders.replan.unavailableHint': "La date proposée par le destinataire s'accepte directement. Une date que vous proposez reste en attente de son accord sur sa page de suivi.",
+  'planning.transportOrders.replan.unavailableHint':
+    "La date proposée par le destinataire s'accepte directement. Une date que vous proposez reste en attente de son accord sur sa page de suivi.",
   'planning.transportOrders.replan.recipientDate': 'Date du destinataire',
   'planning.transportOrders.replan.plannerDate': 'Date proposée',
   'planning.transportOrders.replan.noDate': 'Aucune date donnée',
@@ -444,10 +456,13 @@ export default {
   'planning.transportOrders.replan.proposeTitle': 'Proposer une date au destinataire',
   'planning.transportOrders.replan.chooseTitle': 'Replanifier la ligne',
   'planning.transportOrders.replan.date': 'Date de livraison',
-  'planning.transportOrders.replan.proposeHint': "Le destinataire voit cette date sur sa page de suivi : il l'accepte, et la ligne est replanifiée, ou il redonne la sienne.",
-  'planning.transportOrders.replan.chooseHint': "La ligne rejoint l'ordre en attente de ce jour, avec les autres lignes replanifiées à la même date ; vous y affectez ensuite un véhicule et un conducteur.",
+  'planning.transportOrders.replan.proposeHint':
+    "Le destinataire voit cette date sur sa page de suivi : il l'accepte, et la ligne est replanifiée, ou il redonne la sienne.",
+  'planning.transportOrders.replan.chooseHint':
+    "La ligne rejoint l'ordre en attente de ce jour, avec les autres lignes replanifiées à la même date ; vous y affectez ensuite un véhicule et un conducteur.",
   'planning.transportOrders.routePlan.title': 'Plan de trajet prévisionnel',
-  'planning.transportOrders.routePlan.none': 'Choisissez un itinéraire type pour obtenir le plan de trajet.',
+  'planning.transportOrders.routePlan.none':
+    'Choisissez un itinéraire type pour obtenir le plan de trajet.',
   'planning.transportOrders.routePlan.distance': 'Distance',
   'planning.transportOrders.routePlan.driving': 'Temps de conduite',
   'planning.transportOrders.routePlan.rest': "Temps d'arrêt et de repos",
@@ -458,31 +473,39 @@ export default {
   'planning.transportOrders.routePlan.maxInterval': 'Trajet maximal',
   'planning.transportOrders.routePlan.maxStop': 'Arrêt maximal',
   'planning.transportOrders.routePlan.riskZones': "Zones à risque le long de l'itinéraire",
-  'planning.transportOrders.routePlan.noRisk': 'Aucune zone à risque du référentiel des sites à proximité.',
+  'planning.transportOrders.routePlan.noRisk':
+    'Aucune zone à risque du référentiel des sites à proximité.',
   'planning.transportOrders.routePlan.fromRoute': "à {km} km de l'itinéraire",
-  'planning.transportOrders.routePlan.validated': 'Plan validé le {date} : son corridor est transmis au FMS',
+  'planning.transportOrders.routePlan.validated':
+    'Plan validé le {date} : son corridor est transmis au FMS',
   'planning.transportOrders.routePlan.notValidated': 'Plan non validé',
   'planning.transportOrders.routePlan.corridorWidth': 'Largeur du corridor (km)',
   'planning.transportOrders.routePlan.validate': 'Valider le plan',
-  'planning.transportOrders.routePlan.corridorHint': "Le corridor est la bande autour de l'itinéraire dans laquelle le véhicule doit rester ; le FMS s'en sert pour détecter un écart de route. Simulation : la distance est calculée à vol d'oiseau majorée d'un coefficient routier.",
+  'planning.transportOrders.routePlan.corridorHint':
+    "Le corridor est la bande autour de l'itinéraire dans laquelle le véhicule doit rester ; le FMS s'en sert pour détecter un écart de route. Simulation : la distance est calculée à vol d'oiseau majorée d'un coefficient routier.",
   'planning.transportOrders.routePlan.change': "Modifier l'itinéraire en route",
   'planning.transportOrders.routePlan.newRoute': 'Nouvel itinéraire type',
   'planning.transportOrders.routePlan.reason': 'Motif de la modification',
-  'planning.transportOrders.routePlan.changeHint': "Le conducteur est notifié ; l'itinéraire suivi jusque-là reste dans l'historique.",
+  'planning.transportOrders.routePlan.changeHint':
+    "Le conducteur est notifié ; l'itinéraire suivi jusque-là reste dans l'historique.",
   'planning.transportOrders.routePlan.changeConfirm': "Modifier l'itinéraire",
   'planning.transportOrders.routePlan.history': 'Itinéraires précédents',
   'planning.transportOrders.routePlan.mode': 'Mode de transport : {mode}',
-  'planning.transportOrders.expired.alert': 'Cet ordre a dépassé sa date sans être exécuté : il est expiré. Reprogrammez-le ou annulez-le.',
-  'planning.transportOrders.expired.blocked': "Cet ordre a dépassé sa date sans être exécuté : il ne peut plus être chargé tant qu'il n'est pas reprogrammé ou annulé.",
+  'planning.transportOrders.expired.alert':
+    'Cet ordre a dépassé sa date sans être exécuté : il est expiré. Reprogrammez-le ou annulez-le.',
+  'planning.transportOrders.expired.blocked':
+    "Cet ordre a dépassé sa date sans être exécuté : il ne peut plus être chargé tant qu'il n'est pas reprogrammé ou annulé.",
   'planning.transportOrders.expired.reschedule': 'Reprogrammer',
   'planning.transportOrders.proposal.title': 'Proposition de chargement',
-  'planning.transportOrders.proposal.hint': 'Les commandes du jour sont réparties entre les véhicules libres selon leur destination, leur poids, leur volume, les familles de produits, les compatibilités, les équipements exigés et les règles des compartiments. Corrigez-la, relancez-la ou effacez-la, puis validez : chaque véhicule devient un ordre en attente.',
+  'planning.transportOrders.proposal.hint':
+    'Les commandes du jour sont réparties entre les véhicules libres selon leur destination, leur poids, leur volume, les familles de produits, les compatibilités, les équipements exigés et les règles des compartiments. Corrigez-la, relancez-la ou effacez-la, puis validez : chaque véhicule devient un ordre en attente.',
   'planning.transportOrders.proposal.date': 'Jour de livraison',
   'planning.transportOrders.proposal.run': 'Proposer',
   'planning.transportOrders.proposal.rerun': 'Relancer',
   'planning.transportOrders.proposal.clear': 'Tout effacer',
   'planning.transportOrders.proposal.remaining': 'Quantités restant à charger',
-  'planning.transportOrders.proposal.noVehicle': "Aucun véhicule n'est retenu : ajoutez-en un ou relancez la proposition.",
+  'planning.transportOrders.proposal.noVehicle':
+    "Aucun véhicule n'est retenu : ajoutez-en un ou relancez la proposition.",
   'planning.transportOrders.proposal.empty': 'Aucune commande sur ce véhicule.',
   'planning.transportOrders.proposal.move': 'Déplacer la commande',
   'planning.transportOrders.proposal.compartments': 'Compartiments',
@@ -493,19 +516,34 @@ export default {
   'planning.transportOrders.proposal.unassigned': 'À affecter',
   'planning.transportOrders.proposal.unassignedTitle': 'Commandes à affecter',
   'planning.transportOrders.proposal.validate': 'Valider la proposition',
-  'planning.transportOrders.proposal.error': "La proposition de chargement n'a pas pu être établie.",
+  'planning.transportOrders.proposal.error':
+    "La proposition de chargement n'a pas pu être établie.",
   'planning.transportOrders.waiting.label': "Commandes en attente d'un ordre",
-  'planning.transportOrders.waiting.expired': 'Expirés : {requests} commandes, {orders} ordres de cette page',
+  'planning.transportOrders.waiting.expired':
+    'Expirés : {requests} commandes, {orders} ordres de cette page',
   'planning.transportOrders.picker.orderer': 'Ordonnateur : {name}',
   'planning.transportOrders.picker.quantityTaken': 'Quantité prise',
   'planning.transportOrders.picker.totals': 'Commandes cochées : {weight} kg, {volume} m³',
-  'planning.transportOrders.linesDialog.manualHint': "Une ligne saisie ici est enregistrée comme une commande émise par le planificateur et rattachée à l'ordre.",
+  'planning.transportOrders.linesDialog.manualHint':
+    "Une ligne saisie ici est enregistrée comme une commande émise par le planificateur et rattachée à l'ordre.",
   'planning.transportOrders.linesDialog.orderer': 'Ordonnateur',
-  'planning.transportOrders.linesDialog.ordererHint': "Laissé vide, c'est le destinataire s'il passe lui-même ses commandes.",
+  'planning.transportOrders.linesDialog.ordererHint':
+    "Laissé vide, c'est le destinataire s'il passe lui-même ses commandes.",
   'planning.transportOrders.linesDialog.volume': 'Volume (m³)',
   'planning.transportOrders.plan.absent': 'absent',
   'planning.transportOrders.plan.absentFor': 'absent : {reason}',
-  'planning.transportOrders.plan.withheld': 'Non proposés, pièce administrative expirée : {vehicles}',
+  'planning.transportOrders.plan.withheld':
+    'Non proposés, pièce administrative expirée : {vehicles}',
   'planning.transportOrders.replan.refused': 'Refusée par le destinataire, revenue à l’entrepôt',
-  'planning.transportOrders.replan.returnNonconforming': 'Non conforme au retour : {reason}'
+  'planning.transportOrders.replan.returnNonconforming': 'Non conforme au retour : {reason}',
+  'planning.transportOrders.history.correction': 'Correction du conducteur',
+  'planning.transportOrders.history.retried': 'Point retenté',
+  'planning.transportOrders.col.expectedArrival': 'Arrivée estimée',
+  'planning.transportOrders.col.depot': 'Dépôt',
+  'planning.transportOrders.col.region': 'Région',
+  'planning.transportOrders.col.plannedDate': 'Date de départ',
+  'planning.transportOrders.view.late': 'En retard',
+  'planning.transportOrders.delay': '+{min} min',
+  'planning.transportOrders.board.eta': 'Arrivée estimée',
+  'planning.transportOrders.replan.proposedOn': 'Proposée au destinataire : {date}'
 }

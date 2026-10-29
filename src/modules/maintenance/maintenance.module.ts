@@ -1,4 +1,5 @@
 import {
+  ArrowLeftRight,
   Award,
   Briefcase,
   Bug,
@@ -197,6 +198,13 @@ export function registerMaintenanceModule(): void {
         group: 'nav.group.setup',
         icon: Settings2,
         menuKey: 'maintenanceSettings'
+      },
+      {
+        labelKey: 'nav.stockMovements',
+        to: '/maintenance/stock-items/movements',
+        group: 'nav.group.purchasing',
+        icon: ArrowLeftRight,
+        menuKey: 'stockItem'
       }
     ]
   })

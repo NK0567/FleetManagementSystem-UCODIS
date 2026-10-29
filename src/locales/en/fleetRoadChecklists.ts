@@ -28,5 +28,14 @@ export default {
   'fleet.roadChecklists.anomalies': 'No anomaly | {n} anomaly | {n} anomalies',
   'fleet.roadChecklists.form.takenBy': 'Taken by',
   'fleet.roadChecklists.form.resultsHint':
-    'An anomaly on a blocking point keeps the vehicle from leaving.'
+    'An anomaly on a blocking point keeps the vehicle from leaving.',
+  'fleet.roadChecklists.col.signed': 'Signed',
+  'fleet.roadChecklists.col.syncedAt': 'Synchronized on',
+  'fleet.roadChecklists.col.capturedOffline': 'Taken offline',
+  'fleet.roadChecklists.form.signature': 'Driver signature',
+  'fleet.roadChecklists.form.sync': 'Synchronization',
+  'fleet.roadChecklists.signedBy': 'Signed by {name} on {date}',
+  'fleet.roadChecklists.unsigned': 'Not signed',
+  'fleet.roadChecklists.syncedOnline': 'Synchronized on {date}',
+  'fleet.roadChecklists.syncedOffline': 'Taken offline, synchronized on {date}'
 }

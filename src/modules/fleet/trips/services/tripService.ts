@@ -1,9 +1,12 @@
 import { createCrudService } from '@/core/factories'
 import { tripApi } from '../api/tripApi'
-import type { TripApi, TripSearchColumn } from '../types/trip.types'
+import type { TripApi, TripSearchColumn, TripSummaryApi } from '../types/trip.types'
 
 export const tripService = {
   ...createCrudService<TripApi, TripSearchColumn>(tripApi),
+  async summary(): Promise<TripSummaryApi> {
+    return (await tripApi.summary()).data.data
+  },
   async start(no: string, startOdometerKm: number | null): Promise<TripApi> {
     return (await tripApi.start(no, startOdometerKm)).data.data
   },

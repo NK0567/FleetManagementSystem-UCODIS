@@ -72,3 +72,14 @@ export type ClaimSearchColumn =
   | 'driverName'
   | 'location'
   | 'no,vehiclePlate,driverName,location'
+
+/** The figures above the list of claims. */
+export interface ClaimSummaryApi {
+  claims: number
+  accidents: number
+  /** Kilometres on the odometers of the motor vehicles of the park. */
+  fleetKm: number
+  accidentsPerMillionKm: number | null
+  damageTotal: number
+  residualTotal: number
+}
