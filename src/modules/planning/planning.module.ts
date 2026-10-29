@@ -61,6 +61,20 @@ export function registerPlanningModule(): void {
     order: PLANNING_MENU_ORDER,
     subItems: [
       {
+        labelKey: 'nav.planningDashboard',
+        to: '/planning/dashboard',
+        group: 'nav.group.overview',
+        icon: LayoutDashboard,
+        menuKey: 'planningDashboard'
+      },
+      {
+        labelKey: 'nav.transportReports',
+        to: '/planning/reports',
+        group: 'nav.group.overview',
+        icon: FileChartColumn,
+        menuKey: 'transportReport'
+      },
+      {
         labelKey: 'nav.deliveryRequests',
         to: '/planning/delivery-requests',
         group: 'nav.group.orders',
@@ -122,20 +136,6 @@ export function registerPlanningModule(): void {
         group: 'nav.group.billing',
         icon: FileSpreadsheet,
         menuKey: 'carrierInvoice'
-      },
-      {
-        labelKey: 'nav.planningDashboard',
-        to: '/planning/dashboard',
-        group: 'nav.group.overview',
-        icon: LayoutDashboard,
-        menuKey: 'planningDashboard'
-      },
-      {
-        labelKey: 'nav.transportReports',
-        to: '/planning/reports',
-        group: 'nav.group.overview',
-        icon: FileChartColumn,
-        menuKey: 'transportReport'
       },
       {
         labelKey: 'nav.customers',

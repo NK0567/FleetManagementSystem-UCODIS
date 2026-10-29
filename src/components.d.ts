@@ -387,6 +387,7 @@ declare module 'vue' {
     TransportOrderLineStatePill: typeof import('./modules/planning/transport-orders/components/TransportOrderLineStatePill.vue')['default']
     TransportOrderMeansPanel: typeof import('./modules/planning/transport-orders/components/TransportOrderMeansPanel.vue')['default']
     TransportOrderPickupPanel: typeof import('./modules/planning/loading/components/TransportOrderPickupPanel.vue')['default']
+    TransportOrdersBoard: typeof import('./modules/planning/transport-orders/components/TransportOrdersBoard.vue')['default']
     TransportOrdersList: typeof import('./modules/planning/transport-orders/pages/TransportOrdersList.vue')['default']
     TransportOrderStatusPill: typeof import('./modules/planning/transport-orders/components/TransportOrderStatusPill.vue')['default']
     TransportTariffCard: typeof import('./modules/planning/transport-tariffs/pages/TransportTariffCard.vue')['default']

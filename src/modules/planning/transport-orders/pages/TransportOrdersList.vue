@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import { Archive, ClipboardCheck, ListChecks, PhoneCall } from '@lucide/vue'
+import { Archive, ClipboardCheck, Columns3, ListChecks, PhoneCall } from '@lucide/vue'
+import TransportOrdersBoard from '../components/TransportOrdersBoard.vue'
 import { useI18n } from 'vue-i18n'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
@@ -228,6 +229,26 @@ function toggleArchives() {
   )
 }
 
+/* The board view (kanban), remembered for the viewer on this browser. */
+const BOARD_KEY = 'planning.transportOrders.board'
+const readBoard = () => {
+  try {
+    return localStorage.getItem(BOARD_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+const boardView = ref(readBoard())
+const boardReload = ref(0)
+function toggleBoard() {
+  boardView.value = !boardView.value
+  try {
+    localStorage.setItem(BOARD_KEY, boardView.value ? '1' : '0')
+  } catch {
+    /* the view simply is not remembered */
+  }
+}
+
 function onCreatedFromRequests(no: string) {
   creatingFromRequests.value = false
   void store.fetchItems(store.pagination.page, store.pagination.limit)
@@ -283,6 +304,20 @@ function onCreatedFromRequests(no: string) {
             type="button"
             class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm hover:bg-accent border rounded transition"
             :class="
+              boardView
+                ? 'border-primary text-primary bg-primary/5'
+                : 'border-border text-card-foreground'
+            "
+            :aria-pressed="boardView"
+            @click="toggleBoard"
+          >
+            <Columns3 class="w-4 h-4 text-primary" />
+            {{ t('planning.transportOrders.board.toggle') }}
+          </button>
+          <button
+            type="button"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm hover:bg-accent border rounded transition"
+            :class="
               awaitingClosingView
                 ? 'border-primary text-primary bg-primary/5'
                 : 'border-border text-card-foreground'
@@ -321,7 +356,14 @@ function onCreatedFromRequests(no: string) {
 
       <FormAlerts class="mx-4" :error="exportError" @clear:error="exportError = null" />
 
+      <TransportOrdersBoard
+        v-if="boardView"
+        :search="store.searchQuery"
+        :reload-key="boardReload"
+        @open="openFromList"
+      />
       <ListPageLayout
+        v-else
         :filter-panel-open="showFilterPanel"
         :table-columns="visibleColumns"
         :sticky-column-count="stickyColumnCount"

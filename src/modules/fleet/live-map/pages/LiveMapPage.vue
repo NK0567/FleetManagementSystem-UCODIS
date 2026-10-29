@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Check } from '@lucide/vue'
+import { Check, Pause, Play, RotateCcw } from '@lucide/vue'
+import { liveMapApi, type SimulationState } from '../api/liveMapApi'
 import type { MapCircle, MapMarker, MapPolyline } from '@/components/shared/MapView.vue'
 import { apiErrorMessage } from '@/core/api/apiError'
 import { useOptionsStore } from '@/stores/optionsStore'
@@ -36,6 +37,8 @@ let timer: ReturnType<typeof setInterval> | null = null
 async function refresh() {
   try {
     positions.value = await liveMapService.positions()
+    // The server moves its clock ten minutes at each refresh while the simulation runs.
+    if (simulation.value.active) simulation.value.offsetMin += 10
     error.value = null
   } catch (cause) {
     error.value = apiErrorMessage(cause, t('fleet.liveMap.loadError'))
@@ -44,9 +47,32 @@ async function refresh() {
   }
 }
 
+/* No real GPS in the demonstration: the simulation runs the clock ahead so that the vehicles
+ * on the road move, refreshed every two seconds while it runs. */
+const SIMULATION_REFRESH_MS = 2_000
+const simulation = ref<SimulationState>({ active: false, offsetMin: 0 })
+function schedule() {
+  if (timer) clearInterval(timer)
+  timer = setInterval(refresh, simulation.value.active ? SIMULATION_REFRESH_MS : REFRESH_MS)
+}
+async function setSimulation(body: { active?: boolean; reset?: boolean }) {
+  try {
+    simulation.value = (await liveMapApi.setSimulation(body)).data.data
+    schedule()
+    await refresh()
+  } catch (cause) {
+    error.value = apiErrorMessage(cause, t('fleet.liveMap.loadError'))
+  }
+}
+
 onMounted(async () => {
+  try {
+    simulation.value = (await liveMapApi.simulation()).data.data
+  } catch {
+    /* the map works without the simulation */
+  }
   await refresh()
-  timer = setInterval(refresh, REFRESH_MS)
+  schedule()
 })
 
 // The map polls only while it is on screen.
@@ -135,6 +161,36 @@ function delayLabel(minutes: number | null) {
       <div>
         <h1 class="text-xl font-semibold text-card-foreground">{{ t('fleet.liveMap.title') }}</h1>
         <p class="text-sm text-muted-foreground">{{ t('fleet.liveMap.subtitle') }}</p>
+        <div class="flex flex-wrap items-center gap-2 mt-2">
+          <button
+            type="button"
+            class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded border transition"
+            :class="
+              simulation.active
+                ? 'border-primary bg-primary/5 text-primary'
+                : 'border-border text-card-foreground hover:bg-accent'
+            "
+            @click="setSimulation({ active: !simulation.active })"
+          >
+            <component :is="simulation.active ? Pause : Play" class="w-4 h-4" />
+            {{
+              simulation.active
+                ? t('fleet.liveMap.simulation.stop')
+                : t('fleet.liveMap.simulation.start')
+            }}
+          </button>
+          <button
+            v-if="simulation.offsetMin"
+            type="button"
+            class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded border border-border text-card-foreground hover:bg-accent"
+            @click="setSimulation({ reset: true })"
+          >
+            <RotateCcw class="w-4 h-4" /> {{ t('fleet.liveMap.simulation.reset') }}
+          </button>
+          <span v-if="simulation.offsetMin" class="text-xs text-muted-foreground">
+            {{ t('fleet.liveMap.simulation.ahead', { minutes: simulation.offsetMin }) }}
+          </span>
+        </div>
       </div>
       <div class="flex flex-wrap gap-2">
         <button

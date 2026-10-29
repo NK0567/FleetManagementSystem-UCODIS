@@ -277,5 +277,8 @@ export default {
   'planning.transportOrders.lines.progress': '{done}/{total} lines executed',
   'planning.transportOrders.view.archives': 'Archives',
   'planning.transportOrders.history.pickup_sent': 'Pickup note sent',
-  'planning.transportOrders.history.pickup_confirmed': 'Pickup confirmed'
+  'planning.transportOrders.history.pickup_confirmed': 'Pickup confirmed',
+  'planning.transportOrders.board.toggle': 'Kanban',
+  'planning.transportOrders.board.empty': 'No order',
+  'planning.transportOrders.loadError': 'The transport orders could not be loaded.'
 }

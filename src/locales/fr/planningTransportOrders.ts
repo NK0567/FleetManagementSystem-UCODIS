@@ -279,5 +279,8 @@ export default {
   'planning.transportOrders.lines.progress': '{done}/{total} lignes exécutées',
   'planning.transportOrders.view.archives': 'Archives',
   'planning.transportOrders.history.pickup_sent': 'Bon d’enlèvement transmis',
-  'planning.transportOrders.history.pickup_confirmed': 'Enlèvement confirmé'
+  'planning.transportOrders.history.pickup_confirmed': 'Enlèvement confirmé',
+  'planning.transportOrders.board.toggle': 'Kanban',
+  'planning.transportOrders.board.empty': 'Aucun ordre',
+  'planning.transportOrders.loadError': 'Les ordres de transport n’ont pas pu être chargés.'
 }

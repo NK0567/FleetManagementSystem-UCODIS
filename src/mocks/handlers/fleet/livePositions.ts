@@ -8,7 +8,7 @@ import {
 } from '@/modules/fleet/live-map/domain/livePosition'
 import type { LivePositionApi } from '@/modules/fleet/live-map/types/liveMap.types'
 import { plannedSchedule } from '@/modules/fleet/route-templates/domain/routeTemplate'
-import { minutesBetween, nowIsoDateTime } from '@/utils/date'
+import { addMinutes, minutesBetween, nowIsoDateTime } from '@/utils/date'
 import { circleContaining, type GeoPoint } from '@/utils/geo'
 import type { MockDatabase } from '../../db/database'
 import { DEAD_ZONES } from '../../fixtures/fleet/deadZones'
@@ -23,11 +23,22 @@ import { vehicleStatuses } from './vehicleState'
 const LOCATING_EQUIPMENT = new Set(['GPS', 'OBC'])
 
 /**
+ * The demonstration has no real GPS: « simulate a movement » runs a clock ahead of the real
+ * one, a few minutes at each refresh, so the vehicles on the road move along their route.
+ * Kept in memory only; reloading the application starts again from the real time.
+ */
+const simulation = { active: false, offsetMin: 0 }
+const SIMULATION_STEP_MIN = 10
+
+export const simulatedNow = () =>
+  simulation.offsetMin ? addMinutes(nowIsoDateTime(), simulation.offsetMin) : nowIsoDateTime()
+
+/**
  * Where each tracked vehicle is now. Nothing is stored: the position follows from the trip on the
  * road and the clock, so the map tells the same story as the trip records.
  */
 export function livePositions(db: MockDatabase): LivePositionApi[] {
-  const now = nowIsoDateTime()
+  const now = simulatedNow()
   const signalLossMin = fleetSettings(db).telematics.signalLossMin
   const statuses = vehicleStatuses(db)
   const links = activeLinks(db)
@@ -118,7 +129,23 @@ export function livePositions(db: MockDatabase): LivePositionApi[] {
 }
 
 export function registerLivePositionsHandlers(router: MockRouter, db: MockDatabase): void {
-  router.get('/fleet/live/positions', { feature: 'LIVEMAP', action: 'read' }, () =>
-    ok(livePositions(db))
+  router.get('/fleet/live/positions', { feature: 'LIVEMAP', action: 'read' }, () => {
+    if (simulation.active) simulation.offsetMin += SIMULATION_STEP_MIN
+    return ok(livePositions(db))
+  })
+
+  router.get('/fleet/live/simulation', { feature: 'LIVEMAP', action: 'read' }, () =>
+    ok({ ...simulation })
   )
+
+  router.post('/fleet/live/simulation', { feature: 'LIVEMAP', action: 'read' }, (request) => {
+    const body = (request.body ?? {}) as Record<string, unknown>
+    if (body.reset === true) {
+      simulation.active = false
+      simulation.offsetMin = 0
+    } else {
+      simulation.active = body.active === true
+    }
+    return ok({ ...simulation })
+  })
 }

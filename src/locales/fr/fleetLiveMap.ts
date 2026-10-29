@@ -14,5 +14,9 @@ export default {
   'fleet.liveMap.stop': 'Arrêt',
   'fleet.liveMap.planned': 'Prévu',
   'fleet.liveMap.expected': 'Estimé',
-  'fleet.liveMap.noTrip': 'Aucun trajet en cours.'
+  'fleet.liveMap.noTrip': 'Aucun trajet en cours.',
+  'fleet.liveMap.simulation.start': 'Simuler un déplacement',
+  'fleet.liveMap.simulation.stop': 'Arrêter la simulation',
+  'fleet.liveMap.simulation.reset': 'Revenir à l’heure réelle',
+  'fleet.liveMap.simulation.ahead': 'Simulation : {minutes} min d’avance sur l’heure réelle'
 }

@@ -131,7 +131,7 @@ const toggleSearch = () => {
 
 <template>
   <div class="bg-card border-b border-border px-2 py-1 shrink-0">
-    <div class="flex flex-nowrap items-center min-w-0 gap-0">
+    <div class="flex flex-wrap items-center min-w-0 gap-y-1">
       <div class="flex shrink-0 items-center gap-1" ref="listViewDropdownRef">
         <h1 class="text-sm font-medium text-card-foreground">
           {{ title }}<template v-if="hasListViews">:</template>
