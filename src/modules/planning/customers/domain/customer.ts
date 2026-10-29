@@ -15,7 +15,8 @@ export function customerIssues(customer: CustomerRules): CustomerIssue[] {
   const issues: CustomerIssue[] = []
   if (!customer.isOrderer && !customer.isRecipient) issues.push('noRole')
   const channel = customer.notificationChannel
-  if (channel !== 'email' && !customer.phone.trim()) issues.push('channelNeedsPhone')
-  if (channel !== 'sms' && !customer.email.trim()) issues.push('channelNeedsEmail')
+  const byPhone = channel === 'sms' || channel === 'call' || channel === 'whatsapp'
+  if (byPhone && !customer.phone.trim()) issues.push('channelNeedsPhone')
+  if (channel === 'email' && !customer.email.trim()) issues.push('channelNeedsEmail')
   return issues
 }

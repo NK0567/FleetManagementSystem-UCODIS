@@ -23,7 +23,7 @@ export default {
     'Trajets des véhicules et itinéraires types : véhicule, remorque, conducteur, arrêts et kilométrage.',
   'settings.moduleToggles.item.compliance.label': 'Conformité',
   'settings.moduleToggles.item.compliance.description':
-    "Écarts d'itinéraire détectés sur les voyages, à qualifier par le responsable flotte.",
+    "Écarts d'itinéraire détectés sur les trajets, à qualifier par le responsable flotte.",
   'settings.moduleToggles.item.fuel.label': 'Carburant et cartes',
   'settings.moduleToggles.item.fuel.description':
     'Suivi des pleins par la méthode du plein à plein, consommation de référence, qualification des anomalies.',
@@ -32,7 +32,7 @@ export default {
     'Vue consolidée de la disponibilité et des immobilisations du parc.',
   'settings.moduleToggles.item.checks.label': 'Contrôles',
   'settings.moduleToggles.item.checks.description':
-    'Checklists sur route remplies à chaque pause du voyage, et inspections périodiques du véhicule et de la citerne.',
+    'Checklists sur route remplies à chaque pause du trajet, et inspections périodiques du véhicule et de la citerne.',
   'settings.moduleToggles.item.departures.label': 'Départs',
   'settings.moduleToggles.item.departures.description':
     'Autorisation de départ conditionnée à quatre contrôles : checklist, test, documents du conducteur, documents du véhicule.',
@@ -47,7 +47,7 @@ export default {
     "Seuils d'exploitation : temps de conduite et de repos, rayon des sites, préavis documentaire.",
   'settings.moduleToggles.item.fleet-drivers.label': 'Conducteurs (vue Flotte)',
   'settings.moduleToggles.item.fleet-drivers.description':
-    'Vue opérationnelle du conducteur : affectation, conformité, historique des voyages.',
+    'Vue opérationnelle du conducteur : affectation, conformité, historique des trajets.',
   'settings.moduleToggles.item.sites.label': 'Sites et géofences',
   'settings.moduleToggles.item.sites.description':
     'Référentiel des sites géographiques (dépôts, entrepôts, relais, points de contrôle).',
@@ -65,7 +65,7 @@ export default {
     'Kilométrage moyen entre deux pannes par sous-système, véhicules les plus touchés, coût cumulé par véhicule.',
   'settings.moduleToggles.item.mobile-team.label': 'Équipe mobile',
   'settings.moduleToggles.item.mobile-team.description':
-    "Dépannage sur route d'un camion bloqué loin d'un atelier, et sécurisation d'accident.",
+    "Dépannage sur route d'un véhicule bloqué loin d'un atelier, et sécurisation d'accident.",
   'settings.moduleToggles.item.purchasing.label': 'Achats et stock',
   'settings.moduleToggles.item.purchasing.description':
     "Catalogue de pièces, fournisseurs et mouvements de stock, avec seuils d'alerte de réapprovisionnement.",
@@ -74,11 +74,11 @@ export default {
     "Suivi des pneus : montage, relevés de pression et d'usure, rotations, rechapage et coût au kilomètre.",
   'settings.moduleToggles.item.vehicle-checks.label': 'Contrôles véhicule',
   'settings.moduleToggles.item.vehicle-checks.description':
-    "Contrôles de l'atelier avant chargement, au retour de voyage et à la réception d'un véhicule neuf.",
+    "Contrôles de l'atelier avant chargement, au retour de trajet et à la réception d'un véhicule neuf.",
   'settings.moduleToggles.group.planning': 'Planification',
-  'settings.moduleToggles.item.delivery-requests.label': 'Demandes de livraison',
+  'settings.moduleToggles.item.delivery-requests.label': 'Commandes',
   'settings.moduleToggles.item.delivery-requests.description':
-    'Les commerciaux saisissent ou importent les demandes de leurs clients. Sans ce module, le planificateur crée ses ordres directement.',
+    'Les ordonnateurs saisissent ou importent leurs commandes. Sans ce module, le planificateur crée ses ordres directement.',
   'settings.moduleToggles.item.customer-confirmation.label': 'Confirmation des destinataires',
   'settings.moduleToggles.item.customer-confirmation.description':
     'L’agent d’appels confirme les livraisons, note les indisponibilités et renvoie une ligne vers les demandes à planifier.',
@@ -87,8 +87,8 @@ export default {
     'L’entrepôt déclare les quantités chargées et contrôle chaque ligne avant le départ.',
   'settings.moduleToggles.item.delivery-quality.label': 'Qualité de livraison',
   'settings.moduleToggles.item.delivery-quality.description':
-    'Protêts, parts de responsabilité, retenues sur la facture du transporteur et avoirs au client.',
-  'settings.moduleToggles.item.customer-billing.label': 'Facturation client',
+    'Protêts, parts de responsabilité, retenues sur la facture du transporteur et avoirs accordés.',
+  'settings.moduleToggles.item.customer-billing.label': 'Facturation du transport',
   'settings.moduleToggles.item.customer-billing.description':
     'Valorise chaque livraison livrée et marque la facture : le montant et la référence ne changent plus.',
   'settings.moduleToggles.item.carrier-invoices.label': 'Factures transporteurs',
@@ -96,5 +96,5 @@ export default {
     'Une facture peut couvrir plusieurs ordres. Le montant convenu, retenues déduites, est figé à la validation.',
   'settings.moduleToggles.item.fuel-distribution.label': 'Distribution de carburant',
   'settings.moduleToggles.item.fuel-distribution.description':
-    'Tournées, compartiments, bon d’enlèvement, BSL et bons de livraison.'
+    'Ordres, compartiments, bon d’enlèvement, BSL et bons de livraison.'
 }

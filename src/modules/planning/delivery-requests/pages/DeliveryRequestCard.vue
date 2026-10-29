@@ -141,7 +141,7 @@ const buttonClass =
         <CircleX class="w-5 h-5 text-primary" /> {{ t('planning.deliveryRequests.action.reject') }}
       </button>
       <button
-        v-if="canExecute && item.status === 'pending'"
+        v-if="canExecute && item.status === 'pending' && item.lineCount <= 1"
         type="button"
         :class="buttonClass"
         :disabled="acting"

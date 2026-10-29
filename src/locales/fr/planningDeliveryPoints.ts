@@ -12,11 +12,11 @@ export default {
   'planning.deliveryPoints.confirmDelete': 'Supprimer le point de livraison',
   'planning.deliveryPoints.confirmDeleteMsg': 'Le point « {name} » sera définitivement supprimé.',
 
-  'planning.deliveryPoints.search.all': 'N°, nom, client ou ville',
+  'planning.deliveryPoints.search.all': 'N°, nom, destinataire ou ville',
 
   'planning.deliveryPoints.col.no': 'N°',
   'planning.deliveryPoints.col.name': 'Nom',
-  'planning.deliveryPoints.col.customerNo': 'Client',
+  'planning.deliveryPoints.col.customerNo': 'Destinataire',
   'planning.deliveryPoints.col.address': 'Adresse',
   'planning.deliveryPoints.col.city': 'Ville',
   'planning.deliveryPoints.col.latitude': 'Latitude',
@@ -24,14 +24,14 @@ export default {
   'planning.deliveryPoints.col.pumpRequired': 'Pompe exigée',
   'planning.deliveryPoints.col.acceptedVehicleTypeNos': 'Types de véhicules acceptés',
   'planning.deliveryPoints.col.active': 'Actif',
-  'planning.deliveryPoints.col.customerName': 'Client',
+  'planning.deliveryPoints.col.customerName': 'Destinataire',
 
   'planning.deliveryPoints.form.general': 'Général',
   'planning.deliveryPoints.form.location': 'Emplacement',
   'planning.deliveryPoints.form.constraints': 'Contraintes de livraison',
   'planning.deliveryPoints.form.no': 'N°',
   'planning.deliveryPoints.form.name': 'Nom',
-  'planning.deliveryPoints.form.customerNo': 'Client',
+  'planning.deliveryPoints.form.customerNo': 'Destinataire',
   'planning.deliveryPoints.form.address': 'Adresse',
   'planning.deliveryPoints.form.city': 'Ville',
   'planning.deliveryPoints.form.latitude': 'Latitude',
@@ -45,6 +45,6 @@ export default {
   'planning.deliveryPoints.form.active': 'Actif',
   'planning.deliveryPoints.map.point': 'Point de livraison',
   'planning.deliveryPoints.map.editHint':
-    "Cliquez sur la carte pour placer le point de livraison : c'est là que le chauffeur est attendu.",
-  'planning.deliveryPoints.map.readOnlyHint': 'Le point montre où le chauffeur est attendu.'
+    "Cliquez sur la carte pour placer le point de livraison : c'est là que le conducteur est attendu.",
+  'planning.deliveryPoints.map.readOnlyHint': 'Le point montre où le conducteur est attendu.'
 }

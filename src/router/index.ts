@@ -8,6 +8,8 @@ import { useMenuPermissionsStore } from '@/stores/menuPermissions'
 import { useUserStore } from '@/stores/user'
 
 export const LOGIN_PATH = '/login'
+/** The recipient's tracking page opens from a link, without an account. */
+export const TRACKING_PREFIX = '/suivi/'
 const NOT_FOUND_ROUTE = '/[...path]'
 
 // Hash history: the app is served from an IIS virtual directory without URL rewriting.
@@ -32,6 +34,7 @@ export function landingPath(): string {
 }
 
 router.beforeEach(async (to) => {
+  if (to.path.startsWith(TRACKING_PREFIX)) return true
   if (!localStorage.getItem(AUTH_TOKEN_STORAGE_KEY)) {
     return to.path === LOGIN_PATH ? true : LOGIN_PATH
   }

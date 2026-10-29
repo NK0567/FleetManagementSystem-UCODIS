@@ -1,3 +1,5 @@
+import type { CompartmentContent, CompartmentRules } from '../domain/compartments'
+
 import type { FileMeta } from '@/types/file.types'
 import type { CouplingRole } from '@/modules/fleet/vehicle-types/types/vehicleType.types'
 import type { EquipmentCapability } from '@/modules/fleet/equipment-types/types/equipmentType.types'
@@ -26,10 +28,10 @@ export type EquipmentState = (typeof EQUIPMENT_STATES)[number]
 
 export type EquipmentDueState = 'ok' | 'due_soon' | 'overdue'
 
-export interface VehicleCompartment {
-  no: number
-  volumeL: number
-}
+export type { CompartmentContent }
+
+/** A compartment and what it may hold; see the compartment rules of the domain. */
+export type VehicleCompartment = CompartmentRules
 
 export interface PlateChange {
   previousPlate: string
@@ -82,6 +84,8 @@ export interface VehicleApi {
   maxLoadKg: number | null
   maxVolumeM3: number | null
   compartments: VehicleCompartment[]
+  /** Product families the vehicle is kept for; empty means it takes any product. */
+  productFamilies: string[]
   totalCapacityL: number
   acquisitionMode: AcquisitionMode | null
   acquisitionDate: string | null

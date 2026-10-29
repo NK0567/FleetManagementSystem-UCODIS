@@ -18,6 +18,7 @@ export function resolveToken(authorization: string | undefined): MockSessionUser
     name: account.name,
     profile: account.profile,
     employeeNo: account.employeeNo,
-    orgUnitNo: account.orgUnitNo
+    orgUnitNo: account.orgUnitNo,
+    ordererNo: account.ordererNo
   }
 }

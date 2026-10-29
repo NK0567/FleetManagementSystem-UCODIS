@@ -1,7 +1,7 @@
 export default {
-  'planning.billing.title': 'Facturation client',
+  'planning.billing.title': 'Facturation du transport',
   'planning.billing.subtitle':
-    'Le montant vient du tarif du client. Un forfait de trajet est compté une fois et partagé entre ses livraisons. Marquer la facture fige le montant.',
+    "Le montant vient du tarif de celui qui paie le fret, l'ordonnateur ou le destinataire. Un forfait de trajet est compté une fois et partagé entre ses livraisons. Marquer la facture fige le montant.",
   'planning.billing.loading': 'Chargement des livraisons à facturer…',
   'planning.billing.empty': 'Aucune livraison à facturer.',
   'planning.billing.loadError': 'La facturation n’a pas pu être affichée.',
@@ -29,7 +29,7 @@ export default {
   'planning.billing.state.ready': 'Prête',
   'planning.billing.state.invoiced': 'Facturée',
   'planning.billing.col.order': 'Ordre',
-  'planning.billing.col.customer': 'Client facturé',
+  'planning.billing.col.customer': 'Facturé à',
   'planning.billing.col.delivery': 'Point de livraison',
   'planning.billing.col.quantity': 'Quantité',
   'planning.billing.col.amount': 'Montant',

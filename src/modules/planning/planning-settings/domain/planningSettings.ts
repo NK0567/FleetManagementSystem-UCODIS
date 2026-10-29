@@ -49,6 +49,12 @@ export interface BillingSettings {
   carrierInvoiceToleranceAmount: number
 }
 
+/** Capacity and calendar are checked with a warning the planner may override, unless made strict. */
+export interface ControlSettings {
+  strictCapacity: boolean
+  strictCalendar: boolean
+}
+
 export interface ClosingSettings {
   /** Comma-separated document kinds required before an order can be closed. A dash requires none. */
   requiredDocuments: string
@@ -61,6 +67,7 @@ export interface PlanningSettings {
   requests: RequestSettings
   quantities: QuantitySettings
   billing: BillingSettings
+  controls: ControlSettings
   closing: ClosingSettings
 }
 
@@ -73,6 +80,7 @@ export const PLANNING_SETTINGS_SECTIONS = [
   'requests',
   'quantities',
   'billing',
+  'controls',
   'closing'
 ] as const
 
@@ -132,6 +140,10 @@ export const PLANNING_SETTING_FIELDS: Record<PlanningSettingsSection, readonly F
       max: 100_000_000
     }
   ],
+  controls: [
+    { key: 'strictCapacity', kind: 'boolean' },
+    { key: 'strictCalendar', kind: 'boolean' }
+  ],
   closing: [{ key: 'requiredDocuments', kind: 'text', maxLength: 200 }]
 }
 
@@ -146,6 +158,7 @@ export const DEFAULT_PLANNING_SETTINGS: PlanningSettings = {
   },
   quantities: { overToleranceMode: 'flag', volume15Method: 'coefficient' },
   billing: { defaultFreightPayer: 'orderer', carrierInvoiceToleranceAmount: 0 },
+  controls: { strictCapacity: false, strictCalendar: false },
   closing: { requiredDocuments: 'loading_list,delivery_note' }
 }
 

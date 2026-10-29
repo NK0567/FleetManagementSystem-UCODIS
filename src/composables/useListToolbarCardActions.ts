@@ -13,7 +13,8 @@ export type UseListToolbarCardActionsOptions = {
   openCard: (no: string, mode: CardOpenMode) => void
 }
 
-/** View and Edit toolbar actions; opening from the list edits when allowed, else views. */
+/** View and Edit toolbar actions. A record opened from the list is always shown read-only:
+ * editing is an explicit choice (Edit button in the toolbar or on the card). */
 export function useListToolbarCardActions(options: UseListToolbarCardActionsOptions) {
   const hasCardForm = options.hasCardForm ?? true
 
@@ -33,13 +34,6 @@ export function useListToolbarCardActions(options: UseListToolbarCardActionsOpti
     () => hasCardForm && hasSelection.value && options.canUpdate.value && documentEditable.value
   )
 
-  function resolveOpenMode(no: string): CardOpenMode {
-    const trimmed = String(no ?? '').trim()
-    if (!trimmed) return 'view'
-    const docEditable = options.isDocumentEditableByNo?.(trimmed) ?? documentEditable.value
-    return options.canUpdate.value && docEditable ? 'edit' : 'view'
-  }
-
   function openSelectedView() {
     if (!canViewSelected.value) return
     options.openCard(selectedNo.value, 'view')
@@ -53,7 +47,7 @@ export function useListToolbarCardActions(options: UseListToolbarCardActionsOpti
   function openFromList(no: string) {
     const trimmed = String(no ?? '').trim()
     if (!trimmed) return
-    options.openCard(trimmed, resolveOpenMode(trimmed))
+    options.openCard(trimmed, 'view')
   }
 
   return {

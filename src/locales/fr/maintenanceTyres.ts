@@ -75,5 +75,18 @@ export default {
   'maintenance.tyres.position.left_outer': 'gauche extérieur',
   'maintenance.tyres.position.left_inner': 'gauche intérieur',
   'maintenance.tyres.position.right_inner': 'droit intérieur',
-  'maintenance.tyres.position.right_outer': 'droit extérieur'
+  'maintenance.tyres.position.right_outer': 'droit extérieur',
+  'maintenance.tyres.life.col.vehicle': 'Véhicule',
+  'maintenance.tyres.life.col.position': 'Position',
+  'maintenance.tyres.life.col.mountedAt': 'Monté le',
+  'maintenance.tyres.life.col.dismountedAt': 'Démonté le',
+  'maintenance.tyres.life.col.fromKm': 'Du km',
+  'maintenance.tyres.life.col.toKm': 'Au km',
+  'maintenance.tyres.life.col.at': 'Date',
+  'maintenance.tyres.life.col.pressure': 'Pression',
+  'maintenance.tyres.life.col.tread': 'Profondeur',
+  'maintenance.tyres.life.col.by': 'Par',
+  'maintenance.tyres.life.col.event': 'Événement',
+  'maintenance.tyres.life.col.detail': 'Détail',
+  'maintenance.tyres.life.noHistory': 'Aucun événement.'
 }

@@ -109,5 +109,16 @@ export default {
   'maintenance.workOrders.import.title': "Importer l'historique de maintenance",
   'maintenance.workOrders.import.hint':
     "Fichier CSV (séparateur ; ou ,) avec une ligne d'en-têtes. Chaque ligne devient un ordre clôturé, créé avec les mêmes contrôles qu'une saisie ; son coût compte dans les coûts, pas dans les indicateurs de fiabilité.",
-  'maintenance.workOrders.import.created': 'Aucun ordre créé. | Un ordre créé. | {n} ordres créés.'
+  'maintenance.workOrders.import.created': 'Aucun ordre créé. | Un ordre créé. | {n} ordres créés.',
+  'maintenance.workOrders.progress.col.date': 'Date',
+  'maintenance.workOrders.progress.col.technician': 'Technicien',
+  'maintenance.workOrders.progress.col.hours': 'Heures',
+  'maintenance.workOrders.progress.col.part': 'Pièce',
+  'maintenance.workOrders.progress.col.quantity': 'Quantité',
+  'maintenance.workOrders.progress.col.amount': 'Montant',
+  'maintenance.workOrders.progress.col.purchase': "Demande d'achat",
+  'maintenance.workOrders.progress.col.at': 'Date',
+  'maintenance.workOrders.progress.col.event': 'Événement',
+  'maintenance.workOrders.progress.col.by': 'Par',
+  'maintenance.workOrders.progress.col.comment': 'Commentaire'
 }

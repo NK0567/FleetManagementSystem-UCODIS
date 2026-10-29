@@ -1,11 +1,11 @@
 import {
   BadgeDollarSign,
+  CalendarDays,
   Building,
   ClipboardList,
   FileChartColumn,
   FileSpreadsheet,
   FileText,
-  Fuel,
   Inbox,
   Layers,
   LayoutDashboard,
@@ -36,10 +36,11 @@ export function registerPlanningModule(): void {
     TRANSPORTORDER: { to: '/planning/transport-orders', menuKey: 'transportOrder' },
     CUSTOMERCONFIRMATION: { to: '/planning/confirmations', menuKey: 'customerConfirmation' },
     LOADING: { to: '/planning/loading', menuKey: 'loading' },
+    LOADINGPLAN: { to: '/planning/loading-preparations', menuKey: 'loadingPreparation' },
     DELIVERYQUALITY: { to: '/planning/delivery-quality', menuKey: 'deliveryQuality' },
     CUSTOMERBILLING: { to: '/planning/customer-billing', menuKey: 'customerBilling' },
     CARRIERINVOICE: { to: '/planning/carrier-invoices', menuKey: 'carrierInvoice' },
-    FUELTOUR: { to: '/planning/fuel-tours', menuKey: 'fuelTour' },
+    PLANNINGCALENDAR: { to: '/planning/calendar', menuKey: 'planningCalendar' },
     PLANNINGDASHBOARD: { to: '/planning/dashboard', menuKey: 'planningDashboard' },
     TRANSPORTREPORT: { to: '/planning/reports', menuKey: 'transportReport' },
     CUSTOMER: { to: '/planning/customers', menuKey: 'customer' },
@@ -60,6 +61,13 @@ export function registerPlanningModule(): void {
     order: PLANNING_MENU_ORDER,
     subItems: [
       {
+        labelKey: 'nav.deliveryRequests',
+        to: '/planning/delivery-requests',
+        group: 'nav.group.orders',
+        icon: Inbox,
+        menuKey: 'deliveryRequest'
+      },
+      {
         labelKey: 'nav.transportOrders',
         to: '/planning/transport-orders',
         group: 'nav.group.orders',
@@ -67,11 +75,25 @@ export function registerPlanningModule(): void {
         menuKey: 'transportOrder'
       },
       {
+        labelKey: 'nav.planningCalendar',
+        to: '/planning/calendar',
+        group: 'nav.group.orders',
+        icon: CalendarDays,
+        menuKey: 'planningCalendar'
+      },
+      {
         labelKey: 'nav.customerConfirmations',
         to: '/planning/confirmations',
         group: 'nav.group.execution',
         icon: PhoneCall,
         menuKey: 'customerConfirmation'
+      },
+      {
+        labelKey: 'nav.loadingPreparations',
+        to: '/planning/loading-preparations',
+        group: 'nav.group.execution',
+        icon: Layers,
+        menuKey: 'loadingPreparation'
       },
       {
         labelKey: 'nav.loading',
@@ -102,13 +124,6 @@ export function registerPlanningModule(): void {
         menuKey: 'carrierInvoice'
       },
       {
-        labelKey: 'nav.fuelTours',
-        to: '/planning/fuel-tours',
-        group: 'nav.group.orders',
-        icon: Fuel,
-        menuKey: 'fuelTour'
-      },
-      {
         labelKey: 'nav.planningDashboard',
         to: '/planning/dashboard',
         group: 'nav.group.overview',
@@ -121,13 +136,6 @@ export function registerPlanningModule(): void {
         group: 'nav.group.overview',
         icon: FileChartColumn,
         menuKey: 'transportReport'
-      },
-      {
-        labelKey: 'nav.deliveryRequests',
-        to: '/planning/delivery-requests',
-        group: 'nav.group.orders',
-        icon: Inbox,
-        menuKey: 'deliveryRequest'
       },
       {
         labelKey: 'nav.customers',
@@ -151,13 +159,6 @@ export function registerPlanningModule(): void {
         menuKey: 'product'
       },
       {
-        labelKey: 'nav.transportTariffs',
-        to: '/planning/transport-tariffs',
-        group: 'nav.group.setup',
-        icon: BadgeDollarSign,
-        menuKey: 'transportTariff'
-      },
-      {
         labelKey: 'nav.productCompatibilities',
         to: '/planning/product-compatibilities',
         group: 'nav.group.setup',
@@ -170,6 +171,13 @@ export function registerPlanningModule(): void {
         group: 'nav.group.setup',
         icon: Scale,
         menuKey: 'quantityTolerance'
+      },
+      {
+        labelKey: 'nav.transportTariffs',
+        to: '/planning/transport-tariffs',
+        group: 'nav.group.setup',
+        icon: BadgeDollarSign,
+        menuKey: 'transportTariff'
       },
       {
         labelKey: 'nav.planningReasons',

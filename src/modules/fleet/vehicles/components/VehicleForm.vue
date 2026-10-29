@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
+import type { SubListColumn } from '@/components/shared/RecordSubList.vue'
 import { useI18n } from 'vue-i18n'
 import { useEntityForm, type FormValidationError } from '@/composables/useEntityForm'
 import { useFormValidationUi } from '@/composables/useFormValidationUi'
@@ -75,6 +76,7 @@ const { draft, isRequired, expose } = useEntityForm({
     maxLoadKg: null as number | null,
     maxVolumeM3: null as number | null,
     compartments: [] as VehicleCompartment[],
+    productFamilies: [] as string[],
     acquisitionMode: null as AcquisitionMode | null,
     acquisitionDate: null as string | null,
     acquisitionProviderNo: null as string | null,
@@ -145,6 +147,38 @@ const setOption = (field: 'fuelType' | 'acquisitionMode') => (value: string | nu
 
 const odometerReadings = computed(() => [...(props.initialData.odometerReadings ?? [])].reverse())
 const plateHistory = computed(() => [...(props.initialData.plateHistory ?? [])].reverse())
+
+/* The two lists of the history read like the main lists: sortable, searchable, filterable. */
+const readingColumns = computed<SubListColumn[]>(() => [
+  {
+    sortKey: 'readAt',
+    label: t('fleet.vehicles.form.readAt'),
+    formatter: (v) => formatDateTime(String(v))
+  },
+  {
+    sortKey: 'km',
+    label: t('fleet.vehicles.form.km'),
+    align: 'right',
+    formatter: (v) => formatNumber(Number(v), 0)
+  },
+  {
+    sortKey: 'source',
+    label: t('fleet.vehicles.form.source'),
+    formatter: (v) => t(`fleet.vehicles.odometerSource.${String(v)}`),
+    filter: true
+  },
+  { sortKey: 'recordedBy', label: t('fleet.vehicles.form.by'), filter: true }
+])
+const plateColumns = computed<SubListColumn[]>(() => [
+  {
+    sortKey: 'changedAt',
+    label: t('fleet.vehicles.form.changedAt'),
+    formatter: (v) => formatDateTime(String(v))
+  },
+  { sortKey: 'previousPlate', label: t('fleet.vehicles.form.previousPlate') },
+  { sortKey: 'newPlate', label: t('fleet.vehicles.form.newPlate') },
+  { sortKey: 'changedBy', label: t('fleet.vehicles.form.by'), filter: true }
+])
 
 defineExpose(expose)
 </script>
@@ -325,6 +359,15 @@ defineExpose(expose)
           >
             <VehicleCompartmentsEditor v-model="draft.compartments" :disabled="disabled" />
           </BaseFormField>
+          <BaseFormField
+            v-if="vehicleShape.carriesGoods"
+            :label="t('fleet.vehicles.form.productFamilies')"
+          >
+            <ProductFamilyPicker v-model="draft.productFamilies" :disabled="disabled" />
+            <p class="text-xs text-muted-foreground mt-1">
+              {{ t('fleet.vehicles.form.productFamiliesHint') }}
+            </p>
+          </BaseFormField>
         </div>
       </template>
     </FormSection>
@@ -473,75 +516,34 @@ defineExpose(expose)
           t('fleet.vehicles.form.plateChangeCount', plateHistory.length)
         ]"
       >
-        <div class="min-w-0 space-y-2">
+        <div class="min-w-0 space-y-2 xl:col-span-2">
           <h3 class="text-sm font-semibold text-card-foreground">
             {{ t('fleet.vehicles.form.odometerReadings') }}
           </h3>
-          <table class="w-full text-sm border border-border rounded">
-            <thead>
-              <tr class="bg-muted/40 text-left text-xs text-muted-foreground">
-                <th class="px-3 py-2 font-semibold">{{ t('fleet.vehicles.form.readAt') }}</th>
-                <th class="px-3 py-2 font-semibold text-right">
-                  {{ t('fleet.vehicles.form.km') }}
-                </th>
-                <th class="px-3 py-2 font-semibold">{{ t('fleet.vehicles.form.source') }}</th>
-                <th class="px-3 py-2 font-semibold">{{ t('fleet.vehicles.form.by') }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="reading in odometerReadings"
-                :key="`${reading.readAt}-${reading.km}`"
-                class="border-t border-border"
-              >
-                <td class="px-3 py-1.5">{{ formatDateTime(reading.readAt) }}</td>
-                <td class="px-3 py-1.5 text-right tabular-nums">
-                  {{ formatNumber(reading.km, 0) }}
-                </td>
-                <td class="px-3 py-1.5">
-                  {{ t(`fleet.vehicles.odometerSource.${reading.source}`) }}
-                </td>
-                <td class="px-3 py-1.5">{{ reading.recordedBy }}</td>
-              </tr>
-            </tbody>
-          </table>
+          <RecordSubList
+            :rows="odometerReadings as unknown as Record<string, unknown>[]"
+            :columns="readingColumns"
+            :row-key="(row: Record<string, unknown>) => `${row.readAt}-${row.km}`"
+            :empty-text="t('fleet.vehicles.form.noReading')"
+            :initial-sort="{ key: 'readAt', direction: 'DESC' }"
+          />
         </div>
-        <div class="min-w-0 space-y-2">
+        <div class="min-w-0 space-y-2 xl:col-span-2">
           <h3 class="text-sm font-semibold text-card-foreground">
             {{ t('fleet.vehicles.form.plateHistory') }}
           </h3>
-          <p v-if="plateHistory.length === 0" class="text-sm text-muted-foreground">
-            {{ t('fleet.vehicles.form.noPlateChange') }}
-          </p>
-          <table v-else class="w-full text-sm border border-border rounded">
-            <thead>
-              <tr class="bg-muted/40 text-left text-xs text-muted-foreground">
-                <th class="px-3 py-2 font-semibold">{{ t('fleet.vehicles.form.changedAt') }}</th>
-                <th class="px-3 py-2 font-semibold">
-                  {{ t('fleet.vehicles.form.previousPlate') }}
-                </th>
-                <th class="px-3 py-2 font-semibold">{{ t('fleet.vehicles.form.newPlate') }}</th>
-                <th class="px-3 py-2 font-semibold">{{ t('fleet.vehicles.form.by') }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="change in plateHistory"
-                :key="change.changedAt"
-                class="border-t border-border align-top"
-              >
-                <td class="px-3 py-1.5">{{ formatDateTime(change.changedAt) }}</td>
-                <td class="px-3 py-1.5">{{ change.previousPlate }}</td>
-                <td class="px-3 py-1.5">
-                  {{ change.newPlate }}
-                  <p v-if="change.reason" class="text-xs text-muted-foreground">
-                    {{ change.reason }}
-                  </p>
-                </td>
-                <td class="px-3 py-1.5">{{ change.changedBy }}</td>
-              </tr>
-            </tbody>
-          </table>
+          <RecordSubList
+            :rows="plateHistory as unknown as Record<string, unknown>[]"
+            :columns="plateColumns"
+            row-key="changedAt"
+            :empty-text="t('fleet.vehicles.form.noPlateChange')"
+            :initial-sort="{ key: 'changedAt', direction: 'DESC' }"
+          >
+            <template #cell-newPlate="{ row }">
+              {{ row.newPlate }}
+              <p v-if="row.reason" class="text-xs text-muted-foreground">{{ row.reason }}</p>
+            </template>
+          </RecordSubList>
         </div>
       </FormSection>
 

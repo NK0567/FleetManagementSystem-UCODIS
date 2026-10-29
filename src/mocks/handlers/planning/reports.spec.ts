@@ -11,7 +11,7 @@ beforeEach(() => {
 describe('planning reports', () => {
   it('hides orders outside the user region and counts only what remains', async () => {
     const all = await call(server, 'get', '/planning/transport-orders', {
-      as: 'FLT001',
+      as: 'LIV001',
       query: { pageSize: 100 }
     })
     const limited = await call(server, 'get', '/planning/transport-orders', {
@@ -25,7 +25,7 @@ describe('planning reports', () => {
     expect(numbers(limited)).toContain('TR-2026-0002')
 
     const limitedBoard = await call(server, 'get', '/planning/dashboard', { as: 'DIR001' })
-    const fullBoard = await call(server, 'get', '/planning/dashboard', { as: 'FLT001' })
+    const fullBoard = await call(server, 'get', '/planning/dashboard', { as: 'LIV001' })
     const board = (response: { data: { data: unknown } }) =>
       response.data.data as { orders: number; punctuality: number | null }
     expect(board(limitedBoard).orders).toBeLessThan(board(fullBoard).orders)

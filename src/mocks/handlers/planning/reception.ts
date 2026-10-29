@@ -1,4 +1,9 @@
-import { checkDeliveryRequest, newDeliveryRequest, nextDeliveryRequestNo } from './deliveryRequests'
+import {
+  checkDeliveryRequest,
+  entryFromLine,
+  newDeliveryRequest,
+  nextDeliveryRequestNo
+} from './deliveryRequests'
 import {
   canHandBack,
   canReceiveReturn,
@@ -222,7 +227,7 @@ export function registerReceptionHandlers(router: MockRouter, db: MockDatabase):
 
   router.post(
     '/planning/transport-orders/:no/lines/:lineNo/handle-contest',
-    { feature: 'TRANSPORTORDER', action: 'execute' },
+    { feature: 'TRANSPORTORDER', action: 'update' },
     (request) => {
       const { order, line } = findLine(db, request)
       if (!line.receptionContestedAt) throw conflict(PLANNING_MESSAGES.receptionNotContested)
@@ -295,7 +300,7 @@ export function registerReceptionHandlers(router: MockRouter, db: MockDatabase):
 
   router.post(
     '/planning/transport-orders/:no/lines/:lineNo/receive-return',
-    { feature: 'LOADING', action: 'execute' },
+    { feature: 'GOODSRETURN', action: 'execute' },
     (request) => {
       const { order, line } = findLine(db, request)
       if (!canReceiveReturn(line)) {
@@ -328,7 +333,7 @@ export function registerReceptionHandlers(router: MockRouter, db: MockDatabase):
 
   router.post(
     '/planning/transport-orders/:no/lines/:lineNo/remainder',
-    { feature: 'TRANSPORTORDER', action: 'execute' },
+    { feature: 'TRANSPORTORDER', action: 'update' },
     (request) => {
       const { order, line } = findLine(db, request)
       if (line.remainderAt) throw conflict(PLANNING_MESSAGES.receptionRemainderTaken)
@@ -345,22 +350,26 @@ export function registerReceptionHandlers(router: MockRouter, db: MockDatabase):
         source?.ordererNo ??
         (db.customers.findOrFail(point.customerNo).isOrderer ? point.customerNo : '')
       if (!ordererNo) throw unprocessable(PLANNING_MESSAGES.confirmationNeedsOrderer)
-      const entry = {
-        ordererNo,
-        deliveryPointNo: line.deliveryPointNo,
-        desiredDate: date,
-        validUntil: null,
-        externalReference: '',
-        freightPayer: source?.freightPayer ?? ('orderer' as const),
-        comment: '',
-        productNo: line.productNo,
-        quantity: left,
-        weightKg:
-          line.weightKg === null || line.quantity <= 0
-            ? null
-            : Math.round((line.weightKg * left) / line.quantity),
-        volumeM3: source?.volumeM3 ?? null
-      }
+      const entry = entryFromLine(
+        db,
+        {
+          ordererNo,
+          deliveryPointNo: line.deliveryPointNo,
+          desiredDate: date,
+          validUntil: null,
+          externalReference: '',
+          freightPayer: source?.freightPayer ?? ('orderer' as const),
+          comment: '',
+          productNo: line.productNo,
+          quantity: left,
+          weightKg:
+            line.weightKg === null || line.quantity <= 0
+              ? null
+              : Math.round((line.weightKg * left) / line.quantity),
+          volumeM3: source?.volumeM3 ?? null
+        },
+        source
+      )
       checkDeliveryRequest(db, entry)
       const no = nextDeliveryRequestNo(db)
       db.deliveryRequests.insert(

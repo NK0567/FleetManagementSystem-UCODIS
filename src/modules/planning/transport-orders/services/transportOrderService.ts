@@ -11,8 +11,16 @@ import type {
 
 export const transportOrderService = {
   ...createCrudService<TransportOrderApi, TransportOrderSearchColumn>(transportOrderApi),
-  async replaceLines(no: string, lines: TransportOrderLineInput[]): Promise<TransportOrderApi> {
-    return (await transportOrderApi.replaceLines(no, lines)).data.data
+  async replaceLines(
+    no: string,
+    lines: TransportOrderLineInput[],
+    force = false
+  ): Promise<TransportOrderApi> {
+    return (await transportOrderApi.replaceLines(no, lines, force)).data.data
+  },
+  /** The execution order of the lines; their line numbers stay as they are. */
+  async reorderLines(no: string, lineNos: number[]): Promise<TransportOrderApi> {
+    return (await transportOrderApi.reorderLines(no, lineNos)).data.data
   },
   async act(
     no: string,

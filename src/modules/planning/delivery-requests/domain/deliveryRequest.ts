@@ -32,6 +32,41 @@ export const canReject = (status: DeliveryRequestStatus) =>
 
 export const canCancel = (status: DeliveryRequestStatus) => isEditable(status)
 
+export interface RequestLineFacts {
+  lineNo: number
+  productNo: string
+  quantity: number
+  weightKg: number | null
+  volumeM3: number | null
+}
+
+/** The lines of an order; an order stored before lines existed reads as one line. */
+export function requestLines(row: {
+  lines?: readonly RequestLineFacts[]
+  productNo: string
+  quantity: number
+  weightKg: number | null
+  volumeM3: number | null
+}): RequestLineFacts[] {
+  if (row.lines?.length) return row.lines.map((line) => ({ ...line }))
+  const { productNo, quantity, weightKg, volumeM3 } = row
+  return [{ lineNo: 1, productNo, quantity, weightKg, volumeM3 }]
+}
+
+/** First product and totals: a weight or a volume is known only when every line gives it. */
+export function linesSummary(lines: readonly RequestLineFacts[]) {
+  const total = (pick: (line: RequestLineFacts) => number | null) =>
+    lines.some((line) => pick(line) === null)
+      ? null
+      : Math.round(lines.reduce((sum, line) => sum + (pick(line) ?? 0), 0) * 1000) / 1000
+  return {
+    productNo: lines[0]?.productNo ?? '',
+    quantity: total((line) => line.quantity) ?? 0,
+    weightKg: total((line) => line.weightKg),
+    volumeM3: total((line) => line.volumeM3)
+  }
+}
+
 export type DeliveryRequestIssue = 'desiredDateInPast' | 'validityBeforeDesiredDate'
 
 export function deliveryRequestIssues(

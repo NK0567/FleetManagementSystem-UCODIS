@@ -18,7 +18,7 @@ import type {
   TransportOrderRow
 } from '../../fixtures/planning/transportOrders'
 import { readBody, routeParam, stampModified } from '../../http/crudResource'
-import { conflict, unprocessable } from '../../http/errors'
+import { conflict, forbidden, unprocessable } from '../../http/errors'
 import { readNumber, readString } from '../../http/input'
 import { ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
@@ -46,7 +46,7 @@ function statusOf(db: MockDatabase, order: TransportOrderRow) {
 
 function onTheRoad(db: MockDatabase, order: TransportOrderRow): boolean {
   const status = statusOf(db, order)
-  return status === 'in_progress' || status === 'delivered'
+  return status === 'in_progress'
 }
 
 function save(
@@ -65,6 +65,21 @@ function save(
     ],
     ...stampModified(request)
   })
+}
+
+/** A fleet order the signed-in driver is assigned to; any other is not his. */
+export function driverOrder(
+  db: MockDatabase,
+  orderNo: string,
+  request: MockRequest
+): TransportOrderRow {
+  const order = db.transportOrders.findOrFail(orderNo)
+  const trip = order.tripNo ? db.trips.find(order.tripNo) : undefined
+  const employeeNo = sessionUser(request).employeeNo
+  if (!trip || !employeeNo || trip.driverNo !== employeeNo || order.cancelledAt) {
+    throw forbidden(PLANNING_MESSAGES.executionNotYourOrder)
+  }
+  return order
 }
 
 export function registerExecutionHandlers(router: MockRouter, db: MockDatabase): void {
@@ -93,42 +108,128 @@ export function registerExecutionHandlers(router: MockRouter, db: MockDatabase):
     }
   )
 
+  /** What the driver does on the spot; for a fleet order, only he does it, from his space. */
+  const DRIVER_ACTIONS = ['declare', 'refuse', 'postpone']
+
+  const runLineAction = (
+    order: TransportOrderRow,
+    lineNo: number,
+    name: string,
+    request: MockRequest,
+    apply: (
+      order: TransportOrderRow,
+      line: TransportOrderLineRow,
+      request: MockRequest
+    ) => TransportOrderLineRow
+  ) => {
+    if (!onTheRoad(db, order)) throw conflict(PLANNING_MESSAGES.executionNotOnTheRoad)
+    const line = order.lines.find((item) => item.lineNo === lineNo)
+    if (!line) throw unprocessable(PLANNING_MESSAGES.confirmationLineMissing)
+    const next = apply(order, line, request)
+    save(
+      db,
+      order,
+      { lines: order.lines.map((item) => (item.lineNo === lineNo ? next : item)) },
+      request,
+      name === 'declare'
+        ? 'declared'
+        : name === 'refuse'
+          ? 'refused'
+          : name === 'qualify'
+            ? 'qualified'
+            : 'postponed',
+      String(lineNo)
+    )
+    const updated = db.transportOrders.findOrFail(order.no)
+    return ok({ status: statusOf(db, updated), delivered: linesDelivered(updated.lines) })
+  }
+
   const lineAction = (
     name: string,
     apply: (
       order: TransportOrderRow,
       line: TransportOrderLineRow,
       request: MockRequest
-    ) => TransportOrderLineRow
-  ) =>
+    ) => TransportOrderLineRow,
+    /* Qualifying a gap is the delivery manager's (TRS03-US17), not the planner's. */
+    feature = name === 'qualify' ? 'DELIVERYQUALITY' : 'TRANSPORTORDER'
+  ) => {
     router.post(
       `/planning/transport-orders/:no/lines/:lineNo/${name}`,
-      { feature: 'TRANSPORTORDER', action: 'execute' },
+      { feature, action: 'execute' },
       (request) => {
         const order = db.transportOrders.findOrFail(routeParam(request, 'no'))
-        if (!onTheRoad(db, order)) throw conflict(PLANNING_MESSAGES.executionNotOnTheRoad)
-        const lineNo = Number(routeParam(request, 'lineNo'))
-        const line = order.lines.find((item) => item.lineNo === lineNo)
-        if (!line) throw unprocessable(PLANNING_MESSAGES.confirmationLineMissing)
-        const next = apply(order, line, request)
-        save(
-          db,
-          order,
-          { lines: order.lines.map((item) => (item.lineNo === lineNo ? next : item)) },
-          request,
-          name === 'declare'
-            ? 'declared'
-            : name === 'refuse'
-              ? 'refused'
-              : name === 'qualify'
-                ? 'qualified'
-                : 'postponed',
-          String(lineNo)
-        )
-        const updated = db.transportOrders.findOrFail(order.no)
-        return ok({ status: statusOf(db, updated), delivered: linesDelivered(updated.lines) })
+        if (DRIVER_ACTIONS.includes(name) && order.means === 'fleet') {
+          throw conflict(PLANNING_MESSAGES.executionByDriver)
+        }
+        return runLineAction(order, Number(routeParam(request, 'lineNo')), name, request, apply)
       }
     )
+    if (!DRIVER_ACTIONS.includes(name)) return
+    router.post(
+      `/me/orders/:no/lines/:lineNo/${name}`,
+      { feature: 'MYSPACE', action: 'execute' },
+      (request) => {
+        const order = driverOrder(db, routeParam(request, 'no'), request)
+        const lineNo = Number(routeParam(request, 'lineNo'))
+        const line = order.lines.find((item) => item.lineNo === lineNo)
+        // Once arrived at the point, the driver declares what was delivered (TRS03-US09).
+        if (name === 'declare' && line && !line.arrivedAt) {
+          throw conflict(PLANNING_MESSAGES.executionNotArrived)
+        }
+        return runLineAction(order, lineNo, name, request, apply)
+      }
+    )
+  }
+
+  /* The driver marks his arrival at a point: on the first point of an order ready to go, this
+   * gesture starts the execution; a point opens only once the previous one is settled. */
+  router.post(
+    '/me/orders/:no/lines/:lineNo/arrive',
+    { feature: 'MYSPACE', action: 'execute' },
+    (request) => {
+      const order = driverOrder(db, routeParam(request, 'no'), request)
+      const status = statusOf(db, order)
+      if (status !== 'ready' && status !== 'in_progress') {
+        throw conflict(PLANNING_MESSAGES.executionNotReady)
+      }
+      const lineNo = Number(routeParam(request, 'lineNo'))
+      const target = order.lines.find((item) => item.lineNo === lineNo)
+      if (!target) throw unprocessable(PLANNING_MESSAGES.confirmationLineMissing)
+      const route = order.lines.filter((item) => !item.unavailableAt && !item.replannedAt)
+      const points = [...new Set(route.map((item) => item.deliveryPointNo))]
+      const index = points.indexOf(target.deliveryPointNo)
+      const previous =
+        index > 0 ? route.filter((item) => item.deliveryPointNo === points[index - 1]) : []
+      const settled = (item: TransportOrderLineRow) =>
+        !!item.declaredAt || !!item.refusalAt || !!item.postponedAt || !!item.nonconformityAt
+      if (previous.some((item) => !settled(item))) {
+        throw conflict(PLANNING_MESSAGES.executionPreviousOpen)
+      }
+      if (status === 'ready' && order.tripNo) {
+        const trip = db.trips.findOrFail(order.tripNo)
+        if (trip.status === 'planned') {
+          db.trips.update(trip.no, { status: 'in_progress', actualDeparture: nowIsoDateTime() })
+        }
+      }
+      const at = nowIsoDateTime()
+      save(
+        db,
+        order,
+        {
+          lines: order.lines.map((item) =>
+            item.deliveryPointNo === target.deliveryPointNo && !item.arrivedAt
+              ? { ...item, arrivedAt: at }
+              : item
+          )
+        },
+        request,
+        'departed',
+        `arrivée ${target.deliveryPointNo}`
+      )
+      return ok({ status: statusOf(db, db.transportOrders.findOrFail(order.no)) })
+    }
+  )
 
   lineAction('declare', (_order, line, request) => {
     if (lineOutOfTour(line) || line.refusalAt || line.declaredAt) {

@@ -7,6 +7,7 @@ defineProps<{ state: OrderLineState }>()
 
 const TONES: Record<OrderLineState, StatusTone> = {
   pending: 'neutral',
+  not_loaded: 'danger',
   declared: 'success',
   refused: 'danger',
   postponed: 'warning',

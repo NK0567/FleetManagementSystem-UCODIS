@@ -1,7 +1,7 @@
 export default {
-  'planning.billing.title': 'Customer billing',
+  'planning.billing.title': 'Transport billing',
   'planning.billing.subtitle':
-    'The amount comes from the customer tariff. A route flat rate is counted once and split across that customer’s deliveries. Marking the invoice freezes the amount.',
+    'The amount comes from the tariff of the one who pays the freight, the orderer or the recipient. A route flat rate is counted once and split across its deliveries. Marking the invoice freezes the amount.',
   'planning.billing.loading': 'Loading the deliveries to invoice…',
   'planning.billing.empty': 'No delivery to invoice.',
   'planning.billing.loadError': 'Billing could not be displayed.',
@@ -29,7 +29,7 @@ export default {
   'planning.billing.state.ready': 'Ready',
   'planning.billing.state.invoiced': 'Invoiced',
   'planning.billing.col.order': 'Order',
-  'planning.billing.col.customer': 'Billed customer',
+  'planning.billing.col.customer': 'Billed to',
   'planning.billing.col.delivery': 'Delivery point',
   'planning.billing.col.quantity': 'Quantity',
   'planning.billing.col.amount': 'Amount',

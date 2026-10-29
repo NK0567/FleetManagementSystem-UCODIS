@@ -16,7 +16,7 @@ export default {
   'planning.deliveryRequests.col.deliveryPointNo': 'Delivery point',
   'planning.deliveryRequests.col.desiredDate': 'Desired date',
   'planning.deliveryRequests.col.validUntil': 'Valid until',
-  'planning.deliveryRequests.col.externalReference': 'Customer reference',
+  'planning.deliveryRequests.col.externalReference': "Orderer's reference",
   'planning.deliveryRequests.col.freightPayer': 'Freight paid by',
   'planning.deliveryRequests.col.comment': 'Comment',
   'planning.deliveryRequests.col.productNo': 'Product',
@@ -39,7 +39,7 @@ export default {
   'planning.deliveryRequests.form.validUntil': 'Valid until',
   'planning.deliveryRequests.form.validUntilHint':
     'Past this date, the request expires unless it is planned.',
-  'planning.deliveryRequests.form.externalReference': 'Customer reference',
+  'planning.deliveryRequests.form.externalReference': "Orderer's reference",
   'planning.deliveryRequests.form.freightPayer': 'Freight paid by',
   'planning.deliveryRequests.form.comment': 'Comment',
   'planning.deliveryRequests.form.productNo': 'Product',
@@ -60,7 +60,32 @@ export default {
   'planning.deliveryRequests.import.action': 'Import',
   'planning.deliveryRequests.import.title': 'Import delivery requests',
   'planning.deliveryRequests.import.hint':
-    'One line per request, with the codes of the customer, the delivery point and the product. Each line goes through the same checks as an entry on screen.',
+    'One line per order, with the codes of the orderer, the delivery point and the product. Each line goes through the same checks as an entry on screen.',
   'planning.deliveryRequests.import.created':
-    'No request created. | One request created. | {n} requests created.'
+    'No request created. | One request created. | {n} requests created.',
+  'planning.deliveryRequests.lines.title': 'Product lines',
+  'planning.deliveryRequests.lines.count': 'No line | {n} line | {n} lines',
+  'planning.deliveryRequests.lines.add': 'Add a line',
+  'planning.deliveryRequests.lines.remove': 'Remove the line',
+  'planning.deliveryRequests.lines.incomplete': 'Each line needs a product and a quantity',
+  'planning.deliveryRequests.preferences.title': "Recipient's preferences",
+  'planning.deliveryRequests.preferences.hint':
+    "Copied from the recipient's record. They apply to this order only and stay editable until it is planned.",
+  'planning.deliveryRequests.preferences.fullDeliveryRequired': 'Full delivery required',
+  'planning.deliveryRequests.preferences.fullDeliveryHint':
+    'All lines and the whole quantity of each line must leave together. Partial planning stays possible, with a warning.',
+  'planning.deliveryRequests.col.lineCount': 'Lines',
+  'planning.deliveryRequests.col.products': 'Products',
+  'planning.deliveryRequests.col.followUp': 'Follow-up',
+  'planning.deliveryRequests.followUp.planned': 'Planned',
+  'planning.deliveryRequests.followUp.postponed': 'Postponed',
+  'planning.deliveryRequests.followUp.to_replan': 'To plan again',
+  'planning.deliveryRequests.followUp.delivered': 'Delivered',
+  'planning.deliveryRequests.followUp.confirmed': 'Delivered and confirmed by the recipient',
+  'planning.deliveryRequests.followUp.contested': 'Contested',
+  'planning.deliveryRequests.followUp.refused': 'Refused by the recipient',
+  'planning.deliveryRequests.counter.pending': 'Pending',
+  'planning.deliveryRequests.counter.planned': 'Planned',
+  'planning.deliveryRequests.counter.rejected': 'Rejected',
+  'planning.deliveryRequests.counter.delivered': 'Delivered'
 }

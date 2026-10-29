@@ -8,8 +8,23 @@ beforeEach(() => {
   server = createTestServer()
 })
 
-const post = (url: string, body: Record<string, unknown> = {}, as = 'FLT001') =>
+const post = (url: string, body: Record<string, unknown> = {}, as = 'LIV001') =>
   call(server, 'post', url, { as, body, language: 'en' })
+
+/** The driver of the fleet order declares from his space, once arrived at the point. */
+async function driverDeclare(
+  orderNo: string,
+  lineNo: number,
+  body: Record<string, unknown>,
+  as = 'CND001'
+) {
+  await call(server, 'post', `/me/orders/${orderNo}/lines/${lineNo}/arrive`, { as })
+  return call(server, 'post', `/me/orders/${orderNo}/lines/${lineNo}/declare`, {
+    as,
+    body,
+    language: 'en'
+  })
+}
 
 describe('delivery quality', () => {
   it('numbers protest notes by year and closes only an issued note', async () => {
@@ -17,7 +32,7 @@ describe('delivery quality', () => {
     expect((await post(`${line}/protests`, { reasonNo: 'PRT-DAMAGE', quantity: 1 })).status).toBe(
       409
     )
-    await post(`${line}/declare`, { receivedQuantity: 100 })
+    await driverDeclare('TR-2026-0003', 1, { receivedQuantity: 100 })
     expect((await post(`${line}/protests`, { reasonNo: 'PRT-DAMAGE', quantity: 200 })).status).toBe(
       422
     )
@@ -36,7 +51,7 @@ describe('delivery quality', () => {
     expect(
       (
         await call(server, 'patch', `${line}/protests/NP-2026-0001`, {
-          as: 'FLT001',
+          as: 'LIV001',
           body: { reasonNo: 'PRT-DAMAGE', quantity: 2 }
         })
       ).status

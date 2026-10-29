@@ -137,5 +137,18 @@ export default {
   'fleet.vehicles.form.photos': 'Photos',
   'fleet.vehicles.form.photoCount': 'No photo | 1 photo | {count} photos',
   'fleet.vehicles.form.documents': 'Documents',
-  'fleet.vehicles.form.documentsNotCompliant': 'Not compliant'
+  'fleet.vehicles.form.documentsNotCompliant': 'Not compliant',
+  'fleet.vehicles.compartmentVolume': 'Compartment volume',
+  'fleet.vehicles.compartmentContent': 'Content allowed',
+  'fleet.vehicles.content.mixed': 'Mixed products',
+  'fleet.vehicles.content.one_family': 'One category at a time',
+  'fleet.vehicles.content.one_product': 'One product at a time',
+  'fleet.vehicles.fullFill': 'Must be filled completely',
+  'fleet.vehicles.compartmentFamilies': 'Categories allowed',
+  'fleet.vehicles.families.any': 'Any category',
+  'fleet.vehicles.families.loadError': 'The product categories could not be read.',
+  'fleet.vehicles.form.productFamilies': 'Product categories carried',
+  'fleet.vehicles.form.productFamiliesHint':
+    'None ticked: the vehicle carries any product. Choosing the vehicle then filters the orders offered.',
+  'fleet.vehicles.form.noReading': 'No reading.'
 }

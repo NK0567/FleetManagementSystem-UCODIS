@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { CalendarPlus, PackageCheck, Undo2 } from '@lucide/vue'
+import { CalendarPlus, GripVertical, PackageCheck, Search, Undo2 } from '@lucide/vue'
 import { remainderQuantity } from '@/modules/planning/reception/domain/reception'
 import { formatNumber } from '@/utils/format'
 import {
@@ -17,9 +17,16 @@ const props = defineProps<{
   status: TransportOrderStatus
   totalWeightKg: number | null
   canAct?: boolean
+  /** Replanning a remainder is the planner's (TRS01-US17). */
+  canReplan?: boolean
+  /** On a fleet order the driver declares from his space; the card only shows the result. */
+  driverDeclares?: boolean
   busy?: boolean
+  /** The execution order can be changed by moving the lines. */
+  reorderable?: boolean
 }>()
 const emit = defineEmits<{
+  reorder: [lineNos: number[]]
   declare: [line: TransportOrderLineApi]
   handBack: [line: TransportOrderLineApi]
   remainder: [line: TransportOrderLineApi]
@@ -27,27 +34,109 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
-const actionsShown = computed(
-  () =>
-    props.canAct &&
-    props.lines.some(
-      (line) =>
-        canDeclareLine(props.status, line) ||
-        canHandBackLine(line) ||
-        remainderQuantity(line) !== null
-    )
+const actionsShown = computed(() =>
+  props.lines.some(
+    (line) =>
+      (props.canAct &&
+        ((!props.driverDeclares && canDeclareLine(props.status, line)) || canHandBackLine(line))) ||
+      (props.canReplan && remainderQuantity(line) !== null)
+  )
 )
+
+/* The execution order is the order of the rows; it is changed by dragging a row (or with the
+ * arrow keys on its handle). The line number stays the line's identifier. */
+const rows = ref<TransportOrderLineApi[]>([...props.lines])
+watch(
+  () => props.lines,
+  (lines) => (rows.value = [...lines])
+)
+const dragged = ref<number | null>(null)
+const over = ref<number | null>(null)
+
+function onDragStart(lineNo: number, event: DragEvent) {
+  dragged.value = lineNo
+  event.dataTransfer?.setData('text/plain', String(lineNo))
+  if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move'
+}
+function onDragOver(lineNo: number) {
+  if (dragged.value === null || dragged.value === lineNo) return
+  over.value = lineNo
+  const from = rows.value.findIndex((line) => line.lineNo === dragged.value)
+  const to = rows.value.findIndex((line) => line.lineNo === lineNo)
+  if (from < 0 || to < 0) return
+  const next = [...rows.value]
+  const [moved] = next.splice(from, 1)
+  next.splice(to, 0, moved!)
+  rows.value = next
+}
+function commit() {
+  const before = props.lines.map((line) => line.lineNo).join(',')
+  const after = rows.value.map((line) => line.lineNo)
+  dragged.value = null
+  over.value = null
+  if (after.join(',') !== before) emit('reorder', after)
+}
+function finishDrag() {
+  if (dragged.value === null) return
+  commit()
+}
+function moveBy(lineNo: number, step: -1 | 1) {
+  const from = rows.value.findIndex((line) => line.lineNo === lineNo)
+  const to = from + step
+  if (from < 0 || to < 0 || to >= rows.value.length) return
+  const next = [...rows.value]
+  const [moved] = next.splice(from, 1)
+  next.splice(to, 0, moved!)
+  rows.value = next
+  commit()
+}
+
+/* A sub-list is filtered like a main list. */
+const query = ref('')
+const shown = computed(() => {
+  const q = query.value.trim().toLowerCase()
+  if (!q) return rows.value
+  return rows.value.filter((line) =>
+    [line.deliveryRequestNo, line.deliveryPointName, line.recipientName, line.productName]
+      .join(' ')
+      .toLowerCase()
+      .includes(q)
+  )
+})
+const canDrag = computed(() => !!props.reorderable && !props.busy && !query.value.trim())
 
 const actionClass =
   'cursor-pointer inline-flex items-center justify-center p-1.5 rounded text-primary hover:bg-accent transition disabled:opacity-60 disabled:cursor-not-allowed'
 </script>
 
 <template>
+  <div v-if="lines.length > 1" class="flex items-center justify-between gap-3 mb-2">
+    <label class="relative w-full max-w-xs">
+      <Search
+        class="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none"
+      />
+      <input
+        v-model="query"
+        type="search"
+        class="w-full h-8 pl-8 pr-2 text-sm border border-border rounded bg-background outline-none focus:border-primary"
+        :placeholder="t('planning.transportOrders.lines.filter')"
+      />
+    </label>
+    <p v-if="reorderable" class="text-xs text-muted-foreground">
+      {{ t('planning.transportOrders.lines.reorderHint') }}
+    </p>
+  </div>
   <div class="border border-border rounded overflow-x-auto">
     <table class="w-full text-sm">
       <thead>
         <tr class="bg-muted/40 text-xs text-muted-foreground">
-          <th class="px-3 py-2 font-semibold text-right w-10">#</th>
+          <th v-if="reorderable" class="px-1 py-2 w-6" />
+          <th class="px-3 py-2 font-semibold text-right w-14 whitespace-nowrap">
+            {{ t('planning.transportOrders.lines.col.sequence') }}
+          </th>
+          <th class="px-3 py-2 font-semibold text-right w-14 whitespace-nowrap">
+            {{ t('planning.transportOrders.lines.col.lineNo') }}
+          </th>
           <th class="px-3 py-2 font-semibold text-left whitespace-nowrap">
             {{ t('planning.transportOrders.lines.col.request') }}
           </th>
@@ -75,12 +164,41 @@ const actionClass =
         </tr>
       </thead>
       <tbody>
-        <tr v-if="!lines.length">
-          <td colspan="9" class="px-3 py-4 text-muted-foreground">
+        <tr v-if="!shown.length">
+          <td colspan="11" class="px-3 py-4 text-muted-foreground">
             {{ t('planning.transportOrders.lines.empty') }}
           </td>
         </tr>
-        <tr v-for="line in lines" :key="line.lineNo" class="border-t border-border align-top">
+        <tr
+          v-for="line in shown"
+          :key="line.lineNo"
+          class="border-t border-border align-top transition-colors"
+          :class="
+            dragged === line.lineNo ? 'bg-primary/10' : over === line.lineNo ? 'bg-accent' : ''
+          "
+          :draggable="canDrag"
+          @dragstart="(event) => canDrag && onDragStart(line.lineNo, event)"
+          @dragover.prevent="canDrag && onDragOver(line.lineNo)"
+          @drop.prevent="finishDrag"
+          @dragend="finishDrag"
+        >
+          <td v-if="reorderable" class="px-1 py-2 text-muted-foreground">
+            <button
+              type="button"
+              class="p-0.5 rounded hover:bg-accent disabled:opacity-40"
+              :class="canDrag ? 'cursor-grab' : 'cursor-not-allowed'"
+              :disabled="!canDrag"
+              :title="t('planning.transportOrders.lines.reorderHint')"
+              :aria-label="t('planning.transportOrders.lines.moveLine', { no: line.lineNo })"
+              @keydown.up.prevent="moveBy(line.lineNo, -1)"
+              @keydown.down.prevent="moveBy(line.lineNo, 1)"
+            >
+              <GripVertical class="w-4 h-4" />
+            </button>
+          </td>
+          <td class="px-3 py-2 text-right tabular-nums font-semibold text-card-foreground">
+            {{ rows.indexOf(line) + 1 }}
+          </td>
           <td class="px-3 py-2 text-right tabular-nums text-muted-foreground">
             {{ line.lineNo }}
           </td>
@@ -131,7 +249,7 @@ const actionClass =
           </td>
           <td v-if="actionsShown" class="px-3 py-1.5 text-right whitespace-nowrap">
             <button
-              v-if="canDeclareLine(status, line)"
+              v-if="canAct && !driverDeclares && canDeclareLine(status, line)"
               type="button"
               :class="actionClass"
               :disabled="busy"
@@ -142,7 +260,7 @@ const actionClass =
               <PackageCheck class="w-4 h-4" />
             </button>
             <button
-              v-if="canHandBackLine(line)"
+              v-if="canAct && canHandBackLine(line)"
               type="button"
               :class="actionClass"
               :disabled="busy"
@@ -153,7 +271,7 @@ const actionClass =
               <Undo2 class="w-4 h-4" />
             </button>
             <button
-              v-if="remainderQuantity(line) !== null"
+              v-if="canReplan && remainderQuantity(line) !== null"
               type="button"
               :class="actionClass"
               :disabled="busy"
@@ -168,7 +286,10 @@ const actionClass =
       </tbody>
       <tfoot v-if="lines.length && totalWeightKg !== null">
         <tr class="border-t border-border bg-muted/40 font-medium">
-          <td colspan="6" class="px-3 py-2 text-right text-xs text-muted-foreground">
+          <td
+            :colspan="reorderable ? 8 : 7"
+            class="px-3 py-2 text-right text-xs text-muted-foreground"
+          >
             {{ t('planning.transportOrders.lines.total') }}
           </td>
           <td class="px-3 py-2 text-right tabular-nums">{{ formatNumber(totalWeightKg, 1) }}</td>

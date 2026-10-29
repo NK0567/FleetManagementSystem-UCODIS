@@ -13,6 +13,13 @@ export interface LineFollowUp {
   clientProposedOn: string | null
   plannerProposedOn: string | null
   replannedAt: string | null
+  /** The agent handling the line: while it is taken, it is not offered to the others. */
+  confirmationAgent: string | null
+  confirmationTakenAt: string | null
+  /** Who gave the answer: the recipient through his link, or an agent on the phone. */
+  answerOrigin: 'link' | 'agent' | null
+  /** The driver marked his arrival at the delivery point of this line. */
+  arrivedAt: string | null
   trackingToken: string | null
   trackingExpiresOn: string | null
   loadedQuantity: number | null
@@ -63,6 +70,10 @@ export function emptyFollowUp(): LineFollowUp {
     clientProposedOn: null,
     plannerProposedOn: null,
     replannedAt: null,
+    confirmationAgent: null,
+    confirmationTakenAt: null,
+    answerOrigin: null,
+    arrivedAt: null,
     trackingToken: null,
     trackingExpiresOn: null,
     loadedQuantity: null,

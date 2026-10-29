@@ -7,6 +7,7 @@ import {
   deliveryRequestService,
   type DeliveryRequestApi
 } from '@/modules/planning/delivery-requests'
+import { toLineInputs, type PickedLines } from '../domain/requestPick'
 import type { TransportOrderApi, TransportOrderLineInput } from '../types/transportOrder.types'
 
 const props = defineProps<{
@@ -28,6 +29,7 @@ interface ManualLine {
 const { t } = useI18n()
 const requests = ref<DeliveryRequestApi[]>([])
 const picked = ref<string[]>([])
+const pickedLines = ref<PickedLines>({})
 const manual = ref<ManualLine[]>([])
 const loadingRequests = ref(false)
 const loadError = ref<string | null>(null)
@@ -42,9 +44,14 @@ watch(
   async (open) => {
     if (!open || !props.order) return
     loadError.value = null
-    picked.value = props.order.lines
-      .map((line) => line.deliveryRequestNo)
-      .filter((no): no is string => !!no)
+    /* An order already in the transport order keeps only the lines taken, the others having
+     * become an order of their own: it is offered whole. */
+    picked.value = [
+      ...new Set(
+        props.order.lines.map((line) => line.deliveryRequestNo).filter((no): no is string => !!no)
+      )
+    ]
+    pickedLines.value = {}
     manual.value = props.order.lines
       .filter((line) => !line.deliveryRequestNo)
       .map((line) => ({
@@ -83,7 +90,7 @@ function removeManual(key: number) {
 
 function confirm() {
   emit('confirm', [
-    ...picked.value.map((deliveryRequestNo) => ({ deliveryRequestNo })),
+    ...toLineInputs(requests.value, picked.value, pickedLines.value),
     ...manual.value.map((line) => ({
       deliveryPointNo: line.deliveryPointNo,
       productNo: line.productNo,
@@ -121,8 +128,11 @@ const buttonClass =
         </div>
         <RequestPickerTable
           v-model="picked"
+          v-model:lines="pickedLines"
           :requests="requests"
           :loading="loadingRequests"
+          :date="order?.plannedDeparture ?? null"
+          :families="order?.vehicleProductFamilies ?? []"
           :empty-message="t('planning.transportOrders.linesDialog.none')"
         />
       </div>

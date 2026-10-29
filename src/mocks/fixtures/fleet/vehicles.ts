@@ -25,6 +25,7 @@ export interface VehicleRow extends MockRow {
   maxLoadKg: number | null
   maxVolumeM3: number | null
   compartments: VehicleCompartment[]
+  productFamilies: string[]
   acquisitionMode: AcquisitionMode | null
   acquisitionDate: string | null
   acquisitionProviderNo: string | null
@@ -39,7 +40,7 @@ export interface VehicleRow extends MockRow {
   photoFileNos: string[]
 }
 
-const SEED: Omit<VehicleRow, keyof typeof seedAudit | 'photoFileNos'>[] = [
+const SEED: Omit<VehicleRow, keyof typeof seedAudit | 'photoFileNos' | 'productFamilies'>[] = [
   {
     fuelType: 'diesel',
     tankCapacityL: 500,
@@ -685,15 +686,24 @@ const SEED: Omit<VehicleRow, keyof typeof seedAudit | 'photoFileNos'>[] = [
     compartments: [
       {
         no: 1,
-        volumeL: 12000
+        volumeL: 12000,
+        families: ['Carburant'],
+        content: 'one_product',
+        fullFill: false
       },
       {
         no: 2,
-        volumeL: 10000
+        volumeL: 10000,
+        families: ['Carburant'],
+        content: 'one_product',
+        fullFill: false
       },
       {
         no: 3,
-        volumeL: 8000
+        volumeL: 8000,
+        families: ['Carburant'],
+        content: 'one_product',
+        fullFill: false
       }
     ],
     outOfService: null,
@@ -726,15 +736,24 @@ const SEED: Omit<VehicleRow, keyof typeof seedAudit | 'photoFileNos'>[] = [
     compartments: [
       {
         no: 1,
-        volumeL: 12000
+        volumeL: 12000,
+        families: ['Carburant'],
+        content: 'one_product',
+        fullFill: false
       },
       {
         no: 2,
-        volumeL: 10000
+        volumeL: 10000,
+        families: ['Carburant'],
+        content: 'one_product',
+        fullFill: false
       },
       {
         no: 3,
-        volumeL: 8000
+        volumeL: 8000,
+        families: ['Carburant'],
+        content: 'one_product',
+        fullFill: false
       }
     ],
     outOfService: null,
@@ -767,15 +786,24 @@ const SEED: Omit<VehicleRow, keyof typeof seedAudit | 'photoFileNos'>[] = [
     compartments: [
       {
         no: 1,
-        volumeL: 15000
+        volumeL: 15000,
+        families: ['Carburant'],
+        content: 'one_product',
+        fullFill: false
       },
       {
         no: 2,
-        volumeL: 10000
+        volumeL: 10000,
+        families: ['Carburant'],
+        content: 'one_product',
+        fullFill: false
       },
       {
         no: 3,
-        volumeL: 8000
+        volumeL: 8000,
+        families: ['Carburant'],
+        content: 'one_product',
+        fullFill: false
       }
     ],
     outOfService: null,
@@ -808,15 +836,24 @@ const SEED: Omit<VehicleRow, keyof typeof seedAudit | 'photoFileNos'>[] = [
     compartments: [
       {
         no: 1,
-        volumeL: 12000
+        volumeL: 12000,
+        families: ['Carburant'],
+        content: 'one_product',
+        fullFill: false
       },
       {
         no: 2,
-        volumeL: 10000
+        volumeL: 10000,
+        families: ['Carburant'],
+        content: 'one_product',
+        fullFill: false
       },
       {
         no: 3,
-        volumeL: 8000
+        volumeL: 8000,
+        families: ['Carburant'],
+        content: 'one_product',
+        fullFill: false
       }
     ],
     outOfService: null,
@@ -842,7 +879,14 @@ const SEED: Omit<VehicleRow, keyof typeof seedAudit | 'photoFileNos'>[] = [
 
 export const vehiclesCollection: CollectionDefinition<VehicleRow> = {
   name: 'vehicles',
-  seed: () => SEED.map((row) => ({ ...row, photoFileNos: [], ...seedAudit })),
+  seed: () =>
+    SEED.map((row) => ({
+      ...row,
+      // The tankers are kept for fuel; the other vehicles take any product.
+      productFamilies: row.compartments.length ? ['Carburant'] : [],
+      photoFileNos: [],
+      ...seedAudit
+    })),
   // Readings move with the demo clock, like the refills and trips that also carry the odometer.
   dateFields: ['odometerReadings[].readAt']
 }

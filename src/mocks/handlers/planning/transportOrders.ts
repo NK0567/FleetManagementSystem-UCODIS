@@ -1,9 +1,16 @@
 import {
+  allocate,
+  compartmentsOf,
+  familyAllowed,
+  type CompartmentIssue
+} from '@/modules/fleet/vehicles/domain/compartments'
+import {
   plannedSchedule,
   type RouteStop
 } from '@/modules/fleet/route-templates/domain/routeTemplate'
 import { forbiddenTogether } from '@/modules/planning/product-compatibilities/domain/productCompatibility'
 import {
+  awaitingClosing,
   canCancel,
   canEditLines,
   canEditSchedule,
@@ -24,6 +31,7 @@ import type {
 } from '@/modules/planning/transport-orders/types/transportOrder.types'
 import {
   emptyFollowUp,
+  lineOutOfTour,
   linesConfirmed,
   opaqueToken,
   trackingExpiry
@@ -62,13 +70,19 @@ import { optionalReference, requireReference, unknownReference } from '../../htt
 import { ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
 import { sessionUser, type MockRequest } from '../../http/types'
+import { localize, toMockLanguage, type MockLanguage } from '../../i18n'
 import { orderPlace, visibleTo } from './perimeter'
-import { buildTrip } from '../fleet/trips'
+import { buildTrip, overlapWarnings } from '../fleet/trips'
 import { equipmentApi } from '../fleet/vehicles'
 import { employeeNames, vehiclePlates } from '../fleet/links'
 import { plannedArrival } from '../fleet/tripIndex'
-import { deliveryRequestStatus } from '@/modules/planning/delivery-requests/domain/deliveryRequest'
+import {
+  deliveryRequestStatus,
+  linesSummary,
+  requestLines
+} from '@/modules/planning/delivery-requests/domain/deliveryRequest'
 import type { DeliveryRequestRow } from '../../fixtures/planning/deliveryRequests'
+import { nextDeliveryRequestNo } from './deliveryRequests'
 import { PLANNING_MESSAGES } from './messages'
 import { readReason } from './planningReasons'
 import { planningSettings } from './settings'
@@ -112,7 +126,8 @@ export function transportOrdersApi(db: MockDatabase, userCode?: string): Transpo
           deliveryPointName: point?.name ?? '',
           recipientName: customers.get(point?.customerNo ?? '') ?? '',
           productName: product?.name ?? '',
-          unit: product?.unit ?? ''
+          unit: product?.unit ?? '',
+          contestReasonName: reasons.get(line.contestReasonNo ?? '') ?? ''
         }
       })
       const recipients: string[] = []
@@ -147,6 +162,14 @@ export function transportOrdersApi(db: MockDatabase, userCode?: string): Transpo
         vehiclePlate: trip ? (plates.get(trip.vehicleNo) ?? '') : '',
         trailerNo: trip?.trailerNo ?? null,
         trailerPlate: trip?.trailerNo ? (plates.get(trip.trailerNo) ?? '') : '',
+        compartmentPlan: trip
+          ? compartmentPlan(db, row.lines, trip.vehicleNo, trip.trailerNo ?? null)
+          : null,
+        vehicleProductFamilies: trip
+          ? goodsCarriers(db, trip.vehicleNo, trip.trailerNo ?? null).flatMap(
+              (vehicle) => vehicle.productFamilies ?? []
+            )
+          : [],
         driverNo: trip?.driverNo ?? null,
         driverName: trip ? (names.get(trip.driverNo) ?? '') : '',
         carrierNo: row.carrierNo,
@@ -159,16 +182,14 @@ export function transportOrdersApi(db: MockDatabase, userCode?: string): Transpo
         cancelledAt: row.cancelledAt,
         cancelledBy: row.cancelledBy,
         events: row.events,
-        status: transportOrderStatus({
-          cancelledAt: row.cancelledAt,
-          means: row.means,
-          tripStatus: trip?.status ?? null,
-          linesConfirmed: linesConfirmed(row.lines),
-          loadingReady: loadingReady(row.lines),
-          carrierDeparted: row.carrierDepartedAt !== null,
-          linesDelivered: linesDelivered(row.lines),
-          closedAt: row.closedAt
-        }),
+        status: statusOf(db, row),
+        awaitingClosing: awaitingClosing(statusOf(db, row), linesDelivered(row.lines)),
+        archived: statusOf(db, row) === 'completed',
+        // A planned order still waiting for recipients to confirm shows an icon in the list.
+        awaitingConfirmations:
+          statusOf(db, row) === 'planned'
+            ? row.lines.filter((line) => !line.confirmedAt && !lineOutOfTour(line)).length
+            : 0,
         createdAt: row.createdAt,
         createdBy: row.createdBy,
         modifiedAt: row.modifiedAt,
@@ -231,6 +252,8 @@ function readLimited(input: Record<string, unknown>, field: string, max: number)
 
 interface RawLine {
   deliveryRequestNo: string | null
+  /** A part of the order's lines; empty takes them all. */
+  requestLineNos?: number[]
   deliveryPointNo: string
   productNo: string
   quantity: number
@@ -245,8 +268,16 @@ function readLines(input: Record<string, unknown>): RawLine[] {
     const row = item as Record<string, unknown>
     const deliveryRequestNo = readString(row, 'deliveryRequestNo') || null
     if (deliveryRequestNo) {
+      const picked = row.requestLineNos
+      if (
+        picked != null &&
+        (!Array.isArray(picked) || picked.some((no) => !Number.isInteger(no)))
+      ) {
+        throw invalidField('requestLineNos')
+      }
       return {
         deliveryRequestNo,
+        requestLineNos: (picked as number[] | undefined) ?? [],
         deliveryPointNo: '',
         productNo: '',
         quantity: 0,
@@ -296,14 +327,26 @@ function assertActiveGoods(db: MockDatabase, deliveryPointNo: string, productNo:
   }
 }
 
-/** Lines as they will be stored. A request supplies its own point, product and quantity. */
+/** Part of an order (commande) taken: the lines left behind become a new order, still pending. */
+interface RequestSplit {
+  requestNo: string
+  keep: number[]
+}
+
+/**
+ * Lines as they will be stored. An order supplies its own point, products and quantities, one
+ * line of the transport order per line of the order; taking only some of its lines shares it.
+ */
 function resolveLines(
   db: MockDatabase,
   orderNo: string | null,
-  rawLines: RawLine[]
-): TransportOrderLineRow[] {
+  rawLines: RawLine[],
+  language: MockLanguage = 'fr'
+): { lines: TransportOrderLineRow[]; splits: RequestSplit[]; warnings: string[] } {
   const seen = new Set<string>()
-  return rawLines.map((raw, index) => {
+  const splits: RequestSplit[] = []
+  const warnings: string[] = []
+  const lines = rawLines.flatMap((raw): Omit<TransportOrderLineRow, 'lineNo'>[] => {
     if (raw.deliveryRequestNo) {
       if (seen.has(raw.deliveryRequestNo)) {
         throw unprocessable(PLANNING_MESSAGES.orderRequestRepeated, { no: raw.deliveryRequestNo })
@@ -314,50 +357,136 @@ function resolveLines(
       }
       const request = db.deliveryRequests.findOrFail(raw.deliveryRequestNo)
       assertRequestTakeable(db, request, orderNo)
-      assertActiveGoods(db, request.deliveryPointNo, request.productNo)
-      return {
-        lineNo: index + 1,
-        deliveryRequestNo: request.no,
-        deliveryPointNo: request.deliveryPointNo,
-        productNo: request.productNo,
-        quantity: request.quantity,
-        weightKg: request.weightKg,
+      const all = requestLines(request)
+      const wanted = raw.requestLineNos?.length
+        ? all.filter((line) => raw.requestLineNos!.includes(line.lineNo))
+        : all
+      if (!wanted.length || wanted.length !== (raw.requestLineNos?.length || all.length)) {
+        throw invalidField('requestLineNos')
+      }
+      if (wanted.length < all.length) {
+        splits.push({ requestNo: request.no, keep: wanted.map((line) => line.lineNo) })
+        if (request.fullDeliveryRequired) {
+          warnings.push(
+            localize(language, PLANNING_MESSAGES.fullDeliveryPartial, { no: request.no })
+          )
+        }
+      }
+      return wanted.map((line) => {
+        assertActiveGoods(db, request.deliveryPointNo, line.productNo)
+        return {
+          deliveryRequestNo: request.no,
+          requestLineNo: line.lineNo,
+          deliveryPointNo: request.deliveryPointNo,
+          productNo: line.productNo,
+          quantity: line.quantity,
+          weightKg: line.weightKg,
+          ...emptyFollowUp(),
+          ...emptyQuality()
+        }
+      })
+    }
+    assertActiveGoods(db, raw.deliveryPointNo, raw.productNo)
+    return [
+      {
+        deliveryRequestNo: null,
+        deliveryPointNo: raw.deliveryPointNo,
+        productNo: raw.productNo,
+        quantity: raw.quantity,
+        weightKg: raw.weightKg,
         ...emptyFollowUp(),
         ...emptyQuality()
       }
-    }
-    assertActiveGoods(db, raw.deliveryPointNo, raw.productNo)
-    return {
-      lineNo: index + 1,
-      deliveryRequestNo: null,
-      deliveryPointNo: raw.deliveryPointNo,
-      productNo: raw.productNo,
-      quantity: raw.quantity,
-      weightKg: raw.weightKg,
-      ...emptyFollowUp(),
-      ...emptyQuality()
-    }
+    ]
   })
+  return {
+    lines: lines.map((line, index) => ({ ...line, lineNo: index + 1 })),
+    splits,
+    warnings
+  }
+}
+
+/** Shares each order partly taken: the lines kept stay on it, the others go to a new order. */
+function applySplits(db: MockDatabase, splits: readonly RequestSplit[], request: MockRequest) {
+  for (const split of splits) {
+    const row = db.deliveryRequests.findOrFail(split.requestNo)
+    const all = requestLines(row)
+    const kept = all.filter((line) => split.keep.includes(line.lineNo))
+    const left = all
+      .filter((line) => !split.keep.includes(line.lineNo))
+      .map((line, index) => ({ ...line, lineNo: index + 1 }))
+    if (!left.length) continue
+    const no = nextDeliveryRequestNo(db)
+    db.deliveryRequests.insert(
+      stampCreated(
+        {
+          ...row,
+          no,
+          externalReference: '',
+          parentNo: row.parentNo ?? row.no,
+          transportOrderNo: null,
+          lines: left,
+          ...linesSummary(left)
+        },
+        request
+      )
+    )
+    db.deliveryRequests.update(row.no, {
+      lines: kept,
+      ...linesSummary(kept),
+      ...stampModified(request)
+    })
+  }
 }
 
 function keepFollowUp(
   previous: readonly TransportOrderLineRow[],
   lines: TransportOrderLineRow[]
 ): TransportOrderLineRow[] {
+  // A kept line keeps its number: the array order is the execution order, the number identifies it.
+  let nextLineNo = previous.reduce((max, line) => Math.max(max, line.lineNo), 0)
   return lines.map((line) => {
     const kept = line.deliveryRequestNo
-      ? previous.find((item) => item.deliveryRequestNo === line.deliveryRequestNo)
+      ? previous.find(
+          (item) =>
+            item.deliveryRequestNo === line.deliveryRequestNo &&
+            (item.requestLineNo ?? 1) === (line.requestLineNo ?? 1)
+        )
       : undefined
-    if (!kept) return line
+    if (!kept) return { ...line, lineNo: ++nextLineNo }
     return {
       ...kept,
-      lineNo: line.lineNo,
       deliveryPointNo: line.deliveryPointNo,
       productNo: line.productNo,
       quantity: line.quantity,
       weightKg: line.weightKg
     }
   })
+}
+
+/**
+ * A line whose order asks for no availability confirmation is confirmed as soon as the transport
+ * order is planned; the others wait for their recipient. Before planning, nothing is confirmed.
+ */
+function autoConfirm(
+  db: MockDatabase,
+  order: Pick<TransportOrderRow, 'means'>,
+  lines: readonly TransportOrderLineRow[]
+): TransportOrderLineRow[] {
+  if (!order.means) return [...lines]
+  return lines.map((line) => {
+    if (line.confirmedAt || confirmationRequiredOf(db, line)) return line
+    return { ...line, confirmedAt: nowIsoDateTime(), confirmedBy: 'auto' }
+  })
+}
+
+/** The order's own preference, else the recipient's. */
+function confirmationRequiredOf(db: MockDatabase, line: TransportOrderLineRow): boolean {
+  const request = line.deliveryRequestNo ? db.deliveryRequests.find(line.deliveryRequestNo) : null
+  if (request) return request.confirmationRequired ?? true
+  const point = db.deliveryPoints.find(line.deliveryPointNo)
+  const customer = point ? db.customers.find(point.customerNo) : undefined
+  return customer?.confirmationRequired ?? true
 }
 
 function issueTokens(lines: readonly TransportOrderLineRow[]): TransportOrderLineRow[] {
@@ -418,7 +547,7 @@ function combinationHasPump(
   )
 }
 
-function serving(
+export function serving(
   db: MockDatabase,
   vehicleNo: string,
   trailerNo: string | null
@@ -476,6 +605,36 @@ function refuseLoad(issue: LoadIssue): never {
   }
 }
 
+/** An excess of weight or volume, read out: a warning unless the capacity check is strict. */
+function loadWarning(language: MockLanguage, issue: LoadIssue): string | null {
+  if (issue.code === 'overWeight') {
+    return localize(language, PLANNING_MESSAGES.orderOverWeight, {
+      weightKg: shown(issue.weightKg),
+      maxLoadKg: shown(issue.maxLoadKg)
+    })
+  }
+  if (issue.code === 'overFuel') {
+    return localize(language, PLANNING_MESSAGES.orderOverFuel, {
+      liters: shown(issue.liters),
+      capacityL: shown(issue.capacityL)
+    })
+  }
+  return null
+}
+
+/**
+ * The planner decides on a warning (excess of capacity, overlap in the calendar): the first call
+ * returns the warnings, the call that confirms them sends force.
+ */
+function confirmWarnings(warnings: readonly string[], body: Record<string, unknown>): void {
+  if (!warnings.length || body.force === true) return
+  throw conflict(
+    PLANNING_MESSAGES.planningWarnings,
+    { details: warnings.join(' ') },
+    { errorCode: 'PLANNING_WARNINGS' }
+  )
+}
+
 function refusePoint(issue: PointIssue): never {
   const text =
     issue.code === 'pumpRequired'
@@ -497,12 +656,17 @@ function assertCompatible(db: MockDatabase, lines: readonly TransportOrderLineRo
   })
 }
 
-function assertServed(
+/**
+ * Compatibility and the delivery points always hold. An excess of capacity is refused only when
+ * the capacity check is strict; otherwise it comes back as a warning.
+ */
+function servedWarnings(
   db: MockDatabase,
   lines: readonly TransportOrderLineRow[],
   vehicleNo: string,
-  trailerNo: string | null
-): void {
+  trailerNo: string | null,
+  language: MockLanguage
+): string[] {
   const served = serving(db, vehicleNo, trailerNo)
   assertCompatible(db, lines)
   const points = lines.map((line) => {
@@ -515,8 +679,106 @@ function assertServed(
   })
   const place = pointIssue(points, served.typeNo, served.hasPump)
   if (place) refusePoint(place)
+  assertFamilies(db, lines, vehicleNo, trailerNo)
+  // A compartment rule (here, a compartment to fill completely) is never broken (TRS07-US04);
+  // what finds no room is a matter of capacity, warned unless the capacity check is strict.
+  const issues = compartmentIssues(db, lines, vehicleNo, trailerNo)
+  const broken = issues.filter((issue) => issue.code === 'notFull')
+  if (broken.length) {
+    const text = broken.map((issue) => compartmentText('fr', issue)).join(' ')
+    const textEn = broken.map((issue) => compartmentText('en', issue)).join(' ')
+    throw unprocessable({ fr: text, en: textEn })
+  }
+  const compartmentWarnings = issues.map((issue) => compartmentText(language, issue))
+  if (compartmentWarnings.length && planningSettings(db).controls.strictCapacity) {
+    throw unprocessable({ fr: compartmentWarnings.join(' '), en: compartmentWarnings.join(' ') })
+  }
   const load = loadIssue(asLoad(db, lines), served.capacity)
-  if (load) refuseLoad(load)
+  if (!load) return compartmentWarnings
+  const warning = loadWarning(language, load)
+  if (!warning || planningSettings(db).controls.strictCapacity) refuseLoad(load)
+  return [warning, ...compartmentWarnings]
+}
+
+/** The vehicles of the combination that carry the goods: the trailer, else the vehicle itself. */
+export function goodsCarriers(db: MockDatabase, vehicleNo: string, trailerNo: string | null) {
+  return [vehicleNo, trailerNo]
+    .filter((no): no is string => !!no)
+    .map((no) => db.vehicles.findOrFail(no))
+    .filter((vehicle) => db.vehicleTypes.find(vehicle.vehicleTypeNo)?.carriesGoods)
+}
+
+/** A vehicle kept for some product categories refuses the others; that is never a warning. */
+function assertFamilies(
+  db: MockDatabase,
+  lines: readonly TransportOrderLineRow[],
+  vehicleNo: string,
+  trailerNo: string | null
+): void {
+  for (const vehicle of goodsCarriers(db, vehicleNo, trailerNo)) {
+    for (const line of lines) {
+      const product = db.products.find(line.productNo)
+      if (!product || familyAllowed(vehicle.productFamilies ?? [], product.family)) continue
+      throw unprocessable(PLANNING_MESSAGES.orderFamilyRefused, {
+        plate: vehicle.plate,
+        family: product.family,
+        product: product.name
+      })
+    }
+  }
+}
+
+/** Litres of a line, when its product is counted in litres; otherwise unknown. */
+function litresOfLine(db: MockDatabase, line: TransportOrderLineRow): number | null {
+  const unit = (db.products.find(line.productNo)?.unit ?? '').toLowerCase()
+  return unit === 'litre' || unit === 'l' ? line.quantity : null
+}
+
+/** The lines placed in the compartments of the combination; nothing for a vehicle without any. */
+export function compartmentPlan(
+  db: MockDatabase,
+  lines: readonly TransportOrderLineRow[],
+  vehicleNo: string,
+  trailerNo: string | null
+) {
+  const compartments = compartmentsOf(
+    goodsCarriers(db, vehicleNo, trailerNo).flatMap((vehicle) => vehicle.compartments),
+    null
+  )
+  if (!compartments.length) return null
+  const plan = allocate(
+    compartments,
+    lines.map((line) => {
+      const product = db.products.find(line.productNo)
+      return {
+        lineNo: line.lineNo,
+        productNo: line.productNo,
+        productName: product?.name ?? line.productNo,
+        family: product?.family ?? '',
+        volumeL: litresOfLine(db, line)
+      }
+    })
+  )
+  return { compartments, ...plan }
+}
+
+function compartmentIssues(
+  db: MockDatabase,
+  lines: readonly TransportOrderLineRow[],
+  vehicleNo: string,
+  trailerNo: string | null
+): CompartmentIssue[] {
+  return compartmentPlan(db, lines, vehicleNo, trailerNo)?.issues ?? []
+}
+
+function compartmentText(language: MockLanguage, issue: CompartmentIssue): string {
+  return issue.code === 'noRoom'
+    ? localize(language, PLANNING_MESSAGES.compartmentNoRoom, { product: issue.productName })
+    : localize(language, PLANNING_MESSAGES.compartmentNotFull, {
+        no: issue.no,
+        used: shown(issue.usedL),
+        volume: shown(issue.volumeL)
+      })
 }
 
 /** Every line of the non-cancelled orders already on the trip, plus the lines being checked. */
@@ -568,17 +830,24 @@ export function registerTransportOrdersHandlers(router: MockRouter, db: MockData
       const routeTemplateNo = 'routeTemplateNo' in input ? readRoute(db, input) : null
       const plannedDeparture = 'plannedDeparture' in input ? readDeparture(input) : null
       const comment = readLimited(input, 'comment', 500)
-      const lines = resolveLines(
+      // Whole orders by their numbers, or lines that may take only part of an order.
+      const raw = Array.isArray(input.lines)
+        ? readLines(input)
+        : readStringList(input, 'deliveryRequestNos').map((deliveryRequestNo) => ({
+            deliveryRequestNo,
+            deliveryPointNo: '',
+            productNo: '',
+            quantity: 0,
+            weightKg: null
+          }))
+      const { lines, splits, warnings } = resolveLines(
         db,
         null,
-        readStringList(input, 'deliveryRequestNos').map((deliveryRequestNo) => ({
-          deliveryRequestNo,
-          deliveryPointNo: '',
-          productNo: '',
-          quantity: 0,
-          weightKg: null
-        }))
+        raw,
+        toMockLanguage(request.language)
       )
+      confirmWarnings(warnings, input)
+      applySplits(db, splits, request)
       const no = nextTransportOrderNo(db)
       syncRequests(db, no, [], requestNos(lines), request)
       return {
@@ -623,16 +892,54 @@ export function registerTransportOrdersHandlers(router: MockRouter, db: MockData
     (request) => {
       const order = orderOf(request)
       if (!canEditLines(statusOf(db, order))) throw conflict(PLANNING_MESSAGES.orderLinesLocked)
-      const lines = keepFollowUp(
-        order.lines,
-        resolveLines(db, order.no, readLines(readBody(request)))
-      )
+      const language = toMockLanguage(request.language)
+      const resolved = resolveLines(db, order.no, readLines(readBody(request)), language)
+      const lines = autoConfirm(db, order, keepFollowUp(order.lines, resolved.lines))
+      const warnings = [...resolved.warnings]
       if (order.means === 'fleet' && order.tripNo) {
         const trip = db.trips.findOrFail(order.tripNo)
-        assertServed(db, tripLines(db, trip.no, order.no, lines), trip.vehicleNo, trip.trailerNo)
+        warnings.push(
+          ...servedWarnings(
+            db,
+            tripLines(db, trip.no, order.no, lines),
+            trip.vehicleNo,
+            trip.trailerNo,
+            language
+          )
+        )
       }
       if (order.means === 'carrier') assertCompatible(db, lines)
+      confirmWarnings(warnings, readBody(request))
+      applySplits(db, resolved.splits, request)
       syncRequests(db, order.no, requestNos(order.lines), requestNos(lines), request)
+      db.transportOrders.update(order.no, {
+        lines,
+        events: [...order.events, eventOf(request, 'lines_changed', String(lines.length))],
+        ...stampModified(request)
+      })
+      return ok(oneOf(db, order.no))
+    }
+  )
+
+  router.put(
+    `${BASE_PATH}/:no/sequence`,
+    { feature: 'TRANSPORTORDER', action: 'update' },
+    (request) => {
+      const order = orderOf(request)
+      if (!canEditLines(statusOf(db, order))) throw conflict(PLANNING_MESSAGES.orderLinesLocked)
+      const raw = readBody(request).lineNos
+      if (!Array.isArray(raw)) throw invalidField('lineNos')
+      const wanted = raw.map((value) => Number(value))
+      const known = order.lines.map((line) => line.lineNo)
+      if (
+        wanted.length !== known.length ||
+        new Set(wanted).size !== wanted.length ||
+        wanted.some((lineNo) => !known.includes(lineNo))
+      ) {
+        throw invalidField('lineNos')
+      }
+      // Only the execution order changes: each line keeps its number and its follow-up.
+      const lines = wanted.map((lineNo) => order.lines.find((line) => line.lineNo === lineNo)!)
       db.transportOrders.update(order.no, {
         lines,
         events: [...order.events, eventOf(request, 'lines_changed', String(lines.length))],
@@ -644,7 +951,7 @@ export function registerTransportOrdersHandlers(router: MockRouter, db: MockData
 
   router.post(
     `${BASE_PATH}/:no/plan`,
-    { feature: 'TRANSPORTORDER', action: 'execute' },
+    { feature: 'TRANSPORTORDER', action: 'update' },
     (request) => {
       const order = orderOf(request)
       if (!canPlan(statusOf(db, order))) throw conflict(PLANNING_MESSAGES.orderNotPlannable)
@@ -703,26 +1010,30 @@ function planNewTrip(
   const vehicleNo = requireReference(db.vehicles, body, 'vehicleNo')
   const trailerNo = optionalReference(db.vehicles, body, 'trailerNo')
   const driverNo = requireReference(db.employees, body, 'driverNo')
-  // Availability first: a taken vehicle is a conflict, before the load is judged.
-  const built = buildTrip(
-    db,
-    {
-      routeTemplateNo: order.routeTemplateNo ?? '',
-      vehicleNo,
-      trailerNo,
-      driverNo,
-      plannedDeparture: order.plannedDeparture ?? ''
-    },
-    request.language
+  const language = toMockLanguage(request.language)
+  const plan = {
+    routeTemplateNo: order.routeTemplateNo ?? '',
+    vehicleNo,
+    trailerNo,
+    driverNo,
+    plannedDeparture: order.plannedDeparture ?? ''
+  }
+  // An overlap with another trip is shown in red and left to the planner, unless the calendar is
+  // strict: then the busy vehicle or driver is refused as before.
+  const strictCalendar = planningSettings(db).controls.strictCalendar
+  const overlaps = strictCalendar ? [] : overlapWarnings(db, plan, language)
+  confirmWarnings(
+    [...overlaps, ...servedWarnings(db, order.lines, vehicleNo, trailerNo, language)],
+    body
   )
-  assertServed(db, order.lines, vehicleNo, trailerNo)
+  const built = buildTrip(db, plan, request.language, { allowBusy: !strictCalendar })
   const trip = stampCreated<TripRow>(built, request)
   db.trips.insert(trip)
   return {
     means: 'fleet',
     tripNo: trip.no,
     ...blankCarrier(),
-    lines: issueTokens(order.lines),
+    lines: autoConfirm(db, { means: 'fleet' }, issueTokens(order.lines)),
     events: [...order.events, eventOf(request, 'planned', trip.no)]
   }
 }
@@ -736,14 +1047,23 @@ function planOnTrip(
   if (!db.trips.exists(tripNo)) throw unknownReference('tripNo')
   const trip = db.trips.findOrFail(tripNo)
   if (trip.status !== 'planned') throw conflict(PLANNING_MESSAGES.orderTripNotPlanned)
-  assertServed(db, tripLines(db, trip.no, order.no, order.lines), trip.vehicleNo, trip.trailerNo)
+  confirmWarnings(
+    servedWarnings(
+      db,
+      tripLines(db, trip.no, order.no, order.lines),
+      trip.vehicleNo,
+      trip.trailerNo,
+      toMockLanguage(request.language)
+    ),
+    readBody(request)
+  )
   return {
     means: 'fleet',
     tripNo: trip.no,
     routeTemplateNo: trip.routeTemplateNo,
     plannedDeparture: trip.plannedDeparture,
     ...blankCarrier(),
-    lines: issueTokens(order.lines),
+    lines: autoConfirm(db, { means: 'fleet' }, issueTokens(order.lines)),
     events: [...order.events, eventOf(request, 'planned', trip.no)]
   }
 }
@@ -760,13 +1080,18 @@ function planCarrier(
   if (carrier.providerType !== 'carrier') throw unprocessable(PLANNING_MESSAGES.orderNotCarrier)
   if (!carrier.authorized) throw unprocessable(PLANNING_MESSAGES.orderCarrierNotAuthorized)
   assertCompatible(db, order.lines)
+  // The carrier's means are those attached to its record: the vehicle is one of them.
+  const plate = readLimited(body, 'carrierVehiclePlate', 20)
+  if (!(carrier.carrierVehicles ?? []).some((vehicle) => vehicle.plate === plate)) {
+    throw unprocessable(PLANNING_MESSAGES.orderCarrierVehicleUnknown)
+  }
   return {
     means: 'carrier',
     tripNo: null,
     carrierNo,
-    carrierVehiclePlate: readLimited(body, 'carrierVehiclePlate', 20),
+    carrierVehiclePlate: plate,
     carrierDriverName: readLimited(body, 'carrierDriverName', 80),
-    lines: issueTokens(order.lines),
+    lines: autoConfirm(db, { means: 'fleet' }, issueTokens(order.lines)),
     events: [...order.events, eventOf(request, 'planned', carrierNo)]
   }
 }

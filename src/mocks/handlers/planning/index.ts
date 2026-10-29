@@ -11,6 +11,7 @@ import { registerTransportTariffsHandlers } from './transportTariffs'
 import { registerDeliveryRequestsHandlers } from './deliveryRequests'
 import { registerTransportOrdersHandlers } from './transportOrders'
 import { registerConfirmationsHandlers } from './confirmations'
+import { registerTrackingHandlers } from './tracking'
 import { registerLoadingHandlers } from './loading'
 import { registerExecutionHandlers } from './execution'
 import { registerReceptionHandlers } from './reception'
@@ -18,8 +19,10 @@ import { registerDeliveryQualityHandlers } from './deliveryQuality'
 import { registerClosingHandlers } from './closing'
 import { registerCustomerBillingHandlers } from './customerBilling'
 import { registerCarrierInvoiceHandlers } from './carrierInvoices'
-import { registerFuelTourHandlers } from './fuelTours'
 import { registerReportHandlers } from './reports'
+import { registerDeliveryNotesHandlers } from './deliveryNotes'
+import { registerPickupHandlers } from './pickup'
+import { registerLoadingPreparationHandlers } from './loadingPreparations'
 
 export function registerPlanningHandlers(router: MockRouter, db: MockDatabase): void {
   registerPlanningSettingsHandlers(router, db)
@@ -33,13 +36,16 @@ export function registerPlanningHandlers(router: MockRouter, db: MockDatabase): 
   registerDeliveryRequestsHandlers(router, db)
   registerTransportOrdersHandlers(router, db)
   registerConfirmationsHandlers(router, db)
+  registerTrackingHandlers(router, db)
   registerLoadingHandlers(router, db)
   registerExecutionHandlers(router, db)
   registerReceptionHandlers(router, db)
+  registerDeliveryNotesHandlers(router, db)
+  registerPickupHandlers(router, db)
+  registerLoadingPreparationHandlers(router, db)
   registerDeliveryQualityHandlers(router, db)
   registerClosingHandlers(router, db)
   registerCustomerBillingHandlers(router, db)
   registerCarrierInvoiceHandlers(router, db)
-  registerFuelTourHandlers(router, db)
   registerReportHandlers(router, db)
 }

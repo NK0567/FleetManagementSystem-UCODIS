@@ -1,3 +1,4 @@
+import { addDays } from '@/utils/date'
 import type {
   TransportMeans,
   TransportOrderEventKind
@@ -17,6 +18,8 @@ import { seedAudit } from '../seedAudit'
 export interface TransportOrderLineRow extends LineFollowUp, QualityFields {
   lineNo: number
   deliveryRequestNo: string | null
+  /** The line of the order (commande) it carries; absent reads as its first line. */
+  requestLineNo?: number | null
   deliveryPointNo: string
   productNo: string
   quantity: number
@@ -47,6 +50,24 @@ export interface TransportOrderRow extends MockRow, OrderDossier {
   cancelledAt: string | null
   cancelledBy: string | null
   events: TransportOrderEventRow[]
+  /** The pickup note: sent to the site, then confirmed with its data (TRS03-US03, US04). */
+  pickup?: PickupRecord | null
+}
+
+export interface PickupRecord {
+  sentAt: string | null
+  sentTo: string
+  confirmedAt: string | null
+  confirmedBy: string | null
+  documentRef: string
+  entries: {
+    compartmentNo: number
+    lineNo: number
+    loadedQuantity: number
+    temperatureC: number | null
+    density: number | null
+    volume15L: number | null
+  }[]
 }
 
 const line = (
@@ -65,6 +86,19 @@ const line = (
   weightKg,
   ...emptyFollowUp(),
   ...emptyQuality()
+})
+
+/** A fixed token for the demo, so that the recipient's link can be opened from the data. */
+const withToken = (
+  order: { no: string; plannedDeparture: string | null },
+  item: TransportOrderLineRow
+): TransportOrderLineRow => ({
+  ...item,
+  trackingToken: `demo${order.no}${item.lineNo}`
+    .replace(/[^a-z0-9]/gi, '')
+    .toLowerCase()
+    .padEnd(32, '0'),
+  trackingExpiresOn: addDays((order.plannedDeparture ?? '2026-09-01').slice(0, 10), 30)
 })
 
 const event = (at: string, kind: TransportOrderEventKind, detail = ''): TransportOrderEventRow => ({
@@ -127,7 +161,14 @@ const SEED: Omit<TransportOrderRow, keyof typeof seedAudit | keyof OrderDossier>
     routeTemplateNo: 'TNR-TOA',
     plannedDeparture: '2026-09-04T06:00:00',
     comment: '',
-    lines: [line(1, 'DL-2026-0010', 'DP-006', 'PRD-001', 150, 2200)],
+    // Loaded and checked by the driver before leaving (TRS03-US05).
+    lines: [
+      {
+        ...line(1, 'DL-2026-0010', 'DP-006', 'PRD-001', 150, 2200),
+        loadedQuantity: 150,
+        conformingAt: '2026-09-04T05:40:00'
+      }
+    ],
     means: 'fleet',
     tripNo: 'TRP-00006',
     carrierNo: null,
@@ -153,7 +194,7 @@ const SEED: Omit<TransportOrderRow, keyof typeof seedAudit | keyof OrderDossier>
     means: 'carrier',
     tripNo: null,
     carrierNo: 'PRS-016',
-    carrierVehiclePlate: '1234 TBA',
+    carrierVehiclePlate: '2345 TBA',
     carrierDriverName: 'Hery Rakoto',
     carrierDepartedAt: null,
     carrierArrivedAt: null,
@@ -192,6 +233,20 @@ const SEED: Omit<TransportOrderRow, keyof typeof seedAudit | keyof OrderDossier>
 
 export const transportOrdersCollection: CollectionDefinition<TransportOrderRow> = {
   name: 'transport-orders',
-  seed: () => SEED.map((row) => ({ ...row, ...emptyDossier(), ...seedAudit })),
-  dateFields: ['plannedDeparture', 'cancelledAt', 'events[].at']
+  seed: () =>
+    SEED.map((row) => ({
+      ...row,
+      // A planned order has sent its tracking links: one per line, as planning does.
+      lines:
+        row.means && !row.cancelledAt ? row.lines.map((item) => withToken(row, item)) : row.lines,
+      ...emptyDossier(),
+      ...seedAudit
+    })),
+  dateFields: [
+    'plannedDeparture',
+    'cancelledAt',
+    'events[].at',
+    'lines[].trackingExpiresOn',
+    'lines[].conformingAt'
+  ]
 }

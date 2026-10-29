@@ -17,7 +17,7 @@ const SEED: Omit<PlanningReasonRow, keyof typeof seedAudit>[] = [
   },
   {
     no: 'CXL-INCIDENT',
-    name: 'Incident sur la tournée',
+    name: 'Incident sur l’ordre',
     kind: 'cancellation',
     active: true
   },

@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import type { SubListColumn } from '@/components/shared/RecordSubList.vue'
 import { PenLine, Plus } from '@lucide/vue'
 import type { StatusTone } from '@/components/ui/status-pill/StatusPill.vue'
 import { apiErrorMessage } from '@/core/api/apiError'
@@ -20,9 +21,29 @@ const loading = ref(false)
 const error = ref<string | null>(null)
 const showUninstalled = ref(false)
 
-const shown = computed(() =>
+const installed = computed(() =>
   items.value.filter((item) => showUninstalled.value || item.state !== 'uninstalled')
 )
+const columns = computed<SubListColumn[]>(() => [
+  { sortKey: 'equipmentTypeName', label: t('fleet.vehicles.equipment.type'), filter: true },
+  { sortKey: 'serialNumber', label: t('fleet.vehicles.equipment.serialNumber') },
+  {
+    sortKey: 'state',
+    label: t('fleet.vehicles.equipment.state'),
+    formatter: (v) => optionsStore.getOptionLabel('equipmentState', v),
+    filter: true
+  },
+  {
+    sortKey: 'dueDate',
+    label: t('fleet.vehicles.equipment.dueDate'),
+    formatter: (v) => formatDate(v as string | null)
+  },
+  {
+    sortKey: 'installedOn',
+    label: t('fleet.vehicles.equipment.installedOn'),
+    formatter: (v) => formatDate(v as string | null)
+  }
+])
 
 const DUE_TONES: Record<EquipmentDueState, StatusTone> = {
   ok: 'success',
@@ -144,58 +165,36 @@ watch(() => props.vehicleNo, load)
       </button>
     </div>
     <LoadingSpinner v-if="loading" :text="t('common.loading')" />
-    <p v-else-if="shown.length === 0" class="text-sm text-muted-foreground">
-      {{ t('fleet.vehicles.equipment.empty') }}
-    </p>
-    <div v-else class="overflow-x-auto border border-border rounded">
-      <table class="w-full text-sm">
-        <thead>
-          <tr class="bg-muted/40 text-left text-xs text-muted-foreground">
-            <th class="px-3 py-2 font-semibold">{{ t('fleet.vehicles.equipment.type') }}</th>
-            <th class="px-3 py-2 font-semibold">
-              {{ t('fleet.vehicles.equipment.serialNumber') }}
-            </th>
-            <th class="px-3 py-2 font-semibold">{{ t('fleet.vehicles.equipment.state') }}</th>
-            <th class="px-3 py-2 font-semibold">{{ t('fleet.vehicles.equipment.dueDate') }}</th>
-            <th class="px-3 py-2 font-semibold">{{ t('fleet.vehicles.equipment.installedOn') }}</th>
-            <th v-if="editable" class="w-10"></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="item in shown" :key="item.no" class="border-t border-border">
-            <td class="px-3 py-2">{{ item.equipmentTypeName }}</td>
-            <td class="px-3 py-2">{{ item.serialNumber || '—' }}</td>
-            <td class="px-3 py-2">
-              <StatusPill
-                :label="optionsStore.getOptionLabel('equipmentState', item.state)"
-                :tone="STATE_TONES[item.state]"
-              />
-            </td>
-            <td class="px-3 py-2">
-              <span v-if="!item.dueDate">—</span>
-              <StatusPill
-                v-else-if="item.dueState"
-                :label="formatDate(item.dueDate)"
-                :tone="DUE_TONES[item.dueState]"
-              />
-              <span v-else>{{ formatDate(item.dueDate) }}</span>
-            </td>
-            <td class="px-3 py-2">{{ formatDate(item.installedOn) }}</td>
-            <td v-if="editable" class="px-2 py-2 text-right">
-              <button
-                type="button"
-                class="p-1.5 rounded hover:bg-accent"
-                :aria-label="t('common.edit')"
-                :title="t('common.edit')"
-                @click="openEdit(item)"
-              >
-                <PenLine class="w-4 h-4 text-primary" />
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <RecordSubList
+      v-else
+      :rows="installed as unknown as Record<string, unknown>[]"
+      :columns="columns"
+      row-key="no"
+      :empty-text="t('fleet.vehicles.equipment.empty')"
+    >
+      <template #cell-state="{ row, text }">
+        <StatusPill :label="text" :tone="STATE_TONES[row.state as EquipmentState]" />
+      </template>
+      <template #cell-dueDate="{ row, text }">
+        <StatusPill
+          v-if="row.dueDate && row.dueState"
+          :label="text"
+          :tone="DUE_TONES[row.dueState as EquipmentDueState]"
+        />
+        <span v-else>{{ text }}</span>
+      </template>
+      <template v-if="editable" #actions="{ row }">
+        <button
+          type="button"
+          class="p-1.5 rounded hover:bg-accent"
+          :aria-label="t('common.edit')"
+          :title="t('common.edit')"
+          @click="openEdit(row as unknown as VehicleEquipmentApi)"
+        >
+          <PenLine class="w-4 h-4 text-primary" />
+        </button>
+      </template>
+    </RecordSubList>
 
     <ConfirmDialog
       :open="showDialog"

@@ -9,7 +9,7 @@ beforeEach(() => {
   server = createTestServer()
 })
 
-const act = (url: string, body: Record<string, unknown> = {}, as = 'FLT001') =>
+const act = (url: string, body: Record<string, unknown> = {}, as = 'PLN001') =>
   call(server, 'post', url, { as, body, language: 'en' })
 
 async function readyCarrier() {
@@ -19,6 +19,21 @@ async function readyCarrier() {
     body: { lines: [{ lineNo: 1, loadedQuantity: 60 }] }
   })
   await act('/planning/transport-orders/TR-2026-0004/lines/1/conform', {}, 'DEP001')
+}
+
+/** The driver of the fleet order declares from his space, once arrived at the point. */
+async function driverDeclare(
+  orderNo: string,
+  lineNo: number,
+  body: Record<string, unknown>,
+  as = 'CND001'
+) {
+  await call(server, 'post', `/me/orders/${orderNo}/lines/${lineNo}/arrive`, { as })
+  return call(server, 'post', `/me/orders/${orderNo}/lines/${lineNo}/declare`, {
+    as,
+    body,
+    language: 'en'
+  })
 }
 
 describe('delivery execution', () => {
@@ -36,11 +51,12 @@ describe('delivery execution', () => {
     const declared = await act('/planning/transport-orders/TR-2026-0004/lines/1/declare', {
       receivedQuantity: 60
     })
-    expect(declared.data.data).toMatchObject({ delivered: true, status: 'delivered' })
+    expect(declared.data.data).toMatchObject({ delivered: true, status: 'in_progress' })
     const order = (
-      await call(server, 'get', '/planning/transport-orders/TR-2026-0004', { as: 'FLT001' })
+      await call(server, 'get', '/planning/transport-orders/TR-2026-0004', { as: 'PLN001' })
     ).data.data as TransportOrderApi
-    expect(order.status).toBe('delivered')
+    expect(order.status).toBe('in_progress')
+    expect(order.awaitingClosing).toBe(true)
     expect(
       (await act('/planning/transport-orders/TR-2026-0004/cancel', { reasonNo: 'CXL-CUSTOMER' }))
         .status
@@ -54,17 +70,25 @@ describe('delivery execution', () => {
       receivedQuantity: 50
     })
     expect(flagged.status).toBe(200)
-    const qualified = await act('/planning/transport-orders/TR-2026-0004/lines/1/qualify', {
-      kind: 'loss',
-      comment: 'Manquant'
-    })
+    const qualified = await act(
+      '/planning/transport-orders/TR-2026-0004/lines/1/qualify',
+      {
+        kind: 'loss',
+        comment: 'Manquant'
+      },
+      'LIV001'
+    )
     expect(qualified.status).toBe(200)
     expect(
       (
-        await act('/planning/transport-orders/TR-2026-0004/lines/1/qualify', {
-          kind: 'gain',
-          comment: 'Non'
-        })
+        await act(
+          '/planning/transport-orders/TR-2026-0004/lines/1/qualify',
+          {
+            kind: 'gain',
+            comment: 'Non'
+          },
+          'LIV001'
+        )
       ).status
     ).toBe(409)
 
@@ -72,13 +96,15 @@ describe('delivery execution', () => {
     server.db.planningSettings.update('PLANNING', {
       quantities: { ...settings.quantities, overToleranceMode: 'block' }
     })
+    // On a fleet order, the planner no longer declares: the driver does, from his space.
     expect(
       (
         await act('/planning/transport-orders/TR-2026-0003/lines/1/declare', {
           receivedQuantity: 1
         })
       ).status
-    ).toBe(422)
+    ).toBe(409)
+    expect((await driverDeclare('TR-2026-0003', 1, { receivedQuantity: 1 })).status).toBe(422)
   })
 
   it('refuses a line, which settles the order', async () => {
@@ -87,6 +113,6 @@ describe('delivery execution', () => {
     const refused = await act('/planning/transport-orders/TR-2026-0004/lines/1/refuse', {
       reasonNo: 'RFS-DAMAGED'
     })
-    expect(refused.data.data).toMatchObject({ delivered: true, status: 'delivered' })
+    expect(refused.data.data).toMatchObject({ delivered: true, status: 'in_progress' })
   })
 })

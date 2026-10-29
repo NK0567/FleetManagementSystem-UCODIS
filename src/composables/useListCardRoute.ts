@@ -39,7 +39,7 @@ export function useListCardRoute(options: UseListCardRouteOptions = {}) {
     return { ...route.query, ...patch }
   }
 
-  function openCard(documentNo: string, mode: CardOpenMode = 'edit') {
+  function openCard(documentNo: string, mode: CardOpenMode = 'view') {
     const trimmed = String(documentNo ?? '').trim()
     if (!trimmed) return
     cardNo.value = trimmed

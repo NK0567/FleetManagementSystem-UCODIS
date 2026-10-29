@@ -1,12 +1,13 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import type { SubListColumn } from '@/components/shared/RecordSubList.vue'
 import { useI18n } from 'vue-i18n'
 import { useOptionsStore } from '@/stores/optionsStore'
 import { useReferenceStore } from '@/stores/referenceStore'
 import { formatDate, formatDateTime, formatNumber } from '@/utils/format'
 import type { WorkOrderApi } from '../types/workOrder.types'
 
-defineProps<{ order: WorkOrderApi }>()
+const props = defineProps<{ order: WorkOrderApi }>()
 
 const { t } = useI18n()
 const optionsStore = useOptionsStore()
@@ -21,6 +22,65 @@ const expandedSections = ref({
   history: false
 })
 const technician = (no: string) => referenceStore.getLabel('technicians', no) || no
+
+const asRows = (items: readonly object[]) =>
+  items.map((item, index) => ({ ...item, index })) as unknown as Record<string, unknown>[]
+const labour = computed(() => asRows(props.order.labour))
+const parts = computed(() =>
+  asRows(props.order.parts.map((line) => ({ ...line, total: line.quantity * line.unitPrice })))
+)
+const history = computed(() => asRows(props.order.history))
+
+const labourColumns = computed<SubListColumn[]>(() => [
+  {
+    sortKey: 'date',
+    label: t('maintenance.workOrders.progress.col.date'),
+    formatter: (v) => formatDate(v as string | null)
+  },
+  {
+    sortKey: 'technicianNo',
+    label: t('maintenance.workOrders.progress.col.technician'),
+    formatter: (v) => technician(String(v)),
+    filter: true
+  },
+  {
+    sortKey: 'hours',
+    label: t('maintenance.workOrders.progress.col.hours'),
+    align: 'right',
+    formatter: (v) => `${formatNumber(Number(v), 2)} h`
+  }
+])
+const partColumns = computed<SubListColumn[]>(() => [
+  { sortKey: 'label', label: t('maintenance.workOrders.progress.col.part') },
+  {
+    sortKey: 'quantity',
+    label: t('maintenance.workOrders.progress.col.quantity'),
+    align: 'right',
+    formatter: (v) => `× ${String(v)}`
+  },
+  {
+    sortKey: 'total',
+    label: t('maintenance.workOrders.progress.col.amount'),
+    align: 'right',
+    formatter: (v) => formatNumber(Number(v))
+  },
+  { sortKey: 'purchaseRequestNo', label: t('maintenance.workOrders.progress.col.purchase') }
+])
+const historyColumns = computed<SubListColumn[]>(() => [
+  {
+    sortKey: 'at',
+    label: t('maintenance.workOrders.progress.col.at'),
+    formatter: (v) => formatDateTime(String(v))
+  },
+  {
+    sortKey: 'kind',
+    label: t('maintenance.workOrders.progress.col.event'),
+    formatter: (v) => optionsStore.getOptionLabel('workOrderEvent', v),
+    filter: true
+  },
+  { sortKey: 'by', label: t('maintenance.workOrders.progress.col.by'), filter: true },
+  { sortKey: 'comment', label: t('maintenance.workOrders.progress.col.comment') }
+])
 </script>
 
 <template>
@@ -65,24 +125,13 @@ const technician = (no: string) => referenceStore.getLabel('technicians', no) ||
             })
           }}
         </p>
-        <p v-if="!order.labour.length" class="text-sm text-muted-foreground">
-          {{ t('maintenance.workOrders.progress.noLabour') }}
-        </p>
-        <table v-else class="w-full text-sm border border-border rounded">
-          <tbody>
-            <tr
-              v-for="(line, index) in order.labour"
-              :key="`${line.technicianNo}-${line.date}-${index}`"
-              class="border-t border-border first:border-t-0"
-            >
-              <td class="px-3 py-1.5 whitespace-nowrap">{{ formatDate(line.date) }}</td>
-              <td class="px-3 py-1.5">{{ technician(line.technicianNo) }}</td>
-              <td class="px-3 py-1.5 text-right tabular-nums">
-                {{ formatNumber(line.hours, 2) }} h
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <RecordSubList
+          :rows="labour"
+          :columns="labourColumns"
+          row-key="index"
+          :empty-text="t('maintenance.workOrders.progress.noLabour')"
+          :initial-sort="{ key: 'date', direction: 'DESC' }"
+        />
       </div>
     </FormSection>
 
@@ -97,42 +146,32 @@ const technician = (no: string) => referenceStore.getLabel('technicians', no) ||
       ]"
     >
       <div class="xl:col-span-2 min-w-0">
-        <p v-if="!order.parts.length" class="text-sm text-muted-foreground">
-          {{ t('maintenance.workOrders.progress.noParts') }}
-        </p>
-        <table v-else class="w-full text-sm border border-border rounded">
-          <tbody>
-            <tr
-              v-for="(line, index) in order.parts"
-              :key="`${line.itemNo ?? line.label}-${index}`"
-              class="border-t border-border first:border-t-0"
+        <RecordSubList
+          :rows="parts"
+          :columns="partColumns"
+          row-key="index"
+          :empty-text="t('maintenance.workOrders.progress.noParts')"
+        >
+          <template #cell-label="{ row }">
+            {{ row.label }}
+            <span v-if="row.itemNo" class="text-muted-foreground">· {{ row.itemNo }}</span>
+          </template>
+          <template #cell-purchaseRequestNo="{ row }">
+            <RouterLink
+              v-if="row.purchaseRequestNo"
+              :to="{
+                path: '/maintenance/purchase-requests',
+                query: { no: String(row.purchaseRequestNo), cardMode: 'view' }
+              }"
+              class="text-primary hover:underline"
             >
-              <td class="px-3 py-1.5">
-                {{ line.label }}
-                <span v-if="line.itemNo" class="text-muted-foreground">· {{ line.itemNo }}</span>
-              </td>
-              <td class="px-3 py-1.5 text-right tabular-nums">× {{ line.quantity }}</td>
-              <td class="px-3 py-1.5 text-right tabular-nums">
-                {{ formatNumber(line.quantity * line.unitPrice) }}
-              </td>
-              <td class="px-3 py-1.5 whitespace-nowrap">
-                <RouterLink
-                  v-if="line.purchaseRequestNo"
-                  :to="{
-                    path: '/maintenance/purchase-requests',
-                    query: { no: line.purchaseRequestNo, cardMode: 'view' }
-                  }"
-                  class="text-primary hover:underline"
-                >
-                  {{ line.purchaseRequestNo }}
-                </RouterLink>
-                <span v-if="!line.receivedAt" class="ml-1 text-warning">
-                  {{ t('maintenance.workOrders.progress.partPending') }}
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              {{ row.purchaseRequestNo }}
+            </RouterLink>
+            <span v-if="!row.receivedAt" class="ml-1 text-warning">
+              {{ t('maintenance.workOrders.progress.partPending') }}
+            </span>
+          </template>
+        </RecordSubList>
       </div>
     </FormSection>
 
@@ -227,16 +266,15 @@ const technician = (no: string) => referenceStore.getLabel('technicians', no) ||
       :title="t('maintenance.workOrders.section.history')"
       :summary="[]"
     >
-      <p v-if="!order.history.length" class="text-sm text-muted-foreground xl:col-span-2">
-        {{ t('maintenance.workOrders.progress.noHistory') }}
-      </p>
-      <ul v-else class="space-y-1 text-sm xl:col-span-2">
-        <li v-for="(entry, index) in order.history" :key="`${entry.at}-${index}`">
-          <span class="text-muted-foreground tabular-nums">{{ formatDateTime(entry.at) }}</span>
-          · {{ optionsStore.getOptionLabel('workOrderEvent', entry.kind) }} · {{ entry.by }}
-          <span v-if="entry.comment" class="text-muted-foreground">— {{ entry.comment }}</span>
-        </li>
-      </ul>
+      <div class="xl:col-span-2 min-w-0">
+        <RecordSubList
+          :rows="history"
+          :columns="historyColumns"
+          row-key="index"
+          :empty-text="t('maintenance.workOrders.progress.noHistory')"
+          :initial-sort="{ key: 'at', direction: 'DESC' }"
+        />
+      </div>
     </FormSection>
   </div>
 </template>

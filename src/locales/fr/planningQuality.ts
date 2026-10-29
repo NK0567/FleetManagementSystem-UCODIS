@@ -1,7 +1,7 @@
 export default {
   'planning.quality.title': 'Qualité de livraison',
   'planning.quality.subtitle':
-    'Un protêt se prépare puis s’émet. La retenue du transporteur vaut l’avoir au client multiplié par sa part. Les parts se figent dès que le client est facturé ou que la facture du transporteur est validée.',
+    'Un protêt se prépare puis s’émet. La retenue du transporteur vaut l’avoir accordé multiplié par sa part. Les parts se figent dès que le transport est facturé ou que la facture du transporteur est validée.',
   'planning.quality.loading': 'Chargement du suivi qualité…',
   'planning.quality.empty': 'Aucune livraison à suivre.',
   'planning.quality.loadError': 'Le suivi qualité n’a pas pu être affiché.',
@@ -62,7 +62,7 @@ export default {
   'planning.quality.origin.departure': 'Départ',
   'planning.quality.origin.transport': 'Transport',
   'planning.quality.origin.order': 'Commande',
-  'planning.quality.actor.orderer': 'Donneur d’ordre',
+  'planning.quality.actor.orderer': 'Ordonnateur',
   'planning.quality.actor.logistics': 'Logistique',
   'planning.quality.actor.internal_carrier': 'Flotte interne',
   'planning.quality.actor.external_carrier': 'Transporteur externe'

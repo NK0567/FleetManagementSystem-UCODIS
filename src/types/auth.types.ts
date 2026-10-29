@@ -2,6 +2,9 @@ export const USER_PROFILES = [
   'ADMIN',
   'FLEET_MANAGER',
   'MAINTENANCE_TECHNICIAN',
+  'PLANNER',
+  'DELIVERY_MANAGER',
+  'BILLING',
   'CUSTOMER_SERVICE',
   'SALES',
   'DEPOT',
@@ -23,6 +26,8 @@ export interface User {
   language?: string
   /** Preferred landing page, used when the user may read it. */
   landingRoute?: string
+  /** An orderer account works on the orders of this orderer only. */
+  ordererNo?: string
 }
 
 export interface LoginRequest {

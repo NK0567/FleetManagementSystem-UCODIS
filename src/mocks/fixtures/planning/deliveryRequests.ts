@@ -1,6 +1,9 @@
 import type {
+  DeliveryRequestLine,
   DeliveryRequestOrigin,
-  FreightPayer
+  DeliverySlot,
+  FreightPayer,
+  NotificationChannel
 } from '@/modules/planning/delivery-requests/types/deliveryRequest.types'
 import type { CollectionDefinition, MockRow } from '../../db/collection'
 import { seedAudit } from '../seedAudit'
@@ -14,7 +17,7 @@ function request(
   weightKg: number | null,
   desiredDate: string,
   transportOrderNo: string
-): Omit<DeliveryRequestRow, keyof typeof seedAudit> {
+): SeedRow {
   return {
     no,
     ordererNo,
@@ -50,10 +53,16 @@ export interface DeliveryRequestRow extends MockRow {
   externalReference: string
   freightPayer: FreightPayer
   comment: string
+  /** The product lines; the first product and the totals are kept alongside for the lists. */
+  lines: DeliveryRequestLine[]
   productNo: string
   quantity: number
   weightKg: number | null
   volumeM3: number | null
+  notificationChannel: NotificationChannel
+  confirmationRequired: boolean
+  preferredSlot: DeliverySlot
+  fullDeliveryRequired: boolean
   origin: DeliveryRequestOrigin
   /** The request a part was split from. */
   parentNo: string | null
@@ -68,7 +77,14 @@ export interface DeliveryRequestRow extends MockRow {
   transportOrderNo: string | null
 }
 
-const SEED: Omit<DeliveryRequestRow, keyof typeof seedAudit>[] = [
+type Preferences = Pick<
+  DeliveryRequestRow,
+  'notificationChannel' | 'confirmationRequired' | 'preferredSlot' | 'fullDeliveryRequired'
+>
+type SeedRow = Omit<DeliveryRequestRow, keyof typeof seedAudit | 'lines' | keyof Preferences> &
+  Partial<Pick<DeliveryRequestRow, 'lines'> & Preferences>
+
+const SEED: SeedRow[] = [
   {
     no: 'DL-2026-0001',
     ordererNo: 'CLI-002',
@@ -223,11 +239,58 @@ const SEED: Omit<DeliveryRequestRow, keyof typeof seedAudit>[] = [
   request('DL-2026-0008', 'CLI-004', 'DP-001', 'PRD-002', 80, 1200, '2026-09-09', 'TR-2026-0001'),
   request('DL-2026-0009', 'CLI-004', 'DP-003', 'PRD-003', 400, 6000, '2026-09-04', 'TR-2026-0002'),
   request('DL-2026-0010', 'CLI-002', 'DP-006', 'PRD-001', 150, 2200, '2026-09-04', 'TR-2026-0003'),
-  request('DL-2026-0011', 'CLI-002', 'DP-005', 'PRD-004', 60, 600, '2026-09-08', 'TR-2026-0004')
+  request('DL-2026-0011', 'CLI-002', 'DP-005', 'PRD-004', 60, 600, '2026-09-08', 'TR-2026-0004'),
+  {
+    ...request('DL-2026-0012', 'CLI-002', 'DP-002', 'PRD-001', 120, 1800, '2026-09-09', ''),
+    transportOrderNo: null,
+    externalReference: 'LPA-5530',
+    comment: 'Le magasin veut tout recevoir en une seule livraison.',
+    origin: 'request',
+    lines: [
+      { lineNo: 1, productNo: 'PRD-001', quantity: 120, weightKg: 1800, volumeM3: null },
+      { lineNo: 2, productNo: 'PRD-002', quantity: 60, weightKg: 900, volumeM3: null },
+      { lineNo: 3, productNo: 'PRD-004', quantity: 25, weightKg: 250, volumeM3: null }
+    ],
+    quantity: 205,
+    weightKg: 2950,
+    fullDeliveryRequired: true,
+    preferredSlot: 'morning'
+  },
+  // Fuel for the stations, to prepare from the Alarobia depot (TRS01-US20).
+  {
+    ...request('DL-2026-0020', 'CLI-010', 'DP-011', 'PRD-007', 9000, null, '2026-09-06', ''),
+    transportOrderNo: null,
+    origin: 'request'
+  },
+  {
+    ...request('DL-2026-0021', 'CLI-010', 'DP-012', 'PRD-006', 12000, null, '2026-09-06', ''),
+    transportOrderNo: null,
+    origin: 'request'
+  }
 ]
+
+/** Every order carries its lines and the recipient's preferences. */
+function complete(row: SeedRow): Omit<DeliveryRequestRow, keyof typeof seedAudit> {
+  return {
+    notificationChannel: 'sms',
+    confirmationRequired: true,
+    preferredSlot: 'any',
+    fullDeliveryRequired: false,
+    ...row,
+    lines: row.lines ?? [
+      {
+        lineNo: 1,
+        productNo: row.productNo,
+        quantity: row.quantity,
+        weightKg: row.weightKg,
+        volumeM3: row.volumeM3
+      }
+    ]
+  }
+}
 
 export const deliveryRequestsCollection: CollectionDefinition<DeliveryRequestRow> = {
   name: 'delivery-requests',
-  seed: () => SEED.map((row) => ({ ...row, ...seedAudit })),
+  seed: () => SEED.map((row) => ({ ...complete(row), ...seedAudit })),
   dateFields: ['desiredDate', 'validUntil', 'rejectedAt', 'cancelledAt']
 }

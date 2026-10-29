@@ -1,28 +1,96 @@
 import type { LocalizedText } from '../../i18n'
 
 export const PLANNING_MESSAGES = {
+  prepValidated: {
+    fr: 'La préparation est validée : elle ne se modifie plus que par les bons.',
+    en: 'The preparation is validated: it now changes only through its notes.'
+  },
+  prepDepotRequired: {
+    fr: 'Choisissez un dépôt de chargement.',
+    en: 'Choose a loading depot.'
+  },
+  prepRequestNotPending: {
+    fr: 'La commande {no} n’est plus en attente : elle ne peut pas entrer dans la préparation.',
+    en: 'Order {no} is no longer pending: it cannot enter the preparation.'
+  },
+  prepVehicleNoGoods: {
+    fr: 'Le véhicule {plate} ne porte pas de marchandise : ajoutez sa remorque.',
+    en: 'Vehicle {plate} carries no goods: add its trailer.'
+  },
+  prepVehicleTwice: {
+    fr: 'Le véhicule {plate} est déjà dans la préparation.',
+    en: 'Vehicle {plate} is already in the preparation.'
+  },
+  prepEntryUnknown: {
+    fr: 'Une ligne du plan ne correspond à aucun véhicule, compartiment ou commande de la préparation.',
+    en: 'A plan entry matches no vehicle, compartment or order of the preparation.'
+  },
+  prepOverRequest: {
+    fr: 'La commande {no} est répartie au-delà de sa quantité ({quantity} {unit}).',
+    en: 'Order {no} is shared beyond its quantity ({quantity} {unit}).'
+  },
+  prepCompartmentVolume: {
+    fr: 'Capacité dépassée : le compartiment {compartment} de {plate} reçoit {used} L pour {volume} L.',
+    en: 'Capacity exceeded: compartment {compartment} of {plate} gets {used} L for {volume} L.'
+  },
+  prepCompartmentFamily: {
+    fr: 'Règle du compartiment {compartment} de {plate} : il n’accepte pas la catégorie {family}.',
+    en: 'Rule of compartment {compartment} of {plate}: it does not take category {family}.'
+  },
+  prepCompartmentContent: {
+    fr: 'Règle du compartiment {compartment} de {plate} : un seul {what} à la fois.',
+    en: 'Rule of compartment {compartment} of {plate}: one {what} at a time.'
+  },
+  prepIncompatible: {
+    fr: 'Compatibilité : {productA} et {productB} ne peuvent pas voyager ensemble sur {plate}.',
+    en: 'Compatibility: {productA} and {productB} cannot travel together on {plate}.'
+  },
+  prepEquipment: {
+    fr: 'Équipement exigé absent : {point} demande {equipment}, que {plate} n’a pas.',
+    en: 'Required equipment missing: {point} needs {equipment}, which {plate} lacks.'
+  },
+  requestNeedsLines: {
+    fr: 'Une commande contient au moins une ligne de produit.',
+    en: 'An order holds at least one product line.'
+  },
+  requestSplitMultiLine: {
+    fr: 'Une commande de plusieurs lignes se partage en retirant des lignes de l’ordre.',
+    en: 'An order of several lines is shared by leaving lines out of the transport order.'
+  },
+  fullDeliveryPartial: {
+    fr: 'La commande {no} exige une livraison complète : seule une partie de ses lignes est prise.',
+    en: 'Order {no} requires a full delivery: only part of its lines is taken.'
+  },
+  fullDeliverySplit: {
+    fr: 'La commande {no} exige une livraison complète : la partager la livrera en plusieurs fois.',
+    en: 'Order {no} requires a full delivery: sharing it will deliver it in several goes.'
+  },
+  planningWarnings: {
+    fr: 'À vérifier avant de continuer : {details}',
+    en: 'To check before going on: {details}'
+  },
   unknownSettingsSection: {
     fr: 'Cette section de réglages n’existe pas.',
     en: 'This settings section does not exist.'
   },
   customerNameTaken: {
-    fr: 'Le client {no} porte déjà ce nom.',
+    fr: 'L’ordonnateur ou destinataire {no} porte déjà ce nom.',
     en: 'Customer {no} already has this name.'
   },
   customer_noRole: {
-    fr: "Un client est donneur d'ordre, destinataire, ou les deux.",
+    fr: 'Une fiche est ordonnateur, destinataire, ou les deux.',
     en: 'A customer is an orderer, a recipient, or both.'
   },
   customer_channelNeedsPhone: {
-    fr: 'Le SMS demande un numéro de téléphone.',
-    en: 'SMS needs a phone number.'
+    fr: 'Le SMS, l’appel et WhatsApp demandent un numéro de téléphone.',
+    en: 'SMS, call and WhatsApp need a phone number.'
   },
   customer_channelNeedsEmail: {
-    fr: 'Le courriel demande une adresse e-mail.',
+    fr: 'L’e-mail demande une adresse e-mail.',
     en: 'E-mail needs an e-mail address.'
   },
   customerHasDeliveryPoints: {
-    fr: 'Ce client a des points de livraison : désactivez-le plutôt.',
+    fr: 'Cette fiche a des points de livraison : désactivez-la plutôt.',
     en: 'This customer has delivery points: deactivate it instead.'
   },
   productNameTaken: {
@@ -54,7 +122,7 @@ export const PLANNING_MESSAGES = {
     en: 'A gap in quantity is counted in the unit of a product: choose the product.'
   },
   toleranceExists: {
-    fr: 'La tolérance {no} couvre déjà ce client et ce produit : modifiez-la plutôt.',
+    fr: 'La tolérance {no} couvre déjà ce destinataire et ce produit : modifiez-la plutôt.',
     en: 'Tolerance {no} already covers this customer and product: change it instead.'
   },
   companyToleranceKept: {
@@ -62,7 +130,7 @@ export const PLANNING_MESSAGES = {
     en: 'The company tolerance applies when no other one fits: change its value instead.'
   },
   tariff_partyMissing: {
-    fr: 'Choisissez le client ou le transporteur de ce tarif.',
+    fr: 'Choisissez l’ordonnateur ou destinataire, ou le transporteur de ce tarif.',
     en: 'Choose the customer or the carrier of this tariff.'
   },
   tariff_routeNeeded: {
@@ -70,7 +138,7 @@ export const PLANNING_MESSAGES = {
     en: 'A flat rate applies to a route template: choose it.'
   },
   tariffInternalCustomer: {
-    fr: 'Un service interne ne se facture pas : les tarifs clients visent les clients externes.',
+    fr: 'Un service interne ne se facture pas : ces tarifs visent les ordonnateurs et destinataires externes.',
     en: 'An internal department is not billed: customer tariffs are for outside customers.'
   },
   tariffNotCarrier: {
@@ -94,7 +162,7 @@ export const PLANNING_MESSAGES = {
     en: 'This reason is not offered here: choose one from the list.'
   },
   requestOrdererInvalid: {
-    fr: 'Le donneur d’ordre doit être un client actif qui passe des commandes.',
+    fr: 'L’ordonnateur doit être une fiche active qui passe des commandes.',
     en: 'The orderer must be an active customer that places orders.'
   },
   requestPointInactive: {
@@ -114,43 +182,43 @@ export const PLANNING_MESSAGES = {
     en: 'The validity cannot end before the desired date.'
   },
   requestReferenceRequired: {
-    fr: 'Indiquez la référence du client ({label}).',
+    fr: 'Indiquez la référence de l’ordonnateur ({label}).',
     en: 'Give the customer reference ({label}).'
   },
   requestReferenceTaken: {
-    fr: 'Cette référence client est déjà celle de la demande {no}.',
+    fr: 'Cette référence de l’ordonnateur est déjà celle de la commande {no}.',
     en: 'This customer reference already belongs to request {no}.'
   },
   requestNotEditable: {
-    fr: 'Une demande planifiée ou annulée ne se modifie plus.',
+    fr: 'Une commande planifiée ou annulée ne se modifie plus.',
     en: 'A planned or cancelled request can no longer be changed.'
   },
   requestNotRejectable: {
-    fr: 'Seule une demande en attente ou expirée se rejette.',
+    fr: 'Seule une commande en attente ou expirée se rejette.',
     en: 'Only a pending or expired request can be rejected.'
   },
   requestNotCancellable: {
-    fr: 'Une demande planifiée ou déjà annulée ne s’annule plus ici.',
+    fr: 'Une commande planifiée ou déjà annulée ne s’annule plus ici.',
     en: 'A planned or already cancelled request cannot be cancelled here.'
   },
   requestNotSplittable: {
-    fr: 'Seule une demande en attente se fractionne.',
+    fr: 'Seule une commande en attente se fractionne.',
     en: 'Only a pending request can be split.'
   },
   requestSplitTooLarge: {
-    fr: 'La part retirée doit être plus petite que la quantité de la demande.',
+    fr: 'La part retirée doit être plus petite que la quantité de la commande.',
     en: 'The part taken out must be smaller than the quantity of the request.'
   },
   requestNotMergeable: {
-    fr: 'On regroupe sur la demande d’origine, quand elle est encore en attente.',
+    fr: 'On regroupe sur la commande d’origine, quand elle est encore en attente.',
     en: 'Parts are merged into the original request, while it is still pending.'
   },
   requestNoPartToMerge: {
-    fr: 'Aucune part en attente à regrouper avec cette demande.',
+    fr: 'Aucune part en attente à regrouper avec cette commande.',
     en: 'No pending part to merge into this request.'
   },
   deliveryPointCustomerNotRecipient: {
-    fr: 'Un point de livraison appartient à un client destinataire actif.',
+    fr: 'Un point de livraison appartient à un destinataire actif.',
     en: 'A delivery point belongs to an active recipient customer.'
   },
   orderDepartureInPast: {
@@ -190,19 +258,19 @@ export const PLANNING_MESSAGES = {
     en: 'Set the route and the departure time before planning.'
   },
   orderRequestTaken: {
-    fr: 'La demande {no} est déjà sur un ordre.',
+    fr: 'La commande {no} est déjà sur un ordre.',
     en: 'Request {no} is already on an order.'
   },
   orderRequestUnavailable: {
-    fr: 'La demande {no} n’est pas à planifier.',
+    fr: 'La commande {no} n’est pas à planifier.',
     en: 'Request {no} is not waiting to be planned.'
   },
   orderRequestExpired: {
-    fr: 'La demande {no} est expirée : le réglage interdit de la planifier.',
+    fr: 'La commande {no} est expirée : le réglage interdit de la planifier.',
     en: 'Request {no} has expired: the setting forbids planning it.'
   },
   orderRequestRepeated: {
-    fr: 'La demande {no} est citée deux fois.',
+    fr: 'La commande {no} est citée deux fois.',
     en: 'Request {no} is listed twice.'
   },
   orderPointInactive: {
@@ -237,6 +305,18 @@ export const PLANNING_MESSAGES = {
     fr: 'Le point {point} n’accepte pas ce type de véhicule.',
     en: 'Delivery point {point} does not accept this vehicle type.'
   },
+  orderFamilyRefused: {
+    fr: 'Le véhicule {plate} ne transporte pas la catégorie {family} ({product}).',
+    en: 'Vehicle {plate} does not carry the {family} category ({product}).'
+  },
+  compartmentNoRoom: {
+    fr: 'Aucun compartiment ne peut recevoir {product} selon ses règles.',
+    en: 'No compartment can take {product} under its rules.'
+  },
+  compartmentNotFull: {
+    fr: 'Le compartiment {no} doit être plein : {used} L sur {volume} L.',
+    en: 'Compartment {no} must be full: {used} L out of {volume} L.'
+  },
   orderProductsIncompatible: {
     fr: '{productA} et {productB} ne voyagent pas ensemble.',
     en: '{productA} and {productB} do not travel together.'
@@ -253,6 +333,66 @@ export const PLANNING_MESSAGES = {
     fr: 'Ce transporteur n’est plus autorisé.',
     en: 'This carrier is no longer authorized.'
   },
+  requestNotYours: {
+    fr: 'Vous ne passez des commandes que pour votre propre fiche d’ordonnateur.',
+    en: 'You place orders for your own orderer record only.'
+  },
+  executionByDriver: {
+    fr: 'Sur un ordre de la flotte, c’est le conducteur qui le fait, depuis son espace.',
+    en: 'On a fleet order, the driver does it, from his space.'
+  },
+  executionNotArrived: {
+    fr: 'Marquez d’abord votre arrivée sur ce point.',
+    en: 'Mark your arrival at this point first.'
+  },
+  executionPreviousOpen: {
+    fr: 'Le point précédent n’est pas encore réglé.',
+    en: 'The previous point is not settled yet.'
+  },
+  executionNotYourOrder: {
+    fr: 'Cet ordre de transport ne vous est pas confié.',
+    en: 'This transport order is not assigned to you.'
+  },
+  loadingByDriver: {
+    fr: 'Sur un ordre de la flotte, le conducteur contrôle son chargement depuis son espace.',
+    en: 'On a fleet order, the driver checks his load from his space.'
+  },
+  orderCarrierVehicleUnknown: {
+    fr: 'Choisissez l’un des véhicules rattachés à ce transporteur.',
+    en: 'Choose one of the vehicles attached to this carrier.'
+  },
+  pickupNotIssued: {
+    fr: 'Le bon d’enlèvement existe une fois l’ordre planifié sur un véhicule.',
+    en: 'The pickup note exists once the order is planned on a vehicle.'
+  },
+  pickupConfirmed: {
+    fr: 'L’enlèvement est déjà confirmé : le bon ne change plus.',
+    en: 'The pickup is already confirmed: the note no longer changes.'
+  },
+  trackingNotDeclared: {
+    fr: 'La livraison n’a pas encore été déclarée par le conducteur.',
+    en: 'The delivery has not been declared by the driver yet.'
+  },
+  trackingCannotRefuse: {
+    fr: 'Le refus n’est possible que lorsque le conducteur est sur place, avant sa déclaration.',
+    en: 'A refusal is possible only while the driver is on site, before his declaration.'
+  },
+  trackingUnknown: {
+    fr: 'Ce lien de suivi n’existe pas.',
+    en: 'This tracking link does not exist.'
+  },
+  trackingExpired: {
+    fr: 'Ce lien de suivi a expiré.',
+    en: 'This tracking link has expired.'
+  },
+  trackingDateTooEarly: {
+    fr: 'La nouvelle date doit suivre la date prévue.',
+    en: 'The new date must come after the planned one.'
+  },
+  confirmationTaken: {
+    fr: 'Cette ligne est déjà traitée par {agent}.',
+    en: 'This line is already handled by {agent}.'
+  },
   confirmationClosed: {
     fr: 'On ne confirme les destinataires qu’une fois l’ordre planifié, et avant le départ.',
     en: 'Recipients are confirmed only once the order is planned, and before it leaves.'
@@ -262,11 +402,11 @@ export const PLANNING_MESSAGES = {
     en: 'This line is not on the order.'
   },
   confirmationOutOfTour: {
-    fr: 'Cette ligne n’est plus dans la tournée.',
+    fr: 'Cette ligne n’est plus dans l’ordre.',
     en: 'This line is no longer in the tour.'
   },
   confirmationAlreadyReplanned: {
-    fr: 'Cette ligne est déjà repartie dans les demandes à planifier.',
+    fr: 'Cette ligne est déjà repartie dans les commandes à planifier.',
     en: 'This line has already gone back to the requests waiting to be planned.'
   },
   confirmationDateMissing: {
@@ -274,7 +414,7 @@ export const PLANNING_MESSAGES = {
     en: 'Give the date kept for replanning.'
   },
   confirmationNeedsOrderer: {
-    fr: 'Cette ligne n’a pas de donneur d’ordre : elle ne peut pas revenir dans les demandes.',
+    fr: 'Cette ligne n’a pas d’ordonnateur : elle ne peut pas revenir dans les commandes.',
     en: 'This line has no orderer: it cannot go back to the requests.'
   },
   loadingClosed: {
@@ -282,7 +422,7 @@ export const PLANNING_MESSAGES = {
     en: 'Loading is declared once the order is confirmed, and before it is ready.'
   },
   loadingQuantityMissing: {
-    fr: 'Indiquez la quantité chargée de chaque ligne encore dans la tournée.',
+    fr: 'Indiquez la quantité chargée de chaque ligne encore dans l’ordre.',
     en: 'Give the loaded quantity of every line still in the tour.'
   },
   loadingLineOut: {
@@ -398,11 +538,11 @@ export const PLANNING_MESSAGES = {
     en: 'The same actor appears only once.'
   },
   qualityExternalMeans: {
-    fr: 'Le transporteur externe ne répond que d’une expédition qui lui a été confiée.',
+    fr: 'Le transporteur externe ne répond que d’un ordre de transport qui lui a été confié.',
     en: 'The external carrier answers only for an expedition entrusted to them.'
   },
   qualityInternalMeans: {
-    fr: 'Le transporteur interne ne répond pas d’une expédition confiée à un transporteur.',
+    fr: 'Le transporteur interne ne répond pas d’un ordre de transport confié à un transporteur.',
     en: 'The internal carrier does not answer for an expedition entrusted to a carrier.'
   },
   qualitySharePercent: {
@@ -426,7 +566,7 @@ export const PLANNING_MESSAGES = {
     en: 'A withholding applies only to the responsible external carrier.'
   },
   qualityFrozen: {
-    fr: 'Les parts sont figées : le client est facturé ou la facture du transporteur est validée.',
+    fr: 'Les parts sont figées : le transport est facturé ou la facture du transporteur est validée.',
     en: 'The shares are frozen: the customer is invoiced or the carrier invoice is validated.'
   },
   qualityCreditMissing: {
@@ -490,7 +630,7 @@ export const PLANNING_MESSAGES = {
     en: 'Handle the contestation before invoicing.'
   },
   billingTariff: {
-    fr: 'Aucun tarif de ce client ne s’applique à cette livraison.',
+    fr: 'Aucun tarif de celui qui paie le fret ne s’applique à cette livraison.',
     en: 'No tariff of this customer applies to this delivery.'
   },
   billingInvoiced: {
@@ -530,7 +670,7 @@ export const PLANNING_MESSAGES = {
     en: 'This invoice has already been checked.'
   },
   carrierInvoiceNotDone: {
-    fr: 'Seules les expéditions réellement effectuées se paient.',
+    fr: 'Seuls les ordres de transport réellement effectués se paient.',
     en: 'Only expeditions that were actually carried out are paid.'
   },
   carrierInvoiceOutside: {
@@ -544,30 +684,6 @@ export const PLANNING_MESSAGES = {
   fuelDepot: {
     fr: 'Le dépôt doit être un site de type dépôt, actif.',
     en: 'The depot must be an active depot site.'
-  },
-  fuelDate: {
-    fr: 'La date de la tournée ne peut pas être passée.',
-    en: 'The tour date cannot be in the past.'
-  },
-  fuelValidity: {
-    fr: 'La validité ne peut pas précéder la date de la tournée.',
-    en: 'The validity cannot be earlier than the tour date.'
-  },
-  fuelRequests: {
-    fr: 'Choisissez au moins une demande de carburant.',
-    en: 'Choose at least one fuel request.'
-  },
-  fuelRequest: {
-    fr: 'La demande doit porter sur un carburant encore à planifier.',
-    en: 'The request must be a fuel that is still to plan.'
-  },
-  fuelTourClosed: {
-    fr: 'Cette tournée est déjà validée.',
-    en: 'This tour is already validated.'
-  },
-  fuelPlan: {
-    fr: 'Le plan dépasse un compartiment, un produit ou la demande.',
-    en: 'The plan exceeds a compartment, a product or the request.'
   },
   fuelCompartment: {
     fr: 'Ce véhicule n’a pas ce compartiment.',
@@ -598,7 +714,7 @@ export const PLANNING_MESSAGES = {
     en: 'This delivery note can no longer be changed.'
   },
   fuelDeviation: {
-    fr: 'La déviation exige le même produit, un volume couvert et une demande encore libre.',
+    fr: 'La déviation exige le même produit, un volume couvert et une commande encore libre.',
     en: 'A deviation needs the same product, a covered volume and a request that is still free.'
   }
 } satisfies Record<string, LocalizedText>

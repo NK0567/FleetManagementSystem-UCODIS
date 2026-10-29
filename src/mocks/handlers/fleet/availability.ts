@@ -164,6 +164,18 @@ export function createAvailability(db: MockDatabase, window: TimeWindow, languag
   }
 }
 
+/** The driver assigned to a vehicle on a given day, if any. */
+function assignedDriver(db: MockDatabase, vehicleNo: string, at: string): string | null {
+  const day = at.slice(0, 10)
+  const assignment = db.driverAssignments
+    .all()
+    .find(
+      (row) =>
+        row.vehicleNo === vehicleNo && row.startDate <= day && (!row.endDate || row.endDate >= day)
+    )
+  return assignment?.employeeNo ?? null
+}
+
 /** Every vehicle and driver of the park, with whether it is free over the window and why not. */
 export function availabilityOver(
   db: MockDatabase,
@@ -182,9 +194,8 @@ export function availabilityOver(
         ? 'towed'
         : null
     if (!role) continue
-    const reasons = availability
-      .vehicleUnavailability(vehicle.no, role)
-      .map((item) => unavailabilityText(language, item))
+    const items = availability.vehicleUnavailability(vehicle.no, role)
+    const reasons = items.map((item) => unavailabilityText(language, item))
     vehicles.push({
       no: vehicle.no,
       label: vehicle.plate,
@@ -199,20 +210,22 @@ export function availabilityOver(
         null
       ),
       available: reasons.length === 0,
-      reasons
+      reasons,
+      busyOnly: items.length > 0 && items.every((item) => item.code === 'busy'),
+      assignedDriverNo: role === 'motorized' ? assignedDriver(db, vehicle.no, window.start) : null
     })
   }
   const drivers = availability.drivers().map((employee): ResourceAvailabilityApi => {
-    const reasons = availability
-      .driverUnavailability(employee.no)
-      .map((item) => unavailabilityText(language, item))
+    const items = availability.driverUnavailability(employee.no)
+    const reasons = items.map((item) => unavailabilityText(language, item))
     return {
       no: employee.no,
       label: availability.names.get(employee.no) ?? employee.no,
       role: 'driver',
       capacity: null,
       available: reasons.length === 0,
-      reasons
+      reasons,
+      busyOnly: items.length > 0 && items.every((item) => item.code === 'busy')
     }
   })
   return { vehicles, drivers }

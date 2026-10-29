@@ -11,6 +11,8 @@ export interface MockAccount {
   language: 'fr' | 'en'
   landingRoute: string
   active: boolean
+  /** The orderer record an orderer account places its orders for (TRS01-US03: « mes commandes »). */
+  ordererNo?: string
 }
 
 export const DEMO_PASSWORD = 'demo'
@@ -54,6 +56,36 @@ export const MOCK_ACCOUNTS: readonly MockAccount[] = [
     active: true
   },
   {
+    code: 'PLN001',
+    password: DEMO_PASSWORD,
+    name: 'Andry Rakotondrabe',
+    email: 'a.rakotondrabe@ucodis.mg',
+    profile: 'PLANNER',
+    language: 'fr',
+    landingRoute: '/planning/transport-orders',
+    active: true
+  },
+  {
+    code: 'LIV001',
+    password: DEMO_PASSWORD,
+    name: 'Hanta Ravelojaona',
+    email: 'h.ravelojaona@ucodis.mg',
+    profile: 'DELIVERY_MANAGER',
+    language: 'fr',
+    landingRoute: '/planning/loading',
+    active: true
+  },
+  {
+    code: 'FAC001',
+    password: DEMO_PASSWORD,
+    name: 'Voahirana Rasoamanana',
+    email: 'v.rasoamanana@ucodis.mg',
+    profile: 'BILLING',
+    language: 'fr',
+    landingRoute: '/planning/customer-billing',
+    active: true
+  },
+  {
     code: 'CLI001',
     password: DEMO_PASSWORD,
     name: 'Miora Randrianasolo',
@@ -62,7 +94,7 @@ export const MOCK_ACCOUNTS: readonly MockAccount[] = [
     employeeNo: 'UCT-004',
     orgUnitNo: 'CLI',
     language: 'fr',
-    landingRoute: '/planning/customer-confirmations',
+    landingRoute: '/planning/confirmations',
     active: true
   },
   {
@@ -75,7 +107,8 @@ export const MOCK_ACCOUNTS: readonly MockAccount[] = [
     orgUnitNo: 'COM',
     language: 'fr',
     landingRoute: '/planning/delivery-requests',
-    active: true
+    active: true,
+    ordererNo: 'CLI-004'
   },
   {
     code: 'DEP001',
@@ -106,6 +139,17 @@ export const MOCK_ACCOUNTS: readonly MockAccount[] = [
     name: 'Tiana Rasolofoson',
     profile: 'DRIVER',
     employeeNo: 'UCT-012',
+    orgUnitNo: 'CND',
+    language: 'fr',
+    landingRoute: '/me',
+    active: true
+  },
+  {
+    code: 'CND014',
+    password: DEMO_PASSWORD,
+    name: 'Fenohery Randriamampionona',
+    profile: 'DRIVER',
+    employeeNo: 'UCT-014',
     orgUnitNo: 'CND',
     language: 'fr',
     landingRoute: '/me',

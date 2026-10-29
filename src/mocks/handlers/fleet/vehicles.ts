@@ -1,3 +1,4 @@
+import { COMPARTMENT_CONTENTS, compartmentsOf } from '@/modules/fleet/vehicles/domain/compartments'
 import { equipmentDueState } from '@/modules/fleet/vehicles/domain/equipment'
 import { normalizePlate } from '@/modules/fleet/vehicles/domain/vehicleStatus'
 import {
@@ -26,6 +27,7 @@ import { conflict, notFound, unprocessable } from '../../http/errors'
 import {
   invalidField,
   readAll,
+  readBoolean,
   readDate,
   readEnum,
   readNumber,
@@ -116,6 +118,8 @@ export function vehiclesApi(db: MockDatabase, language: MockLanguage = 'fr'): Ve
       carriesGoods: type?.carriesGoods ?? false,
       hasCompartments: type?.hasCompartments ?? false,
       homeSiteName: sites.get(vehicle.homeSiteNo) ?? '',
+      compartments: compartmentsOf(vehicle.compartments, null),
+      productFamilies: vehicle.productFamilies ?? [],
       totalCapacityL: vehicle.compartments.reduce((total, item) => total + item.volumeL, 0),
       formerPlates: vehicle.plateHistory.map((change) => change.previousPlate).join(', '),
       status: result.status,
@@ -145,12 +149,29 @@ function readCompartments(input: Record<string, unknown>): VehicleCompartment[] 
   if (raw == null) return []
   if (!Array.isArray(raw)) throw invalidField('compartments')
   return raw.map((item: unknown, index) => {
-    const volumeL = Number((item as { volumeL?: unknown } | null)?.volumeL)
+    const row = (item ?? {}) as Record<string, unknown>
+    const volumeL = Number(row.volumeL)
     if (!Number.isFinite(volumeL) || volumeL <= 0) {
       throw unprocessable(FLEET_MESSAGES.compartmentsRequired)
     }
-    return { no: index + 1, volumeL }
+    return {
+      no: index + 1,
+      volumeL,
+      families: readFamilies(row, 'families'),
+      content: readEnum(row, 'content', COMPARTMENT_CONTENTS) ?? 'mixed',
+      fullFill: readBoolean(row, 'fullFill')
+    }
   })
+}
+
+/** A list of product family names; empty means any family. */
+function readFamilies(input: Record<string, unknown>, field: string): string[] {
+  const raw = input[field]
+  if (raw == null) return []
+  if (!Array.isArray(raw) || raw.some((item) => typeof item !== 'string')) {
+    throw invalidField(field)
+  }
+  return [...new Set((raw as string[]).map((item) => item.trim()).filter(Boolean))]
 }
 
 /** The vehicle using a plate, now or in its history. */
@@ -197,6 +218,7 @@ export function registerVehiclesHandlers(router: MockRouter, db: MockDatabase): 
     maxLoadKg: (input) => readNumber(input, 'maxLoadKg', { min: 1 }),
     maxVolumeM3: (input) => readNumber(input, 'maxVolumeM3', { min: 0 }),
     compartments: readCompartments,
+    productFamilies: (input) => readFamilies(input, 'productFamilies'),
     acquisitionMode: (input) => readEnum(input, 'acquisitionMode', ACQUISITION_MODES),
     acquisitionDate: (input) => readDate(input, 'acquisitionDate'),
     acquisitionProviderNo: (input) =>

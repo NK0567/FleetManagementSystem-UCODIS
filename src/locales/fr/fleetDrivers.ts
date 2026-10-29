@@ -71,5 +71,15 @@ export default {
   'fleet.drivers.activity.deviations': "Écarts d'itinéraire",
   'fleet.drivers.activity.infractions': 'Infractions',
   'fleet.drivers.activity.trainings': 'Formations',
-  'fleet.drivers.activity.none': 'Aucun.'
+  'fleet.drivers.activity.none': 'Aucun.',
+  'fleet.drivers.activity.col.trip': 'Trajet',
+  'fleet.drivers.activity.col.route': 'Itinéraire',
+  'fleet.drivers.activity.col.vehicle': 'Véhicule',
+  'fleet.drivers.activity.col.departure': 'Départ prévu',
+  'fleet.drivers.activity.col.status': 'Statut',
+  'fleet.drivers.activity.col.distance': 'Distance',
+  'fleet.drivers.activity.col.refill': 'Plein',
+  'fleet.drivers.activity.col.date': 'Date',
+  'fleet.drivers.activity.col.liters': 'Litres',
+  'fleet.drivers.activity.col.amount': 'Montant'
 }

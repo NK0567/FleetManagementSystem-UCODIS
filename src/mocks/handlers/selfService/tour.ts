@@ -13,6 +13,7 @@ import type { MockRouter } from '../../http/router'
 import { sessionUser } from '../../http/types'
 import { activeCheckPoints, readCheckResults } from '../fleet/checkPoints'
 import { FLEET_MESSAGES } from '../fleet/messages'
+import { transportOrdersApi } from '../planning/transportOrders'
 import { SELF_SERVICE_MESSAGES } from './messages'
 
 function driverTrips(db: MockDatabase, employeeNo: string): TripRow[] {
@@ -78,7 +79,77 @@ export function myTour(db: MockDatabase, employeeNo: string) {
   }
 }
 
+/**
+ * The transport orders of the driver's current trip, as he works them (TRS03-US05 to US14): the
+ * lines in their execution order, each with its recipient, address and content; a line taken out
+ * before loading is not his, a line not loaded stays shown with its status.
+ */
+export function myOrders(db: MockDatabase, employeeNo: string) {
+  const trip = pickTour(driverTrips(db, employeeNo))
+  if (!trip) return []
+  const reasons = (kind: string) =>
+    db.planningReasons
+      .all()
+      .filter((reason) => reason.kind === kind && reason.active)
+      .map((reason) => ({ no: reason.no, name: reason.name }))
+  return transportOrdersApi(db)
+    .filter((order) => order.tripNo === trip.no && order.status !== 'cancelled')
+    .map((order) => {
+      const row = db.transportOrders.findOrFail(order.no)
+      const lines = row.lines
+        .filter((line) => !line.unavailableAt && !line.replannedAt)
+        .map((line) => {
+          const point = db.deliveryPoints.find(line.deliveryPointNo)
+          const recipient = point ? db.customers.find(point.customerNo) : undefined
+          const product = db.products.find(line.productNo)
+          return {
+            lineNo: line.lineNo,
+            deliveryPointNo: line.deliveryPointNo,
+            deliveryPointName: point?.name ?? line.deliveryPointNo,
+            recipientName: recipient?.name ?? '',
+            address: [point?.address, point?.city].filter(Boolean).join(', '),
+            productName: product?.name ?? line.productNo,
+            unit: product?.unit ?? '',
+            quantity: line.quantity,
+            loadedQuantity: line.loadedQuantity,
+            conformingAt: line.conformingAt,
+            nonconformityAt: line.nonconformityAt,
+            arrivedAt: line.arrivedAt ?? null,
+            declaredAt: line.declaredAt,
+            receivedQuantity: line.receivedQuantity,
+            refusalAt: line.refusalAt,
+            postponedAt: line.postponedAt,
+            returnedAt: line.returnedAt,
+            handedBackAt: line.handedBackAt,
+            receptionConfirmedAt: line.receptionConfirmedAt,
+            receptionContestedAt: line.receptionContestedAt
+          }
+        })
+      return {
+        no: order.no,
+        status: order.status,
+        plannedDeparture: order.plannedDeparture,
+        routeName: order.routeName,
+        vehiclePlate: order.vehiclePlate,
+        trailerPlate: order.trailerPlate,
+        compartmentPlan: order.compartmentPlan,
+        lines,
+        reasons: {
+          nonconformity: reasons('nonconformity'),
+          postponement: reasons('postponement'),
+          refusal: reasons('delivery_refusal')
+        }
+      }
+    })
+}
+
 export function registerTourHandlers(router: MockRouter, db: MockDatabase): void {
+  router.get('/me/orders', { feature: 'MYSPACE' }, (request) => {
+    const user = sessionUser(request)
+    if (!user.employeeNo) throw notFound(SELF_SERVICE_MESSAGES.noEmployee)
+    return ok(myOrders(db, user.employeeNo))
+  })
+
   router.get('/me/tour', { feature: 'MYSPACE' }, (request) => {
     const user = sessionUser(request)
     if (!user.employeeNo) throw notFound(SELF_SERVICE_MESSAGES.noEmployee)

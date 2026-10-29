@@ -5,7 +5,12 @@ import { useEntityForm, type FormValidationError } from '@/composables/useEntity
 import { useFormValidationUi } from '@/composables/useFormValidationUi'
 import { isValidEmail } from '@/utils/email'
 import { contractIssues } from '../domain/provider'
-import type { ProviderApi, ProviderContract, ProviderType } from '../types/provider.types'
+import type {
+  CarrierVehicle,
+  ProviderApi,
+  ProviderContract,
+  ProviderType
+} from '../types/provider.types'
 
 const props = withDefaults(
   defineProps<{
@@ -35,7 +40,8 @@ const { draft, isRequired, expose } = useEntityForm({
     address: '',
     authorized: true,
     notAuthorizedReason: '',
-    contracts: [] as ProviderContract[]
+    contracts: [] as ProviderContract[],
+    carrierVehicles: [] as CarrierVehicle[]
   }),
   required: ['name', 'providerType'],
   labelOf: (field) => t(`fleet.providers.form.${field}`),
@@ -61,6 +67,7 @@ const expandedSections = ref({
   general: true,
   authorization: true,
   contracts: true,
+  carrierVehicles: true,
   audit: false
 })
 const { hasValidationError } = useFormValidationUi({
@@ -160,6 +167,20 @@ defineExpose(expose)
     >
       <div class="xl:col-span-2 min-w-0" data-field="contracts">
         <ProviderContractsEditor v-model="draft.contracts" :disabled="disabled" />
+      </div>
+    </FormSection>
+
+    <FormSection
+      v-if="draft.providerType === 'carrier'"
+      v-model:open="expandedSections.carrierVehicles"
+      :title="t('fleet.providers.carrierVehicles.title')"
+      :summary="[t('fleet.providers.carrierVehicles.count', draft.carrierVehicles.length)]"
+    >
+      <div class="xl:col-span-2 min-w-0">
+        <p class="text-xs text-muted-foreground mb-2">
+          {{ t('fleet.providers.carrierVehicles.hint') }}
+        </p>
+        <CarrierVehiclesEditor v-model="draft.carrierVehicles" :disabled="disabled" />
       </div>
     </FormSection>
 

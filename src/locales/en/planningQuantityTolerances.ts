@@ -12,22 +12,20 @@ export default {
   'planning.quantityTolerances.confirmDelete': 'Delete the tolerance',
   'planning.quantityTolerances.confirmDeleteMsg':
     'The "{name}" tolerance will be permanently deleted.',
-
-  'planning.quantityTolerances.search.all': 'No., customer or product',
-
+  'planning.quantityTolerances.search.all': 'No., recipient or product',
   'planning.quantityTolerances.col.no': 'No.',
-  'planning.quantityTolerances.col.customerNo': 'Customer',
+  'planning.quantityTolerances.col.customerNo': 'Recipient',
   'planning.quantityTolerances.col.productNo': 'Product',
   'planning.quantityTolerances.col.value': 'Gap allowed',
   'planning.quantityTolerances.col.unit': 'Expressed as',
   'planning.quantityTolerances.col.scopeLabel': 'Scope',
-  'planning.quantityTolerances.col.customerName': 'Customer',
+  'planning.quantityTolerances.col.customerName': 'Recipient',
   'planning.quantityTolerances.col.productName': 'Product',
 
   'planning.quantityTolerances.form.general': 'General',
   'planning.quantityTolerances.form.no': 'No.',
-  'planning.quantityTolerances.form.customerNo': 'Customer',
-  'planning.quantityTolerances.form.customerNoHint': 'Empty: every customer.',
+  'planning.quantityTolerances.form.customerNo': 'Recipient',
+  'planning.quantityTolerances.form.customerNoHint': 'Empty: every recipient.',
   'planning.quantityTolerances.form.productNo': 'Product',
   'planning.quantityTolerances.form.productNoHint':
     'Empty: every product. A tolerance in quantity targets a product.',

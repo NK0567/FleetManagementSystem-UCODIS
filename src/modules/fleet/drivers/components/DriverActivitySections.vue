@@ -1,5 +1,7 @@
 <script lang="ts" setup>
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import type { SubListColumn } from '@/components/shared/RecordSubList.vue'
 import { useI18n } from 'vue-i18n'
 import { apiErrorMessage } from '@/core/api/apiError'
 import { useOptionsStore } from '@/stores/optionsStore'
@@ -31,6 +33,59 @@ watch(
 
 const label = (set: string, value: string) => optionsStore.getOptionLabel(set, value)
 const card = (path: string, no: string) => ({ path, query: { no, cardMode: 'view' } })
+const router = useRouter()
+const openCard = (path: string, row: Record<string, unknown>) =>
+  void router.push(card(path, String(row.no)))
+
+const tripColumns = computed<SubListColumn[]>(() => [
+  { sortKey: 'no', label: t('fleet.drivers.activity.col.trip') },
+  { sortKey: 'routeName', label: t('fleet.drivers.activity.col.route'), filter: true },
+  { sortKey: 'vehiclePlate', label: t('fleet.drivers.activity.col.vehicle'), filter: true },
+  {
+    sortKey: 'plannedDeparture',
+    label: t('fleet.drivers.activity.col.departure'),
+    formatter: (v) => formatDate(v as string | null)
+  },
+  {
+    sortKey: 'status',
+    label: t('fleet.drivers.activity.col.status'),
+    formatter: (v) => label('tripStatus', String(v)),
+    filter: true
+  },
+  {
+    sortKey: 'distanceKm',
+    label: t('fleet.drivers.activity.col.distance'),
+    align: 'right',
+    formatter: (v) => (v === null ? '' : `${formatNumber(Number(v))} km`)
+  }
+])
+const refillColumns = computed<SubListColumn[]>(() => [
+  { sortKey: 'no', label: t('fleet.drivers.activity.col.refill') },
+  {
+    sortKey: 'refueledAt',
+    label: t('fleet.drivers.activity.col.date'),
+    formatter: (v) => formatDate(v as string | null)
+  },
+  { sortKey: 'vehiclePlate', label: t('fleet.drivers.activity.col.vehicle'), filter: true },
+  {
+    sortKey: 'liters',
+    label: t('fleet.drivers.activity.col.liters'),
+    align: 'right',
+    formatter: (v) => `${formatNumber(Number(v))} L`
+  },
+  {
+    sortKey: 'amount',
+    label: t('fleet.drivers.activity.col.amount'),
+    align: 'right',
+    formatter: (v) => formatNumber(Number(v))
+  },
+  {
+    sortKey: 'status',
+    label: t('fleet.drivers.activity.col.status'),
+    formatter: (v) => label('refillStatus', String(v)),
+    filter: true
+  }
+])
 </script>
 
 <template>
@@ -48,34 +103,19 @@ const card = (path: string, no: string) => ({ path, query: { no, cardMode: 'view
       ]"
     >
       <div class="xl:col-span-2 min-w-0">
-        <p v-if="!activity.trips.length" class="text-sm text-muted-foreground">
-          {{ t('fleet.drivers.activity.noTrip') }}
-        </p>
-        <table v-else class="w-full text-sm border border-border rounded">
-          <tbody>
-            <tr
-              v-for="trip in activity.trips"
-              :key="trip.no"
-              class="border-t border-border first:border-t-0"
-            >
-              <td class="px-3 py-1.5 whitespace-nowrap">
-                <RouterLink
-                  :to="card('/fleet/trips', trip.no)"
-                  class="text-primary hover:underline"
-                >
-                  {{ trip.no }}
-                </RouterLink>
-              </td>
-              <td class="px-3 py-1.5">{{ trip.routeName }}</td>
-              <td class="px-3 py-1.5">{{ trip.vehiclePlate }}</td>
-              <td class="px-3 py-1.5">{{ formatDate(trip.plannedDeparture) }}</td>
-              <td class="px-3 py-1.5">{{ label('tripStatus', trip.status) }}</td>
-              <td class="px-3 py-1.5 text-right tabular-nums">
-                {{ trip.distanceKm === null ? '' : `${formatNumber(trip.distanceKm)} km` }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <RecordSubList
+          :rows="activity.trips as unknown as Record<string, unknown>[]"
+          :columns="tripColumns"
+          row-key="no"
+          :empty-text="t('fleet.drivers.activity.noTrip')"
+          :initial-sort="{ key: 'plannedDeparture', direction: 'DESC' }"
+          clickable
+          @row-click="(row: Record<string, unknown>) => openCard('/fleet/trips', row)"
+        >
+          <template #cell-no="{ text }">
+            <span class="text-primary">{{ text }}</span>
+          </template>
+        </RecordSubList>
       </div>
     </FormSection>
 
@@ -91,34 +131,19 @@ const card = (path: string, no: string) => ({ path, query: { no, cardMode: 'view
       ]"
     >
       <div class="xl:col-span-2 min-w-0">
-        <p v-if="!activity.refills.length" class="text-sm text-muted-foreground">
-          {{ t('fleet.drivers.activity.noRefill') }}
-        </p>
-        <table v-else class="w-full text-sm border border-border rounded">
-          <tbody>
-            <tr
-              v-for="refill in activity.refills"
-              :key="refill.no"
-              class="border-t border-border first:border-t-0"
-            >
-              <td class="px-3 py-1.5 whitespace-nowrap">
-                <RouterLink
-                  :to="card('/fleet/fuel-refills', refill.no)"
-                  class="text-primary hover:underline"
-                >
-                  {{ refill.no }}
-                </RouterLink>
-              </td>
-              <td class="px-3 py-1.5">{{ formatDate(refill.refueledAt) }}</td>
-              <td class="px-3 py-1.5">{{ refill.vehiclePlate }}</td>
-              <td class="px-3 py-1.5 text-right tabular-nums">
-                {{ formatNumber(refill.liters) }} L
-              </td>
-              <td class="px-3 py-1.5 text-right tabular-nums">{{ formatNumber(refill.amount) }}</td>
-              <td class="px-3 py-1.5">{{ label('refillStatus', refill.status) }}</td>
-            </tr>
-          </tbody>
-        </table>
+        <RecordSubList
+          :rows="activity.refills as unknown as Record<string, unknown>[]"
+          :columns="refillColumns"
+          row-key="no"
+          :empty-text="t('fleet.drivers.activity.noRefill')"
+          :initial-sort="{ key: 'refueledAt', direction: 'DESC' }"
+          clickable
+          @row-click="(row: Record<string, unknown>) => openCard('/fleet/fuel-refills', row)"
+        >
+          <template #cell-no="{ text }">
+            <span class="text-primary">{{ text }}</span>
+          </template>
+        </RecordSubList>
       </div>
     </FormSection>
 

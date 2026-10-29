@@ -39,7 +39,7 @@ function delivered(db: MockDatabase, order: TransportOrderRow): boolean {
       loadingReady: loadingReady(order.lines),
       carrierDeparted: order.carrierDepartedAt !== null || fleetDeparted,
       linesDelivered: linesDelivered(order.lines)
-    }) === 'delivered'
+    }) === 'in_progress' && linesDelivered(order.lines)
   )
 }
 
@@ -115,7 +115,7 @@ export function registerClosingHandlers(router: MockRouter, db: MockDatabase): v
 
   router.post(
     '/planning/transport-orders/:no/documents',
-    { feature: FEATURE, action: 'execute' },
+    { feature: 'DELIVERYQUALITY', action: 'execute' },
     (request) => {
       const order = db.transportOrders.findOrFail(routeParam(request, 'no'))
       if (order.closedAt) throw conflict(PLANNING_MESSAGES.closingDone)
@@ -136,7 +136,7 @@ export function registerClosingHandlers(router: MockRouter, db: MockDatabase): v
 
   router.post(
     '/planning/transport-orders/:no/debriefing',
-    { feature: FEATURE, action: 'execute' },
+    { feature: 'DELIVERYQUALITY', action: 'execute' },
     (request) => {
       const order = db.transportOrders.findOrFail(routeParam(request, 'no'))
       if (order.closedAt) throw conflict(PLANNING_MESSAGES.closingDone)

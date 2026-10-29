@@ -3,7 +3,7 @@ import type { LocalizedText } from '../i18n'
 export const PLANNING_OPTION_SETS: Record<string, Record<string, LocalizedText>> = {
   planningReasonKind: {
     cancellation: { fr: 'Annulation', en: 'Cancellation' },
-    request_rejection: { fr: 'Rejet de demande', en: 'Request rejection' },
+    request_rejection: { fr: 'Rejet de commande', en: 'Request rejection' },
     delivery_refusal: { fr: 'Refus à la livraison', en: 'Refusal on delivery' },
     unavailability: { fr: 'Indisponibilité du destinataire', en: 'Recipient unavailable' },
     nonconformity: { fr: 'Non-conformité au chargement', en: 'Loading nonconformity' },
@@ -16,9 +16,16 @@ export const PLANNING_OPTION_SETS: Record<string, Record<string, LocalizedText>>
     internal: { fr: 'Service interne', en: 'Internal department' }
   },
   notificationChannel: {
+    none: { fr: 'Aucune notification', en: 'No notification' },
     sms: { fr: 'SMS', en: 'SMS' },
+    call: { fr: 'Appel', en: 'Call' },
     email: { fr: 'E-mail', en: 'E-mail' },
-    sms_email: { fr: 'SMS et e-mail', en: 'SMS and e-mail' }
+    whatsapp: { fr: 'WhatsApp', en: 'WhatsApp' }
+  },
+  deliverySlot: {
+    any: { fr: 'Indifférent', en: 'Any time' },
+    morning: { fr: 'Le matin', en: 'In the morning' },
+    afternoon: { fr: "L'après-midi", en: 'In the afternoon' }
   },
   productCompatibilityKind: {
     together: { fr: 'Jamais ensemble', en: 'Never together' },
@@ -29,7 +36,7 @@ export const PLANNING_OPTION_SETS: Record<string, Record<string, LocalizedText>>
     quantity: { fr: 'Unités du produit', en: 'Product units' }
   },
   tariffTarget: {
-    customer: { fr: 'Client', en: 'Customer' },
+    customer: { fr: 'Ordonnateur ou destinataire', en: 'Orderer or recipient' },
     carrier: { fr: 'Transporteur', en: 'Carrier' }
   },
   tariffBasis: {
@@ -46,22 +53,21 @@ export const PLANNING_OPTION_SETS: Record<string, Record<string, LocalizedText>>
     cancelled: { fr: 'Annulée', en: 'Cancelled' }
   },
   deliveryRequestOrigin: {
-    request: { fr: 'Demande', en: 'Request' },
+    request: { fr: 'Commande', en: 'Order' },
     import: { fr: 'Import', en: 'Import' },
     planner: { fr: 'Saisie par le planificateur', en: 'Keyed by the planner' }
   },
   freightPayer: {
-    orderer: { fr: "Donneur d'ordre", en: 'Orderer' },
+    orderer: { fr: 'Ordonnateur', en: 'Orderer' },
     recipient: { fr: 'Destinataire', en: 'Recipient' }
   },
   transportOrderStatus: {
-    draft: { fr: 'Brouillon', en: 'Draft' },
+    draft: { fr: 'En attente', en: 'Pending' },
     planned: { fr: 'Planifié', en: 'Planned' },
     confirmed: { fr: 'Confirmé', en: 'Confirmed' },
-    ready: { fr: 'Prêt', en: 'Ready' },
+    ready: { fr: 'Prêt pour exécution', en: 'Ready for execution' },
     in_progress: { fr: 'En cours', en: 'In progress' },
-    delivered: { fr: 'Livré', en: 'Delivered' },
-    closed: { fr: 'Clôturé', en: 'Closed' },
+    completed: { fr: 'Terminé', en: 'Completed' },
     cancelled: { fr: 'Annulé', en: 'Cancelled' }
   },
   transportMeans: {

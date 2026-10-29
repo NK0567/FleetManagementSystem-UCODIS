@@ -141,5 +141,10 @@ export default {
   'common.import.run': 'Import | Import one line | Import {n} lines',
   'common.import.rejected': 'No line refused. | One line refused: | {n} lines refused:',
   'common.import.line': 'Line {line}',
-  'common.import.error': 'The import could not be done.'
+  'common.import.error': 'The import could not be done.',
+  'common.subList.search': 'Search the list',
+  'common.subList.all': 'all',
+  'common.subList.clear': 'Clear',
+  'common.subList.count': '{shown} of {total}',
+  'common.subList.noMatch': 'No line matches the filter.'
 }

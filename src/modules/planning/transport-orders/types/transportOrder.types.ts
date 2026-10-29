@@ -1,4 +1,9 @@
 import type { FileMeta } from '@/types/file.types'
+import type {
+  CompartmentIssue,
+  CompartmentRules,
+  CompartmentUse
+} from '@/modules/fleet/vehicles/domain/compartments'
 import type { ClosingBlock, OrderDebriefing } from '@/modules/planning/closing/domain/closing'
 import type {
   OrderLineState,
@@ -21,6 +26,7 @@ export interface TransportOrderLineApi {
   quantity: number
   weightKg: number | null
   loadedQuantity: number | null
+  nonconformityAt: string | null
   declaredAt: string | null
   receivedQuantity: number | null
   quantityGap: number | null
@@ -31,6 +37,13 @@ export interface TransportOrderLineApi {
   warehouseReceivedAt: string | null
   remainderAt: string | null
   remainderRequestNo: string | null
+  /* A delivery contested by its recipient, then handled by the planner (TRS04-US03). */
+  receptionContestedAt: string | null
+  contestReasonName: string
+  contestComment: string
+  contestHandledAt: string | null
+  contestHandledBy: string | null
+  contestNote: string
 }
 
 /** What the lines action accepts: a request, or a line keyed without one. */
@@ -40,6 +53,13 @@ export interface TransportOrderLineInput {
   productNo?: string
   quantity?: number | null
   weightKg?: number | null
+}
+
+/** How the lines fit in the compartments of the vehicle: a proposal, the planner decides. */
+export interface CompartmentPlanApi {
+  compartments: CompartmentRules[]
+  uses: CompartmentUse[]
+  issues: CompartmentIssue[]
 }
 
 export interface TransportOrderEventApi {
@@ -68,6 +88,9 @@ export interface TransportOrderApi {
   vehiclePlate: string
   trailerNo: string | null
   trailerPlate: string
+  compartmentPlan: CompartmentPlanApi | null
+  /** Product categories the vehicle is kept for; empty means any. */
+  vehicleProductFamilies: string[]
   driverNo: string | null
   driverName: string
   carrierNo: string | null
@@ -81,6 +104,12 @@ export interface TransportOrderApi {
   cancelledBy: string | null
   events: TransportOrderEventApi[]
   status: TransportOrderStatus
+  /** In progress and every line dealt with: shown in the « awaiting closing » view. */
+  awaitingClosing: boolean
+  /** A completed order is final and joins the archives (TRS05-US06). */
+  archived: boolean
+  /** Lines of a planned order still waiting for their recipient to confirm. */
+  awaitingConfirmations: number
   createdAt: string
   createdBy: string
   modifiedAt: string

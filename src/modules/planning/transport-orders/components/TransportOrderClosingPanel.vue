@@ -16,7 +16,12 @@ const emit = defineEmits<{
   debrief: [debriefing: DebriefingInput]
 }>()
 
-const { t } = useI18n()
+const { t, te } = useI18n()
+/* The known kinds have a label; a kind added in the settings shows its code. */
+const kindLabel = (kind: string) =>
+  te(`planning.transportOrders.closing.kinds.${kind}`)
+    ? t(`planning.transportOrders.closing.kinds.${kind}`)
+    : kind
 
 const filedKinds = computed(() => new Set(props.closing.documents.map((item) => item.kind)))
 const missingKinds = computed(() =>
@@ -115,7 +120,7 @@ const buttonClass =
           <StatusPill
             v-for="required in closing.requiredDocuments"
             :key="required"
-            :label="required"
+            :label="kindLabel(required)"
             :tone="filedKinds.has(required) ? 'success' : 'warning'"
           />
         </div>
@@ -127,7 +132,7 @@ const buttonClass =
         <BaseFormField
           v-for="document in closing.documents"
           :key="document.kind"
-          :label="document.kind"
+          :label="kindLabel(document.kind)"
         >
           <FileAttachmentField :file="document.file" disabled />
         </BaseFormField>

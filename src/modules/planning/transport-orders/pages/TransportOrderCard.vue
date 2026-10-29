@@ -1,8 +1,19 @@
 <script lang="ts" setup>
+import TransportOrderPickupPanel from '@/modules/planning/loading/components/TransportOrderPickupPanel.vue'
+import LoadingListView from '@/modules/planning/loading/components/LoadingListView.vue'
+import { pickupApi } from '@/modules/planning/loading/api/pickupApi'
+import type { LoadingListApi } from '@/modules/planning/loading/types/pickup.types'
+import { printElement } from '@/utils/printElement'
+import TransportOrderDisputesPanel from '../components/TransportOrderDisputesPanel.vue'
+import { confirmationService } from '@/modules/planning/customer-confirmations/services/confirmationService'
+import { orderLineState } from '../domain/transportOrder'
+import DeliveryNoteView from '@/modules/planning/delivery-notes/components/DeliveryNoteView.vue'
+import { deliveryNoteApi } from '@/modules/planning/delivery-notes/api/deliveryNoteApi'
+import type { DeliveryNoteApi } from '@/modules/planning/delivery-notes/types/deliveryNote.types'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Ban, CalendarClock, ListTree, Lock, Truck } from '@lucide/vue'
-import { apiErrorMessage } from '@/core/api/apiError'
+import { Ban, CalendarClock, ClipboardList, ListTree, Lock, Truck } from '@lucide/vue'
+import { apiErrorBody, apiErrorMessage } from '@/core/api/apiError'
 import type { CardOpenMode } from '@/composables/cardOpenMode'
 import { useEntityCard } from '@/composables/useEntityCard'
 import { usePermissions } from '@/composables/usePermissions'
@@ -29,6 +40,32 @@ const emit = defineEmits<{ close: []; create: [] }>()
 const { t } = useI18n()
 const store = useTransportOrderStore()
 const { canUpdate, canInsert, canExecute } = usePermissions('TRANSPORTORDER')
+/* Documents and debriefing are the delivery manager's (TRS05-US04, US05). */
+const { canExecute: canFileClosing } = usePermissions('DELIVERYQUALITY')
+const { canRead: canReadLoading } = usePermissions('LOADING')
+/* The pickup note and the loading list follow the planned order (TRS03-US03, US06). */
+const LOADING_STATUSES = ['planned', 'confirmed', 'ready']
+const loadingList = ref<LoadingListApi | null>(null)
+const listView = ref<InstanceType<typeof LoadingListView> | null>(null)
+async function openLoadingList() {
+  const no = item.value?.no
+  if (!no) return
+  try {
+    loadingList.value = await pickupApi.loadingList(no)
+  } catch (error) {
+    saveError.value = apiErrorMessage(error, t('planning.transportOrders.saveError'))
+  }
+}
+function printLoadingList() {
+  printElement(
+    listView.value?.root ?? null,
+    t('planning.loadingList.title', { no: loadingList.value?.orderNo ?? '' })
+  )
+}
+async function onPickupChanged() {
+  const no = item.value?.no
+  if (no) store.setCurrentItem(await transportOrderService.getById(no))
+}
 const formRef = ref<InstanceType<typeof TransportOrderForm> | null>(null)
 
 const {
@@ -75,18 +112,29 @@ const cancelling = ref(false)
 const lineAction = ref<OrderLineAction | null>(null)
 const actionLine = ref<TransportOrderLineApi | null>(null)
 const closing = ref<TransportOrderClosingApi | null>(null)
+/* The delivery notes of the order, read by the planner (TRS05-US03). */
+const deliveryNotes = ref<DeliveryNoteApi[]>([])
 const dialogError = ref<string | null>(null)
+/** A warning the planner may override (excess of capacity, overlap in the calendar). */
+const warning = ref<{ message: string; retry: () => Promise<void> } | null>(null)
 
 const expandedSections = ref({
   means: true,
   lines: true,
+  compartments: true,
   closing: true,
+  deliveryNotes: true,
+  pickup: true,
+  disputes: true,
   history: false,
   audit: false
 })
 
 /** Runs one server step, then reloads the order, the list and the closing dossier. */
-async function perform(step: (no: string) => Promise<TransportOrderApi | void>): Promise<boolean> {
+async function perform(
+  step: (no: string) => Promise<TransportOrderApi | void>,
+  retryWithForce?: () => Promise<void>
+): Promise<boolean> {
   const no = item.value?.no
   if (!no) return false
   acting.value = true
@@ -99,6 +147,13 @@ async function perform(step: (no: string) => Promise<TransportOrderApi | void>):
     await loadClosing()
     return true
   } catch (error) {
+    if (retryWithForce && apiErrorBody(error)?.errorCode === 'PLANNING_WARNINGS') {
+      warning.value = {
+        message: apiErrorMessage(error, t('planning.transportOrders.saveError')),
+        retry: retryWithForce
+      }
+      return false
+    }
     saveError.value = apiErrorMessage(error, t('planning.transportOrders.saveError'))
     dialogError.value = saveError.value
     return false
@@ -109,12 +164,14 @@ async function perform(step: (no: string) => Promise<TransportOrderApi | void>):
 
 async function loadClosing() {
   const current = item.value
-  if (!current || (current.status !== 'delivered' && current.status !== 'closed')) {
+  if (!current || (current.status !== 'in_progress' && current.status !== 'completed')) {
     closing.value = null
+    deliveryNotes.value = []
     return
   }
   try {
     closing.value = await transportOrderService.closing(current.no)
+    deliveryNotes.value = await deliveryNoteApi.ofOrder(current.no)
   } catch (error) {
     saveError.value = apiErrorMessage(error, t('planning.transportOrders.saveError'))
   }
@@ -127,13 +184,29 @@ watch(
 )
 
 async function plan(body: Record<string, unknown>) {
-  if (await perform((no) => transportOrderService.act(no, 'plan', body))) planning.value = false
+  const done = await perform(
+    (no) => transportOrderService.act(no, 'plan', body),
+    () => plan({ ...body, force: true })
+  )
+  if (done) planning.value = false
 }
 
-async function saveLines(lines: TransportOrderLineInput[]) {
-  if (await perform((no) => transportOrderService.replaceLines(no, lines))) {
-    editingLines.value = false
-  }
+async function saveLines(lines: TransportOrderLineInput[], force = false) {
+  const done = await perform(
+    (no) => transportOrderService.replaceLines(no, lines, force),
+    () => saveLines(lines, true)
+  )
+  if (done) editingLines.value = false
+}
+
+async function overrideWarning() {
+  const pending = warning.value
+  warning.value = null
+  await pending?.retry()
+}
+
+async function reorderLines(lineNos: number[]) {
+  await perform((no) => transportOrderService.reorderLines(no, lineNos))
 }
 
 async function cancel(choice: { reasonNo: string; comment: string }) {
@@ -174,9 +247,34 @@ async function confirmLineAction(choice: OrderLineChoice) {
   if (done) lineAction.value = null
 }
 
-const linesSummary = computed(() =>
-  item.value ? [t('planning.transportOrders.lines.count', item.value.lineCount)] : []
-)
+/* Indicators by line, to decide on completing the order (TRS05-US06). */
+const lineProgress = computed(() => {
+  const lines = item.value?.lines ?? []
+  const pending = lines.filter((line) => orderLineState(line) === 'pending').length
+  return { done: lines.length - pending, pending }
+})
+const linesSummary = computed(() => {
+  const order = item.value
+  if (!order) return []
+  const summary = [t('planning.transportOrders.lines.count', order.lineCount)]
+  if (order.status === 'in_progress' || order.status === 'completed') {
+    summary.push(
+      t('planning.transportOrders.lines.done', lineProgress.value.done),
+      t('planning.transportOrders.lines.pending', lineProgress.value.pending)
+    )
+  }
+  return summary
+})
+const disputes = computed(() => item.value?.lines.filter((line) => line.receptionContestedAt) ?? [])
+const disputesOpen = computed(() => disputes.value.filter((line) => !line.contestHandledAt).length)
+const disputeError = ref<string | null>(null)
+async function handleDispute(line: TransportOrderLineApi, note: string) {
+  disputeError.value = null
+  const done = await perform((no) =>
+    confirmationService.receive({ orderNo: no, lineNo: line.lineNo }, 'handle-contest', { note })
+  )
+  if (!done) disputeError.value = saveError.value
+}
 const meansSummary = computed(() => {
   const order = item.value
   if (!order?.means) return [t('planning.transportOrders.means.none')]
@@ -233,7 +331,7 @@ const buttonClass =
     </template>
     <template v-if="item && !isEditMode && !isFormDirty" #action-buttons>
       <button
-        v-if="canExecute && canPlan(item.status)"
+        v-if="canUpdate && canPlan(item.status)"
         type="button"
         :class="buttonClass"
         :disabled="acting"
@@ -263,7 +361,7 @@ const buttonClass =
         {{ t('planning.transportOrders.action.depart') }}
       </button>
       <button
-        v-if="canExecute && item.status === 'delivered'"
+        v-if="canExecute && item.status === 'in_progress'"
         type="button"
         :class="buttonClass"
         :disabled="acting || !!closingBlocked"
@@ -272,6 +370,23 @@ const buttonClass =
       >
         <Lock class="w-5 h-5 text-primary" />
         {{ t('planning.transportOrders.action.close') }}
+        <span class="text-xs text-muted-foreground tabular-nums">
+          {{
+            t('planning.transportOrders.lines.progress', {
+              done: lineProgress.done,
+              total: lineProgress.done + lineProgress.pending
+            })
+          }}
+        </span>
+      </button>
+      <button
+        v-if="LOADING_STATUSES.includes(item.status)"
+        type="button"
+        :class="buttonClass"
+        @click="openLoadingList"
+      >
+        <ClipboardList class="w-5 h-5 text-primary" />
+        {{ t('planning.loadingList.open') }}
       </button>
       <button
         v-if="canExecute && canCancel(item.status)"
@@ -341,10 +456,82 @@ const buttonClass =
                   :status="item.status"
                   :total-weight-kg="item.totalWeightKg"
                   :can-act="canExecute && !isEditMode"
+                  :can-replan="canUpdate && !isEditMode"
+                  :driver-declares="item.means === 'fleet'"
                   :busy="acting"
+                  :reorderable="canUpdate && canEditLines(item.status)"
+                  @reorder="reorderLines"
                   @declare="(line) => openLineAction('declare', line)"
                   @hand-back="(line) => openLineAction('handBack', line)"
                   @remainder="(line) => openLineAction('remainder', line)"
+                />
+              </div>
+            </FormSection>
+            <FormSection
+              v-if="item.compartmentPlan"
+              v-model:open="expandedSections.compartments"
+              :title="t('planning.transportOrders.compartments.title')"
+              :summary="[
+                item.compartmentPlan.issues.length
+                  ? t(
+                      'planning.transportOrders.compartments.issues',
+                      item.compartmentPlan.issues.length
+                    )
+                  : ''
+              ]"
+            >
+              <div class="xl:col-span-2 min-w-0">
+                <p class="text-xs text-muted-foreground mb-2">
+                  {{ t('planning.transportOrders.compartments.hint') }}
+                </p>
+                <CompartmentPlanTable :plan="item.compartmentPlan" />
+              </div>
+            </FormSection>
+            <FormSection
+              v-if="
+                canReadLoading &&
+                item.means &&
+                [...LOADING_STATUSES, 'in_progress', 'completed'].includes(item.status)
+              "
+              v-model:open="expandedSections.pickup"
+              :title="t('planning.pickup.section')"
+              :summary="[]"
+            >
+              <TransportOrderPickupPanel
+                :order-no="item.no"
+                :order-status="item.status"
+                @changed="onPickupChanged"
+              />
+            </FormSection>
+            <FormSection
+              v-if="disputes.length"
+              v-model:open="expandedSections.disputes"
+              :title="t('planning.transportOrders.disputes.title')"
+              :summary="[
+                disputesOpen
+                  ? t('planning.transportOrders.disputes.openCount', disputesOpen)
+                  : t('planning.transportOrders.disputes.allHandled')
+              ]"
+            >
+              <TransportOrderDisputesPanel
+                :lines="item.lines"
+                :can-handle="canUpdate && item.status === 'in_progress'"
+                :busy="acting"
+                :error="disputeError"
+                @handle="handleDispute"
+              />
+            </FormSection>
+            <FormSection
+              v-if="deliveryNotes.length"
+              v-model:open="expandedSections.deliveryNotes"
+              :title="t('planning.deliveryNote.sectionTitle')"
+              :summary="[t('planning.deliveryNote.count', deliveryNotes.length)]"
+            >
+              <div class="xl:col-span-2 grid gap-3 lg:grid-cols-2 min-w-0">
+                <DeliveryNoteView
+                  v-for="note in deliveryNotes"
+                  :key="note.deliveryPointNo"
+                  :note="note"
                 />
               </div>
             </FormSection>
@@ -356,7 +543,7 @@ const buttonClass =
             >
               <TransportOrderClosingPanel
                 :closing="closing"
-                :editable="canExecute && item.status === 'delivered'"
+                :editable="canFileClosing && item.status === 'in_progress'"
                 :busy="acting"
                 @attach="attachDocument"
                 @debrief="saveDebriefing"
@@ -401,6 +588,15 @@ const buttonClass =
     @confirm="confirmLineAction"
     @cancel="lineAction = null"
   />
+  <ConfirmDialog
+    :open="!!warning"
+    :title="t('planning.transportOrders.warning.title')"
+    :message="warning?.message ?? ''"
+    :confirm-label="t('planning.transportOrders.warning.override')"
+    :loading="acting"
+    @confirm="overrideWarning"
+    @cancel="warning = null"
+  />
   <PlanningReasonDialog
     :open="cancelling"
     :title="t('planning.transportOrders.action.cancel')"
@@ -410,4 +606,14 @@ const buttonClass =
     @confirm="cancel"
     @cancel="cancelling = false"
   />
+  <ConfirmDialog
+    :open="!!loadingList"
+    :title="t('planning.loadingList.open')"
+    :confirm-label="t('planning.pickup.print')"
+    panel-class="max-w-2xl"
+    @confirm="printLoadingList"
+    @cancel="loadingList = null"
+  >
+    <LoadingListView v-if="loadingList" ref="listView" :list="loadingList" />
+  </ConfirmDialog>
 </template>

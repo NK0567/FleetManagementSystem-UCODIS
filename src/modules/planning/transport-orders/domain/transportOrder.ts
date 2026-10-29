@@ -7,8 +7,7 @@ export const TRANSPORT_ORDER_STATUSES = [
   'confirmed',
   'ready',
   'in_progress',
-  'delivered',
-  'closed',
+  'completed',
   'cancelled'
 ] as const
 export type TransportOrderStatus = (typeof TRANSPORT_ORDER_STATUSES)[number]
@@ -22,6 +21,8 @@ export const TRANSPORT_ORDER_EVENT_KINDS = [
   'planned',
   'confirmed',
   'replanned',
+  'pickup_sent',
+  'pickup_confirmed',
   'departed',
   'declared',
   'refused',
@@ -65,16 +66,16 @@ export interface TransportOrderFacts {
 }
 
 /**
- * Read from the facts. Delivered and closed arrive with execution and closing;
- * until then a trip that has left keeps the order in progress.
+ * Read from the facts. Seven statuses: pending, planned, confirmed, ready, in progress, completed,
+ * cancelled. An order on the road stays in progress until the planner completes it, whatever its
+ * lines say: the lines carry the reality of the field, never an automatic status change.
  */
 export function transportOrderStatus(order: TransportOrderFacts): TransportOrderStatus {
   if (order.cancelledAt) return 'cancelled'
-  if (order.closedAt) return 'closed'
+  if (order.closedAt) return 'completed'
   const fleetDeparted =
     order.means === 'fleet' && !!order.tripStatus && TRIP_DEPARTED.includes(order.tripStatus)
   const departed = fleetDeparted || !!order.carrierDeparted
-  if (departed && order.linesDelivered) return 'delivered'
   if (departed) return 'in_progress'
   if (order.means && order.linesConfirmed && order.loadingReady) return 'ready'
   if (order.means && order.linesConfirmed) return 'confirmed'
@@ -90,9 +91,13 @@ export const canEditLines = (status: TransportOrderStatus) =>
 /** The route and the departure belong to the trip once the order is planned. */
 export const canEditSchedule = (status: TransportOrderStatus) => status === 'draft'
 
-/** Allowed up to and including the road. A delivered or closed order stays. */
+/** Only before the vehicle leaves: once in progress, the returns are recorded on the lines. */
 export const canCancel = (status: TransportOrderStatus) =>
-  status !== 'cancelled' && status !== 'delivered' && status !== 'closed'
+  status === 'draft' || status === 'planned' || status === 'confirmed' || status === 'ready'
+
+/** The « awaiting closing » view: an order in progress whose every line has been dealt with. */
+export const awaitingClosing = (status: TransportOrderStatus, linesDelivered: boolean) =>
+  status === 'in_progress' && linesDelivered
 
 export interface LoadLine {
   weightKg: number | null
@@ -153,6 +158,7 @@ export function pointIssue(
 
 export type OrderLineState =
   | 'pending'
+  | 'not_loaded'
   | 'declared'
   | 'refused'
   | 'postponed'
@@ -166,11 +172,15 @@ export interface OrderLineFacts {
   returnedAt: string | null
   handedBackAt: string | null
   warehouseReceivedAt: string | null
+  /** Found not conforming at loading: the line stays in the order, its outcome is drawn at the
+   * end of the order. */
+  nonconformityAt?: string | null
 }
 
 /** Where a line stands on the road. Goods back at the warehouse win over the reason they came back. */
 export function orderLineState(line: OrderLineFacts): OrderLineState {
   if (line.handedBackAt || line.warehouseReceivedAt) return 'handed_back'
+  if (line.nonconformityAt) return 'not_loaded'
   if (line.refusalAt) return 'refused'
   if (line.returnedAt) return 'returned'
   if (line.postponedAt) return 'postponed'

@@ -14,6 +14,10 @@ import type { StatusTone } from '@/components/ui/status-pill/StatusPill.vue'
 import { usePermissions } from '@/composables/usePermissions'
 import { formatDateTime, formatNumber } from '@/utils/format'
 import { useLoadingStore } from '../stores/loadingStore'
+import { apiErrorMessage } from '@/core/api/apiError'
+import { pickupApi } from '../api/pickupApi'
+import PickupConfirmDialog from '../components/PickupConfirmDialog.vue'
+import type { PickupEntryInput, PickupNoteApi } from '../types/pickup.types'
 import type {
   LoadingLineApi,
   LoadingLineState,
@@ -33,9 +37,9 @@ const buttonClass =
 const { t } = useI18n()
 const store = useLoadingStore()
 const { canUpdate, canExecute } = usePermissions('LOADING')
+/* The returns are received by the warehouse (TRS04-US01). */
+const { canExecute: canReceiveReturns } = usePermissions('GOODSRETURN')
 
-const declaring = ref<{ orderNo: string; lines: LoadingLineApi[] } | null>(null)
-const quantities = ref<Record<number, number | null>>({})
 const rejecting = ref<LoadingLineApi | null>(null)
 const receiving = ref<ReturnLineApi | null>(null)
 const refusingReturn = ref<ReturnLineApi | null>(null)
@@ -90,30 +94,32 @@ const orderCard = (orderNo: string) => ({
   query: { no: orderNo, cardMode: 'view' }
 })
 
-const declareValid = computed(
-  () =>
-    !!declaring.value &&
-    declaring.value.lines.every((line) => {
-      const value = quantities.value[line.lineNo]
-      return typeof value === 'number' && Number.isFinite(value) && value >= 0
-    })
-)
-
-function openDeclare(orderNo: string, lines: LoadingLineApi[]) {
-  quantities.value = Object.fromEntries(
-    lines.map((line) => [line.lineNo, line.loadedQuantity ?? line.quantity])
-  )
-  declaring.value = { orderNo, lines }
+/* Loading is confirmed on the pickup note, with the site's data (TRS03-US04). */
+const confirming = ref<PickupNoteApi | null>(null)
+const confirmError = ref<string | null>(null)
+const confirmBusy = ref(false)
+async function openConfirm(orderNo: string) {
+  confirmError.value = null
+  try {
+    confirming.value = await pickupApi.note(orderNo)
+  } catch (cause) {
+    store.error = apiErrorMessage(cause, t('planning.pickup.saveError'))
+  }
 }
-
-async function onDeclare() {
-  const pending = declaring.value
-  if (!pending || !declareValid.value) return
-  const lines = pending.lines.map((line) => ({
-    lineNo: line.lineNo,
-    loadedQuantity: Number(quantities.value[line.lineNo])
-  }))
-  if (await store.declare(pending.orderNo, lines)) declaring.value = null
+async function onConfirmPickup(documentRef: string, entries: PickupEntryInput[]) {
+  const note = confirming.value
+  if (!note) return
+  confirmBusy.value = true
+  confirmError.value = null
+  try {
+    await pickupApi.confirm(note.orderNo, documentRef, entries)
+    confirming.value = null
+    await store.fetchAll()
+  } catch (cause) {
+    confirmError.value = apiErrorMessage(cause, t('planning.pickup.saveError'))
+  } finally {
+    confirmBusy.value = false
+  }
 }
 
 async function onReject(choice: ReasonChoice) {
@@ -188,14 +194,14 @@ onMounted(() => void store.fetchAll())
           </span>
         </h2>
         <button
-          v-if="canUpdate"
+          v-if="canUpdate && order.lines.some((line) => line.loadedQuantity === null)"
           type="button"
           :class="buttonClass"
           :disabled="store.acting"
-          @click="openDeclare(order.orderNo, order.lines)"
+          @click="openConfirm(order.orderNo)"
         >
           <PackageCheck class="w-5 h-5 text-primary" />
-          {{ t('planning.loading.declare') }}
+          {{ t('planning.pickup.confirm') }}
         </button>
       </div>
       <table class="w-full text-sm">
@@ -242,8 +248,14 @@ onMounted(() => void store.fetchAll())
               />
             </td>
             <td class="px-3 py-2">
+              <p
+                v-if="line.checkedByDriver && stateOf(line) !== 'to_declare'"
+                class="text-right text-xs text-muted-foreground"
+              >
+                {{ t('planning.loading.byDriver') }}
+              </p>
               <div
-                v-if="canExecute && stateOf(line) !== 'to_declare'"
+                v-else-if="canExecute && stateOf(line) !== 'to_declare'"
                 class="flex flex-wrap justify-end gap-1"
               >
                 <button
@@ -331,7 +343,7 @@ onMounted(() => void store.fetchAll())
               </span>
             </td>
             <td class="px-3 py-2">
-              <div v-if="canExecute" class="flex flex-wrap justify-end gap-1">
+              <div v-if="canReceiveReturns" class="flex flex-wrap justify-end gap-1">
                 <button
                   type="button"
                   :class="buttonClass"
@@ -358,33 +370,6 @@ onMounted(() => void store.fetchAll())
     </section>
   </div>
 
-  <ConfirmDialog
-    :open="declaring !== null"
-    :title="t('planning.loading.declareTitle', { no: declaring?.orderNo ?? '' })"
-    :confirm-disabled="!declareValid"
-    :loading="store.acting"
-    panel-class="max-w-lg"
-    @confirm="onDeclare"
-    @cancel="declaring = null"
-  >
-    <div class="space-y-3">
-      <BaseFormField
-        v-for="line in declaring?.lines ?? []"
-        :key="line.lineNo"
-        :label="
-          t('planning.loading.declareLine', {
-            no: line.lineNo,
-            product: line.productName || line.productNo,
-            quantity: formatNumber(line.quantity),
-            unit: line.unit
-          })
-        "
-        required
-      >
-        <FormInput v-model="quantities[line.lineNo]" type="number" :min="0" />
-      </BaseFormField>
-    </div>
-  </ConfirmDialog>
   <PlanningReasonDialog
     :open="rejecting !== null"
     :title="t('planning.loading.nonconform')"
@@ -417,5 +402,12 @@ onMounted(() => void store.fetchAll())
     destructive
     @confirm="onRefuseReturn"
     @cancel="refusingReturn = null"
+  />
+  <PickupConfirmDialog
+    :note="confirming"
+    :loading="confirmBusy"
+    :error="confirmError"
+    @confirm="onConfirmPickup"
+    @cancel="confirming = null"
   />
 </template>

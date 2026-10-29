@@ -1,5 +1,6 @@
 import type {
   CustomerNature,
+  DeliverySlot,
   NotificationChannel
 } from '@/modules/planning/customers/types/customer.types'
 import type { CollectionDefinition, MockRow } from '../../db/collection'
@@ -16,6 +17,8 @@ export interface CustomerRow extends MockRow {
   phone: string
   email: string
   notificationChannel: NotificationChannel
+  confirmationRequired: boolean
+  preferredSlot: DeliverySlot
   active: boolean
 }
 
@@ -31,7 +34,9 @@ const SEED: Omit<CustomerRow, keyof typeof seedAudit>[] = [
     contactName: 'Service réception',
     phone: '020 22 123 45',
     email: 'reception@jumboscore-tnj.mg',
-    notificationChannel: 'sms_email',
+    notificationChannel: 'sms',
+    confirmationRequired: true,
+    preferredSlot: 'morning',
     active: true
   },
   {
@@ -46,6 +51,8 @@ const SEED: Omit<CustomerRow, keyof typeof seedAudit>[] = [
     phone: '020 44 567 89',
     email: 'reception@leaderprice-antsirabe.mg',
     notificationChannel: 'email',
+    confirmationRequired: true,
+    preferredSlot: 'any',
     active: true
   },
   {
@@ -60,6 +67,8 @@ const SEED: Omit<CustomerRow, keyof typeof seedAudit>[] = [
     phone: '020 62 345 67',
     email: '',
     notificationChannel: 'sms',
+    confirmationRequired: true,
+    preferredSlot: 'afternoon',
     active: true
   },
   {
@@ -73,7 +82,9 @@ const SEED: Omit<CustomerRow, keyof typeof seedAudit>[] = [
     contactName: 'Lova Rabemananjara',
     phone: '034 11 222 33',
     email: 'commercial@ucodis.mg',
-    notificationChannel: 'email',
+    notificationChannel: 'whatsapp',
+    confirmationRequired: true,
+    preferredSlot: 'any',
     active: true
   },
   {
@@ -88,6 +99,8 @@ const SEED: Omit<CustomerRow, keyof typeof seedAudit>[] = [
     phone: '020 22 234 56',
     email: '',
     notificationChannel: 'sms',
+    confirmationRequired: false,
+    preferredSlot: 'morning',
     active: true
   },
   {
@@ -101,7 +114,9 @@ const SEED: Omit<CustomerRow, keyof typeof seedAudit>[] = [
     contactName: 'Service réception',
     phone: '020 44 678 90',
     email: '',
-    notificationChannel: 'sms',
+    notificationChannel: 'call',
+    confirmationRequired: true,
+    preferredSlot: 'any',
     active: true
   },
   {
@@ -115,7 +130,9 @@ const SEED: Omit<CustomerRow, keyof typeof seedAudit>[] = [
     contactName: 'Service réception',
     phone: '020 53 321 45',
     email: 'reception@leaderprice-toamasina.mg',
-    notificationChannel: 'sms_email',
+    notificationChannel: 'sms',
+    confirmationRequired: true,
+    preferredSlot: 'any',
     active: true
   },
   {
@@ -130,6 +147,8 @@ const SEED: Omit<CustomerRow, keyof typeof seedAudit>[] = [
     phone: '034 05 123 45',
     email: '',
     notificationChannel: 'sms',
+    confirmationRequired: true,
+    preferredSlot: 'morning',
     active: true
   },
   {
@@ -143,7 +162,9 @@ const SEED: Omit<CustomerRow, keyof typeof seedAudit>[] = [
     contactName: 'Service réception',
     phone: '020 53 456 78',
     email: '',
-    notificationChannel: 'sms',
+    notificationChannel: 'none',
+    confirmationRequired: false,
+    preferredSlot: 'any',
     active: true
   },
   {
@@ -157,7 +178,9 @@ const SEED: Omit<CustomerRow, keyof typeof seedAudit>[] = [
     contactName: 'Service approvisionnement',
     phone: '034 20 101 00',
     email: 'appro@stations-ht.mg',
-    notificationChannel: 'sms_email',
+    notificationChannel: 'sms',
+    confirmationRequired: true,
+    preferredSlot: 'afternoon',
     active: true
   }
 ]

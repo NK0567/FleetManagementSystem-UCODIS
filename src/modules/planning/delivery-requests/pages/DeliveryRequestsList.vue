@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { Upload, Truck } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -10,6 +10,7 @@ import { useListPage } from '@/composables/useListPage'
 import { usePermissions } from '@/composables/usePermissions'
 import { getListCellDisplay } from '@/utils/listCellDisplay'
 import { deliveryRequestApi } from '../api/deliveryRequestApi'
+import { deliveryRequestService } from '../services/deliveryRequestService'
 import { useDeliveryRequestStore } from '../stores/deliveryRequestStore'
 import type {
   DeliveryRequestApi,
@@ -23,6 +24,32 @@ const creatingOrder = ref(false)
 const { canInsert: canCreateOrder } = usePermissions('TRANSPORTORDER')
 const store = useDeliveryRequestStore()
 const { formatDateTime, formatDate, optionLabel, formatDecimal } = useListCellFormatters()
+
+/* Counters of the orders the user sees (TRS01-US03): an orderer sees his own only. */
+const all = ref<DeliveryRequestApi[]>([])
+async function loadCounters() {
+  try {
+    all.value = (await deliveryRequestService.getAll({ page: 1, pageSize: 500 })).data.items
+  } catch {
+    all.value = []
+  }
+}
+const counters = computed(() => [
+  { key: 'pending', value: all.value.filter((row) => row.status === 'pending').length },
+  {
+    key: 'planned',
+    value: all.value.filter((row) => row.status === 'planned' && !delivered(row)).length
+  },
+  { key: 'rejected', value: all.value.filter((row) => row.status === 'rejected').length },
+  { key: 'delivered', value: all.value.filter(delivered).length }
+])
+function delivered(row: DeliveryRequestApi) {
+  return (
+    row.followUp === 'delivered' || row.followUp === 'confirmed' || row.followUp === 'contested'
+  )
+}
+onMounted(loadCounters)
+watch(() => store.items, loadCounters)
 
 function onOrderCreated(no: string) {
   creatingOrder.value = false
@@ -75,7 +102,13 @@ const tableColumns = computed<TableColumn[]>(() => [
     label: t('planning.deliveryRequests.col.quantity'),
     minW: '110px',
     align: 'right',
-    formatter: formatDecimal
+    // Quantities in different units do not add up: the line count is shown instead.
+    formatter: (value, item) => {
+      const row = item as unknown as DeliveryRequestApi
+      return row.lineCount > 1 && !row.unit
+        ? t('planning.deliveryRequests.lines.count', row.lineCount)
+        : formatDecimal(value, item)
+    }
   },
   {
     sortKey: 'weightKg',
@@ -91,6 +124,19 @@ const tableColumns = computed<TableColumn[]>(() => [
     minW: '130px',
     formatter: optionLabel('deliveryRequestStatus')
   },
+  {
+    sortKey: 'followUp',
+    label: t('planning.deliveryRequests.col.followUp'),
+    minW: '220px',
+    formatter: (value, item) => {
+      const row = item as DeliveryRequestApi
+      if (!value) return ''
+      const state = t(`planning.deliveryRequests.followUp.${String(value)}`)
+      return value === 'planned'
+        ? `${state} · ${row.transportOrderNo} · ${formatDate(row.plannedOn, row)}${row.vehiclePlate ? ` · ${row.vehiclePlate}` : ''}`
+        : state
+    }
+  },
   { sortKey: 'ordererName', label: t('planning.deliveryRequests.col.ordererName'), minW: '200px' },
   {
     sortKey: 'deliveryPointName',
@@ -103,7 +149,13 @@ const tableColumns = computed<TableColumn[]>(() => [
     minW: '200px',
     defaultHidden: true
   },
-  { sortKey: 'productName', label: t('planning.deliveryRequests.col.productName'), minW: '160px' },
+  { sortKey: 'productName', label: t('planning.deliveryRequests.col.productName'), minW: '200px' },
+  {
+    sortKey: 'lineCount',
+    label: t('planning.deliveryRequests.col.lineCount'),
+    minW: '80px',
+    align: 'right'
+  },
   { sortKey: 'unit', label: t('planning.deliveryRequests.col.unit'), minW: '90px' },
   {
     sortKey: 'modifiedAt',
@@ -266,6 +318,19 @@ const {
       </ListPageToolbar>
 
       <FormAlerts class="mx-4" :error="exportError" @clear:error="exportError = null" />
+
+      <div class="mx-4 mb-2 flex flex-wrap gap-2">
+        <span
+          v-for="counter in counters"
+          :key="counter.key"
+          class="inline-flex items-center gap-2 rounded border border-border bg-card px-3 py-1.5 text-sm"
+        >
+          <span class="text-muted-foreground">{{
+            t(`planning.deliveryRequests.counter.${counter.key}`)
+          }}</span>
+          <span class="font-semibold tabular-nums text-card-foreground">{{ counter.value }}</span>
+        </span>
+      </div>
 
       <ListPageLayout
         :filter-panel-open="showFilterPanel"

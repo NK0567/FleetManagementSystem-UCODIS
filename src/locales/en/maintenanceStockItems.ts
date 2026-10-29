@@ -42,5 +42,10 @@ export default {
   'maintenance.stockItems.adjustHint':
     'The counted stock differs from the movements? Enter the gap ({quantity} in stock), positive or negative, and why.',
   'maintenance.stockItems.form.delta': 'Gap (parts)',
-  'maintenance.stockItems.form.reason': 'Reason'
+  'maintenance.stockItems.form.reason': 'Reason',
+  'maintenance.stockItems.movements.col.at': 'Date',
+  'maintenance.stockItems.movements.col.kind': 'Movement',
+  'maintenance.stockItems.movements.col.delta': 'Quantity',
+  'maintenance.stockItems.movements.col.reason': 'Reason',
+  'maintenance.stockItems.movements.col.by': 'By'
 }

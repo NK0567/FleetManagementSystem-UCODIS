@@ -144,5 +144,10 @@ export default {
   'common.import.run': 'Importer | Importer une ligne | Importer {n} lignes',
   'common.import.rejected': 'Aucune ligne refusée. | Une ligne refusée : | {n} lignes refusées :',
   'common.import.line': 'Ligne {line}',
-  'common.import.error': "L'import n'a pas pu être effectué."
+  'common.import.error': "L'import n'a pas pu être effectué.",
+  'common.subList.search': 'Rechercher dans la liste',
+  'common.subList.all': 'tous',
+  'common.subList.clear': 'Effacer',
+  'common.subList.count': '{shown} sur {total}',
+  'common.subList.noMatch': 'Aucune ligne ne correspond au filtre.'
 }

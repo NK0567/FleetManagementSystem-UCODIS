@@ -55,5 +55,14 @@ export default {
   'fleet.providers.contracts.issue.subjectRequired': "Indiquez l'objet du contrat.",
   'fleet.providers.contracts.issue.startRequired': 'Indiquez la date de début.',
   'fleet.providers.contracts.issue.endBeforeStart': 'La fin précède le début.',
-  'fleet.providers.contracts.issue.negativeAmount': 'Le montant ne peut pas être négatif.'
+  'fleet.providers.contracts.issue.negativeAmount': 'Le montant ne peut pas être négatif.',
+  'fleet.providers.carrierVehicles.title': 'Véhicules du transporteur',
+  'fleet.providers.carrierVehicles.hint':
+    'Les moyens de transport rattachés à ce transporteur : à la planification, choisir ce transporteur limite la liste des véhicules à ceux-ci.',
+  'fleet.providers.carrierVehicles.count': 'Aucun véhicule | Un véhicule | {n} véhicules',
+  'fleet.providers.carrierVehicles.empty': 'Aucun véhicule rattaché.',
+  'fleet.providers.carrierVehicles.plate': 'Immatriculation',
+  'fleet.providers.carrierVehicles.description': 'Description (type, capacité)',
+  'fleet.providers.carrierVehicles.add': 'Ajouter un véhicule',
+  'fleet.providers.carrierVehicles.remove': 'Retirer le véhicule'
 }

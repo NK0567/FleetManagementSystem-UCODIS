@@ -1,10 +1,19 @@
-import { checkDeliveryRequest, newDeliveryRequest, nextDeliveryRequestNo } from './deliveryRequests'
+import {
+  checkDeliveryRequest,
+  entryFromLine,
+  newDeliveryRequest,
+  nextDeliveryRequestNo
+} from './deliveryRequests'
 import {
   confirmationState,
   linesConfirmed,
   lineOutOfTour,
   type ConfirmationState
 } from '@/modules/planning/customer-confirmations/domain/confirmation'
+import type {
+  DeliverySlot,
+  NotificationChannel
+} from '@/modules/planning/customers/types/customer.types'
 import { transportOrderStatus } from '@/modules/planning/transport-orders/domain/transportOrder'
 import { nowIsoDateTime } from '@/utils/date'
 import type { MockDatabase } from '../../db/database'
@@ -37,6 +46,14 @@ export interface ConfirmationLineApi {
   availableOn: string | null
   trackingToken: string | null
   trackingExpiresOn: string | null
+  /** Planned departure of the order: the queue is worked from the earliest. */
+  plannedDeparture: string | null
+  notificationChannel: NotificationChannel
+  preferredSlot: DeliverySlot
+  agent: string | null
+  takenAt: string | null
+  /** The recipient answered himself through the link of his SMS, WhatsApp or e-mail. */
+  byLink: boolean
 }
 
 function orderStatus(db: MockDatabase, order: TransportOrderRow) {
@@ -60,7 +77,9 @@ function assertOpen(db: MockDatabase, order: TransportOrderRow): void {
 export function confirmationsApi(db: MockDatabase): ConfirmationLineApi[] {
   const points = new Map(db.deliveryPoints.all().map((point) => [point.no, point]))
   const products = new Map(db.products.all().map((product) => [product.no, product]))
+  const recipients = new Map(db.customers.all().map((customer) => [customer.no, customer]))
   const customers = new Map(db.customers.all().map((customer) => [customer.no, customer.name]))
+  const requests = new Map(db.deliveryRequests.all().map((request) => [request.no, request]))
   const rows: ConfirmationLineApi[] = []
   for (const order of db.transportOrders.all()) {
     const status = orderStatus(db, order)
@@ -68,6 +87,9 @@ export function confirmationsApi(db: MockDatabase): ConfirmationLineApi[] {
     for (const line of order.lines) {
       const point = points.get(line.deliveryPointNo)
       const product = products.get(line.productNo)
+      // The order's preferences come first, then those of the recipient's record.
+      const source =
+        requests.get(line.deliveryRequestNo ?? '') ?? recipients.get(point?.customerNo ?? '')
       rows.push({
         orderNo: order.no,
         lineNo: line.lineNo,
@@ -81,11 +103,31 @@ export function confirmationsApi(db: MockDatabase): ConfirmationLineApi[] {
         plannerProposedOn: line.plannerProposedOn,
         availableOn: line.availableOn,
         trackingToken: line.trackingToken,
-        trackingExpiresOn: line.trackingExpiresOn
+        trackingExpiresOn: line.trackingExpiresOn,
+        plannedDeparture: order.plannedDeparture,
+        notificationChannel: source?.notificationChannel ?? 'sms',
+        preferredSlot: source?.preferredSlot ?? 'any',
+        agent: line.confirmationAgent ?? null,
+        takenAt: line.confirmationTakenAt ?? null,
+        byLink: line.answerOrigin === 'link'
       })
     }
   }
-  return rows
+  // Earliest departure first; an order with no departure yet comes last.
+  return rows.sort(
+    (a, b) =>
+      (a.plannedDeparture ?? '9999').localeCompare(b.plannedDeparture ?? '9999') ||
+      a.orderNo.localeCompare(b.orderNo) ||
+      a.lineNo - b.lineNo
+  )
+}
+
+/** A line taken by another agent is left to that agent. */
+function assertFree(line: TransportOrderLineRow, request: MockRequest): void {
+  const agent = line.confirmationAgent ?? null
+  if (agent && agent !== sessionUser(request).code) {
+    throw conflict(PLANNING_MESSAGES.confirmationTaken, { agent })
+  }
 }
 
 function lineOf(order: TransportOrderRow, lineNo: number): TransportOrderLineRow {
@@ -135,6 +177,7 @@ export function registerConfirmationsHandlers(router: MockRouter, db: MockDataba
         assertOpen(db, order)
         const line = lineOf(order, Number(routeParam(request, 'lineNo')))
         if (line.replannedAt) throw conflict(PLANNING_MESSAGES.confirmationAlreadyReplanned)
+        assertFree(line, request)
         apply(order, line, request)
         return ok(
           confirmationsApi(db).find(
@@ -144,12 +187,30 @@ export function registerConfirmationsHandlers(router: MockRouter, db: MockDataba
       }
     )
 
+  const take = (order: TransportOrderRow, line: TransportOrderLineRow, request: MockRequest) =>
+    saveLine(
+      db,
+      order,
+      {
+        ...line,
+        confirmationAgent: sessionUser(request).code,
+        confirmationTakenAt: nowIsoDateTime()
+      },
+      request
+    )
+
+  act('take', take)
+  act('release', (order, line, request) =>
+    saveLine(db, order, { ...line, confirmationAgent: null, confirmationTakenAt: null }, request)
+  )
+
   act('confirm', (order, line, request) => {
     if (lineOutOfTour(line)) throw conflict(PLANNING_MESSAGES.confirmationOutOfTour)
     const next = {
       ...line,
       confirmedAt: nowIsoDateTime(),
       confirmedBy: sessionUser(request).code,
+      answerOrigin: 'agent' as const,
       unavailableAt: null,
       unavailabilityReasonNo: null,
       unavailabilityComment: ''
@@ -167,6 +228,7 @@ export function registerConfirmationsHandlers(router: MockRouter, db: MockDataba
       unavailabilityReasonNo: reason.reasonNo,
       unavailabilityComment: reason.comment,
       availableOn,
+      answerOrigin: 'agent' as const,
       confirmedAt: null,
       confirmedBy: null
     }
@@ -196,19 +258,23 @@ export function registerConfirmationsHandlers(router: MockRouter, db: MockDataba
       source?.ordererNo ??
       (db.customers.findOrFail(point.customerNo).isOrderer ? point.customerNo : '')
     if (!ordererNo) throw unprocessable(PLANNING_MESSAGES.confirmationNeedsOrderer)
-    const entry = {
-      ordererNo,
-      deliveryPointNo: line.deliveryPointNo,
-      desiredDate: date,
-      validUntil: null,
-      externalReference: '',
-      freightPayer: source?.freightPayer ?? ('orderer' as const),
-      comment: '',
-      productNo: line.productNo,
-      quantity: line.quantity,
-      weightKg: line.weightKg,
-      volumeM3: source?.volumeM3 ?? null
-    }
+    const entry = entryFromLine(
+      db,
+      {
+        ordererNo,
+        deliveryPointNo: line.deliveryPointNo,
+        desiredDate: date,
+        validUntil: null,
+        externalReference: '',
+        freightPayer: source?.freightPayer ?? ('orderer' as const),
+        comment: '',
+        productNo: line.productNo,
+        quantity: line.quantity,
+        weightKg: line.weightKg,
+        volumeM3: source?.volumeM3 ?? null
+      },
+      source
+    )
     checkDeliveryRequest(db, entry)
     const no = nextDeliveryRequestNo(db)
     db.deliveryRequests.insert(

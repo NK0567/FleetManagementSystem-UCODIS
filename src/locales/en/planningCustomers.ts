@@ -44,11 +44,18 @@ export default {
   'planning.customers.form.contactName': 'Contact',
   'planning.customers.form.phone': 'Phone',
   'planning.customers.form.email': 'E-mail',
-  'planning.customers.form.notificationChannel': 'Notification channel',
+  'planning.customers.form.notificationChannel': 'Notification mode',
   'planning.customers.form.notificationChannelHint':
-    'The channel needs the matching contact: a phone for SMS, an e-mail address for e-mail.',
+    'Among the channels made available. SMS, call and WhatsApp need a phone, e-mail an address.',
   'planning.customers.form.active': 'Active',
   'planning.customers.issue.noRole': 'Tick orderer, recipient, or both.',
-  'planning.customers.issue.channelNeedsPhone': 'SMS needs a phone number.',
-  'planning.customers.issue.channelNeedsEmail': 'E-mail needs an e-mail address.'
+  'planning.customers.issue.channelNeedsPhone': 'SMS, call and WhatsApp need a phone number.',
+  'planning.customers.issue.channelNeedsEmail': 'E-mail needs an e-mail address.',
+  'planning.customers.form.preferences': "Recipient's preferences",
+  'planning.customers.form.preferencesHint':
+    'They are copied on each new order of this recipient, where they stay editable until the order is planned.',
+  'planning.customers.form.preferredSlot': 'Preferred delivery slot',
+  'planning.customers.form.confirmationRequired': 'Availability confirmation required',
+  'planning.customers.form.confirmationRequiredHint':
+    'If not, the line goes straight to confirmed when the order is planned.'
 }

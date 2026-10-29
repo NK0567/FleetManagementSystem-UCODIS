@@ -89,7 +89,6 @@ import planningLoading from './planningLoading'
 import planningQuality from './planningQuality'
 import planningBilling from './planningBilling'
 import planningCarrierInvoices from './planningCarrierInvoices'
-import planningFuelTours from './planningFuelTours'
 import planningReports from './planningReports'
 import selfService from './selfService'
 export default {
@@ -183,7 +182,6 @@ export default {
   ...planningQuality,
   ...planningBilling,
   ...planningCarrierInvoices,
-  ...planningFuelTours,
   ...planningReports,
   ...selfService
 }

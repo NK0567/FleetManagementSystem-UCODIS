@@ -6,7 +6,8 @@ import type {
   ConfirmationAction,
   ConfirmationLineApi,
   ReceptionAction,
-  ReceptionLineApi
+  ReceptionLineApi,
+  TrackingApi
 } from '../types/confirmation.types'
 
 const orders = '/planning/transport-orders'
@@ -17,6 +18,23 @@ export const confirmationApi = {
   list: () => httpClient.get<SingleResponse<ConfirmationLineApi[]>>('/planning/confirmations'),
   act: (orderNo: string, lineNo: number, action: ConfirmationAction, body: ActionBody = {}) =>
     httpClient.post<SingleResponse<ConfirmationLineApi>>(linePath(orderNo, lineNo, action), body),
+  tracking: (token: string) =>
+    httpClient.get<SingleResponse<TrackingApi>>(`/public/tracking/${encodeURIComponent(token)}`),
+  trackingAnswer: (
+    token: string,
+    answer:
+      | 'confirm'
+      | 'unavailable'
+      | 'accept-proposal'
+      | 'receive-confirm'
+      | 'receive-contest'
+      | 'refuse',
+    body: ActionBody = {}
+  ) =>
+    httpClient.post<SingleResponse<TrackingApi>>(
+      `/public/tracking/${encodeURIComponent(token)}/${answer}`,
+      body
+    ),
   receptions: () => httpClient.get<SingleResponse<ReceptionLineApi[]>>('/planning/receptions'),
   receive: (orderNo: string, lineNo: number, action: ReceptionAction, body: ActionBody) =>
     httpClient.post<SingleResponse<unknown>>(linePath(orderNo, lineNo, action), body)

@@ -33,12 +33,27 @@ describe('recipient confirmation', () => {
     const confirmed = await send('post', '/planning/transport-orders/TR-2026-0002/lines/1/confirm')
     expect(confirmed.data.data).toMatchObject({ state: 'confirmed' })
     const order = (
-      await call(server, 'get', '/planning/transport-orders/TR-2026-0002', { as: 'FLT001' })
+      await call(server, 'get', '/planning/transport-orders/TR-2026-0002', { as: 'PLN001' })
     ).data.data as TransportOrderApi
     expect(order.status).toBe('confirmed')
     expect(
       (await send('post', '/planning/transport-orders/TR-2026-0003/lines/1/confirm')).status
     ).toBe(409)
+  })
+
+  it('serves the queue by departure and keeps a taken line for its agent', async () => {
+    const lines = (await send('get', '/planning/confirmations')).data.data as ConfirmationLineApi[]
+    const departures = lines.map((line) => line.plannedDeparture ?? '9999')
+    expect(departures).toEqual([...departures].sort())
+    expect(lines[0]).toHaveProperty('notificationChannel')
+    const free = lines.find((line) => line.state === 'pending' && !line.agent)!
+    const path = `/planning/transport-orders/${free.orderNo}/lines/${free.lineNo}`
+    expect((await send('post', `${path}/take`)).data.data).toMatchObject({ agent: 'CLI001' })
+    // Another agent can neither take nor confirm it until it is released.
+    expect((await send('post', `${path}/take`, {}, 'ADM001')).status).toBe(409)
+    expect((await send('post', `${path}/confirm`, {}, 'ADM001')).status).toBe(409)
+    await send('post', `${path}/release`)
+    expect((await send('post', `${path}/take`, {}, 'ADM001')).status).toBe(200)
   })
 
   it('sends an accepted date back to the requests, without a new order', async () => {
@@ -65,7 +80,7 @@ describe('recipient confirmation', () => {
       .find((row) => row.desiredDate === '2026-09-12' && row.parentNo === 'DL-2026-0009')
     expect(created?.transportOrderNo).toBeNull()
     const request = (
-      await call(server, 'get', `/planning/delivery-requests/${created?.no}`, { as: 'FLT001' })
+      await call(server, 'get', `/planning/delivery-requests/${created?.no}`, { as: 'PLN001' })
     ).data.data as DeliveryRequestApi
     expect(request.status).toBe('pending')
     expect(
@@ -93,7 +108,7 @@ describe('recipient confirmation', () => {
 
     const order = (
       await call(server, 'post', '/planning/transport-orders', {
-        as: 'FLT001',
+        as: 'PLN001',
         body: {
           routeTemplateNo: 'TNR-ATS',
           plannedDeparture: '2026-09-12T06:00',
@@ -102,8 +117,8 @@ describe('recipient confirmation', () => {
       })
     ).data.data as TransportOrderApi
     const planned = await call(server, 'post', `/planning/transport-orders/${order.no}/plan`, {
-      as: 'FLT001',
-      body: { means: 'carrier', carrierNo: 'PRS-016' }
+      as: 'PLN001',
+      body: { means: 'carrier', carrierNo: 'PRS-016', carrierVehiclePlate: '2345 TBA' }
     })
     const line = (planned.data.data as { lines: { trackingToken: string | null }[] }).lines[0]
     expect(line?.trackingToken).toHaveLength(32)

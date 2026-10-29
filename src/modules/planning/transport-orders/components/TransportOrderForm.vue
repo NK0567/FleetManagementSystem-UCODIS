@@ -103,10 +103,7 @@ defineExpose(expose)
         </BaseFormField>
       </div>
       <div class="space-y-3 min-w-0">
-        <BaseFormField
-          field="comment"
-          :label="t('planning.transportOrders.form.comment')"
-        >
+        <BaseFormField field="comment" :label="t('planning.transportOrders.form.comment')">
           <FormTextarea v-model="draft.comment" :disabled="disabled" :maxlength="500" />
         </BaseFormField>
       </div>

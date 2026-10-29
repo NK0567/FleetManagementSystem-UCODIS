@@ -26,9 +26,9 @@ export default {
 
   'planning.settings.section.requests': 'Requests and orders',
   'planning.settings.section.requests.hint':
-    'The reference the customer gives to its order, and what happens when a request or an order passes its date without being carried out.',
-  'planning.settings.field.requests.externalReferenceLabel': 'Customer reference label',
-  'planning.settings.field.requests.externalReferenceRequired': 'Customer reference required',
+    'The reference the orderer gives to its order, and what happens when an order or a transport order passes its date without being carried out.',
+  'planning.settings.field.requests.externalReferenceLabel': "Orderer's reference label",
+  'planning.settings.field.requests.externalReferenceRequired': "Orderer's reference required",
   'planning.settings.field.requests.expiredDateMode': 'Date passed',
 
   'planning.settings.section.quantities': 'Quantity control',
@@ -58,5 +58,10 @@ export default {
   'planning.settings.issue.outOfRange': 'Enter a value between {min} and {max} {unit}.',
   'planning.settings.issue.invalidTime': 'Enter a time as HH:MM.',
   'planning.settings.issue.tooLong': 'This setting is limited to {max} characters.',
-  'planning.settings.issue.invalidChoice': 'Pick one of the offered values.'
+  'planning.settings.issue.invalidChoice': 'Pick one of the offered values.',
+  'planning.settings.section.controls': 'Strictness of the checks',
+  'planning.settings.section.controls.hint':
+    'By default, an excess of capacity or an overlap in the schedule is flagged and the planner decides. A strict check blocks the planning.',
+  'planning.settings.field.controls.strictCapacity': 'Strict capacity check',
+  'planning.settings.field.controls.strictCalendar': 'Strict calendar'
 }

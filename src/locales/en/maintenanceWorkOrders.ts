@@ -111,5 +111,16 @@ export default {
   'maintenance.workOrders.import.hint':
     'CSV file (; or , separated) with a header line. Each line becomes a closed order, created with the same checks as an entry; its cost counts in the costs, not in the reliability indicators.',
   'maintenance.workOrders.import.created':
-    'No order created. | One order created. | {n} orders created.'
+    'No order created. | One order created. | {n} orders created.',
+  'maintenance.workOrders.progress.col.date': 'Date',
+  'maintenance.workOrders.progress.col.technician': 'Technician',
+  'maintenance.workOrders.progress.col.hours': 'Hours',
+  'maintenance.workOrders.progress.col.part': 'Part',
+  'maintenance.workOrders.progress.col.quantity': 'Quantity',
+  'maintenance.workOrders.progress.col.amount': 'Amount',
+  'maintenance.workOrders.progress.col.purchase': 'Purchase request',
+  'maintenance.workOrders.progress.col.at': 'Date',
+  'maintenance.workOrders.progress.col.event': 'Event',
+  'maintenance.workOrders.progress.col.by': 'By',
+  'maintenance.workOrders.progress.col.comment': 'Comment'
 }

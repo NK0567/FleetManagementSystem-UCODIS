@@ -12,22 +12,20 @@ export default {
   'planning.quantityTolerances.confirmDelete': 'Supprimer la tolérance',
   'planning.quantityTolerances.confirmDeleteMsg':
     'La tolérance « {name} » sera définitivement supprimée.',
-
-  'planning.quantityTolerances.search.all': 'N°, client ou produit',
-
+  'planning.quantityTolerances.search.all': 'N°, destinataire ou produit',
   'planning.quantityTolerances.col.no': 'N°',
-  'planning.quantityTolerances.col.customerNo': 'Client',
+  'planning.quantityTolerances.col.customerNo': 'Destinataire',
   'planning.quantityTolerances.col.productNo': 'Produit',
   'planning.quantityTolerances.col.value': 'Écart autorisé',
   'planning.quantityTolerances.col.unit': 'Exprimé en',
   'planning.quantityTolerances.col.scopeLabel': 'Portée',
-  'planning.quantityTolerances.col.customerName': 'Client',
+  'planning.quantityTolerances.col.customerName': 'Destinataire',
   'planning.quantityTolerances.col.productName': 'Produit',
 
   'planning.quantityTolerances.form.general': 'Général',
   'planning.quantityTolerances.form.no': 'N°',
-  'planning.quantityTolerances.form.customerNo': 'Client',
-  'planning.quantityTolerances.form.customerNoHint': 'Vide : tous les clients.',
+  'planning.quantityTolerances.form.customerNo': 'Destinataire',
+  'planning.quantityTolerances.form.customerNoHint': 'Vide : tous les destinataires.',
   'planning.quantityTolerances.form.productNo': 'Produit',
   'planning.quantityTolerances.form.productNoHint':
     'Vide : tous les produits. Une tolérance en quantité vise un produit.',

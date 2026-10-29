@@ -19,6 +19,12 @@ export interface ProviderContract {
   amount: number | null
 }
 
+/** A vehicle of an external carrier: what the planner picks once the carrier is chosen. */
+export interface CarrierVehicle {
+  plate: string
+  description: string
+}
+
 export interface ProviderApi {
   no: string
   name: string
@@ -30,6 +36,8 @@ export interface ProviderApi {
   authorized: boolean
   notAuthorizedReason: string
   contracts: ProviderContract[]
+  /** Only for a carrier: the means of transport attached to it. */
+  carrierVehicles: CarrierVehicle[]
   activeContractCount: number
   createdAt: string
   createdBy: string

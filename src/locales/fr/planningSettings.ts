@@ -1,7 +1,7 @@
 export default {
   'planning.settings.title': 'Réglages de la planification',
   'planning.settings.subtitle':
-    'Horaires, confirmation des destinataires, marchandises, demandes, contrôle des quantités, facturation et clôture.',
+    'Horaires, confirmation des destinataires, marchandises, commandes, contrôle des quantités, facturation et clôture.',
   'planning.settings.lastModified': 'Modifié le {date} par {user}',
   'planning.settings.loadError': "Les réglages de la planification n'ont pas pu être chargés.",
   'planning.settings.saveError': "Les réglages n'ont pas pu être enregistrés.",
@@ -24,22 +24,24 @@ export default {
   'planning.settings.field.goods.countingUnit': 'Unité de comptage',
   'planning.settings.field.goods.prefillQuantities': 'Préremplir les quantités livrées',
 
-  'planning.settings.section.requests': 'Demandes et ordres',
+  'planning.settings.section.requests': 'Commandes et ordres',
   'planning.settings.section.requests.hint':
-    'La référence que le client donne à sa commande, et ce qui se passe quand une demande ou un ordre dépasse sa date sans être exécuté.',
-  'planning.settings.field.requests.externalReferenceLabel': 'Libellé de la référence client',
-  'planning.settings.field.requests.externalReferenceRequired': 'Référence client obligatoire',
+    "La référence que l'ordonnateur donne à sa commande, et ce qui se passe quand une commande ou un ordre dépasse sa date sans être exécuté.",
+  'planning.settings.field.requests.externalReferenceLabel':
+    "Libellé de la référence de l'ordonnateur",
+  'planning.settings.field.requests.externalReferenceRequired':
+    "Référence de l'ordonnateur obligatoire",
   'planning.settings.field.requests.expiredDateMode': 'Date dépassée',
 
   'planning.settings.section.quantities': 'Contrôle des quantités',
   'planning.settings.section.quantities.hint':
-    'Ce qui se passe quand la quantité reçue sort de la tolérance. Les tolérances elles-mêmes se règlent par client et par produit.',
+    'Ce qui se passe quand la quantité reçue sort de la tolérance. Les tolérances elles-mêmes se règlent par destinataire et par produit.',
   'planning.settings.field.quantities.overToleranceMode': 'Hors tolérance',
   'planning.settings.field.quantities.volume15Method': 'Volume à 15 °C',
 
   'planning.settings.section.billing': 'Facturation',
   'planning.settings.section.billing.hint':
-    "Qui paie le fret quand la demande ne le dit pas, et l'écart accepté entre la facture d'un transporteur et le montant convenu.",
+    "Qui paie le fret quand la commande ne le dit pas, et l'écart accepté entre la facture d'un transporteur et le montant convenu.",
   'planning.settings.field.billing.defaultFreightPayer': 'Fret à la charge de',
   'planning.settings.field.billing.carrierInvoiceToleranceAmount':
     'Écart toléré sur une facture transporteur',
@@ -58,5 +60,10 @@ export default {
   'planning.settings.issue.outOfRange': 'Indiquez une valeur entre {min} et {max} {unit}.',
   'planning.settings.issue.invalidTime': 'Indiquez une heure au format HH:MM.',
   'planning.settings.issue.tooLong': 'Ce réglage est limité à {max} caractères.',
-  'planning.settings.issue.invalidChoice': 'Choisissez une des valeurs proposées.'
+  'planning.settings.issue.invalidChoice': 'Choisissez une des valeurs proposées.',
+  'planning.settings.section.controls': 'Rigueur des contrôles',
+  'planning.settings.section.controls.hint':
+    'Par défaut, un dépassement de capacité ou un chevauchement de planning est signalé et le planificateur décide. Un contrôle strict bloque la planification.',
+  'planning.settings.field.controls.strictCapacity': 'Contrôle de capacité strict',
+  'planning.settings.field.controls.strictCalendar': 'Calendrier strict'
 }

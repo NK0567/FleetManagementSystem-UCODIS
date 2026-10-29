@@ -24,7 +24,7 @@ export default {
   'planning.reasons.form.name': 'Libellé',
   'planning.reasons.form.kind': 'Liste',
   'planning.reasons.form.kindHint':
-    'Le moment où le motif est proposé : annulation, rejet de demande, refus à la livraison, etc.',
+    'Le moment où le motif est proposé : annulation, rejet de commande, refus à la livraison, etc.',
   'planning.reasons.form.active': 'Actif',
   'planning.reasons.dialog.reason': 'Motif',
   'planning.reasons.dialog.comment': 'Commentaire'

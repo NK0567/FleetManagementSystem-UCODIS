@@ -1,6 +1,7 @@
 import { customerIssues } from '@/modules/planning/customers/domain/customer'
 import {
   CUSTOMER_NATURES,
+  DELIVERY_SLOTS,
   NOTIFICATION_CHANNELS,
   type CustomerApi
 } from '@/modules/planning/customers/types/customer.types'
@@ -65,6 +66,8 @@ export function registerCustomersHandlers(router: MockRouter, db: MockDatabase):
     },
     notificationChannel: (input) =>
       readEnum(input, 'notificationChannel', NOTIFICATION_CHANNELS, { required: true }) ?? 'sms',
+    confirmationRequired: (input) => readBoolean(input, 'confirmationRequired', true),
+    preferredSlot: (input) => readEnum(input, 'preferredSlot', DELIVERY_SLOTS) ?? 'any',
     active: (input) => readBoolean(input, 'active', true)
   }
 
@@ -74,7 +77,11 @@ export function registerCustomersHandlers(router: MockRouter, db: MockDatabase):
     collection: db.customers,
     list: () => customersApi(db),
     searchColumns: ['no', 'name', 'city', 'contactName'],
-    optionFields: { nature: 'customerNature', notificationChannel: 'notificationChannel' },
+    optionFields: {
+      nature: 'customerNature',
+      notificationChannel: 'notificationChannel',
+      preferredSlot: 'deliverySlot'
+    },
     create: (input) => {
       const customer = readAll(input, readers)
       checkCustomer(db, customer)

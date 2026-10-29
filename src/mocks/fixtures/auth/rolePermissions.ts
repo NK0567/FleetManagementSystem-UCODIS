@@ -107,10 +107,12 @@ const PLANNING_OPERATIONS = [
   'TRANSPORTORDER',
   'CUSTOMERCONFIRMATION',
   'LOADING',
+  'LOADINGPLAN',
+  'GOODSRETURN',
   'DELIVERYQUALITY',
   'CUSTOMERBILLING',
   'CARRIERINVOICE',
-  'FUELTOUR',
+  'PLANNINGCALENDAR',
   'PLANNINGDASHBOARD',
   'TRANSPORTREPORT'
 ]
@@ -172,8 +174,7 @@ export const ROLE_PERMISSIONS: Record<UserProfileCode, Record<string, Grant>> = 
     LEAVEREQUEST: allRecords(['read', 'insert', 'execute', 'export']),
     LEAVEBALANCE: READ_EXPORT,
     ...FLEET_MANAGEMENT,
-    ...MAINTENANCE_MANAGEMENT,
-    ...PLANNING_MANAGEMENT
+    ...MAINTENANCE_MANAGEMENT
   },
   MANAGEMENT: {
     ...grant([...HR_READ_FEATURES, 'HRDASHBOARD', 'LEAVEREQUEST'], READ_EXPORT),
@@ -199,9 +200,59 @@ export const ROLE_PERMISSIONS: Record<UserProfileCode, Record<string, Grant>> = 
     ),
     ...grant(['DOWNTIME', 'PURCHASEREQUEST'], allRecords(['read', 'insert']))
   },
+  /* The transport roles follow the actors of the user stories: the planner composes and plans
+   * the transport orders, the delivery manager runs loading, quality and the reference data, the
+   * billing manager invoices, the agent confirms the recipients, the orderer places orders. */
+  PLANNER: {
+    ...backOffice,
+    ...grant(PLANNING_REFERENCE, READ),
+    ...grant(['PROVIDER', 'DRIVER'], READ),
+    DELIVERYREQUEST: allRecords(['read', 'insert', 'update', 'execute', 'export']),
+    TRANSPORTORDER: FULL,
+    PLANNINGCALENDAR: READ,
+    CUSTOMERCONFIRMATION: READ,
+    LOADING: READ,
+    LOADINGPLAN: READ,
+    GOODSRETURN: READ,
+    PLANNINGDASHBOARD: READ
+  },
+  DELIVERY_MANAGER: {
+    ...backOffice,
+    /* He keeps the recipients, orderers and products (TRS06-US03, US04); the delivery sites,
+     * the compatibilities, the tolerances and the reason lists are the administrator's
+     * settings (TRS07-US02, US04, US06): he reads them. */
+    ...grant(['CUSTOMER', 'PRODUCT'], FULL),
+    ...grant(
+      ['PLANNINGREASON', 'DELIVERYPOINT', 'PRODUCTCOMPATIBILITY', 'QUANTITYTOLERANCE'],
+      READ
+    ),
+    TRANSPORTTARIFF: READ,
+    ...grant(['DRIVER'], READ),
+    PROVIDER: EDIT,
+    DELIVERYREQUEST: READ_EXPORT,
+    TRANSPORTORDER: allRecords(['read', 'execute', 'export']),
+    PLANNINGCALENDAR: READ,
+    CUSTOMERCONFIRMATION: READ,
+    LOADING: FULL,
+    /* He prepares the loading of several vehicles from a depot (TRS01-US20 to US23). */
+    LOADINGPLAN: FULL,
+    GOODSRETURN: READ,
+    DELIVERYQUALITY: FULL,
+    PLANNINGDASHBOARD: READ_EXPORT,
+    TRANSPORTREPORT: READ_EXPORT
+  },
+  BILLING: {
+    ...backOffice,
+    ...grant(PLANNING_REFERENCE, READ),
+    PROVIDER: READ,
+    TRANSPORTORDER: READ_EXPORT,
+    CUSTOMERBILLING: FULL,
+    CARRIERINVOICE: FULL,
+    TRANSPORTREPORT: READ_EXPORT
+  },
   CUSTOMER_SERVICE: {
     ...backOffice,
-    ...grant([...PLANNING_REFERENCE, 'DELIVERYREQUEST'], READ),
+    ...grant([...PLANNING_REFERENCE, 'DELIVERYREQUEST', 'TRANSPORTORDER'], READ),
     CUSTOMERCONFIRMATION: allRecords(['read', 'execute'])
   },
   SALES: {
@@ -212,7 +263,9 @@ export const ROLE_PERMISSIONS: Record<UserProfileCode, Record<string, Grant>> = 
   DEPOT: {
     ...backOffice,
     ...grant(PLANNING_REFERENCE, READ),
-    LOADING: allRecords(['read', 'update', 'execute'])
+    LOADING: allRecords(['read', 'update', 'execute']),
+    /* Returns are checked and received by the warehouse (TRS04-US01). */
+    GOODSRETURN: allRecords(['read', 'execute'])
   },
   DRIVER: {
     MYSPACE: allRecords(['read', 'execute']),

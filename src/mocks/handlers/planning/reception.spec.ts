@@ -10,7 +10,7 @@ beforeEach(() => {
   server = createTestServer()
 })
 
-const post = (url: string, body: Record<string, unknown> = {}, as = 'FLT001') =>
+const post = (url: string, body: Record<string, unknown> = {}, as = 'LIV001') =>
   call(server, 'post', url, { as, body, language: 'en' })
 
 async function readyCarrier() {
@@ -21,6 +21,21 @@ async function readyCarrier() {
   })
   await post('/planning/transport-orders/TR-2026-0004/lines/1/conform', {}, 'DEP001')
   await post('/planning/transport-orders/TR-2026-0004/depart')
+}
+
+/** The driver of the fleet order declares from his space, once arrived at the point. */
+async function driverDeclare(
+  orderNo: string,
+  lineNo: number,
+  body: Record<string, unknown>,
+  as = 'CND001'
+) {
+  await call(server, 'post', `/me/orders/${orderNo}/lines/${lineNo}/arrive`, { as })
+  return call(server, 'post', `/me/orders/${orderNo}/lines/${lineNo}/declare`, {
+    as,
+    body,
+    language: 'en'
+  })
 }
 
 describe('reception', () => {
@@ -74,22 +89,30 @@ describe('reception', () => {
       (await post('/planning/transport-orders/TR-2026-0004/lines/1/handle-contest', {}, 'CLI001'))
         .status
     ).toBe(403)
-    const handled = await post('/planning/transport-orders/TR-2026-0004/lines/1/handle-contest', {
-      note: 'Avoir proposé',
-      reasonNo: 'CST-QUANTITY'
-    })
+    const handled = await post(
+      '/planning/transport-orders/TR-2026-0004/lines/1/handle-contest',
+      {
+        note: 'Avoir proposé',
+        reasonNo: 'CST-QUANTITY'
+      },
+      'PLN001'
+    )
     expect(handled.data.data).toMatchObject({ handled: true })
     expect(
       (
-        await post('/planning/transport-orders/TR-2026-0004/lines/1/handle-contest', {
-          note: 'Encore'
-        })
+        await post(
+          '/planning/transport-orders/TR-2026-0004/lines/1/handle-contest',
+          {
+            note: 'Encore'
+          },
+          'PLN001'
+        )
       ).status
     ).toBe(409)
   })
 
   it('records satisfaction once the recipient has confirmed', async () => {
-    await post('/planning/transport-orders/TR-2026-0003/lines/1/declare', { receivedQuantity: 150 })
+    await driverDeclare('TR-2026-0003', 1, { receivedQuantity: 150 })
     expect(
       (
         await post(
@@ -161,23 +184,31 @@ describe('reception', () => {
   })
 
   it('puts the missing quantity back into the request pool once', async () => {
-    await post('/planning/transport-orders/TR-2026-0003/lines/1/declare', { receivedQuantity: 100 })
+    await driverDeclare('TR-2026-0003', 1, { receivedQuantity: 100 })
     expect((await post('/planning/transport-orders/TR-2026-0003/lines/1/hand-back')).status).toBe(
       409
     )
     expect(
       (
-        await post('/planning/transport-orders/TR-2026-0003/lines/1/remainder', {
-          date: '2026-09-01'
-        })
+        await post(
+          '/planning/transport-orders/TR-2026-0003/lines/1/remainder',
+          {
+            date: '2026-09-01'
+          },
+          'PLN001'
+        )
       ).status
     ).toBe(422)
-    const remainder = await post('/planning/transport-orders/TR-2026-0003/lines/1/remainder', {
-      date: '2026-09-12'
-    })
-    expect(remainder.data.data).toMatchObject({ requestNo: 'DL-2026-0012' })
+    const remainder = await post(
+      '/planning/transport-orders/TR-2026-0003/lines/1/remainder',
+      {
+        date: '2026-09-12'
+      },
+      'PLN001'
+    )
+    expect(remainder.data.data).toMatchObject({ requestNo: 'DL-2026-0022' })
     const created = (
-      await call(server, 'get', '/planning/delivery-requests/DL-2026-0012', { as: 'FLT001' })
+      await call(server, 'get', '/planning/delivery-requests/DL-2026-0022', { as: 'LIV001' })
     ).data.data as DeliveryRequestApi
     expect(created).toMatchObject({
       status: 'pending',
@@ -189,9 +220,13 @@ describe('reception', () => {
     })
     expect(
       (
-        await post('/planning/transport-orders/TR-2026-0003/lines/1/remainder', {
-          date: '2026-09-15'
-        })
+        await post(
+          '/planning/transport-orders/TR-2026-0003/lines/1/remainder',
+          {
+            date: '2026-09-15'
+          },
+          'PLN001'
+        )
       ).status
     ).toBe(409)
   })

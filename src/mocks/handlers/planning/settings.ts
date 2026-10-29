@@ -3,6 +3,7 @@ import {
   PLANNING_SETTING_FIELDS,
   PLANNING_SETTINGS_SECTIONS,
   planningSettingsIssues,
+  DEFAULT_PLANNING_SETTINGS,
   type PlanningSettings
 } from '@/modules/planning/planning-settings/domain/planningSettings'
 import type { PlanningSettingsApi } from '@/modules/planning/planning-settings/types/planningSettings.types'
@@ -16,17 +17,20 @@ import { readSettingField, settingFieldError } from '../../http/settings'
 import { PLANNING_MESSAGES } from './messages'
 
 export function planningSettings(db: MockDatabase): PlanningSettings {
-  return db.planningSettings.findOrFail(PLANNING_SETTINGS_NO)
+  const row = db.planningSettings.findOrFail(PLANNING_SETTINGS_NO)
+  // A record saved before a section existed reads that section's defaults.
+  return { ...structuredClone(DEFAULT_PLANNING_SETTINGS), ...row }
 }
 
 /** One settings record for transport planning, saved one section at a time. */
 export function registerPlanningSettingsHandlers(router: MockRouter, db: MockDatabase): void {
   const toApi = (): PlanningSettingsApi => {
-    const row = db.planningSettings.findOrFail(PLANNING_SETTINGS_NO)
+    const row = planningSettings(db)
     const sections = Object.fromEntries(
       PLANNING_SETTINGS_SECTIONS.map((section) => [section, row[section]])
     ) as unknown as PlanningSettings
-    return { ...sections, modifiedAt: row.modifiedAt, modifiedBy: row.modifiedBy }
+    const stored = db.planningSettings.findOrFail(PLANNING_SETTINGS_NO)
+    return { ...sections, modifiedAt: stored.modifiedAt, modifiedBy: stored.modifiedBy }
   }
 
   router.get('/planning/settings', { feature: 'PLANNINGSETTINGS', action: 'read' }, () =>

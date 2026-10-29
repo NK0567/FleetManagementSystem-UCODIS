@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import type { SubListColumn } from '@/components/shared/RecordSubList.vue'
 import { formatDateTime } from '@/utils/format'
 import type { TransportOrderEventApi } from '../types/transportOrder.types'
 
@@ -8,29 +9,30 @@ const props = defineProps<{ events: TransportOrderEventApi[] }>()
 
 const { t } = useI18n()
 
-const latestFirst = computed(() => [...props.events].reverse())
+const rows = computed(() => props.events.map((event, index) => ({ ...event, index })))
+const columns = computed<SubListColumn[]>(() => [
+  {
+    sortKey: 'at',
+    label: t('planning.transportOrders.history.at'),
+    formatter: (v) => formatDateTime(String(v))
+  },
+  {
+    sortKey: 'kind',
+    label: t('planning.transportOrders.history.kind'),
+    formatter: (v) => t(`planning.transportOrders.history.${String(v)}`),
+    filter: true
+  },
+  { sortKey: 'detail', label: t('planning.transportOrders.history.detail') },
+  { sortKey: 'by', label: t('planning.transportOrders.history.by'), filter: true }
+])
 </script>
 
 <template>
-  <p v-if="!events.length" class="text-sm text-muted-foreground">
-    {{ t('planning.transportOrders.history.empty') }}
-  </p>
-  <ol v-else class="border-l border-border ml-1.5 space-y-3">
-    <li
-      v-for="(event, index) in latestFirst"
-      :key="`${event.at}-${event.kind}-${index}`"
-      class="relative pl-5 text-sm"
-    >
-      <span
-        class="absolute -left-1.5 top-1.5 w-3 h-3 rounded-full bg-primary/20 border-2 border-primary"
-      />
-      <p class="font-medium text-card-foreground">
-        {{ t(`planning.transportOrders.history.${event.kind}`) }}
-        <span v-if="event.detail" class="font-normal text-muted-foreground">
-          · {{ event.detail }}
-        </span>
-      </p>
-      <p class="text-xs text-muted-foreground">{{ formatDateTime(event.at) }} · {{ event.by }}</p>
-    </li>
-  </ol>
+  <RecordSubList
+    :rows="rows"
+    :columns="columns"
+    :row-key="(row: Record<string, unknown>) => `${row.at}-${row.kind}-${row.index}`"
+    :empty-text="t('planning.transportOrders.history.empty')"
+    :initial-sort="{ key: 'at', direction: 'DESC' }"
+  />
 </template>

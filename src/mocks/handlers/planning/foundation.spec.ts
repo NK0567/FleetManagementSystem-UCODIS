@@ -14,8 +14,16 @@ const send = (
   method: 'post' | 'patch' | 'put' | 'delete',
   path: string,
   body = {},
-  as = 'FLT001'
+  as = 'LIV001'
 ) => call(server, method, path, { as, body, language: 'en' })
+
+/** The settings and the tariffs are the administrator's (TRS07). */
+const admin = (
+  method: 'post' | 'patch' | 'put' | 'delete',
+  path: string,
+  body = {},
+  as = 'ADM001'
+) => send(method, path, body, as)
 
 describe('planning settings', () => {
   it('are saved one section at a time by the planners only', async () => {
@@ -26,22 +34,22 @@ describe('planning settings', () => {
       carrierInvoiceToleranceAmount: 0
     })
     const billing = { defaultFreightPayer: 'recipient', carrierInvoiceToleranceAmount: 5_000 }
-    expect((await send('put', '/planning/settings/billing', billing, 'DIR001')).status).toBe(403)
+    expect((await admin('put', '/planning/settings/billing', billing, 'DIR001')).status).toBe(403)
     expect((await call(server, 'get', '/planning/settings', { as: 'COM001' })).status).toBe(403)
-    const saved = await send('put', '/planning/settings/billing', billing)
+    const saved = await admin('put', '/planning/settings/billing', billing)
     expect((saved.data.data as PlanningSettingsApi).billing).toEqual(billing)
-    expect((await send('put', '/planning/settings/fleet', billing)).status).toBe(404)
+    expect((await admin('put', '/planning/settings/fleet', billing)).status).toBe(404)
   })
 
   it('refuse an unknown choice, an empty text and a switch that is not a boolean', async () => {
     const billing = { defaultFreightPayer: 'carrier', carrierInvoiceToleranceAmount: 0 }
-    expect((await send('put', '/planning/settings/billing', billing)).status).toBe(422)
+    expect((await admin('put', '/planning/settings/billing', billing)).status).toBe(422)
     const goods = { countingUnit: '  ', prefillQuantities: true }
-    expect((await send('put', '/planning/settings/goods', goods)).status).toBe(422)
+    expect((await admin('put', '/planning/settings/goods', goods)).status).toBe(422)
     const malformed = { countingUnit: 'pallets', prefillQuantities: 'yes' }
-    expect((await send('put', '/planning/settings/goods', malformed)).status).toBe(400)
+    expect((await admin('put', '/planning/settings/goods', malformed)).status).toBe(400)
     const confirmation = { tacitConfirmationDays: '' }
-    const saved = await send('put', '/planning/settings/confirmation', confirmation)
+    const saved = await admin('put', '/planning/settings/confirmation', confirmation)
     expect((saved.data.data as PlanningSettingsApi).confirmation.tacitConfirmationDays).toBeNull()
   })
 })
@@ -56,12 +64,14 @@ describe('planning reasons', () => {
     ).data.data as { items: PlanningReasonApi[] }
     expect(items.filter((reason) => reason.kind === 'cancellation')).toHaveLength(4)
     const reason = { no: 'CXL-WEATHER', name: 'Intempéries', kind: 'cancellation' }
-    expect((await send('post', '/planning/reasons', reason, 'COM001')).status).toBe(403)
-    expect((await send('post', '/planning/reasons', reason, 'DIR001')).status).toBe(403)
-    expect((await send('post', '/planning/reasons', reason)).status).toBe(201)
-    expect((await send('post', '/planning/reasons', reason)).status).toBe(409)
+    expect((await admin('post', '/planning/reasons', reason, 'COM001')).status).toBe(403)
+    expect((await admin('post', '/planning/reasons', reason, 'DIR001')).status).toBe(403)
+    // The reason lists are the administrator's (TRS07-US06); the delivery manager reads them.
+    expect((await send('post', '/planning/reasons', reason)).status).toBe(403)
+    expect((await admin('post', '/planning/reasons', reason)).status).toBe(201)
+    expect((await admin('post', '/planning/reasons', reason)).status).toBe(409)
     expect(
-      (await send('post', '/planning/reasons', { ...reason, no: 'X', kind: 'other' })).status
+      (await admin('post', '/planning/reasons', { ...reason, no: 'X', kind: 'other' })).status
     ).toBe(400)
   })
 })
@@ -92,10 +102,10 @@ describe('customers and delivery points', () => {
 
   it('place points on a recipient and refuse to drop a customer that has some', async () => {
     const point = { name: 'Quai 2', customerNo: 'CLI-004', latitude: -18.9, longitude: 47.5 }
-    expect((await send('post', '/planning/delivery-points', point)).status).toBe(422)
+    expect((await admin('post', '/planning/delivery-points', point)).status).toBe(422)
     expect(
       (
-        await send('post', '/planning/delivery-points', {
+        await admin('post', '/planning/delivery-points', {
           ...point,
           customerNo: 'CLI-001',
           latitude: null
@@ -104,14 +114,14 @@ describe('customers and delivery points', () => {
     ).toBe(400)
     expect(
       (
-        await send('post', '/planning/delivery-points', {
+        await admin('post', '/planning/delivery-points', {
           ...point,
           customerNo: 'CLI-001',
           acceptedVehicleTypeNos: ['ROCKET']
         })
       ).status
     ).toBe(400)
-    const created = await send('post', '/planning/delivery-points', {
+    const created = await admin('post', '/planning/delivery-points', {
       ...point,
       customerNo: 'CLI-001'
     })
@@ -151,22 +161,22 @@ describe('compatibilities and tolerances', () => {
   it('refuse a rule on one product and a rule said twice', async () => {
     const rule = { kind: 'together', productANo: 'PRD-007', productBNo: 'PRD-008' }
     const path = '/planning/product-compatibilities'
-    expect((await send('post', path, { ...rule, productBNo: 'PRD-007' })).status).toBe(422)
-    expect((await send('post', path, rule)).status).toBe(409)
-    expect((await send('post', path, { ...rule, kind: 'succession' })).status).toBe(201)
-    expect((await send('post', path, rule, 'DIR001')).status).toBe(403)
+    expect((await admin('post', path, { ...rule, productBNo: 'PRD-007' })).status).toBe(422)
+    expect((await admin('post', path, rule)).status).toBe(409)
+    expect((await admin('post', path, { ...rule, kind: 'succession' })).status).toBe(201)
+    expect((await admin('post', path, rule, 'DIR001')).status).toBe(403)
   })
 
   it('keep one tolerance per scope and the company one for good', async () => {
     const path = '/planning/quantity-tolerances'
     const tolerance = { customerNo: 'CLI-002', productNo: null, value: 2, unit: 'percent' }
-    expect((await send('post', path, { ...tolerance, unit: 'quantity' })).status).toBe(422)
-    expect((await send('post', path, { ...tolerance, value: 120 })).status).toBe(422)
-    expect((await send('post', path, { ...tolerance, customerNo: 'CLI-001' })).status).toBe(409)
-    const created = await send('post', path, tolerance)
+    expect((await admin('post', path, { ...tolerance, unit: 'quantity' })).status).toBe(422)
+    expect((await admin('post', path, { ...tolerance, value: 120 })).status).toBe(422)
+    expect((await admin('post', path, { ...tolerance, customerNo: 'CLI-001' })).status).toBe(409)
+    const created = await admin('post', path, tolerance)
     expect(created.data.data).toMatchObject({ no: 'TOL-004', scopeLabel: 'Leader Price Antsirabe' })
-    expect((await send('delete', `${path}/TOL-001`)).status).toBe(409)
-    expect((await send('delete', `${path}/TOL-004`)).status).toBe(200)
+    expect((await admin('delete', `${path}/TOL-001`)).status).toBe(409)
+    expect((await admin('delete', `${path}/TOL-004`)).status).toBe(200)
     const company = await call(server, 'get', `${path}/TOL-001`, { as: 'COM001', language: 'en' })
     expect(company.data.data).toMatchObject({ scopeLabel: 'Whole company' })
   })
@@ -177,12 +187,12 @@ describe('transport tariffs', () => {
   const tariff = { target: 'customer', customerNo: 'CLI-005', basis: 'distance', price: 4_000 }
 
   it('bill outside customers and authorized carriers only', async () => {
-    expect((await send('post', path, { ...tariff, customerNo: 'CLI-004' })).status).toBe(422)
+    expect((await admin('post', path, { ...tariff, customerNo: 'CLI-004' })).status).toBe(422)
     const carrier = { target: 'carrier', carrierNo: 'PRS-001', basis: 'distance', price: 3_000 }
-    expect((await send('post', path, carrier)).status).toBe(422)
-    expect((await send('post', path, { ...tariff, customerNo: null })).status).toBe(422)
-    expect((await send('post', path, tariff, 'DIR001')).status).toBe(403)
-    const created = await send('post', path, { ...tariff, carrierNo: 'PRS-016' })
+    expect((await admin('post', path, carrier)).status).toBe(422)
+    expect((await admin('post', path, { ...tariff, customerNo: null })).status).toBe(422)
+    expect((await admin('post', path, tariff, 'DIR001')).status).toBe(403)
+    const created = await admin('post', path, { ...tariff, carrierNo: 'PRS-016' })
     expect(created.data.data).toMatchObject({
       no: 'TRF-007',
       carrierNo: null,
@@ -192,11 +202,11 @@ describe('transport tariffs', () => {
 
   it('tie a flat rate to an active route and refuse the same grid twice', async () => {
     const flat = { ...tariff, basis: 'route_template' }
-    expect((await send('post', path, flat)).status).toBe(422)
-    const created = await send('post', path, { ...flat, routeTemplateNo: 'TNR-MJN' })
+    expect((await admin('post', path, flat)).status).toBe(422)
+    const created = await admin('post', path, { ...flat, routeTemplateNo: 'TNR-MJN' })
     expect(created.data.data).toMatchObject({ routeTemplateName: 'Antananarivo → Mahajanga (RN4)' })
-    expect((await send('post', path, { ...flat, routeTemplateNo: 'TNR-MJN' })).status).toBe(409)
-    const perKm = await send('patch', `${path}/TRF-003`, { basis: 'route_template' })
+    expect((await admin('post', path, { ...flat, routeTemplateNo: 'TNR-MJN' })).status).toBe(409)
+    const perKm = await admin('patch', `${path}/TRF-003`, { basis: 'route_template' })
     expect(perKm.status).toBe(422)
   })
 })

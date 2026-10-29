@@ -16,9 +16,13 @@ describe('customerIssues', () => {
 
   it('needs the contact the channel uses', () => {
     expect(customerIssues(base)).toEqual([])
-    expect(customerIssues({ ...base, notificationChannel: 'sms_email' })).toEqual([
-      'channelNeedsEmail'
+    expect(customerIssues({ ...base, phone: '', notificationChannel: 'whatsapp' })).toEqual([
+      'channelNeedsPhone'
     ])
+    expect(customerIssues({ ...base, phone: '', notificationChannel: 'call' })).toEqual([
+      'channelNeedsPhone'
+    ])
+    expect(customerIssues({ ...base, phone: '', notificationChannel: 'none' })).toEqual([])
     expect(customerIssues({ ...base, phone: ' ', notificationChannel: 'email' })).toEqual([
       'channelNeedsEmail'
     ])

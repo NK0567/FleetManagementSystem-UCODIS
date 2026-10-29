@@ -7,7 +7,6 @@ import {
   ClipboardCheck,
   Clock,
   Hourglass,
-  Package,
   ShieldCheck,
   ShieldQuestion,
   ShieldX,
@@ -15,7 +14,7 @@ import {
 } from '@lucide/vue'
 import type { MapMarker, MapPolyline } from '@/components/shared/MapView.vue'
 import { useOptionsStore } from '@/stores/optionsStore'
-import { formatDateTime, formatNumber } from '@/utils/format'
+import { formatDateTime } from '@/utils/format'
 import { useMySpaceStore } from '../stores/mySpaceStore'
 
 const { t } = useI18n()
@@ -161,31 +160,11 @@ onMounted(() => void store.fetchTour())
         </ol>
       </section>
 
-      <section class="bg-card border border-border rounded">
-        <h2 class="px-4 py-3 border-b border-border text-sm font-semibold text-card-foreground">
+      <section class="space-y-2">
+        <h2 class="text-sm font-semibold text-card-foreground">
           {{ t('selfService.tour.lines') }}
         </h2>
-        <p v-if="!store.tour.lines.length" class="p-4 text-sm text-muted-foreground">
-          {{ t('selfService.tour.noLine') }}
-        </p>
-        <ul v-else class="divide-y divide-border">
-          <li
-            v-for="line in store.tour.lines"
-            :key="`${line.orderNo}-${line.lineNo}`"
-            class="px-4 py-3 flex items-start gap-3"
-          >
-            <Package class="w-5 h-5 text-primary shrink-0" />
-            <div class="min-w-0 flex-1">
-              <p class="text-sm font-medium text-card-foreground">{{ line.deliveryPointName }}</p>
-              <p class="text-xs text-muted-foreground">
-                {{ line.productName }}<span v-if="line.city"> · {{ line.city }}</span>
-              </p>
-            </div>
-            <span class="text-sm font-semibold tabular-nums text-card-foreground shrink-0">
-              {{ formatNumber(line.quantity) }}
-            </span>
-          </li>
-        </ul>
+        <MyTransportOrders />
       </section>
 
       <div

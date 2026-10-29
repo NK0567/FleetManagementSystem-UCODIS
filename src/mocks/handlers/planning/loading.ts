@@ -10,6 +10,7 @@ import { invalidField, readNumber } from '../../http/input'
 import { ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
 import type { MockRequest } from '../../http/types'
+import { driverOrder } from './execution'
 import { PLANNING_MESSAGES } from './messages'
 import { readReason } from './planningReasons'
 
@@ -37,6 +38,8 @@ export function registerLoadingHandlers(router: MockRouter, db: MockDatabase): v
         const product = products.get(line.productNo)
         rows.push({
           orderNo: order.no,
+          /* A fleet driver checks his own load; the check is done here for a carrier's order. */
+          checkedByDriver: order.means === 'fleet',
           lineNo: line.lineNo,
           productNo: line.productNo,
           productName: product?.name ?? '',
@@ -95,6 +98,7 @@ export function registerLoadingHandlers(router: MockRouter, db: MockDatabase): v
       (request) => {
         const order = db.transportOrders.findOrFail(routeParam(request, 'no'))
         if (statusOf(db, order) !== 'confirmed') throw conflict(PLANNING_MESSAGES.loadingClosed)
+        if (order.means === 'fleet') throw conflict(PLANNING_MESSAGES.loadingByDriver)
         const lineNo = Number(routeParam(request, 'lineNo'))
         const line = order.lines.find((item) => item.lineNo === lineNo)
         if (!line || !stillToLoad(line)) throw conflict(PLANNING_MESSAGES.loadingLineOut)
@@ -108,6 +112,51 @@ export function registerLoadingHandlers(router: MockRouter, db: MockDatabase): v
         return ok({ ready: loadingReady(updated.lines), status: statusOf(db, updated) })
       }
     )
+
+  /* The driver checks his load compartment by compartment (TRS03-US05): one verdict for the
+   * lines of a compartment, a reason when they do not conform; the other lines leave normally. */
+  router.post('/me/orders/:no/check', { feature: 'MYSPACE', action: 'execute' }, (request) => {
+    const order = driverOrder(db, routeParam(request, 'no'), request)
+    if (statusOf(db, order) !== 'confirmed') throw conflict(PLANNING_MESSAGES.loadingClosed)
+    const body = readBody(request)
+    const raw = body.lineNos
+    if (!Array.isArray(raw) || !raw.length || raw.some((no) => !Number.isInteger(no))) {
+      throw invalidField('lineNos')
+    }
+    const lineNos = raw as number[]
+    const verdict = body.verdict
+    if (verdict !== 'conform' && verdict !== 'nonconform') throw invalidField('verdict')
+    const reason = verdict === 'nonconform' ? readReason(db, body, 'nonconformity') : null
+    const targets = order.lines.filter((item) => lineNos.includes(item.lineNo))
+    if (targets.length !== lineNos.length || targets.some((item) => !stillToLoad(item))) {
+      throw conflict(PLANNING_MESSAGES.loadingLineOut)
+    }
+    if (targets.some((item) => item.loadedQuantity === null)) {
+      throw conflict(PLANNING_MESSAGES.loadingNotDeclared)
+    }
+    const at = nowIsoDateTime()
+    const lines = order.lines.map((item) => {
+      if (!lineNos.includes(item.lineNo)) return item
+      return reason
+        ? {
+            ...item,
+            conformingAt: null,
+            nonconformityAt: at,
+            nonconformityReasonNo: reason.reasonNo,
+            nonconformityComment: reason.comment
+          }
+        : {
+            ...item,
+            conformingAt: at,
+            nonconformityAt: null,
+            nonconformityReasonNo: null,
+            nonconformityComment: ''
+          }
+    })
+    db.transportOrders.update(order.no, { lines, ...stampModified(request) })
+    const updated = db.transportOrders.findOrFail(order.no)
+    return ok({ ready: loadingReady(updated.lines), status: statusOf(db, updated) })
+  })
 
   check('conform', (line) => ({
     ...line,

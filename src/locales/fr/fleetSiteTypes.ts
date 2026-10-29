@@ -32,7 +32,7 @@ export default {
     "Rayon de la zone d'un site de ce type, quand le site n'en fixe pas.",
   'fleet.siteTypes.form.color': 'Couleur sur la carte',
   'fleet.siteTypes.form.loadingDepot': 'Dépôt de chargement',
-  'fleet.siteTypes.form.loadingDepotHint': 'Les expéditions partent des sites de ce type.',
+  'fleet.siteTypes.form.loadingDepotHint': 'Les ordres de transport partent des sites de ce type.',
   'fleet.siteTypes.form.restAllowed': 'Repos autorisé',
   'fleet.siteTypes.form.restAllowedHint':
     "Un arrêt prolongé sur un site de ce type n'est pas signalé.",

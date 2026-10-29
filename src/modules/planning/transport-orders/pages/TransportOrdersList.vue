@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import { ListChecks } from '@lucide/vue'
+import { Archive, ClipboardCheck, ListChecks, PhoneCall } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
@@ -107,6 +107,18 @@ const filterDefs: FilterFieldDef[] = [
     optionsKey: 'transportOrderStatus'
   },
   {
+    field: 'archived',
+    labelKey: 'planning.transportOrders.view.archives',
+    valueType: 'boolean',
+    kind: 'boolean'
+  },
+  {
+    field: 'awaitingClosing',
+    labelKey: 'planning.transportOrders.view.awaitingClosing',
+    valueType: 'boolean',
+    kind: 'boolean'
+  },
+  {
     field: 'means',
     labelKey: 'planning.transportOrders.col.means',
     valueType: 'string',
@@ -190,6 +202,32 @@ const {
   exportApi: transportOrderApi.exportExcel
 })
 
+/** The « awaiting closing » view is a filter, not a status: orders in progress whose lines are all dealt with. */
+const awaitingClosingView = computed(() =>
+  store.userFilters.some((filter) => filter.field === 'awaitingClosing' && filter.value === true)
+)
+function toggleAwaitingClosing() {
+  const others = store.userFilters.filter((filter) => filter.field !== 'awaitingClosing')
+  onUpdateUserFilters(
+    awaitingClosingView.value
+      ? others
+      : [...others, { field: 'awaitingClosing', valueType: 'boolean', value: true }]
+  )
+}
+
+/* Completed orders are final and join the archives (TRS05-US06). */
+const archivesView = computed(() =>
+  store.userFilters.some((filter) => filter.field === 'archived' && filter.value === true)
+)
+function toggleArchives() {
+  const others = store.userFilters.filter((filter) => filter.field !== 'archived')
+  onUpdateUserFilters(
+    archivesView.value
+      ? others
+      : [...others, { field: 'archived', valueType: 'boolean', value: true }]
+  )
+}
+
 function onCreatedFromRequests(no: string) {
   creatingFromRequests.value = false
   void store.fetchItems(store.pagination.page, store.pagination.limit)
@@ -240,8 +278,37 @@ function onCreatedFromRequests(no: string) {
             :reset-preferences="resetPreferences"
           />
         </template>
-        <template v-if="canInsert" #extra-actions>
+        <template #extra-actions>
           <button
+            type="button"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm hover:bg-accent border rounded transition"
+            :class="
+              awaitingClosingView
+                ? 'border-primary text-primary bg-primary/5'
+                : 'border-border text-card-foreground'
+            "
+            :aria-pressed="awaitingClosingView"
+            @click="toggleAwaitingClosing"
+          >
+            <ClipboardCheck class="w-4 h-4 text-primary" />
+            {{ t('planning.transportOrders.view.awaitingClosing') }}
+          </button>
+          <button
+            type="button"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm hover:bg-accent border rounded transition"
+            :class="
+              archivesView
+                ? 'border-primary text-primary bg-primary/5'
+                : 'border-border text-card-foreground'
+            "
+            :aria-pressed="archivesView"
+            @click="toggleArchives"
+          >
+            <Archive class="w-4 h-4 text-primary" />
+            {{ t('planning.transportOrders.view.archives') }}
+          </button>
+          <button
+            v-if="canInsert"
             type="button"
             class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
             @click="creatingFromRequests = true"
@@ -289,6 +356,26 @@ function onCreatedFromRequests(no: string) {
         @row-dblclick="(item) => openFromList((item as TransportOrderApi).no)"
         @primary-cell-click="(_item, value) => openFromList(String(value))"
       >
+        <template #cell-status="{ item, value }">
+          <span class="inline-flex items-center gap-1.5 min-w-0">
+            <span class="truncate">{{ optionLabel('transportOrderStatus')(value, item) }}</span>
+            <span
+              v-if="(item as TransportOrderApi).awaitingConfirmations"
+              class="inline-flex items-center gap-0.5 text-warning shrink-0"
+              :title="
+                t(
+                  'planning.transportOrders.awaitingConfirmations',
+                  (item as TransportOrderApi).awaitingConfirmations
+                )
+              "
+            >
+              <PhoneCall class="w-3.5 h-3.5" />
+              <span class="text-xs tabular-nums">{{
+                (item as TransportOrderApi).awaitingConfirmations
+              }}</span>
+            </span>
+          </span>
+        </template>
         <template #filter-panel>
           <AdvancedFilterPanel
             :fields="filterFields"

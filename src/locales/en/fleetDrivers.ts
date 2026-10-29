@@ -71,5 +71,15 @@ export default {
   'fleet.drivers.activity.deviations': 'Route deviations',
   'fleet.drivers.activity.infractions': 'Infractions',
   'fleet.drivers.activity.trainings': 'Trainings',
-  'fleet.drivers.activity.none': 'None.'
+  'fleet.drivers.activity.none': 'None.',
+  'fleet.drivers.activity.col.trip': 'Trip',
+  'fleet.drivers.activity.col.route': 'Route',
+  'fleet.drivers.activity.col.vehicle': 'Vehicle',
+  'fleet.drivers.activity.col.departure': 'Planned departure',
+  'fleet.drivers.activity.col.status': 'Status',
+  'fleet.drivers.activity.col.distance': 'Distance',
+  'fleet.drivers.activity.col.refill': 'Refill',
+  'fleet.drivers.activity.col.date': 'Date',
+  'fleet.drivers.activity.col.liters': 'Litres',
+  'fleet.drivers.activity.col.amount': 'Amount'
 }

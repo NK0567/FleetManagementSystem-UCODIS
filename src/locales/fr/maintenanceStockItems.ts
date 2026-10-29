@@ -43,5 +43,10 @@ export default {
   'maintenance.stockItems.adjustHint':
     "Le stock compté diffère des mouvements ? Saisissez l'écart ({quantity} en stock), positif ou négatif, et sa raison.",
   'maintenance.stockItems.form.delta': 'Écart (pièces)',
-  'maintenance.stockItems.form.reason': 'Raison'
+  'maintenance.stockItems.form.reason': 'Raison',
+  'maintenance.stockItems.movements.col.at': 'Date',
+  'maintenance.stockItems.movements.col.kind': 'Mouvement',
+  'maintenance.stockItems.movements.col.delta': 'Quantité',
+  'maintenance.stockItems.movements.col.reason': 'Motif',
+  'maintenance.stockItems.movements.col.by': 'Par'
 }

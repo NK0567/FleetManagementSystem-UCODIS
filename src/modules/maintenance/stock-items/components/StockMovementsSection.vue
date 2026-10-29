@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
+import type { SubListColumn } from '@/components/shared/RecordSubList.vue'
 import { useI18n } from 'vue-i18n'
 import { apiErrorMessage } from '@/core/api/apiError'
 import { useOptionsStore } from '@/stores/optionsStore'
@@ -30,6 +31,23 @@ watch(
   { immediate: true }
 )
 
+const columns = computed<SubListColumn[]>(() => [
+  {
+    sortKey: 'at',
+    label: t('maintenance.stockItems.movements.col.at'),
+    formatter: (v) => formatDateTime(String(v))
+  },
+  {
+    sortKey: 'kind',
+    label: t('maintenance.stockItems.movements.col.kind'),
+    formatter: (v) => optionsStore.getOptionLabel('stockMovementKind', v),
+    filter: true
+  },
+  { sortKey: 'delta', label: t('maintenance.stockItems.movements.col.delta'), align: 'right' },
+  { sortKey: 'reason', label: t('maintenance.stockItems.movements.col.reason') },
+  { sortKey: 'recordedBy', label: t('maintenance.stockItems.movements.col.by'), filter: true }
+])
+
 const order = (no: string) => ({
   path: '/maintenance/work-orders',
   query: { no, cardMode: 'view' }
@@ -45,43 +63,32 @@ const order = (no: string) => ({
       :summary="[t('maintenance.stockItems.movements.count', movements.length)]"
     >
       <div class="xl:col-span-2 min-w-0">
-        <p v-if="!movements.length" class="text-sm text-muted-foreground">
-          {{ t('maintenance.stockItems.movements.empty') }}
-        </p>
-        <table v-else class="w-full text-sm border border-border rounded">
-          <tbody>
-            <tr
-              v-for="movement in movements"
-              :key="movement.no"
-              class="border-t border-border first:border-t-0"
+        <RecordSubList
+          :rows="movements as unknown as Record<string, unknown>[]"
+          :columns="columns"
+          row-key="no"
+          :empty-text="t('maintenance.stockItems.movements.empty')"
+          :initial-sort="{ key: 'at', direction: 'DESC' }"
+        >
+          <template #cell-delta="{ row }">
+            <span :class="Number(row.delta) < 0 ? 'text-destructive' : 'text-success'">
+              {{ Number(row.delta) > 0 ? '+' : '' }}{{ formatNumber(Number(row.delta)) }}
+            </span>
+          </template>
+          <template #cell-reason="{ row }">
+            {{ row.reason }}
+            <RouterLink
+              v-if="row.workOrderNo"
+              :to="order(String(row.workOrderNo))"
+              class="text-primary hover:underline"
             >
-              <td class="px-3 py-1.5 whitespace-nowrap">{{ formatDateTime(movement.at) }}</td>
-              <td class="px-3 py-1.5">
-                {{ optionsStore.getOptionLabel('stockMovementKind', movement.kind) }}
-              </td>
-              <td
-                class="px-3 py-1.5 text-right tabular-nums"
-                :class="movement.delta < 0 ? 'text-destructive' : 'text-success'"
-              >
-                {{ movement.delta > 0 ? '+' : '' }}{{ formatNumber(movement.delta) }}
-              </td>
-              <td class="px-3 py-1.5">
-                {{ movement.reason }}
-                <RouterLink
-                  v-if="movement.workOrderNo"
-                  :to="order(movement.workOrderNo)"
-                  class="text-primary hover:underline"
-                >
-                  {{ movement.workOrderNo }}
-                </RouterLink>
-                <span v-if="movement.vehiclePlate" class="text-muted-foreground">
-                  · {{ movement.vehiclePlate }}
-                </span>
-              </td>
-              <td class="px-3 py-1.5 text-muted-foreground">{{ movement.recordedBy }}</td>
-            </tr>
-          </tbody>
-        </table>
+              {{ row.workOrderNo }}
+            </RouterLink>
+            <span v-if="row.vehiclePlate" class="text-muted-foreground">
+              · {{ row.vehiclePlate }}
+            </span>
+          </template>
+        </RecordSubList>
       </div>
     </FormSection>
   </div>

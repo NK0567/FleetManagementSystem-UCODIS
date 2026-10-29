@@ -5,7 +5,12 @@ import { useEntityForm, type FormValidationError } from '@/composables/useEntity
 import { useFormValidationUi } from '@/composables/useFormValidationUi'
 import { isValidEmail } from '@/utils/email'
 import { customerIssues, type CustomerIssue } from '../domain/customer'
-import type { CustomerApi, CustomerNature, NotificationChannel } from '../types/customer.types'
+import type {
+  CustomerApi,
+  CustomerNature,
+  DeliverySlot,
+  NotificationChannel
+} from '../types/customer.types'
 
 const props = withDefaults(
   defineProps<{
@@ -43,6 +48,8 @@ const { draft, isRequired, expose } = useEntityForm({
     phone: '',
     email: '',
     notificationChannel: 'sms' as NotificationChannel,
+    confirmationRequired: true,
+    preferredSlot: 'any' as DeliverySlot,
     active: true
   }),
   required: ['name', 'nature', 'notificationChannel'],
@@ -59,7 +66,7 @@ const { draft, isRequired, expose } = useEntityForm({
   }
 })
 
-const expandedSections = ref({ general: true, contact: true, audit: false })
+const expandedSections = ref({ general: true, contact: true, preferences: true, audit: false })
 const { hasValidationError } = useFormValidationUi({
   validationErrors: () => props.validationErrors,
   expandedSections,
@@ -69,7 +76,7 @@ const { hasValidationError } = useFormValidationUi({
     isRecipient: 'general',
     phone: 'contact',
     email: 'contact',
-    notificationChannel: 'contact'
+    notificationChannel: 'preferences'
   },
   fieldValues: () => ({ ...draft })
 })
@@ -153,6 +160,21 @@ defineExpose(expose)
         </BaseFormField>
       </div>
       <div class="space-y-3 min-w-0">
+        <BaseFormField :label="t('planning.customers.form.active')">
+          <ToggleSwitch v-model="draft.active" :disabled="disabled" />
+        </BaseFormField>
+      </div>
+    </FormSection>
+
+    <FormSection
+      v-model:open="expandedSections.preferences"
+      :title="t('planning.customers.form.preferences')"
+      :summary="[]"
+    >
+      <p class="xl:col-span-2 text-xs text-muted-foreground">
+        {{ t('planning.customers.form.preferencesHint') }}
+      </p>
+      <div class="space-y-3 min-w-0">
         <BaseFormField
           field="notificationChannel"
           :label="t('planning.customers.form.notificationChannel')"
@@ -169,8 +191,21 @@ defineExpose(expose)
             {{ t('planning.customers.form.notificationChannelHint') }}
           </p>
         </BaseFormField>
-        <BaseFormField :label="t('planning.customers.form.active')">
-          <ToggleSwitch v-model="draft.active" :disabled="disabled" />
+        <BaseFormField :label="t('planning.customers.form.preferredSlot')">
+          <OptionsSelect
+            :model-value="draft.preferredSlot"
+            options-key="deliverySlot"
+            :disabled="disabled"
+            @update:model-value="draft.preferredSlot = String($event) as DeliverySlot"
+          />
+        </BaseFormField>
+      </div>
+      <div class="space-y-3 min-w-0">
+        <BaseFormField :label="t('planning.customers.form.confirmationRequired')">
+          <ToggleSwitch v-model="draft.confirmationRequired" :disabled="disabled" />
+          <p class="text-xs text-muted-foreground mt-1">
+            {{ t('planning.customers.form.confirmationRequiredHint') }}
+          </p>
         </BaseFormField>
       </div>
     </FormSection>

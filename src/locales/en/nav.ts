@@ -113,8 +113,9 @@ export default {
   'nav.deliveryQuality': 'Delivery quality',
   'nav.customerBilling': 'Customer billing',
   'nav.carrierInvoices': 'Carrier invoices',
-  'nav.fuelTours': 'Fuel tours',
   'nav.planningDashboard': 'Dashboard',
   'nav.transportReports': 'Transport reports',
-  'nav.deliveryRequests': 'Delivery requests'
+  'nav.deliveryRequests': 'Orders',
+  'nav.planningCalendar': 'Calendar',
+  'nav.loadingPreparations': 'Loading preparations'
 }

@@ -16,14 +16,14 @@ const send = (
   method: 'post' | 'patch' | 'put',
   url: string,
   body: Record<string, unknown> = {},
-  as = 'FLT001'
+  as = 'PLN001'
 ) => call(server, method, url, { as, body, language: 'en' })
 
 const getOrder = async (no: string) =>
-  (await call(server, 'get', `${path}/${no}`, { as: 'FLT001' })).data.data as TransportOrderApi
+  (await call(server, 'get', `${path}/${no}`, { as: 'PLN001' })).data.data as TransportOrderApi
 
 const getRequest = async (no: string) =>
-  (await call(server, 'get', `/planning/delivery-requests/${no}`, { as: 'FLT001' })).data
+  (await call(server, 'get', `/planning/delivery-requests/${no}`, { as: 'PLN001' })).data
     .data as DeliveryRequestApi
 
 const fleet = {
@@ -33,7 +33,7 @@ const fleet = {
   driverNo: 'UCT-010'
 }
 
-async function draft(extra: Record<string, unknown> = {}, as = 'FLT001') {
+async function draft(extra: Record<string, unknown> = {}, as = 'PLN001') {
   return send(
     'post',
     path,
@@ -111,7 +111,7 @@ describe('transport orders', () => {
       requests: { ...row.requests, expiredDateMode: 'block' }
     })
     const refused = await call(blocked, 'post', path, {
-      as: 'FLT001',
+      as: 'PLN001',
       language: 'en',
       body: { deliveryRequestNos: ['DL-2026-0005'] }
     })
@@ -158,7 +158,7 @@ describe('transport orders', () => {
       means: 'fleet',
       tripNo: 'TRP-00010'
     })
-    const trip = (await call(server, 'get', '/fleet/trips/TRP-00010', { as: 'FLT001' })).data
+    const trip = (await call(server, 'get', '/fleet/trips/TRP-00010', { as: 'PLN001' })).data
       .data as TripApi
     expect(trip).toMatchObject({ status: 'planned', vehicleNo: 'VEH-001', trailerNo: 'VEH-011' })
     expect((await send('post', `${path}/${order.no}/plan`, fleet)).status).toBe(409)
@@ -214,6 +214,37 @@ describe('transport orders', () => {
     )
   })
 
+  it('keeps a tanker to its categories and checks its compartments', async () => {
+    const tanker = { ...fleet, trailerNo: 'VEH-021' }
+    const food = (await draft({ plannedDeparture: '2026-09-24T06:00' })).data
+      .data as TransportOrderApi
+    await send('put', `${path}/${food.no}/lines`, {
+      lines: [{ deliveryPointNo: 'DP-001', productNo: 'PRD-001', quantity: 10, weightKg: 100 }]
+    })
+    const refused = await send('post', `${path}/${food.no}/plan`, tanker)
+    expect(refused.status).toBe(422)
+    expect(refused.data.message).toContain('does not carry')
+
+    // One product per compartment: 25 000 L of gazole and 4 000 L of petrol cannot both fit.
+    const fuel = (await draft({ plannedDeparture: '2026-09-25T06:00' })).data
+      .data as TransportOrderApi
+    await send('put', `${path}/${fuel.no}/lines`, {
+      lines: [
+        { deliveryPointNo: 'DP-001', productNo: 'PRD-006', quantity: 25000, weightKg: null },
+        { deliveryPointNo: 'DP-001', productNo: 'PRD-007', quantity: 4000, weightKg: null }
+      ]
+    })
+    const warned = await send('post', `${path}/${fuel.no}/plan`, tanker)
+    expect(warned.status).toBe(409)
+    expect((warned.data as { errorCode?: string }).errorCode).toBe('PLANNING_WARNINGS')
+    expect(warned.data.message).toContain('No compartment can take')
+    const forced = await send('post', `${path}/${fuel.no}/plan`, { ...tanker, force: true })
+    expect(forced.status).toBe(200)
+    const plan = (forced.data.data as TransportOrderApi).compartmentPlan
+    // The petrol takes the smallest compartment: the least is left on the ground.
+    expect(plan?.uses.map((use) => use.usedL)).toEqual([12000, 10000, 4000])
+  })
+
   it('refuses means already taken, and groups onto a trip that is still planned', async () => {
     const busy = (await draft({ deliveryRequestNos: ['DL-2026-0001'] })).data
       .data as TransportOrderApi
@@ -256,22 +287,32 @@ describe('transport orders', () => {
       (await send('post', `${path}/${order.no}/plan`, { means: 'carrier', carrierNo: 'PRS-017' }))
         .status
     ).toBe(422)
+    // A plate that is not one of the carrier's vehicles is refused.
+    expect(
+      (
+        await send('post', `${path}/${order.no}/plan`, {
+          means: 'carrier',
+          carrierNo: 'PRS-016',
+          carrierVehiclePlate: '5678 TBA'
+        })
+      ).status
+    ).toBe(422)
     const handed = await send('post', `${path}/${order.no}/plan`, {
       means: 'carrier',
       carrierNo: 'PRS-016',
-      carrierVehiclePlate: '5678 TBA',
+      carrierVehiclePlate: '2345 TBA',
       carrierDriverName: 'Naina'
     })
     expect(handed.data.data).toMatchObject({
       status: 'planned',
       means: 'carrier',
       tripNo: null,
-      carrierVehiclePlate: '5678 TBA'
+      carrierVehiclePlate: '2345 TBA'
     })
     expect(server.db.trips.all().some((trip) => trip.no === 'TRP-00010')).toBe(false)
   })
 
-  it('cancels up to the road, frees undelivered requests and leaves the trip alone', async () => {
+  it('cancels before the road, frees the requests and leaves the trip alone', async () => {
     const order = (await draft({ deliveryRequestNos: ['DL-2026-0001'] })).data
       .data as TransportOrderApi
     await send('post', `${path}/${order.no}/plan`, fleet)
@@ -282,7 +323,7 @@ describe('transport orders', () => {
       status: 'pending',
       transportOrderNo: null
     })
-    const trip = (await call(server, 'get', `/fleet/trips/${tripNo}`, { as: 'FLT001' })).data
+    const trip = (await call(server, 'get', `/fleet/trips/${tripNo}`, { as: 'PLN001' })).data
       .data as TripApi
     expect(trip.status).toBe('planned')
     expect(
@@ -293,10 +334,10 @@ describe('transport orders', () => {
       reasonNo: 'CXL-INCIDENT',
       comment: 'Panne'
     })
-    expect(onRoad.data.data).toMatchObject({ status: 'cancelled' })
-    expect(await getRequest('DL-2026-0010')).toMatchObject({ status: 'pending' })
+    // Once on the road the order is no longer cancelled: the returns are recorded on its lines.
+    expect(onRoad.status).toBe(409)
     expect(
-      ((await call(server, 'get', '/fleet/trips/TRP-00006', { as: 'FLT001' })).data.data as TripApi)
+      ((await call(server, 'get', '/fleet/trips/TRP-00006', { as: 'PLN001' })).data.data as TripApi)
         .status
     ).toBe('in_progress')
   })

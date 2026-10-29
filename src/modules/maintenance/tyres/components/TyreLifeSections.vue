@@ -1,15 +1,84 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import type { SubListColumn } from '@/components/shared/RecordSubList.vue'
 import { useI18n } from 'vue-i18n'
 import { useOptionsStore } from '@/stores/optionsStore'
 import { formatDateTime, formatNumber } from '@/utils/format'
 import type { TyreApi } from '../types/tyre.types'
 
-defineProps<{ tyre: TyreApi }>()
+const props = defineProps<{ tyre: TyreApi }>()
 
 const { t } = useI18n()
 const optionsStore = useOptionsStore()
 const open = ref({ use: true, readings: true, history: false })
+
+const asRows = (items: readonly object[]) =>
+  items.map((item, index) => ({ ...item, index })) as unknown as Record<string, unknown>[]
+const stints = computed(() => asRows(props.tyre.stints))
+const readings = computed(() => asRows(props.tyre.readings))
+const history = computed(() => asRows(props.tyre.history))
+
+const stintColumns = computed<SubListColumn[]>(() => [
+  { sortKey: 'vehicleNo', label: t('maintenance.tyres.life.col.vehicle'), filter: true },
+  { sortKey: 'positionCode', label: t('maintenance.tyres.life.col.position'), filter: true },
+  {
+    sortKey: 'mountedAt',
+    label: t('maintenance.tyres.life.col.mountedAt'),
+    formatter: (v) => formatDateTime(String(v))
+  },
+  {
+    sortKey: 'dismountedAt',
+    label: t('maintenance.tyres.life.col.dismountedAt'),
+    formatter: (v) => (v ? formatDateTime(String(v)) : t('maintenance.tyres.life.now'))
+  },
+  {
+    sortKey: 'fromKm',
+    label: t('maintenance.tyres.life.col.fromKm'),
+    align: 'right',
+    formatter: (v) => formatNumber(Number(v))
+  },
+  {
+    sortKey: 'toKm',
+    label: t('maintenance.tyres.life.col.toKm'),
+    align: 'right',
+    formatter: (v) => (v === null ? '…' : formatNumber(Number(v)))
+  }
+])
+const readingColumns = computed<SubListColumn[]>(() => [
+  {
+    sortKey: 'at',
+    label: t('maintenance.tyres.life.col.at'),
+    formatter: (v) => formatDateTime(String(v))
+  },
+  {
+    sortKey: 'pressureBar',
+    label: t('maintenance.tyres.life.col.pressure'),
+    align: 'right',
+    formatter: (v) => `${formatNumber(Number(v), 1)} bar`
+  },
+  {
+    sortKey: 'treadMm',
+    label: t('maintenance.tyres.life.col.tread'),
+    align: 'right',
+    formatter: (v) => `${formatNumber(Number(v), 1)} mm`
+  },
+  { sortKey: 'by', label: t('maintenance.tyres.life.col.by'), filter: true }
+])
+const historyColumns = computed<SubListColumn[]>(() => [
+  {
+    sortKey: 'at',
+    label: t('maintenance.tyres.life.col.at'),
+    formatter: (v) => formatDateTime(String(v))
+  },
+  {
+    sortKey: 'kind',
+    label: t('maintenance.tyres.life.col.event'),
+    formatter: (v) => optionsStore.getOptionLabel('tyreEvent', v),
+    filter: true
+  },
+  { sortKey: 'detail', label: t('maintenance.tyres.life.col.detail') },
+  { sortKey: 'by', label: t('maintenance.tyres.life.col.by'), filter: true }
+])
 </script>
 
 <template>
@@ -38,29 +107,14 @@ const open = ref({ use: true, readings: true, history: false })
         <p v-if="!tyre.stints.length" class="text-muted-foreground">
           {{ t('maintenance.tyres.life.neverMounted') }}
         </p>
-        <table v-else class="w-full border border-border rounded">
-          <tbody>
-            <tr
-              v-for="(stint, index) in tyre.stints"
-              :key="index"
-              class="border-t border-border first:border-t-0"
-            >
-              <td class="px-3 py-1.5">{{ stint.vehicleNo }} · {{ stint.positionCode }}</td>
-              <td class="px-3 py-1.5 text-muted-foreground whitespace-nowrap">
-                {{ formatDateTime(stint.mountedAt) }} →
-                {{
-                  stint.dismountedAt
-                    ? formatDateTime(stint.dismountedAt)
-                    : t('maintenance.tyres.life.now')
-                }}
-              </td>
-              <td class="px-3 py-1.5 text-right tabular-nums whitespace-nowrap">
-                {{ formatNumber(stint.fromKm) }} →
-                {{ stint.toKm === null ? '…' : formatNumber(stint.toKm) }} km
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <RecordSubList
+          v-else
+          :rows="stints"
+          :columns="stintColumns"
+          row-key="index"
+          :empty-text="t('maintenance.tyres.life.neverMounted')"
+          :initial-sort="{ key: 'mountedAt', direction: 'DESC' }"
+        />
         <p v-if="tyre.scrapReason" class="text-destructive">{{ tyre.scrapReason }}</p>
       </div>
     </FormSection>
@@ -71,39 +125,26 @@ const open = ref({ use: true, readings: true, history: false })
       :summary="[t('maintenance.tyres.life.readingCount', tyre.readings.length)]"
     >
       <div class="xl:col-span-2 min-w-0 text-sm">
-        <p v-if="!tyre.readings.length" class="text-muted-foreground">
-          {{ t('maintenance.tyres.life.noReading') }}
-        </p>
-        <ul v-else class="divide-y divide-border border border-border rounded">
-          <li
-            v-for="(reading, index) in [...tyre.readings].reverse()"
-            :key="index"
-            class="px-3 py-1.5 flex flex-wrap gap-x-3"
-          >
-            <span class="whitespace-nowrap">{{ formatDateTime(reading.at) }}</span>
-            <span class="tabular-nums">{{ formatNumber(reading.pressureBar, 1) }} bar</span>
-            <span class="tabular-nums">{{ formatNumber(reading.treadMm, 1) }} mm</span>
-            <span class="text-muted-foreground">{{ reading.by }}</span>
-          </li>
-        </ul>
+        <RecordSubList
+          :rows="readings"
+          :columns="readingColumns"
+          row-key="index"
+          :empty-text="t('maintenance.tyres.life.noReading')"
+          :initial-sort="{ key: 'at', direction: 'DESC' }"
+        />
       </div>
     </FormSection>
 
     <FormSection v-model:open="open.history" :title="t('maintenance.tyres.section.history')">
-      <ul class="xl:col-span-2 min-w-0 text-sm divide-y divide-border">
-        <li
-          v-for="(event, index) in [...tyre.history].reverse()"
-          :key="index"
-          class="py-1.5 flex flex-wrap gap-x-3"
-        >
-          <span class="whitespace-nowrap">{{ formatDateTime(event.at) }}</span>
-          <span class="font-medium">{{
-            optionsStore.getOptionLabel('tyreEvent', event.kind)
-          }}</span>
-          <span class="text-muted-foreground">{{ event.detail }}</span>
-          <span class="text-muted-foreground">{{ event.by }}</span>
-        </li>
-      </ul>
+      <div class="xl:col-span-2 min-w-0">
+        <RecordSubList
+          :rows="history"
+          :columns="historyColumns"
+          row-key="index"
+          :empty-text="t('maintenance.tyres.life.noHistory')"
+          :initial-sort="{ key: 'at', direction: 'DESC' }"
+        />
+      </div>
     </FormSection>
   </div>
 </template>

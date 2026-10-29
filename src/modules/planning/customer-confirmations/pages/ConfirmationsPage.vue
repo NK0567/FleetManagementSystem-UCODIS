@@ -1,10 +1,21 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { CalendarClock, CircleCheck, MessageSquareWarning, PhoneCall, UserX } from '@lucide/vue'
+import {
+  CalendarClock,
+  CircleCheck,
+  ExternalLink,
+  Hand,
+  MessageSquareWarning,
+  PhoneCall,
+  Undo2,
+  UserX
+} from '@lucide/vue'
 import type { StatusTone } from '@/components/ui/status-pill/StatusPill.vue'
 import { usePermissions } from '@/composables/usePermissions'
-import { formatDate, formatNumber } from '@/utils/format'
+import { useOptionsStore } from '@/stores/optionsStore'
+import { useUserStore } from '@/stores/user'
+import { formatDate, formatDateTime, formatNumber } from '@/utils/format'
 import type { ConfirmationState } from '../domain/confirmation'
 import { useConfirmationStore } from '../stores/confirmationStore'
 import {
@@ -40,9 +51,15 @@ const tabClass = (active: boolean) =>
 const { t } = useI18n()
 const store = useConfirmationStore()
 const { canExecute } = usePermissions('CUSTOMERCONFIRMATION')
-const { canExecute: canHandleContest } = usePermissions('TRANSPORTORDER')
+/* A contested delivery is the planner's to handle (TRS04-US03). */
+const { canUpdate: canHandleContest } = usePermissions('TRANSPORTORDER')
 
+const userStore = useUserStore()
+const optionsStore = useOptionsStore()
+const me = computed(() => userStore.user?.code ?? '')
 const confirmationTab = ref<ConfirmationState>('pending')
+/** A line taken by another agent is theirs: hidden by default, shown on demand. */
+const hideTakenByOthers = ref(true)
 const receptionTab = ref<ReceptionState>('awaiting')
 
 const unavailable = ref<ConfirmationLineApi | null>(null)
@@ -86,9 +103,21 @@ const kpis = computed(() => [
   }
 ])
 
+const takenByOther = (line: ConfirmationLineApi) => !!line.agent && line.agent !== me.value
 const visibleLines = computed(() =>
-  store.lines.filter((line) => line.state === confirmationTab.value)
+  store.lines.filter(
+    (line) =>
+      line.state === confirmationTab.value &&
+      !(hideTakenByOthers.value && isOpen(line) && takenByOther(line))
+  )
 )
+const hiddenCount = computed(
+  () =>
+    store.lines.filter(
+      (line) => line.state === confirmationTab.value && isOpen(line) && takenByOther(line)
+    ).length
+)
+
 const visibleReceptions = computed(() =>
   store.receptions.filter((line) => line.state === receptionTab.value)
 )
@@ -165,7 +194,10 @@ async function onRate() {
   }
 }
 
-onMounted(() => void store.fetchAll())
+onMounted(() => {
+  void optionsStore.fetchOptions()
+  void store.fetchAll()
+})
 </script>
 
 <template>
@@ -215,14 +247,32 @@ onMounted(() => void store.fetchAll())
           </span>
         </button>
       </nav>
+      <div class="flex flex-wrap items-center gap-3 px-4 py-2 border-b border-border">
+        <label class="inline-flex items-center gap-2 text-sm text-card-foreground">
+          <input v-model="hideTakenByOthers" type="checkbox" class="h-4 w-4 accent-primary" />
+          {{ t('planning.confirmations.queue.hideOthers') }}
+        </label>
+        <span v-if="hideTakenByOthers && hiddenCount" class="text-xs text-muted-foreground">
+          {{ t('planning.confirmations.queue.hidden', hiddenCount) }}
+        </span>
+        <span class="ml-auto text-xs text-muted-foreground">
+          {{ t('planning.confirmations.queue.order') }}
+        </span>
+      </div>
       <table class="w-full text-sm">
         <thead>
           <tr class="bg-muted/40 text-xs text-muted-foreground">
+            <th class="px-3 py-2 font-semibold text-left">
+              {{ t('planning.confirmations.col.departure') }}
+            </th>
             <th class="px-3 py-2 font-semibold text-left">
               {{ t('planning.confirmations.col.order') }}
             </th>
             <th class="px-3 py-2 font-semibold text-left">
               {{ t('planning.confirmations.col.recipient') }}
+            </th>
+            <th class="px-3 py-2 font-semibold text-left">
+              {{ t('planning.confirmations.col.channel') }}
             </th>
             <th class="px-3 py-2 font-semibold text-left">
               {{ t('planning.confirmations.col.product') }}
@@ -243,7 +293,7 @@ onMounted(() => void store.fetchAll())
         </thead>
         <tbody>
           <tr v-if="!visibleLines.length">
-            <td colspan="7" class="px-3 py-4 text-muted-foreground">
+            <td colspan="9" class="px-3 py-4 text-muted-foreground">
               {{
                 store.loading
                   ? t('planning.confirmations.loading')
@@ -252,6 +302,9 @@ onMounted(() => void store.fetchAll())
             </td>
           </tr>
           <tr v-for="line in visibleLines" :key="keyOf(line)" class="border-t border-border">
+            <td class="px-3 py-2 whitespace-nowrap tabular-nums">
+              {{ line.plannedDeparture ? formatDateTime(line.plannedDeparture) : '·' }}
+            </td>
             <td class="px-3 py-2 whitespace-nowrap">
               <RouterLink :to="orderCard(line.orderNo)" class="text-primary hover:underline">
                 {{ line.orderNo }}
@@ -263,6 +316,24 @@ onMounted(() => void store.fetchAll())
             <td class="px-3 py-2">
               <p class="text-card-foreground">{{ line.recipientName || '—' }}</p>
               <p class="text-xs text-muted-foreground">{{ line.deliveryPointName }}</p>
+            </td>
+            <td class="px-3 py-2 whitespace-nowrap">
+              <p class="text-card-foreground">
+                {{ optionsStore.getOptionLabel('notificationChannel', line.notificationChannel) }}
+              </p>
+              <a
+                v-if="line.trackingToken && line.notificationChannel !== 'none'"
+                :href="`#/suivi/${line.trackingToken}`"
+                target="_blank"
+                rel="noopener"
+                class="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+              >
+                <ExternalLink class="w-3.5 h-3.5" />
+                {{ t('planning.confirmations.queue.openLink') }}
+              </a>
+              <p v-if="line.preferredSlot !== 'any'" class="text-xs text-muted-foreground">
+                {{ optionsStore.getOptionLabel('deliverySlot', line.preferredSlot) }}
+              </p>
             </td>
             <td class="px-3 py-2">{{ line.productName || '—' }}</td>
             <td class="px-3 py-2 text-right tabular-nums whitespace-nowrap">
@@ -288,9 +359,45 @@ onMounted(() => void store.fetchAll())
                 :label="t(`planning.confirmations.state.${line.state}`)"
                 :tone="STATE_TONES[line.state]"
               />
+              <p v-if="line.byLink" class="mt-1 text-xs text-muted-foreground">
+                {{ t('planning.confirmations.queue.byLink') }}
+              </p>
+              <p v-if="line.agent && isOpen(line)" class="mt-1 text-xs text-muted-foreground">
+                {{
+                  line.agent === me
+                    ? t('planning.confirmations.queue.mine')
+                    : t('planning.confirmations.queue.takenBy', { agent: line.agent })
+                }}
+              </p>
             </td>
             <td class="px-3 py-2">
-              <div v-if="canExecute && isOpen(line)" class="flex flex-wrap justify-end gap-1">
+              <p
+                v-if="canExecute && isOpen(line) && takenByOther(line)"
+                class="text-right text-xs text-muted-foreground"
+              >
+                {{ t('planning.confirmations.queue.takenBy', { agent: line.agent }) }}
+              </p>
+              <div v-else-if="canExecute && isOpen(line)" class="flex flex-wrap justify-end gap-1">
+                <button
+                  v-if="!line.agent"
+                  type="button"
+                  :class="buttonClass"
+                  :disabled="store.acting"
+                  @click="store.take(line)"
+                >
+                  <Hand class="w-4 h-4 text-primary" />
+                  {{ t('planning.confirmations.queue.take') }}
+                </button>
+                <button
+                  v-else
+                  type="button"
+                  :class="buttonClass"
+                  :disabled="store.acting"
+                  @click="store.release(line)"
+                >
+                  <Undo2 class="w-4 h-4 text-primary" />
+                  {{ t('planning.confirmations.queue.release') }}
+                </button>
                 <button
                   v-if="line.state === 'pending'"
                   type="button"

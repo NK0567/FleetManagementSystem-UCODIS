@@ -20,7 +20,7 @@ import type { MockRouter } from '../../http/router'
 import { sessionUser, type MockRequest } from '../../http/types'
 import type { MockLanguage } from '../../i18n'
 import { assertUsable } from './couplings'
-import { createAvailability, unavailabilityError } from './availability'
+import { createAvailability, unavailabilityError, unavailabilityText } from './availability'
 import { driverFacts, ineligibilityText } from './drivers'
 import { employeeNames, vehiclePlates } from './links'
 import { FLEET_MESSAGES } from './messages'
@@ -124,7 +124,8 @@ function assertResourcesFree(
   db: MockDatabase,
   plan: Plan,
   language: MockLanguage,
-  except?: string
+  except?: string,
+  allowBusy = false
 ): void {
   const availability = createAvailability(
     db,
@@ -135,8 +136,30 @@ function assertResourcesFree(
     ...availability.vehicleUnavailability(plan.vehicleNo, 'motorized', except),
     ...(plan.trailerNo ? availability.vehicleUnavailability(plan.trailerNo, 'towed', except) : []),
     ...availability.driverUnavailability(plan.driverNo, except)
-  ]
+  ].filter((item) => !allowBusy || item.code !== 'busy')
   if (first) throw unavailabilityError(language, first)
+}
+
+/** The overlaps of a plan with other open trips, read out: a warning the planner may override. */
+export function overlapWarnings(
+  db: MockDatabase,
+  plan: Omit<TripPlan, 'routeTemplateNo'> & { routeTemplateNo: string },
+  language: MockLanguage
+): string[] {
+  const route = db.routeTemplates.findOrFail(plan.routeTemplateNo)
+  const full: Plan = { ...plan, stops: route.stops.map((stop) => ({ ...stop, passedAt: null })) }
+  const availability = createAvailability(
+    db,
+    { start: full.plannedDeparture, end: plannedArrival(full) },
+    language
+  )
+  return [
+    ...availability.vehicleUnavailability(full.vehicleNo, 'motorized'),
+    ...(full.trailerNo ? availability.vehicleUnavailability(full.trailerNo, 'towed') : []),
+    ...availability.driverUnavailability(full.driverNo)
+  ]
+    .filter((item) => item.code === 'busy')
+    .map((item) => unavailabilityText(language, item))
 }
 
 function assertAllowed(trip: TripRow, action: TripAction): void {
@@ -155,7 +178,8 @@ export interface TripPlan {
 export function buildTrip(
   db: MockDatabase,
   plan: TripPlan,
-  language: MockLanguage
+  language: MockLanguage,
+  options: { allowBusy?: boolean } = {}
 ): Omit<TripRow, 'createdAt' | 'createdBy' | 'modifiedAt' | 'modifiedBy'> {
   const route = db.routeTemplates.findOrFail(plan.routeTemplateNo)
   if (!route.active) throw unprocessable(FLEET_MESSAGES.inactiveRoute)
@@ -166,7 +190,7 @@ export function buildTrip(
     ...plan,
     stops: route.stops.map((stop) => ({ ...stop, passedAt: null }))
   }
-  assertResourcesFree(db, full, language)
+  assertResourcesFree(db, full, language, undefined, options.allowBusy)
   return {
     no: nextNo(
       db.trips.all().map((trip) => trip.no),

@@ -56,6 +56,8 @@ export const useConfirmationStore = defineStore('planning-customer-confirmation'
     perform(() => confirmationService.receive(line, action, body))
 
   const confirm = (line: ConfirmationLineApi) => act(line, 'confirm')
+  const take = (line: ConfirmationLineApi) => act(line, 'take')
+  const release = (line: ConfirmationLineApi) => act(line, 'release')
   const markUnavailable = (line: ConfirmationLineApi, reason: ActionBody) =>
     act(line, 'unavailable', reason)
   const setClientDate = (line: ConfirmationLineApi, date: string) =>
@@ -81,6 +83,8 @@ export const useConfirmationStore = defineStore('planning-customer-confirmation'
     error,
     fetchAll,
     confirm,
+    take,
+    release,
     markUnavailable,
     setClientDate,
     proposeDate,

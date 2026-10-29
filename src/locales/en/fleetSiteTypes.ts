@@ -32,7 +32,7 @@ export default {
     'Radius of the zone of a site of this type, when the site sets none.',
   'fleet.siteTypes.form.color': 'Map color',
   'fleet.siteTypes.form.loadingDepot': 'Loading depot',
-  'fleet.siteTypes.form.loadingDepotHint': 'Shipments leave from sites of this type.',
+  'fleet.siteTypes.form.loadingDepotHint': 'Transport orders leave from sites of this type.',
   'fleet.siteTypes.form.restAllowed': 'Rest allowed',
   'fleet.siteTypes.form.restAllowedHint': 'A long stop at a site of this type is not reported.',
   'fleet.siteTypes.form.restricted': 'Restricted zone',

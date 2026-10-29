@@ -1,6 +1,7 @@
 import { contractIssues, isContractActive } from '@/modules/fleet/providers/domain/provider'
 import {
   PROVIDER_TYPES,
+  type CarrierVehicle,
   type ProviderApi,
   type ProviderContract
 } from '@/modules/fleet/providers/types/provider.types'
@@ -31,6 +32,7 @@ export function providersApi(db: MockDatabase): ProviderApi[] {
   const today = todayIso()
   return db.providers.all().map((provider) => ({
     ...provider,
+    carrierVehicles: provider.carrierVehicles ?? [],
     activeContractCount: provider.contracts.filter((contract) => isContractActive(contract, today))
       .length
   }))
@@ -67,6 +69,24 @@ function readContracts(db: MockDatabase, input: Record<string, unknown>): Provid
   })
 }
 
+/** The vehicles of a carrier: a plate each, kept only for a carrier. */
+function readCarrierVehicles(input: Record<string, unknown>): CarrierVehicle[] {
+  const raw = input.carrierVehicles
+  if (raw == null) return []
+  if (!Array.isArray(raw)) throw invalidField('carrierVehicles')
+  const seen = new Set<string>()
+  return raw.flatMap((item: unknown) => {
+    if (!item || typeof item !== 'object') throw invalidField('carrierVehicles')
+    const line = item as Record<string, unknown>
+    const plate = typeof line.plate === 'string' ? line.plate.trim().toUpperCase() : ''
+    if (!plate) return []
+    if (seen.has(plate) || plate.length > 20) throw invalidField('carrierVehicles')
+    seen.add(plate)
+    const description = typeof line.description === 'string' ? line.description.trim() : ''
+    return [{ plate, description: description.slice(0, 80) }]
+  })
+}
+
 export function registerProvidersHandlers(router: MockRouter, db: MockDatabase): void {
   const readers: FieldReaders<Fields> = {
     name: (input) => readString(input, 'name', { required: true }),
@@ -82,7 +102,11 @@ export function registerProvidersHandlers(router: MockRouter, db: MockDatabase):
     address: (input) => readString(input, 'address'),
     authorized: (input) => readBoolean(input, 'authorized', true),
     notAuthorizedReason: (input) => readString(input, 'notAuthorizedReason'),
-    contracts: (input) => readContracts(db, input)
+    contracts: (input) => readContracts(db, input),
+    carrierVehicles: (input) =>
+      input.providerType === 'carrier' || input.providerType === undefined
+        ? readCarrierVehicles(input)
+        : []
   }
 
   function assertValid(provider: Fields, no?: string): void {

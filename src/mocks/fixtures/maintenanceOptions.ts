@@ -100,7 +100,7 @@ export const MAINTENANCE_OPTION_SETS: Record<string, Record<string, LocalizedTex
   },
   vehicleCheckMoment: {
     before_loading: { fr: 'Avant le chargement', en: 'Before loading' },
-    trip_return: { fr: 'Au retour de voyage', en: 'On trip return' },
+    trip_return: { fr: 'Au retour de trajet', en: 'On trip return' },
     new_vehicle: { fr: "À la réception d'un camion neuf", en: 'On new vehicle delivery' }
   },
   checkResult: {

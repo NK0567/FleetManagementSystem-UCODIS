@@ -50,7 +50,7 @@ function orderDone(db: MockDatabase, order: TransportOrderRow): boolean {
     carrierDeparted: order.carrierDepartedAt !== null || fleetDeparted,
     linesDelivered: linesDelivered(order.lines)
   })
-  return status === 'delivered' || status === 'closed'
+  return status === 'completed' || (status === 'in_progress' && linesDelivered(order.lines))
 }
 
 function agreedOf(db: MockDatabase, order: TransportOrderRow) {

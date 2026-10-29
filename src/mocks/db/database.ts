@@ -76,14 +76,14 @@ import { quantityTolerancesCollection } from '../fixtures/planning/quantityToler
 import { transportTariffsCollection } from '../fixtures/planning/transportTariffs'
 import { deliveryRequestsCollection } from '../fixtures/planning/deliveryRequests'
 import { transportOrdersCollection } from '../fixtures/planning/transportOrders'
+import { loadingPreparationsCollection } from '../fixtures/planning/loadingPreparations'
 import { carrierInvoicesCollection } from '../fixtures/planning/carrierInvoices'
-import { fuelToursCollection } from '../fixtures/planning/fuelTours'
 import { perimetersCollection } from '../fixtures/planning/perimeters'
 import { createCollection, type CollectionContext } from './collection'
 import { clearStoredCollections } from './storage'
 
 /** Bump when fixtures change shape: every collection is then reseeded. */
-export const MOCK_SEED_VERSION = 51
+export const MOCK_SEED_VERSION = 56
 
 export function createDatabase(
   context: CollectionContext = {
@@ -169,8 +169,8 @@ export function createDatabase(
     transportTariffs: createCollection(transportTariffsCollection, context),
     deliveryRequests: createCollection(deliveryRequestsCollection, context),
     transportOrders: createCollection(transportOrdersCollection, context),
+    loadingPreparations: createCollection(loadingPreparationsCollection, context),
     carrierInvoices: createCollection(carrierInvoicesCollection, context),
-    fuelTours: createCollection(fuelToursCollection, context),
     perimeters: createCollection(perimetersCollection, context)
   }
 

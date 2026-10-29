@@ -9,6 +9,7 @@ export interface MockSessionUser {
   profile: UserProfileCode
   employeeNo?: string
   orgUnitNo?: string
+  ordererNo?: string
 }
 
 export interface MockRequest {

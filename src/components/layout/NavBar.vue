@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import type { NavMenuItem } from '@/core/navigation/moduleRegistry'
+import type { NavMenuItem, NavSubItem } from '@/core/navigation/moduleRegistry'
 import { useUserStore } from '@/stores/user'
 import { useMenuPermissionsStore } from '@/stores/menuPermissions'
 import { ChevronDown, ChevronLeft, ChevronRight } from '@lucide/vue'
@@ -57,11 +57,21 @@ const dropdownPos = ref<{ left: number; top: number; width: number }>({
   top: 0,
   width: 660
 })
-const dropdownCols = ref<1 | 2 | 3>(3)
+const dropdownCols = ref<1 | 2 | 3 | 4>(3)
 const dropdownTruncate = ref(false)
 
 const DROPDOWN_GUTTER_PX = 8
 const DROPDOWN_MIN_COL_WIDTH_PX = 180
+
+/** The entries of a menu grouped by capability, in the order their first entry appears. */
+function sectionsOf(menu: NavMenuItem): { group: string; items: NavSubItem[] }[] {
+  const byGroup = new Map<string, NavSubItem[]>()
+  for (const item of menu.subItems) {
+    const key = item.group ?? ''
+    byGroup.set(key, [...(byGroup.get(key) ?? []), item])
+  }
+  return [...byGroup].map(([group, items]) => ({ group, items }))
+}
 
 function setMenuTriggerEl(index: number, el: HTMLElement | null) {
   menuTriggerEls.value[index] = el
@@ -104,7 +114,14 @@ function updateDropdownPosition() {
   const maxWidth = Math.max(280, viewportWidth.value - gutter * 2)
 
   const contentColWidth = measureContentColWidth()
-  const cols = Math.min(3, Math.max(1, Math.floor(maxWidth / contentColWidth))) as 1 | 2 | 3
+  const menu = navMenus.value[idx]
+  const sectionCount = menu ? sectionsOf(menu).length : 3
+  const wanted = sectionCount > 1 ? Math.min(4, sectionCount) : 3
+  const cols = Math.min(wanted, Math.max(1, Math.floor(maxWidth / contentColWidth))) as
+    | 1
+    | 2
+    | 3
+    | 4
   dropdownCols.value = cols
 
   const idealWidth = cols * contentColWidth
@@ -295,20 +312,33 @@ watch(openMenuIndex, async (idx) => {
                       }"
                     >
                       <div
-                        class="bg-white rounded-b-md border border-gray-200 shadow-lg py-2 grid gap-0"
+                        class="bg-white rounded-b-md border border-gray-200 shadow-lg py-2 grid gap-0 max-h-[75vh] overflow-y-auto"
                         :class="{
                           'grid-cols-1': dropdownCols === 1,
                           'grid-cols-2': dropdownCols === 2,
                           'grid-cols-3': dropdownCols === 3,
-                          'overflow-hidden': dropdownTruncate
+                          'grid-cols-4': dropdownCols === 4,
+                          'overflow-x-hidden': dropdownTruncate
                         }"
                       >
-                        <template v-for="item in menu.subItems" :key="item.to">
+                        <section
+                          v-for="section in sectionsOf(menu)"
+                          :key="section.group"
+                          class="min-w-0 pb-1"
+                        >
+                          <p
+                            v-if="section.group"
+                            class="px-4 pt-2 pb-1 text-xs font-bold uppercase tracking-wide text-muted-foreground truncate"
+                          >
+                            {{ t(section.group) }}
+                          </p>
                           <router-link
+                            v-for="item in section.items"
+                            :key="item.to"
                             :to="item.to"
                             :title="dropdownTruncate ? t(item.labelKey) : undefined"
                             :class="[
-                              'block min-w-0 px-4 py-2 text-sm text-gray-700 hover:bg-primary hover:text-white transition-colors whitespace-nowrap',
+                              'block min-w-0 px-4 py-1.5 text-sm text-gray-700 hover:bg-primary hover:text-white transition-colors whitespace-nowrap',
                               dropdownTruncate ? 'truncate' : '',
                               isSubItemActive(menu, item.to) ? 'nav-sub-link--active' : ''
                             ]"
@@ -316,7 +346,7 @@ watch(openMenuIndex, async (idx) => {
                           >
                             {{ t(item.labelKey) }}
                           </router-link>
-                        </template>
+                        </section>
                       </div>
                     </div>
                   </transition>

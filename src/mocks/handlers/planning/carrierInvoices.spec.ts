@@ -8,7 +8,7 @@ beforeEach(() => {
   server = createTestServer()
 })
 
-const post = (url: string, body: Record<string, unknown> = {}, as = 'FLT001') =>
+const post = (url: string, body: Record<string, unknown> = {}, as = 'FAC001') =>
   call(server, 'post', url, { as, body, language: 'en' })
 
 const invoice = (amount: number, reference = 'F-2026-1') =>
@@ -27,8 +27,12 @@ async function deliver() {
     body: { lines: [{ lineNo: 1, loadedQuantity: 60 }] }
   })
   await post('/planning/transport-orders/TR-2026-0004/lines/1/conform', {}, 'DEP001')
-  await post('/planning/transport-orders/TR-2026-0004/depart')
-  await post('/planning/transport-orders/TR-2026-0004/lines/1/declare', { receivedQuantity: 60 })
+  await post('/planning/transport-orders/TR-2026-0004/depart', {}, 'PLN001')
+  await post(
+    '/planning/transport-orders/TR-2026-0004/lines/1/declare',
+    { receivedQuantity: 60 },
+    'PLN001'
+  )
 }
 
 describe('carrier invoices', () => {
@@ -43,7 +47,7 @@ describe('carrier invoices', () => {
     const no = (created.data.data as { no: string }).no
     expect((await post(`/planning/carrier-invoices/${no}/validate`)).status).toBe(422)
     await call(server, 'patch', `/planning/carrier-invoices/${no}`, {
-      as: 'FLT001',
+      as: 'FAC001',
       body: { amount: 604_800 }
     })
     const validated = await post(`/planning/carrier-invoices/${no}/validate`)

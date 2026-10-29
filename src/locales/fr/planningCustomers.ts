@@ -1,22 +1,22 @@
 export default {
-  'planning.customers.title': 'Clients',
-  'planning.customers.card': 'Fiche client',
-  'planning.customers.new': 'Nouveau client',
-  'planning.customers.loadingList': 'Chargement des clients…',
-  'planning.customers.noResults': 'Aucun client.',
-  'planning.customers.noSearchResults': 'Aucun client ne correspond à « {query} ».',
-  'planning.customers.saveSuccess': 'Client enregistré.',
-  'planning.customers.saveError': "Le client n'a pas pu être enregistré.",
-  'planning.customers.createError': "Le client n'a pas pu être créé.",
-  'planning.customers.deleteError': "Le client n'a pas pu être supprimé.",
-  'planning.customers.confirmDelete': 'Supprimer le client',
-  'planning.customers.confirmDeleteMsg': 'Le client « {name} » sera définitivement supprimé.',
+  'planning.customers.title': 'Ordonnateurs et destinataires',
+  'planning.customers.card': 'Fiche ordonnateur ou destinataire',
+  'planning.customers.new': 'Nouvelle fiche',
+  'planning.customers.loadingList': 'Chargement des fiches…',
+  'planning.customers.noResults': 'Aucun ordonnateur ni destinataire.',
+  'planning.customers.noSearchResults': 'Aucune fiche ne correspond à « {query} ».',
+  'planning.customers.saveSuccess': 'Fiche enregistrée.',
+  'planning.customers.saveError': "La fiche n'a pas pu être enregistrée.",
+  'planning.customers.createError': "La fiche n'a pas pu être créée.",
+  'planning.customers.deleteError': "La fiche n'a pas pu être supprimée.",
+  'planning.customers.confirmDelete': 'Supprimer la fiche',
+  'planning.customers.confirmDeleteMsg': 'La fiche « {name} » sera définitivement supprimée.',
 
   'planning.customers.search.all': 'N°, nom, ville ou contact',
 
   'planning.customers.col.no': 'N°',
   'planning.customers.col.name': 'Nom',
-  'planning.customers.col.isOrderer': "Donneur d'ordre",
+  'planning.customers.col.isOrderer': 'Ordonnateur',
   'planning.customers.col.isRecipient': 'Destinataire',
   'planning.customers.col.nature': 'Nature',
   'planning.customers.col.address': 'Adresse',
@@ -32,7 +32,7 @@ export default {
   'planning.customers.form.contact': 'Contact et notifications',
   'planning.customers.form.no': 'N°',
   'planning.customers.form.name': 'Nom',
-  'planning.customers.form.isOrderer': "Donneur d'ordre",
+  'planning.customers.form.isOrderer': 'Ordonnateur',
   'planning.customers.form.isOrdererHint': 'Passe des commandes de transport.',
   'planning.customers.form.isRecipient': 'Destinataire',
   'planning.customers.form.isRecipientHint':
@@ -44,11 +44,19 @@ export default {
   'planning.customers.form.contactName': 'Contact',
   'planning.customers.form.phone': 'Téléphone',
   'planning.customers.form.email': 'E-mail',
-  'planning.customers.form.notificationChannel': 'Canal des notifications',
+  'planning.customers.form.notificationChannel': 'Mode de notification',
   'planning.customers.form.notificationChannelHint':
-    'Le canal demande le contact correspondant : un téléphone pour le SMS, un e-mail pour le courriel.',
+    "Parmi les canaux mis à disposition. Le SMS, l'appel et WhatsApp demandent un téléphone, l'e-mail une adresse.",
   'planning.customers.form.active': 'Actif',
-  'planning.customers.issue.noRole': "Cochez donneur d'ordre, destinataire, ou les deux.",
-  'planning.customers.issue.channelNeedsPhone': 'Le SMS demande un numéro de téléphone.',
-  'planning.customers.issue.channelNeedsEmail': 'Le courriel demande une adresse e-mail.'
+  'planning.customers.issue.noRole': 'Cochez ordonnateur, destinataire, ou les deux.',
+  'planning.customers.issue.channelNeedsPhone':
+    "Le SMS, l'appel et WhatsApp demandent un numéro de téléphone.",
+  'planning.customers.issue.channelNeedsEmail': "L'e-mail demande une adresse e-mail.",
+  'planning.customers.form.preferences': 'Préférences du destinataire',
+  'planning.customers.form.preferencesHint':
+    "Elles sont reprises sur chaque nouvelle commande de ce destinataire, où elles restent modifiables tant que la commande n'est pas planifiée.",
+  'planning.customers.form.preferredSlot': 'Créneau de livraison préféré',
+  'planning.customers.form.confirmationRequired': 'Confirmation de disponibilité requise',
+  'planning.customers.form.confirmationRequiredHint':
+    "Si non, la ligne passe directement à confirmée quand l'ordre est planifié."
 }

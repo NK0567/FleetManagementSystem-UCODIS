@@ -1,5 +1,7 @@
 export interface LoadingLineApi {
   orderNo: string
+  /** The driver checks the load of a fleet order from his space. */
+  checkedByDriver: boolean
   lineNo: number
   productNo: string
   productName: string

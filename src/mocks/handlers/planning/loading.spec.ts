@@ -33,10 +33,15 @@ describe('loading control', () => {
       body: { lines: [{ lineNo: 1, loadedQuantity: 400 }] }
     })
     expect(declared.status).toBe(200)
-    const checked = await post('/planning/transport-orders/TR-2026-0002/lines/1/conform')
+    // On a fleet order, the warehouse confirms the quantities and the driver checks his load.
+    expect((await post('/planning/transport-orders/TR-2026-0002/lines/1/conform')).status).toBe(409)
+    const checked = await call(server, 'post', '/me/orders/TR-2026-0002/check', {
+      as: 'CND014',
+      body: { lineNos: [1], verdict: 'conform' }
+    })
     expect(checked.data.data).toMatchObject({ ready: true, status: 'ready' })
     const order = (
-      await call(server, 'get', '/planning/transport-orders/TR-2026-0002', { as: 'FLT001' })
+      await call(server, 'get', '/planning/transport-orders/TR-2026-0002', { as: 'LIV001' })
     ).data.data as TransportOrderApi
     expect(order.status).toBe('ready')
   })

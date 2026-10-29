@@ -7,6 +7,10 @@ export interface ResourceAvailabilityApi {
   capacity: LoadCapacity | null
   available: boolean
   reasons: string[]
+  /** Only held by another trip at that time: an overlap the planner may accept. */
+  busyOnly: boolean
+  /** For a motorized vehicle: the driver assigned to it, proposed by default. */
+  assignedDriverNo?: string | null
 }
 
 /** Vehicles and drivers of the park over a time window, free or not and why. */

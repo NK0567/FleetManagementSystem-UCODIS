@@ -44,7 +44,8 @@ describe('transport order status', () => {
     expect(canEditLines('in_progress')).toBe(false)
     expect(canEditSchedule('draft')).toBe(true)
     expect(canEditSchedule('planned')).toBe(false)
-    expect(canCancel('in_progress')).toBe(true)
+    expect(canCancel('ready')).toBe(true)
+    expect(canCancel('in_progress')).toBe(false)
     expect(canCancel('cancelled')).toBe(false)
   })
 })
@@ -104,6 +105,7 @@ describe('order line state', () => {
   it('reads where the line stands', () => {
     expect(orderLineState(line)).toBe('pending')
     expect(orderLineState({ ...line, declaredAt: at })).toBe('declared')
+    expect(orderLineState({ ...line, nonconformityAt: at })).toBe('not_loaded')
     expect(orderLineState({ ...line, postponedAt: at })).toBe('postponed')
     expect(orderLineState({ ...line, postponedAt: at, returnedAt: at })).toBe('returned')
     expect(orderLineState({ ...line, refusalAt: at })).toBe('refused')

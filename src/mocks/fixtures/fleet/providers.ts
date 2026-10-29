@@ -1,4 +1,8 @@
-import type { ProviderContract, ProviderType } from '@/modules/fleet/providers/types/provider.types'
+import type {
+  CarrierVehicle,
+  ProviderContract,
+  ProviderType
+} from '@/modules/fleet/providers/types/provider.types'
 import type { CollectionDefinition, MockRow } from '../../db/collection'
 import { seedAudit } from '../seedAudit'
 
@@ -12,6 +16,7 @@ export interface ProviderRow extends MockRow {
   authorized: boolean
   notAuthorizedReason: string
   contracts: ProviderContract[]
+  carrierVehicles?: CarrierVehicle[]
 }
 
 const SEED: Omit<ProviderRow, keyof typeof seedAudit>[] = [
@@ -25,7 +30,8 @@ const SEED: Omit<ProviderRow, keyof typeof seedAudit>[] = [
     address: '',
     authorized: true,
     notAuthorizedReason: '',
-    contracts: []
+    contracts: [],
+    carrierVehicles: []
   },
   {
     no: 'PRS-002',
@@ -37,7 +43,8 @@ const SEED: Omit<ProviderRow, keyof typeof seedAudit>[] = [
     address: '',
     authorized: true,
     notAuthorizedReason: '',
-    contracts: []
+    contracts: [],
+    carrierVehicles: []
   },
   {
     no: 'PRS-003',
@@ -49,7 +56,8 @@ const SEED: Omit<ProviderRow, keyof typeof seedAudit>[] = [
     address: '',
     authorized: false,
     notAuthorizedReason: 'Retards répétés et facturation contestée.',
-    contracts: []
+    contracts: [],
+    carrierVehicles: []
   },
   {
     no: 'PRS-004',
@@ -61,7 +69,8 @@ const SEED: Omit<ProviderRow, keyof typeof seedAudit>[] = [
     address: '',
     authorized: true,
     notAuthorizedReason: '',
-    contracts: []
+    contracts: [],
+    carrierVehicles: []
   },
   {
     no: 'PRS-005',
@@ -73,7 +82,8 @@ const SEED: Omit<ProviderRow, keyof typeof seedAudit>[] = [
     address: '',
     authorized: true,
     notAuthorizedReason: '',
-    contracts: []
+    contracts: [],
+    carrierVehicles: []
   },
   {
     no: 'PRS-006',
@@ -85,7 +95,8 @@ const SEED: Omit<ProviderRow, keyof typeof seedAudit>[] = [
     address: '',
     authorized: true,
     notAuthorizedReason: '',
-    contracts: []
+    contracts: [],
+    carrierVehicles: []
   },
   {
     no: 'PRS-007',
@@ -97,7 +108,8 @@ const SEED: Omit<ProviderRow, keyof typeof seedAudit>[] = [
     address: '',
     authorized: true,
     notAuthorizedReason: '',
-    contracts: []
+    contracts: [],
+    carrierVehicles: []
   },
   {
     no: 'PRS-008',
@@ -109,7 +121,8 @@ const SEED: Omit<ProviderRow, keyof typeof seedAudit>[] = [
     address: '',
     authorized: true,
     notAuthorizedReason: '',
-    contracts: []
+    contracts: [],
+    carrierVehicles: []
   },
   {
     no: 'PRS-009',
@@ -161,7 +174,8 @@ const SEED: Omit<ProviderRow, keyof typeof seedAudit>[] = [
     address: '',
     authorized: true,
     notAuthorizedReason: '',
-    contracts: []
+    contracts: [],
+    carrierVehicles: []
   },
   {
     no: 'PRS-012',
@@ -173,7 +187,8 @@ const SEED: Omit<ProviderRow, keyof typeof seedAudit>[] = [
     address: '',
     authorized: true,
     notAuthorizedReason: '',
-    contracts: []
+    contracts: [],
+    carrierVehicles: []
   },
   {
     no: 'PRS-013',
@@ -185,7 +200,8 @@ const SEED: Omit<ProviderRow, keyof typeof seedAudit>[] = [
     address: '',
     authorized: true,
     notAuthorizedReason: '',
-    contracts: []
+    contracts: [],
+    carrierVehicles: []
   },
   {
     no: 'PRS-014',
@@ -197,7 +213,8 @@ const SEED: Omit<ProviderRow, keyof typeof seedAudit>[] = [
     address: '',
     authorized: true,
     notAuthorizedReason: '',
-    contracts: []
+    contracts: [],
+    carrierVehicles: []
   },
   {
     no: 'PRS-015',
@@ -209,7 +226,8 @@ const SEED: Omit<ProviderRow, keyof typeof seedAudit>[] = [
     address: '',
     authorized: true,
     notAuthorizedReason: '',
-    contracts: []
+    contracts: [],
+    carrierVehicles: []
   },
   {
     no: 'PRS-016',
@@ -221,7 +239,11 @@ const SEED: Omit<ProviderRow, keyof typeof seedAudit>[] = [
     address: 'Zone industrielle Forello, Tanjombato',
     authorized: true,
     notAuthorizedReason: '',
-    contracts: []
+    contracts: [],
+    carrierVehicles: [
+      { plate: '2345 TBA', description: 'Semi-remorque bâchée 32 t' },
+      { plate: '2378 TBA', description: 'Porteur 19 t' }
+    ]
   },
   {
     no: 'PRS-017',
@@ -233,7 +255,11 @@ const SEED: Omit<ProviderRow, keyof typeof seedAudit>[] = [
     address: 'Route des Hydrocarbures, Toamasina',
     authorized: true,
     notAuthorizedReason: '',
-    contracts: []
+    contracts: [],
+    carrierVehicles: [
+      { plate: '5120 TAD', description: 'Citerne 3 compartiments 30 000 L' },
+      { plate: '5144 TAD', description: 'Citerne 2 compartiments 20 000 L' }
+    ]
   }
 ]
 

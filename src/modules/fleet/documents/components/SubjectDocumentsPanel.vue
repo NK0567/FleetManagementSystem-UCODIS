@@ -1,8 +1,10 @@
 <script lang="ts" setup>
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import type { SubListColumn } from '@/components/shared/RecordSubList.vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { apiErrorMessage } from '@/core/api/apiError'
+import { useOptionsStore } from '@/stores/optionsStore'
 import { formatDate } from '@/utils/format'
 import { documentService } from '../services/documentService'
 import type { DocumentApi, SubjectKind } from '../types/document.types'
@@ -16,6 +18,7 @@ const props = defineProps<{
 
 const { t } = useI18n()
 const router = useRouter()
+const optionsStore = useOptionsStore()
 const documents = ref<DocumentApi[]>([])
 const loading = ref(false)
 const error = ref<string | null>(null)
@@ -45,6 +48,22 @@ function open(no: string) {
   void router.push({ path: '/fleet/documents', query: { no, cardMode: 'view' } })
 }
 
+const columns = computed<SubListColumn[]>(() => [
+  { sortKey: 'documentTypeName', label: t('fleet.documents.col.documentTypeNo'), filter: true },
+  { sortKey: 'number', label: t('fleet.documents.col.number') },
+  {
+    sortKey: 'expiryDate',
+    label: t('fleet.documents.col.expiryDate'),
+    formatter: (v) => formatDate(v as string | null)
+  },
+  {
+    sortKey: 'state',
+    label: t('fleet.documents.col.state'),
+    formatter: (v) => optionsStore.getOptionLabel('documentState', v),
+    filter: true
+  }
+])
+
 onMounted(load)
 watch(() => props.subjectNo, load)
 </script>
@@ -56,31 +75,21 @@ watch(() => props.subjectNo, load)
     </p>
     <FormAlerts :error="error" @clear:error="error = null" />
     <LoadingSpinner v-if="loading" :text="t('common.loading')" />
-    <p v-else-if="documents.length === 0" class="text-sm text-muted-foreground">
-      {{ t('fleet.documents.noResults') }}
-    </p>
-    <table v-else class="w-full text-sm border border-border rounded">
-      <thead>
-        <tr class="bg-muted/40 text-left text-xs text-muted-foreground">
-          <th class="px-3 py-2 font-semibold">{{ t('fleet.documents.col.documentTypeNo') }}</th>
-          <th class="px-3 py-2 font-semibold">{{ t('fleet.documents.col.number') }}</th>
-          <th class="px-3 py-2 font-semibold">{{ t('fleet.documents.col.expiryDate') }}</th>
-          <th class="px-3 py-2 font-semibold">{{ t('fleet.documents.col.state') }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-for="document in documents"
-          :key="document.no"
-          class="border-t border-border cursor-pointer hover:bg-accent/40"
-          @click="open(document.no)"
-        >
-          <td class="px-3 py-1.5 text-primary">{{ document.documentTypeName }}</td>
-          <td class="px-3 py-1.5">{{ document.number || '—' }}</td>
-          <td class="px-3 py-1.5">{{ formatDate(document.expiryDate) }}</td>
-          <td class="px-3 py-1.5"><DocumentStatePill :state="document.state" /></td>
-        </tr>
-      </tbody>
-    </table>
+    <RecordSubList
+      v-else
+      :rows="documents as unknown as Record<string, unknown>[]"
+      :columns="columns"
+      row-key="no"
+      :empty-text="t('fleet.documents.noResults')"
+      clickable
+      @row-click="(row: Record<string, unknown>) => open(String(row.no))"
+    >
+      <template #cell-documentTypeName="{ text }">
+        <span class="text-primary">{{ text }}</span>
+      </template>
+      <template #cell-state="{ row }">
+        <DocumentStatePill :state="row.state as DocumentApi['state']" />
+      </template>
+    </RecordSubList>
   </div>
 </template>

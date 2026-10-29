@@ -11,12 +11,10 @@ export default {
   'planning.transportTariffs.deleteError': 'The tariff could not be deleted.',
   'planning.transportTariffs.confirmDelete': 'Delete the tariff',
   'planning.transportTariffs.confirmDeleteMsg': 'The "{name}" tariff will be permanently deleted.',
-
-  'planning.transportTariffs.search.all': 'No., customer, carrier or family',
-
+  'planning.transportTariffs.search.all': 'No., orderer, recipient, carrier or family',
   'planning.transportTariffs.col.no': 'No.',
   'planning.transportTariffs.col.target': 'Grid of',
-  'planning.transportTariffs.col.customerNo': 'Customer',
+  'planning.transportTariffs.col.customerNo': 'Orderer or recipient',
   'planning.transportTariffs.col.carrierNo': 'Carrier',
   'planning.transportTariffs.col.basis': 'Basis',
   'planning.transportTariffs.col.routeTemplateNo': 'Route template',
@@ -24,7 +22,7 @@ export default {
   'planning.transportTariffs.col.active': 'Active',
   'planning.transportTariffs.col.family': 'Product family',
   'planning.transportTariffs.col.productNo': 'Product',
-  'planning.transportTariffs.col.partyName': 'Customer or carrier',
+  'planning.transportTariffs.col.partyName': 'Billed to or carrier',
   'planning.transportTariffs.col.routeTemplateName': 'Route template',
   'planning.transportTariffs.col.productName': 'Product',
 
@@ -34,7 +32,7 @@ export default {
   'planning.transportTariffs.form.target': 'Grid of',
   'planning.transportTariffs.form.targetHint':
     'Customer: what the company bills. Carrier: what an outside carrier bills the company.',
-  'planning.transportTariffs.form.customerNo': 'Customer',
+  'planning.transportTariffs.form.customerNo': 'Orderer or recipient',
   'planning.transportTariffs.form.carrierNo': 'Carrier',
   'planning.transportTariffs.form.basis': 'Basis',
   'planning.transportTariffs.form.basisHint':
@@ -49,7 +47,8 @@ export default {
   'planning.transportTariffs.form.productNo': 'Product',
   'planning.transportTariffs.form.productNoHint':
     'A tariff on one product comes before the one of its family.',
-  'planning.transportTariffs.issue.partyMissing': 'Choose the customer or the carrier.',
+  'planning.transportTariffs.issue.partyMissing':
+    'Choose the orderer or recipient, or the carrier.',
   'planning.transportTariffs.issue.routeNeeded':
     'A flat rate applies to a route template: choose it.'
 }

@@ -10,7 +10,11 @@ export const REQUEST_IMPORT_COLUMNS = {
   validUntil: ['valable_jusqu_au', 'validite', 'valid_until'],
   externalReference: ['reference', 'reference_client', 'customer_reference'],
   weightKg: ['poids_kg', 'poids', 'weight_kg'],
-  comment: ['commentaire', 'comment']
+  comment: ['commentaire', 'comment'],
+  notificationChannel: ['mode_notification', 'notification', 'notification_channel'],
+  confirmationRequired: ['confirmation_requise', 'confirmation', 'confirmation_required'],
+  preferredSlot: ['creneau', 'creneau_prefere', 'preferred_slot'],
+  fullDeliveryRequired: ['livraison_complete', 'full_delivery']
 } as const satisfies ImportColumns<string>
 
 export type RequestImportField = keyof typeof REQUEST_IMPORT_COLUMNS
@@ -22,6 +26,35 @@ export const REQUEST_REQUIRED: readonly RequestImportField[] = [
   'quantity',
   'desiredDate'
 ]
+
+const YES = ['oui', 'o', 'yes', 'y', '1', 'vrai', 'true', 'x']
+const NO = ['non', 'n', 'no', '0', 'faux', 'false']
+const CHANNELS: Record<string, string> = {
+  aucun: 'none',
+  aucune: 'none',
+  appel: 'call',
+  telephone: 'call',
+  mail: 'email',
+  'e-mail': 'email'
+}
+const SLOTS: Record<string, string> = {
+  matin: 'morning',
+  'apres-midi': 'afternoon',
+  'après-midi': 'afternoon',
+  apres_midi: 'afternoon',
+  indifferent: 'any',
+  indifférent: 'any'
+}
+
+/* A yes or no cell: an empty cell keeps the recipient's preference, any other word is sent as it
+ * is so that the server rejects the row with a clear message instead of guessing. */
+function parseYesNo(value: string): boolean | string | undefined {
+  const word = value.toLowerCase()
+  if (!word) return undefined
+  if (YES.includes(word)) return true
+  if (NO.includes(word)) return false
+  return value
+}
 
 /** One line of the file, as the server expects it; codes are upper-cased, nothing else is guessed. */
 export function toRequestRow(
@@ -36,6 +69,13 @@ export function toRequestRow(
     } else if (field === 'quantity' || field === 'weightKg') row[field] = parseImportNumber(value)
     else if (field === 'ordererNo' || field === 'deliveryPointNo' || field === 'productNo') {
       row[field] = value.toUpperCase()
+    } else if (field === 'confirmationRequired' || field === 'fullDeliveryRequired') {
+      const flag = parseYesNo(value)
+      if (flag !== undefined) row[field] = flag
+    } else if (field === 'notificationChannel' || field === 'preferredSlot') {
+      // Left empty, the preference comes from the recipient's record.
+      const word = value.toLowerCase()
+      if (word) row[field] = (field === 'notificationChannel' ? CHANNELS : SLOTS)[word] ?? word
     } else row[field] = value
   }
   return row
