@@ -283,6 +283,20 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/fleet/fuel-references/': RouteRecordInfo<
+      '/fleet/fuel-references/',
+      '/fleet/fuel-references',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/fuel-references/[id]': RouteRecordInfo<
+      '/fleet/fuel-references/[id]',
+      '/fleet/fuel-references/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/fleet/fuel-refills/': RouteRecordInfo<
       '/fleet/fuel-refills/',
       '/fleet/fuel-refills',
@@ -325,6 +339,20 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/fleet/inspection-items/': RouteRecordInfo<
+      '/fleet/inspection-items/',
+      '/fleet/inspection-items',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/inspection-items/[id]': RouteRecordInfo<
+      '/fleet/inspection-items/[id]',
+      '/fleet/inspection-items/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/fleet/inspections/': RouteRecordInfo<
       '/fleet/inspections/',
       '/fleet/inspections',
@@ -358,6 +386,20 @@ declare module 'vue-router/auto-routes' {
       '/fleet/live-map',
       Record<never, never>,
       Record<never, never>,
+      | never
+    >,
+    '/fleet/provider-types/': RouteRecordInfo<
+      '/fleet/provider-types/',
+      '/fleet/provider-types',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/provider-types/[id]': RouteRecordInfo<
+      '/fleet/provider-types/[id]',
+      '/fleet/provider-types/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
       | never
     >,
     '/fleet/providers/': RouteRecordInfo<
@@ -948,6 +990,13 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/me/vehicle': RouteRecordInfo<
+      '/me/vehicle',
+      '/me/vehicle',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/planning/calendar/': RouteRecordInfo<
       '/planning/calendar/',
       '/planning/calendar',
@@ -1466,6 +1515,22 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | 'id'
     }
+    'src/pages/fleet/fuel-references/index.vue': {
+      routes:
+        | '/fleet/fuel-references/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/fuel-references/[id].vue': {
+      routes:
+        | '/fleet/fuel-references/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
     'src/pages/fleet/fuel-refills/index.vue': {
       routes:
         | '/fleet/fuel-refills/'
@@ -1514,6 +1579,22 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | 'id'
     }
+    'src/pages/fleet/inspection-items/index.vue': {
+      routes:
+        | '/fleet/inspection-items/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/inspection-items/[id].vue': {
+      routes:
+        | '/fleet/inspection-items/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
     'src/pages/fleet/inspections/index.vue': {
       routes:
         | '/fleet/inspections/'
@@ -1553,6 +1634,22 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | never
+    }
+    'src/pages/fleet/provider-types/index.vue': {
+      routes:
+        | '/fleet/provider-types/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/provider-types/[id].vue': {
+      routes:
+        | '/fleet/provider-types/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
     }
     'src/pages/fleet/providers/index.vue': {
       routes:
@@ -2221,6 +2318,14 @@ declare module 'vue-router/auto-routes' {
     'src/pages/me/tour.vue': {
       routes:
         | '/me/tour'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/me/vehicle.vue': {
+      routes:
+        | '/me/vehicle'
       views:
         | never
       pathParamNames:

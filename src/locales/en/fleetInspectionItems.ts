@@ -1,0 +1,29 @@
+export default {
+  'fleet.inspectionItems.title': 'Inspection grid',
+  'fleet.inspectionItems.card': 'Inspection item card',
+  'fleet.inspectionItems.new': 'New inspection item',
+  'fleet.inspectionItems.loadingList': 'Loading the grid…',
+  'fleet.inspectionItems.noResults': 'No item in the grid.',
+  'fleet.inspectionItems.noSearchResults': 'No item matches "{query}".',
+  'fleet.inspectionItems.saveSuccess': 'Item saved.',
+  'fleet.inspectionItems.saveError': 'The item could not be saved.',
+  'fleet.inspectionItems.createError': 'The item could not be created.',
+  'fleet.inspectionItems.deleteError': 'The item could not be deleted.',
+  'fleet.inspectionItems.confirmDelete': 'Delete the item',
+  'fleet.inspectionItems.confirmDeleteMsg':
+    'The item "{name}" will be removed from the grid; signed reports keep it.',
+  'fleet.inspectionItems.search.all': 'Code or label',
+  'fleet.inspectionItems.col.no': 'Code',
+  'fleet.inspectionItems.col.label': 'Item',
+  'fleet.inspectionItems.col.part': 'Part',
+  'fleet.inspectionItems.col.sortOrder': 'Order',
+  'fleet.inspectionItems.col.active': 'Active',
+  'fleet.inspectionItems.form.general': 'General',
+  'fleet.inspectionItems.form.no': 'Code',
+  'fleet.inspectionItems.form.label': 'Item',
+  'fleet.inspectionItems.form.part': 'Part',
+  'fleet.inspectionItems.form.partHint':
+    'Tank items are only inspected on a vehicle that carries one.',
+  'fleet.inspectionItems.form.sortOrder': 'Order',
+  'fleet.inspectionItems.form.active': 'Active'
+}

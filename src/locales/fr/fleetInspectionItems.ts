@@ -1,0 +1,29 @@
+export default {
+  'fleet.inspectionItems.title': "Grille d'inspection",
+  'fleet.inspectionItems.card': "Fiche poste d'inspection",
+  'fleet.inspectionItems.new': "Nouveau poste d'inspection",
+  'fleet.inspectionItems.loadingList': 'Chargement de la grille…',
+  'fleet.inspectionItems.noResults': 'Aucun poste dans la grille.',
+  'fleet.inspectionItems.noSearchResults': 'Aucun poste ne correspond à « {query} ».',
+  'fleet.inspectionItems.saveSuccess': 'Poste enregistré.',
+  'fleet.inspectionItems.saveError': "Le poste n'a pas pu être enregistré.",
+  'fleet.inspectionItems.createError': "Le poste n'a pas pu être créé.",
+  'fleet.inspectionItems.deleteError': "Le poste n'a pas pu être supprimé.",
+  'fleet.inspectionItems.confirmDelete': 'Supprimer le poste',
+  'fleet.inspectionItems.confirmDeleteMsg':
+    'Le poste « {name} » sera retiré de la grille ; les rapports déjà signés le gardent.',
+  'fleet.inspectionItems.search.all': 'Code ou libellé',
+  'fleet.inspectionItems.col.no': 'Code',
+  'fleet.inspectionItems.col.label': 'Poste',
+  'fleet.inspectionItems.col.part': 'Partie',
+  'fleet.inspectionItems.col.sortOrder': 'Ordre',
+  'fleet.inspectionItems.col.active': 'Actif',
+  'fleet.inspectionItems.form.general': 'Général',
+  'fleet.inspectionItems.form.no': 'Code',
+  'fleet.inspectionItems.form.label': 'Poste',
+  'fleet.inspectionItems.form.part': 'Partie',
+  'fleet.inspectionItems.form.partHint':
+    "Les postes de la citerne ne s'inspectent que sur un véhicule qui en porte une.",
+  'fleet.inspectionItems.form.sortOrder': 'Ordre',
+  'fleet.inspectionItems.form.active': 'Actif'
+}
