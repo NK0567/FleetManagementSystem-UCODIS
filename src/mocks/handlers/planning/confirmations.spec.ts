@@ -9,6 +9,9 @@ let server: MockServer
 
 beforeEach(() => {
   server = createTestServer()
+  // A second agent of the confirmation team, with the same role as CLI001.
+  const agent = server.db.userAccounts.findOrFail('CLI001')
+  server.db.userAccounts.insert({ ...agent, no: 'CLI002', name: 'Second agent' })
 })
 
 const send = (
@@ -50,10 +53,10 @@ describe('recipient confirmation', () => {
     const path = `/planning/transport-orders/${free.orderNo}/lines/${free.lineNo}`
     expect((await send('post', `${path}/take`)).data.data).toMatchObject({ agent: 'CLI001' })
     // Another agent can neither take nor confirm it until it is released.
-    expect((await send('post', `${path}/take`, {}, 'ADM001')).status).toBe(409)
-    expect((await send('post', `${path}/confirm`, {}, 'ADM001')).status).toBe(409)
+    expect((await send('post', `${path}/take`, {}, 'CLI002')).status).toBe(409)
+    expect((await send('post', `${path}/confirm`, {}, 'CLI002')).status).toBe(409)
     await send('post', `${path}/release`)
-    expect((await send('post', `${path}/take`, {}, 'ADM001')).status).toBe(200)
+    expect((await send('post', `${path}/take`, {}, 'CLI002')).status).toBe(200)
   })
 
   it('leaves the retained date to the planner, who takes the line into the pending order of that day', async () => {

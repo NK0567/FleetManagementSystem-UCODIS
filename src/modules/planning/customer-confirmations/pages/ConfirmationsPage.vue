@@ -6,7 +6,6 @@ import {
   CircleCheck,
   ExternalLink,
   Hand,
-  MessageSquareWarning,
   PhoneCall,
   Undo2,
   UserX
@@ -18,13 +17,7 @@ import { useUserStore } from '@/stores/user'
 import { formatDate, formatDateTime, formatNumber } from '@/utils/format'
 import type { ConfirmationState } from '../domain/confirmation'
 import { useConfirmationStore } from '../stores/confirmationStore'
-import {
-  RECEPTION_STATES,
-  type AnsweredLineApi,
-  type ConfirmationLineApi,
-  type ReceptionLineApi,
-  type ReceptionState
-} from '../types/confirmation.types'
+import type { AnsweredLineApi, ConfirmationLineApi } from '../types/confirmation.types'
 
 type DateAction = 'client-date'
 type QueueTab = ConfirmationState | 'answered'
@@ -43,12 +36,6 @@ const STATE_TONES: Record<ConfirmationState, StatusTone> = {
   confirmed: 'success',
   replanned: 'neutral'
 }
-const RECEPTION_TONES: Record<ReceptionState, StatusTone> = {
-  awaiting: 'warning',
-  contested: 'danger',
-  to_rate: 'info'
-}
-const SCORES = [1, 2, 3, 4, 5]
 
 const buttonClass =
   'cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed'
@@ -60,8 +47,6 @@ const tabClass = (active: boolean) =>
 const { t } = useI18n()
 const store = useConfirmationStore()
 const { canExecute } = usePermissions('CUSTOMERCONFIRMATION')
-/* A contested delivery is the planner's to handle (TRS04-US03). */
-const { canUpdate: canHandleContest } = usePermissions('TRANSPORTORDER')
 
 const userStore = useUserStore()
 const optionsStore = useOptionsStore()
@@ -79,18 +64,10 @@ const tabCount = (tab: QueueTab) =>
   tab === 'answered' ? store.answered.length : countOf(store.lines, tab)
 /** A line taken by another agent is theirs: hidden by default, shown on demand. */
 const hideTakenByOthers = ref(true)
-const receptionTab = ref<ReceptionState>('awaiting')
 
 const unavailable = ref<ConfirmationLineApi | null>(null)
 const dating = ref<{ line: ConfirmationLineApi; action: DateAction } | null>(null)
 const date = ref('')
-const confirmingReception = ref<ReceptionLineApi | null>(null)
-const signer = ref('')
-const contesting = ref<ReceptionLineApi | null>(null)
-const handling = ref<ReceptionLineApi | null>(null)
-const rating = ref<ReceptionLineApi | null>(null)
-const score = ref<number | null>(null)
-const scoreComment = ref('')
 
 const countOf = <T extends { state: string }>(rows: T[], state: string) =>
   rows.filter((row) => row.state === state).length
@@ -113,12 +90,6 @@ const kpis = computed(() => [
     icon: CircleCheck,
     value: countOf(store.lines, 'confirmed'),
     label: t('planning.confirmations.kpi.confirmed')
-  },
-  {
-    key: 'contested',
-    icon: MessageSquareWarning,
-    value: countOf(store.receptions, 'contested'),
-    label: t('planning.confirmations.kpi.contested')
   }
 ])
 
@@ -136,10 +107,6 @@ const hiddenCount = computed(
     store.lines.filter(
       (line) => line.state === confirmationTab.value && isOpen(line) && takenByOther(line)
     ).length
-)
-
-const visibleReceptions = computed(() =>
-  store.receptions.filter((line) => line.state === receptionTab.value)
 )
 
 const keyOf = (line: { orderNo: string; lineNo: number }) => `${line.orderNo}-${line.lineNo}`
@@ -165,41 +132,6 @@ async function onDate() {
 async function onUnavailable(choice: { reasonNo: string; comment: string }) {
   if (unavailable.value && (await store.markUnavailable(unavailable.value, choice))) {
     unavailable.value = null
-  }
-}
-
-function openReceptionConfirm(line: ReceptionLineApi) {
-  signer.value = ''
-  confirmingReception.value = line
-}
-
-async function onReceptionConfirm() {
-  const line = confirmingReception.value
-  if (!line || !signer.value.trim()) return
-  if (await store.confirmReception(line, signer.value.trim())) confirmingReception.value = null
-}
-
-async function onContest(choice: { reasonNo: string; comment: string }) {
-  if (contesting.value && (await store.contestReception(contesting.value, choice))) {
-    contesting.value = null
-  }
-}
-
-async function onHandle(note: string) {
-  if (handling.value && (await store.handleContest(handling.value, note))) handling.value = null
-}
-
-function openRating(line: ReceptionLineApi) {
-  score.value = null
-  scoreComment.value = ''
-  rating.value = line
-}
-
-async function onRate() {
-  const line = rating.value
-  if (!line || score.value === null) return
-  if (await store.rateSatisfaction(line, score.value, scoreComment.value.trim())) {
-    rating.value = null
   }
 }
 
@@ -532,143 +464,6 @@ onMounted(() => {
         </tbody>
       </table>
     </section>
-
-    <section class="bg-card border border-border rounded overflow-x-auto">
-      <div class="px-4 py-3 border-b border-border">
-        <h2 class="text-sm font-semibold text-card-foreground">
-          {{ t('planning.confirmations.receptionTitle') }}
-        </h2>
-        <p class="text-xs text-muted-foreground">
-          {{ t('planning.confirmations.receptionSubtitle') }}
-        </p>
-      </div>
-      <nav class="flex flex-wrap gap-1 px-2 border-b border-border">
-        <button
-          v-for="state in RECEPTION_STATES"
-          :key="state"
-          type="button"
-          class="cursor-pointer px-3 py-2 text-sm border-b-2 -mb-px transition"
-          :class="tabClass(receptionTab === state)"
-          @click="receptionTab = state"
-        >
-          {{ t(`planning.confirmations.reception.state.${state}`) }}
-          <span class="ml-1 text-xs tabular-nums text-muted-foreground">
-            {{ countOf(store.receptions, state) }}
-          </span>
-        </button>
-      </nav>
-      <table class="w-full text-sm">
-        <thead>
-          <tr class="bg-muted/40 text-xs text-muted-foreground">
-            <th class="px-3 py-2 font-semibold text-left">
-              {{ t('planning.confirmations.col.order') }}
-            </th>
-            <th class="px-3 py-2 font-semibold text-left">
-              {{ t('planning.confirmations.col.recipient') }}
-            </th>
-            <th class="px-3 py-2 font-semibold text-left">
-              {{ t('planning.confirmations.col.product') }}
-            </th>
-            <th class="px-3 py-2 font-semibold text-right">
-              {{ t('planning.confirmations.col.quantity') }}
-            </th>
-            <th class="px-3 py-2 font-semibold text-right">
-              {{ t('planning.confirmations.col.received') }}
-            </th>
-            <th class="px-3 py-2 font-semibold text-left">
-              {{ t('planning.confirmations.col.state') }}
-            </th>
-            <th class="px-3 py-2 font-semibold text-right">
-              {{ t('planning.confirmations.col.actions') }}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="!visibleReceptions.length">
-            <td colspan="7" class="px-3 py-4 text-muted-foreground">
-              {{ t('planning.confirmations.receptionEmpty') }}
-            </td>
-          </tr>
-          <tr v-for="line in visibleReceptions" :key="keyOf(line)" class="border-t border-border">
-            <td class="px-3 py-2 whitespace-nowrap">
-              <RouterLink :to="orderCard(line.orderNo)" class="text-primary hover:underline">
-                {{ line.orderNo }}
-              </RouterLink>
-              <span class="text-xs text-muted-foreground">
-                · {{ t('planning.confirmations.lineNo', { no: line.lineNo }) }}
-              </span>
-            </td>
-            <td class="px-3 py-2">
-              <p class="text-card-foreground">{{ line.recipientName || '' }}</p>
-              <p class="text-xs text-muted-foreground">{{ line.deliveryPointName }}</p>
-            </td>
-            <td class="px-3 py-2">{{ line.productName || '' }}</td>
-            <td class="px-3 py-2 text-right tabular-nums whitespace-nowrap">
-              {{ formatNumber(line.quantity) }} {{ line.unit }}
-            </td>
-            <td class="px-3 py-2 text-right tabular-nums whitespace-nowrap">
-              {{ formatNumber(line.receivedQuantity) }}
-              <template v-if="line.receivedQuantity !== null">{{ line.unit }}</template>
-            </td>
-            <td class="px-3 py-2">
-              <div class="flex flex-wrap gap-1">
-                <StatusPill
-                  :label="t(`planning.confirmations.reception.state.${line.state}`)"
-                  :tone="RECEPTION_TONES[line.state]"
-                />
-                <StatusPill
-                  v-if="line.attested"
-                  :label="t('planning.confirmations.reception.attested')"
-                  tone="success"
-                />
-              </div>
-            </td>
-            <td class="px-3 py-2">
-              <div class="flex flex-wrap justify-end gap-1">
-                <template v-if="line.state === 'awaiting' && canExecute">
-                  <button
-                    type="button"
-                    :class="buttonClass"
-                    :disabled="store.acting"
-                    @click="openReceptionConfirm(line)"
-                  >
-                    <CircleCheck class="w-4 h-4 text-primary" />
-                    {{ t('planning.confirmations.reception.confirm') }}
-                  </button>
-                  <button
-                    type="button"
-                    :class="buttonClass"
-                    :disabled="store.acting"
-                    @click="contesting = line"
-                  >
-                    <MessageSquareWarning class="w-4 h-4 text-primary" />
-                    {{ t('planning.confirmations.reception.contest') }}
-                  </button>
-                </template>
-                <button
-                  v-else-if="line.state === 'contested' && canHandleContest"
-                  type="button"
-                  :class="buttonClass"
-                  :disabled="store.acting"
-                  @click="handling = line"
-                >
-                  {{ t('planning.confirmations.reception.handle') }}
-                </button>
-                <button
-                  v-else-if="line.state === 'to_rate' && canExecute"
-                  type="button"
-                  :class="buttonClass"
-                  :disabled="store.acting"
-                  @click="openRating(line)"
-                >
-                  {{ t('planning.confirmations.reception.score') }}
-                </button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
   </div>
 
   <PlanningReasonDialog
@@ -694,69 +489,5 @@ onMounted(() => {
     <p class="text-xs text-muted-foreground mt-2">
       {{ t('planning.confirmations.dateDialog.clientHint') }}
     </p>
-  </ConfirmDialog>
-  <ConfirmDialog
-    :open="confirmingReception !== null"
-    :title="t('planning.confirmations.reception.confirm')"
-    :confirm-disabled="!signer.trim()"
-    :loading="store.acting"
-    panel-class="max-w-md"
-    @confirm="onReceptionConfirm"
-    @cancel="confirmingReception = null"
-  >
-    <BaseFormField :label="t('planning.confirmations.reception.signer')" required>
-      <FormInput v-model="signer" :maxlength="100" />
-    </BaseFormField>
-  </ConfirmDialog>
-  <PlanningReasonDialog
-    :open="contesting !== null"
-    :title="t('planning.confirmations.reception.contest')"
-    kind="contestation"
-    :loading="store.acting"
-    destructive
-    @confirm="onContest"
-    @cancel="contesting = null"
-  />
-  <ReasonDialog
-    :open="handling !== null"
-    :title="t('planning.confirmations.reception.handle')"
-    :label="t('planning.confirmations.reception.handleNote')"
-    :min-length="1"
-    :loading="store.acting"
-    @confirm="onHandle"
-    @cancel="handling = null"
-  />
-  <ConfirmDialog
-    :open="rating !== null"
-    :title="t('planning.confirmations.reception.score')"
-    :confirm-disabled="score === null"
-    :loading="store.acting"
-    panel-class="max-w-md"
-    @confirm="onRate"
-    @cancel="rating = null"
-  >
-    <div class="space-y-3">
-      <BaseFormField :label="t('planning.confirmations.reception.scoreLabel')" required>
-        <div class="flex gap-1">
-          <button
-            v-for="value in SCORES"
-            :key="value"
-            type="button"
-            class="cursor-pointer w-9 h-9 border rounded text-sm tabular-nums transition"
-            :class="
-              score === value
-                ? 'border-primary bg-primary text-primary-foreground'
-                : 'border-border text-card-foreground hover:bg-accent'
-            "
-            @click="score = value"
-          >
-            {{ value }}
-          </button>
-        </div>
-      </BaseFormField>
-      <BaseFormField :label="t('planning.confirmations.reception.scoreComment')">
-        <FormTextarea v-model="scoreComment" :rows="3" :maxlength="500" />
-      </BaseFormField>
-    </div>
   </ConfirmDialog>
 </template>

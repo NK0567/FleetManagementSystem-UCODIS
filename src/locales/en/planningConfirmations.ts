@@ -1,6 +1,6 @@
 export default {
   'planning.confirmations.title': 'Recipient confirmation',
-  'planning.confirmations.subtitle': 'Recipient availability before departure and delivery reception.',
+  'planning.confirmations.subtitle': 'Recipient availability before departure.',
   'planning.confirmations.loading': 'Loading the lines to confirm…',
   'planning.confirmations.empty': 'No line to confirm.',
   'planning.confirmations.loadError': 'The confirmations could not be loaded.',

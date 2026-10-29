@@ -1,6 +1,6 @@
 export default {
   'planning.confirmations.title': 'Confirmation des destinataires',
-  'planning.confirmations.subtitle': 'Disponibilité des destinataires avant le départ et réception des livraisons.',
+  'planning.confirmations.subtitle': 'Disponibilité des destinataires avant le départ.',
   'planning.confirmations.loading': 'Chargement des lignes à confirmer…',
   'planning.confirmations.empty': 'Aucune ligne à confirmer.',
   'planning.confirmations.loadError': 'Les confirmations n’ont pas pu être chargées.',

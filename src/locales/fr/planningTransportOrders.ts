@@ -545,5 +545,6 @@ export default {
   'planning.transportOrders.view.late': 'En retard',
   'planning.transportOrders.delay': '+{min} min',
   'planning.transportOrders.board.eta': 'Arrivée estimée',
-  'planning.transportOrders.replan.proposedOn': 'Proposée au destinataire : {date}'
+  'planning.transportOrders.replan.proposedOn': 'Proposée au destinataire : {date}',
+  'planning.transportOrders.lines.trackingLink': 'Lien de suivi du destinataire'
 }

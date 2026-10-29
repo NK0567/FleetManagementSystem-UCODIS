@@ -162,7 +162,8 @@ export function transportOrdersApi(db: MockDatabase, userCode?: string): Transpo
             ) ??
             line.incident?.comment ??
             '',
-          returnNonconformityReasonName: reasons.get(line.returnNonconformityReasonNo ?? '') ?? ''
+          returnNonconformityReasonName: reasons.get(line.returnNonconformityReasonNo ?? '') ?? '',
+          trackingToken: line.trackingToken ?? null
         }
       })
       const recipients: string[] = []

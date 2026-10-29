@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { CalendarPlus, GripVertical, PackageCheck, Search, Undo2 } from '@lucide/vue'
+import { CalendarPlus, ExternalLink, GripVertical, PackageCheck, Search, Undo2 } from '@lucide/vue'
 import { remainderQuantity } from '@/modules/planning/reception/domain/reception'
 import { formatNumber } from '@/utils/format'
 import {
@@ -226,6 +226,16 @@ const actionClass =
             <p v-if="line.recipientName" class="text-xs text-muted-foreground">
               {{ line.recipientName }}
             </p>
+            <a
+              v-if="line.trackingToken"
+              :href="`#/suivi/${line.trackingToken}`"
+              target="_blank"
+              rel="noopener"
+              class="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+            >
+              <ExternalLink class="w-3 h-3" />
+              {{ t('planning.transportOrders.lines.trackingLink') }}
+            </a>
           </td>
           <td class="px-3 py-2 min-w-32">{{ line.productName }}</td>
           <td class="px-3 py-2 text-right tabular-nums whitespace-nowrap">

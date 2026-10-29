@@ -91,6 +91,8 @@ export interface TransportOrderLineApi {
   gapQualification?: 'gain' | 'loss' | null
   gapComment?: string
   gapImputableToDriver?: boolean | null
+  /** The recipient's own tracking page, once the order is planned. */
+  trackingToken?: string | null
 }
 
 /** What the lines action accepts: a request, or a line keyed without one. */
