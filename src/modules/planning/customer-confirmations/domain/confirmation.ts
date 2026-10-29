@@ -51,6 +51,31 @@ export interface LineFollowUp {
   contestHandlingReasonNo: string | null
   satisfactionScore: number | null
   satisfactionComment: string
+  /** Whether a qualified gap is the driver's doing (TRS03-US17). */
+  gapImputableToDriver?: boolean | null
+  /** A product line left undelivered at the declaration, with its reason (TRS03-US11). */
+  undeliveredReasonNo?: string | null
+  undeliveredComment?: string
+  /** What the driver measured at the delivery, for fuel: volume, temperature, density, 15 °C (TRS03-US10). */
+  deliveryMeasures?: {
+    deliveredVolumeL: number | null
+    temperatureC: number | null
+    density: number | null
+    volume15L: number | null
+  } | null
+  /** A delivery note cancelled by an incident or deviated (TRS01-US25, US26). */
+  incident?: {
+    kind: 'cancellation' | 'deviation' | 'return'
+    at: string
+    by: string
+    incidentTypeNo: string
+    reasonTypeNo: string
+    reasonCodeNo: string
+    comment: string
+    deviatedToRequestNo: string | null
+  } | null
+  /** The day from which the recipient can be delivered, given with a postponement (TRS03-US13). */
+  availableFrom?: string | null
   /** Messages sent to the recipient on his channel as the delivery moves on (TRS02-US02). */
   recipientMessages?: { at: string; channel: string; kind: string }[]
   handedBackAt: string | null
@@ -124,6 +149,7 @@ type TourLine = {
   replannedAt: string | null
   nonconformityAt?: string | null
   returnedAt?: string | null
+  incident?: unknown
 }
 
 /** A line left the tour: the recipient is unavailable, the goods failed the loading check, or the delivery was sent back to the pool. */
@@ -131,6 +157,7 @@ export function lineOutOfTour(line: TourLine): boolean {
   return (
     line.unavailableAt !== null ||
     line.replannedAt !== null ||
+    !!line.incident ||
     !!line.nonconformityAt ||
     !!line.returnedAt
   )
@@ -141,6 +168,20 @@ export function confirmationState(line: TourLine): ConfirmationState {
   if (line.unavailableAt || line.nonconformityAt) return 'unavailable'
   if (line.confirmedAt) return 'confirmed'
   return 'pending'
+}
+
+/** The driver has marked his arrival on a point, or already settled one (TRS03-US09). */
+export function firstArrivalMarked(
+  lines: readonly {
+    arrivedAt?: string | null
+    declaredAt?: string | null
+    refusalAt?: string | null
+    postponedAt?: string | null
+  }[]
+): boolean {
+  return lines.some(
+    (line) => !!line.arrivedAt || !!line.declaredAt || !!line.refusalAt || !!line.postponedAt
+  )
 }
 
 /** Nothing left in the tour still waits for a yes. An empty tour counts as confirmed. */

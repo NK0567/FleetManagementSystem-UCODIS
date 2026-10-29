@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { formatDate } from '@/utils/format'
 import { FileWarning, RefreshCw } from '@lucide/vue'
 import { apiErrorMessage } from '@/core/api/apiError'
 import type { CardOpenMode } from '@/composables/cardOpenMode'
@@ -170,6 +171,40 @@ async function confirmDeclare() {
           class="flex-1 min-h-0 overflow-y-auto transition-opacity duration-200"
           :class="isSaving ? 'opacity-60 pointer-events-none select-none' : ''"
         >
+          <div
+            v-if="item && item.current && (item.state === 'expiring' || item.state === 'expired')"
+            class="mx-4 sm:mx-6 lg:mx-8 mt-4 rounded px-3 py-2 text-sm space-y-1"
+            :class="
+              item.state === 'expired'
+                ? 'bg-destructive/10 text-destructive'
+                : 'bg-warning-bg text-warning'
+            "
+            role="alert"
+            data-testid="document-alert"
+          >
+            <p class="font-medium">
+              {{
+                item.state === 'expired'
+                  ? t('fleet.documents.alert.expired', { date: formatDate(item.expiryDate) })
+                  : t('fleet.documents.alert.expiring', {
+                      date: formatDate(item.expiryDate),
+                      days: item.effectiveNoticeDays
+                    })
+              }}
+            </p>
+            <p
+              v-for="sent in item.notifications"
+              :key="`${sent.channel}-${sent.to}`"
+              class="text-xs"
+            >
+              {{
+                t(`fleet.documents.alert.sent.${sent.channel}`, {
+                  to: sent.to,
+                  date: formatDate(sent.sentAt)
+                })
+              }}
+            </p>
+          </div>
           <DocumentForm
             ref="formRef"
             :initial-data="item ?? {}"

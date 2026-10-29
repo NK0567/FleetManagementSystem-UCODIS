@@ -22,12 +22,26 @@ export default {
   'maintenance.serviceDue.everyKm': 'tous les {km} km',
   'maintenance.serviceDue.everyDays': 'tous les jours | tous les {count} jours',
   'maintenance.serviceDue.provisional':
-    "Plan provisoire : cette échéance alerte mais n'immobilise pas le véhicule.",
+    "Plan provisoire : cette échéance est réelle et à traiter, mais son intervalle reste à confirmer ; elle n'immobilise pas le véhicule.",
   'maintenance.serviceDue.lastPassage': 'Dernier passage le {date}, à {km} km.',
   'maintenance.serviceDue.noPassage': 'Aucun passage connu : renseignez le dernier.',
   'maintenance.serviceDue.coveredBy': "Couverte par l'ordre",
   'maintenance.serviceDue.action.openWorkOrder': "Créer l'ordre préventif",
   'maintenance.serviceDue.action.recordPassage': 'Saisir un passage',
   'maintenance.serviceDue.form.date': 'Date du passage',
-  'maintenance.serviceDue.form.km': 'Kilométrage'
+  'maintenance.serviceDue.form.km': 'Kilométrage',
+  'maintenance.serviceDue.col.nextHours': 'Échéance (h)',
+  'maintenance.serviceDue.col.hoursRemaining': 'Heures restantes',
+  'maintenance.serviceDue.col.currentHours': 'Compteur horaire',
+  'maintenance.serviceDue.everyHours': 'toutes les {hours} heures moteur',
+  'maintenance.serviceDue.blockingHint':
+    "Échéance dépassée : le véhicule est indisponible jusqu'au passage.",
+  'maintenance.serviceDue.dueSoonHint':
+    'Échéance proche : une alerte est partie vers le responsable maintenance.',
+  'maintenance.serviceDue.hourMeter':
+    'Compteur horaire : {hours} h (au dernier passage : {last} h).',
+  'maintenance.serviceDue.noHourMeter': 'Aucun relevé du compteur horaire pour ce véhicule.',
+  'maintenance.serviceDue.action.recordHours': 'Relever le compteur horaire',
+  'maintenance.serviceDue.form.hours': 'Heures moteur au passage',
+  'maintenance.serviceDue.form.engineHours': 'Heures moteur affichées'
 }

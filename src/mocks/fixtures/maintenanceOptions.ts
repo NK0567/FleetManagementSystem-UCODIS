@@ -16,7 +16,10 @@ export const MAINTENANCE_OPTION_SETS: Record<string, Record<string, LocalizedTex
   downtimeRole: {
     breakdown: { fr: 'Panne', en: 'Breakdown' },
     preventive: { fr: 'Entretien préventif', en: 'Preventive service' },
-    accident: { fr: 'Accident', en: 'Accident' }
+    accident: { fr: 'Accident', en: 'Accident' },
+    expired_document: { fr: 'Document obligatoire expiré', en: 'Mandatory document expired' },
+    recheck: { fr: 'Contre-visite à passer', en: 'Re-inspection due' },
+    overdue_service: { fr: 'Entretien dépassé', en: 'Service overdue' }
   },
   downtimeStatus: {
     open: { fr: 'En cours', en: 'Open' },
@@ -52,6 +55,7 @@ export const MAINTENANCE_OPTION_SETS: Record<string, Record<string, LocalizedTex
     open: { fr: 'Déclaré', en: 'Reported' },
     diagnosed: { fr: 'Diagnostiqué', en: 'Diagnosed' },
     in_progress: { fr: 'En cours', en: 'In progress' },
+    awaiting_parts: { fr: 'En attente de pièce', en: 'Awaiting parts' },
     awaiting_validation: { fr: 'À valider', en: 'To validate' },
     closed: { fr: 'Clôturé', en: 'Closed' },
     cancelled: { fr: 'Annulé', en: 'Cancelled' }
@@ -66,16 +70,21 @@ export const MAINTENANCE_OPTION_SETS: Record<string, Record<string, LocalizedTex
     external_update: { fr: 'Suivi du garage', en: 'Garage follow-up' },
     returned: { fr: 'Retour du garage', en: 'Back from the garage' },
     completed: { fr: 'Fin des travaux déclarée', en: 'Work declared finished' },
+    nomenclature: { fr: 'Correspondance validée', en: 'Mapping confirmed' },
     refused: { fr: 'Fin refusée', en: 'Finish refused' },
     validated: { fr: 'Ordre validé', en: 'Order validated' },
     cancelled: { fr: 'Ordre annulé', en: 'Order cancelled' }
+  },
+  nomenclatureState: {
+    to_confirm: { fr: 'À valider', en: 'To confirm' },
+    confirmed: { fr: 'Validée', en: 'Confirmed' }
   },
   serviceDueStatus: {
     unknown: { fr: 'À renseigner', en: 'To fill in' },
     upcoming: { fr: 'À venir', en: 'Upcoming' },
     due_soon: { fr: 'Proche', en: 'Due soon' },
-    overdue: { fr: 'Dépassée', en: 'Overdue' },
-    blocking: { fr: 'Bloquante', en: 'Blocking' }
+    overdue: { fr: 'Dépassée, plan provisoire', en: 'Overdue, provisional plan' },
+    blocking: { fr: 'Dépassée, véhicule indisponible', en: 'Overdue, vehicle unavailable' }
   },
   operationNature: {
     check: { fr: 'Vérifier', en: 'Check' },

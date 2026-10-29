@@ -52,6 +52,9 @@ export function fleetReferenceData(db: MockDatabase): Record<string, ReferenceIt
     siteTypes: db.siteTypes
       .all()
       .map((type) => ({ code: type.no, description: type.name, active: type.active })),
+    providerTypes: db.providerTypes
+      .all()
+      .map((type) => ({ code: type.no, description: type.name, active: type.active })),
     sites: db.sites
       .all()
       .map((site) => ({ code: site.no, description: site.name, active: site.active })),

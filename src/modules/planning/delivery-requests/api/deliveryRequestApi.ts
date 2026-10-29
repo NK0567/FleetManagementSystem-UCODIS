@@ -16,5 +16,10 @@ export const deliveryRequestApi = {
       body
     ),
   importRows: (rows: Record<string, unknown>[]) =>
-    httpClient.post<SingleResponse<ImportReport>>(`${basePath}/import`, { rows })
+    httpClient.post<SingleResponse<ImportReport>>(`${basePath}/import`, { rows }),
+  syncConnector: () =>
+    httpClient.post<SingleResponse<{ received: string[] }>>(`${basePath}/connector/sync`, {}),
+  /** The public API external orderers send their orders to (TRS01-US01). */
+  sendThroughApi: (body: Record<string, unknown>) =>
+    httpClient.post<SingleResponse<{ no: string }>>('/public/orderer-api/orders', body)
 }

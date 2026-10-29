@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Mail, PackageCheck, Printer } from '@lucide/vue'
+import { Bot, Cable, Mail, PackageCheck, Printer } from '@lucide/vue'
 import { apiErrorMessage } from '@/core/api/apiError'
 import { usePermissions } from '@/composables/usePermissions'
 import { printElement } from '@/utils/printElement'
@@ -9,12 +9,13 @@ import { pickupApi } from '../api/pickupApi'
 import type { PickupEntryInput, PickupNoteApi } from '../types/pickup.types'
 import PickupConfirmDialog from './PickupConfirmDialog.vue'
 import PickupNoteView from './PickupNoteView.vue'
+import PickupOperations from './PickupOperations.vue'
 
 /**
  * The pickup note on the order card: read by the planner, sent to the site and confirmed by
  * the delivery manager or the site (TRS03-US03, US04).
  */
-const props = defineProps<{ orderNo: string; orderStatus: string }>()
+const props = defineProps<{ orderNo: string; orderStatus: string; fleet?: boolean }>()
 const emit = defineEmits<{ changed: [] }>()
 const { t } = useI18n()
 const { canRead, canUpdate } = usePermissions('LOADING')
@@ -77,6 +78,20 @@ async function confirm(documentRef: string, entries: PickupEntryInput[]) {
   }
 }
 
+async function simple(step: () => Promise<PickupNoteApi>) {
+  busy.value = true
+  error.value = null
+  try {
+    note.value = await step()
+    emit('changed')
+  } catch (cause) {
+    error.value = apiErrorMessage(cause, t('planning.pickup.saveError'))
+  } finally {
+    busy.value = false
+  }
+}
+const sentElectronically = computed(() => (note.value?.sentTo ?? '').startsWith('liaison'))
+
 function startSend() {
   email.value = note.value?.sentTo || note.value?.pickupSiteEmail || ''
   sending.value = true
@@ -103,6 +118,29 @@ defineExpose({ visible: () => !!note.value })
       >
         <Mail class="w-4 h-4 text-primary" />
         {{ note.sentAt ? t('planning.pickup.resend') : t('planning.pickup.send') }}
+      </button>
+      <button
+        v-if="canUpdate && note.status !== 'confirmed'"
+        type="button"
+        :class="buttonClass"
+        :disabled="busy"
+        @click="simple(() => pickupApi.sendElectronic(orderNo))"
+      >
+        <Cable class="w-4 h-4 text-primary" /> {{ t('planning.pickup.sendElectronic') }}
+      </button>
+      <button
+        v-if="
+          canUpdate &&
+          sentElectronically &&
+          note.status !== 'confirmed' &&
+          note.orderStatus === 'confirmed'
+        "
+        type="button"
+        :class="buttonClass"
+        :disabled="busy"
+        @click="simple(() => pickupApi.systemConfirm(orderNo))"
+      >
+        <Bot class="w-4 h-4 text-primary" /> {{ t('planning.pickup.systemConfirm') }}
       </button>
       <button
         v-if="canUpdate && note.status !== 'confirmed' && note.orderStatus === 'confirmed'"
@@ -135,6 +173,12 @@ defineExpose({ visible: () => !!note.value })
       </button>
     </div>
     <PickupNoteView ref="view" :note="note" />
+    <PickupOperations
+      v-if="canUpdate"
+      :note="note"
+      :fleet="!!fleet"
+      @changed="((note = $event), emit('changed'))"
+    />
     <PickupConfirmDialog
       :note="confirming"
       :loading="busy"

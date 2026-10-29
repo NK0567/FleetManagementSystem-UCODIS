@@ -11,7 +11,15 @@ const { t } = useI18n()
 function addOperation() {
   operations.value = [
     ...operations.value,
-    { no: '', label: '', subsystemNo: '', nature: 'check', intervalKm: null, intervalDays: null }
+    {
+      no: '',
+      label: '',
+      subsystemNo: '',
+      nature: 'check',
+      intervalKm: null,
+      intervalHours: null,
+      intervalDays: null
+    }
   ]
 }
 
@@ -53,6 +61,9 @@ function readInterval(value: string | number): number | null {
             </th>
             <th class="px-3 py-2 font-semibold">
               {{ t('maintenance.maintenancePlans.operations.intervalKm') }}
+            </th>
+            <th class="px-3 py-2 font-semibold">
+              {{ t('maintenance.maintenancePlans.operations.intervalHours') }}
             </th>
             <th class="px-3 py-2 font-semibold">
               {{ t('maintenance.maintenancePlans.operations.intervalDays') }}
@@ -110,6 +121,15 @@ function readInterval(value: string | number): number | null {
                 inputmode="numeric"
                 :disabled="props.disabled"
                 @update:model-value="update(index, { intervalKm: readInterval($event) })"
+              />
+            </td>
+            <td class="px-3 py-2 min-w-28">
+              <FormInput
+                :model-value="operation.intervalHours"
+                numeric-only
+                inputmode="numeric"
+                :disabled="props.disabled"
+                @update:model-value="update(index, { intervalHours: readInterval($event) })"
               />
             </td>
             <td class="px-3 py-2 min-w-28">

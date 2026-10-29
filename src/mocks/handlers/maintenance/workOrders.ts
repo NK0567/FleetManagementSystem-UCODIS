@@ -50,10 +50,32 @@ import type { MockRouter } from '../../http/router'
 import { sessionUser, type MockRequest } from '../../http/types'
 import { MAINTENANCE_MESSAGES } from './messages'
 import { recordPassages } from './serviceRecords'
+import { engineHoursByVehicle } from './engineHours'
+import { driverVehicle } from '../fleet/driverVehicle'
 import { SOURCED_ORIGINS, sourceRequest } from './workOrderSources'
 import { addMovement } from './stockLedger'
 import { technicianIssue } from '@/modules/maintenance/workshop-load/domain/workshopLoad'
 import { maintenanceSettings } from './settings'
+import { leadTimeDays } from '@/modules/maintenance/purchase-requests/domain/purchaseRequest'
+import {
+  proposeSubsystem,
+  type SubsystemKeywords
+} from '@/modules/maintenance/work-orders/domain/historyImport'
+
+/** How the workshop names the work on each subsystem, to read the former books. */
+const SUBSYSTEM_KEYWORDS: SubsystemKeywords = {
+  ENGINE: ['vidange', 'huile', 'courroie', 'injecteur', 'culasse', 'distribution'],
+  TRANSMISSION: ['embrayage', 'boite', 'pont', 'cardan'],
+  AIR: ['compresseur', 'dessiccateur'],
+  'FUEL-SYSTEM': ['gazole', 'gasoil', 'carburant', 'injection'],
+  COOLING: ['radiateur', 'thermostat', 'durite'],
+  BRAKES: ['frein', 'plaquette', 'garniture', 'disque', 'tambour'],
+  STEERING: ['amortisseur', 'rotule', 'ressort', 'lame', 'suspension'],
+  WHEELS: ['roue', 'roulement', 'moyeu', 'pneu'],
+  ELECTRONICS: ['batterie', 'alternateur', 'demarreur', 'eclairage', 'feux'],
+  CHASSIS: ['chassis', 'tole', 'carrosserie', 'sellette', 'attelage'],
+  TANK: ['citerne', 'vanne', 'compartiment', 'clapet', 'soupape']
+}
 
 /** Shortest account of what was done that the workshop accepts. */
 const MIN_TEXT = 10
@@ -66,6 +88,13 @@ export function workOrdersApi(db: MockDatabase): WorkOrderApi[] {
   const names = new Map(
     db.employees.all().map((employee) => [employee.no, employeeFullName(employee)])
   )
+  const now = nowIso()
+  const waits = new Map<string, number>()
+  for (const purchase of db.purchaseRequests.all()) {
+    if (!purchase.workOrderNo || !purchase.orderedAt || purchase.cancelledAt) continue
+    const days = leadTimeDays(purchase.orderedAt, purchase.receivedAt ?? now) ?? 0
+    waits.set(purchase.workOrderNo, (waits.get(purchase.workOrderNo) ?? 0) + days)
+  }
   return db.workOrders.all().map((row) => {
     const hours = labourHours(row.labour)
     const labourCost = Math.round(hours * rate)
@@ -87,6 +116,16 @@ export function workOrdersApi(db: MockDatabase): WorkOrderApi[] {
       subcontractingCost: subcontracting,
       partsCost,
       pendingPartCount: row.parts.length - received.length,
+      partsWaitDays: Math.round((waits.get(row.no) ?? 0) * 10) / 10,
+      nomenclature: row.nomenclature ?? null,
+      nomenclatureState: row.nomenclature
+        ? row.nomenclature.confirmedAt
+          ? ('confirmed' as const)
+          : ('to_confirm' as const)
+        : null,
+      proposedSubsystemName: row.nomenclature?.proposedSubsystemNo
+        ? (codes.get(row.nomenclature.proposedSubsystemNo) ?? '')
+        : '',
       totalCost: labourCost + partsCost + subcontracting + (row.historicalCost ?? 0),
       diagnosedAt: row.diagnosis?.at ?? null,
       status: workOrderStatus({ ...row, diagnosedAt: row.diagnosis?.at ?? null })
@@ -103,7 +142,7 @@ function event(request: MockRequest, kind: WorkOrderEvent['kind'], comment = '')
 }
 
 /** Keeps the vehicle out from `at`, under the cause the application uses for this kind of order. */
-function openDowntime(
+export function openDowntime(
   db: MockDatabase,
   order: Pick<WorkOrderRow, 'no' | 'vehicleNo' | 'maintenanceType' | 'origin' | 'symptom'>,
   at: string,
@@ -425,7 +464,7 @@ export function registerWorkOrdersHandlers(router: MockRouter, db: MockDatabase)
     }
   )
 
-  // The garage's account of the work is the declared finish; the downtime stops at the return, not at validation.
+  // The garage's account of the work is the declared finish; the vehicle stays unavailable until the closing is validated.
   router.post(
     '/maintenance/work-orders/:no/return',
     { feature: 'WORKORDER', action: 'update' },
@@ -439,7 +478,6 @@ export function registerWorkOrdersHandlers(router: MockRouter, db: MockDatabase)
       }
       const code = sessionUser(request).code
       recordOdometer(order.vehicleNo, odometerKm, code)
-      endDowntime(db, order.downtimeNo, returnedAt, code)
       db.workOrders.update(order.no, {
         external: { ...order.external, returnedAt, finalAmount: readAmount(body, 'finalAmount') },
         completedAt: returnedAt,
@@ -460,6 +498,9 @@ export function registerWorkOrdersHandlers(router: MockRouter, db: MockDatabase)
     (request) => {
       const vehicleOf = vehicleByPlate(db)
       const code = sessionUser(request).code
+      const subsystems = db.failureCodes
+        .all()
+        .filter((item) => item.kind === 'subsystem' && item.active)
       return ok(
         importRows(readBody(request).rows, request, (input) => {
           const vehicleNo = vehicleOf(readString(input, 'plate'))
@@ -471,6 +512,7 @@ export function registerWorkOrdersHandlers(router: MockRouter, db: MockDatabase)
           const workDone = readString(input, 'workDone', { required: true })
           const cost = readNumber(input, 'cost', { required: true, min: 0 }) ?? 0
           const km = readNumber(input, 'odometerKm', { min: 0 }) ?? null
+          const category = readString(input, 'category')
           const at = `${doneOn}T08:00:00`
           const order = createWorkOrder(
             db,
@@ -494,13 +536,94 @@ export function registerWorkOrdersHandlers(router: MockRouter, db: MockDatabase)
             workDone,
             validatedAt: at,
             validatedBy: code,
-            historicalCost: cost
+            historicalCost: cost,
+            // A person confirms the proposed subsystem before the order counts by subsystem.
+            nomenclature: {
+              sourceText: category || workDone,
+              proposedSubsystemNo: proposeSubsystem(
+                [category, workDone],
+                subsystems,
+                SUBSYSTEM_KEYWORDS
+              ),
+              confirmedBy: null,
+              confirmedAt: null
+            }
           })
           return order.no
         })
       )
     }
   )
+
+  // The person who imports the history confirms or corrects the proposed subsystem, one order at a time.
+  router.post(
+    '/maintenance/work-orders/:no/confirm-nomenclature',
+    { feature: 'WORKORDER', action: 'execute' },
+    (request) => {
+      const order = db.workOrders.findOrFail(routeParam(request, 'no'))
+      if (!order.nomenclature || order.nomenclature.confirmedAt) {
+        throw conflict(MAINTENANCE_MESSAGES.nomenclatureNotPending)
+      }
+      const subsystemNo = readDiagnosisCode(readBody(request), 'subsystemNo', 'subsystem')
+      if (!subsystemNo) throw unprocessable(MAINTENANCE_MESSAGES.nomenclatureSubsystemMissing)
+      const user = sessionUser(request).code
+      const at = nowIsoDateTime()
+      db.workOrders.update(order.no, {
+        nomenclature: { ...order.nomenclature, confirmedBy: user, confirmedAt: at },
+        diagnosis: { subsystemNo, modeNo: null, causeNo: null, by: user, at },
+        history: [
+          ...order.history,
+          event(request, 'nomenclature', db.failureCodes.find(subsystemNo)?.name ?? subsystemNo)
+        ],
+        ...stampModified(request)
+      })
+      return respond(order.no)
+    }
+  )
+
+  // The driver reports a breakdown of his own vehicle from his phone: it opens a repair order at once.
+  router.post('/me/breakdowns', { feature: 'MYSPACE', action: 'execute' }, (request) => {
+    const { vehicleNo } = driverVehicle(db, request)
+    const body = readBody(request)
+    const order = createWorkOrder(
+      db,
+      {
+        vehicleNo,
+        maintenanceType: 'corrective',
+        severity: readEnum(body, 'severity', WORK_ORDER_SEVERITIES, { required: true }) ?? 'major',
+        origin: 'driver_report',
+        originNo: null,
+        symptom: readString(body, 'symptom', { required: true }),
+        declaredAt: nowIsoDateTime()
+      },
+      request
+    )
+    return created(myBreakdown(order.no))
+  })
+
+  router.get('/me/breakdowns', { feature: 'MYSPACE', action: 'read' }, (request) => {
+    const code = sessionUser(request).code
+    return ok(
+      workOrdersApi(db)
+        .filter((order) => order.declaredBy === code)
+        .sort((a, b) => b.declaredAt.localeCompare(a.declaredAt))
+        .slice(0, 5)
+        .map((order) => myBreakdown(order.no))
+    )
+  })
+
+  /** What the driver sees of an order he reported: no cost, no workshop detail. */
+  function myBreakdown(no: string) {
+    const order = workOrderApiOf(db, no)!
+    return {
+      no: order.no,
+      vehiclePlate: order.vehiclePlate,
+      symptom: order.symptom,
+      severity: order.severity,
+      declaredAt: order.declaredAt,
+      status: order.status
+    }
+  }
 
   // An order opened from a fleet record takes its vehicle, severity and symptom from it.
   router.post(
@@ -529,7 +652,8 @@ export function registerWorkOrdersHandlers(router: MockRouter, db: MockDatabase)
       maintenanceType: 'maintenanceType',
       severity: 'workOrderSeverity',
       origin: 'workOrderOrigin',
-      status: 'workOrderStatus'
+      status: 'workOrderStatus',
+      nomenclatureState: 'nomenclatureState'
     },
     create: (input, request) => {
       const origin = readEnum(input, 'origin', WORK_ORDER_ORIGINS, { required: true })
@@ -706,6 +830,7 @@ export function registerWorkOrdersHandlers(router: MockRouter, db: MockDatabase)
           vehicleNo: order.vehicleNo,
           operationNo,
           km: order.odometerKmAtCompletion,
+          hours: engineHoursByVehicle(db).get(order.vehicleNo) ?? null,
           date: (order.completedAt ?? at).slice(0, 10),
           workOrderNo: order.no
         })),
@@ -734,12 +859,9 @@ export function registerWorkOrdersHandlers(router: MockRouter, db: MockDatabase)
       if (reason.length < MIN_TEXT) {
         throw unprocessable(MAINTENANCE_MESSAGES.reasonTooShort, { min: MIN_TEXT })
       }
-      // A refused outside job goes back to the garage, and the vehicle is out again from now.
+      // A refused outside job goes back to the garage; the vehicle never stopped being unavailable.
       const backToGarage = order.external
-        ? {
-            external: { ...order.external, returnedAt: null, finalAmount: null },
-            downtimeNo: openDowntime(db, order, nowIsoDateTime(), request)
-          }
+        ? { external: { ...order.external, returnedAt: null, finalAmount: null } }
         : {}
       db.workOrders.update(order.no, {
         ...backToGarage,

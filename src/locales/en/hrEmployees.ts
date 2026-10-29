@@ -69,5 +69,13 @@ export default {
   'hr.employees.form.exitDate': 'Exit date',
   'hr.employees.form.hasSystemAccount': 'User account',
   'hr.employees.form.drivingAuthorized': 'Authorized to drive',
-  'hr.employees.form.drivingAuthorizedAt': 'Last decision'
+  'hr.employees.form.drivingAuthorizedAt': 'Last decision',
+  'hr.employees.import.action': 'Import',
+  'hr.employees.import.title': 'Import people',
+  'hr.employees.import.hint': 'Each line follows the rules of the record; an identity document already known is refused. The job position, entity, category and site are given by code or name.',
+  'hr.employees.import.created': 'No person created. | One person created. | {n} people created.',
+  'hr.employees.sync.action': 'Synchronize with the HR system',
+  'hr.employees.sync.hint': 'Takes the people of the HR system (simulated in the mock-up).',
+  'hr.employees.sync.done': 'Synchronization done: {created} created, {updated} updated, {unchanged} unchanged, {skipped} left out.',
+  'hr.employees.sync.error': 'The synchronization could not be done.'
 }

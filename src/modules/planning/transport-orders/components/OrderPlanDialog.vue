@@ -8,6 +8,9 @@ import { formatDateTime } from '@/utils/format'
 import { tripService, type ResourceAvailabilityApi, type TripApi } from '@/modules/fleet/trips'
 import { providerService, type ProviderApi } from '@/modules/fleet/providers'
 import { transportOrderService } from '../services/transportOrderService'
+import { loadFill } from '../domain/transportOrder'
+import { orderPlanningService, type MeansNotesApi } from '../api/orderPlanningApi'
+import LoadGauge from './LoadGauge.vue'
 import type { Choice } from './ChoiceSelect.vue'
 import type { TransportOrderApi } from '../types/transportOrder.types'
 
@@ -35,13 +38,29 @@ const driverNo = ref('')
 const tripNo = ref('')
 const carrierVehiclePlate = ref('')
 const carrierDriverName = ref('')
+/* Absences with their reason, expired documents and couplings over the window (TRS01-US07). */
+const notes = ref<MeansNotesApi>({ absences: [], expiredVehicles: [], couplings: [] })
 
 const internal = computed(() => carrierNo.value === INTERNAL)
 const scheduleReady = computed(
   () => !!props.order?.plannedDeparture && !!props.order?.plannedArrival
 )
-const vehicles = computed(() => resources.value.filter((item) => item.role === 'motorized'))
-const trailers = computed(() => resources.value.filter((item) => item.role === 'towed'))
+/* A vehicle whose document is expired is not offered at all (TRS01-US07). */
+const expired = computed(() => new Set(notes.value.expiredVehicles.map((item) => item.vehicleNo)))
+const vehicles = computed(() =>
+  resources.value.filter((item) => item.role === 'motorized' && !expired.value.has(item.no))
+)
+const trailers = computed(() =>
+  resources.value.filter((item) => item.role === 'towed' && !expired.value.has(item.no))
+)
+const withheld = computed(() =>
+  notes.value.expiredVehicles
+    .map((item) => {
+      const resource = resources.value.find((entry) => entry.no === item.vehicleNo)
+      return resource ? `${resource.label} (${item.documents})` : ''
+    })
+    .filter(Boolean)
+)
 const drivers = computed(() => resources.value.filter((item) => item.role === 'driver'))
 const carrier = computed(() => carriers.value.find((item) => item.no === carrierNo.value) ?? null)
 
@@ -76,12 +95,44 @@ const confirmDisabled = computed(() => {
  * shown in red and the planner decides. Anything else (not fit for the road, on leave) is not
  * offered. */
 function choicesOf(items: ResourceAvailabilityApi[]): Choice[] {
-  return items.map((item) => ({
-    value: item.no,
-    label: item.available ? item.label : `${item.label} · ${item.reasons.join(', ')}`,
-    disabled: !item.available && !item.busyOnly
-  }))
+  return items.map((item) => {
+    // A driver away on approved leave shows its reason: leave, sickness, permission.
+    const absence = notes.value.absences.find((entry) => entry.driverNo === item.no)
+    const reasons = absence
+      ? [
+          absence.reason
+            ? t('planning.transportOrders.plan.absentFor', { reason: absence.reason })
+            : t('planning.transportOrders.plan.absent'),
+          ...item.reasons
+        ]
+      : item.reasons
+    return {
+      value: item.no,
+      label: item.available ? item.label : `${item.label} · ${reasons.join(', ')}`,
+      disabled: !item.available && !item.busyOnly
+    }
+  })
 }
+
+/* The load of the order against the chosen combination: the trailer carries, else the vehicle. */
+const chosenCapacity = computed(() => {
+  const trailer = trailers.value.find((item) => item.no === trailerNo.value)
+  const vehicle = vehicles.value.find((item) => item.no === vehicleNo.value)
+  return trailer?.capacity ?? vehicle?.capacity ?? null
+})
+const chosenFill = computed(() =>
+  loadFill(
+    [
+      {
+        weightKg: props.order?.totalWeightKg ?? 0,
+        volumeM3: props.order?.totalVolumeM3 ?? 0,
+        quantity: props.order?.totalFuelL ?? 0,
+        fuel: true
+      }
+    ],
+    chosenCapacity.value
+  )
+)
 
 const overlaps = computed(() =>
   [vehicleNo.value, trailerNo.value, driverNo.value]
@@ -103,6 +154,9 @@ const tripChoices = computed<Choice[]>(() =>
 watch(vehicleNo, (no) => {
   const assigned = vehicles.value.find((item) => item.no === no)?.assignedDriverNo
   if (assigned && drivers.value.some((item) => item.no === assigned)) driverNo.value = assigned
+  // The trailer coupled to the tractor is proposed; it stays changeable by hand (TRS01-US07).
+  const coupled = notes.value.couplings.find((item) => item.tractorNo === no)?.trailerNo
+  if (coupled && trailers.value.some((item) => item.no === coupled)) trailerNo.value = coupled
 })
 
 watch(carrierNo, () => {
@@ -137,17 +191,27 @@ watch(
     }
     if (order?.plannedDeparture && order.plannedArrival) {
       try {
-        const window = await transportOrderService.availability(
-          order.plannedDeparture,
-          order.plannedArrival
-        )
+        const [window, found] = await Promise.all([
+          transportOrderService.availability(order.plannedDeparture, order.plannedArrival),
+          orderPlanningService.meansNotes(order.plannedDeparture, order.plannedArrival)
+        ])
+        notes.value = found
         resources.value = [...window.vehicles, ...window.drivers].sort(
           (a, b) => Number(b.available) - Number(a.available)
         )
+        // The vehicle the loading proposal chose comes first (TRS01-US10).
+        if (
+          order.proposedVehicleNo &&
+          vehicles.value.some((item) => item.no === order.proposedVehicleNo)
+        ) {
+          vehicleNo.value = order.proposedVehicleNo
+          if (order.proposedTrailerNo) trailerNo.value = order.proposedTrailerNo
+        }
       } catch (error) {
         loadError.value = apiErrorMessage(error, t('planning.transportOrders.saveError'))
       }
     }
+    if (order?.proposedCarrierNo) carrierNo.value = order.proposedCarrierNo
     try {
       const page = await tripService.getAll({
         page: 1,
@@ -248,6 +312,18 @@ function confirm() {
                 {{ t('planning.transportOrders.plan.driverHint') }}
               </p>
             </BaseFormField>
+            <div v-if="vehicleNo" class="rounded border border-border p-3">
+              <LoadGauge
+                :fill="chosenFill"
+                :capacity="chosenCapacity"
+                :weight-kg="order?.totalWeightKg ?? 0"
+                :volume-m3="order?.totalVolumeM3 ?? 0"
+                :liters="order?.totalFuelL ?? 0"
+              />
+            </div>
+            <p v-if="withheld.length" class="text-xs text-muted-foreground">
+              {{ t('planning.transportOrders.plan.withheld', { vehicles: withheld.join(', ') }) }}
+            </p>
             <div
               v-if="overlaps.length"
               class="rounded border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm"

@@ -1,3 +1,4 @@
+import type { AlertRuleSeverity } from '@/modules/fleet/alert-rules/types/alertRule.types'
 import type { CollectionDefinition, MockRow } from '../../db/collection'
 import { seedAudit } from '../seedAudit'
 
@@ -7,6 +8,13 @@ export interface AlertRuleRow extends MockRow {
   escalationHours: number
   escalateTo: string
   active: boolean
+  /** Forced on every alert of the rule; by_case keeps the severity of each situation. Defaults to by_case. */
+  severity?: AlertRuleSeverity
+  /** The application always shows the alert; e-mail and SMS go to the addresses of the rule. */
+  email?: boolean
+  sms?: boolean
+  emailTo?: string[]
+  smsTo?: string[]
 }
 
 const SEED: Omit<AlertRuleRow, keyof typeof seedAudit>[] = [
@@ -16,7 +24,11 @@ const SEED: Omit<AlertRuleRow, keyof typeof seedAudit>[] = [
     recipients: ['ADMIN', 'FLEET_MANAGER'],
     escalationHours: 72,
     escalateTo: 'MANAGEMENT',
-    active: true
+    active: true,
+    email: true,
+    sms: true,
+    emailTo: ['flotte@ucodis.mg'],
+    smsTo: ['034 12 345 02']
   },
   {
     no: 'companyDocument',
@@ -28,11 +40,13 @@ const SEED: Omit<AlertRuleRow, keyof typeof seedAudit>[] = [
   },
   {
     no: 'checklist',
-    name: 'Anomalie bloquante à la check-list de départ',
+    name: 'Point non conforme à une check-list sur route',
     recipients: ['ADMIN', 'FLEET_MANAGER', 'MAINTENANCE_TECHNICIAN'],
     escalationHours: 4,
     escalateTo: 'MANAGEMENT',
-    active: true
+    active: true,
+    sms: true,
+    smsTo: ['034 12 345 02']
   },
   {
     no: 'infraction',
@@ -111,6 +125,14 @@ const SEED: Omit<AlertRuleRow, keyof typeof seedAudit>[] = [
     name: 'Pneus sous les seuils ou à permuter',
     recipients: ['ADMIN', 'FLEET_MANAGER', 'MAINTENANCE_TECHNICIAN'],
     escalationHours: 24,
+    escalateTo: 'MANAGEMENT',
+    active: true
+  },
+  {
+    no: 'service',
+    name: "Échéances d'entretien proches ou dépassées",
+    recipients: ['ADMIN', 'FLEET_MANAGER'],
+    escalationHours: 48,
     escalateTo: 'MANAGEMENT',
     active: true
   }

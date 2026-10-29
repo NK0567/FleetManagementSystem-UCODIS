@@ -178,7 +178,7 @@ defineExpose(expose)
           />
         </BaseFormField>
         <BaseFormField :label="t('fleet.infractions.form.handlerCode')">
-          <FormInput :model-value="initialData.handlerCode ?? '—'" disabled />
+          <FormInput :model-value="initialData.handlerCode ?? '-'" disabled />
         </BaseFormField>
       </div>
       <div class="space-y-3 min-w-0">

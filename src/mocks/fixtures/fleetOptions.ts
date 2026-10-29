@@ -23,12 +23,27 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
     bank: { fr: 'Banque', en: 'Bank' },
     carrier: { fr: 'Transporteur', en: 'Carrier' }
   },
+  providerRole: {
+    garage: { fr: 'Atelier de la maintenance', en: 'Workshop of the maintenance' },
+    parts_supplier: { fr: 'Fournisseur des achats de pièces', en: 'Supplier of parts purchases' },
+    tyre_supplier: { fr: 'Fournisseur des pneumatiques', en: 'Supplier of tyres' },
+    fuel_supplier: { fr: 'Fournisseur de carburant', en: 'Fuel supplier' },
+    insurer: { fr: 'Assureur des polices', en: 'Insurer of the policies' },
+    manufacturer: { fr: 'Constructeur', en: 'Manufacturer' },
+    bank: { fr: 'Banque des acquisitions', en: 'Bank of the acquisitions' },
+    carrier: { fr: 'Transporteur du planning', en: 'Carrier of the planning' }
+  },
   vehicleStatus: {
     available: { fr: 'Disponible', en: 'Available' },
     assigned: { fr: 'Affecté', en: 'Assigned' },
     in_mission: { fr: 'En trajet', en: 'On trip' },
+    in_maintenance: { fr: 'En maintenance', en: 'In maintenance' },
     immobilized: { fr: 'Immobilisé', en: 'Immobilized' },
     out_of_service: { fr: 'Hors service', en: 'Out of service' },
+    removed: { fr: 'Sorti du parc', en: 'Left the fleet' }
+  },
+  administrativeStatus: {
+    in_service: { fr: 'En service', en: 'In service' },
     removed: { fr: 'Sorti du parc', en: 'Left the fleet' }
   },
   fuelType: {
@@ -207,6 +222,15 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
     conforming: { fr: 'Conforme', en: 'Conforming' },
     non_conforming: { fr: 'Non conforme', en: 'Non-conforming' }
   },
+  inspectionVerdict: {
+    conforming: { fr: 'Conforme', en: 'Conforming' },
+    observation: { fr: 'Conforme avec observation', en: 'Conforming with observation' },
+    non_conforming: { fr: 'Non conforme', en: 'Non-conforming' }
+  },
+  inspectionPart: {
+    vehicle: { fr: 'Véhicule', en: 'Vehicle' },
+    tank: { fr: 'Citerne', en: 'Tank' }
+  },
   inspectionState: {
     conforming: { fr: 'Conforme', en: 'Conforming' },
     recheck_pending: { fr: 'Contre-visite à passer', en: 'Re-inspection due' },
@@ -274,12 +298,24 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
     insurance: { fr: 'Assurances', en: 'Insurance' },
     telematics: { fr: 'Télématique', en: 'Telematics' },
     driverScore: { fr: 'Scores de conduite', en: 'Driving scores' },
-    tyre: { fr: 'Pneumatiques', en: 'Tyres' }
+    tyre: { fr: 'Pneumatiques', en: 'Tyres' },
+    service: { fr: "Échéances d'entretien", en: 'Service due dates' }
   },
   alertSeverity: {
     info: { fr: 'Information', en: 'Information' },
     warning: { fr: 'Attention', en: 'Warning' },
     critical: { fr: 'Critique', en: 'Critical' }
+  },
+  alertRuleSeverity: {
+    by_case: { fr: 'Selon la situation', en: 'Depending on the situation' },
+    info: { fr: 'Information', en: 'Information' },
+    warning: { fr: 'Attention', en: 'Warning' },
+    critical: { fr: 'Critique', en: 'Critical' }
+  },
+  alertChannel: {
+    app: { fr: 'Application', en: 'Application' },
+    email: { fr: 'E-mail', en: 'E-mail' },
+    sms: { fr: 'SMS', en: 'SMS' }
   },
   alertStatus: {
     new: { fr: 'Nouvelle', en: 'New' },
@@ -315,6 +351,7 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
     dismissed: { fr: 'Classé', en: 'Dismissed' }
   },
   fuelReferenceSource: {
+    vehicle: { fr: 'Véhicule', en: 'Vehicle' },
     route: { fr: 'Itinéraire', en: 'Route' },
     vehicleType: { fr: 'Type de véhicule', en: 'Vehicle type' },
     default: { fr: 'Par défaut', en: 'Default' }

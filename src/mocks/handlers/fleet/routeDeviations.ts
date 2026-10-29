@@ -31,6 +31,7 @@ import { requireReference } from '../../http/references'
 import { ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
 import { sessionUser } from '../../http/types'
+import { detectRouteDeviations } from './deviationDetection'
 import { FLEET_MESSAGES } from './messages'
 import { fleetSettings } from './settings'
 
@@ -109,7 +110,11 @@ export function registerRouteDeviationsHandlers(router: MockRouter, db: MockData
     basePath: '/fleet/route-deviations',
     feature: 'ROUTEDEVIATION',
     collection: db.routeDeviations,
-    list: () => routeDeviationsApi(db),
+    list: () => {
+      // What the trips show against their course is recorded before the list is read.
+      detectRouteDeviations(db, nowIsoDateTime())
+      return routeDeviationsApi(db)
+    },
     searchColumns: ['no', 'tripNo', 'vehiclePlate', 'driverName'],
     optionFields: { severity: 'deviationSeverity', nature: 'deviationNature' },
     create: (input) => {

@@ -230,7 +230,7 @@ onMounted(() => void store.fetchAll())
           <tr v-for="line in order.lines" :key="keyOf(line)" class="border-t border-border">
             <td class="px-3 py-2 tabular-nums">{{ line.lineNo }}</td>
             <td class="px-3 py-2">
-              <p class="text-card-foreground">{{ line.recipientName || '—' }}</p>
+              <p class="text-card-foreground">{{ line.recipientName || '-' }}</p>
               <p class="text-xs text-muted-foreground">{{ line.deliveryPointName }}</p>
             </td>
             <td class="px-3 py-2">{{ line.productName || line.productNo }}</td>
@@ -325,7 +325,7 @@ onMounted(() => void store.fetchAll())
               </span>
             </td>
             <td class="px-3 py-2">
-              <p class="text-card-foreground">{{ line.recipientName || '—' }}</p>
+              <p class="text-card-foreground">{{ line.recipientName || '-' }}</p>
               <p class="text-xs text-muted-foreground">{{ line.deliveryPointName }}</p>
             </td>
             <td class="px-3 py-2">{{ line.productName || line.productNo }}</td>

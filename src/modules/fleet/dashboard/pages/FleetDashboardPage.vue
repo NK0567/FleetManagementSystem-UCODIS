@@ -1,15 +1,51 @@
 <script lang="ts" setup>
-import { computed, onMounted } from 'vue'
+import { computed, onBeforeUnmount, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Container, FileExclamationPoint, Fuel, Route, Truck, UserRound } from '@lucide/vue'
 import { LIVE_SITUATIONS } from '@/modules/fleet/live-map/domain/livePosition'
 import { useOptionsStore } from '@/stores/optionsStore'
-import { formatDate, formatNumber } from '@/utils/format'
+import { EMPTY_CELL, formatDate, formatNumber } from '@/utils/format'
+import { againstTarget } from '../domain/park'
 import { useFleetDashboardStore } from '../stores/fleetDashboardStore'
+import type { FleetSupervision, SupervisedVehicle } from '../types/fleetDashboard.types'
 
 const { t } = useI18n()
 const store = useFleetDashboardStore()
 const optionsStore = useOptionsStore()
+
+/** The four columns of the control room board, each vehicle opening on the live map. */
+const SUPERVISION_GROUPS: (keyof FleetSupervision)[] = [
+  'onMission',
+  'stopped',
+  'inAlert',
+  'outOfZone'
+]
+
+function supervisedDetail(vehicle: SupervisedVehicle, group: keyof FleetSupervision) {
+  if (group === 'inAlert')
+    return t('fleet.dashboard.supervision.alerts', { count: vehicle.alertCount })
+  if (group === 'outOfZone') {
+    return vehicle.corridorGapM !== null
+      ? t('fleet.dashboard.supervision.offCorridor', {
+          km: formatNumber(vehicle.corridorGapM / 1000, 1)
+        })
+      : t('fleet.dashboard.supervision.offSites')
+  }
+  if (vehicle.situation === 'moving') {
+    return [
+      t('fleet.dashboard.supervision.speed', { speed: vehicle.speedKmh }),
+      vehicle.nextStopName
+    ]
+      .filter(Boolean)
+      .join(' · ')
+  }
+  return vehicle.placeName || optionsStore.getOptionLabel('liveSituation', vehicle.situation)
+}
+
+const park = computed(() => store.dashboard?.park ?? null)
+const parkTarget = computed(() =>
+  park.value ? againstTarget(park.value.availabilityRate, park.value.availabilityTargetPct) : null
+)
 
 const SEVERITY_TONES = {
   critical: 'bg-destructive',
@@ -69,7 +105,7 @@ const kpis = computed(() => {
       icon: Route,
       value:
         dashboard.compliance.tripComplianceRate === null
-          ? '—'
+          ? EMPTY_CELL
           : `${dashboard.compliance.tripComplianceRate} %`,
       label: t('fleet.dashboard.kpi.compliance'),
       sub: t('fleet.dashboard.kpi.complianceSub', {
@@ -85,7 +121,16 @@ const fleetTotal = computed(() =>
   (store.dashboard?.fleetByStatus ?? []).reduce((total, item) => total + item.count, 0)
 )
 
-onMounted(() => void store.fetchDashboard())
+/** The board follows the live map: refreshed while it is on screen. */
+const REFRESH_MS = 30_000
+let timer: ReturnType<typeof setInterval> | null = null
+onMounted(() => {
+  void store.fetchDashboard()
+  timer = setInterval(() => void store.fetchDashboard(), REFRESH_MS)
+})
+onBeforeUnmount(() => {
+  if (timer) clearInterval(timer)
+})
 </script>
 
 <template>
@@ -99,6 +144,114 @@ onMounted(() => void store.fetchDashboard())
     <LoadingSpinner v-if="store.loading && !store.dashboard" :text="t('common.loading')" />
 
     <template v-if="store.dashboard">
+      <section v-if="park" class="bg-card border border-border rounded">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-border">
+          <h2 class="text-sm font-semibold text-card-foreground">
+            {{ t('fleet.dashboard.park.title') }}
+          </h2>
+          <RouterLink to="/fleet/fleet-status" class="text-xs text-primary hover:underline">
+            {{ t('fleet.dashboard.park.openStatus') }}
+          </RouterLink>
+        </div>
+        <dl class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 p-4 text-sm">
+          <div>
+            <dt class="text-muted-foreground">{{ t('fleet.dashboard.park.available') }}</dt>
+            <dd class="text-2xl font-semibold tabular-nums">{{ park.available }}</dd>
+          </div>
+          <div>
+            <dt class="text-muted-foreground">{{ t('fleet.dashboard.park.onMission') }}</dt>
+            <dd class="text-2xl font-semibold tabular-nums">{{ park.onMission }}</dd>
+          </div>
+          <div>
+            <dt class="text-muted-foreground">{{ t('fleet.dashboard.park.immobilized') }}</dt>
+            <dd class="text-2xl font-semibold tabular-nums">{{ park.immobilized }}</dd>
+          </div>
+          <div>
+            <dt class="text-muted-foreground">{{ t('fleet.dashboard.park.total') }}</dt>
+            <dd class="text-2xl font-semibold tabular-nums">{{ park.total }}</dd>
+          </div>
+          <div>
+            <dt class="text-muted-foreground">{{ t('fleet.dashboard.park.availabilityRate') }}</dt>
+            <dd
+              class="text-2xl font-semibold tabular-nums"
+              :class="parkTarget === 'missed' ? 'text-destructive' : ''"
+            >
+              {{
+                park.availabilityRate === null
+                  ? EMPTY_CELL
+                  : `${formatNumber(park.availabilityRate, 1)} %`
+              }}
+            </dd>
+            <dd class="text-xs text-muted-foreground">
+              {{ t('fleet.dashboard.park.target', { target: park.availabilityTargetPct }) }}
+              <template v-if="parkTarget">
+                · {{ t(`fleet.dashboard.park.targetState.${parkTarget}`) }}
+              </template>
+            </dd>
+          </div>
+          <div>
+            <dt class="text-muted-foreground">{{ t('fleet.dashboard.park.averageAge') }}</dt>
+            <dd class="text-2xl font-semibold tabular-nums">
+              {{
+                park.averageAgeYears === null
+                  ? EMPTY_CELL
+                  : t('fleet.dashboard.park.years', {
+                      years: formatNumber(park.averageAgeYears, 1)
+                    })
+              }}
+            </dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="bg-card border border-border rounded">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-border">
+          <h2 class="text-sm font-semibold text-card-foreground">
+            {{ t('fleet.dashboard.supervision.title') }}
+          </h2>
+          <RouterLink to="/fleet/live-map" class="text-xs text-primary hover:underline">
+            {{ t('fleet.dashboard.openMap') }}
+          </RouterLink>
+        </div>
+        <div class="grid gap-3 p-4 md:grid-cols-2 xl:grid-cols-4">
+          <div v-for="group in SUPERVISION_GROUPS" :key="group" class="min-w-0">
+            <h3 class="text-xs font-semibold text-muted-foreground mb-1">
+              {{ t(`fleet.dashboard.supervision.${group}`) }}
+              <span class="text-card-foreground tabular-nums">
+                {{ store.dashboard.supervision[group].length }}
+              </span>
+            </h3>
+            <ul
+              v-if="store.dashboard.supervision[group].length"
+              class="divide-y divide-border border border-border rounded"
+            >
+              <li v-for="vehicle in store.dashboard.supervision[group]" :key="vehicle.vehicleNo">
+                <RouterLink
+                  :to="{ path: '/fleet/live-map', query: { vehicle: vehicle.vehicleNo } }"
+                  class="block px-3 py-2 hover:bg-accent"
+                >
+                  <span class="flex items-center justify-between gap-2">
+                    <span class="text-sm font-medium text-card-foreground">
+                      {{ vehicle.plate }}
+                    </span>
+                    <LiveSituationPill :situation="vehicle.situation" />
+                  </span>
+                  <span class="block text-xs text-muted-foreground truncate">
+                    {{ [vehicle.driverName, vehicle.tripNo].filter(Boolean).join(' · ') }}
+                  </span>
+                  <span class="block text-xs text-muted-foreground truncate">
+                    {{ supervisedDetail(vehicle, group) }}
+                  </span>
+                </RouterLink>
+              </li>
+            </ul>
+            <p v-else class="text-xs text-muted-foreground">
+              {{ t('fleet.dashboard.supervision.none') }}
+            </p>
+          </div>
+        </div>
+      </section>
+
       <section class="grid grid-cols-2 xl:grid-cols-6 gap-3">
         <RouterLink
           v-for="kpi in kpis"

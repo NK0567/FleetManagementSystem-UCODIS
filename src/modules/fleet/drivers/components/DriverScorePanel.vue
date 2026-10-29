@@ -4,15 +4,14 @@ import { useI18n } from 'vue-i18n'
 import { GraduationCap } from '@lucide/vue'
 import { apiErrorMessage } from '@/core/api/apiError'
 import { usePermissions } from '@/composables/usePermissions'
-import { useOptionsStore } from '@/stores/optionsStore'
 import { driverService } from '../services/driverService'
 import type { DriverScoreApi } from '../types/driver.types'
+import type { FamilyScore, ScoreTerm } from '../domain/driverScore'
 
 const props = defineProps<{ driverNo: string }>()
 const emit = defineEmits<{ changed: [] }>()
 
 const { t } = useI18n()
-const optionsStore = useOptionsStore()
 const { canInsert: canProposeTraining } = usePermissions('TRAINING')
 
 const detail = ref<DriverScoreApi | null>(null)
@@ -47,6 +46,29 @@ const deltaText = computed(() => {
   const delta = detail.value?.delta ?? 0
   if (delta === 0) return t('fleet.drivers.score.stable')
   return t('fleet.drivers.score.delta', { delta: delta > 0 ? `+${delta}` : String(delta) })
+})
+
+/** mark = min(cap, max(0, 100 - sum of count x points)), written out with its figures. */
+function formulaOf(family: FamilyScore): string {
+  const terms = family.terms.map((term) => `${term.count} × ${term.points}`)
+  const lost = terms.length ? ` - (${terms.join(' + ')})` : ''
+  const cap = family.cap !== null ? t('fleet.drivers.score.capped', { cap: family.cap }) : ''
+  return `100${lost}${cap} = ${family.mark}`
+}
+
+function sourceLabel(term: ScoreTerm): string {
+  const source = t(`fleet.settings.scoreSource.${term.source}`)
+  return term.severity
+    ? `${source} (${t(`fleet.drivers.score.severity.${term.severity}`)})`
+    : source
+}
+
+const overallFormula = computed(() => {
+  if (!detail.value) return ''
+  const parts = detail.value.families.map(
+    (family) => `${family.mark} × ${Math.round(family.weightPct)} %`
+  )
+  return `${parts.join(' + ')} = ${detail.value.score}`
 })
 
 const barTone = (mark: number) =>
@@ -105,7 +127,7 @@ const barTone = (mark: number) =>
         <li v-for="family in detail.families" :key="family.family" class="text-sm">
           <div class="flex items-center justify-between gap-2">
             <span class="text-card-foreground">
-              {{ optionsStore.getOptionLabel('scoreFamily', family.family) }}
+              {{ family.label }}
               <span class="text-xs text-muted-foreground">
                 · {{ t('fleet.drivers.score.weight', { weight: Math.round(family.weightPct) }) }}
               </span>
@@ -119,11 +141,31 @@ const barTone = (mark: number) =>
               :style="{ width: `${family.mark}%` }"
             />
           </div>
-          <p class="text-xs text-muted-foreground">
-            {{ t(`fleet.drivers.score.explain.${family.family}`, family.events) }}
+          <p class="text-xs text-muted-foreground" data-testid="score-formula">
+            {{ t('fleet.drivers.score.formula', { formula: formulaOf(family) }) }}
           </p>
+          <ul
+            v-if="family.terms.length || family.cap !== null"
+            class="text-xs text-muted-foreground"
+          >
+            <li v-for="term in family.terms" :key="`${term.source}-${term.severity}`">
+              {{
+                t('fleet.drivers.score.term', {
+                  source: sourceLabel(term),
+                  count: term.count,
+                  points: term.points
+                })
+              }}
+            </li>
+            <li v-if="family.cap !== null">
+              {{ t('fleet.drivers.score.cap', { cap: family.cap }) }}
+            </li>
+          </ul>
         </li>
       </ul>
+      <p class="text-xs text-muted-foreground">
+        {{ t('fleet.drivers.score.overallFormula', { formula: overallFormula }) }}
+      </p>
     </template>
   </div>
 </template>

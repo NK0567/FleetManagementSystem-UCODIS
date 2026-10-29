@@ -1,9 +1,16 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useEntityForm, type FormValidationError } from '@/composables/useEntityForm'
 import { useFormValidationUi } from '@/composables/useFormValidationUi'
-import { productNeedsDensity } from '../domain/product'
+import {
+  defaultMeasures,
+  FUEL_MEASURES,
+  measureIssues,
+  PRODUCT_MEASURES,
+  productNeedsDensity,
+  type ProductMeasure
+} from '../domain/product'
 import type { ProductApi } from '../types/product.types'
 
 const props = withDefaults(
@@ -32,7 +39,11 @@ const { draft, isRequired, expose } = useEntityForm({
     active: true,
     isFuel: false,
     referenceDensity: null as number | null,
-    expansionCoefficient: null as number | null
+    expansionCoefficient: null as number | null,
+    unitWeightKg: null as number | null,
+    unitVolumeM3: null as number | null,
+    loadingMeasures: ['quantity'] as ProductMeasure[],
+    deliveryMeasures: ['quantity'] as ProductMeasure[]
   }),
   required: ['name', 'family', 'unit'],
   labelOf: (field) => t(`planning.products.form.${field}`),
@@ -44,15 +55,46 @@ const { draft, isRequired, expose } = useEntityForm({
         label: t('planning.products.form.referenceDensityRequired')
       })
     }
+    for (const field of ['loadingMeasures', 'deliveryMeasures'] as const) {
+      const [issue] = measureIssues(values.isFuel, values[field])
+      if (issue) errors.push({ fieldKey: field, label: t(`planning.products.measures.${issue}`) })
+    }
     return errors
   }
 })
 
-const expandedSections = ref({ general: true, fuel: true, audit: false })
+const expandedSections = ref({ general: true, fuel: true, measures: true, audit: false })
+
+/* A product turning into a fuel takes the measures of a fuel by default; one that stops being a
+ * fuel drops them (TRS06-US04). */
+watch(
+  () => draft.isFuel,
+  (isFuel, was) => {
+    if (props.disabled || isFuel === was) return
+    for (const field of ['loadingMeasures', 'deliveryMeasures'] as const) {
+      draft[field] = isFuel
+        ? [...new Set([...draft[field], ...defaultMeasures(true)])]
+        : draft[field].filter((measure) => !FUEL_MEASURES.includes(measure))
+    }
+  }
+)
+
+function toggleMeasure(field: 'loadingMeasures' | 'deliveryMeasures', measure: ProductMeasure) {
+  draft[field] = draft[field].includes(measure)
+    ? draft[field].filter((item) => item !== measure)
+    : [...draft[field], measure]
+}
 const { hasValidationError } = useFormValidationUi({
   validationErrors: () => props.validationErrors,
   expandedSections,
-  fieldSections: { name: 'general', family: 'general', unit: 'general', referenceDensity: 'fuel' },
+  fieldSections: {
+    name: 'general',
+    family: 'general',
+    unit: 'general',
+    referenceDensity: 'fuel',
+    loadingMeasures: 'measures',
+    deliveryMeasures: 'measures'
+  },
   fieldValues: () => ({ ...draft })
 })
 
@@ -108,10 +150,57 @@ defineExpose(expose)
             :invalid="hasValidationError('unit')"
           />
         </BaseFormField>
+        <BaseFormField :label="t('planning.products.form.unitWeightKg')">
+          <FormInput v-model="draft.unitWeightKg" type="number" :min="0" :disabled="disabled" />
+        </BaseFormField>
+        <BaseFormField :label="t('planning.products.form.unitVolumeM3')">
+          <FormInput v-model="draft.unitVolumeM3" type="number" :min="0" :disabled="disabled" />
+          <p class="text-xs text-muted-foreground mt-1">
+            {{ t('planning.products.form.unitMeasuresHint') }}
+          </p>
+        </BaseFormField>
         <BaseFormField :label="t('planning.products.form.active')">
           <ToggleSwitch v-model="draft.active" :disabled="disabled" />
         </BaseFormField>
       </div>
+    </FormSection>
+
+    <FormSection
+      v-model:open="expandedSections.measures"
+      :title="t('planning.products.measures.title')"
+      :summary="[]"
+    >
+      <p class="xl:col-span-2 text-xs text-muted-foreground">
+        {{ t('planning.products.measures.hint') }}
+      </p>
+      <BaseFormField
+        v-for="field in ['loadingMeasures', 'deliveryMeasures'] as const"
+        :key="field"
+        :field="field"
+        :label="t(`planning.products.measures.${field}`)"
+      >
+        <div class="flex flex-wrap gap-x-4 gap-y-1" :data-field="field">
+          <label
+            v-for="measure in PRODUCT_MEASURES"
+            :key="measure"
+            class="inline-flex items-center gap-2 text-sm"
+            :class="!draft.isFuel && FUEL_MEASURES.includes(measure) ? 'opacity-50' : ''"
+          >
+            <input
+              type="checkbox"
+              class="h-4 w-4 accent-primary"
+              :checked="draft[field].includes(measure)"
+              :disabled="
+                disabled ||
+                measure === 'quantity' ||
+                (!draft.isFuel && FUEL_MEASURES.includes(measure))
+              "
+              @change="toggleMeasure(field, measure)"
+            />
+            {{ t(`planning.products.measures.${measure}`) }}
+          </label>
+        </div>
+      </BaseFormField>
     </FormSection>
 
     <FormSection

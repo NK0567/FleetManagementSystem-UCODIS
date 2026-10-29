@@ -15,6 +15,8 @@ export interface FleetStatusApi {
   orderNos: string[]
   mission: string
   location: string
+  /** Where the tracked vehicle is now: the site holding it, or its coordinates. */
+  position?: string
   immobilizationReason: string
   observation: string
   expectedBackOn: string | null
@@ -28,4 +30,15 @@ export interface FleetStatusDay {
   live: boolean
   archivedAt: string | null
   archivedBy: string | null
+}
+
+/** A sending of the fleet status by e-mail, as recorded by the demonstration. */
+export interface FleetStatusDispatchApi {
+  no: string
+  date: string
+  recipients: string[]
+  subject: string
+  lineCount: number
+  sentAt: string
+  sentBy: string
 }

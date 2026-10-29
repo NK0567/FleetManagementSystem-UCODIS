@@ -37,7 +37,7 @@ export const useOptionsStore = defineStore('options', () => {
 
   /** Label of an enumerated value; the raw value when the option set is not loaded. */
   function getOptionLabel(key: string, value: unknown): string {
-    if (value == null || value === '') return '—'
+    if (value == null || value === '') return '-'
     const found = getOptions(key).find((option) => String(option.value) === String(value))
     return found ? found.description : String(value)
   }

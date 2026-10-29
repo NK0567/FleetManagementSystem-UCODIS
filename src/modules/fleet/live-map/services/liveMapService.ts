@@ -1,8 +1,14 @@
 import { liveMapApi } from '../api/liveMapApi'
-import type { LivePositionApi } from '../types/liveMap.types'
+import type { LivePositionApi, TrackHistoryApi, VehicleJournalApi } from '../types/liveMap.types'
 
 export const liveMapService = {
   async positions(): Promise<LivePositionApi[]> {
     return (await liveMapApi.positions()).data.data
+  },
+  async history(vehicleNo: string, from: string, to: string): Promise<TrackHistoryApi> {
+    return (await liveMapApi.history(vehicleNo, from, to)).data.data
+  },
+  async journal(vehicleNo: string, from: string, to: string): Promise<VehicleJournalApi> {
+    return (await liveMapApi.journal(vehicleNo, from, to)).data.data
   }
 }

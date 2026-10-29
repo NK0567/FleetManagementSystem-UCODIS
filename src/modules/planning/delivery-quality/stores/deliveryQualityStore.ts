@@ -46,6 +46,8 @@ export const useDeliveryQualityStore = defineStore('planning-delivery-quality', 
     perform(() => deliveryQualityService.prepareProtest(row, body))
   const issueProtest = (row: QualityRowApi, protestNo: string) =>
     perform(() => deliveryQualityService.issueProtest(row, protestNo))
+  const attachProtestFile = (row: QualityRowApi, protestNo: string, fileNo: string) =>
+    perform(() => deliveryQualityService.attachProtestFile(row, protestNo, fileNo))
   const closeProtest = (row: QualityRowApi, protestNo: string, outcome: string) =>
     perform(() => deliveryQualityService.closeProtest(row, protestNo, outcome))
   const setResponsibility = (row: QualityRowApi, body: ResponsibilityInput) =>
@@ -61,6 +63,7 @@ export const useDeliveryQualityStore = defineStore('planning-delivery-quality', 
     fetchRows,
     prepareProtest,
     issueProtest,
+    attachProtestFile,
     closeProtest,
     setResponsibility,
     issueCredit

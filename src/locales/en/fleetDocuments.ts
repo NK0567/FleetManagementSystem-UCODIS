@@ -58,5 +58,9 @@ export default {
   'fleet.documents.form.status': 'Status and history',
   'fleet.documents.form.replacedBy': 'Replaced by',
   'fleet.documents.form.declaredStatus': 'Declaration',
-  'fleet.documents.form.declaredReason': 'Reason for the declaration'
+  'fleet.documents.form.declaredReason': 'Reason for the declaration',
+  'fleet.documents.alert.expired': 'Document expired since {date}: to be put in order.',
+  'fleet.documents.alert.expiring': 'Document to renew: it expires on {date} ({days} days notice).',
+  'fleet.documents.alert.sent.email': 'E-mail sent to {to} on {date} (simulated).',
+  'fleet.documents.alert.sent.sms': 'SMS sent to {to} on {date} (simulated).'
 }

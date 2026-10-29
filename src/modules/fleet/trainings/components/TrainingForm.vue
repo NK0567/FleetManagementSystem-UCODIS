@@ -152,7 +152,7 @@ defineExpose(expose)
           <FormInput :model-value="formatDate(initialData.attendedOn)" disabled />
         </BaseFormField>
         <BaseFormField :label="t('fleet.trainings.form.result')">
-          <p class="text-sm text-card-foreground">{{ initialData.result || '—' }}</p>
+          <p class="text-sm text-card-foreground">{{ initialData.result || '-' }}</p>
         </BaseFormField>
       </div>
       <div v-else class="space-y-3 min-w-0">

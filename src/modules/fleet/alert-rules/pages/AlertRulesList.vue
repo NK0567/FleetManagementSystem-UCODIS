@@ -5,6 +5,7 @@ import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
 import { useListCellFormatters } from '@/composables/useListCellFormatters'
 import { useListPage } from '@/composables/useListPage'
 import { getListCellDisplay } from '@/utils/listCellDisplay'
+import { useOptionsStore } from '@/stores/optionsStore'
 import { alertRuleApi } from '../api/alertRuleApi'
 import { useAlertRuleStore } from '../stores/alertRuleStore'
 import type { AlertRuleApi, AlertRuleSearchColumn } from '../types/alertRule.types'
@@ -12,6 +13,7 @@ import type { AlertRuleApi, AlertRuleSearchColumn } from '../types/alertRule.typ
 const { t } = useI18n()
 const store = useAlertRuleStore()
 const { formatDateTime, formatInteger, booleanLabel } = useListCellFormatters()
+const optionsStore = useOptionsStore()
 
 const searchColumnOptions = computed<{ value: AlertRuleSearchColumn; label: string }[]>(() => [
   { value: 'no,name', label: t('fleet.alertRules.search.all') },
@@ -30,6 +32,31 @@ const tableColumns = computed<TableColumn[]>(() => [
     formatter: formatInteger
   },
   { sortKey: 'escalateTo', label: t('fleet.alertRules.col.escalateTo'), minW: '150px' },
+  {
+    sortKey: 'severity',
+    label: t('fleet.alertRules.col.severity'),
+    minW: '150px',
+    formatter: (value) => optionsStore.getOptionLabel('alertRuleSeverity', String(value))
+  },
+  {
+    sortKey: 'email',
+    label: t('fleet.alertRules.col.channels'),
+    minW: '170px',
+    formatter: (_value, row) =>
+      [
+        t('fleet.alertRules.channel.app'),
+        (row as AlertRuleApi).email ? t('fleet.alertRules.channel.email') : '',
+        (row as AlertRuleApi).sms ? t('fleet.alertRules.channel.sms') : ''
+      ]
+        .filter(Boolean)
+        .join(', ')
+  },
+  {
+    sortKey: 'threshold',
+    label: t('fleet.alertRules.col.threshold'),
+    minW: '280px',
+    defaultHidden: true
+  },
   {
     sortKey: 'active',
     label: t('fleet.alertRules.col.active'),

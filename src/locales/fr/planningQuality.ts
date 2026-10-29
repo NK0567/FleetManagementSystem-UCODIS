@@ -65,5 +65,8 @@ export default {
   'planning.quality.actor.orderer': 'Ordonnateur',
   'planning.quality.actor.logistics': 'Logistique',
   'planning.quality.actor.internal_carrier': 'Flotte interne',
-  'planning.quality.actor.external_carrier': 'Transporteur externe'
+  'planning.quality.actor.external_carrier': 'Transporteur externe',
+  'planning.quality.col.files': 'Pièces jointes',
+  'planning.quality.files': 'Pièces jointes',
+  'planning.quality.noFile': 'Aucune pièce jointe.'
 }

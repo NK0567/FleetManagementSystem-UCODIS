@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useEntityForm } from '@/composables/useEntityForm'
 import { useFormValidationUi } from '@/composables/useFormValidationUi'
 import { formatDateTime } from '@/utils/format'
-import type { TransportOrderApi } from '../types/transportOrder.types'
+import type { TransportMode, TransportOrderApi } from '../types/transportOrder.types'
 
 const props = withDefaults(
   defineProps<{
@@ -30,7 +30,8 @@ const { draft, expose } = useEntityForm({
   empty: () => ({
     routeTemplateNo: '',
     plannedDeparture: '',
-    comment: ''
+    comment: '',
+    transportMode: 'road' as TransportMode
   }),
   required: [],
   labelOf: (field) => t(`planning.transportOrders.form.${field}`)
@@ -103,6 +104,18 @@ defineExpose(expose)
         </BaseFormField>
       </div>
       <div class="space-y-3 min-w-0">
+        <BaseFormField :label="t('planning.transportOrders.form.transportMode')">
+          <OptionsSelect
+            :model-value="draft.transportMode"
+            options-key="transportMode"
+            :disabled="scheduleDisabled"
+            :disabled-values="['rail', 'sea', 'air']"
+            @update:model-value="draft.transportMode = String($event) as TransportMode"
+          />
+          <p class="text-xs text-muted-foreground mt-1">
+            {{ t('planning.transportOrders.form.transportModeHint') }}
+          </p>
+        </BaseFormField>
         <BaseFormField field="comment" :label="t('planning.transportOrders.form.comment')">
           <FormTextarea v-model="draft.comment" :disabled="disabled" :maxlength="500" />
         </BaseFormField>

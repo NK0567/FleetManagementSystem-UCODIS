@@ -7,7 +7,8 @@ import {
   deliveryRequestService,
   type DeliveryRequestApi
 } from '@/modules/planning/delivery-requests'
-import { toLineInputs, type PickedLines } from '../domain/requestPick'
+import { toLineInputs, type PickedLines, type PickedQuantities } from '../domain/requestPick'
+import { usePlanningCircuit } from '@/modules/planning/planning-settings'
 import type { TransportOrderApi, TransportOrderLineInput } from '../types/transportOrder.types'
 
 const props = defineProps<{
@@ -20,23 +21,39 @@ const emit = defineEmits<{ confirm: [lines: TransportOrderLineInput[]]; cancel: 
 
 interface ManualLine {
   key: number
+  /** A line already in the order without an order behind it, kept as it is. */
+  lineNo?: number
+  ordererNo: string
   deliveryPointNo: string
   productNo: string
   quantity: number | null
   weightKg: number | null
+  volumeM3: number | null
 }
 
 const { t } = useI18n()
 const requests = ref<DeliveryRequestApi[]>([])
 const picked = ref<string[]>([])
 const pickedLines = ref<PickedLines>({})
+const pickedQuantities = ref<PickedQuantities>({})
+/* Keying an order in the order is allowed or not by the company (TRS01-US06, TRS07-US05). */
+const { circuit } = usePlanningCircuit()
+const manualTotals = computed(() => ({
+  weightKg: manual.value.reduce((total, line) => total + (Number(line.weightKg) || 0), 0),
+  volumeM3: manual.value.reduce((total, line) => total + (Number(line.volumeM3) || 0), 0)
+}))
 const manual = ref<ManualLine[]>([])
 const loadingRequests = ref(false)
 const loadError = ref<string | null>(null)
 let nextKey = 1
 
+/* An order keyed here is an order like any other: its weight is always asked (TRS01-US02). */
 const incomplete = computed(() =>
-  manual.value.some((line) => !line.deliveryPointNo || !line.productNo || !line.quantity)
+  manual.value.some(
+    (line) =>
+      !line.lineNo &&
+      (!line.deliveryPointNo || !line.productNo || !line.quantity || !(Number(line.weightKg) > 0))
+  )
 )
 
 watch(
@@ -46,20 +63,24 @@ watch(
     loadError.value = null
     /* An order already in the transport order keeps only the lines taken, the others having
      * become an order of their own: it is offered whole. */
+    // A line replanned into another order stays there as history: it is not offered again.
+    const live = props.order.lines.filter((line) => !line.replannedToOrderNo)
     picked.value = [
-      ...new Set(
-        props.order.lines.map((line) => line.deliveryRequestNo).filter((no): no is string => !!no)
-      )
+      ...new Set(live.map((line) => line.deliveryRequestNo).filter((no): no is string => !!no))
     ]
     pickedLines.value = {}
-    manual.value = props.order.lines
+    pickedQuantities.value = {}
+    manual.value = live
       .filter((line) => !line.deliveryRequestNo)
       .map((line) => ({
         key: nextKey++,
+        lineNo: line.lineNo,
+        ordererNo: '',
         deliveryPointNo: line.deliveryPointNo,
         productNo: line.productNo,
         quantity: line.quantity,
-        weightKg: line.weightKg
+        weightKg: line.weightKg,
+        volumeM3: line.volumeM3
       }))
     loadingRequests.value = true
     try {
@@ -80,7 +101,15 @@ watch(
 function addManual() {
   manual.value = [
     ...manual.value,
-    { key: nextKey++, deliveryPointNo: '', productNo: '', quantity: null, weightKg: null }
+    {
+      key: nextKey++,
+      ordererNo: '',
+      deliveryPointNo: '',
+      productNo: '',
+      quantity: null,
+      weightKg: null,
+      volumeM3: null
+    }
   ]
 }
 
@@ -90,12 +119,15 @@ function removeManual(key: number) {
 
 function confirm() {
   emit('confirm', [
-    ...toLineInputs(requests.value, picked.value, pickedLines.value),
+    ...toLineInputs(requests.value, picked.value, pickedLines.value, pickedQuantities.value),
     ...manual.value.map((line) => ({
+      ...(line.lineNo ? { lineNo: line.lineNo } : {}),
+      ...(line.ordererNo ? { ordererNo: line.ordererNo } : {}),
       deliveryPointNo: line.deliveryPointNo,
       productNo: line.productNo,
       quantity: line.quantity,
-      weightKg: line.weightKg
+      weightKg: line.weightKg,
+      volumeM3: line.volumeM3
     }))
   ])
 }
@@ -129,6 +161,10 @@ const buttonClass =
         <RequestPickerTable
           v-model="picked"
           v-model:lines="pickedLines"
+          v-model:quantities="pickedQuantities"
+          :capacity="order?.capacity ?? null"
+          :extra-weight-kg="manualTotals.weightKg"
+          :extra-volume-m3="manualTotals.volumeM3"
           :requests="requests"
           :loading="loadingRequests"
           :date="order?.plannedDeparture ?? null"
@@ -136,12 +172,22 @@ const buttonClass =
           :empty-message="t('planning.transportOrders.linesDialog.none')"
         />
       </div>
-      <div>
+      <div v-if="circuit.intake.plannerDirectEntry || manual.length">
         <div class="flex items-center justify-between mb-2">
-          <p class="text-sm font-semibold text-card-foreground">
-            {{ t('planning.transportOrders.linesDialog.manual') }}
-          </p>
-          <button type="button" :class="buttonClass" @click="addManual">
+          <div>
+            <p class="text-sm font-semibold text-card-foreground">
+              {{ t('planning.transportOrders.linesDialog.manual') }}
+            </p>
+            <p class="text-xs text-muted-foreground">
+              {{ t('planning.transportOrders.linesDialog.manualHint') }}
+            </p>
+          </div>
+          <button
+            v-if="circuit.intake.plannerDirectEntry"
+            type="button"
+            :class="buttonClass"
+            @click="addManual"
+          >
             <Plus class="w-5 h-5 text-primary" />
             {{ t('planning.transportOrders.linesDialog.add') }}
           </button>
@@ -164,6 +210,19 @@ const buttonClass =
               </button>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <BaseFormField
+                v-if="!line.lineNo"
+                :label="t('planning.transportOrders.linesDialog.orderer')"
+              >
+                <ReferenceLookup
+                  v-model="line.ordererNo"
+                  reference-key="ordererCustomers"
+                  :modal-title="t('planning.transportOrders.linesDialog.orderer')"
+                />
+                <p class="text-xs text-muted-foreground mt-1">
+                  {{ t('planning.transportOrders.linesDialog.ordererHint') }}
+                </p>
+              </BaseFormField>
               <BaseFormField :label="t('planning.transportOrders.linesDialog.point')" required>
                 <ReferenceLookup
                   v-model="line.deliveryPointNo"
@@ -183,8 +242,11 @@ const buttonClass =
               <BaseFormField :label="t('planning.transportOrders.linesDialog.quantity')" required>
                 <FormInput v-model="line.quantity" type="number" :min="0" />
               </BaseFormField>
-              <BaseFormField :label="t('planning.transportOrders.linesDialog.weight')">
+              <BaseFormField :label="t('planning.transportOrders.linesDialog.weight')" required>
                 <FormInput v-model="line.weightKg" type="number" :min="0" />
+              </BaseFormField>
+              <BaseFormField :label="t('planning.transportOrders.linesDialog.volume')">
+                <FormInput v-model="line.volumeM3" type="number" :min="0" />
               </BaseFormField>
             </div>
           </div>

@@ -34,12 +34,13 @@ import {
   type FieldReaders
 } from '../../http/input'
 import { optionalReference, requireReference, unknownReference } from '../../http/references'
-import { ok } from '../../http/responses'
+import { created, ok } from '../../http/responses'
 import { importRows, vehicleByPlate } from '../../http/importRows'
 import type { MockRouter } from '../../http/router'
 import { sessionUser } from '../../http/types'
 import { localize, localizeNumber, type MockLanguage } from '../../i18n'
 import { fileMetaOf } from '../files'
+import { driverVehicle } from './driverVehicle'
 import { expectedDrivers, tripAt } from './links'
 import { FLEET_MESSAGES } from './messages'
 import { fleetSettings } from './settings'
@@ -197,7 +198,7 @@ export function registerFuelRefillsHandlers(router: MockRouter, db: MockDatabase
   }
 
   /** One way to build a refill, whether typed in or imported: the same rules apply to both. */
-  function buildRefill(input: Record<string, unknown>, channel: 'manual' | 'import') {
+  function buildRefill(input: Record<string, unknown>, channel: 'manual' | 'import' | 'mobile') {
     const vehicleNo = requireReference(db.vehicles, input, 'vehicleNo')
     const fields = {
       refueledAt: readers.refueledAt(input),
@@ -271,6 +272,49 @@ export function registerFuelRefillsHandlers(router: MockRouter, db: MockDatabase
       return ok(refillApiOf(db, refill.no, request.language))
     }
   )
+
+  // From his phone, the driver declares a refill of his own vehicle, with the photo of the receipt.
+  router.post('/me/refills', { feature: 'MYSPACE', action: 'execute' }, (request) => {
+    const { employeeNo, vehicleNo } = driverVehicle(db, request)
+    const body = readBody(request)
+    if (!readString(body, 'receiptFileNo'))
+      throw unprocessable(FLEET_MESSAGES.refillReceiptRequired)
+    const refill = db.fuelRefills.insert(
+      stampCreated(
+        buildRefill(
+          {
+            ...body,
+            vehicleNo,
+            driverNo: employeeNo,
+            refueledAt: body.refueledAt || nowIsoDateTime().slice(0, 16)
+          },
+          'mobile'
+        ),
+        request
+      )
+    )
+    return created(refillApiOf(db, refill.no, request.language))
+  })
+
+  router.get('/me/refills', { feature: 'MYSPACE', action: 'read' }, (request) => {
+    const { employeeNo, vehicleNo } = driverVehicle(db, request)
+    const plate = db.vehicles.find(vehicleNo)?.plate ?? vehicleNo
+    const mine = fuelRefillsApi(db, request.language)
+      .filter((refill) => refill.driverNo === employeeNo)
+      .sort((a, b) => b.refueledAt.localeCompare(a.refueledAt))
+      .slice(0, 5)
+      .map((refill) => ({
+        no: refill.no,
+        refueledAt: refill.refueledAt,
+        vehiclePlate: refill.vehiclePlate,
+        liters: refill.liters,
+        amount: refill.amount,
+        stationLabel: refill.stationLabel,
+        channel: refill.channel,
+        status: refill.status
+      }))
+    return ok({ vehicleNo, vehiclePlate: plate, refills: mine })
+  })
 
   // A file from a station or a card supplier names the vehicle by its plate, the driver by a number.
   router.post(

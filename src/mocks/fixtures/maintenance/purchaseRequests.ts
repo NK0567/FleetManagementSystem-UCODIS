@@ -22,9 +22,11 @@ export type PurchaseRequestRow = MockRow &
     | 'cancelledAt'
     | 'cancelledBy'
     | 'cancelReason'
+    | 'erpReference'
+    | 'erpSentAt'
   >
 
-const SEED: Omit<PurchaseRequestRow, keyof typeof seedAudit>[] = [
+const SEED: Omit<PurchaseRequestRow, keyof typeof seedAudit | 'erpReference' | 'erpSentAt'>[] = [
   {
     no: 'DA-2026-0001',
     itemNo: 'BV-FOT-EST',
@@ -69,6 +71,13 @@ const SEED: Omit<PurchaseRequestRow, keyof typeof seedAudit>[] = [
 
 export const purchaseRequestsCollection: CollectionDefinition<PurchaseRequestRow> = {
   name: 'purchase-requests',
-  seed: () => SEED.map((row) => ({ ...row, ...seedAudit })),
-  dateFields: ['requestedAt', 'orderedAt', 'receivedAt', 'cancelledAt']
+  // Every request went to the ERP as soon as it was made (simulated).
+  seed: () =>
+    SEED.map((row) => ({
+      ...row,
+      erpReference: `ERP-${row.no}`,
+      erpSentAt: row.requestedAt,
+      ...seedAudit
+    })),
+  dateFields: ['requestedAt', 'orderedAt', 'receivedAt', 'cancelledAt', 'erpSentAt']
 }

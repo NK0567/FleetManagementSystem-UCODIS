@@ -115,3 +115,56 @@ export function liveSituation(facts: {
   if (!facts.onTrip) return 'parked'
   return facts.moving ? 'moving' : 'stopped'
 }
+
+const METRES_PER_DEGREE = 111_320
+
+/**
+ * Shortest distance from a point to the road drawn by the stops, in metres. A flat projection
+ * around the point is precise enough at the scale of a corridor; null without a leg to measure.
+ */
+export function distanceToRouteM(point: GeoPoint, route: readonly GeoPoint[]): number | null {
+  if (route.length < 2) return null
+  const scaleX = Math.cos((point.latitude * Math.PI) / 180) * METRES_PER_DEGREE
+  const project = (p: GeoPoint) => ({
+    x: (p.longitude - point.longitude) * scaleX,
+    y: (p.latitude - point.latitude) * METRES_PER_DEGREE
+  })
+  let best = Infinity
+  for (let index = 1; index < route.length; index++) {
+    const a = project(route[index - 1] as GeoPoint)
+    const b = project(route[index] as GeoPoint)
+    const dx = b.x - a.x
+    const dy = b.y - a.y
+    const length = dx * dx + dy * dy
+    const t = length ? Math.min(1, Math.max(0, -(a.x * dx + a.y * dy) / length)) : 0
+    best = Math.min(best, Math.hypot(a.x + t * dx, a.y + t * dy))
+  }
+  return Math.round(best)
+}
+
+export interface TrackPoint extends GeoPoint {
+  at: string
+  speedKmh: number
+}
+
+/**
+ * The positions a unit recorded over a stretch of its trip, one every few minutes; nothing is
+ * recorded inside a dead zone, where the unit cannot report.
+ */
+export function recordedTrack(
+  stops: readonly TrackedStop[],
+  arrivals: readonly string[],
+  from: string,
+  to: string,
+  deadZones: readonly GeoCircle[],
+  stepMin = 10
+): TrackPoint[] {
+  const points: TrackPoint[] = []
+  for (let at = from; at <= to; at = addMinutes(at, stepMin)) {
+    const fix = positionOnTrip(stops, arrivals, at)
+    const position = { latitude: fix.latitude, longitude: fix.longitude }
+    if (circleContaining(position, deadZones)) continue
+    points.push({ at, ...position, speedKmh: fix.speedKmh })
+  }
+  return points
+}

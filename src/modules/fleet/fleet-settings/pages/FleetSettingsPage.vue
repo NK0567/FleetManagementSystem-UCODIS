@@ -12,13 +12,37 @@ import {
   type FleetSettingsSection
 } from '../domain/fleetSettings'
 import { useFleetSettingsStore } from '../stores/fleetSettingsStore'
+import ImportMappingsPanel from '../components/ImportMappingsPanel.vue'
+import IndicatorsPanel from '../components/IndicatorsPanel.vue'
+import ScoreFamiliesPanel from '../components/ScoreFamiliesPanel.vue'
+import type { IndicatorSetting } from '../domain/indicators'
 
 const { t } = useI18n()
 const store = useFleetSettingsStore()
 const { canUpdate } = usePermissions('FLEETSETTINGS')
 
 const dirtySections = reactive(new Set<FleetSettingsSection>())
-useUnsavedChangesRouteGuard(computed(() => dirtySections.size > 0))
+/** The lists of the settings (score families, imports, indicators) are saved on their own. */
+const dirtyLists = reactive(new Set<string>())
+useUnsavedChangesRouteGuard(computed(() => dirtySections.size > 0 || dirtyLists.size > 0))
+
+function setListDirty(list: string, dirty: boolean) {
+  if (dirty) dirtyLists.add(list)
+  else dirtyLists.delete(list)
+}
+
+/** The availability target is shared with the reporting section: both show the saved value. */
+function onIndicatorsSaved(indicators: IndicatorSetting[]) {
+  if (!store.settings) return
+  store.settings.indicators = indicators
+  const availability = indicators.find((item) => item.key === 'availabilityRate')
+  if (availability?.target != null && store.settings.reporting) {
+    store.settings.reporting = {
+      ...store.settings.reporting,
+      availabilityTargetPct: availability.target
+    }
+  }
+}
 
 function setDirty(section: FleetSettingsSection, dirty: boolean) {
   if (dirty) dirtySections.add(section)
@@ -75,6 +99,26 @@ onMounted(() => void store.fetchSettings())
         :save="saveSection(section)"
         @update:dirty="setDirty(section, $event)"
       />
+      <div class="border border-border rounded">
+        <ScoreFamiliesPanel
+          :families="store.settings.scoreFamilies"
+          :can-edit="canUpdate"
+          @saved="store.settings.scoreFamilies = $event"
+          @update:dirty="setListDirty('scoreFamilies', $event)"
+        />
+        <ImportMappingsPanel
+          :mappings="store.settings.importMappings"
+          :can-edit="canUpdate"
+          @saved="(kind, mapping) => (store.settings!.importMappings[kind] = mapping)"
+          @update:dirty="setListDirty('importMappings', $event)"
+        />
+        <IndicatorsPanel
+          :indicators="store.settings.indicators"
+          :can-edit="canUpdate"
+          @saved="onIndicatorsSaved"
+          @update:dirty="setListDirty('indicators', $event)"
+        />
+      </div>
     </template>
   </div>
 </template>

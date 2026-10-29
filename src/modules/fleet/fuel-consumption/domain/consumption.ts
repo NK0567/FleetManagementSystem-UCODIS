@@ -64,14 +64,19 @@ export function averageLitersPer100(
   return litersPer100(liters, km)
 }
 
-export type ReferenceSource = 'route' | 'vehicleType' | 'default'
+export type ReferenceSource = 'vehicle' | 'route' | 'vehicleType' | 'default'
 
-/** The route knows the road best, then the vehicle type, then the fleet default. */
+/**
+ * The reference set for the vehicle itself, on the corridor or on all of them, wins; then the
+ * route knows the road best, then the vehicle type, then the fleet default.
+ */
 export function consumptionReference(
+  vehicleL100: number | null,
   routeL100: number | null,
   vehicleTypeL100: number | null,
   defaultL100: number
 ): { value: number; source: ReferenceSource } {
+  if (vehicleL100 !== null) return { value: vehicleL100, source: 'vehicle' }
   if (routeL100 !== null) return { value: routeL100, source: 'route' }
   if (vehicleTypeL100 !== null) return { value: vehicleTypeL100, source: 'vehicleType' }
   return { value: defaultL100, source: 'default' }
@@ -114,4 +119,25 @@ export function deductionIssues(
   if (amount > excess) issues.push('aboveExcessCost')
   if (cap !== null && amount > cap) issues.push('aboveCap')
   return issues
+}
+
+/**
+ * What may still be withheld from the driver this month: the share of his salary set by the
+ * applicable labour law, less the deductions already proposed or approved for the month.
+ */
+export function withholdableAmount(salary: number, maxSalaryPct: number, otherThisMonth: number) {
+  return Math.max(0, Math.floor((salary * maxSalaryPct) / 100) - otherThisMonth)
+}
+
+/** Energies that emit little: the vehicles running on them make the low-emission share. */
+export const LOW_EMISSION_FUELS = ['electric', 'hybrid'] as const
+
+export function lowEmissionShare(fuelTypes: readonly (string | null)[]) {
+  const motorized = fuelTypes.filter((fuel): fuel is string => fuel !== null)
+  const low = motorized.filter((fuel) => (LOW_EMISSION_FUELS as readonly string[]).includes(fuel))
+  return {
+    motorized: motorized.length,
+    lowEmission: low.length,
+    sharePct: motorized.length ? Math.round((low.length / motorized.length) * 100) : null
+  }
 }

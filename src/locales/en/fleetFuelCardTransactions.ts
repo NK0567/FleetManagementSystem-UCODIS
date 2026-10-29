@@ -46,5 +46,11 @@ export default {
   'fleet.fuelCardTransactions.action.openRefill': 'Open the refill',
   'fleet.fuelCardTransactions.action.detach': 'Detach',
   'fleet.fuelCardTransactions.action.match': 'Match',
-  'fleet.fuelCardTransactions.action.createRefill': 'Create the refill'
+  'fleet.fuelCardTransactions.action.createRefill': 'Create the refill',
+  'fleet.fuelCardTransactions.import.action': 'Import transactions',
+  'fleet.fuelCardTransactions.import.title': 'Import the supplier statement',
+  'fleet.fuelCardTransactions.import.hint':
+    'CSV file (separator ; or ,) from the card supplier, with a header line. Each line goes through the same checks as an entry (known card, past date, duplicate refused), then the transactions are matched with the refills.',
+  'fleet.fuelCardTransactions.import.created':
+    'No transaction imported. | One transaction imported. | {n} transactions imported.'
 }

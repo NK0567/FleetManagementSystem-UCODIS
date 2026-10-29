@@ -8,6 +8,7 @@ import { useEntityCard } from '@/composables/useEntityCard'
 import { usePermissions } from '@/composables/usePermissions'
 import { formatNumber } from '@/utils/format'
 import TripForm from '../components/TripForm.vue'
+import TripDrivingTimeSection from '../components/TripDrivingTimeSection.vue'
 import { canApply, nextStopIndex } from '../domain/trip'
 import { tripService } from '../services/tripService'
 import { useTripStore } from '../stores/tripStore'
@@ -251,6 +252,11 @@ const nextStopName = computed(() => {
             :initial-data="item ?? {}"
             :disabled="!isEditMode || isSaving"
             :validation-errors="validationErrors"
+          />
+          <TripDrivingTimeSection
+            v-if="item"
+            :trip-no="item.no"
+            :refresh-key="`${item.status}-${item.modifiedAt}`"
           />
         </div>
       </div>

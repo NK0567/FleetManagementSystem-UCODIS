@@ -18,7 +18,12 @@ describe('planning settings', () => {
     expect(planningSettingsIssues('schedule', schedule)).toEqual([
       { field: 'averageSpeedKmh', code: 'outOfRange', min: 1, max: 130 }
     ])
-    expect(planningSettingsIssues('confirmation', { tacitConfirmationDays: null })).toEqual([])
+    expect(
+      planningSettingsIssues('confirmation', {
+        tacitConfirmationDays: null,
+        callMoment: 'same_day'
+      })
+    ).toEqual([])
   })
 
   it('refuse an empty counting unit and an unknown freight payer', () => {

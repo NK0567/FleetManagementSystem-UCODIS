@@ -1,7 +1,7 @@
 import { currentLocale } from '@/core/i18n'
 import { isIsoDay, parseIsoDay } from '@/utils/date'
 
-export const EMPTY_CELL = '—'
+export const EMPTY_CELL = '-'
 
 const DATE_TIME_PATTERN = /^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/
 

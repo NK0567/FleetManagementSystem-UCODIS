@@ -1,4 +1,6 @@
 import {
+  modelCode,
+  modelLabel,
   OPERATION_NATURES,
   operationIssues,
   type MaintenanceOperation,
@@ -26,23 +28,41 @@ import { MAINTENANCE_MESSAGES } from './messages'
 
 type Fields = Omit<MaintenancePlanRow, 'no' | keyof AuditFields>
 
-export function maintenancePlansApi(db: MockDatabase): MaintenancePlanApi[] {
-  const plates = new Map(db.vehicles.all().map((vehicle) => [vehicle.no, vehicle.plate]))
-  return db.maintenancePlans.all().map((row) => ({
-    ...row,
-    vehiclePlates: row.vehicleNos.map((no) => plates.get(no) ?? no).join(', '),
-    vehicleCount: row.vehicleNos.length,
-    operationCount: row.operations.length
-  }))
+/** The vehicles in the park of each model, in plate order. */
+function vehiclesOfModels(db: MockDatabase, codes: readonly string[]) {
+  return db.vehicles
+    .all()
+    .filter((vehicle) => !vehicle.removal && codes.includes(modelCode(vehicle)))
+    .sort((a, b) => a.plate.localeCompare(b.plate))
 }
 
-/** The active plan each vehicle follows. */
+export function maintenancePlansApi(db: MockDatabase): MaintenancePlanApi[] {
+  return db.maintenancePlans.all().map((row) => {
+    const vehicles = vehiclesOfModels(db, row.modelCodes)
+    return {
+      ...row,
+      modelNames: row.modelCodes.map(modelLabel).join(', '),
+      vehicleNos: vehicles.map((vehicle) => vehicle.no),
+      vehiclePlates: vehicles.map((vehicle) => vehicle.plate).join(', '),
+      vehicleCount: vehicles.length,
+      operationCount: row.operations.length
+    }
+  })
+}
+
+/** The active plan each vehicle follows: the one of its model, so a new vehicle inherits it. */
 export function planByVehicle(db: MockDatabase): Map<string, MaintenancePlanRow> {
-  return new Map(
+  const byModel = new Map(
     db.maintenancePlans
       .all()
       .filter((plan) => plan.active)
-      .flatMap((plan) => plan.vehicleNos.map((vehicleNo) => [vehicleNo, plan] as const))
+      .flatMap((plan) => plan.modelCodes.map((code) => [code, plan] as const))
+  )
+  return new Map(
+    db.vehicles
+      .all()
+      .filter((vehicle) => byModel.has(modelCode(vehicle)))
+      .map((vehicle) => [vehicle.no, byModel.get(modelCode(vehicle))!] as const)
   )
 }
 
@@ -77,6 +97,7 @@ function readOperations(db: MockDatabase, input: Record<string, unknown>): Maint
       subsystemNo: typeof line.subsystemNo === 'string' ? line.subsystemNo : '',
       nature,
       intervalKm: interval('intervalKm'),
+      intervalHours: interval('intervalHours'),
       intervalDays: interval('intervalDays')
     }
     if (operationIssues(operation).length > 0 || !subsystems.has(operation.subsystemNo)) {
@@ -97,25 +118,28 @@ export function registerMaintenancePlansHandlers(router: MockRouter, db: MockDat
     provisional: (input) => readBoolean(input, 'provisional'),
     active: (input) => readBoolean(input, 'active', true),
     source: (input) => readString(input, 'source'),
-    vehicleNos: (input) => {
-      const nos = [...new Set(readStringList(input, 'vehicleNos'))]
-      for (const no of nos) {
-        if (!db.vehicles.exists(no)) throw invalidField('vehicleNos')
+    modelCodes: (input) => {
+      const codes = [...new Set(readStringList(input, 'modelCodes'))]
+      const known = new Set(db.vehicles.all().map(modelCode))
+      for (const code of codes) {
+        if (!known.has(code)) throw invalidField('modelCodes')
       }
-      return nos
+      return codes
     },
     operations: (input) => readOperations(db, input)
   }
 
-  /** A vehicle follows one active plan at most, or its due dates would contradict each other. */
-  function assertVehiclesFree(plan: Pick<Fields, 'active' | 'vehicleNos'>, no?: string) {
+  /** A model follows one active plan at most, or the due dates of its vehicles would contradict each other. */
+  function assertModelsFree(plan: Pick<Fields, 'active' | 'modelCodes'>, no?: string) {
     if (!plan.active) return
-    const taken = planByVehicle(db)
-    for (const vehicleNo of plan.vehicleNos) {
-      const other = taken.get(vehicleNo)
-      if (other && other.no !== no) {
-        const plate = db.vehicles.find(vehicleNo)?.plate ?? vehicleNo
-        throw conflict(MAINTENANCE_MESSAGES.vehicleHasPlan, { plate, plan: other.name })
+    for (const other of db.maintenancePlans.all()) {
+      if (other.no === no || !other.active) continue
+      const shared = plan.modelCodes.find((code) => other.modelCodes.includes(code))
+      if (shared) {
+        throw conflict(MAINTENANCE_MESSAGES.modelHasPlan, {
+          model: modelLabel(shared),
+          plan: other.name
+        })
       }
     }
   }
@@ -135,20 +159,22 @@ export function registerMaintenancePlansHandlers(router: MockRouter, db: MockDat
     searchColumns: ['no', 'name', 'vehiclePlates'],
     create: (input) => {
       const fields = readAll(input, readers)
-      assertVehiclesFree(fields)
+      assertModelsFree(fields)
       return { no: newNo(), ...fields }
     },
     update: (existing, input) => {
       const patch = readPatch(input, readers)
-      assertVehiclesFree({ ...existing, ...patch }, existing.no)
+      assertModelsFree({ ...existing, ...patch }, existing.no)
       return patch
     },
     remove: (existing) => {
-      if (existing.vehicleNos.length) throw conflict(MAINTENANCE_MESSAGES.planHasVehicles)
+      if (vehiclesOfModels(db, existing.modelCodes).length) {
+        throw conflict(MAINTENANCE_MESSAGES.planHasVehicles)
+      }
     }
   })
 
-  // A copy starts with no vehicle and new operation numbers: passages belong to the original.
+  // A copy starts with no model and new operation numbers: passages belong to the original.
   router.post(
     '/maintenance/maintenance-plans/:no/duplicate',
     { feature: 'MAINTENANCEPLAN', action: 'insert' },
@@ -163,7 +189,7 @@ export function registerMaintenancePlansHandlers(router: MockRouter, db: MockDat
       })
       const copy = db.maintenancePlans.insert(
         stampCreated(
-          { ...structuredClone(source), no: newNo(), name, vehicleNos: [], operations },
+          { ...structuredClone(source), no: newNo(), name, modelCodes: [], operations },
           request
         )
       )

@@ -1,5 +1,6 @@
 import {
   lineOutOfTour,
+  firstArrivalMarked,
   linesConfirmed
 } from '@/modules/planning/customer-confirmations/domain/confirmation'
 import { linesDelivered } from '@/modules/planning/execution/domain/execution'
@@ -46,6 +47,7 @@ function orderDone(db: MockDatabase, order: TransportOrderRow): boolean {
     means: order.means,
     tripStatus: trip?.status ?? null,
     linesConfirmed: linesConfirmed(order.lines),
+    firstArrival: firstArrivalMarked(order.lines),
     loadingReady: loadingReady(order.lines),
     carrierDeparted: order.carrierDepartedAt !== null || fleetDeparted,
     linesDelivered: linesDelivered(order.lines)
@@ -93,7 +95,8 @@ function holdingInvoice(
     )
 }
 
-function view(db: MockDatabase, invoice: CarrierInvoiceRow) {
+/** The invoice as the screens and the transport reports read it (TRS08-US04). */
+export function view(db: MockDatabase, invoice: CarrierInvoiceRow) {
   const orders = invoice.orderNos
     .map((no) => db.transportOrders.find(no))
     .filter((order) => !!order)

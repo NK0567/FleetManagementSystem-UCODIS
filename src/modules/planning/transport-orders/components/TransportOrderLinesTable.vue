@@ -216,6 +216,10 @@ const actionClass =
             <span v-else class="text-muted-foreground">
               {{ t('planning.transportOrders.lines.manual') }}
             </span>
+            <!-- The order's reference follows the delivery to the vehicle (TRS01-US06). -->
+            <span v-if="line.externalReference" class="block text-xs text-muted-foreground">
+              {{ line.externalReference }}
+            </span>
           </td>
           <td class="px-3 py-2 min-w-48">
             <p class="font-medium text-card-foreground">{{ line.deliveryPointName }}</p>
@@ -239,10 +243,13 @@ const actionClass =
                 {{ line.quantityGap > 0 ? '+' : '' }}{{ formatNumber(line.quantityGap, 1) }}
               </span>
             </template>
-            <span v-else class="text-muted-foreground">—</span>
+            <span v-else class="text-muted-foreground">·</span>
           </td>
           <td class="px-3 py-2 text-right tabular-nums whitespace-nowrap">
-            {{ line.weightKg === null ? '—' : formatNumber(line.weightKg, 1) }}
+            {{ line.weightKg === null ? '' : formatNumber(line.weightKg, 1) }}
+            <span v-if="line.volumeM3" class="block text-xs text-muted-foreground">
+              {{ formatNumber(line.volumeM3, 1) }} m³
+            </span>
           </td>
           <td class="px-3 py-2">
             <TransportOrderLineStatePill :state="orderLineState(line)" />

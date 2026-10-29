@@ -10,8 +10,11 @@ export interface MaintenancePlanRow extends MockRow {
   provisional: boolean
   active: boolean
   source: string
-  /** The vehicles the plan applies to, chosen one by one: a vehicle follows one active plan at most. */
-  vehicleNos: string[]
+  /**
+   * The vehicle models the plan applies to (make and model, see `modelCode`): every vehicle of a
+   * model inherits its plan, and a model follows one active plan at most.
+   */
+  modelCodes: string[]
   operations: MaintenanceOperation[]
 }
 
@@ -21,8 +24,17 @@ const op = (
   subsystemNo: string,
   nature: OperationNature,
   intervalKm: number | null,
-  intervalDays: number | null = null
-): MaintenanceOperation => ({ no, label, subsystemNo, nature, intervalKm, intervalDays })
+  intervalDays: number | null = null,
+  intervalHours: number | null = null
+): MaintenanceOperation => ({
+  no,
+  label,
+  subsystemNo,
+  nature,
+  intervalKm,
+  intervalHours,
+  intervalDays
+})
 
 const SEED: Omit<MaintenancePlanRow, keyof typeof seedAudit>[] = [
   {
@@ -31,7 +43,7 @@ const SEED: Omit<MaintenancePlanRow, keyof typeof seedAudit>[] = [
     provisional: true,
     active: true,
     source: 'Plan constructeur Sinotruk Howo-NX 400.',
-    vehicleNos: ['VEH-001', 'VEH-002', 'VEH-003'],
+    modelCodes: ['Sinotruk|Howo A7'],
     operations: [
       op(
         'OP-001',
@@ -39,7 +51,8 @@ const SEED: Omit<MaintenancePlanRow, keyof typeof seedAudit>[] = [
         'ENGINE',
         'replace',
         10_000,
-        365
+        365,
+        500
       ),
       op('OP-002', 'Échanger le filtre et le préfiltre gazole', 'FUEL-SYSTEM', 'replace', 10_000),
       op(
@@ -72,7 +85,7 @@ const SEED: Omit<MaintenancePlanRow, keyof typeof seedAudit>[] = [
     provisional: true,
     active: true,
     source: 'Aucun plan constructeur reçu : intervalles calqués sur le plan Sinotruk Howo A7.',
-    vehicleNos: ['VEH-010'],
+    modelCodes: ['Dongfeng|KL'],
     operations: [
       op(
         'OP-013',

@@ -168,7 +168,10 @@ describe('declaring a document cancelled or lost', () => {
       declaredBy: 'FLT001'
     })
     expect((await declare({ status: 'cancelled', reason: 'Encore' })).status).toBe(409)
-    expect((await get<VehicleApi>('/fleet/vehicles/VEH-008')).status).toBe('immobilized')
+    // VEH-008 is also at the workshop: it shows in maintenance, and its documents keep it out.
+    const vehicle = await get<VehicleApi>('/fleet/vehicles/VEH-008')
+    expect(vehicle.status).toBe('in_maintenance')
+    expect(vehicle.documentsCompliant).toBe(false)
   })
 })
 

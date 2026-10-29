@@ -49,6 +49,7 @@ const searchColumnOptions = computed<{ value: FuelConsumptionSearchColumn; label
 const tableColumns = computed<TableColumn[]>(() => [
   { sortKey: 'vehiclePlate', label: t('fleet.fuelConsumption.col.vehiclePlate'), minW: '120px' },
   { sortKey: 'driverName', label: t('fleet.fuelConsumption.col.driverName'), minW: '170px' },
+  { sortKey: 'routeName', label: t('fleet.fuelConsumption.col.routeName'), minW: '200px' },
   {
     sortKey: 'to',
     label: t('fleet.fuelConsumption.col.to'),
@@ -82,6 +83,20 @@ const tableColumns = computed<TableColumn[]>(() => [
     minW: '110px',
     align: 'right',
     formatter: formatDecimal
+  },
+  {
+    sortKey: 'referenceSource',
+    label: t('fleet.fuelConsumption.col.referenceSource'),
+    minW: '130px',
+    formatter: optionLabel('fuelReferenceSource')
+  },
+  {
+    sortKey: 'co2Kg',
+    label: t('fleet.fuelConsumption.col.co2Kg'),
+    minW: '100px',
+    align: 'right',
+    defaultHidden: true,
+    formatter: formatInteger
   },
   {
     sortKey: 'gapPct',
@@ -192,10 +207,12 @@ const dialog = ref<Dialog>(null)
 const causeNo = ref<string | null>(null)
 const comment = ref('')
 const amount = ref<number | null>(null)
+const monthlySalary = ref<number | null>(null)
 
 function open(next: Exclude<Dialog, null>) {
   causeNo.value = null
   comment.value = ''
+  monthlySalary.value = null
   amount.value = selected.value ? Math.min(selected.value.excessCost, 50_000) : null
   dialog.value = next
 }
@@ -203,7 +220,7 @@ function open(next: Exclude<Dialog, null>) {
 const ownProposal = computed(() => selected.value?.proposedBy === userStore.user?.code)
 const confirmDisabled = computed(() => {
   if (dialog.value === 'qualify') return !causeNo.value || !comment.value.trim()
-  if (dialog.value === 'propose') return !amount.value
+  if (dialog.value === 'propose') return !amount.value || !monthlySalary.value
   if (dialog.value === 'approve') return false
   return !comment.value.trim()
 })
@@ -216,7 +233,7 @@ async function confirm() {
       case 'qualify':
         return fuelConsumptionService.qualify(no, causeNo.value ?? '', comment.value)
       case 'propose':
-        return fuelConsumptionService.propose(no, amount.value ?? 0)
+        return fuelConsumptionService.propose(no, amount.value ?? 0, monthlySalary.value)
       case 'approve':
         return fuelConsumptionService.decide(no, true, comment.value)
       case 'reject':
@@ -275,10 +292,19 @@ async function confirm() {
           t('fleet.fuelConsumption.summary', {
             liters: formatNumber(summary.liters),
             amount: formatNumber(summary.amount),
-            average: summary.averageL100 === null ? '—' : formatNumber(summary.averageL100, 1),
+            average: summary.averageL100 === null ? '-' : formatNumber(summary.averageL100, 1),
             co2: formatNumber(summary.co2Kg),
             refills: summary.refillsToQualify,
             gaps: summary.gapsToQualify
+          })
+        }}
+      </p>
+      <p v-if="summary" class="mx-4 text-xs text-muted-foreground">
+        {{
+          t('fleet.fuelConsumption.lowEmission', {
+            low: summary.lowEmissionVehicles,
+            total: summary.motorizedVehicles,
+            share: summary.lowEmissionSharePct === null ? '-' : summary.lowEmissionSharePct
           })
         }}
       </p>
@@ -344,7 +370,7 @@ async function confirm() {
                     t('fleet.fuelConsumption.periodDetail', {
                       km: formatNumber(selected.km),
                       liters: formatNumber(selected.liters, 1),
-                      l100: selected.l100 === null ? '—' : formatNumber(selected.l100, 1),
+                      l100: selected.l100 === null ? '-' : formatNumber(selected.l100, 1),
                       reference: formatNumber(selected.referenceL100, 1),
                       source: optionLabel('fuelReferenceSource')(selected.referenceSource, selected)
                     })
@@ -364,6 +390,17 @@ async function confirm() {
                     t('fleet.fuelConsumption.proposed', {
                       amount: formatNumber(selected.proposedAmount),
                       user: selected.proposedBy
+                    })
+                  }}
+                </p>
+                <p
+                  v-if="selected.withholdableAmount !== null"
+                  class="text-xs text-muted-foreground"
+                >
+                  {{
+                    t('fleet.fuelConsumption.withholdable', {
+                      salary: formatNumber(selected.monthlySalary ?? 0),
+                      max: formatNumber(selected.withholdableAmount)
                     })
                   }}
                 </p>
@@ -464,6 +501,16 @@ async function confirm() {
                 amount: formatNumber(selected?.excessCost ?? 0)
               })
             }}
+          </p>
+        </BaseFormField>
+        <BaseFormField
+          v-if="dialog === 'propose'"
+          :label="t('fleet.fuelConsumption.form.monthlySalary')"
+          required
+        >
+          <FormInput v-model="monthlySalary" type="number" :min="1" />
+          <p class="text-xs text-muted-foreground mt-1">
+            {{ t('fleet.fuelConsumption.form.monthlySalaryHint') }}
           </p>
         </BaseFormField>
         <BaseFormField

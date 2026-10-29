@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { expectedArrivals, lastReport, liveSituation, positionOnTrip } from './livePosition'
+import {
+  distanceToRouteM,
+  expectedArrivals,
+  lastReport,
+  liveSituation,
+  positionOnTrip,
+  recordedTrack
+} from './livePosition'
 
 const stops = [
   {
@@ -85,5 +92,35 @@ describe('liveSituation', () => {
     expect(liveSituation({ ...base, onTrip: false })).toBe('parked')
     expect(liveSituation({ ...base, immobilized: true })).toBe('immobilized')
     expect(liveSituation({ ...base, immobilized: true, signalLost: true })).toBe('signal_lost')
+  })
+})
+
+describe('corridor and recorded track', () => {
+  const road = [
+    { latitude: -18.9, longitude: 47.5 },
+    { latitude: -18.9, longitude: 47.7 }
+  ]
+
+  it('measures the distance from the road, nothing to measure without a leg', () => {
+    expect(distanceToRouteM({ latitude: -18.9, longitude: 47.6 }, road)).toBe(0)
+    const away = distanceToRouteM({ latitude: -18.8, longitude: 47.6 }, road) ?? 0
+    expect(away).toBeGreaterThan(11_000)
+    expect(away).toBeLessThan(11_300)
+    // Past the end of the road, the distance is to its last point.
+    const beyond = distanceToRouteM({ latitude: -18.9, longitude: 47.8 }, road) ?? 0
+    expect(beyond).toBeGreaterThan(10_000)
+    expect(distanceToRouteM({ latitude: -18.9, longitude: 47.6 }, road.slice(0, 1))).toBeNull()
+  })
+
+  it('records a position every few minutes, none in a dead zone', () => {
+    const arrivals = expectedArrivals(stops)
+    const track = recordedTrack(stops, arrivals, '2026-09-04T06:10:00', '2026-09-04T07:10:00', [])
+    expect(track).toHaveLength(7)
+    expect(track[0]?.at).toBe('2026-09-04T06:10:00')
+    const first = stops[0]!
+    const silent = recordedTrack(stops, arrivals, '2026-09-04T06:10:00', '2026-09-04T07:10:00', [
+      { latitude: first.latitude, longitude: first.longitude, radiusM: 1_000 }
+    ])
+    expect(silent.length).toBeLessThan(track.length)
   })
 })

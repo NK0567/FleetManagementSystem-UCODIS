@@ -28,3 +28,29 @@ describe('requestPick', () => {
     expect(partlyTaken(order('A', 2, true), { A: [1, 2] })).toBe(false)
   })
 })
+
+describe('requestPick quantities (TRS01-US17)', () => {
+  const request = {
+    no: 'A',
+    lines: [
+      { lineNo: 1, quantity: 10 },
+      { lineNo: 2, quantity: 5 }
+    ],
+    fullDeliveryRequired: true
+  }
+
+  it('sends a reduced quantity and warns on a full delivery', () => {
+    expect(toLineInputs([request], ['A'], {}, { A: { 1: 4 } })).toEqual([
+      { deliveryRequestNo: 'A', lineQuantities: { 1: 4 } }
+    ])
+    expect(partlyTaken(request, {}, { A: { 1: 4 } })).toBe(true)
+    // The whole quantity typed again is no reduction.
+    expect(partlyTaken(request, {}, { A: { 1: 10 } })).toBe(false)
+  })
+
+  it('ignores a quantity on a line left out', () => {
+    expect(toLineInputs([request], ['A'], { A: [2] }, { A: { 1: 4 } })).toEqual([
+      { deliveryRequestNo: 'A', requestLineNos: [2] }
+    ])
+  })
+})

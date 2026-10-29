@@ -2,7 +2,8 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { Link2 } from '@lucide/vue'
+import { Link2, Upload } from '@lucide/vue'
+import TransactionImportDialog from '../components/TransactionImportDialog.vue'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
 import { apiErrorMessage } from '@/core/api/apiError'
@@ -152,6 +153,12 @@ async function run(action: () => Promise<FuelCardTransactionApi>) {
   }
 }
 
+const importing = ref(false)
+async function onImported(matched: number) {
+  info.value = t('fleet.fuelCardTransactions.matched', matched)
+  await store.fetchItems(store.pagination.page, store.pagination.limit)
+}
+
 async function matchAll() {
   working.value = true
   actionError.value = null
@@ -244,8 +251,18 @@ async function onCreated() {
             :reset-preferences="resetPreferences"
           />
         </template>
-        <template v-if="canUpdate" #extra-actions>
+        <template v-if="canUpdate || canInsert" #extra-actions>
           <button
+            v-if="canInsert"
+            type="button"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
+            @click="importing = true"
+          >
+            <Upload class="w-4 h-4 text-primary" />
+            {{ t('fleet.fuelCardTransactions.import.action') }}
+          </button>
+          <button
+            v-if="canUpdate"
             type="button"
             class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60"
             :disabled="working"
@@ -386,6 +403,7 @@ async function onCreated() {
       </ListPageLayout>
     </template>
 
+    <TransactionImportDialog :open="importing" @close="importing = false" @imported="onImported" />
     <FuelCardTransactionCreateModal
       v-if="showCreateModal"
       @close="showCreateModal = false"

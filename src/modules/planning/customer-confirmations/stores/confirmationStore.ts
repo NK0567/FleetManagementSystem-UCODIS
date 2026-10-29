@@ -5,6 +5,7 @@ import { apiErrorMessage } from '@/core/api/apiError'
 import { confirmationService } from '../services/confirmationService'
 import type {
   ActionBody,
+  AnsweredLineApi,
   ConfirmationAction,
   ConfirmationLineApi,
   ReceptionAction,
@@ -14,6 +15,7 @@ import type {
 export const useConfirmationStore = defineStore('planning-customer-confirmation', () => {
   const lines = ref<ConfirmationLineApi[]>([])
   const receptions = ref<ReceptionLineApi[]>([])
+  const answered = ref<AnsweredLineApi[]>([])
   const loading = ref(false)
   const acting = ref(false)
   const error = ref<string | null>(null)
@@ -22,12 +24,14 @@ export const useConfirmationStore = defineStore('planning-customer-confirmation'
     loading.value = true
     error.value = null
     try {
-      const [confirmations, received] = await Promise.all([
+      const [confirmations, received, given] = await Promise.all([
         confirmationService.list(),
-        confirmationService.receptions()
+        confirmationService.receptions(),
+        confirmationService.answered()
       ])
       lines.value = confirmations
       receptions.value = received
+      answered.value = given
     } catch (cause) {
       error.value = apiErrorMessage(cause, i18n.global.t('planning.confirmations.loadError'))
     } finally {
@@ -62,9 +66,6 @@ export const useConfirmationStore = defineStore('planning-customer-confirmation'
     act(line, 'unavailable', reason)
   const setClientDate = (line: ConfirmationLineApi, date: string) =>
     act(line, 'client-date', { date })
-  const proposeDate = (line: ConfirmationLineApi, date: string) =>
-    act(line, 'propose-date', { date })
-  const acceptDate = (line: ConfirmationLineApi, date: string) => act(line, 'accept-date', { date })
 
   const confirmReception = (line: ReceptionLineApi, signer: string) =>
     receive(line, 'receive-confirm', { signer })
@@ -78,6 +79,7 @@ export const useConfirmationStore = defineStore('planning-customer-confirmation'
   return {
     lines,
     receptions,
+    answered,
     loading,
     acting,
     error,
@@ -87,8 +89,6 @@ export const useConfirmationStore = defineStore('planning-customer-confirmation'
     release,
     markUnavailable,
     setClientDate,
-    proposeDate,
-    acceptDate,
     confirmReception,
     contestReception,
     handleContest,

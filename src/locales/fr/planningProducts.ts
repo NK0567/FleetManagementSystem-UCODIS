@@ -38,5 +38,19 @@ export default {
   'planning.products.form.referenceDensity': 'Densité de référence (kg/L)',
   'planning.products.form.expansionCoefficient': 'Coefficient de dilatation (/°C)',
   'planning.products.form.referenceDensityRequired':
-    'Indiquez la densité de référence du carburant.'
+    'Indiquez la densité de référence du carburant.',
+  'planning.products.form.unitWeightKg': "Poids d'une unité (kg)",
+  'planning.products.form.unitVolumeM3': "Volume d'une unité (m³)",
+  'planning.products.form.unitMeasuresHint': 'Bien renseignés, ils donnent le poids et le volume de chaque ligne de commande, qui se comparent à la capacité du véhicule.',
+  'planning.products.measures.title': 'Mesures au chargement et à la livraison',
+  'planning.products.measures.hint': 'Ce que le dépôt saisit au chargement et le conducteur à la livraison. Pour un carburant : la température, la densité et le volume à 15 °C, à partir de sa densité de référence.',
+  'planning.products.measures.loadingMeasures': 'Au chargement',
+  'planning.products.measures.deliveryMeasures': 'À la livraison',
+  'planning.products.measures.quantity': 'Quantité',
+  'planning.products.measures.weight': 'Poids',
+  'planning.products.measures.temperature': 'Température',
+  'planning.products.measures.density': 'Densité',
+  'planning.products.measures.volume15': 'Volume à 15 °C',
+  'planning.products.measures.quantityRequired': 'La quantité fait toujours partie des mesures.',
+  'planning.products.measures.fuelOnly': 'La température, la densité et le volume à 15 °C ne se mesurent que pour un carburant.'
 }

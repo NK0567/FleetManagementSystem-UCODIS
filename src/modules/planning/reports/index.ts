@@ -1,4 +1,8 @@
 export { usePlanningDashboardStore } from './stores/planningDashboardStore'
-export { useCarrierReportStore } from './stores/carrierReportStore'
+export { useTransportReportStore } from './stores/transportReportStore'
 export { planningReportService } from './services/planningReportService'
-export type { CarrierReportRow, PlanningDashboardApi } from './types/planningReport.types'
+export type {
+  CarrierReportRow,
+  PlanningDashboardApi,
+  TransportReportApi
+} from './types/planningReport.types'

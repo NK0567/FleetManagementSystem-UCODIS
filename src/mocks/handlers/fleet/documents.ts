@@ -15,6 +15,8 @@ import {
 } from '@/modules/fleet/documents/types/document.types'
 import { employeeFullName, isOnStaff } from '@/modules/hr/employees/domain/employee'
 import { todayIso } from '@/utils/date'
+import { alertNotifications } from '@/modules/fleet/alerts/domain/alert'
+import { alertRuleOf } from './alertRules'
 import { nowIso } from '../../clock'
 import type { MockDatabase } from '../../db/database'
 import { nextNo } from '../../db/numbering'
@@ -65,9 +67,19 @@ export function documentsApi(db: MockDatabase): DocumentApi[] {
   const statuses = documentStatuses(db)
   const types = new Map(db.documentTypes.all().map((type) => [type.no, type]))
   const names = subjectNames(db)
+  const ruleRow = db.alertRules.find('document')
+  const rule = ruleRow?.active ? alertRuleOf(ruleRow) : null
   return db.documents.all().map((document) => {
     const type = types.get(document.documentTypeNo)
     const status = statuses.get(document.no)
+    const state = status?.state ?? 'valid'
+    // The alert of a mandatory document goes out by the channels of the document rule, from the
+    // day its notice starts (or its validity ends).
+    const alerting = !document.replacedByNo && !!type?.mandatory && state !== 'valid'
+    const since =
+      state === 'expiring'
+        ? (status?.notifyOn ?? todayIso())
+        : (document.declaredAt ?? document.expiryDate ?? todayIso())
     return {
       ...document,
       subjectName: names[document.target].get(document.subjectNo) ?? document.subjectNo,
@@ -77,8 +89,9 @@ export function documentsApi(db: MockDatabase): DocumentApi[] {
       effectiveNoticeDays: status?.effectiveNoticeDays ?? 0,
       notifyOn: status?.notifyOn ?? null,
       file: document.fileNo ? fileMetaOf(db, document.fileNo) : null,
-      state: status?.state ?? 'valid',
-      current: !document.replacedByNo
+      state,
+      current: !document.replacedByNo,
+      notifications: alerting ? alertNotifications(rule, since) : []
     }
   })
 }

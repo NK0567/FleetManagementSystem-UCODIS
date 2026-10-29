@@ -10,6 +10,7 @@ const TONES: Record<WorkOrderStatus, StatusTone> = {
   open: 'warning',
   diagnosed: 'warning',
   in_progress: 'info',
+  awaiting_parts: 'warning',
   awaiting_validation: 'info',
   closed: 'success',
   cancelled: 'neutral'

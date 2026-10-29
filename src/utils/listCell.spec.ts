@@ -18,9 +18,9 @@ describe('getListCellDisplay', () => {
   })
 
   it('shows a dash for empty values', () => {
-    expect(getListCellDisplay(null, {}, column())).toBe('—')
-    expect(getListCellDisplay('  ', {}, column())).toBe('—')
-    expect(getListCellDisplay([], {}, column())).toBe('—')
+    expect(getListCellDisplay(null, {}, column())).toBe('-')
+    expect(getListCellDisplay('  ', {}, column())).toBe('-')
+    expect(getListCellDisplay([], {}, column())).toBe('-')
   })
 
   it('formats ISO dates in the active language', () => {

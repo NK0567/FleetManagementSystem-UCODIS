@@ -4,6 +4,7 @@ import { emptyQuality } from '@/modules/planning/delivery-quality/domain/quality
 import {
   closingBlocks,
   debriefingIssue,
+  dossierComplete,
   gainLossText,
   requiredDocumentKinds,
   type ClosingLine
@@ -86,5 +87,13 @@ describe('closing', () => {
       )
     ).toBe('dates')
     expect(gainLossText([{ quantityGap: -4, gapQualification: 'loss' }])).toBe('loss -4')
+  })
+})
+
+describe('documentary dossier', () => {
+  it('is complete only when every piece is available', () => {
+    expect(dossierComplete([{ state: 'available' }, { state: 'available' }])).toBe(true)
+    expect(dossierComplete([{ state: 'available' }, { state: 'pending' }])).toBe(false)
+    expect(dossierComplete([{ state: 'missing' }])).toBe(false)
   })
 })

@@ -56,6 +56,12 @@ const tableColumns = computed<TableColumn[]>(() => [
     formatter: formatDate
   },
   {
+    sortKey: 'filedOn',
+    label: t('fleet.companyDocuments.col.filedOn'),
+    minW: '110px',
+    formatter: formatDate
+  },
+  {
     sortKey: 'expiryDate',
     label: t('fleet.companyDocuments.col.expiryDate'),
     minW: '120px',
@@ -112,6 +118,24 @@ const filterDefs: FilterFieldDef[] = [
     valueType: 'string',
     kind: 'reference',
     referenceKey: 'orgUnits'
+  },
+  {
+    field: 'issueDate',
+    labelKey: 'fleet.companyDocuments.col.issueDate',
+    valueType: 'date',
+    kind: 'date'
+  },
+  {
+    field: 'expiryDate',
+    labelKey: 'fleet.companyDocuments.col.expiryDate',
+    valueType: 'date',
+    kind: 'date'
+  },
+  {
+    field: 'filedOn',
+    labelKey: 'fleet.companyDocuments.col.filedOn',
+    valueType: 'date',
+    kind: 'date'
   }
 ]
 

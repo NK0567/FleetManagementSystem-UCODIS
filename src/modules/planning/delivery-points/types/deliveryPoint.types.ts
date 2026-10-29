@@ -9,6 +9,14 @@ export interface DeliveryPointApi {
   pumpRequired: boolean
   acceptedVehicleTypeNos: string[]
   active: boolean
+  /** A recipient's delivery site, or a loading depot (TRS07-US02). */
+  kind: 'delivery' | 'depot'
+  /** The site of the FMS register it stands for, whose place it takes. */
+  siteNo: string | null
+  siteName: string
+  siteRegion: string
+  /** The third party owning the depot; empty when it is the company's. */
+  ownerName: string
   customerName: string
   createdAt: string
   createdBy: string

@@ -1,5 +1,8 @@
 import { stillToLoad, loadingReady } from '@/modules/planning/loading/domain/loading'
-import { linesConfirmed } from '@/modules/planning/customer-confirmations/domain/confirmation'
+import {
+  firstArrivalMarked,
+  linesConfirmed
+} from '@/modules/planning/customer-confirmations/domain/confirmation'
 import { transportOrderStatus } from '@/modules/planning/transport-orders/domain/transportOrder'
 import { nowIsoDateTime } from '@/utils/date'
 import type { MockDatabase } from '../../db/database'
@@ -13,6 +16,7 @@ import type { MockRequest } from '../../http/types'
 import { driverOrder } from './execution'
 import { PLANNING_MESSAGES } from './messages'
 import { readReason } from './planningReasons'
+import { assertLoadable } from './orderPlan'
 
 function statusOf(db: MockDatabase, order: TransportOrderRow) {
   const trip = order.tripNo ? db.trips.find(order.tripNo) : undefined
@@ -21,6 +25,7 @@ function statusOf(db: MockDatabase, order: TransportOrderRow) {
     means: order.means,
     tripStatus: trip?.status ?? null,
     linesConfirmed: linesConfirmed(order.lines),
+    firstArrival: firstArrivalMarked(order.lines),
     loadingReady: loadingReady(order.lines)
   })
 }
@@ -61,6 +66,8 @@ export function registerLoadingHandlers(router: MockRouter, db: MockDatabase): v
     (request) => {
       const order = db.transportOrders.findOrFail(routeParam(request, 'no'))
       if (statusOf(db, order) !== 'confirmed') throw conflict(PLANNING_MESSAGES.loadingClosed)
+      // Past its date, an order is loaded only once rescheduled, when the company blocks it (TRS07-US07).
+      assertLoadable(db, order)
       const raw = readBody(request).lines
       if (!Array.isArray(raw)) throw invalidField('lines')
       const quantities = new Map<number, number>()
@@ -118,6 +125,7 @@ export function registerLoadingHandlers(router: MockRouter, db: MockDatabase): v
   router.post('/me/orders/:no/check', { feature: 'MYSPACE', action: 'execute' }, (request) => {
     const order = driverOrder(db, routeParam(request, 'no'), request)
     if (statusOf(db, order) !== 'confirmed') throw conflict(PLANNING_MESSAGES.loadingClosed)
+    assertLoadable(db, order)
     const body = readBody(request)
     const raw = body.lineNos
     if (!Array.isArray(raw) || !raw.length || raw.some((no) => !Number.isInteger(no))) {

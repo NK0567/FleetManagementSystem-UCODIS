@@ -2,7 +2,11 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import i18n from '@/core/i18n'
 import { apiErrorMessage } from '@/core/api/apiError'
-import type { PlanningSettings, PlanningSettingsSection } from '../domain/planningSettings'
+import type {
+  IncidentSettings,
+  PlanningSettings,
+  PlanningSettingsSection
+} from '../domain/planningSettings'
 import { planningSettingsService } from '../services/planningSettingsService'
 import type { PlanningSettingsApi } from '../types/planningSettings.types'
 
@@ -43,5 +47,31 @@ export const usePlanningSettingsStore = defineStore('planning-settings', () => {
     }
   }
 
-  return { settings, loading, error, savingSection, saveError, fetchSettings, saveSection }
+  const savingIncidents = ref(false)
+
+  async function saveIncidents(lists: IncidentSettings): Promise<boolean> {
+    savingIncidents.value = true
+    saveError.value = null
+    try {
+      settings.value = await planningSettingsService.updateIncidents(lists)
+      return true
+    } catch (cause) {
+      saveError.value = apiErrorMessage(cause, i18n.global.t('planning.settings.saveError'))
+      return false
+    } finally {
+      savingIncidents.value = false
+    }
+  }
+
+  return {
+    settings,
+    loading,
+    error,
+    savingSection,
+    saveError,
+    savingIncidents,
+    fetchSettings,
+    saveSection,
+    saveIncidents
+  }
 })

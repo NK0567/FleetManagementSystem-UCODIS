@@ -190,18 +190,22 @@ describe('reception', () => {
       },
       'PLN001'
     )
-    expect(remainder.data.data).toMatchObject({ requestNo: 'DL-2026-0022' })
+    // The remainder rides on a child order, taken into the pending transport order of that day
+    // with the lines replanned to it (TRS01-US17).
+    const { requestNo, orderNo } = remainder.data.data as { requestNo: string; orderNo: string }
+    expect(requestNo).toBe('DL-2026-0022')
     const created = (
       await call(server, 'get', '/planning/delivery-requests/DL-2026-0022', { as: 'LIV001' })
     ).data.data as DeliveryRequestApi
     expect(created).toMatchObject({
-      status: 'pending',
+      status: 'planned',
       quantity: 50,
-      weightKg: 733,
       parentNo: 'DL-2026-0010',
       desiredDate: '2026-09-12',
-      transportOrderNo: null
+      transportOrderNo: orderNo
     })
+    expect(created.weightKg).toBeCloseTo(733.333, 2)
+    expect(server.db.transportOrders.find(orderNo)).toMatchObject({ replanDate: '2026-09-12' })
     expect(
       (
         await post(

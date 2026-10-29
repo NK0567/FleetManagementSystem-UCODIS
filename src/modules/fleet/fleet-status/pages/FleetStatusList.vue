@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Archive } from '@lucide/vue'
+import { Archive, Mail } from '@lucide/vue'
+import { isValidEmailAddress, parseRecipients } from '../domain/fleetStatusDispatch'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
 import { apiErrorMessage } from '@/core/api/apiError'
@@ -43,6 +44,7 @@ const tableColumns = computed<TableColumn[]>(() => [
   },
   { sortKey: 'mission', label: t('fleet.fleetStatus.col.mission'), minW: '280px' },
   { sortKey: 'location', label: t('fleet.fleetStatus.col.location'), minW: '180px' },
+  { sortKey: 'position', label: t('fleet.fleetStatus.col.position'), minW: '180px' },
   {
     sortKey: 'immobilizationReason',
     label: t('fleet.fleetStatus.col.immobilizationReason'),
@@ -156,7 +158,49 @@ async function saveNote() {
   }
 }
 
-onMounted(() => void store.fetchDays())
+/* Sending by e-mail: there is no mail server in the demonstration, the sending is recorded. */
+const sendOpen = ref(false)
+const recipientsText = ref('')
+const sending = ref(false)
+const sendError = ref<string | null>(null)
+const sentMessage = ref<string | null>(null)
+const recipients = computed(() => parseRecipients(recipientsText.value))
+const invalidRecipient = computed(
+  () => recipients.value.find((email) => !isValidEmailAddress(email)) ?? null
+)
+
+async function openSend() {
+  sendError.value = null
+  sendOpen.value = true
+  try {
+    await store.fetchDispatches()
+  } catch {
+    /* the list of sendings is a help, the dialog works without it */
+  }
+  recipientsText.value = store.dispatches[0]?.recipients.join(', ') ?? ''
+}
+
+async function send() {
+  if (!recipients.value.length || invalidRecipient.value) return
+  sending.value = true
+  sendError.value = null
+  try {
+    await store.send(recipients.value)
+    sentMessage.value = t('fleet.fleetStatus.send.done', {
+      recipients: recipients.value.join(', ')
+    })
+    sendOpen.value = false
+  } catch (cause) {
+    sendError.value = apiErrorMessage(cause, t('fleet.fleetStatus.send.error'))
+  } finally {
+    sending.value = false
+  }
+}
+
+onMounted(() => {
+  void store.fetchDays()
+  void store.fetchDispatches().catch(() => undefined)
+})
 </script>
 
 <template>
@@ -221,6 +265,15 @@ onMounted(() => void store.fetchDays())
             >
               <Archive class="w-4 h-4 text-primary" /> {{ t('fleet.fleetStatus.archive') }}
             </button>
+            <button
+              v-if="canExecute"
+              type="button"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm border border-border rounded hover:bg-accent transition disabled:opacity-50"
+              :disabled="sending"
+              @click="openSend"
+            >
+              <Mail class="w-4 h-4 text-primary" /> {{ t('fleet.fleetStatus.send.button') }}
+            </button>
           </div>
         </template>
       </ListPageToolbar>
@@ -235,6 +288,16 @@ onMounted(() => void store.fetchDays())
       </p>
       <p v-if="!store.isLive" class="mx-4 mt-1 text-xs text-muted-foreground">
         {{ t('fleet.fleetStatus.readOnlyDay') }}
+      </p>
+      <p v-if="sentMessage" class="mx-4 mt-1 text-xs text-primary">{{ sentMessage }}</p>
+      <p v-else-if="store.dispatches[0]" class="mx-4 mt-1 text-xs text-muted-foreground">
+        {{
+          t('fleet.fleetStatus.send.last', {
+            date: formatDateTime(store.dispatches[0].sentAt),
+            day: formatDate(store.dispatches[0].date),
+            recipients: store.dispatches[0].recipients.join(', ')
+          })
+        }}
       </p>
 
       <FormAlerts
@@ -335,5 +398,50 @@ onMounted(() => void store.fetchDays())
         </template>
       </ListPageLayout>
     </template>
+
+    <ConfirmDialog
+      :open="sendOpen"
+      :title="t('fleet.fleetStatus.send.title', { day: formatDate(store.day) })"
+      :confirm-label="t('fleet.fleetStatus.send.confirm')"
+      :confirm-disabled="!recipients.length || !!invalidRecipient"
+      :loading="sending"
+      panel-class="max-w-lg"
+      @confirm="send"
+      @cancel="sendOpen = false"
+    >
+      <div class="space-y-3 text-sm">
+        <p class="text-muted-foreground">{{ t('fleet.fleetStatus.send.hint') }}</p>
+        <BaseFormField :label="t('fleet.fleetStatus.send.recipients')" required>
+          <FormInput
+            v-model="recipientsText"
+            :invalid="!!invalidRecipient"
+            :placeholder="t('fleet.fleetStatus.send.placeholder')"
+          />
+          <p v-if="invalidRecipient" class="text-xs text-destructive mt-1">
+            {{ t('fleet.fleetStatus.send.invalid', { email: invalidRecipient }) }}
+          </p>
+        </BaseFormField>
+        <p class="text-xs text-muted-foreground">{{ t('fleet.fleetStatus.send.simulated') }}</p>
+        <FormAlerts :error="sendError" @clear:error="sendError = null" />
+        <div v-if="store.dispatches.length">
+          <p class="text-xs font-semibold text-muted-foreground mb-1">
+            {{ t('fleet.fleetStatus.send.history') }}
+          </p>
+          <ul class="space-y-1 text-xs text-muted-foreground max-h-40 overflow-y-auto">
+            <li v-for="dispatch in store.dispatches" :key="dispatch.no">
+              {{
+                t('fleet.fleetStatus.send.line', {
+                  date: formatDateTime(dispatch.sentAt),
+                  day: formatDate(dispatch.date),
+                  count: dispatch.lineCount,
+                  recipients: dispatch.recipients.join(', '),
+                  user: dispatch.sentBy
+                })
+              }}
+            </li>
+          </ul>
+        </div>
+      </div>
+    </ConfirmDialog>
   </div>
 </template>

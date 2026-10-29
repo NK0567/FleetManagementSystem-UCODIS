@@ -56,36 +56,33 @@ describe('recipient confirmation', () => {
     expect((await send('post', `${path}/take`, {}, 'ADM001')).status).toBe(200)
   })
 
-  it('sends an accepted date back to the requests, without a new order', async () => {
-    const proposed = await send(
-      'post',
-      '/planning/transport-orders/TR-2026-0002/lines/1/client-date',
-      {
-        date: '2026-09-12'
-      }
-    )
+  it('leaves the retained date to the planner, who takes the line into the pending order of that day', async () => {
+    const line = '/planning/transport-orders/TR-2026-0002/lines/1'
+    await send('post', `${line}/unavailable`, { reasonNo: 'UNV-CLOSED', availableOn: '2026-09-10' })
+    const proposed = await send('post', `${line}/client-date`, { date: '2026-09-12' })
     expect(proposed.data.data).toMatchObject({ clientProposedOn: '2026-09-12' })
-    const before = server.db.transportOrders.all().length
-    const accepted = await send(
-      'post',
-      '/planning/transport-orders/TR-2026-0002/lines/1/accept-date',
-      {
-        date: '2026-09-12'
-      }
-    )
-    expect(accepted.data.data).toMatchObject({ state: 'replanned' })
-    expect(server.db.transportOrders.all()).toHaveLength(before)
-    const created = server.db.deliveryRequests
-      .all()
-      .find((row) => row.desiredDate === '2026-09-12' && row.parentNo === 'DL-2026-0009')
-    expect(created?.transportOrderNo).toBeNull()
+    // Retaining a date is the planner's (TRS01-US16), never the agent's.
+    expect((await send('post', `${line}/accept-date`, { date: '2026-09-12' })).status).toBe(404)
+    expect((await send('post', `${line}/replan`, {})).status).toBe(403)
+    const pending = await send('post', `${line}/replan`, {}, 'PLN001')
+    expect(pending.status).toBe(200)
+    const order = pending.data.data as TransportOrderApi
+    expect(order).toMatchObject({ status: 'draft', replanDate: '2026-09-12' })
+    expect(order.lines[0]).toMatchObject({
+      deliveryRequestNo: 'DL-2026-0009',
+      replannedFrom: { orderNo: 'TR-2026-0002', lineNo: 1 },
+      weightKg: 6000
+    })
+    // The order (commande) follows its line: nothing is keyed again.
     const request = (
-      await call(server, 'get', `/planning/delivery-requests/${created?.no}`, { as: 'PLN001' })
+      await call(server, 'get', '/planning/delivery-requests/DL-2026-0009', { as: 'PLN001' })
     ).data.data as DeliveryRequestApi
-    expect(request.status).toBe('pending')
-    expect(
-      (await send('post', '/planning/transport-orders/TR-2026-0002/lines/1/confirm')).status
-    ).toBe(409)
+    expect(request).toMatchObject({ transportOrderNo: order.no, desiredDate: '2026-09-12' })
+    const queue = (await send('get', '/planning/confirmations')).data.data as ConfirmationLineApi[]
+    expect(queue.find((item) => item.orderNo === 'TR-2026-0002' && item.lineNo === 1)?.state).toBe(
+      'replanned'
+    )
+    expect((await send('post', `${line}/confirm`)).status).toBe(409)
   })
 
   it('refuses an unavailability without a reason from that list, and stamps a tracking token when planning', async () => {

@@ -72,7 +72,7 @@ const { hasValidationError } = useFormValidationUi({
 })
 
 const kmOf = (value: number | null | undefined) =>
-  value === null || value === undefined ? '—' : `${formatNumber(value, 0)} km`
+  value === null || value === undefined ? '-' : `${formatNumber(value, 0)} km`
 
 defineExpose(expose)
 </script>

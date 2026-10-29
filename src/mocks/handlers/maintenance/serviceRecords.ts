@@ -7,7 +7,10 @@ import { sessionUser } from '../../http/types'
 
 export function recordPassages(
   db: MockDatabase,
-  passages: Pick<ServiceRecordRow, 'vehicleNo' | 'operationNo' | 'km' | 'date' | 'workOrderNo'>[],
+  passages: Pick<
+    ServiceRecordRow,
+    'vehicleNo' | 'operationNo' | 'km' | 'hours' | 'date' | 'workOrderNo'
+  >[],
   request: MockRequest
 ): ServiceRecordRow[] {
   return passages.map((passage) =>

@@ -21,6 +21,8 @@ export interface RouteTemplateApi {
   destinationName: string
   stopCount: number
   plannedDurationMin: number
+  /** Reference time: the distance driven at the average speed, plus the stops (TRS07-US03). */
+  referenceDurationMin: number
   tripCount: number
   createdAt: string
   createdBy: string

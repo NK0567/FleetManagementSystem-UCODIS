@@ -71,5 +71,21 @@ export default {
   'fleet.trips.needsAuthorization': "Le départ doit d'abord être accordé.",
   'fleet.trips.form.authorization': 'Autorisation de départ',
   'fleet.trips.form.noAuthorization': "Aucune demande pour l'instant.",
-  'fleet.trips.deviationsToQualify': 'Écarts encore à qualifier sur ce trajet : {count}.'
+  'fleet.trips.deviationsToQualify': 'Écarts encore à qualifier sur ce trajet : {count}.',
+  'fleet.trips.drivingTime.title': 'Temps de conduite',
+  'fleet.trips.drivingTime.breachCount': 'Aucun dépassement | 1 dépassement | {n} dépassements',
+  'fleet.trips.drivingTime.duration': '{h} h {m}',
+  'fleet.trips.drivingTime.driven.actual': 'Conduite relevée d’après les passages aux étapes : {duration}.',
+  'fleet.trips.drivingTime.driven.planned': 'Conduite prévue d’après l’itinéraire type : {duration}.',
+  'fleet.trips.drivingTime.noBreach': 'Aucun seuil de conduite ou de repos dépassé.',
+  'fleet.trips.drivingTime.hint': 'Seuils des réglages de la flotte ; le temps passé à une étape est sa pause prévue.',
+  'fleet.trips.drivingTime.loadError': "Le temps de conduite n'a pas pu être calculé.",
+  'fleet.trips.drivingTime.tripCount': 'Aucun trajet en dépassement | 1 trajet en dépassement | {n} trajets en dépassement',
+  'fleet.trips.drivingTime.driverClean': 'Aucun dépassement des temps de conduite sur les {days} derniers jours.',
+  'fleet.trips.drivingTime.source.actual': 'relevé',
+  'fleet.trips.drivingTime.source.planned': 'prévu',
+  'fleet.trips.drivingTime.breach.continuous': 'Conduite continue de {driven}, au-delà de {limit} sans pause suffisante.',
+  'fleet.trips.drivingTime.breach.daily': 'Conduite de {driven} le {day}, au-delà de {limit} par jour.',
+  'fleet.trips.drivingTime.breach.weekly': 'Conduite de {driven} sur sept jours, au-delà de {limit} par semaine.',
+  'fleet.trips.drivingTime.breach.night': 'Conduite de nuit interdite le {day} : {driven}.'
 }

@@ -3,6 +3,7 @@ import { resourcePath } from '@/core/factories'
 import type { SingleResponse } from '@/types/api-response.types'
 import type {
   ActionBody,
+  AnsweredLineApi,
   ConfirmationAction,
   ConfirmationLineApi,
   ReceptionAction,
@@ -16,6 +17,8 @@ const linePath = (orderNo: string, lineNo: number, action: string) =>
 
 export const confirmationApi = {
   list: () => httpClient.get<SingleResponse<ConfirmationLineApi[]>>('/planning/confirmations'),
+  answered: () =>
+    httpClient.get<SingleResponse<AnsweredLineApi[]>>('/planning/confirmations/answered'),
   act: (orderNo: string, lineNo: number, action: ConfirmationAction, body: ActionBody = {}) =>
     httpClient.post<SingleResponse<ConfirmationLineApi>>(linePath(orderNo, lineNo, action), body),
   tracking: (token: string) =>

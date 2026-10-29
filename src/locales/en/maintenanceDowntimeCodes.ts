@@ -26,6 +26,6 @@ export default {
   'maintenance.downtimeCodes.form.family': 'Family',
   'maintenance.downtimeCodes.form.systemRole': 'Automatic role',
   'maintenance.downtimeCodes.form.systemRoleHint':
-    'The cause the application picks on its own for a breakdown, a service or an accident. One code per role.',
+    'The cause the application picks on its own for a breakdown, a service, an accident, an expired document, a re-inspection or an overdue service. One code per role.',
   'maintenance.downtimeCodes.form.active': 'Active'
 }

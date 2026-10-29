@@ -17,6 +17,9 @@ export const deliveryQualityService = {
   async issueProtest(line: LineRef, protestNo: string): Promise<void> {
     await deliveryQualityApi.issueProtest(line.orderNo, line.lineNo, protestNo)
   },
+  async attachProtestFile(line: LineRef, protestNo: string, fileNo: string): Promise<void> {
+    await deliveryQualityApi.attachProtestFile(line.orderNo, line.lineNo, protestNo, fileNo)
+  },
   async closeProtest(line: LineRef, protestNo: string, outcome: string): Promise<void> {
     await deliveryQualityApi.closeProtest(line.orderNo, line.lineNo, protestNo, outcome)
   },

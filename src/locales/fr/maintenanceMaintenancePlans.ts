@@ -52,13 +52,24 @@ export default {
   'maintenance.maintenancePlans.operations.add': 'Ajouter une opération',
   'maintenance.maintenancePlans.operations.remove': "Retirer l'opération",
   'maintenance.maintenancePlans.operations.invalid':
-    'Complétez chaque opération : libellé, sous-système et au moins un intervalle.',
+    'Complétez chaque opération : libellé, sous-système et au moins un seuil en kilomètres, en heures ou en jours.',
   'maintenance.maintenancePlans.operations.issue.label': 'Libellé manquant.',
   'maintenance.maintenancePlans.operations.issue.subsystem': 'Sous-système manquant.',
-  'maintenance.maintenancePlans.operations.issue.interval': 'Indiquez au moins un intervalle.',
+  'maintenance.maintenancePlans.operations.issue.interval':
+    'Indiquez au moins un seuil : kilomètres, heures ou jours.',
   'maintenance.maintenancePlans.operations.issue.intervalPositive':
     'Un intervalle doit être positif.',
   'maintenance.maintenancePlans.action.duplicate': 'Dupliquer',
   'maintenance.maintenancePlans.duplicateHint':
-    'La copie reprend les opérations, sans véhicule ni passage.'
+    'La copie reprend les opérations, sans modèle ni passage.',
+  'maintenance.maintenancePlans.col.modelNames': 'Modèles',
+  'maintenance.maintenancePlans.form.models': 'Modèles de véhicules',
+  'maintenance.maintenancePlans.models.empty': 'Aucun modèle ne suit ce plan.',
+  'maintenance.maintenancePlans.models.add': 'Ajouter un modèle',
+  'maintenance.maintenancePlans.models.vehicles': 'Véhicules du parc : {plates}',
+  'maintenance.maintenancePlans.models.noVehicle':
+    "Aucun véhicule de ce modèle dans le parc pour l'instant.",
+  'maintenance.maintenancePlans.models.inheritHint':
+    'chaque véhicule du modèle hérite du plan, y compris ceux qui entreront dans le parc.',
+  'maintenance.maintenancePlans.operations.intervalHours': 'Toutes les (heures moteur)'
 }

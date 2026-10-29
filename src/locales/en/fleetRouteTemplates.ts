@@ -49,5 +49,8 @@ export default {
     'The stops are inconsistent: at least two stops, a departure first, a site on each stop, never the same site twice in a row.',
   'fleet.routeTemplates.form.fuelReferenceL100': 'Reference consumption (L/100 km)',
   'fleet.routeTemplates.form.fuelReferenceL100Hint':
-    'Takes precedence over the vehicle type for trips on this route.'
+    'Takes precedence over the vehicle type for trips on this route.',
+  'fleet.routeTemplates.form.distanceComputedHint': 'Recomputed from the stops at each save. Simulation: straight-line distance between the sites, increased by a road factor of 1.25.',
+  'fleet.routeTemplates.form.referenceDuration': 'Reference time',
+  'fleet.routeTemplates.form.referenceDurationHint': 'The distance driven at the average speed of the planning settings, plus the stops. It is the basis of the trip plan of the transport orders.'
 }

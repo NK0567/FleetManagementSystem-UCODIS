@@ -159,6 +159,13 @@ onMounted(load)
           </dd>
           <dt class="text-muted-foreground">{{ t('planning.tracking.date') }}</dt>
           <dd>{{ formatDate(tracking.plannedDeparture) }}</dd>
+          <template v-if="tracking.expectedArrival && tracking.step !== 'received'">
+            <dt class="text-muted-foreground">{{ t('planning.tracking.eta') }}</dt>
+            <dd :class="tracking.late ? 'text-warning font-medium' : ''">
+              {{ formatDateTime(tracking.expectedArrival) }}
+              <template v-if="tracking.late"> · {{ t('planning.tracking.late') }}</template>
+            </dd>
+          </template>
           <template v-if="tracking.preferredSlot !== 'any'">
             <dt class="text-muted-foreground">{{ t('planning.tracking.slot') }}</dt>
             <dd>{{ t(`planning.tracking.slots.${tracking.preferredSlot}`) }}</dd>
@@ -266,8 +273,8 @@ onMounted(load)
             {{
               t(`planning.tracking.messages.${message.kind}`, {
                 date: formatDate(tracking.plannedDeparture),
-                vehicle: tracking.vehiclePlate || '—',
-                driver: tracking.driverName || '—',
+                vehicle: tracking.vehiclePlate || '·',
+                driver: tracking.driverName || '·',
                 eta: formatDateTime(tracking.expectedArrival)
               })
             }}
@@ -375,6 +382,30 @@ onMounted(load)
           </div>
         </div>
 
+        <!-- What was not delivered or was postponed is delivered from the day retained; its own
+             link opens once its order is planned, to confirm the new date (TRS01-US16, US17). -->
+        <div
+          v-if="tracking.replannedOn"
+          class="rounded border border-primary/30 bg-primary/5 px-3 py-2 space-y-1"
+        >
+          <p>
+            {{
+              tracking.declaredAt
+                ? t('planning.tracking.remainderOn', { date: formatDate(tracking.replannedOn) })
+                : t('planning.tracking.replannedOn', { date: formatDate(tracking.replannedOn) })
+            }}
+          </p>
+          <a
+            v-if="tracking.nextTrackingToken"
+            :href="`#/suivi/${tracking.nextTrackingToken}`"
+            class="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+          >
+            {{ t('planning.tracking.nextDelivery') }}
+          </a>
+          <p v-else class="text-xs text-muted-foreground">
+            {{ t('planning.tracking.nextDeliveryLater') }}
+          </p>
+        </div>
         <div
           v-if="tracking.open && tracking.state === 'confirmed'"
           class="flex items-start gap-2 rounded bg-success/10 px-3 py-2"

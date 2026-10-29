@@ -34,5 +34,41 @@ export default {
   'fleet.inspections.action.recheck': 'Contre-visite passée',
   'fleet.inspections.form.recheckDueOn': 'Contre-visite avant le',
   'fleet.inspections.form.recheckDoneOn': 'Contre-visite passée le',
-  'fleet.inspections.form.recheckAwaited': 'En attente : le véhicule est immobilisé'
+  'fleet.inspections.form.recheckAwaited': 'En attente : le véhicule est immobilisé',
+  'fleet.inspections.form.resultHint':
+    "Déduit de la grille : un seul poste non conforme rend l'inspection non conforme, programme la contre-visite et rend le véhicule inapte à charger jusqu'à celle-ci.",
+  'fleet.inspections.form.findingsHint':
+    'Laissé vide, il reprend les postes non conformes et leurs constats.',
+  'fleet.inspections.form.items': "Grille d'inspection",
+  'fleet.inspections.form.signature': 'Rapport daté et signé',
+  'fleet.inspections.form.inspector': 'Contrôleur',
+  'fleet.inspections.form.signed': 'Signature du contrôleur',
+  'fleet.inspections.form.signedLabel': "Je certifie l'exactitude de ce rapport et je le signe.",
+  'fleet.inspections.form.signedHint':
+    'La signature date le rapport ; ses verdicts ne peuvent plus être modifiés ensuite.',
+  'fleet.inspections.form.signedBy':
+    'Rapport signé par {inspector}, enregistré par {user} le {date}.',
+  'fleet.inspections.form.notSigned':
+    'Inspection enregistrée avant la grille : pas de rapport signé.',
+  'fleet.inspections.form.signatureRequired': 'Le contrôleur doit signer le rapport.',
+  'fleet.inspections.form.recheckItems': 'Postes à revoir : {items}',
+  'fleet.inspections.grid.empty': "Aucun poste actif dans la grille d'inspection.",
+  'fleet.inspections.grid.pickVehicle':
+    "Choisissez le véhicule : la grille s'affiche avec les postes du véhicule et, s'il en porte une, de la citerne.",
+  'fleet.inspections.grid.loading': 'Chargement de la grille…',
+  'fleet.inspections.grid.legacy':
+    'Inspection enregistrée avant la grille : seul le résultat global est connu.',
+  'fleet.inspections.grid.allConforming': 'Marquer les postes restants conformes',
+  'fleet.inspections.grid.count': 'Aucun poste | 1 poste | {count} postes',
+  'fleet.inspections.grid.code': 'Code',
+  'fleet.inspections.grid.item': 'Poste',
+  'fleet.inspections.grid.verdict': 'Verdict',
+  'fleet.inspections.grid.comment': 'Constat',
+  'fleet.inspections.grid.issue.incomplete': 'Donnez un verdict à chaque poste de la grille.',
+  'fleet.inspections.grid.issue.observationRequired':
+    'Décrivez le constat de chaque poste avec observation ou non conforme.',
+  'fleet.inspections.report.title': "Rapport d'inspection {no}",
+  'fleet.inspections.report.recheck':
+    'Contre-visite programmée au plus tard le {date} pour les postes : {items}.',
+  'fleet.inspections.action.printReport': 'Imprimer le rapport'
 }

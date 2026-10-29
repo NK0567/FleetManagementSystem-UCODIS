@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import SiteZonePicker from './SiteZonePicker.vue'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useEntityForm, type FormValidationError } from '@/composables/useEntityForm'
@@ -196,14 +197,14 @@ defineExpose(expose)
       </div>
     </FormSection>
 
-    <MapPointPicker
+    <SiteZonePicker
       v-if="expandedSections.geofence"
       v-model:latitude="draft.latitude"
       v-model:longitude="draft.longitude"
+      v-model:radius-m="draft.radiusM"
       class="mb-6"
-      :radius-m="draft.radiusM ?? initialData.effectiveRadiusM ?? null"
+      :fallback-radius-m="initialData.effectiveRadiusM ?? null"
       :label="draft.name || t('fleet.sites.map.center')"
-      :hint="disabled ? t('fleet.sites.map.readOnlyHint') : t('fleet.sites.map.editHint')"
       :disabled="disabled"
     />
 

@@ -205,7 +205,7 @@ onMounted(() => void store.fetchRows())
                 </span>
               </td>
               <td class="px-3 py-2">
-                <span class="block text-card-foreground">{{ row.customerName ?? '—' }}</span>
+                <span class="block text-card-foreground">{{ row.customerName ?? '-' }}</span>
                 <span v-if="row.customerNo" class="block text-xs text-muted-foreground">
                   {{ row.customerNo }}
                 </span>
@@ -231,7 +231,7 @@ onMounted(() => void store.fetchRows())
               <td class="px-3 py-2">
                 <StatusPill v-bind="pill(row)" />
               </td>
-              <td class="px-3 py-2 whitespace-nowrap">{{ row.reference ?? '—' }}</td>
+              <td class="px-3 py-2 whitespace-nowrap">{{ row.reference ?? '-' }}</td>
               <td v-if="canExecute" class="px-3 py-2 text-right">
                 <button
                   v-if="stateOf(row) === 'ready'"

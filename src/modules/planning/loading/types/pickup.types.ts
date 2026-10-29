@@ -44,6 +44,15 @@ export interface PickupNoteApi {
   confirmedAt: string | null
   confirmedBy: string | null
   documentRef: string
+  pickupSiteNo: string
+  deliveries: {
+    pointNo: string
+    deliveryPointName: string
+    recipientName: string
+    products: string
+    state: 'open' | 'done' | 'cancelled' | 'deviated' | 'returned' | 'out'
+    deviatedToRequestNo: string | null
+  }[]
 }
 
 export interface PickupEntryInput {

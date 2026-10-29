@@ -1,6 +1,7 @@
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { Upload } from '@lucide/vue'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
 import { useListCellFormatters } from '@/composables/useListCellFormatters'
@@ -9,6 +10,7 @@ import { getListCellDisplay } from '@/utils/listCellDisplay'
 import { vehicleApi } from '../api/vehicleApi'
 import { useVehicleStore, type VehicleListView } from '../stores/vehicleStore'
 import type { VehicleApi, VehicleSearchColumn } from '../types/vehicle.types'
+import VehicleImportDialog from '../components/VehicleImportDialog.vue'
 
 const { t } = useI18n()
 const store = useVehicleStore()
@@ -117,6 +119,20 @@ const tableColumns = computed<TableColumn[]>(() => [
   },
   { sortKey: 'statusReason', label: t('fleet.vehicles.col.statusReason'), minW: '220px' },
   {
+    sortKey: 'statusCauseCode',
+    label: t('fleet.vehicles.col.statusCauseCode'),
+    minW: '200px',
+    formatter: (value, row) =>
+      value ? `${String(value)} · ${(row as VehicleApi).statusCauseCodeName}` : ''
+  },
+  {
+    sortKey: 'administrativeStatus',
+    label: t('fleet.vehicles.col.administrativeStatus'),
+    minW: '140px',
+    defaultHidden: true,
+    formatter: optionLabel('administrativeStatus')
+  },
+  {
     sortKey: 'formerPlates',
     label: t('fleet.vehicles.col.formerPlates'),
     minW: '160px',
@@ -139,6 +155,8 @@ const tableColumns = computed<TableColumn[]>(() => [
   { sortKey: 'modifiedBy', label: t('common.audit.modifiedBy'), minW: '110px', defaultHidden: true }
 ])
 
+const importing = ref(false)
+
 const filterDefs: FilterFieldDef[] = [
   {
     field: 'status',
@@ -146,6 +164,13 @@ const filterDefs: FilterFieldDef[] = [
     valueType: 'string',
     kind: 'option',
     optionsKey: 'vehicleStatus'
+  },
+  {
+    field: 'statusCauseCode',
+    labelKey: 'fleet.vehicles.col.statusCauseCode',
+    valueType: 'string',
+    kind: 'reference',
+    referenceKey: 'downtimeCodes'
   },
   {
     field: 'vehicleTypeNo',
@@ -276,6 +301,16 @@ const {
         @clear="store.clearSearch()"
         @update:search-column="onSearchColumnChange"
       >
+        <template v-if="canInsert" #extra-actions>
+          <button
+            type="button"
+            class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
+            @click="importing = true"
+          >
+            <Upload class="w-4 h-4 text-primary" />
+            {{ t('fleet.vehicles.import.action') }}
+          </button>
+        </template>
         <template #column-picker>
           <TableColumnPicker
             :all-columns="tableColumns"
@@ -385,6 +420,11 @@ const {
       </ListPageLayout>
     </template>
 
+    <VehicleImportDialog
+      :open="importing"
+      @close="importing = false"
+      @imported="store.fetchItems(store.pagination.page, store.pagination.limit)"
+    />
     <VehicleCard
       v-if="showCard && cardNo"
       :key="`${cardNo}-${cardOpenMode}`"

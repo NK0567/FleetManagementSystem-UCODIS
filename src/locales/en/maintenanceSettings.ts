@@ -1,7 +1,7 @@
 export default {
   'maintenance.settings.title': 'Maintenance settings',
   'maintenance.settings.subtitle':
-    'Workshop capacity, costs, service notice and tolerance, tyre thresholds and mobile team targets.',
+    'Workshop capacity, costs, service notice, tyre thresholds and mobile team targets.',
   'maintenance.settings.lastModified': 'Changed on {date} by {user}',
   'maintenance.settings.loadError': 'The maintenance settings could not be loaded.',
   'maintenance.settings.saveError': 'The settings could not be saved.',
@@ -26,11 +26,9 @@ export default {
 
   'maintenance.settings.section.service': 'Preventive service',
   'maintenance.settings.section.service.hint':
-    'The notice flags a coming service. Past the tolerance, an overdue service immobilizes the vehicle, except on a provisional plan.',
+    'The notice turns a due date to due soon and raises the alert. An overdue service makes the vehicle unavailable, except on a provisional plan.',
   'maintenance.settings.field.service.noticeKm': 'Notice in kilometres',
   'maintenance.settings.field.service.noticeDays': 'Notice in days',
-  'maintenance.settings.field.service.toleranceKm': 'Tolerance past the due point (km)',
-  'maintenance.settings.field.service.toleranceDays': 'Tolerance past the due point (days)',
 
   'maintenance.settings.section.tyres': 'Tyres',
   'maintenance.settings.section.tyres.hint':
@@ -61,5 +59,14 @@ export default {
 
   'maintenance.settings.issue.required': 'This setting is required.',
   'maintenance.settings.issue.outOfRange': 'Give a value between {min} and {max} {unit}.',
-  'maintenance.settings.issue.invalidTime': 'Give a time as HH:MM.'
+  'maintenance.settings.issue.invalidTime': 'Give a time as HH:MM.',
+  'maintenance.settings.field.service.noticeHours': 'Notice in engine hours',
+  'maintenance.settings.section.targets': 'Targets of the indicators',
+  'maintenance.settings.section.targets.hint':
+    'Compared with the maintenance and reliability indicators.',
+  'maintenance.settings.field.targets.preventiveShareTargetPct': 'Target share of preventive work',
+  'maintenance.settings.field.targets.preventiveCompletionTargetPct':
+    'Target completion rate of preventive work',
+  'maintenance.settings.field.targets.mttrTargetHours': 'Highest MTTR',
+  'maintenance.settings.field.targets.mtbfTargetKm': 'Lowest MTBF'
 }

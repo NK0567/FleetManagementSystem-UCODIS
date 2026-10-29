@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
+import type { FileMeta } from '@/types/file.types'
+import type { QualityRowApi } from '@/modules/planning/delivery-quality/types/deliveryQuality.types'
 import { call, createTestServer } from '../../testing'
 import type { MockServer } from '../../index'
 
@@ -25,6 +27,60 @@ async function driverDeclare(
     language: 'en'
   })
 }
+
+async function upload(name = 'reserve.pdf') {
+  const form = new FormData()
+  form.append('file', new File(['%PDF-1.4 reserve'], name, { type: 'application/pdf' }))
+  return (
+    (await call(server, 'post', '/files', { as: 'LIV001', body: form })).data.data as FileMeta
+  ).no
+}
+
+async function protestOf(no: string) {
+  const rows = (await call(server, 'get', '/planning/delivery-quality', { as: 'LIV001' })).data
+    .data as QualityRowApi[]
+  return rows.flatMap((row) => row.protests).find((note) => note.no === no)
+}
+
+describe('protest attachments (TRS04-US05)', () => {
+  it('keeps the pieces of a note until it is closed', async () => {
+    const line = '/planning/transport-orders/TR-2026-0003/lines/1'
+    await driverDeclare('TR-2026-0003', 1, { receivedQuantity: 140 })
+    const photo = await upload('photo.pdf')
+    expect(
+      (
+        await post(`${line}/protests`, {
+          reasonNo: 'PRT-DAMAGE',
+          quantity: 10,
+          fileNos: ['FIL-999999']
+        })
+      ).status
+    ).toBe(400)
+    const prepared = await post(`${line}/protests`, {
+      reasonNo: 'PRT-DAMAGE',
+      quantity: 10,
+      fileNos: [photo]
+    })
+    const no = (prepared.data.data as { no: string }).no
+    const note = await protestOf(no)
+    expect(note).toMatchObject({ quantity: 10, status: 'preparing', fileNos: [photo] })
+    expect(note?.files.map((file) => file.name)).toEqual(['photo.pdf'])
+
+    expect((await post(`${line}/protests/${no}/files`, { fileNo: photo })).status).toBe(409)
+    expect((await post(`${line}/protests/${no}/files`, { fileNo: photo }, 'DIR001')).status).toBe(
+      403
+    )
+    await post(`${line}/protests/${no}/issue`)
+    const letter = await upload('lettre.pdf')
+    expect((await post(`${line}/protests/${no}/files`, { fileNo: letter })).status).toBe(200)
+    expect((await protestOf(no))?.files).toHaveLength(2)
+    await post(`${line}/protests/${no}/close`, { outcome: 'Avoir accepté' })
+    expect((await protestOf(no))?.status).toBe('closed')
+    expect((await post(`${line}/protests/${no}/files`, { fileNo: await upload() })).status).toBe(
+      409
+    )
+  })
+})
 
 describe('delivery quality', () => {
   it('numbers protest notes by year and closes only an issued note', async () => {

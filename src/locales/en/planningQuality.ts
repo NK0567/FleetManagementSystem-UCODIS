@@ -65,5 +65,8 @@ export default {
   'planning.quality.actor.orderer': 'Orderer',
   'planning.quality.actor.logistics': 'Logistics',
   'planning.quality.actor.internal_carrier': 'Internal fleet',
-  'planning.quality.actor.external_carrier': 'External carrier'
+  'planning.quality.actor.external_carrier': 'External carrier',
+  'planning.quality.col.files': 'Attachments',
+  'planning.quality.files': 'Attachments',
+  'planning.quality.noFile': 'No attachment.'
 }

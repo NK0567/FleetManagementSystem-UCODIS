@@ -33,6 +33,8 @@ export interface CompanyDocumentApi {
   effectiveNoticeDays: number
   notifyOn: string | null
   file: FileMeta | null
+  /** Day the document was filed, to search by date. */
+  filedOn: string
   createdAt: string
   createdBy: string
   modifiedAt: string

@@ -4,14 +4,19 @@ import { useI18n } from 'vue-i18n'
 import {
   CircleCheck,
   ClipboardCheck,
+  CloudUpload,
   ListChecks,
   LoaderCircle,
   TriangleAlert,
-  Truck
+  Truck,
+  WifiOff
 } from '@lucide/vue'
 import { blockingAnomalies, checkIssues, type CheckResult } from '@/modules/fleet/check-points'
 import { nowIsoDateTime } from '@/utils/date'
 import { useMySpaceStore } from '../stores/mySpaceStore'
+import { useOfflineChecklists, type PendingChecklist } from '../composables/useOfflineChecklists'
+import { mySpaceService } from '../services/mySpaceService'
+import type { MyChecklistInput } from '../types/mySpace.types'
 
 type Answer = 'ok' | 'anomaly'
 
@@ -19,7 +24,29 @@ const { t } = useI18n()
 const store = useMySpaceStore()
 
 const takenAt = ref(nowIsoDateTime().slice(0, 16))
+const stage = ref<NonNullable<MyChecklistInput['stage']>>('stop')
 const results = ref<CheckResult[]>([])
+const STAGES = ['departure', 'stop', 'arrival'] as const
+
+const syncError = ref<string | null>(null)
+async function sendPending(item: PendingChecklist): Promise<boolean> {
+  try {
+    await mySpaceService.saveChecklist(item)
+    return true
+  } catch {
+    syncError.value = t('selfService.checklist.offline.syncError')
+    return false
+  }
+}
+const offline = useOfflineChecklists(() => store.profile?.employeeNo ?? 'me', sendPending)
+watch(
+  () => offline.syncing.value,
+  async (running, wasRunning) => {
+    if (running || !wasRunning || !offline.lastSynced.value) return
+    store.notice = t('selfService.checklist.offline.synced', offline.lastSynced.value)
+    await store.fetchChecklist()
+  }
+)
 
 function resetResults() {
   results.value = (store.tour?.checkPoints ?? []).map((point) => ({
@@ -66,10 +93,20 @@ const segmentClass = (point: CheckResult) => {
 
 async function submit() {
   if (!canSubmit.value) return
-  const done = await store.saveChecklist({
+  const input: MyChecklistInput = {
     takenAt: takenAt.value,
+    stage: stage.value,
+    tripNo: store.tour?.tripNo,
     results: results.value.map(({ pointNo, result, comment }) => ({ pointNo, result, comment }))
-  })
+  }
+  // Without network the checklist stays on the phone and leaves as soon as the network is back.
+  if (!offline.online.value && store.tour) {
+    offline.keep({ ...input, tripNo: store.tour.tripNo })
+    store.notice = t('selfService.checklist.offline.kept')
+    resetResults()
+    return
+  }
+  const done = await store.saveChecklist(input)
   if (done) resetResults()
 }
 
@@ -116,6 +153,50 @@ onMounted(async () => {
         <TripStatusPill :status="store.tour.status" />
       </section>
 
+      <section
+        class="border rounded p-3 text-sm space-y-2"
+        :class="offline.online.value ? 'border-border bg-card' : 'border-warning bg-warning-bg'"
+        v-if="store.profile.mayDeclare"
+        data-testid="checklist-network"
+      >
+        <div class="flex items-center justify-between gap-2">
+          <span
+            class="inline-flex items-center gap-2"
+            :class="offline.online.value ? 'text-muted-foreground' : 'text-warning'"
+          >
+            <WifiOff v-if="!offline.online.value" class="w-4 h-4" />
+            <CloudUpload v-else class="w-4 h-4" />
+            {{
+              offline.online.value
+                ? t('selfService.checklist.offline.online')
+                : t('selfService.checklist.offline.offline')
+            }}
+          </span>
+          <label class="inline-flex items-center gap-2 text-xs text-muted-foreground">
+            <input
+              type="checkbox"
+              class="h-4 w-4 accent-primary"
+              :checked="offline.simulatedOffline.value"
+              @change="offline.setSimulatedOffline(($event.target as HTMLInputElement).checked)"
+            />
+            {{ t('selfService.checklist.offline.simulate') }}
+          </label>
+        </div>
+        <p v-if="offline.queue.value.length" class="text-card-foreground">
+          {{ t('selfService.checklist.offline.pending', offline.queue.value.length) }}
+          <button
+            v-if="offline.online.value"
+            type="button"
+            class="ml-1 text-primary hover:underline disabled:opacity-60"
+            :disabled="offline.syncing.value"
+            @click="offline.synchronize()"
+          >
+            {{ t('selfService.checklist.offline.syncNow') }}
+          </button>
+        </p>
+        <p v-if="syncError" class="text-destructive">{{ syncError }}</p>
+      </section>
+
       <p
         v-if="!store.profile.mayDeclare"
         class="bg-info-bg text-info rounded px-3 py-2 text-sm flex items-start gap-2"
@@ -128,6 +209,25 @@ onMounted(async () => {
         <section class="bg-card border border-border rounded p-4 space-y-3">
           <BaseFormField field="takenAt" :label="t('selfService.checklist.takenAt')" required>
             <FormInput v-model="takenAt" type="datetime-local" class="h-11" :invalid="!takenAt" />
+          </BaseFormField>
+          <BaseFormField :label="t('selfService.checklist.stage')" required>
+            <div class="grid grid-cols-3 gap-2" role="group">
+              <button
+                v-for="item in STAGES"
+                :key="item"
+                type="button"
+                class="h-11 rounded border text-sm font-medium transition"
+                :class="
+                  stage === item
+                    ? 'border-primary bg-primary/10 text-primary'
+                    : 'border-border text-muted-foreground hover:bg-accent'
+                "
+                :aria-pressed="stage === item"
+                @click="stage = item"
+              >
+                {{ t(`selfService.checklist.stages.${item}`) }}
+              </button>
+            </div>
           </BaseFormField>
 
           <div class="space-y-2">

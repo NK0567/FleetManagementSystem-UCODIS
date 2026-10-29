@@ -2,6 +2,7 @@ import {
   QUALITY_ACTORS,
   QUALITY_IMPACTS,
   QUALITY_ORIGINS,
+  attachmentIssue,
   followUpOpen,
   protestQuantityAllowed,
   protestStatus,
@@ -26,10 +27,12 @@ import type {
 } from '../../fixtures/planning/transportOrders'
 import { readBody, routeParam, stampModified } from '../../http/crudResource'
 import { conflict, unprocessable } from '../../http/errors'
-import { invalidField, readEnum, readNumber, readString } from '../../http/input'
+import { invalidField, readEnum, readNumber, readString, readStringList } from '../../http/input'
+import { requireReference } from '../../http/references'
 import { ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
 import { sessionUser, type MockRequest } from '../../http/types'
+import { fileMetaOf } from '../files'
 import { PLANNING_MESSAGES } from './messages'
 import { readReason } from './planningReasons'
 
@@ -168,7 +171,11 @@ export function deliveryQualityApi(db: MockDatabase) {
         quantity: referenceOf(line),
         means: order.means,
         facts,
-        protests: line.protests.map((note) => ({ ...note, status: protestStatus(note) })),
+        protests: line.protests.map((note) => ({
+          ...note,
+          status: protestStatus(note),
+          files: (note.fileNos ?? []).map((no) => fileMetaOf(db, no)).filter((file) => !!file)
+        })),
         responsibility: line.responsibility,
         creditReference: line.creditReference,
         creditIssuedAt: line.creditIssuedAt
@@ -196,6 +203,9 @@ export function registerDeliveryQualityHandlers(router: MockRouter, db: MockData
       if (!protestQuantityAllowed(quantity, referenceOf(line))) {
         throw unprocessable(PLANNING_MESSAGES.qualityQuantity)
       }
+      // The pieces given with the note must be stored files (TRS04-US05).
+      const fileNos = [...new Set(readStringList(body, 'fileNos'))]
+      for (const fileNo of fileNos) requireReference(db.files, { fileNo }, 'fileNo')
       const note: ProtestNote = {
         no: nextProtestNo(db),
         reasonNo: reason.reasonNo,
@@ -205,7 +215,8 @@ export function registerDeliveryQualityHandlers(router: MockRouter, db: MockData
         preparedBy: sessionUser(request).code,
         issuedAt: null,
         closedAt: null,
-        outcome: ''
+        outcome: '',
+        fileNos
       }
       replace(
         db,
@@ -272,6 +283,33 @@ export function registerDeliveryQualityHandlers(router: MockRouter, db: MockData
         protestNo
       )
       return ok({ status: 'issued' })
+    }
+  )
+
+  /* A piece is added to the note until it is closed, after its issue too (TRS04-US05). */
+  router.post(
+    '/planning/transport-orders/:no/lines/:lineNo/protests/:protestNo/files',
+    { feature: FEATURE, action: 'execute' },
+    (request) => {
+      const { order, line } = findLine(db, request)
+      const protestNo = routeParam(request, 'protestNo')
+      const note = line.protests.find((item) => item.no === protestNo)
+      if (!note) throw unprocessable(PLANNING_MESSAGES.confirmationLineMissing)
+      const fileNo = requireReference(db.files, readBody(request), 'fileNo')
+      const issue = attachmentIssue(note, fileNo)
+      if (issue === 'closed') throw conflict(PLANNING_MESSAGES.qualityProtestFileClosed)
+      if (issue === 'duplicate') throw conflict(PLANNING_MESSAGES.qualityProtestFileTwice)
+      const next = { ...note, fileNos: [...(note.fileNos ?? []), fileNo] }
+      replace(
+        db,
+        order,
+        line,
+        { ...line, protests: line.protests.map((item) => (item.no === protestNo ? next : item)) },
+        request,
+        'protest_prepared',
+        protestNo
+      )
+      return ok({ fileNos: next.fileNos })
     }
   )
 

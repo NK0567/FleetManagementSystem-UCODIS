@@ -65,6 +65,15 @@ const tableColumns = computed<TableColumn[]>(() => [
     label: t('fleet.alerts.col.escalated'),
     minW: '100px',
     formatter: booleanLabel
+  },
+  {
+    sortKey: 'notifications',
+    label: t('fleet.alerts.col.notifications'),
+    minW: '220px',
+    formatter: (value) =>
+      ((value as AlertApi['notifications'] | undefined) ?? [])
+        .map((item) => t(`fleet.alerts.notification.${item.channel}`, { to: item.to }))
+        .join(' ; ')
   }
 ])
 

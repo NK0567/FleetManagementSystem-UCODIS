@@ -7,3 +7,5 @@ export {
   type FleetSettingsSection
 } from './domain/fleetSettings'
 export type { FleetSettingsApi } from './types/fleetSettings.types'
+export { useImportMapping } from './composables/useImportMapping'
+export type { ImportKind, ImportMapping } from './domain/importMappings'

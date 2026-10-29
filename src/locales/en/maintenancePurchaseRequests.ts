@@ -41,5 +41,7 @@ export default {
   'maintenance.purchaseRequests.form.reason': 'Reason',
   'maintenance.purchaseRequests.receiveForOrder':
     'The part enters the stock, then leaves at once for order {no}.',
-  'maintenance.purchaseRequests.receiveToStock': 'The part enters the stock.'
+  'maintenance.purchaseRequests.receiveToStock': 'The part enters the stock.',
+  'maintenance.purchaseRequests.form.erpSent':
+    'Sent to the ERP on {date} under reference {reference} (link simulated in the mockup).'
 }

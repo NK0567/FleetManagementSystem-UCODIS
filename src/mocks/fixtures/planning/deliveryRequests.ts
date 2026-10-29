@@ -1,4 +1,5 @@
 import type {
+  DeliveryRequestKind,
   DeliveryRequestLine,
   DeliveryRequestOrigin,
   DeliverySlot,
@@ -57,6 +58,12 @@ export interface OrdererSurvey {
 
 export interface DeliveryRequestRow extends MockRow {
   ordererSurvey?: OrdererSurvey | null
+  /** Absent on a row stored before the kinds existed: it reads as a sale. */
+  kind?: DeliveryRequestKind
+  pickupPointNo?: string | null
+  content?: string
+  unitCount?: number | null
+  requiredEquipmentTypeNo?: string | null
   ordererNo: string
   deliveryPointNo: string
   desiredDate: string

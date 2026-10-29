@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useEntityForm } from '@/composables/useEntityForm'
 import { useFormValidationUi } from '@/composables/useFormValidationUi'
+import { formatDateTime } from '@/utils/format'
 import type { PurchaseRequestApi } from '../types/purchaseRequest.types'
 
 const props = withDefaults(
@@ -101,6 +102,14 @@ defineExpose(expose)
             :disabled="disabled || !isNew"
           />
         </BaseFormField>
+        <p v-if="!isNew && initialData.erpSentAt" class="text-xs text-muted-foreground">
+          {{
+            t('maintenance.purchaseRequests.form.erpSent', {
+              reference: initialData.erpReference,
+              date: formatDateTime(initialData.erpSentAt)
+            })
+          }}
+        </p>
       </div>
     </FormSection>
 

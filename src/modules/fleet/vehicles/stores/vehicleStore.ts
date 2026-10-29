@@ -10,6 +10,7 @@ const IN_FLEET: VehicleStatus[] = [
   'available',
   'assigned',
   'in_mission',
+  'in_maintenance',
   'immobilized',
   'out_of_service'
 ]

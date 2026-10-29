@@ -83,10 +83,66 @@ describe('driver scores', () => {
   })
 
   it('leave out a family weighted 0', async () => {
-    await setScoreSettings({ weightRoute: 0 })
+    const settings = await get<FleetSettingsApi>('/fleet/settings')
+    const families = settings.scoreFamilies.map((family) =>
+      family.code === 'route' ? { ...family, weight: 0 } : family
+    )
+    expect(
+      (
+        await call(server, 'put', '/fleet/settings/score-families', {
+          as: 'FLT001',
+          body: { families }
+        })
+      ).status
+    ).toBe(200)
     const jaona = await score('UCT-013')
     expect(jaona.families.map((family) => family.family)).not.toContain('route')
     expect(jaona.score).toBe(97)
+  })
+
+  it('follow the families the administrator sets up, with the terms of their formula', async () => {
+    const families = [
+      { code: 'road', label: 'Route', weight: 50, sources: ['routeDeviation', 'stopDeviation'] },
+      { code: 'rules', label: 'Règles', weight: 50, sources: ['manualInfraction', 'documents'] }
+    ]
+    const saved = await call(server, 'put', '/fleet/settings/score-families', {
+      as: 'ADM001',
+      body: { families }
+    })
+    expect(saved.status).toBe(200)
+    const jaona = await score('UCT-013')
+    expect(jaona.families.map((family) => [family.family, family.label])).toEqual([
+      ['road', 'Route'],
+      ['rules', 'Règles']
+    ])
+    const road = jaona.families.find((family) => family.family === 'road')!
+    expect(road.terms).toContainEqual({
+      source: 'routeDeviation',
+      severity: null,
+      count: 1,
+      points: 20
+    })
+    expect(road.mark).toBe(80)
+  })
+
+  it('refuse families that count a fact twice, and a profile that may not set them', async () => {
+    const twice = await call(server, 'put', '/fleet/settings/score-families', {
+      as: 'FLT001',
+      language: 'fr',
+      body: {
+        families: [
+          { code: 'a', label: 'A', weight: 50, sources: ['ecoEvent'] },
+          { code: 'b', label: 'B', weight: 50, sources: ['ecoEvent'] }
+        ]
+      }
+    })
+    expect(twice.status).toBe(422)
+    expect(twice.data.message).toContain('deux familles')
+    const manager = await call(server, 'put', '/fleet/settings/score-families', {
+      as: 'DIR001',
+      body: { families: [{ code: 'a', label: 'A', weight: 50, sources: ['ecoEvent'] }] }
+    })
+    expect(manager.status).toBe(403)
   })
 })
 

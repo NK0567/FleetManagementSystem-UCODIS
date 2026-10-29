@@ -6,7 +6,8 @@ import type { StatusTone } from '@/components/ui/status-pill/StatusPill.vue'
 import { usePermissions } from '@/composables/usePermissions'
 import { reasonListKey } from '@/modules/planning/reasons/domain/reasonLists'
 import { useOptionsStore } from '@/stores/optionsStore'
-import { formatDate, formatNumber } from '@/utils/format'
+import type { FileMeta } from '@/types/file.types'
+import { EMPTY_CELL, formatDate, formatNumber } from '@/utils/format'
 import {
   QUALITY_ACTORS,
   QUALITY_ORIGINS,
@@ -43,10 +44,16 @@ const { canExecute } = usePermissions('DELIVERYQUALITY')
 const tab = ref<QualityTab>('toQualify')
 
 const preparing = ref<QualityRowApi | null>(null)
-const protest = ref<{ reasonNo: string; comment: string; quantity: number | null }>({
+const protest = ref<{
+  reasonNo: string
+  comment: string
+  quantity: number | null
+  files: FileMeta[]
+}>({
   reasonNo: '',
   comment: '',
-  quantity: null
+  quantity: null,
+  files: []
 })
 const issuing = ref<{ row: QualityRowApi; note: ProtestRowApi } | null>(null)
 const closing = ref<{ row: QualityRowApi; note: ProtestRowApi } | null>(null)
@@ -114,7 +121,7 @@ const orderCard = (orderNo: string) => ({
   query: { no: orderNo, cardMode: 'view' }
 })
 const meansLabel = (row: QualityRowApi) =>
-  row.means ? optionsStore.getOptionLabel('transportMeans', row.means) : '—'
+  row.means ? optionsStore.getOptionLabel('transportMeans', row.means) : EMPTY_CELL
 
 /** The fleet driver is only liable on fleet orders, the carrier only on subcontracted ones. */
 function actorAllowed(row: QualityRowApi, actor: QualityActor): boolean {
@@ -135,7 +142,7 @@ const protestValid = computed(() => {
 })
 
 function openPrepare(row: QualityRowApi) {
-  protest.value = { reasonNo: '', comment: '', quantity: null }
+  protest.value = { reasonNo: '', comment: '', quantity: null, files: [] }
   preparing.value = row
 }
 
@@ -145,9 +152,19 @@ async function onPrepare() {
   const body = {
     reasonNo: protest.value.reasonNo,
     comment: protest.value.comment.trim(),
-    quantity: Number(protest.value.quantity)
+    quantity: Number(protest.value.quantity),
+    fileNos: protest.value.files.map((file) => file.no)
   }
   if (await store.prepareProtest(row, body)) preparing.value = null
+}
+
+/* The pieces of a note: added at its preparation, then until it is closed (TRS04-US05). */
+function addDraftFile(file: FileMeta) {
+  if (!protest.value.files.some((item) => item.no === file.no)) protest.value.files.push(file)
+}
+
+async function attachToNote(row: QualityRowApi, note: ProtestRowApi, file: FileMeta) {
+  await store.attachProtestFile(row, note.no, file.no)
 }
 
 async function onIssue() {
@@ -299,11 +316,11 @@ onMounted(() => void store.fetchRows())
               <p class="text-xs text-muted-foreground">{{ meansLabel(row) }}</p>
             </td>
             <td class="px-3 py-2">
-              <p class="text-card-foreground">{{ row.recipientName || '—' }}</p>
+              <p class="text-card-foreground">{{ row.recipientName || EMPTY_CELL }}</p>
               <p class="text-xs text-muted-foreground">{{ row.deliveryPointName }}</p>
             </td>
             <td class="px-3 py-2">
-              <p>{{ row.productName || '—' }}</p>
+              <p>{{ row.productName || EMPTY_CELL }}</p>
               <p class="text-xs text-muted-foreground tabular-nums">
                 {{ formatNumber(row.quantity) }} {{ row.unit }}
               </p>
@@ -317,7 +334,7 @@ onMounted(() => void store.fetchRows())
                   tone="warning"
                 />
               </div>
-              <span v-else class="text-muted-foreground">—</span>
+              <span v-else class="text-muted-foreground">{{ EMPTY_CELL }}</span>
             </td>
             <td class="px-3 py-2">
               <template v-if="row.responsibility">
@@ -334,7 +351,7 @@ onMounted(() => void store.fetchRows())
                 :label="t('planning.quality.noResponsibility')"
                 tone="neutral"
               />
-              <span v-else class="text-muted-foreground">—</span>
+              <span v-else class="text-muted-foreground">{{ EMPTY_CELL }}</span>
             </td>
             <td class="px-3 py-2 text-right tabular-nums whitespace-nowrap">
               <p>{{ formatNumber(creditOf(row)) }}</p>
@@ -406,6 +423,9 @@ onMounted(() => void store.fetchRows())
               {{ t('planning.quality.col.prepared') }}
             </th>
             <th class="px-3 py-2 font-semibold text-left">
+              {{ t('planning.quality.col.files') }}
+            </th>
+            <th class="px-3 py-2 font-semibold text-left">
               {{ t('planning.quality.col.status') }}
             </th>
             <th class="px-3 py-2 font-semibold text-right">
@@ -415,7 +435,7 @@ onMounted(() => void store.fetchRows())
         </thead>
         <tbody>
           <tr v-if="!protestRows.length">
-            <td colspan="7" class="px-3 py-4 text-muted-foreground">
+            <td colspan="8" class="px-3 py-4 text-muted-foreground">
               {{ t('planning.quality.noProtest') }}
             </td>
           </tr>
@@ -436,7 +456,7 @@ onMounted(() => void store.fetchRows())
               </span>
             </td>
             <td class="px-3 py-2">
-              <p class="text-card-foreground">{{ row.recipientName || '—' }}</p>
+              <p class="text-card-foreground">{{ row.recipientName || EMPTY_CELL }}</p>
               <p class="text-xs text-muted-foreground">{{ row.productName }}</p>
             </td>
             <td class="px-3 py-2 text-right tabular-nums whitespace-nowrap">
@@ -444,6 +464,25 @@ onMounted(() => void store.fetchRows())
             </td>
             <td class="px-3 py-2 whitespace-nowrap text-muted-foreground">
               {{ formatDate(note.preparedAt) }}
+            </td>
+            <td class="px-3 py-2 min-w-56">
+              <div class="space-y-1">
+                <FileAttachmentField
+                  v-for="file in note.files"
+                  :key="file.no"
+                  :file="file"
+                  disabled
+                />
+                <p v-if="!note.files.length" class="text-xs text-muted-foreground">
+                  {{ t('planning.quality.noFile') }}
+                </p>
+                <FileAttachmentField
+                  v-if="canExecute && note.status !== 'closed'"
+                  :file="null"
+                  :disabled="store.acting"
+                  @uploaded="(file) => attachToNote(row, note, file)"
+                />
+              </div>
             </td>
             <td class="px-3 py-2">
               <StatusPill
@@ -513,6 +552,21 @@ onMounted(() => void store.fetchRows())
       </BaseFormField>
       <BaseFormField :label="t('planning.reasons.dialog.comment')">
         <FormTextarea v-model="protest.comment" :rows="3" :maxlength="500" />
+      </BaseFormField>
+      <BaseFormField :label="t('planning.quality.files')">
+        <div class="space-y-1">
+          <FileAttachmentField
+            v-for="file in protest.files"
+            :key="file.no"
+            :file="file"
+            @uploaded="
+              (next) =>
+                (protest.files = protest.files.map((item) => (item.no === file.no ? next : item)))
+            "
+            @removed="protest.files = protest.files.filter((item) => item.no !== file.no)"
+          />
+          <FileAttachmentField :file="null" @uploaded="addDraftFile" />
+        </div>
       </BaseFormField>
     </div>
   </ConfirmDialog>

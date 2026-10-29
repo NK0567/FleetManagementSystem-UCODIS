@@ -40,6 +40,7 @@ const tableColumns = computed<TableColumn[]>(() => [
     minW: '90px',
     formatter: booleanLabel
   },
+  { sortKey: 'modelNames', label: t('maintenance.maintenancePlans.col.modelNames'), minW: '200px' },
   {
     sortKey: 'vehicleCount',
     label: t('maintenance.maintenancePlans.col.vehicleCount'),
@@ -64,7 +65,7 @@ const tableColumns = computed<TableColumn[]>(() => [
   { sortKey: 'modifiedBy', label: t('common.audit.modifiedBy'), minW: '110px', defaultHidden: true }
 ])
 
-const detailKeys = ['provisional', 'vehicleCount', 'operationCount']
+const detailKeys = ['modelNames', 'provisional', 'vehicleCount', 'operationCount']
 const detailColumns = computed(() =>
   detailKeys
     .map((key) => tableColumns.value.find((column) => column.sortKey === key))

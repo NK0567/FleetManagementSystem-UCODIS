@@ -41,5 +41,7 @@ export default {
   'maintenance.purchaseRequests.form.reason': 'Motif',
   'maintenance.purchaseRequests.receiveForOrder':
     "La pièce entre en stock puis sort aussitôt pour l'ordre {no}.",
-  'maintenance.purchaseRequests.receiveToStock': 'La pièce entre en stock.'
+  'maintenance.purchaseRequests.receiveToStock': 'La pièce entre en stock.',
+  'maintenance.purchaseRequests.form.erpSent':
+    "Transmise à l'ERP le {date} sous la référence {reference} (liaison simulée dans la maquette)."
 }

@@ -8,8 +8,11 @@ import { deliveryPointService } from '@/modules/planning/delivery-points'
 import { customerService } from '@/modules/planning/customers'
 import { formatNumber } from '@/utils/format'
 import { useUserStore } from '@/stores/user'
+import { productService } from '@/modules/planning/products'
+import { usePlanningCircuit } from '@/modules/planning/planning-settings'
 import type {
   DeliveryRequestApi,
+  DeliveryRequestKind,
   DeliveryRequestLine,
   DeliverySlot,
   FreightPayer,
@@ -32,6 +35,13 @@ const props = withDefaults(
 )
 
 const { t } = useI18n()
+/* The form follows the company's circuit (TRS07-US05): reference label, counting unit, channels. */
+const { circuit } = usePlanningCircuit()
+const hiddenChannels = computed(() =>
+  ['sms', 'call', 'email', 'whatsapp'].filter(
+    (channel) => !(circuit.value.channels as string[]).includes(channel)
+  )
+)
 /** An orderer orders for his own record: the field is filled for him and stays locked. */
 const ownOrderer = useUserStore().user?.ordererNo ?? ''
 
@@ -62,6 +72,11 @@ const { draft, isRequired, expose } = useEntityForm({
       : {})
   }),
   empty: () => ({
+    kind: 'sale' as DeliveryRequestKind,
+    pickupPointNo: null as string | null,
+    content: '',
+    unitCount: null as number | null,
+    requiredEquipmentTypeNo: null as string | null,
     ordererNo: ownOrderer,
     deliveryPointNo: '',
     desiredDate: '',
@@ -82,8 +97,22 @@ const { draft, isRequired, expose } = useEntityForm({
       : t(`planning.deliveryRequests.form.${field}`),
   validate: (values) => {
     const errors: FormValidationError[] = []
-    if (values.lines.some((line) => !line.productNo || !(Number(line.quantity) > 0))) {
+    // The weight is always asked: it decides the vehicle (TRS01-US02).
+    if (
+      values.lines.some(
+        (line) => !line.productNo || !(Number(line.quantity) > 0) || !(Number(line.weightKg) > 0)
+      )
+    ) {
       errors.push({ fieldKey: 'lines', label: t('planning.deliveryRequests.lines.incomplete') })
+    }
+    if (circuit.value.externalReferenceRequired && !String(values.externalReference ?? '').trim()) {
+      errors.push({ fieldKey: 'externalReference', label: circuit.value.externalReferenceLabel })
+    }
+    if (values.kind !== 'sale' && !values.pickupPointNo) {
+      errors.push({
+        fieldKey: 'pickupPointNo',
+        label: t('planning.deliveryRequests.form.pickupPointNo')
+      })
     }
     return errors
   }
@@ -96,6 +125,8 @@ const { hasValidationError } = useFormValidationUi({
   fieldSections: {
     ordererNo: 'general',
     deliveryPointNo: 'general',
+    pickupPointNo: 'general',
+    externalReference: 'general',
     desiredDate: 'general',
     freightPayer: 'general',
     lines: 'goods'
@@ -115,6 +146,35 @@ const totalWeight = computed(() =>
   draft.lines.reduce((sum, line) => sum + (Number(line.weightKg) || 0), 0)
 )
 
+/* A product configured with its unit weight and volume fills those of the line (TRS01-US08);
+ * a value typed by hand is kept. */
+const unitMeasures = new Map<string, { weightKg: number | null; volumeM3: number | null }>()
+async function prefill(line: DeliveryRequestLine) {
+  if (!line.productNo || !(Number(line.quantity) > 0)) return
+  let unit = unitMeasures.get(line.productNo)
+  if (!unit) {
+    try {
+      const product = await productService.getById(line.productNo)
+      unit = { weightKg: product.unitWeightKg, volumeM3: product.unitVolumeM3 }
+      unitMeasures.set(line.productNo, unit)
+    } catch {
+      return
+    }
+  }
+  const round = (value: number) => Math.round(value * 1000) / 1000
+  if (line.weightKg == null && unit.weightKg) line.weightKg = round(unit.weightKg * line.quantity)
+  if (line.volumeM3 == null && unit.volumeM3) line.volumeM3 = round(unit.volumeM3 * line.quantity)
+}
+watch(
+  () => draft.lines.map((line) => `${line.productNo}|${line.quantity}`),
+  () => {
+    if (!props.disabled) for (const line of draft.lines) void prefill(line)
+  }
+)
+
+/** A return is picked up at the recipient's site; the others at a depot. */
+const pickupReference = computed(() => (draft.kind === 'return' ? 'deliveryPoints' : 'depotPoints'))
+
 /* On a new order, the recipient's preferences are copied from its record once the delivery point
  * is chosen; they stay editable for this order only. If the record cannot be read, the fields keep
  * their values and the server fills them from the recipient. */
@@ -127,7 +187,12 @@ watch(
       if (!point.customerNo || draft.deliveryPointNo !== no) return
       const recipient = await customerService.getById(point.customerNo)
       if (draft.deliveryPointNo !== no) return
-      draft.notificationChannel = recipient.notificationChannel
+      // A channel the company no longer offers falls back to no notification.
+      draft.notificationChannel = (circuit.value.channels as string[]).includes(
+        recipient.notificationChannel
+      )
+        ? recipient.notificationChannel
+        : 'none'
       draft.confirmationRequired = recipient.confirmationRequired
       draft.preferredSlot = recipient.preferredSlot
     } catch {
@@ -147,6 +212,17 @@ defineExpose(expose)
       :summary="[initialData.deliveryPointName]"
     >
       <div class="space-y-3 min-w-0">
+        <BaseFormField :label="t('planning.deliveryRequests.form.kind')" required>
+          <OptionsSelect
+            :model-value="draft.kind"
+            options-key="deliveryRequestKind"
+            :disabled="disabled"
+            @update:model-value="draft.kind = String($event) as DeliveryRequestKind"
+          />
+          <p class="text-xs text-muted-foreground mt-1">
+            {{ t(`planning.deliveryRequests.form.kindHint.${draft.kind}`) }}
+          </p>
+        </BaseFormField>
         <BaseFormField
           field="ordererNo"
           :label="t('planning.deliveryRequests.form.ordererNo')"
@@ -176,6 +252,21 @@ defineExpose(expose)
           />
         </BaseFormField>
         <BaseFormField
+          field="pickupPointNo"
+          :label="t('planning.deliveryRequests.form.pickupPointNo')"
+          :required="draft.kind !== 'sale'"
+        >
+          <ReferenceLookup
+            :key="pickupReference"
+            v-model="draft.pickupPointNo"
+            :reference-key="pickupReference"
+            :modal-title="t('planning.deliveryRequests.form.pickupPointNo')"
+            detail-path="/planning/delivery-points"
+            :disabled="disabled"
+            :invalid="hasValidationError('pickupPointNo')"
+          />
+        </BaseFormField>
+        <BaseFormField
           field="desiredDate"
           :label="t('planning.deliveryRequests.form.desiredDate')"
           :required="isRequired('desiredDate')"
@@ -194,8 +285,20 @@ defineExpose(expose)
         </BaseFormField>
       </div>
       <div class="space-y-3 min-w-0">
-        <BaseFormField :label="t('planning.deliveryRequests.form.externalReference')">
-          <FormInput v-model="draft.externalReference" :maxlength="40" :disabled="disabled" />
+        <BaseFormField
+          field="externalReference"
+          :label="circuit.externalReferenceLabel"
+          :required="circuit.externalReferenceRequired"
+        >
+          <FormInput
+            v-model="draft.externalReference"
+            :maxlength="40"
+            :disabled="disabled"
+            :invalid="hasValidationError('externalReference')"
+          />
+          <p class="text-xs text-muted-foreground mt-1">
+            {{ t('planning.deliveryRequests.form.externalReferenceHint') }}
+          </p>
         </BaseFormField>
         <BaseFormField
           field="freightPayer"
@@ -213,6 +316,17 @@ defineExpose(expose)
         <BaseFormField :label="t('planning.deliveryRequests.form.comment')">
           <FormTextarea v-model="draft.comment" :rows="3" :disabled="disabled" />
         </BaseFormField>
+        <BaseFormField :label="t('planning.deliveryRequests.form.requiredEquipment')">
+          <ReferenceLookup
+            v-model="draft.requiredEquipmentTypeNo"
+            reference-key="equipmentTypes"
+            :modal-title="t('planning.deliveryRequests.form.requiredEquipment')"
+            :disabled="disabled"
+          />
+          <p class="text-xs text-muted-foreground mt-1">
+            {{ t('planning.deliveryRequests.form.requiredEquipmentHint') }}
+          </p>
+        </BaseFormField>
       </div>
     </FormSection>
 
@@ -224,6 +338,24 @@ defineExpose(expose)
         totalWeight ? `${formatNumber(totalWeight, 0)} kg` : ''
       ]"
     >
+      <div class="space-y-3 min-w-0">
+        <BaseFormField :label="t('planning.deliveryRequests.form.content')">
+          <FormInput v-model="draft.content" :maxlength="200" :disabled="disabled" />
+        </BaseFormField>
+      </div>
+      <div class="space-y-3 min-w-0">
+        <BaseFormField
+          :label="t('planning.deliveryRequests.form.unitCount', { unit: circuit.countingUnit })"
+        >
+          <FormInput
+            v-model="draft.unitCount"
+            type="number"
+            :min="0"
+            :max="1000000"
+            :disabled="disabled"
+          />
+        </BaseFormField>
+      </div>
       <div class="xl:col-span-2 min-w-0" data-field="lines">
         <div
           class="border rounded overflow-x-auto"
@@ -240,7 +372,7 @@ defineExpose(expose)
                   {{ t('planning.deliveryRequests.form.quantity') }} *
                 </th>
                 <th class="px-3 py-2 text-right font-semibold w-32">
-                  {{ t('planning.deliveryRequests.form.weightKg') }}
+                  {{ t('planning.deliveryRequests.form.weightKg') }} *
                 </th>
                 <th class="px-3 py-2 text-right font-semibold w-32">
                   {{ t('planning.deliveryRequests.form.volumeM3') }}
@@ -284,6 +416,7 @@ defineExpose(expose)
                     :min="0"
                     :max="1000000"
                     :disabled="disabled"
+                    :invalid="hasValidationError('lines') && !(Number(line.weightKg) > 0)"
                   />
                 </td>
                 <td class="px-2 py-1.5">
@@ -336,6 +469,7 @@ defineExpose(expose)
           <OptionsSelect
             :model-value="draft.notificationChannel"
             options-key="notificationChannel"
+            :hidden-values="hiddenChannels"
             :disabled="disabled"
             @update:model-value="draft.notificationChannel = String($event) as NotificationChannel"
           />

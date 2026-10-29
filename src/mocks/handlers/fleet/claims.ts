@@ -83,13 +83,19 @@ export function claimsApi(db: MockDatabase): ClaimApi[] {
   const policies = new Map(db.insurancePolicies.all().map((policy) => [policy.no, policy]))
   const insurers = new Map(db.providers.all().map((provider) => [provider.no, provider.name]))
   const repairs = workOrdersBySource(db)
+  const downtimeNames = new Map(db.downtimeCodes.all().map((code) => [code.no, code.name]))
   return db.claims.all().map((claim) => {
     const policy = claim.policyNo ? policies.get(claim.policyNo) : undefined
     const repair = repairs.get(`claim ${claim.no}`)
+    const order = repair ? db.workOrders.find(repair.no) : undefined
+    const downtime = order?.downtimeNo ? db.downtimes.find(order.downtimeNo) : undefined
     return {
       ...claim,
       workOrderNo: repair?.no ?? null,
       repairOpen: repair?.open ?? false,
+      downtimeCode: downtime?.downtimeCodeNo ?? null,
+      downtimeCodeName: downtime ? (downtimeNames.get(downtime.downtimeCodeNo) ?? '') : '',
+      downtimeOpen: !!downtime && !downtime.endedAt,
       vehiclePlate: plates.get(claim.vehicleNo) ?? claim.vehicleNo,
       driverName: claim.driverNo ? (names.get(claim.driverNo) ?? claim.driverNo) : '',
       policyNumber: policy?.policyNumber ?? '',

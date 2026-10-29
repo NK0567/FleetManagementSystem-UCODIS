@@ -57,16 +57,24 @@ describe('maintenance plans', () => {
     expect(notSubsystem.status).toBe(422)
   })
 
-  it('keep a vehicle in one active plan, and a plan with vehicles from deletion', async () => {
+  it('keep a model in one active plan, and a plan with vehicles from deletion', async () => {
     const taken = await send('post', '/maintenance/maintenance-plans', {
       name: 'Autre plan',
-      vehicleNos: ['VEH-001']
+      modelCodes: ['Sinotruk|Howo A7']
     })
     expect(taken.status).toBe(409)
+    expect(
+      (
+        await send('post', '/maintenance/maintenance-plans', {
+          name: 'Modèle inconnu',
+          modelCodes: ['Volvo|FH16']
+        })
+      ).status
+    ).toBe(400)
     const inactive = await send('post', '/maintenance/maintenance-plans', {
       name: 'Plan en préparation',
       active: false,
-      vehicleNos: ['VEH-001']
+      modelCodes: ['Sinotruk|Howo A7']
     })
     expect(inactive.status).toBe(201)
     expect((await send('delete', '/maintenance/maintenance-plans/PE-002')).status).toBe(409)
@@ -84,6 +92,53 @@ describe('maintenance plans', () => {
   })
 })
 
+describe('plans by model', () => {
+  it('let every vehicle of the model inherit the plan, a new one included', async () => {
+    const plan = await get<MaintenancePlanApi>('/maintenance/maintenance-plans/PE-001')
+    expect(plan).toMatchObject({
+      modelCodes: ['Sinotruk|Howo A7'],
+      vehicleNos: ['VEH-001', 'VEH-002', 'VEH-003'],
+      vehicleCount: 3
+    })
+    const vehicle = server.db.vehicles.findOrFail('VEH-001')
+    server.db.vehicles.insert({ ...structuredClone(vehicle), no: 'VEH-099', plate: '4099 TBA' })
+    expect(
+      (await get<MaintenancePlanApi>('/maintenance/maintenance-plans/PE-001')).vehicleCount
+    ).toBe(4)
+    expect((await due('VEH-099_OP-001')).planNo).toBe('PE-001')
+  })
+
+  it('count engine hours as a third threshold, from the hour meter', async () => {
+    expect(await due('VEH-001_OP-001')).toMatchObject({
+      intervalHours: 500,
+      lastHours: 5_900,
+      currentHours: 6_120,
+      nextHours: 6_400,
+      hoursRemaining: 280
+    })
+    const read = (hours: number, as = 'MNT001') =>
+      send('post', '/maintenance/engine-hours', { vehicleNo: 'VEH-001', hours }, as)
+    expect((await read(6_000)).status).toBe(422)
+    expect((await read(6_380, 'DIR001')).status).toBe(403)
+    expect((await read(6_380)).status).toBe(201)
+    expect(await due('VEH-001_OP-001')).toMatchObject({ hoursRemaining: 20, status: 'due_soon' })
+  })
+
+  it('alert the maintenance manager when a service comes due', async () => {
+    const alerts = await call(server, 'get', '/fleet/alerts', {
+      as: 'FLT001',
+      query: { pageSize: 200 },
+      language: 'en'
+    })
+    const service = (alerts.data.data as { items: { category: string; subject: string }[] }).items
+      .filter((alert) => alert.category === 'service')
+      .map((alert) => alert.subject)
+    expect(service).toContain('4030 TBA')
+    const forDriver = await call(server, 'get', '/fleet/alerts', { as: 'CND002' })
+    expect(forDriver.status).toBe(403)
+  })
+})
+
 describe('service due', () => {
   it('derive each operation from its latest passage', async () => {
     expect(await due('VEH-001_OP-001')).toMatchObject({
@@ -97,7 +152,7 @@ describe('service due', () => {
     expect((await due('VEH-003_OP-001')).status).toBe('unknown')
   })
 
-  it('immobilize past the tolerance once the plan is confirmed', async () => {
+  it('make the vehicle unavailable as soon as a service is past due, once the plan is confirmed', async () => {
     expect((await get<VehicleApi>('/fleet/vehicles/VEH-002')).status).not.toBe('immobilized')
     await send('patch', '/maintenance/maintenance-plans/PE-001', { provisional: false })
     expect((await due('VEH-002_OP-012')).status).toBe('blocking')

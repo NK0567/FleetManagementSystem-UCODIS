@@ -27,6 +27,10 @@ export interface ClaimApi {
   /** The work order opened from this record, if any. */
   workOrderNo: string | null
   repairOpen: boolean
+  /** Unavailability cause the repair put on the vehicle, from the codification. */
+  downtimeCode: string | null
+  downtimeCodeName: string
+  downtimeOpen: boolean
   no: string
   nature: ClaimNature
   occurredAt: string

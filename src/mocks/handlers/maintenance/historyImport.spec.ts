@@ -69,4 +69,42 @@ describe('maintenance history import', () => {
     expect((await importRows([])).status).toBe(422)
     expect((await importRows([row], 'MNT001')).status).toBe(403)
   })
+
+  it('propose a subsystem of the nomenclature, which a person confirms or corrects', async () => {
+    const report = (
+      await importRows([
+        { ...row, category: 'Freins', workDone: 'Remplacement des plaquettes avant.' },
+        { ...row, workDone: 'Peinture de la cabine.' }
+      ])
+    ).data.data as ImportReport
+    const [braked, painted] = await Promise.all(
+      report.results.map(
+        async (result) =>
+          (await call(server, 'get', `/maintenance/work-orders/${result.no}`, { as: 'FLT001' }))
+            .data.data as WorkOrderApi
+      )
+    )
+    expect(braked).toMatchObject({
+      nomenclatureState: 'to_confirm',
+      diagnosis: null,
+      nomenclature: { sourceText: 'Freins', proposedSubsystemNo: 'BRAKES', confirmedAt: null }
+    })
+    expect(painted?.nomenclature?.proposedSubsystemNo).toBeNull()
+
+    const confirm = (no: string, subsystemNo: string | null, as = 'FLT001') =>
+      call(server, 'post', `/maintenance/work-orders/${no}/confirm-nomenclature`, {
+        as,
+        body: { subsystemNo },
+        language: 'en'
+      })
+    expect((await confirm(braked!.no, 'BRAKES', 'MNT001')).status).toBe(403)
+    expect((await confirm(painted!.no, null)).status).toBe(422)
+    expect((await confirm(painted!.no, 'LEAK')).status).toBe(422)
+    expect((await confirm(painted!.no, 'CHASSIS')).data.data).toMatchObject({
+      nomenclatureState: 'confirmed',
+      subsystemName: 'Châssis et tôlerie'
+    })
+    expect((await confirm(painted!.no, 'CHASSIS')).status).toBe(409)
+    expect((await confirm('OT-2026-0001', 'ENGINE')).status).toBe(409)
+  })
 })

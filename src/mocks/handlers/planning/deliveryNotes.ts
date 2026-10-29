@@ -54,13 +54,17 @@ export function deliveryNoteOf(
           productName: product?.name ?? line.productNo,
           unit: product?.unit ?? '',
           quantity: line.loadedQuantity ?? line.quantity,
-          deliveredQuantity: line.declaredAt ? line.receivedQuantity : null,
-          notDelivered: !planned && !line.declaredAt,
-          reason: line.refusalAt
-            ? reasonName(line.refusalReasonNo)
-            : line.postponedAt
-              ? reasonName(line.postponementReasonNo)
-              : ''
+          deliveredQuantity:
+            line.declaredAt && !line.undeliveredReasonNo ? line.receivedQuantity : null,
+          notDelivered: !planned && (!line.declaredAt || !!line.undeliveredReasonNo),
+          reason: line.undeliveredReasonNo
+            ? reasonName(line.undeliveredReasonNo)
+            : line.refusalAt
+              ? reasonName(line.refusalReasonNo)
+              : line.postponedAt
+                ? reasonName(line.postponementReasonNo)
+                : '',
+          measures: line.deliveryMeasures ?? null
         }
       })
   }

@@ -2,6 +2,7 @@ export const WORK_ORDER_STATUSES = [
   'open',
   'diagnosed',
   'in_progress',
+  'awaiting_parts',
   'awaiting_validation',
   'closed',
   'cancelled'
@@ -40,30 +41,44 @@ export interface WorkOrderFacts {
   completedAt: string | null
   validatedAt: string | null
   cancelledAt: string | null
+  /** Parts of the order; a bought part not received yet holds the order. */
+  parts?: readonly { purchaseRequestNo: string | null; receivedAt: string | null }[]
+}
+
+/** A part bought for the order and not received yet. */
+export function awaitsPart(order: Pick<WorkOrderFacts, 'parts'>): boolean {
+  return (order.parts ?? []).some((part) => !!part.purchaseRequestNo && !part.receivedAt)
 }
 
 export function workOrderStatus(order: WorkOrderFacts): WorkOrderStatus {
   if (order.cancelledAt) return 'cancelled'
   if (order.validatedAt) return 'closed'
   if (order.completedAt) return 'awaiting_validation'
+  if (awaitsPart(order)) return 'awaiting_parts'
   if (order.startedAt) return 'in_progress'
   return order.diagnosedAt ? 'diagnosed' : 'open'
 }
 
-/** Work can still be done on it: diagnosed, logged, declared finished. */
+/** Work can still be done on it: diagnosed, logged, waiting for a part, declared finished. */
 export function isWorkable(status: WorkOrderStatus): boolean {
-  return status === 'open' || status === 'diagnosed' || status === 'in_progress'
+  return (
+    status === 'open' ||
+    status === 'diagnosed' ||
+    status === 'in_progress' ||
+    status === 'awaiting_parts'
+  )
 }
 
 /**
- * A major or critical breakdown stops the vehicle as soon as it is declared; a minor one, or a
- * preventive service, only once the work starts.
+ * Opening a repair order stops the vehicle at once, whatever the severity: it goes into
+ * maintenance under the cause code of the order. A preventive service only stops it once the work
+ * starts, or once a part has to be bought for it.
  */
 export function immobilizesOnDeclaration(order: {
   maintenanceType: MaintenanceType
-  severity: WorkOrderSeverity
+  severity?: WorkOrderSeverity
 }): boolean {
-  return order.maintenanceType !== 'preventive' && order.severity !== 'minor'
+  return order.maintenanceType !== 'preventive'
 }
 
 export type DowntimeRoleOfOrder = 'breakdown' | 'preventive' | 'accident'

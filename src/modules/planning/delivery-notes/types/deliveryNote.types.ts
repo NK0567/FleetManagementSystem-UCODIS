@@ -14,6 +14,13 @@ export interface DeliveryNoteLineApi {
   /** The line is not delivered (refused or postponed), with its reason. */
   notDelivered: boolean
   reason: string
+  /** For fuel, what the driver measured at the delivery; the note gives them (TRS03-US10). */
+  measures: {
+    deliveredVolumeL: number | null
+    temperatureC: number | null
+    density: number | null
+    volume15L: number | null
+  } | null
 }
 
 export interface DeliveryNoteApi {

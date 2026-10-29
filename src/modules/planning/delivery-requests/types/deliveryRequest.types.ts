@@ -30,14 +30,38 @@ export const DELIVERY_FOLLOW_UPS = [
 ] as const
 export type DeliveryFollowUp = (typeof DELIVERY_FOLLOW_UPS)[number]
 
-/** Entered on screen, imported from a file, or keyed by the planner on a customer's behalf. */
-export const DELIVERY_REQUEST_ORIGINS = ['request', 'import', 'planner'] as const
+/**
+ * How the order came in (TRS01-US01): transmitted by a service (the orderer accounts), imported
+ * from a file, keyed by the planner, received from the management system by the connector, or
+ * sent by an external orderer through the API.
+ */
+export const DELIVERY_REQUEST_ORIGINS = [
+  'request',
+  'import',
+  'planner',
+  'connector',
+  'api'
+] as const
 export type DeliveryRequestOrigin = (typeof DELIVERY_REQUEST_ORIGINS)[number]
+
+/** A sale to deliver, a transfer between sites of the company, or a return to the base. */
+export const DELIVERY_REQUEST_KINDS = ['sale', 'transfer', 'return'] as const
+export type DeliveryRequestKind = (typeof DELIVERY_REQUEST_KINDS)[number]
 
 export interface DeliveryRequestApi {
   no: string
+  kind: DeliveryRequestKind
   ordererNo: string
   deliveryPointNo: string
+  /** Where the goods are picked up: a depot, or the recipient's site for a return. */
+  pickupPointNo: string | null
+  pickupPointName: string
+  /** What the goods are, in words, and how many units (cartons, pallets...) they make. */
+  content: string
+  unitCount: number | null
+  /** Equipment the vehicle must carry, such as a pump. */
+  requiredEquipmentTypeNo: string | null
+  requiredEquipmentName: string
   desiredDate: string
   validUntil: string | null
   externalReference: string

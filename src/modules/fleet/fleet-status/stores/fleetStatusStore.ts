@@ -8,6 +8,7 @@ import type { FleetStateGroup } from '../domain/fleetState'
 import type {
   FleetStatusApi,
   FleetStatusDay,
+  FleetStatusDispatchApi,
   FleetStatusSearchColumn
 } from '../types/fleetStatus.types'
 
@@ -25,6 +26,7 @@ function detectView(filters: ListFilter[]): FleetStatusListView {
 export const useFleetStatusStore = defineStore('fleet-fleet-status', () => {
   const day = ref(todayIso())
   const days = ref<FleetStatusDay[]>([])
+  const dispatches = ref<FleetStatusDispatchApi[]>([])
   const api = createFleetStatusApi(() => day.value)
   const service = createCrudService<FleetStatusApi, FleetStatusSearchColumn>(api)
 
@@ -62,6 +64,16 @@ export const useFleetStatusStore = defineStore('fleet-fleet-status', () => {
     await fetchDays()
   }
 
+  async function fetchDispatches() {
+    dispatches.value = (await fleetStatusDayApi.dispatches()).data.data
+  }
+
+  /** Sends the status of the day shown; today's status is archived as it was sent. */
+  async function send(recipients: string[]) {
+    await fleetStatusDayApi.send(day.value, recipients)
+    await Promise.all([fetchDispatches(), fetchDays()])
+  }
+
   async function saveNote(vehicleNo: string, observation: string, expectedBackOn: string | null) {
     const line = (await fleetStatusDayApi.saveNote(vehicleNo, observation, expectedBackOn)).data
       .data
@@ -75,11 +87,14 @@ export const useFleetStatusStore = defineStore('fleet-fleet-status', () => {
     setListView,
     day,
     days,
+    dispatches,
     currentDay,
     isLive,
     fetchDays,
     setDay,
     archive,
+    fetchDispatches,
+    send,
     saveNote,
     exportExcel: api.exportExcel
   }

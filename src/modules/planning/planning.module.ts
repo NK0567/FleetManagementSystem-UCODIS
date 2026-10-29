@@ -14,7 +14,6 @@ import {
   MessageSquareX,
   Package2,
   PackageCheck,
-  PhoneCall,
   ReceiptText,
   Scale,
   Settings2,
@@ -29,6 +28,7 @@ import { deliveryRequestService, type DeliveryRequestApi } from './delivery-requ
 import { transportOrderService, type TransportOrderApi } from './transport-orders'
 
 const PLANNING_MENU_ORDER = 35
+const CONFIRMATIONS_MENU_ORDER = 6
 
 export function registerPlanningModule(): void {
   registerFeatureRoutes({
@@ -54,6 +54,16 @@ export function registerPlanningModule(): void {
     TRANSPORTTARIFF: { to: '/planning/transport-tariffs', menuKey: 'transportTariff' },
     PLANNINGREASON: { to: '/planning/reasons', menuKey: 'planningReason' },
     PLANNINGSETTINGS: { to: '/planning/settings', menuKey: 'planningSettings' }
+  })
+
+  /* The « Confirmations destinataires » tab of the agent (TRS01-US15): a tab of its own in the top
+   * bar, reached from any module, shown only to the profile that holds the feature. */
+  registerNavMenu({
+    labelKey: 'nav.customerConfirmations',
+    to: '/planning/confirmations',
+    menuKey: 'customerConfirmation',
+    order: CONFIRMATIONS_MENU_ORDER,
+    subItems: []
   })
 
   registerNavMenu({
@@ -94,13 +104,6 @@ export function registerPlanningModule(): void {
         group: 'nav.group.orders',
         icon: CalendarDays,
         menuKey: 'planningCalendar'
-      },
-      {
-        labelKey: 'nav.customerConfirmations',
-        to: '/planning/confirmations',
-        group: 'nav.group.execution',
-        icon: PhoneCall,
-        menuKey: 'customerConfirmation'
       },
       {
         labelKey: 'nav.loadingPreparations',

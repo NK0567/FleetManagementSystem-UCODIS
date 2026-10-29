@@ -11,6 +11,12 @@ export interface DeliveryPointRow extends MockRow {
   pumpRequired: boolean
   acceptedVehicleTypeNos: string[]
   active: boolean
+  /** A recipient's delivery site, or a loading depot (TRS07-US02); absent reads as a site. */
+  kind?: 'delivery' | 'depot'
+  /** The site of the FMS register it stands for: its place then comes from there. */
+  siteNo?: string | null
+  /** A site belonging to someone else (a third-party depot); empty when it is ours. */
+  ownerName?: string
 }
 
 const SEED: Omit<DeliveryPointRow, keyof typeof seedAudit>[] = [
@@ -168,6 +174,52 @@ const SEED: Omit<DeliveryPointRow, keyof typeof seedAudit>[] = [
     longitude: 47.47,
     pumpRequired: true,
     acceptedVehicleTypeNos: ['TANKER'],
+    active: true
+  },
+  // The loading depots, taken from the site register of the FMS (TRS07-US02).
+  {
+    no: 'DPT-001',
+    customerNo: '',
+    kind: 'depot',
+    siteNo: 'DEP-TNJ',
+    ownerName: '',
+    name: 'Dépôt Tanjombato',
+    address: '',
+    city: 'Antananarivo',
+    latitude: -18.8792,
+    longitude: 47.5079,
+    pumpRequired: false,
+    acceptedVehicleTypeNos: [],
+    active: true
+  },
+  {
+    no: 'DPT-002',
+    customerNo: '',
+    kind: 'depot',
+    siteNo: 'ENT-TNJ',
+    ownerName: '',
+    name: 'Entrepôt Tanjombato',
+    address: '',
+    city: 'Antananarivo',
+    latitude: -18.9167,
+    longitude: 47.53,
+    pumpRequired: false,
+    acceptedVehicleTypeNos: [],
+    active: true
+  },
+  {
+    no: 'DPT-003',
+    customerNo: '',
+    kind: 'depot',
+    siteNo: 'DEP-ALR',
+    ownerName: "Société de stockage d'Alarobia",
+    name: "Dépôt pétrolier d'Alarobia",
+    address: '',
+    city: 'Antananarivo',
+    latitude: -18.8735,
+    longitude: 47.5262,
+    pumpRequired: false,
+    acceptedVehicleTypeNos: [],
     active: true
   }
 ]

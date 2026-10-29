@@ -17,5 +17,11 @@ export const deliveryRequestService = {
   },
   async importRows(rows: Record<string, unknown>[]): Promise<ImportReport> {
     return (await deliveryRequestApi.importRows(rows)).data.data
+  },
+  async syncConnector(): Promise<string[]> {
+    return (await deliveryRequestApi.syncConnector()).data.data.received
+  },
+  async sendThroughApi(body: Record<string, unknown>): Promise<string> {
+    return (await deliveryRequestApi.sendThroughApi(body)).data.data.no
   }
 }

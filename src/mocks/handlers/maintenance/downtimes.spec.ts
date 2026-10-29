@@ -49,7 +49,7 @@ describe('downtimes', () => {
       durationDays: 7.33
     })
     expect(await get<VehicleApi>('/fleet/vehicles/VEH-008')).toMatchObject({
-      status: 'immobilized',
+      status: 'in_maintenance',
       statusReason: 'Unavailable: Panne'
     })
   })

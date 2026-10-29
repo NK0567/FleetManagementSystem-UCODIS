@@ -14,8 +14,12 @@ export const fuelConsumptionService = {
   async qualify(no: string, causeNo: string, comment: string): Promise<FuelConsumptionApi> {
     return (await fuelConsumptionApi.qualify(no, causeNo, comment)).data.data
   },
-  async propose(no: string, amount: number): Promise<FuelConsumptionApi> {
-    return (await fuelConsumptionApi.propose(no, amount)).data.data
+  async propose(
+    no: string,
+    amount: number,
+    monthlySalary: number | null
+  ): Promise<FuelConsumptionApi> {
+    return (await fuelConsumptionApi.propose(no, amount, monthlySalary)).data.data
   },
   async decide(no: string, approve: boolean, comment: string): Promise<FuelConsumptionApi> {
     return (await fuelConsumptionApi.decide(no, approve, comment)).data.data

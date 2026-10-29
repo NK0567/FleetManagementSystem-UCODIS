@@ -6,6 +6,8 @@ import {
   excessCost,
   gapPercent,
   litersPer100,
+  lowEmissionShare,
+  withholdableAmount,
   type DeductionIssue
 } from '@/modules/fleet/fuel-consumption/domain/consumption'
 import type {
@@ -24,9 +26,10 @@ import { requireReference } from '../../http/references'
 import { ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
 import { sessionUser, type MockRequest } from '../../http/types'
-import type { MockLanguage } from '../../i18n'
+import { localizeNumber, type MockLanguage } from '../../i18n'
 import { FLEET_MESSAGES } from './messages'
 import { fuelRefillsApi } from './fuelRefills'
+import { vehicleReference } from './fuelReferences'
 import { fleetSettings } from './settings'
 
 const DEDUCTION_MESSAGES: Record<DeductionIssue, (typeof FLEET_MESSAGES)['gapClosed']> = {
@@ -41,6 +44,8 @@ const EMPTY_FILE: FuelGapFile = {
   qualifiedBy: null,
   qualifiedAt: null,
   proposedAmount: null,
+  monthlySalary: null,
+  withholdableAmount: null,
   proposedBy: null,
   proposedAt: null,
   decisionComment: '',
@@ -62,6 +67,7 @@ export function fuelConsumptionApi(db: MockDatabase): FuelConsumptionApi[] {
   const files = new Map(db.fuelGapFiles.all().map((file) => [file.no, file]))
   const refills = db.fuelRefills.all()
   const byNo = new Map(refills.map((refill) => [refill.no, refill]))
+  const vehicleReferences = db.fuelReferences.all()
 
   return [...new Set(refills.map((refill) => refill.vehicleNo))].flatMap((vehicleNo) => {
     const vehicle = vehicles.get(vehicleNo)
@@ -72,6 +78,7 @@ export function fuelConsumptionApi(db: MockDatabase): FuelConsumptionApi[] {
           ? routes.get(trips.get(closing.tripNo)?.routeTemplateNo ?? '')
           : undefined
         const reference = consumptionReference(
+          vehicleReference(vehicleReferences, vehicleNo, route?.no ?? null)?.referenceL100 ?? null,
           route?.fuelReferenceL100 ?? null,
           (vehicle && types.get(vehicle.vehicleTypeNo)?.fuelReferenceL100) ?? null,
           settings.defaultL100
@@ -88,7 +95,10 @@ export function fuelConsumptionApi(db: MockDatabase): FuelConsumptionApi[] {
           no,
           vehicleNo,
           vehiclePlate: vehicle?.plate ?? vehicleNo,
+          driverNo: closing?.driverNo ?? null,
           driverName: closing?.driverNo ? (names.get(closing.driverNo) ?? closing.driverNo) : '',
+          routeTemplateNo: route?.no ?? null,
+          routeName: route?.name ?? '',
           openingNo: period.openingNo,
           closingNo: period.closingNo,
           from: period.from,
@@ -119,6 +129,19 @@ export function fuelSummary(db: MockDatabase, language: MockLanguage): FuelConsu
     amount: refills.reduce((total, refill) => total + refill.amount, 0),
     averageL100: averageLitersPer100(periods),
     co2Kg: Math.round((liters * fleetSettings(db).fuel.co2GramsPerL) / 1000),
+    ...(() => {
+      const share = lowEmissionShare(
+        db.vehicles
+          .all()
+          .filter((vehicle) => !vehicle.removal)
+          .map((vehicle) => vehicle.fuelType)
+      )
+      return {
+        motorizedVehicles: share.motorized,
+        lowEmissionVehicles: share.lowEmission,
+        lowEmissionSharePct: share.sharePct
+      }
+    })(),
     refillsToQualify: refills.filter((refill) => refill.status === 'anomaly').length,
     gapsToQualify: periods.filter((period) => period.status === 'to_qualify').length
   }
@@ -195,19 +218,44 @@ export function registerFuelConsumptionHandlers(router: MockRouter, db: MockData
     (request) => {
       const period = periodOf(request)
       if (period.status !== 'qualified') throw conflict(FLEET_MESSAGES.gapNotQualified)
-      const amount = readNumber(readBody(request), 'amount', { required: true, min: 1 }) ?? 0
+      const body = readBody(request)
+      const amount = readNumber(body, 'amount', { required: true, min: 1 }) ?? 0
+      const settings = fleetSettings(db).fuel
       const [issue] = deductionIssues(
         amount,
         period.chargeable,
         period.excessCost,
-        fleetSettings(db).fuel.deductionCapAmount
+        settings.deductionCapAmount
       )
       if (issue) throw unprocessable(DEDUCTION_MESSAGES[issue])
+      // The labour law caps what a month of salary may lose: the other deductions of the month count.
+      const salary = readNumber(body, 'monthlySalary', { min: 1 })
+      if (!salary) throw unprocessable(FLEET_MESSAGES.gapSalaryRequired)
+      const month = period.to.slice(0, 7)
+      const other = fuelConsumptionApi(db)
+        .filter(
+          (row) =>
+            row.no !== period.no &&
+            row.driverNo !== null &&
+            row.driverNo === period.driverNo &&
+            row.to.slice(0, 7) === month &&
+            (row.status === 'deduction_proposed' || row.status === 'deduction_approved')
+        )
+        .reduce((total, row) => total + (row.proposedAmount ?? 0), 0)
+      const withholdable = withholdableAmount(salary, settings.deductionMaxSalaryPct, other)
+      if (amount > withholdable) {
+        throw unprocessable(FLEET_MESSAGES.gapDeductionAboveSalaryShare, {
+          other: localizeNumber(request.language, other),
+          max: localizeNumber(request.language, withholdable)
+        })
+      }
       return save(
         period,
         {
           status: 'deduction_proposed',
           proposedAmount: amount,
+          monthlySalary: salary,
+          withholdableAmount: withholdable,
           proposedBy: sessionUser(request).code,
           proposedAt: nowIso()
         },

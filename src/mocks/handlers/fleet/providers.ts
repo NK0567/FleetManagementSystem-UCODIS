@@ -1,6 +1,5 @@
 import { contractIssues, isContractActive } from '@/modules/fleet/providers/domain/provider'
 import {
-  PROVIDER_TYPES,
   type CarrierVehicle,
   type ProviderApi,
   type ProviderContract
@@ -18,20 +17,25 @@ import {
   invalidField,
   readAll,
   readBoolean,
-  readEnum,
   readPatch,
   readString,
   type FieldReaders
 } from '../../http/input'
 import type { MockRouter } from '../../http/router'
 import { FLEET_MESSAGES } from './messages'
+import { PROVIDER_TYPE_MESSAGES } from './providerTypes'
+import { requireReference } from '../../http/references'
 
 type Fields = Omit<ProviderRow, 'no' | keyof AuditFields>
 
 export function providersApi(db: MockDatabase): ProviderApi[] {
   const today = todayIso()
+  const types = new Map(db.providerTypes.all().map((type) => [type.no, type.name]))
   return db.providers.all().map((provider) => ({
     ...provider,
+    providerTypeName: types.get(provider.providerType) ?? provider.providerType,
+    source: provider.source ?? 'fms',
+    externalId: provider.externalId ?? null,
     carrierVehicles: provider.carrierVehicles ?? [],
     activeContractCount: provider.contracts.filter((contract) => isContractActive(contract, today))
       .length
@@ -88,10 +92,15 @@ function readCarrierVehicles(input: Record<string, unknown>): CarrierVehicle[] {
 }
 
 export function registerProvidersHandlers(router: MockRouter, db: MockDatabase): void {
+  /** A provider keeps a type deactivated since; none may newly take it. */
+  function assertTypeActive(code: string): void {
+    if (!db.providerTypes.findOrFail(code).active) {
+      throw unprocessable(PROVIDER_TYPE_MESSAGES.inactive)
+    }
+  }
   const readers: FieldReaders<Fields> = {
     name: (input) => readString(input, 'name', { required: true }),
-    providerType: (input) =>
-      readEnum(input, 'providerType', PROVIDER_TYPES, { required: true }) ?? 'garage',
+    providerType: (input) => requireReference(db.providerTypes, input, 'providerType'),
     contactName: (input) => readString(input, 'contactName'),
     phone: (input) => readString(input, 'phone'),
     email: (input) => {
@@ -133,6 +142,7 @@ export function registerProvidersHandlers(router: MockRouter, db: MockDatabase):
     optionFields: { providerType: 'providerType' },
     create: (input) => {
       const fields = readAll(input, readers)
+      assertTypeActive(fields.providerType)
       assertValid(fields)
       return {
         no: nextNo(
@@ -145,6 +155,9 @@ export function registerProvidersHandlers(router: MockRouter, db: MockDatabase):
     },
     update: (existing, input) => {
       const patch = readPatch(input, readers)
+      if (patch.providerType && patch.providerType !== existing.providerType) {
+        assertTypeActive(patch.providerType)
+      }
       const merged = { ...existing, ...patch }
       assertValid(merged, existing.no)
       // An authorized provider keeps no withdrawal reason.

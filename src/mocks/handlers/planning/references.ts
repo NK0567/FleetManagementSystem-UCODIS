@@ -39,6 +39,11 @@ export function planningReferenceData(db: MockDatabase): Record<string, Referenc
       description: point.name,
       active: point.active,
       parentCode: point.customerNo
-    }))
+    })),
+    // The loading depots, where an order is picked up (TRS01-US02, TRS07-US02).
+    depotPoints: db.deliveryPoints
+      .all()
+      .filter((point) => point.kind === 'depot')
+      .map((point) => ({ code: point.no, description: point.name, active: point.active }))
   }
 }

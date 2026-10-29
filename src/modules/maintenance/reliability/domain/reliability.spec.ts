@@ -6,6 +6,7 @@ import {
   ownershipCost,
   premiumShare,
   reliabilityKpis,
+  targetState,
   type ReliabilityOrder
 } from './reliability'
 
@@ -39,7 +40,7 @@ describe('reliability indicators', () => {
     const kpis = reliabilityKpis({
       orders: [
         order({}),
-        order({ completedAt: '2026-08-03T08:00:00' }),
+        order({ completedAt: '2026-08-03T08:00:00', validatedAt: '2026-08-03T08:00:00' }),
         order({ maintenanceType: 'preventive', totalCost: 50_000 }),
         order({ imported: true, totalCost: 400_000 }),
         order({ cancelled: true, totalCost: 900_000 }),
@@ -52,7 +53,7 @@ describe('reliability indicators', () => {
       to: '2026-08-31T23:59:59'
     })
     expect(kpis).toEqual({
-      mttrHours: 15,
+      mttrHours: 16,
       mtbfKm: 10_000,
       preventiveShare: 33,
       costPerKm: 32.5,
@@ -87,5 +88,15 @@ describe('ownership cost', () => {
       total: 2_000_000,
       costPerKm: 250
     })
+  })
+})
+
+describe('targets of the maintenance indicators', () => {
+  it('read a share against a floor and a repair time against a ceiling', () => {
+    expect(targetState(65, 60, 'atLeast')).toBe('reached')
+    expect(targetState(40, 60, 'atLeast')).toBe('missed')
+    expect(targetState(30, 24, 'atMost')).toBe('missed')
+    expect(targetState(12, 24, 'atMost')).toBe('reached')
+    expect(targetState(null, 24, 'atMost')).toBeNull()
   })
 })

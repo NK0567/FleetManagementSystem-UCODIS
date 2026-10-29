@@ -81,5 +81,14 @@ export default {
   'fleet.drivers.activity.col.refill': 'Plein',
   'fleet.drivers.activity.col.date': 'Date',
   'fleet.drivers.activity.col.liters': 'Litres',
-  'fleet.drivers.activity.col.amount': 'Montant'
+  'fleet.drivers.activity.col.amount': 'Montant',
+  'fleet.drivers.score.formula': 'Formule : {formula}',
+  'fleet.drivers.score.term': '{source} : {count} × {points} points',
+  'fleet.drivers.score.cap': 'Note plafonnée à {cap} tant qu’un document obligatoire manque ou est expiré',
+  'fleet.drivers.score.capped': ', plafonnée à {cap}',
+  'fleet.drivers.score.overallFormula': 'Score : {formula}',
+  'fleet.drivers.score.severity.critical': 'critique',
+  'fleet.drivers.score.severity.major': 'majeure',
+  'fleet.drivers.score.severity.minor': 'mineure',
+  'fleet.drivers.section.drivingTime': 'Temps de conduite'
 }

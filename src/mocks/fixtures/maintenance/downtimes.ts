@@ -70,8 +70,19 @@ const SEED: Omit<DowntimeRow, keyof typeof seedAudit>[] = [
     origin: 'work_order',
     startedAt: '2026-08-04T10:00:00',
     comment: 'OT-2026-0005 · Boîte de vitesses confiée au garage.',
-    endedAt: '2026-08-12T15:00:00',
-    endedBy: 'MNT001',
+    endedAt: '2026-08-12T17:00:00',
+    endedBy: 'FLT001',
+    endComment: ''
+  },
+  {
+    no: 'IND-00006',
+    vehicleNo: 'VEH-008',
+    downtimeCodeNo: 'PNN',
+    origin: 'work_order',
+    startedAt: at(-1, '08:00'),
+    comment: 'OT-2026-0003 · Grincement au freinage à basse vitesse.',
+    endedAt: null,
+    endedBy: null,
     endComment: ''
   }
 ]

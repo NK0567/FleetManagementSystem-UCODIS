@@ -10,6 +10,7 @@ export interface PassageInput {
   vehicleNo: string
   operationNo: string
   km: number | null
+  hours: number | null
   date: string
 }
 
@@ -17,6 +18,8 @@ export const serviceDueApi = {
   ...createCrudApi<ServiceDueApi>({ basePath }),
   recordPassage: (passage: PassageInput) =>
     httpClient.post<SingleResponse<ServiceDueApi>>(`${basePath}/passages`, passage),
+  recordEngineHours: (vehicleNo: string, hours: number) =>
+    httpClient.post<SingleResponse<unknown>>('/maintenance/engine-hours', { vehicleNo, hours }),
   openWorkOrder: (vehicleNo: string) =>
     httpClient.post<SingleResponse<WorkOrderApi>>(`${basePath}/work-order`, { vehicleNo })
 }

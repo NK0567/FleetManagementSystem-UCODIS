@@ -5,10 +5,11 @@ import type { WorkOrderStatus } from '../domain/workOrder'
 import { workOrderService } from '../services/workOrderService'
 import type { WorkOrderApi, WorkOrderSearchColumn } from '../types/workOrder.types'
 
-export type WorkOrderListView = 'active' | 'to_validate' | 'finished' | 'all'
+export type WorkOrderListView = 'active' | 'awaiting_parts' | 'to_validate' | 'finished' | 'all'
 
 const VIEW_STATUSES: Record<WorkOrderListView, WorkOrderStatus[] | null> = {
-  active: ['open', 'diagnosed', 'in_progress'],
+  active: ['open', 'diagnosed', 'in_progress', 'awaiting_parts'],
+  awaiting_parts: ['awaiting_parts'],
   to_validate: ['awaiting_validation'],
   finished: ['closed', 'cancelled'],
   all: null

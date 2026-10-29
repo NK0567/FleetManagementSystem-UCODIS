@@ -8,11 +8,16 @@ export const VEHICLE_STATUSES = [
   'available',
   'assigned',
   'in_mission',
+  'in_maintenance',
   'immobilized',
   'out_of_service',
   'removed'
 ] as const
 export type VehicleStatus = (typeof VEHICLE_STATUSES)[number]
+
+/** The administrative status says whether the vehicle belongs to the park; the operational one follows the facts. */
+export const ADMINISTRATIVE_STATUSES = ['in_service', 'removed'] as const
+export type AdministrativeStatus = (typeof ADMINISTRATIVE_STATUSES)[number]
 
 export const FUEL_TYPES = ['diesel', 'petrol', 'electric', 'hybrid', 'lpg'] as const
 export type FuelType = (typeof FUEL_TYPES)[number]
@@ -102,6 +107,12 @@ export interface VehicleApi {
   removal: VehicleRemoval | null
   status: VehicleStatus
   statusReason: string
+  administrativeStatus: AdministrativeStatus
+  /** Status from maintenance, compliance and operations; null once the vehicle left the park. */
+  operationalStatus: Exclude<VehicleStatus, 'removed'> | null
+  /** Code of the unavailability cause in the codification, when the vehicle cannot leave. */
+  statusCauseCode: string | null
+  statusCauseCodeName: string
   driverNo: string | null
   driverName: string
   coupledVehicleNo: string | null

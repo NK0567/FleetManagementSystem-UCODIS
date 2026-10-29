@@ -1,7 +1,12 @@
 import httpClient from '@/core/api/httpClient'
 import { createCrudApi, resourcePath } from '@/core/factories'
 import type { SingleResponse } from '@/types/api-response.types'
+import type { ImportReport } from '@/core/utils/csvImport'
 import type { VehicleApi, VehicleEquipmentApi } from '../types/vehicle.types'
+import type {
+  VehicleMaintenanceEntry,
+  VehicleOwnershipCostApi
+} from '../types/vehicleRecords.types'
 
 const basePath = '/fleet/vehicles'
 
@@ -22,6 +27,16 @@ export const vehicleApi = {
   removePhoto: (no: string, fileNo: string) =>
     httpClient.delete<SingleResponse<VehicleApi>>(
       `${resourcePath(basePath, no)}/photos/${encodeURIComponent(fileNo)}`
+    ),
+  importRows: (rows: Record<string, unknown>[]) =>
+    httpClient.post<SingleResponse<ImportReport>>(`${basePath}/import`, { rows }),
+  maintenanceLog: (no: string) =>
+    httpClient.get<SingleResponse<VehicleMaintenanceEntry[]>>(
+      `${resourcePath(basePath, no)}/maintenance-log`
+    ),
+  ownershipCost: (no: string) =>
+    httpClient.get<SingleResponse<VehicleOwnershipCostApi>>(
+      `${resourcePath(basePath, no)}/ownership-cost`
     ),
   getEquipment: (no: string) =>
     httpClient.get<SingleResponse<VehicleEquipmentApi[]>>(equipmentPath(no)),

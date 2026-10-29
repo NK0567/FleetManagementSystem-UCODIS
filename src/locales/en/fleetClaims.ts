@@ -76,5 +76,11 @@ export default {
   'fleet.claims.form.history': 'History',
   'fleet.claims.action.training': 'Send to a training',
   'fleet.claims.trainingHint': '{driver} will be enrolled in a training linked to this claim.',
-  'fleet.claims.closureBlock.repairOpen': 'the repair is still under way'
+  'fleet.claims.closureBlock.repairOpen': 'the repair is still under way',
+  'fleet.claims.form.repair': 'Repair',
+  'fleet.claims.form.noRepair': 'No work order is open for this record.',
+  'fleet.claims.form.workOrder': 'Work order {no}',
+  'fleet.claims.form.downtimeCode': 'Unavailability code put on the vehicle: {code} · {name}',
+  'fleet.claims.form.downtimeOpen': 'ongoing',
+  'fleet.claims.form.downtimeEnded': 'ended'
 }

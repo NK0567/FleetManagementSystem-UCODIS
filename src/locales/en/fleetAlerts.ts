@@ -22,5 +22,17 @@ export default {
   'fleet.alerts.action.handle': 'Mark as handled',
   'fleet.alerts.escalatedTo': 'Escalated to: {profile}',
   'fleet.alerts.acknowledgedBy': 'Taken in charge by {user} on {date}',
-  'fleet.alerts.handledBy': 'Handled by {user} on {date}'
+  'fleet.alerts.handledBy': 'Handled by {user} on {date}',
+  'fleet.alerts.bell.title': 'Alerts and requests to handle',
+  'fleet.alerts.bell.alerts': 'Open alerts | Open alert (1) | Open alerts ({n})',
+  'fleet.alerts.bell.noAlert': 'No open alert.',
+  'fleet.alerts.bell.requests': 'Requests to handle | Request to handle (1) | Requests to handle ({n})',
+  'fleet.alerts.bell.noRequest': 'No request awaiting your decision.',
+  'fleet.alerts.bell.kind.leave': 'Leave request',
+  'fleet.alerts.bell.kind.companyDocument': 'Document to approve',
+  'fleet.alerts.bell.kind.departure': 'Departure authorization',
+  'fleet.alerts.bell.seeAll': 'See the alerts table',
+  'fleet.alerts.col.notifications': 'Notifications sent',
+  'fleet.alerts.notification.email': 'E-mail to {to}',
+  'fleet.alerts.notification.sms': 'SMS to {to}'
 }

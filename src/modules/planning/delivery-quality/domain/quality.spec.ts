@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { emptyFollowUp } from '@/modules/planning/customer-confirmations/domain/confirmation'
 import {
+  attachmentIssue,
   emptyQuality,
   followUpOpen,
   mainActor,
@@ -122,5 +123,16 @@ describe('delivery quality', () => {
     expect(followUpOpen({ cancelled: true, closed: false }, false)).toBe(false)
     expect(followUpOpen({ cancelled: true, closed: false }, true)).toBe(true)
     expect(followUpOpen({ cancelled: false, closed: true }, true)).toBe(false)
+  })
+})
+
+describe('protest attachments', () => {
+  it('takes a new piece until the note is closed', () => {
+    const note = { issuedAt: null, closedAt: null, fileNos: ['FIL-1'] }
+    expect(attachmentIssue(note, 'FIL-2')).toBeNull()
+    expect(attachmentIssue(note, 'FIL-1')).toBe('duplicate')
+    expect(attachmentIssue({ ...note, issuedAt: 'x' }, 'FIL-2')).toBeNull()
+    expect(attachmentIssue({ ...note, closedAt: 'x' }, 'FIL-2')).toBe('closed')
+    expect(attachmentIssue({ issuedAt: null, closedAt: null }, 'FIL-2')).toBeNull()
   })
 })

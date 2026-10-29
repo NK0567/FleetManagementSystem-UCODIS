@@ -9,6 +9,7 @@ import {
 } from '@/modules/maintenance/reliability/domain/reliability'
 import type {
   MaintenanceDashboardApi,
+  MaintenanceSteering,
   ReliabilityApi,
   VehicleCostApi
 } from '@/modules/maintenance/reliability/types/reliability.types'
@@ -22,7 +23,7 @@ import type { MockRequest } from '../../http/types'
 import { openDowntimeCauses } from './downtimes'
 import { purchaseRequestsApi } from './purchaseRequests'
 import { serviceDueApi } from './serviceDue'
-import { maintenanceSettings } from './settings'
+import { maintenanceSettings, maintenanceTargets } from './settings'
 import { stockItemsApi } from './stockItems'
 import { tyresApi } from './tyres'
 import { workOrdersApi } from './workOrders'
@@ -162,14 +163,90 @@ export function reliabilityApi(db: MockDatabase, from: string, to: string): Reli
     })),
     topVehicles: top(byVehicle, (value) => value.failures * 1e12 + value.cost).map(
       ([plate, value]) => ({ plate, ...value })
-    )
+    ),
+    ...maintenanceSteering(db, orders, fromAt, toAt, lostByFamily)
+  }
+}
+
+/**
+ * What the maintenance manager steers the park with (FLT07-US03): the workload of the workshop
+ * today, how much of the preventive work was done, preventive against corrective cost, days lost
+ * to people against days lost to the machines, and the targets they are read against.
+ */
+function maintenanceSteering(
+  db: MockDatabase,
+  orders: ReturnType<typeof workOrdersApi>,
+  fromAt: string,
+  toAt: string,
+  lostByFamily: Map<string, { days: number; cost: number }>
+): MaintenanceSteering {
+  const today = todayIso()
+  const live = orders.filter((order) => order.status !== 'cancelled')
+  const workable = live.filter((order) => isWorkable(order.status))
+  const plannedFor = (order: (typeof orders)[number]) => order.planning?.date ?? null
+  const preventive = live.filter(
+    (order) =>
+      order.maintenanceType === 'preventive' &&
+      order.origin !== 'history' &&
+      order.declaredAt >= fromAt &&
+      order.declaredAt <= toAt
+  )
+  // Services past their due point with no order opened for them: due, and not done.
+  const missed = serviceDueApi(db).filter(
+    (due) => (due.status === 'overdue' || due.status === 'blocking') && !due.openOrderNo
+  ).length
+  const done = preventive.filter((order) => order.completedAt).length
+  const validated = live.filter(
+    (order) => order.validatedAt && order.validatedAt >= fromAt && order.validatedAt <= toAt
+  )
+  const costOf = (type: string) =>
+    validated
+      .filter((order) => order.maintenanceType === type)
+      .reduce((total, order) => total + order.totalCost, 0)
+  const human = lostByFamily.get('human')?.days ?? 0
+  const technical = lostByFamily.get('technical')?.days ?? 0
+  const round = (value: number) => Math.round(value * 100) / 100
+  return {
+    workload: {
+      inProgress: workable.filter((order) => order.status === 'in_progress').length,
+      planned: workable.filter((order) => {
+        const date = plannedFor(order)
+        return order.status !== 'in_progress' && !!date && date >= today
+      }).length,
+      late: workable.filter((order) => {
+        const date = plannedFor(order)
+        return !!date && date < today
+      }).length
+    },
+    preventiveCompletion: {
+      due: preventive.length + missed,
+      done,
+      missedServices: missed,
+      rate:
+        preventive.length + missed ? Math.round((done * 100) / (preventive.length + missed)) : null
+    },
+    costByType: {
+      preventive: costOf('preventive'),
+      corrective: costOf('corrective'),
+      improvement: costOf('improvement')
+    },
+    lostDaysByCause: {
+      human: round(human),
+      technical: round(technical),
+      ratio: technical ? round(human / technical) : null
+    },
+    targets: maintenanceTargets(db)
   }
 }
 
 export function maintenanceDashboardApi(db: MockDatabase): MaintenanceDashboardApi {
   const orders = workOrdersApi(db)
   const today = todayIso()
+  const last30 = reliabilityApi(db, addDays(today, -29), today)
   return {
+    workload: last30.workload,
+    preventiveCompletion: last30.preventiveCompletion,
+    targets: last30.targets,
     openOrders: orders.filter((order) => isWorkable(order.status)).length,
     awaitingValidation: orders.filter((order) => order.status === 'awaiting_validation').length,
     awaitingParts: orders.filter((order) => isWorkable(order.status) && order.pendingPartCount > 0)
@@ -186,7 +263,7 @@ export function maintenanceDashboardApi(db: MockDatabase): MaintenanceDashboardA
       (request) => request.status === 'requested' || request.status === 'ordered'
     ).length,
     tyreAlerts: tyresApi(db).filter((tyre) => tyre.alert === 'safety').length,
-    last30Days: reliabilityApi(db, addDays(today, -29), today).kpis
+    last30Days: last30.kpis
   }
 }
 

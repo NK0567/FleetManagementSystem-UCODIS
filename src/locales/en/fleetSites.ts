@@ -50,5 +50,10 @@ export default {
   'fleet.sites.map.editHint':
     'Click on the map to place the center of the site. The circle shows the detection zone.',
   'fleet.sites.map.readOnlyHint':
-    'The circle shows the zone in which a vehicle is considered on the site.'
+    'The circle shows the zone in which a vehicle is considered on the site.',
+  'fleet.sites.map.mode': 'Click on the map:',
+  'fleet.sites.map.modes.centre': 'place the centre',
+  'fleet.sites.map.modes.edge': 'trace the edge of the zone',
+  'fleet.sites.map.useDefaultRadius': 'Use the default radius',
+  'fleet.sites.map.edgeHint': 'Click on the map at the edge of the zone: the radius takes the distance to the centre.'
 }

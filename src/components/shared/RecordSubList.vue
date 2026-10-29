@@ -48,7 +48,7 @@ const valueOf = (row: Row, column: SubListColumn) => row[column.field ?? column.
 function textOf(row: Row, column: SubListColumn): string {
   const value = valueOf(row, column)
   if (column.formatter) return column.formatter(value, row)
-  return value === null || value === undefined || value === '' ? '—' : String(value)
+  return value === null || value === undefined || value === '' ? '-' : String(value)
 }
 
 const filterColumns = computed(() => props.columns.filter((column) => column.filter))

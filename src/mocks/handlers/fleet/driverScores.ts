@@ -20,6 +20,7 @@ import { driverEmployees } from './drivers'
 import { FLEET_MESSAGES } from './messages'
 import { routeDeviationsApi } from './routeDeviations'
 import { fleetSettings } from './settings'
+import { scoreFamiliesOf } from './settingsLists'
 import { createTraining } from './trainings'
 
 const SEVERITY_OF_INFRACTION: Record<string, ScoreSeverity> = {
@@ -100,8 +101,11 @@ function scoreFacts(db: MockDatabase, asOf: string): Map<string, ScoreFacts> {
 
 function scoresAsOf(db: MockDatabase, asOf: string) {
   const settings = fleetSettings(db).driverScore
+  const families = scoreFamiliesOf(db)
   const scores = new Map<string, ReturnType<typeof familyScores>>()
-  for (const [no, facts] of scoreFacts(db, asOf)) scores.set(no, familyScores(facts, settings))
+  for (const [no, facts] of scoreFacts(db, asOf)) {
+    scores.set(no, familyScores(facts, settings, families))
+  }
   return scores
 }
 

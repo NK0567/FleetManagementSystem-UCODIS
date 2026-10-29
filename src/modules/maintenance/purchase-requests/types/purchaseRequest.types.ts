@@ -21,6 +21,9 @@ export interface PurchaseRequestApi {
   cancelledAt: string | null
   cancelledBy: string | null
   cancelReason: string
+  /** The purchase request as the ERP received it; the link with the ERP is simulated in the demo. */
+  erpReference: string
+  erpSentAt: string | null
   itemName: string
   supplierName: string
   vehiclePlate: string

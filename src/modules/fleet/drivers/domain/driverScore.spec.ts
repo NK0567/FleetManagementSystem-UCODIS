@@ -1,19 +1,15 @@
 import { describe, expect, it } from 'vitest'
 import {
+  DEFAULT_SCORE_FAMILIES,
   familyScores,
   overallScore,
+  scoreFamiliesIssues,
   type DriverScoreSettings,
   type ScoreFacts
 } from './driverScore'
 
 const settings: DriverScoreSettings = {
   periodDays: 90,
-  weightSafety: 30,
-  weightRoute: 25,
-  weightRegulatory: 20,
-  weightDiscipline: 15,
-  weightEcoDriving: 10,
-  weightDeliveryQuality: 10,
   deliveryDisputePoints: 20,
   criticalPoints: 15,
   majorPoints: 8,
@@ -66,11 +62,52 @@ describe('familyScores', () => {
   it('leaves out a family weighted 0 and shares its weight among the others', () => {
     const families = familyScores(
       { ...clean, documentsCompliant: false },
-      { ...settings, weightRegulatory: 0 }
+      settings,
+      DEFAULT_SCORE_FAMILIES.map((family) =>
+        family.code === 'regulatory' ? { ...family, weight: 0 } : family
+      )
     )
     expect(families.map((family) => family.family)).not.toContain('regulatory')
     expect(families.reduce((sum, family) => sum + family.weightPct, 0)).toBeCloseTo(100)
     expect(overallScore(families)).toBe(100)
+  })
+})
+
+describe('configured families', () => {
+  it('add up the sources they are given, and show the terms of their formula', () => {
+    const facts = {
+      ...clean,
+      deviations: [{ category: 'route' as const, severity: 'minor' as const }],
+      openDisputes: 1
+    }
+    const [family] = familyScores(facts, settings, [
+      {
+        code: 'road',
+        label: 'Route et livraison',
+        weight: 1,
+        sources: ['routeDeviation', 'deliveryDispute']
+      }
+    ])
+    expect(family).toMatchObject({
+      family: 'road',
+      label: 'Route et livraison',
+      mark: 60,
+      weightPct: 100
+    })
+    expect(family!.terms).toEqual([
+      { source: 'routeDeviation', severity: null, count: 1, points: 20 },
+      { source: 'deliveryDispute', severity: null, count: 1, points: 20 }
+    ])
+  })
+
+  it('refuse a source used twice, a duplicate code or no weight at all', () => {
+    expect(scoreFamiliesIssues(DEFAULT_SCORE_FAMILIES)).toEqual([])
+    expect(scoreFamiliesIssues([])).toEqual([{ code: 'noFamily' }])
+    const codes = scoreFamiliesIssues([
+      { code: 'a', label: 'A', weight: 0, sources: ['ecoEvent'] },
+      { code: 'A', label: '', weight: 0, sources: ['ecoEvent'] }
+    ]).map((issue) => issue.code)
+    expect(codes).toEqual(['duplicateCode', 'labelRequired', 'sourceTwice', 'noWeight'])
   })
 })
 

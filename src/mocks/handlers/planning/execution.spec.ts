@@ -70,15 +70,29 @@ describe('delivery execution', () => {
       receivedQuantity: 50
     })
     expect(flagged.status).toBe(200)
+    // The delivery manager must say whether the driver is accountable (TRS03-US17).
+    expect(
+      (
+        await act(
+          '/planning/transport-orders/TR-2026-0004/lines/1/qualify',
+          { kind: 'loss', comment: 'Manquant' },
+          'LIV001'
+        )
+      ).status
+    ).toBe(400)
     const qualified = await act(
       '/planning/transport-orders/TR-2026-0004/lines/1/qualify',
       {
         kind: 'loss',
-        comment: 'Manquant'
+        comment: 'Manquant',
+        imputableToDriver: true
       },
       'LIV001'
     )
     expect(qualified.status).toBe(200)
+    expect(server.db.transportOrders.find('TR-2026-0004')!.lines[0]!.gapImputableToDriver).toBe(
+      true
+    )
     expect(
       (
         await act(

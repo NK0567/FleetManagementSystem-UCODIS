@@ -1,86 +1,53 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
 import { FileDown, FileSpreadsheet } from '@lucide/vue'
-import { apiErrorMessage } from '@/core/api/apiError'
-import type { ReportTable } from '@/modules/fleet/reports/composables/useReportFormat'
-import { exportReportPdf, exportReportXlsx } from '@/modules/fleet/reports/services/reportExport'
-import { EMPTY_CELL, formatDate, formatNumber } from '@/utils/format'
-import { useCarrierReportStore } from '../stores/carrierReportStore'
-import type { CarrierReportRow, ReportPeriod } from '../types/planningReport.types'
+import { usePermissions } from '@/composables/usePermissions'
+import { EMPTY_CELL } from '@/utils/format'
+import ReportFiltersBar from '../components/ReportFiltersBar.vue'
+import ReportTableCard from '../components/ReportTableCard.vue'
+import { useReportExport, type ExportFormat } from '../composables/useReportExport'
+import { useTransportReportTables } from '../composables/useTransportReportTables'
+import { useTransportReportStore } from '../stores/transportReportStore'
+import type { ReportFilters } from '../types/planningReport.types'
+
+type Section = 'punctuality' | 'costs' | 'quality' | 'means' | 'carriers'
+const SECTIONS: Section[] = ['punctuality', 'costs', 'quality', 'means', 'carriers']
 
 const { t } = useI18n()
-const store = useCarrierReportStore()
+const store = useTransportReportStore()
+const { report } = storeToRefs(store)
+/* The director exports the transport reports (TRS08-US05). */
+const { canExport } = usePermissions('TRANSPORTREPORT')
 
-const period = ref<ReportPeriod>({ from: '', to: '' })
-const exporting = ref(false)
-const exportError = ref<string | null>(null)
+const filters = ref<ReportFilters>({ from: '', to: '', depotNo: '', region: '', ordererNo: '' })
+const section = ref<Section>('punctuality')
+const choices = computed(() => report.value?.choices ?? null)
+const { exporting, exportError, exportAs, subtitle } = useReportExport(filters, choices)
+const tables = useTransportReportTables(report)
 
-const COLUMNS = [
-  'carrier',
-  'orders',
-  'punctuality',
-  'confirmation',
-  'contestation',
-  'refusals',
-  'invoices',
-  'withoutTariff'
-] as const
-type Column = (typeof COLUMNS)[number]
+const percent = (value: number | null | undefined) =>
+  value === null || value === undefined ? EMPTY_CELL : `${value} %`
 
-const PERCENT = new Set<Column>(['punctuality', 'confirmation', 'contestation'])
-
-function cell(row: CarrierReportRow, column: Column) {
-  if (column === 'carrier') {
-    const text = row.carrierName ? `${row.carrierName} (${row.carrierNo})` : row.carrierNo
-    return { text, value: text }
-  }
-  const value = row[column]
-  if (value === null) return { text: EMPTY_CELL, value: null }
-  return { text: PERCENT.has(column) ? `${value} %` : formatNumber(value), value }
-}
-
-const table = computed<ReportTable>(() => ({
-  title: t('planning.reports.section'),
-  headers: COLUMNS.map((column) => t(`planning.reports.col.${column}`)),
-  numeric: COLUMNS.map((column) => column !== 'carrier'),
-  rows: store.rows.map((row) => COLUMNS.map((column) => cell(row, column)))
-}))
-
-const subtitle = computed(() => {
-  const { from, to } = period.value
-  if (!from && !to) return t('planning.reports.allPeriods')
-  return t('planning.reports.period', {
-    from: from ? formatDate(from) : EMPTY_CELL,
-    to: to ? formatDate(to) : EMPTY_CELL
-  })
+const headline = computed(() => {
+  const data = report.value
+  if (!data) return []
+  return [
+    { key: 'orders', value: String(data.orders) },
+    { key: 'punctuality', value: percent(data.punctuality.rate) },
+    { key: 'confirmed', value: percent(data.quality.rates.confirmed) },
+    { key: 'weightRate', value: percent(data.means.averages.weightRate) },
+    { key: 'carriers', value: String(data.carriers.length) }
+  ]
 })
 
-const fileName = computed(() =>
-  `${t('planning.reports.title')} ${period.value.from} ${period.value.to}`.trim()
-)
-
-async function exportAs(format: 'xlsx' | 'pdf') {
-  exporting.value = true
-  exportError.value = null
-  try {
-    if (format === 'xlsx') await exportReportXlsx([table.value], fileName.value)
-    else {
-      await exportReportPdf(
-        { title: t('planning.reports.title'), subtitle: subtitle.value },
-        [table.value],
-        fileName.value,
-        t('planning.reports.empty')
-      )
-    }
-  } catch (cause) {
-    exportError.value = apiErrorMessage(cause, t('planning.reports.exportError'))
-  } finally {
-    exporting.value = false
-  }
+function exportReport(format: ExportFormat) {
+  const all = SECTIONS.flatMap((item) => tables[item].value)
+  void exportAs(format, t('planning.reports.title'), all)
 }
 
-watch(period, () => void store.fetchRows(period.value), { deep: true, immediate: true })
+watch(filters, () => void store.fetchReport(filters.value), { deep: true, immediate: true })
 </script>
 
 <template>
@@ -92,14 +59,14 @@ watch(period, () => void store.fetchRows(period.value), { deep: true, immediate:
         </h1>
         <p class="text-sm text-muted-foreground">{{ t('planning.reports.subtitle') }}</p>
       </div>
-      <div class="flex gap-2">
+      <div v-if="canExport" class="flex gap-2">
         <button
           v-for="format in ['xlsx', 'pdf'] as const"
           :key="format"
           type="button"
           class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
-          :disabled="store.loading || exporting || !store.rows.length"
-          @click="exportAs(format)"
+          :disabled="store.loading || exporting || !report"
+          @click="exportReport(format)"
         >
           <FileSpreadsheet v-if="format === 'xlsx'" class="w-5 h-5 text-primary" />
           <FileDown v-else class="w-5 h-5 text-primary" />
@@ -108,55 +75,81 @@ watch(period, () => void store.fetchRows(period.value), { deep: true, immediate:
       </div>
     </header>
 
-    <section class="grid gap-3 sm:grid-cols-3 max-w-3xl">
-      <BaseFormField :label="t('planning.reports.filter.from')">
-        <DateFormInput v-model="period.from" />
-      </BaseFormField>
-      <BaseFormField :label="t('planning.reports.filter.to')">
-        <DateFormInput v-model="period.to" />
-      </BaseFormField>
-    </section>
+    <ReportFiltersBar v-model="filters" :choices="choices" />
+    <p class="text-xs text-muted-foreground">{{ subtitle() }}</p>
 
     <FormAlerts :error="store.error" @clear:error="store.error = null" />
     <FormAlerts :error="exportError" @clear:error="exportError = null" />
     <LoadingBar v-if="store.loading" :height="2" bar-color="var(--color-primary)" />
 
-    <section class="bg-card border border-border rounded overflow-x-auto">
-      <div class="px-4 py-3 border-b border-border">
-        <h2 class="text-sm font-semibold text-card-foreground">{{ table.title }}</h2>
-        <p class="text-xs text-muted-foreground">{{ subtitle }}</p>
+    <section v-if="report" class="grid grid-cols-2 lg:grid-cols-5 gap-3">
+      <div
+        v-for="item in headline"
+        :key="item.key"
+        class="bg-card border border-border rounded p-4"
+      >
+        <p class="text-xs text-muted-foreground">
+          {{ t(`planning.reports.headline.${item.key}`) }}
+        </p>
+        <p class="text-2xl font-semibold tabular-nums text-card-foreground">{{ item.value }}</p>
       </div>
-      <table class="w-full text-sm">
-        <thead>
-          <tr class="bg-muted/40 text-xs text-muted-foreground">
-            <th
-              v-for="(header, index) in table.headers"
-              :key="header"
-              class="px-3 py-2 font-semibold whitespace-nowrap"
-              :class="table.numeric[index] ? 'text-right' : 'text-left'"
-            >
-              {{ header }}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="!table.rows.length">
-            <td :colspan="table.headers.length" class="px-3 py-4 text-muted-foreground">
-              {{ t('planning.reports.empty') }}
-            </td>
-          </tr>
-          <tr v-for="(row, rowIndex) in table.rows" :key="rowIndex" class="border-t border-border">
-            <td
-              v-for="(item, index) in row"
-              :key="index"
-              class="px-3 py-1.5 whitespace-nowrap"
-              :class="table.numeric[index] ? 'text-right tabular-nums' : 'text-card-foreground'"
-            >
-              {{ item.text }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
     </section>
+
+    <nav class="flex flex-wrap gap-1 border-b border-border">
+      <button
+        v-for="item in SECTIONS"
+        :key="item"
+        type="button"
+        class="cursor-pointer px-3 py-2 text-sm border-b-2 -mb-px transition"
+        :class="
+          section === item
+            ? 'border-primary text-card-foreground font-medium'
+            : 'border-transparent text-muted-foreground hover:text-card-foreground'
+        "
+        @click="section = item"
+      >
+        {{ t(`planning.reports.tab.${item}`) }}
+      </button>
+    </nav>
+
+    <template v-if="report">
+      <p class="text-xs text-muted-foreground">
+        {{
+          t(`planning.reports.hint.${section}`, {
+            margin: report.punctuality.marginMin
+          })
+        }}
+      </p>
+      <section v-if="section === 'quality'" class="grid gap-3 sm:grid-cols-4">
+        <div class="bg-card border border-border rounded p-3">
+          <p class="text-xs text-muted-foreground">{{ t('planning.reports.quality.gainCount') }}</p>
+          <p class="text-lg font-semibold tabular-nums">
+            {{ report.quality.fuelGaps.gainCount }} · {{ report.quality.fuelGaps.gainVolume }} L
+          </p>
+        </div>
+        <div class="bg-card border border-border rounded p-3">
+          <p class="text-xs text-muted-foreground">{{ t('planning.reports.quality.lossCount') }}</p>
+          <p class="text-lg font-semibold tabular-nums">
+            {{ report.quality.fuelGaps.lossCount }} · {{ report.quality.fuelGaps.lossVolume }} L
+          </p>
+        </div>
+        <div class="bg-card border border-border rounded p-3">
+          <p class="text-xs text-muted-foreground">
+            {{ t('planning.reports.quality.unqualified') }}
+          </p>
+          <p class="text-lg font-semibold tabular-nums">
+            {{ report.quality.fuelGaps.unqualified }}
+          </p>
+        </div>
+      </section>
+      <div class="grid gap-3 xl:grid-cols-2">
+        <ReportTableCard
+          v-for="table in tables[section].value"
+          :key="table.title"
+          :table="table"
+          :class="table.headers.length > 5 ? 'xl:col-span-2' : ''"
+        />
+      </div>
+    </template>
   </div>
 </template>

@@ -34,7 +34,7 @@ export const useReferenceStore = defineStore('reference', () => {
   }
 
   function getLabel(key: string, code: string | null | undefined): string {
-    if (!code) return '—'
+    if (!code) return '-'
     return getItems(key).find((item) => item.code === code)?.description ?? code
   }
 

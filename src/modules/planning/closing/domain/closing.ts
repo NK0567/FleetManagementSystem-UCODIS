@@ -17,6 +17,15 @@ export interface OrderDocument {
   fileNo: string
 }
 
+/** A compartment as loaded, read from the pickup data or the compartment plan (TRS05-US05). */
+export interface DebriefingCompartment {
+  /** 0 when the vehicle has one space. */
+  no: number
+  productName: string
+  unit: string
+  quantity: number | null
+}
+
 export interface OrderDebriefing {
   voucherNo: string
   loadedAt: string
@@ -24,6 +33,32 @@ export interface OrderDebriefing {
   observations: string
   savedAt: string
   savedBy: string
+  /** Kept as they were when the fiche was saved; absent on a fiche saved before. */
+  place?: string
+  vehicle?: string
+  trailer?: string
+  compartments?: DebriefingCompartment[]
+  gainLoss?: string
+}
+
+/** The pieces of the documentary dossier of an order (TRS05-US04), in this order. */
+export const DOSSIER_PIECES = [
+  'transport_order',
+  'pickup_note',
+  'depot_document',
+  'delivery_note',
+  'loading_list',
+  'incidents',
+  'debriefing'
+] as const
+export type DossierPieceKind = (typeof DOSSIER_PIECES)[number]
+
+/** Available: in the dossier; pending: started but not final (a note not signed yet); missing. */
+export type DossierPieceState = 'available' | 'pending' | 'missing'
+
+/** A dossier is complete once each piece is there; incidents are there even when there are none. */
+export function dossierComplete(pieces: readonly { state: DossierPieceState }[]): boolean {
+  return pieces.every((piece) => piece.state === 'available')
 }
 
 export interface OrderDossier {

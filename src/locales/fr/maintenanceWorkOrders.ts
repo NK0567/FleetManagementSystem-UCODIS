@@ -13,13 +13,13 @@ export default {
 
   'maintenance.workOrders.col.no': 'N°',
   'maintenance.workOrders.col.vehicleNo': 'Véhicule',
-  'maintenance.workOrders.col.maintenanceType': 'Type',
+  'maintenance.workOrders.col.maintenanceType': "Type d'intervention",
   'maintenance.workOrders.col.severity': 'Gravité',
   'maintenance.workOrders.col.origin': 'Origine',
   'maintenance.workOrders.col.symptom': 'Symptôme constaté',
   'maintenance.workOrders.col.declaredAt': 'Déclaré le',
   'maintenance.workOrders.col.vehiclePlate': 'Véhicule',
-  'maintenance.workOrders.col.subsystemName': 'Sous-système',
+  'maintenance.workOrders.col.subsystemName': 'Diagnostic (sous-système)',
   'maintenance.workOrders.col.labourHours': 'Heures',
   'maintenance.workOrders.col.totalCost': 'Coût',
   'maintenance.workOrders.col.status': 'Statut',
@@ -33,9 +33,9 @@ export default {
   'maintenance.workOrders.form.symptom': 'Symptôme constaté',
   'maintenance.workOrders.form.declaredAt': 'Déclaré le',
   'maintenance.workOrders.actionError': "L'action n'a pas pu être enregistrée.",
-  'maintenance.workOrders.listView.active': 'En cours',
+  'maintenance.workOrders.listView.active': 'En cours (dont attente de pièce)',
   'maintenance.workOrders.listView.toValidate': 'À valider',
-  'maintenance.workOrders.listView.finished': 'Terminés',
+  'maintenance.workOrders.listView.finished': 'Clôturés ou annulés',
   'maintenance.workOrders.listView.all': 'Tous',
   'maintenance.workOrders.section.diagnosis': 'Diagnostic',
   'maintenance.workOrders.section.labour': "Main-d'œuvre",
@@ -71,7 +71,7 @@ export default {
   'maintenance.workOrders.dialog.odometerKm': 'Kilométrage',
   'maintenance.workOrders.dialog.odometerAtOpening': "À l'ouverture : {km} km.",
   'maintenance.workOrders.dialog.validateHint':
-    "La validation clôt l'ordre et remet le véhicule en service.",
+    "La validation clôt l'ordre, referme l'indisponibilité du véhicule, qui redevient disponible, et compte la durée de l'ouverture à la clôture dans le MTTR.",
   'maintenance.workOrders.dialog.reason': 'Motif',
   'maintenance.workOrders.col.providerName': 'Atelier externe',
   'maintenance.workOrders.col.subcontractingCost': 'Sous-traitance',
@@ -108,7 +108,7 @@ export default {
   'maintenance.workOrders.import.action': "Importer l'historique",
   'maintenance.workOrders.import.title': "Importer l'historique de maintenance",
   'maintenance.workOrders.import.hint':
-    "Fichier CSV (séparateur ; ou ,) avec une ligne d'en-têtes. Chaque ligne devient un ordre clôturé, créé avec les mêmes contrôles qu'une saisie ; son coût compte dans les coûts, pas dans les indicateurs de fiabilité.",
+    "Fichier CSV (séparateur ; ou ,) avec une ligne d'en-têtes. Chaque ligne devient un ordre clôturé, créé avec les mêmes contrôles qu'une saisie ; son coût compte dans les coûts, pas dans les indicateurs de fiabilité. La colonne catégorie (facultative) aide à proposer le sous-système de la nomenclature ; chaque correspondance proposée se valide ensuite sur l'ordre (filtre Correspondance : à valider).",
   'maintenance.workOrders.import.created': 'Aucun ordre créé. | Un ordre créé. | {n} ordres créés.',
   'maintenance.workOrders.progress.col.date': 'Date',
   'maintenance.workOrders.progress.col.technician': 'Technicien',
@@ -120,5 +120,24 @@ export default {
   'maintenance.workOrders.progress.col.at': 'Date',
   'maintenance.workOrders.progress.col.event': 'Événement',
   'maintenance.workOrders.progress.col.by': 'Par',
-  'maintenance.workOrders.progress.col.comment': 'Commentaire'
+  'maintenance.workOrders.progress.col.comment': 'Commentaire',
+  'maintenance.workOrders.col.nomenclatureState': 'Correspondance',
+  'maintenance.workOrders.listView.awaitingParts': 'En attente de pièce',
+  'maintenance.workOrders.dialog.stockLevel':
+    "En stock : {quantity} (seuil d'alerte {threshold}) · délai moyen du fournisseur : {days} j",
+  'maintenance.workOrders.dialog.stockShort': 'Stock insuffisant pour cette quantité.',
+  'maintenance.workOrders.dialog.buyPartHint':
+    "La demande d'achat est transmise à l'ERP et l'ordre passe en attente de pièce ; le véhicule reste indisponible jusqu'à la clôture.",
+  'maintenance.workOrders.progress.partsWait':
+    "Attente des pièces commandées : {days} j, comptés dans l'immobilisation du véhicule.",
+  'maintenance.workOrders.action.nomenclature': 'Valider la correspondance',
+  'maintenance.workOrders.dialog.nomenclatureSource': "Dans l'ancien historique :",
+  'maintenance.workOrders.dialog.nomenclatureProposed':
+    'Sous-système proposé : {name}. Confirmez-le ou choisissez-en un autre.',
+  'maintenance.workOrders.dialog.nomenclatureNone':
+    'Aucune correspondance trouvée : choisissez le sous-système.',
+  'maintenance.workOrders.progress.nomenclaturePending':
+    'Historique importé « {source} » : correspondance proposée {name}, à valider.',
+  'maintenance.workOrders.progress.nomenclatureConfirmed':
+    'Correspondance avec la nomenclature validée par {by} le {date}.'
 }

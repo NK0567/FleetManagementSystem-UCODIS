@@ -1,3 +1,4 @@
+import type { ProductMeasure } from '@/modules/planning/products/domain/product'
 import type { CollectionDefinition, MockRow } from '../../db/collection'
 import { seedAudit } from '../seedAudit'
 
@@ -9,6 +10,11 @@ export interface ProductRow extends MockRow {
   isFuel: boolean
   referenceDensity: number | null
   expansionCoefficient: number | null
+  /** Absent on a row stored before they existed: read as unknown, and the default measures. */
+  unitWeightKg?: number | null
+  unitVolumeM3?: number | null
+  loadingMeasures?: ProductMeasure[]
+  deliveryMeasures?: ProductMeasure[]
 }
 
 const SEED: Omit<ProductRow, keyof typeof seedAudit>[] = [

@@ -38,6 +38,8 @@ import fleetInfractionTypes from './fleetInfractionTypes'
 import fleetInfractions from './fleetInfractions'
 import fleetTrainings from './fleetTrainings'
 import fleetCheckPoints from './fleetCheckPoints'
+import fleetInspectionItems from './fleetInspectionItems'
+import fleetFuelReferences from './fleetFuelReferences'
 import fleetInspections from './fleetInspections'
 import fleetRoadChecklists from './fleetRoadChecklists'
 import fleetDepartureAuthorizations from './fleetDepartureAuthorizations'
@@ -131,6 +133,8 @@ export default {
   ...fleetInfractions,
   ...fleetTrainings,
   ...fleetCheckPoints,
+  ...fleetInspectionItems,
+  ...fleetFuelReferences,
   ...fleetInspections,
   ...fleetRoadChecklists,
   ...fleetDepartureAuthorizations,

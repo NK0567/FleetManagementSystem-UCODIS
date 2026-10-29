@@ -6,6 +6,7 @@ import { apiErrorMessage } from '@/core/api/apiError'
 import {
   mapHeaders,
   missingColumns,
+  normalizeHeader,
   type ImportColumns,
   type ImportReport
 } from '@/core/utils/csvImport'
@@ -28,10 +29,27 @@ const props = defineProps<{
   createdKey: string
   toRow: (record: Record<string, string>, mapping: Map<string, F>) => Record<string, unknown>
   submit: (rows: Record<string, unknown>[]) => Promise<ImportReport>
+  /** Headings of the source file the administrator set for some fields; they are read first. */
+  mapping?: Partial<Record<string, string>> | null
 }>()
 const emit = defineEmits<{ close: []; imported: [] }>()
 
 const { t } = useI18n()
+
+/** The heading set for a field comes first, so that it also heads the template. */
+const columns = computed<ImportColumns<F>>(() => {
+  const result = {} as Record<F, readonly string[]>
+  for (const field of Object.keys(props.columns) as F[]) {
+    const heading = props.mapping?.[field]?.trim()
+    result[field] = heading
+      ? [heading, normalizeHeader(heading), ...props.columns[field]]
+      : props.columns[field]
+  }
+  return result
+})
+const mappedFields = computed(() =>
+  (Object.keys(props.columns) as F[]).filter((field) => !!props.mapping?.[field]?.trim())
+)
 
 const fileName = ref('')
 const rows = ref<Record<string, unknown>[]>([])
@@ -63,13 +81,13 @@ async function readFile(event: Event) {
     header: true,
     skipEmptyLines: 'greedy'
   })
-  const mapping = mapHeaders(props.columns, parsed.meta.fields ?? [])
+  const mapping = mapHeaders(columns.value, parsed.meta.fields ?? [])
   missing.value = missingColumns(mapping, props.required)
   rows.value = parsed.data.map((record) => props.toRow(record, mapping))
 }
 
 const missingColumnNames = computed(() =>
-  missing.value.map((field) => props.columns[field][0]).join(', ')
+  missing.value.map((field) => columns.value[field][0]).join(', ')
 )
 
 const canImport = computed(() => rows.value.length > 0 && missing.value.length === 0)
@@ -88,7 +106,7 @@ async function runImport() {
 }
 
 function downloadTemplate() {
-  const headers = (Object.keys(props.columns) as F[]).map((field) => props.columns[field][0])
+  const headers = (Object.keys(columns.value) as F[]).map((field) => columns.value[field][0])
   const csv = `${headers.join(';')}\n${props.example.join(';')}\n`
   saveBlob(new Blob([csv], { type: 'text/csv;charset=utf-8' }), props.templateName)
 }
@@ -109,6 +127,9 @@ const rejected = computed(() => report.value?.results.filter((result) => result.
   >
     <div class="space-y-3 text-sm">
       <p class="text-muted-foreground">{{ hint }}</p>
+      <p v-if="mappedFields.length" class="text-xs text-muted-foreground">
+        {{ t('common.import.mapped', mappedFields.length) }}
+      </p>
       <button
         type="button"
         class="cursor-pointer inline-flex items-center gap-1.5 text-primary hover:underline"

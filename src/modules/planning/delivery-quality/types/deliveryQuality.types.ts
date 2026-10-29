@@ -1,3 +1,4 @@
+import type { FileMeta } from '@/types/file.types'
 import type {
   LineResponsibility,
   ProtestNote,
@@ -10,6 +11,8 @@ import type {
 
 export interface ProtestRowApi extends ProtestNote {
   status: ProtestStatus
+  /** The attached pieces, readable from the note (TRS04-US05). */
+  files: FileMeta[]
 }
 
 export interface QualityRowApi {
@@ -33,6 +36,7 @@ export interface ProtestInput {
   reasonNo: string
   comment: string
   quantity: number
+  fileNos?: string[]
 }
 
 export interface ResponsibilityInput {

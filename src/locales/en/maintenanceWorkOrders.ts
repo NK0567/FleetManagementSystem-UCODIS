@@ -13,13 +13,13 @@ export default {
 
   'maintenance.workOrders.col.no': 'No.',
   'maintenance.workOrders.col.vehicleNo': 'Vehicle',
-  'maintenance.workOrders.col.maintenanceType': 'Type',
+  'maintenance.workOrders.col.maintenanceType': 'Type of work',
   'maintenance.workOrders.col.severity': 'Severity',
   'maintenance.workOrders.col.origin': 'Origin',
   'maintenance.workOrders.col.symptom': 'Reported symptom',
   'maintenance.workOrders.col.declaredAt': 'Reported on',
   'maintenance.workOrders.col.vehiclePlate': 'Vehicle',
-  'maintenance.workOrders.col.subsystemName': 'Subsystem',
+  'maintenance.workOrders.col.subsystemName': 'Diagnosis (subsystem)',
   'maintenance.workOrders.col.labourHours': 'Hours',
   'maintenance.workOrders.col.totalCost': 'Cost',
   'maintenance.workOrders.col.status': 'Status',
@@ -33,9 +33,9 @@ export default {
   'maintenance.workOrders.form.symptom': 'Reported symptom',
   'maintenance.workOrders.form.declaredAt': 'Reported on',
   'maintenance.workOrders.actionError': 'The action could not be saved.',
-  'maintenance.workOrders.listView.active': 'Ongoing',
+  'maintenance.workOrders.listView.active': 'In progress (incl. awaiting parts)',
   'maintenance.workOrders.listView.toValidate': 'To validate',
-  'maintenance.workOrders.listView.finished': 'Finished',
+  'maintenance.workOrders.listView.finished': 'Closed or cancelled',
   'maintenance.workOrders.listView.all': 'All',
   'maintenance.workOrders.section.diagnosis': 'Diagnosis',
   'maintenance.workOrders.section.labour': 'Labour',
@@ -71,7 +71,7 @@ export default {
   'maintenance.workOrders.dialog.odometerKm': 'Odometer',
   'maintenance.workOrders.dialog.odometerAtOpening': 'At opening: {km} km.',
   'maintenance.workOrders.dialog.validateHint':
-    'Validation closes the order and puts the vehicle back in service.',
+    'The validation closes the order, ends the vehicle downtime so it is available again, and counts the time from opening to closing in the MTTR.',
   'maintenance.workOrders.dialog.reason': 'Reason',
   'maintenance.workOrders.col.providerName': 'Outside garage',
   'maintenance.workOrders.col.subcontractingCost': 'Subcontracting',
@@ -109,7 +109,7 @@ export default {
   'maintenance.workOrders.import.action': 'Import history',
   'maintenance.workOrders.import.title': 'Import maintenance history',
   'maintenance.workOrders.import.hint':
-    'CSV file (; or , separated) with a header line. Each line becomes a closed order, created with the same checks as an entry; its cost counts in the costs, not in the reliability indicators.',
+    'CSV file (separator ; or ,) with a header line. Each line becomes a closed order, created with the same checks as an entry; its cost counts in costs, not in reliability indicators. The optional category column helps propose the subsystem of the nomenclature; each proposed mapping is then confirmed on the order (Mapping filter: to confirm).',
   'maintenance.workOrders.import.created':
     'No order created. | One order created. | {n} orders created.',
   'maintenance.workOrders.progress.col.date': 'Date',
@@ -122,5 +122,23 @@ export default {
   'maintenance.workOrders.progress.col.at': 'Date',
   'maintenance.workOrders.progress.col.event': 'Event',
   'maintenance.workOrders.progress.col.by': 'By',
-  'maintenance.workOrders.progress.col.comment': 'Comment'
+  'maintenance.workOrders.progress.col.comment': 'Comment',
+  'maintenance.workOrders.col.nomenclatureState': 'Mapping',
+  'maintenance.workOrders.listView.awaitingParts': 'Awaiting parts',
+  'maintenance.workOrders.dialog.stockLevel':
+    'In stock: {quantity} (alert threshold {threshold}) · supplier average lead time: {days} d',
+  'maintenance.workOrders.dialog.stockShort': 'Not enough stock for this quantity.',
+  'maintenance.workOrders.dialog.buyPartHint':
+    'The purchase request goes to the ERP and the order waits for the part; the vehicle stays unavailable until the closing.',
+  'maintenance.workOrders.progress.partsWait':
+    'Wait for the ordered parts: {days} d, counted in the vehicle downtime.',
+  'maintenance.workOrders.action.nomenclature': 'Confirm the mapping',
+  'maintenance.workOrders.dialog.nomenclatureSource': 'In the former history:',
+  'maintenance.workOrders.dialog.nomenclatureProposed':
+    'Proposed subsystem: {name}. Confirm it or choose another one.',
+  'maintenance.workOrders.dialog.nomenclatureNone': 'No match found: choose the subsystem.',
+  'maintenance.workOrders.progress.nomenclaturePending':
+    'Imported history "{source}": proposed mapping {name}, to confirm.',
+  'maintenance.workOrders.progress.nomenclatureConfirmed':
+    'Mapping with the nomenclature confirmed by {by} on {date}.'
 }

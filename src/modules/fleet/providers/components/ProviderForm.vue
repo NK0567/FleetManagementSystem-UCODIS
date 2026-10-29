@@ -5,12 +5,7 @@ import { useEntityForm, type FormValidationError } from '@/composables/useEntity
 import { useFormValidationUi } from '@/composables/useFormValidationUi'
 import { isValidEmail } from '@/utils/email'
 import { contractIssues } from '../domain/provider'
-import type {
-  CarrierVehicle,
-  ProviderApi,
-  ProviderContract,
-  ProviderType
-} from '../types/provider.types'
+import type { CarrierVehicle, ProviderApi, ProviderContract } from '../types/provider.types'
 
 const props = withDefaults(
   defineProps<{
@@ -33,7 +28,7 @@ const { draft, isRequired, expose } = useEntityForm({
   initialData: () => props.initialData,
   empty: () => ({
     name: '',
-    providerType: 'garage' as ProviderType,
+    providerType: 'garage',
     contactName: '',
     phone: '',
     email: '',
@@ -110,13 +105,22 @@ defineExpose(expose)
           :label="t('fleet.providers.form.providerType')"
           :required="isRequired('providerType')"
         >
-          <OptionsSelect
-            :model-value="draft.providerType"
-            options-key="providerType"
+          <ReferenceLookup
+            v-model="draft.providerType"
+            reference-key="providerTypes"
+            :modal-title="t('fleet.providers.form.providerType')"
+            detail-path="/fleet/provider-types"
             :disabled="disabled"
             :invalid="hasValidationError('providerType')"
-            @update:model-value="draft.providerType = String($event) as ProviderType"
           />
+          <p
+            v-if="!isNew && initialData.source === 'management_system'"
+            class="text-xs text-muted-foreground mt-1"
+          >
+            {{
+              t('fleet.providers.form.fromManagementSystem', { id: initialData.externalId ?? '' })
+            }}
+          </p>
         </BaseFormField>
         <BaseFormField :label="t('fleet.providers.form.contactName')">
           <FormInput v-model="draft.contactName" :maxlength="80" :disabled="disabled" />

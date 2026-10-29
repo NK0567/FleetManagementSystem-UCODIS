@@ -131,7 +131,7 @@ onMounted(() => void store.fetchCalendar())
             <td class="px-4 py-3">
               <div v-if="day.working" class="flex items-center gap-2">
                 <FormInput v-model="day.start" type="time" class="w-28" :disabled="!isEditing" />
-                <span class="text-muted-foreground">–</span>
+                <span class="text-muted-foreground">-</span>
                 <FormInput v-model="day.end" type="time" class="w-28" :disabled="!isEditing" />
               </div>
               <span v-else class="text-muted-foreground">{{ t('hr.workingCalendar.dayOff') }}</span>
@@ -146,7 +146,7 @@ onMounted(() => void store.fetchCalendar())
                     class="w-28"
                     :disabled="!isEditing"
                   />
-                  <span class="text-muted-foreground">–</span>
+                  <span class="text-muted-foreground">-</span>
                   <FormInput
                     v-model="day.breakEnd"
                     type="time"

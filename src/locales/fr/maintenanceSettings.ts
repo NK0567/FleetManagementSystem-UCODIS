@@ -1,7 +1,7 @@
 export default {
   'maintenance.settings.title': 'Réglages de la maintenance',
   'maintenance.settings.subtitle':
-    "Capacité de l'atelier, coûts, préavis et tolérance d'entretien, seuils des pneus et objectifs de l'équipe mobile.",
+    "Capacité de l'atelier, coûts, préavis d'entretien, seuils des pneus et objectifs de l'équipe mobile.",
   'maintenance.settings.lastModified': 'Modifié le {date} par {user}',
   'maintenance.settings.loadError': "Les réglages de la maintenance n'ont pas pu être chargés.",
   'maintenance.settings.saveError': "Les réglages n'ont pas pu être enregistrés.",
@@ -26,11 +26,9 @@ export default {
 
   'maintenance.settings.section.service': 'Entretien préventif',
   'maintenance.settings.section.service.hint':
-    'Le préavis signale un entretien à venir. Au-delà de la tolérance, un entretien dépassé immobilise le véhicule, sauf sur un plan provisoire.',
+    "Le préavis fait passer une échéance à « proche » et déclenche l'alerte. Une échéance dépassée rend le véhicule indisponible, sauf sur un plan provisoire.",
   'maintenance.settings.field.service.noticeKm': 'Préavis en kilomètres',
   'maintenance.settings.field.service.noticeDays': 'Préavis en jours',
-  'maintenance.settings.field.service.toleranceKm': 'Tolérance au-delà de l’échéance (km)',
-  'maintenance.settings.field.service.toleranceDays': 'Tolérance au-delà de l’échéance (jours)',
 
   'maintenance.settings.section.tyres': 'Pneus',
   'maintenance.settings.section.tyres.hint':
@@ -60,5 +58,14 @@ export default {
 
   'maintenance.settings.issue.required': 'Ce réglage est obligatoire.',
   'maintenance.settings.issue.outOfRange': 'Indiquez une valeur entre {min} et {max} {unit}.',
-  'maintenance.settings.issue.invalidTime': 'Indiquez une heure au format HH:MM.'
+  'maintenance.settings.issue.invalidTime': 'Indiquez une heure au format HH:MM.',
+  'maintenance.settings.field.service.noticeHours': 'Préavis en heures moteur',
+  'maintenance.settings.section.targets': 'Cibles des indicateurs',
+  'maintenance.settings.section.targets.hint':
+    'Comparées aux indicateurs de maintenance et de fiabilité.',
+  'maintenance.settings.field.targets.preventiveShareTargetPct': 'Part du préventif visée',
+  'maintenance.settings.field.targets.preventiveCompletionTargetPct':
+    'Taux de réalisation du préventif visé',
+  'maintenance.settings.field.targets.mttrTargetHours': 'MTTR à ne pas dépasser',
+  'maintenance.settings.field.targets.mtbfTargetKm': 'MTBF minimal'
 }

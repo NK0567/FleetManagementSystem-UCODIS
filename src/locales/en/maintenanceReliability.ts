@@ -12,7 +12,7 @@ export default {
   'maintenance.reliability.kpi.availabilityRate': 'Availability',
   'maintenance.reliability.kpi.totalCost': 'Maintenance cost',
   'maintenance.reliability.definition.mttrHours':
-    'Corrective orders: from the report to the declared finish.',
+    'Corrective orders: from the opening to the validated closing.',
   'maintenance.reliability.definition.mtbfKm':
     'Km run by the fleet divided by the number of failures.',
   'maintenance.reliability.definition.preventiveShare':
@@ -48,7 +48,7 @@ export default {
   'maintenance.dashboard.sub.lowStock': 'Low or out of stock',
   'maintenance.dashboard.sub.purchases': 'Requested or ordered',
   'maintenance.dashboard.sub.tyres': 'Pressure or tread under the threshold',
-  'maintenance.dashboard.sub.mttr': 'From the report to the declared finish',
+  'maintenance.dashboard.sub.mttr': 'From the opening to the validated closing',
   'maintenance.dashboard.last30': 'The last 30 days',
   'maintenance.dashboard.openReliability': 'See reliability',
   'maintenance.vehicleCost.title': 'Running cost',
@@ -60,5 +60,29 @@ export default {
   'maintenance.vehicleCost.total': 'Period total',
   'maintenance.vehicleCost.perKm': '{km} km run · {cost} per km',
   'maintenance.vehicleCost.acquisition': 'Acquisition, apart: {cost}',
-  'maintenance.vehicleCost.noAcquisition': 'Acquisition cost not entered.'
+  'maintenance.vehicleCost.noAcquisition': 'Acquisition cost not entered.',
+  'maintenance.dashboard.workload.title': 'Work orders',
+  'maintenance.dashboard.workload.open': 'See the work orders',
+  'maintenance.dashboard.workload.inProgress': 'In progress',
+  'maintenance.dashboard.workload.planned': 'Planned',
+  'maintenance.dashboard.workload.late': 'Late',
+  'maintenance.reliability.kpi.preventiveCompletion': 'Preventive work done',
+  'maintenance.reliability.definition.preventiveCompletion':
+    'Preventive orders of the period finished, over those opened and the services overdue without an order.',
+  'maintenance.reliability.targets.title': 'Indicators and targets',
+  'maintenance.reliability.targets.settings': 'Set the targets',
+  'maintenance.reliability.targets.indicator': 'Indicator',
+  'maintenance.reliability.targets.value': 'Value',
+  'maintenance.reliability.targets.target': 'Target',
+  'maintenance.reliability.targets.state': 'Status',
+  'maintenance.reliability.targets.reached': 'Target reached',
+  'maintenance.reliability.targets.missed': 'Target missed',
+  'maintenance.reliability.targets.completionBasis':
+    'Preventive: {done} order(s) finished out of {due} due, including {missed} overdue service(s) without an order.',
+  'maintenance.reliability.costByType': 'Preventive and corrective cost',
+  'maintenance.reliability.lostByCause': 'Days lost: human and technical causes',
+  'maintenance.reliability.lostRatio': 'Human over technical ratio',
+  'maintenance.reliability.days': '{days} d',
+  'maintenance.reliability.byMode': 'Most frequent failure modes',
+  'maintenance.reliability.byCause': 'Most frequent root causes'
 }

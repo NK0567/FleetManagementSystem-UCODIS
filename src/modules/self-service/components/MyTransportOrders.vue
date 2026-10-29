@@ -1,11 +1,20 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { CalendarClock, CircleCheck, CircleX, MapPin, PackageCheck, Undo2 } from '@lucide/vue'
+import {
+  CalendarClock,
+  CircleCheck,
+  CircleX,
+  CloudOff,
+  MapPin,
+  PackageCheck,
+  Undo2,
+  Wifi
+} from '@lucide/vue'
 import { apiErrorMessage } from '@/core/api/apiError'
 import { formatDateTime, formatNumber } from '@/utils/format'
 import { mySpaceApi } from '../api/mySpaceApi'
-import type { MyOrderApi, MyOrderLineApi } from '../types/mySpace.types'
+import type { MyOrderApi, MyOrderLineApi, MyReturnApi } from '../types/mySpace.types'
 
 /**
  * What the driver does himself on his transport order (TRS03-US05 to US14): he checks his load
@@ -19,6 +28,7 @@ const acting = ref(false)
 const error = ref<string | null>(null)
 
 async function load() {
+  void loadReturns()
   try {
     orders.value = (await mySpaceApi.orders()).data.data
   } catch (cause) {
@@ -28,11 +38,78 @@ async function load() {
   }
 }
 
-async function run(call: () => Promise<unknown>): Promise<boolean> {
+/* ---- Without network (TRS03-US18): what the driver records is kept on the device and sent by
+ * itself as soon as the connection is back, without doing it again. The demonstration has a
+ * switch to cut the network; the real device would follow its own connection. */
+type Operation =
+  | {
+      op: 'line'
+      orderNo: string
+      lineNo: number
+      action: Parameters<typeof mySpaceApi.lineAction>[2]
+      body: Record<string, unknown>
+    }
+  | { op: 'point'; orderNo: string; pointNo: string; lines: Record<string, unknown>[] }
+  | { op: 'check'; orderNo: string; body: Record<string, unknown> }
+const QUEUE_KEY = 'selfService.pendingOperations'
+const readQueue = (): Operation[] => {
+  try {
+    return JSON.parse(localStorage.getItem(QUEUE_KEY) ?? '[]') as Operation[]
+  } catch {
+    return []
+  }
+}
+const queue = ref<Operation[]>(readQueue())
+const offline = ref(false)
+function keepQueue() {
+  try {
+    localStorage.setItem(QUEUE_KEY, JSON.stringify(queue.value))
+  } catch {
+    /* kept in memory only */
+  }
+}
+function send(operation: Operation): Promise<unknown> {
+  if (operation.op === 'line') {
+    return mySpaceApi.lineAction(
+      operation.orderNo,
+      operation.lineNo,
+      operation.action,
+      operation.body
+    )
+  }
+  if (operation.op === 'point') {
+    return mySpaceApi.declarePoint(operation.orderNo, operation.pointNo, operation.lines)
+  }
+  return mySpaceApi.check(operation.orderNo, operation.body)
+}
+async function synchronize() {
+  while (queue.value.length && !offline.value) {
+    const [first] = queue.value
+    try {
+      await send(first!)
+    } catch (cause) {
+      error.value = apiErrorMessage(cause, t('selfService.orders.saveError'))
+    }
+    queue.value = queue.value.slice(1)
+    keepQueue()
+  }
+  await load()
+}
+function toggleNetwork() {
+  offline.value = !offline.value
+  if (!offline.value) void synchronize()
+}
+
+async function run(operation: Operation): Promise<boolean> {
+  if (offline.value) {
+    queue.value = [...queue.value, operation]
+    keepQueue()
+    return true
+  }
   acting.value = true
   error.value = null
   try {
-    await call()
+    await send(operation)
     await load()
     return true
   } catch (cause) {
@@ -40,6 +117,29 @@ async function run(call: () => Promise<unknown>): Promise<boolean> {
     return false
   } finally {
     acting.value = false
+  }
+}
+
+/* ---- What is still to bring back to the warehouse, even from a completed order (TRS03-US11). */
+const returns = ref<MyReturnApi[]>([])
+async function loadReturns() {
+  try {
+    returns.value = (await mySpaceApi.returns()).data.data
+  } catch {
+    returns.value = []
+  }
+}
+async function handBack(item: MyReturnApi) {
+  if (
+    await run({
+      op: 'line',
+      orderNo: item.orderNo,
+      lineNo: item.lineNo,
+      action: 'hand-back',
+      body: {}
+    })
+  ) {
+    await loadReturns()
   }
 }
 
@@ -72,24 +172,31 @@ const reasonNo = ref('')
 const comment = ref('')
 
 function conform(order: MyOrderApi, group: CheckGroup) {
-  void run(() =>
-    mySpaceApi.check(order.no, {
-      lineNos: toCheck(group).map((line) => line.lineNo),
-      verdict: 'conform'
-    })
-  )
+  void run({
+    op: 'check',
+    orderNo: order.no,
+    body: { lineNos: toCheck(group).map((line) => line.lineNo), verdict: 'conform' }
+  })
+}
+/* A shortcut validates every compartment at once when all is conforming (TRS03-US02). */
+function conformAll(order: MyOrderApi) {
+  const lineNos = groupsOf(order).flatMap((group) => toCheck(group).map((line) => line.lineNo))
+  if (lineNos.length)
+    void run({ op: 'check', orderNo: order.no, body: { lineNos, verdict: 'conform' } })
 }
 async function confirmNonconform() {
   const pending = rejecting.value
   if (!pending || !reasonNo.value) return
-  const done = await run(() =>
-    mySpaceApi.check(pending.order.no, {
+  const done = await run({
+    op: 'check',
+    orderNo: pending.order.no,
+    body: {
       lineNos: toCheck(pending.group).map((line) => line.lineNo),
       verdict: 'nonconform',
       reasonNo: reasonNo.value,
       comment: comment.value
-    })
-  )
+    }
+  })
   if (done) rejecting.value = null
 }
 
@@ -171,6 +278,7 @@ type Pending =
 const pending = ref<Pending | null>(null)
 const quantity = ref<number | null>(null)
 const withReturn = ref(false)
+const availableFrom = ref('')
 
 function open(kind: Pending['kind'], order: MyOrderApi, line: MyOrderLineApi) {
   pending.value = { kind, order, line }
@@ -178,6 +286,83 @@ function open(kind: Pending['kind'], order: MyOrderApi, line: MyOrderLineApi) {
   reasonNo.value = ''
   comment.value = ''
   withReturn.value = false
+  availableFrom.value = ''
+}
+
+/* ---- The delivery of a point, line by line (TRS03-US11), with the fuel measures (TRS03-US10). */
+interface DeclareRow {
+  line: MyOrderLineApi
+  delivered: boolean
+  receivedQuantity: number | null
+  deliveredVolumeL: number | null
+  temperatureC: number | null
+  density: number | null
+  volume15L: number | null
+  reasonNo: string
+  comment: string
+}
+const declaring = ref<{ order: MyOrderApi; point: Point; rows: DeclareRow[] } | null>(null)
+const openLines = (point: Point) =>
+  point.lines.filter(
+    (line) =>
+      !notLoaded(line) &&
+      !line.declaredAt &&
+      !line.refusalAt &&
+      !(line.postponedAt && line.returnedAt)
+  )
+function openDeclare(order: MyOrderApi, point: Point) {
+  declaring.value = {
+    order,
+    point,
+    rows: openLines(point).map((line) => ({
+      line,
+      delivered: true,
+      receivedQuantity: line.loadedQuantity ?? line.quantity,
+      deliveredVolumeL: line.isFuel ? (line.loadedQuantity ?? line.quantity) : null,
+      temperatureC: null,
+      density: null,
+      volume15L: null,
+      reasonNo: '',
+      comment: ''
+    }))
+  }
+}
+const num = (value: unknown) =>
+  value === '' || value === null || value === undefined ? NaN : Number(value)
+const declareValid = computed(() => {
+  const rows = declaring.value?.rows ?? []
+  if (!rows.some((row) => row.delivered)) return false
+  return rows.every((row) =>
+    !row.delivered
+      ? !!row.reasonNo
+      : row.line.isFuel
+        ? [row.deliveredVolumeL, row.temperatureC, row.density, row.volume15L].every((v) =>
+            Number.isFinite(num(v))
+          )
+        : Number.isFinite(num(row.receivedQuantity)) && num(row.receivedQuantity) >= 0
+  )
+})
+async function confirmDeclare() {
+  const item = declaring.value
+  if (!item || !declareValid.value) return
+  const lines = item.rows.map((row) =>
+    !row.delivered
+      ? { lineNo: row.line.lineNo, delivered: false, reasonNo: row.reasonNo, comment: row.comment }
+      : row.line.isFuel
+        ? {
+            lineNo: row.line.lineNo,
+            delivered: true,
+            receivedQuantity: num(row.deliveredVolumeL),
+            deliveredVolumeL: num(row.deliveredVolumeL),
+            temperatureC: num(row.temperatureC),
+            density: num(row.density),
+            volume15L: num(row.volume15L)
+          }
+        : { lineNo: row.line.lineNo, delivered: true, receivedQuantity: num(row.receivedQuantity) }
+  )
+  if (await run({ op: 'point', orderNo: item.order.no, pointNo: item.point.no, lines })) {
+    declaring.value = null
+  }
 }
 const reasonsOf = (order: MyOrderApi, kind: 'postpone' | 'refuse') =>
   kind === 'postpone' ? order.reasons.postponement : order.reasons.refusal
@@ -189,11 +374,20 @@ async function confirmPending() {
     item.kind === 'declare'
       ? { receivedQuantity: quantity.value }
       : item.kind === 'postpone'
-        ? { reasonNo: reasonNo.value, comment: comment.value, withReturn: withReturn.value }
+        ? {
+            reasonNo: reasonNo.value,
+            comment: comment.value,
+            withReturn: withReturn.value,
+            availableFrom: availableFrom.value || null
+          }
         : { reasonNo: reasonNo.value, comment: comment.value }
-  const done = await run(() =>
-    mySpaceApi.lineAction(item.order.no, item.line.lineNo, item.kind, body)
-  )
+  const done = await run({
+    op: 'line',
+    orderNo: item.order.no,
+    lineNo: item.line.lineNo,
+    action: item.kind,
+    body
+  })
   if (done) pending.value = null
 }
 const pendingDisabled = computed(() => {
@@ -213,7 +407,47 @@ onMounted(load)
 
 <template>
   <div class="space-y-4">
+    <div class="flex flex-wrap items-center gap-2 text-sm">
+      <button
+        type="button"
+        class="cursor-pointer inline-flex items-center gap-1.5 px-3 h-8 rounded border transition"
+        :class="
+          offline
+            ? 'border-warning text-warning bg-warning/10'
+            : 'border-border text-muted-foreground hover:bg-accent'
+        "
+        @click="toggleNetwork"
+      >
+        <component :is="offline ? CloudOff : Wifi" class="w-4 h-4" />
+        {{ offline ? t('selfService.offline.on') : t('selfService.offline.off') }}
+      </button>
+      <span v-if="queue.length" class="text-xs text-warning">
+        {{ t('selfService.offline.pending', queue.length) }}
+      </span>
+    </div>
     <FormAlerts :error="error" @clear:error="error = null" />
+
+    <section v-if="returns.length" class="bg-card border border-warning/40 rounded p-3 space-y-2">
+      <h3 class="text-sm font-semibold text-card-foreground">
+        {{ t('selfService.returns.title') }}
+      </h3>
+      <div
+        v-for="item in returns"
+        :key="`${item.orderNo}-${item.lineNo}`"
+        class="flex flex-wrap items-center justify-between gap-2 text-sm"
+      >
+        <span>
+          {{ item.productName }} · {{ formatNumber(item.quantity) }} {{ item.unit }}
+          <span class="text-muted-foreground">
+            · {{ item.deliveryPointName }} · {{ item.orderNo
+            }}<template v-if="item.reason"> · {{ item.reason }}</template>
+          </span>
+        </span>
+        <button type="button" :class="buttonClass" :disabled="acting" @click="handBack(item)">
+          <Undo2 class="w-4 h-4 text-primary" /> {{ t('selfService.returns.handBack') }}
+        </button>
+      </div>
+    </section>
     <LoadingSpinner v-if="loading" :text="t('common.loading')" />
     <p
       v-else-if="!orders.length"
@@ -239,9 +473,23 @@ onMounted(load)
 
       <!-- Loading check, before leaving -->
       <div v-if="order.status === 'confirmed'" class="px-4 py-3 border-b border-border space-y-2">
-        <h3 class="text-sm font-semibold text-card-foreground">
-          {{ t('selfService.orders.checkTitle') }}
-        </h3>
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <h3 class="text-sm font-semibold text-card-foreground">
+            {{ t('selfService.orders.checkTitle') }}
+          </h3>
+          <button
+            v-if="
+              groupsOf(order).filter((group) => toCheck(group).length && !awaitingWarehouse(group))
+                .length > 1
+            "
+            type="button"
+            :class="primaryClass"
+            :disabled="acting"
+            @click="conformAll(order)"
+          >
+            <CircleCheck class="w-4 h-4" /> {{ t('selfService.orders.conformAll') }}
+          </button>
+        </div>
         <div
           v-for="group in groupsOf(order)"
           :key="group.key"
@@ -315,11 +563,30 @@ onMounted(load)
               type="button"
               :class="primaryClass"
               :disabled="acting"
-              @click="run(() => mySpaceApi.lineAction(order.no, point.lines[0]!.lineNo, 'arrive'))"
+              @click="
+                run({
+                  op: 'line',
+                  orderNo: order.no,
+                  lineNo: point.lines[0]!.lineNo,
+                  action: 'arrive',
+                  body: {}
+                })
+              "
             >
               <MapPin class="w-4 h-4" /> {{ t('selfService.orders.arrive') }}
             </button>
-            <span v-else-if="arrived(point)" class="text-xs text-muted-foreground shrink-0">
+            <button
+              v-else-if="
+                order.status === 'in_progress' && arrived(point) && openLines(point).length
+              "
+              type="button"
+              :class="primaryClass"
+              :disabled="acting"
+              @click="openDeclare(order, point)"
+            >
+              <PackageCheck class="w-4 h-4" /> {{ t('selfService.orders.declare') }}
+            </button>
+            <span v-if="arrived(point)" class="text-xs text-muted-foreground shrink-0">
               {{
                 t('selfService.orders.arrivedAt', {
                   at: formatDateTime(point.lines.find((line) => line.arrivedAt)!.arrivedAt)
@@ -341,17 +608,6 @@ onMounted(load)
                 }}</span>
               </div>
               <div v-if="canAct(order, point, line)" class="mt-1.5 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  :class="primaryClass"
-                  :disabled="acting"
-                  @click="open('declare', order, line)"
-                >
-                  <PackageCheck class="w-4 h-4" />
-                  {{
-                    retry(line) ? t('selfService.orders.retry') : t('selfService.orders.declare')
-                  }}
-                </button>
                 <button
                   v-if="!retry(line)"
                   type="button"
@@ -376,6 +632,81 @@ onMounted(load)
         </li>
       </ol>
     </section>
+
+    <ConfirmDialog
+      :open="!!declaring"
+      :title="t('selfService.orders.declare')"
+      :confirm-label="t('common.save')"
+      :confirm-disabled="!declareValid"
+      :loading="acting"
+      panel-class="max-w-lg"
+      @confirm="confirmDeclare"
+      @cancel="declaring = null"
+    >
+      <div v-if="declaring" class="space-y-3">
+        <p class="text-sm text-muted-foreground">
+          {{ declaring.point.recipientName || declaring.point.name }} ·
+          {{ t('selfService.orders.declareHint') }}
+        </p>
+        <div
+          v-for="row in declaring.rows"
+          :key="row.line.lineNo"
+          class="rounded border border-border p-2 space-y-2"
+        >
+          <label class="flex items-center gap-2 text-sm font-medium">
+            <input v-model="row.delivered" type="checkbox" class="h-4 w-4 accent-primary" />
+            {{ row.line.productName }} ·
+            {{ formatNumber(row.line.loadedQuantity ?? row.line.quantity) }} {{ row.line.unit }}
+          </label>
+          <template v-if="row.delivered">
+            <BaseFormField
+              v-if="!row.line.isFuel"
+              :label="t('selfService.orders.receivedQuantity')"
+              required
+            >
+              <FormInput v-model="row.receivedQuantity" type="number" :min="0" />
+            </BaseFormField>
+            <div v-else class="grid grid-cols-2 gap-2">
+              <BaseFormField :label="t('selfService.orders.deliveredVolume')" required>
+                <FormInput v-model="row.deliveredVolumeL" type="number" :min="0" />
+              </BaseFormField>
+              <BaseFormField :label="t('planning.pickup.temperature')" required>
+                <FormInput v-model="row.temperatureC" type="number" />
+              </BaseFormField>
+              <BaseFormField :label="t('planning.pickup.density')" required>
+                <FormInput v-model="row.density" type="number" />
+              </BaseFormField>
+              <BaseFormField :label="t('planning.pickup.volume15')" required>
+                <FormInput v-model="row.volume15L" type="number" :min="0" />
+              </BaseFormField>
+            </div>
+          </template>
+          <template v-else>
+            <BaseFormField :label="t('selfService.orders.undeliveredReason')" required>
+              <select
+                v-model="row.reasonNo"
+                class="w-full h-9 px-2 text-sm border border-border rounded bg-background"
+              >
+                <option value="" disabled>{{ t('selfService.orders.pickReason') }}</option>
+                <option
+                  v-for="reason in declaring.order.reasons.refusal"
+                  :key="reason.no"
+                  :value="reason.no"
+                >
+                  {{ reason.name }}
+                </option>
+              </select>
+            </BaseFormField>
+            <BaseFormField :label="t('selfService.orders.comment')">
+              <FormInput v-model="row.comment" :maxlength="200" />
+            </BaseFormField>
+          </template>
+        </div>
+        <p v-if="!declaring.rows.some((row) => row.delivered)" class="text-xs text-destructive">
+          {{ t('selfService.orders.nothingDelivered') }}
+        </p>
+      </div>
+    </ConfirmDialog>
 
     <ConfirmDialog
       :open="!!rejecting"
@@ -450,6 +781,12 @@ onMounted(load)
           </BaseFormField>
           <BaseFormField :label="t('selfService.orders.comment')">
             <FormInput v-model="comment" :maxlength="200" />
+          </BaseFormField>
+          <BaseFormField
+            v-if="pending.kind === 'postpone'"
+            :label="t('selfService.orders.availableFrom')"
+          >
+            <DateFormInput v-model="availableFrom" />
           </BaseFormField>
           <label v-if="pending.kind === 'postpone'" class="inline-flex items-start gap-2 text-sm">
             <input v-model="withReturn" type="checkbox" class="h-4 w-4 mt-0.5 accent-primary" />

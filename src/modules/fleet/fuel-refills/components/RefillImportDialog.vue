@@ -2,11 +2,13 @@
 import { useI18n } from 'vue-i18n'
 import { REFILL_IMPORT_COLUMNS, REFILL_REQUIRED, toImportRow } from '../domain/refillImport'
 import { fuelRefillService } from '../services/fuelRefillService'
+import { useImportMapping } from '@/modules/fleet/fleet-settings/composables/useImportMapping'
 
-defineProps<{ open: boolean }>()
+const props = defineProps<{ open: boolean }>()
 const emit = defineEmits<{ close: []; imported: [] }>()
 
 const { t } = useI18n()
+const mapping = useImportMapping('refills', () => props.open)
 
 const EXAMPLE = [
   '4021 TBA',
@@ -32,6 +34,7 @@ const EXAMPLE = [
     created-key="fleet.fuelRefills.import.created"
     :to-row="toImportRow"
     :submit="fuelRefillService.importRows"
+    :mapping="mapping"
     @close="emit('close')"
     @imported="emit('imported')"
   />

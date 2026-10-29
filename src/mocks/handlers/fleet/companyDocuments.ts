@@ -60,6 +60,7 @@ export function companyDocumentsApi(db: MockDatabase): CompanyDocumentApi[] {
       documentTypeName: type?.name ?? '',
       orgUnitName: document.orgUnitNo ? (units.get(document.orgUnitNo) ?? '') : '',
       keywordText: document.keywords.join(', '),
+      filedOn: document.createdAt.slice(0, 10),
       validity,
       state: approved
         ? documentState(

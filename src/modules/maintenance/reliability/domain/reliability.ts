@@ -44,7 +44,7 @@ export interface ReliabilityOrder {
 }
 
 export interface ReliabilityKpis {
-  /** Mean time to repair: corrective orders, from the report to the declared finish, in hours. */
+  /** Mean time to repair: corrective orders, from their opening to their validated closing, in hours. */
   mttrHours: number | null
   /** Mean km between failures: fleet km of the period over its corrective orders. */
   mtbfKm: number | null
@@ -74,10 +74,10 @@ export function reliabilityKpis(input: {
   const measured = live.filter((order) => !order.imported && inPeriod(order.declaredAt, from, to))
   const failures = measured.filter((order) => order.maintenanceType === 'corrective')
   const repairs = failures
-    .filter((order) => order.completedAt)
+    .filter((order) => order.validatedAt)
     .map(
       (order) =>
-        (new Date(order.completedAt!).getTime() - new Date(order.declaredAt).getTime()) / HOUR_MS
+        (new Date(order.validatedAt!).getTime() - new Date(order.declaredAt).getTime()) / HOUR_MS
     )
   const totalCost = live
     .filter((order) => inPeriod(order.validatedAt, from, to))
@@ -144,4 +144,15 @@ export function ownershipCost(
 ): OwnershipCost {
   const total = parts.maintenance + parts.fuel + parts.tyres + parts.insurance
   return { ...parts, total, costPerKm: km > 0 ? Math.round((total / km) * 100) / 100 : null }
+}
+
+/** How an indicator reads against its target: some must reach it, others stay under it. */
+export function targetState(
+  value: number | null,
+  target: number,
+  direction: 'atLeast' | 'atMost'
+): 'reached' | 'missed' | null {
+  if (value === null) return null
+  const reached = direction === 'atLeast' ? value >= target : value <= target
+  return reached ? 'reached' : 'missed'
 }

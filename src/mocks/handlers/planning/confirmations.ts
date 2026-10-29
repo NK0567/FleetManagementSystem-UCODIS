@@ -1,11 +1,6 @@
 import {
-  checkDeliveryRequest,
-  entryFromLine,
-  newDeliveryRequest,
-  nextDeliveryRequestNo
-} from './deliveryRequests'
-import {
   confirmationState,
+  firstArrivalMarked,
   linesConfirmed,
   lineOutOfTour,
   type ConfirmationState
@@ -15,13 +10,13 @@ import type {
   NotificationChannel
 } from '@/modules/planning/customers/types/customer.types'
 import { transportOrderStatus } from '@/modules/planning/transport-orders/domain/transportOrder'
-import { nowIsoDateTime } from '@/utils/date'
+import { addDays, nowIsoDateTime, todayIso } from '@/utils/date'
 import type { MockDatabase } from '../../db/database'
 import type {
   TransportOrderLineRow,
   TransportOrderRow
 } from '../../fixtures/planning/transportOrders'
-import { readBody, routeParam, stampCreated, stampModified } from '../../http/crudResource'
+import { readBody, routeParam, stampModified } from '../../http/crudResource'
 import { conflict, unprocessable } from '../../http/errors'
 import { readDate } from '../../http/input'
 import { ok } from '../../http/responses'
@@ -29,6 +24,8 @@ import type { MockRouter } from '../../http/router'
 import { sessionUser, type MockRequest } from '../../http/types'
 import { PLANNING_MESSAGES } from './messages'
 import { readReason } from './planningReasons'
+import { planningSettings } from './settings'
+import { transportOrdersApi } from './transportOrders'
 
 const FEATURE = 'CUSTOMERCONFIRMATION'
 
@@ -54,6 +51,52 @@ export interface ConfirmationLineApi {
   takenAt: string | null
   /** The recipient answered himself through the link of his SMS, WhatsApp or e-mail. */
   byLink: boolean
+  /**
+   * What the planned line asks of the agents (TRS01-US15): a call for a recipient whose channel is
+   * the phone, once due by the company's call moment; nothing but waiting for an automated
+   * channel, whose answer comes by itself.
+   */
+  activity: 'call' | 'call_later' | 'await_answer' | null
+}
+
+/** One answer already given, kept for the « already answered » history (TRS01-US15). */
+export interface AnsweredLineApi {
+  orderNo: string
+  lineNo: number
+  recipientName: string
+  deliveryPointName: string
+  productName: string
+  quantity: number
+  unit: string
+  plannedDeparture: string | null
+  answer: 'confirmed' | 'unavailable'
+  /** The recipient himself through his link, or an agent after a call. */
+  origin: 'recipient' | 'call'
+  answeredAt: string | null
+  availableOn: string | null
+  orderStatus: string
+}
+
+/** The day the calls of a delivery fall due: the day before, or the day itself. */
+function callDue(db: MockDatabase, plannedDeparture: string | null): boolean {
+  if (!plannedDeparture) return false
+  const moment = planningSettings(db).confirmation.callMoment
+  const due =
+    moment === 'same_day'
+      ? plannedDeparture.slice(0, 10)
+      : addDays(plannedDeparture.slice(0, 10), -1)
+  return todayIso() >= due
+}
+
+function activityOf(
+  db: MockDatabase,
+  state: ConfirmationState,
+  channel: NotificationChannel,
+  plannedDeparture: string | null
+): ConfirmationLineApi['activity'] {
+  if (state !== 'pending') return null
+  if (channel === 'call') return callDue(db, plannedDeparture) ? 'call' : 'call_later'
+  return channel === 'none' ? null : 'await_answer'
 }
 
 function orderStatus(db: MockDatabase, order: TransportOrderRow) {
@@ -62,7 +105,8 @@ function orderStatus(db: MockDatabase, order: TransportOrderRow) {
     cancelledAt: order.cancelledAt,
     means: order.means,
     tripStatus: trip?.status ?? null,
-    linesConfirmed: linesConfirmed(order.lines)
+    linesConfirmed: linesConfirmed(order.lines),
+    firstArrival: firstArrivalMarked(order.lines)
   })
 }
 
@@ -109,7 +153,13 @@ export function confirmationsApi(db: MockDatabase): ConfirmationLineApi[] {
         preferredSlot: source?.preferredSlot ?? 'any',
         agent: line.confirmationAgent ?? null,
         takenAt: line.confirmationTakenAt ?? null,
-        byLink: line.answerOrigin === 'link'
+        byLink: line.answerOrigin === 'link',
+        activity: activityOf(
+          db,
+          confirmationState(line),
+          source?.notificationChannel ?? 'sms',
+          order.plannedDeparture
+        )
       })
     }
   }
@@ -120,6 +170,42 @@ export function confirmationsApi(db: MockDatabase): ConfirmationLineApi[] {
       a.orderNo.localeCompare(b.orderNo) ||
       a.lineNo - b.lineNo
   )
+}
+
+/**
+ * Every answer given so far, whatever has become of the order since (TRS01-US15): what was
+ * answered, by whom, and where the order stands now. Lines confirmed without asking are left out.
+ */
+export function answeredApi(db: MockDatabase): AnsweredLineApi[] {
+  const points = new Map(db.deliveryPoints.all().map((point) => [point.no, point]))
+  const products = new Map(db.products.all().map((product) => [product.no, product]))
+  const customers = new Map(db.customers.all().map((customer) => [customer.no, customer.name]))
+  const statuses = new Map(transportOrdersApi(db).map((order) => [order.no, order.status]))
+  const rows: AnsweredLineApi[] = []
+  for (const order of db.transportOrders.all()) {
+    for (const line of order.lines) {
+      const answered = line.confirmedAt ? line.confirmedBy !== 'auto' : line.unavailableAt !== null
+      if (!answered || !line.answerOrigin) continue
+      const point = points.get(line.deliveryPointNo)
+      const product = products.get(line.productNo)
+      rows.push({
+        orderNo: order.no,
+        lineNo: line.lineNo,
+        recipientName: customers.get(point?.customerNo ?? '') ?? '',
+        deliveryPointName: point?.name ?? '',
+        productName: product?.name ?? '',
+        quantity: line.quantity,
+        unit: product?.unit ?? '',
+        plannedDeparture: order.plannedDeparture,
+        answer: line.confirmedAt ? 'confirmed' : 'unavailable',
+        origin: line.answerOrigin === 'link' ? 'recipient' : 'call',
+        answeredAt: line.confirmedAt ?? line.unavailableAt,
+        availableOn: line.availableOn,
+        orderStatus: statuses.get(order.no) ?? 'draft'
+      })
+    }
+  }
+  return rows.sort((a, b) => (b.answeredAt ?? '').localeCompare(a.answeredAt ?? ''))
 }
 
 /** A line taken by another agent is left to that agent. */
@@ -163,6 +249,9 @@ function saveLine(
 export function registerConfirmationsHandlers(router: MockRouter, db: MockDatabase): void {
   router.get('/planning/confirmations', { feature: FEATURE, action: 'read' }, () =>
     ok(confirmationsApi(db))
+  )
+  router.get('/planning/confirmations/answered', { feature: FEATURE, action: 'read' }, () =>
+    ok(answeredApi(db))
   )
 
   const act = (
@@ -235,57 +324,16 @@ export function registerConfirmationsHandlers(router: MockRouter, db: MockDataba
     saveLine(db, order, next, request)
   })
 
+  /* The date the recipient gives on the phone, from which he can be delivered (TRS01-US15): it
+   * replaces a date the planner proposed, which he thereby refuses. Retaining it, or proposing
+   * another, is the planner's, on the order card (TRS01-US16). */
   act('client-date', (order, line, request) => {
     const date = readDate(readBody(request), 'date', { required: true })
-    saveLine(db, order, { ...line, clientProposedOn: date }, request)
-  })
-
-  act('propose-date', (order, line, request) => {
-    const date = readDate(readBody(request), 'date', { required: true })
-    saveLine(db, order, { ...line, plannerProposedOn: date }, request)
-  })
-
-  act('accept-date', (order, line, request) => {
-    const body = readBody(request)
-    const date =
-      readDate(body, 'date') ?? line.clientProposedOn ?? line.plannerProposedOn ?? line.availableOn
-    if (!date) throw unprocessable(PLANNING_MESSAGES.confirmationDateMissing)
-    const source = line.deliveryRequestNo
-      ? db.deliveryRequests.find(line.deliveryRequestNo)
-      : undefined
-    const point = db.deliveryPoints.findOrFail(line.deliveryPointNo)
-    const ordererNo =
-      source?.ordererNo ??
-      (db.customers.findOrFail(point.customerNo).isOrderer ? point.customerNo : '')
-    if (!ordererNo) throw unprocessable(PLANNING_MESSAGES.confirmationNeedsOrderer)
-    const entry = entryFromLine(
+    saveLine(
       db,
-      {
-        ordererNo,
-        deliveryPointNo: line.deliveryPointNo,
-        desiredDate: date,
-        validUntil: null,
-        externalReference: '',
-        freightPayer: source?.freightPayer ?? ('orderer' as const),
-        comment: '',
-        productNo: line.productNo,
-        quantity: line.quantity,
-        weightKg: line.weightKg,
-        volumeM3: source?.volumeM3 ?? null
-      },
-      source
+      order,
+      { ...line, clientProposedOn: date, plannerProposedOn: null, answerOrigin: 'agent' },
+      request
     )
-    checkDeliveryRequest(db, entry)
-    const no = nextDeliveryRequestNo(db)
-    db.deliveryRequests.insert(
-      stampCreated(
-        { ...newDeliveryRequest(no, entry, 'planner'), parentNo: source?.no ?? null },
-        request
-      )
-    )
-    saveLine(db, order, { ...line, replannedAt: nowIsoDateTime() }, request, {
-      kind: 'replanned',
-      detail: no
-    })
   })
 }

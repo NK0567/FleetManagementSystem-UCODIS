@@ -1,14 +1,14 @@
 import type {
   CarrierVehicle,
   ProviderContract,
-  ProviderType
+  ProviderSource
 } from '@/modules/fleet/providers/types/provider.types'
 import type { CollectionDefinition, MockRow } from '../../db/collection'
 import { seedAudit } from '../seedAudit'
 
 export interface ProviderRow extends MockRow {
   name: string
-  providerType: ProviderType
+  providerType: string
   contactName: string
   phone: string
   email: string
@@ -17,6 +17,8 @@ export interface ProviderRow extends MockRow {
   notAuthorizedReason: string
   contracts: ProviderContract[]
   carrierVehicles?: CarrierVehicle[]
+  source?: ProviderSource
+  externalId?: string | null
 }
 
 const SEED: Omit<ProviderRow, keyof typeof seedAudit>[] = [

@@ -1,5 +1,6 @@
-import { blockingAnomalies } from '@/modules/fleet/check-points/domain/checkResult'
+import { anomalies, blockingAnomalies } from '@/modules/fleet/check-points/domain/checkResult'
 import {
+  alertNotifications,
   alertStatus,
   isEscalated,
   isVisibleTo,
@@ -25,12 +26,15 @@ import { infractionsApi } from './infractions'
 import { inspectionsApi } from './inspections'
 import { insurancePoliciesApi } from './insurancePolicies'
 import { FLEET_MESSAGES } from './messages'
-import { departureChecklist } from './roadChecklists'
+import { departureChecklist, roadChecklistsApi } from './roadChecklists'
 import { routeDeviationsApi } from './routeDeviations'
 import { telematicsEventsApi } from './telematicsEvents'
 import { driverScoresApi } from './driverScores'
 import { trainingsApi } from './trainings'
 import { tyresApi } from '../maintenance/tyres'
+import { alertRuleOf } from './alertRules'
+import { serviceDueApi } from '../maintenance/serviceDue'
+import { needsService } from '@/modules/maintenance/service-due/domain/serviceDue'
 
 /** A situation that calls for someone, found in the fleet records each time alerts are read. */
 interface AlertSignal {
@@ -100,6 +104,27 @@ export function alertSignals(db: MockDatabase, language: MockLanguage): AlertSig
         severity: 'critical',
         subject: trip.no,
         detail: blocking.map((point) => point.label).join(', '),
+        since: checklist.takenAt
+      })
+    )
+  }
+  // Any other point found in anomaly on the road alerts the manager too, until a work order takes
+  // it up or the trip is over.
+  const flagged = new Set(signals.map((item) => item.key))
+  const tripsByNo = new Map(db.trips.all().map((trip) => [trip.no, trip]))
+  for (const checklist of roadChecklistsApi(db)) {
+    const trip = tripsByNo.get(checklist.tripNo)
+    if (!trip || trip.status === 'closed' || trip.status === 'cancelled') continue
+    const found = anomalies(checklist.results)
+    if (!found.length || checklist.workOrderNo || flagged.has(`checklist.${checklist.no}`)) continue
+    if (checklist.stage === 'departure' && departureChecklist(db, trip.no)?.no !== checklist.no) {
+      continue
+    }
+    signals.push(
+      signal('checklist', checklist.no, '/fleet/road-checklists', {
+        severity: 'warning',
+        subject: `${trip.no} · ${checklist.vehiclePlate}`,
+        detail: found.map((point) => point.label).join(', '),
         since: checklist.takenAt
       })
     )
@@ -254,6 +279,18 @@ export function alertSignals(db: MockDatabase, language: MockLanguage): AlertSig
       })
     )
   }
+  // A service within its notice or past due; the next due point is in the key, so each cycle alerts anew.
+  for (const due of serviceDueApi(db).filter((row) => needsService(row.status))) {
+    signals.push({
+      ...signal('service', due.no, '/maintenance/service-due', {
+        severity: due.status === 'due_soon' ? 'warning' : 'critical',
+        subject: due.vehiclePlate,
+        detail: `${due.operationLabel} · ${label('serviceDueStatus', due.status)}`,
+        since: todayIso()
+      }),
+      key: `service.${due.no}@${due.nextKm ?? ''}/${due.nextHours ?? ''}/${due.nextDate ?? ''}`
+    })
+  }
   return signals
 }
 
@@ -261,7 +298,7 @@ export function alertSignals(db: MockDatabase, language: MockLanguage): AlertSig
 export function alertsApi(db: MockDatabase, request: MockRequest): AlertApi[] {
   const now = new Date()
   const profile = sessionUser(request).profile
-  const rules = new Map(db.alertRules.all().map((rule) => [rule.no, rule]))
+  const rules = new Map(db.alertRules.all().map((rule) => [rule.no, alertRuleOf(rule)]))
   const handlings = new Map(db.alertHandlings.all().map((row) => [row.no, row]))
   const signals = alertSignals(db, request.language)
   const live = new Set(signals.map((item) => item.key))
@@ -282,7 +319,8 @@ export function alertsApi(db: MockDatabase, request: MockRequest): AlertApi[] {
       ...(handling ?? {}),
       no: item.key,
       category: item.category,
-      severity: item.severity,
+      // A rule may force its severity; by default each situation keeps its own.
+      severity: rule && rule.severity !== 'by_case' ? rule.severity : item.severity,
       subject: item.subject,
       detail: item.detail,
       since: item.since,
@@ -290,7 +328,8 @@ export function alertsApi(db: MockDatabase, request: MockRequest): AlertApi[] {
       recordNo: item.recordNo,
       status,
       escalated: !!rule && isEscalated(status, item.since, rule.escalationHours, now),
-      escalateTo: rule?.escalateTo || null
+      escalateTo: rule?.escalateTo || null,
+      notifications: rule?.active ? alertNotifications(rule, item.since) : []
     }
   })
   const resolved: AlertApi[] = db.alertHandlings
@@ -304,7 +343,8 @@ export function alertsApi(db: MockDatabase, request: MockRequest): AlertApi[] {
       recordNo: row.no.slice(row.no.indexOf('.') + 1),
       status: 'resolved' as const,
       escalated: false,
-      escalateTo: null
+      escalateTo: null,
+      notifications: []
     }))
 
   return [...current, ...resolved].filter((alert) => {

@@ -1,6 +1,7 @@
 import type { CheckResult } from '@/modules/fleet/check-points/domain/checkResult'
 import {
   DEPARTURE_CHECK_CODES,
+  type DepartureActivation,
   type DepartureCheck,
   type DepartureDecision
 } from '@/modules/fleet/departure-authorizations/domain/departure'
@@ -16,6 +17,8 @@ export interface DepartureAuthorizationRow extends MockRow {
   decidedAt: string | null
   refusalReason: string
   checksSnapshot: DepartureCheck[] | null
+  /** What the grant switched on in the vehicle; absent before the grant. */
+  activation?: DepartureActivation | null
 }
 
 function driverChecks(): CheckResult[] {

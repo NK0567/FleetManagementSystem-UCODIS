@@ -1,5 +1,7 @@
+import type { DowntimeRole } from '@/modules/maintenance/downtime-codes/types/downtimeCode.types'
 import {
   vehicleStatus,
+  type Immobilization,
   type VehicleStatusCause,
   type VehicleStatusFacts,
   type VehicleStatusResult
@@ -8,7 +10,6 @@ import type { MockDatabase } from '../../db/database'
 import type { VehicleRow } from '../../fixtures/fleet/vehicles'
 import { localize, localizeDay, type MockLanguage } from '../../i18n'
 import { activeLinks, coupledWith, employeeNames, vehiclePlates } from './links'
-import { openDowntimeCauses } from '../maintenance/downtimes'
 import { blockingServiceCauses } from '../maintenance/serviceDue'
 import { FLEET_MESSAGES } from './messages'
 import { tripIndex } from './tripIndex'
@@ -24,8 +25,28 @@ export function vehicleStatuses(db: MockDatabase): Map<string, VehicleStatusResu
   const compliance = documentCompliance(db).vehicles
   const typeNames = new Map(db.documentTypes.all().map((type) => [type.no, type.name]))
   const rechecks = vehiclesAwaitingRecheck(db)
-  const downtimes = openDowntimeCauses(db)
   const services = blockingServiceCauses(db)
+  const codes = db.downtimeCodes.all()
+  const codeOf = (role: DowntimeRole) => codes.find((code) => code.systemRole === role)?.no ?? null
+  const codeNames = new Map(codes.map((code) => [code.no, code.name]))
+  const openWorkOrderDowntimes = new Set(
+    db.workOrders
+      .all()
+      .map((order) => order.downtimeNo)
+      .filter((no): no is string => !!no)
+  )
+  const downtimes = new Map<string, Immobilization[]>()
+  for (const row of db.downtimes.all().filter((downtime) => !downtime.endedAt)) {
+    downtimes.set(row.vehicleNo, [
+      ...(downtimes.get(row.vehicleNo) ?? []),
+      {
+        kind: 'maintenance',
+        detail: codeNames.get(row.downtimeCodeNo) ?? row.downtimeCodeNo,
+        code: row.downtimeCodeNo,
+        workshop: row.origin === 'work_order' || openWorkOrderDowntimes.has(row.no)
+      }
+    ])
+  }
   const factsOf = (vehicle: VehicleRow): VehicleStatusFacts => {
     const assignment = links.assignmentByVehicle.get(vehicle.no)
     const coupling = links.couplingByVehicle.get(vehicle.no)
@@ -33,18 +54,24 @@ export function vehicleStatuses(db: MockDatabase): Map<string, VehicleStatusResu
       removed: vehicle.removal !== null,
       outOfServiceReason: vehicle.outOfService?.reason ?? null,
       immobilizations: [
+        ...(downtimes.get(vehicle.no) ?? []),
         ...invalidatingGaps(compliance.get(vehicle.no) ?? []).map((gap) => ({
           kind: 'document' as const,
-          detail: typeNames.get(gap.documentTypeNo) ?? gap.documentTypeNo
+          detail: typeNames.get(gap.documentTypeNo) ?? gap.documentTypeNo,
+          code: codeOf('expired_document')
         })),
         ...[rechecks.get(vehicle.no)]
           .filter((inspection) => !!inspection)
-          .map((inspection) => ({ kind: 'inspection' as const, detail: inspection.findings })),
-        ...(downtimes.get(vehicle.no) ?? []).map((detail) => ({
-          kind: 'maintenance' as const,
-          detail
-        })),
-        ...(services.get(vehicle.no) ?? []).map((detail) => ({ kind: 'service' as const, detail }))
+          .map((inspection) => ({
+            kind: 'inspection' as const,
+            detail: inspection.findings,
+            code: codeOf('recheck')
+          })),
+        ...(services.get(vehicle.no) ?? []).map((detail) => ({
+          kind: 'service' as const,
+          detail,
+          code: codeOf('overdue_service')
+        }))
       ],
       activeTripNo: trips.onRoadByVehicle.get(vehicle.no)?.no ?? null,
       driverName: assignment ? (names.get(assignment.employeeNo) ?? assignment.employeeNo) : null,
@@ -82,4 +109,13 @@ export function statusReason(
     case 'coupling':
       return localize(language, FLEET_MESSAGES.causeCoupling, { detail: cause.detail })
   }
+}
+
+/** Code and name of the unavailability cause in the codification, if the cause carries one. */
+export function statusCauseCode(
+  db: MockDatabase,
+  cause: VehicleStatusCause | null
+): { code: string | null; name: string } {
+  const code = cause && 'code' in cause ? (cause.code ?? null) : null
+  return { code, name: code ? (db.downtimeCodes.find(code)?.name ?? '') : '' }
 }

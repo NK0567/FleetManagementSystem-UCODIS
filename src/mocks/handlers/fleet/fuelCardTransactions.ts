@@ -24,6 +24,8 @@ import {
 import { conflict, unprocessable } from '../../http/errors'
 import { readBoolean, readDateTime, readNumber, readString } from '../../http/input'
 import { requireReference } from '../../http/references'
+import { importRows } from '../../http/importRows'
+import { normalizeCardNumber } from '@/modules/fleet/fuel-card-transactions/domain/transactionImport'
 import { ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
 import type { MockRequest } from '../../http/types'
@@ -140,72 +142,97 @@ export function registerFuelCardTransactionsHandlers(router: MockRouter, db: Moc
     return transaction
   }
 
+  /** One way to build a transaction, typed in or imported from the supplier's statement. */
+  function buildTransaction(input: Record<string, unknown>, cardNo: string) {
+    const transactedAt = readDateTime(input, 'transactedAt', { required: true }) ?? ''
+    if (transactedAt > nowIsoDateTime()) throw unprocessable(FLEET_MESSAGES.dateInFuture)
+    const transaction = {
+      no: nextNo(
+        db.fuelCardTransactions.all().map((row) => row.no),
+        'TX-',
+        5
+      ),
+      cardNo,
+      transactedAt,
+      station: readString(input, 'station', { required: true }),
+      city: readString(input, 'city', { required: true }),
+      liters: readNumber(input, 'liters', { required: true, min: 0.1 }) ?? 0,
+      amount: readNumber(input, 'amount', { required: true, min: 1 }) ?? 0,
+      refillNo: null,
+      matchMode: null
+    }
+    // The supplier's file may be imported twice: same card, same minute, same litres.
+    const twin = db.fuelCardTransactions
+      .all()
+      .find(
+        (row) =>
+          row.cardNo === cardNo &&
+          row.transactedAt.slice(0, 16) === transactedAt.slice(0, 16) &&
+          row.liters === transaction.liters
+      )
+    if (twin) throw conflict(FLEET_MESSAGES.transactionDuplicate, { no: twin.no })
+    return transaction
+  }
+
+  /** Matches every transaction still alone with the closest refill of its holder. */
+  function matchAll(request: MockRequest): number {
+    const settings = fleetSettings(db).fuel
+    let matched = 0
+    // Detached transactions were judged by someone: an automatic match leaves them alone.
+    for (const transaction of db.fuelCardTransactions
+      .all()
+      .filter((row) => !row.refillNo && !row.matchMode)) {
+      const card = db.fuelCards.findOrFail(transaction.cardNo)
+      const refill = closestRefill(
+        transaction,
+        freeRefills(db, card, transaction.no),
+        settings.matchingToleranceMin,
+        settings.matchingTolerancePct
+      )
+      if (!refill) continue
+      db.fuelCardTransactions.update(transaction.no, {
+        refillNo: refill.no,
+        matchMode: 'auto',
+        ...stampModified(request)
+      })
+      matched++
+    }
+    return matched
+  }
+
+  // The supplier's statement: each line goes through the same rules, then is matched with the refills.
+  router.post(
+    '/fleet/fuel-card-transactions/import',
+    { feature: 'FUELCARD', action: 'insert' },
+    (request) => {
+      const cards = new Map(
+        db.fuelCards.all().map((card) => [normalizeCardNumber(card.number), card.no])
+      )
+      const report = importRows(readBody(request).rows, request, (input) => {
+        const number = readString(input, 'cardNumber', { required: true })
+        const cardNo = cards.get(normalizeCardNumber(number))
+        if (!cardNo) throw unprocessable(FLEET_MESSAGES.cardNumberUnknown, { number })
+        return db.fuelCardTransactions.insert(
+          stampCreated(buildTransaction(input, cardNo), request)
+        ).no
+      })
+      return ok({ ...report, matched: report.created ? matchAll(request) : 0 })
+    }
+  )
+
   registerCrudResource(router, {
     basePath: '/fleet/fuel-card-transactions',
     feature: 'FUELCARD',
     collection: db.fuelCardTransactions,
     list: (request) => fuelCardTransactionsApi(db, request.language),
     searchColumns: ['no', 'cardNumber', 'station', 'city'],
-    create: (input) => {
-      const cardNo = requireReference(db.fuelCards, input, 'cardNo')
-      const transactedAt = readDateTime(input, 'transactedAt', { required: true }) ?? ''
-      if (transactedAt > nowIsoDateTime()) throw unprocessable(FLEET_MESSAGES.dateInFuture)
-      const transaction = {
-        no: nextNo(
-          db.fuelCardTransactions.all().map((row) => row.no),
-          'TX-',
-          5
-        ),
-        cardNo,
-        transactedAt,
-        station: readString(input, 'station', { required: true }),
-        city: readString(input, 'city', { required: true }),
-        liters: readNumber(input, 'liters', { required: true, min: 0.1 }) ?? 0,
-        amount: readNumber(input, 'amount', { required: true, min: 1 }) ?? 0,
-        refillNo: null,
-        matchMode: null
-      }
-      // The supplier's file may be imported twice: same card, same minute, same litres.
-      const twin = db.fuelCardTransactions
-        .all()
-        .find(
-          (row) =>
-            row.cardNo === cardNo &&
-            row.transactedAt.slice(0, 16) === transactedAt.slice(0, 16) &&
-            row.liters === transaction.liters
-        )
-      if (twin) throw conflict(FLEET_MESSAGES.transactionDuplicate, { no: twin.no })
-      return transaction
-    }
+    create: (input) => buildTransaction(input, requireReference(db.fuelCards, input, 'cardNo'))
   })
 
   router.post(
     '/fleet/fuel-card-transactions/match-all',
     { feature: 'FUELCARD', action: 'update' },
-    (request) => {
-      const settings = fleetSettings(db).fuel
-      let matched = 0
-      // Detached transactions were judged by someone: an automatic match leaves them alone.
-      for (const transaction of db.fuelCardTransactions
-        .all()
-        .filter((row) => !row.refillNo && !row.matchMode)) {
-        const card = db.fuelCards.findOrFail(transaction.cardNo)
-        const refill = closestRefill(
-          transaction,
-          freeRefills(db, card, transaction.no),
-          settings.matchingToleranceMin,
-          settings.matchingTolerancePct
-        )
-        if (!refill) continue
-        db.fuelCardTransactions.update(transaction.no, {
-          refillNo: refill.no,
-          matchMode: 'auto',
-          ...stampModified(request)
-        })
-        matched++
-      }
-      return ok({ matched })
-    }
+    (request) => ok({ matched: matchAll(request) })
   )
 
   router.post(

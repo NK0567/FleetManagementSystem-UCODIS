@@ -27,6 +27,6 @@ export default {
   'maintenance.downtimeCodes.form.family': 'Famille',
   'maintenance.downtimeCodes.form.systemRole': 'Rôle automatique',
   'maintenance.downtimeCodes.form.systemRoleHint':
-    "La cause que l'application choisit seule pour une panne, un entretien ou un accident. Un seul code par rôle.",
+    "La cause que l'application choisit seule pour une panne, un entretien, un accident, un document expiré, une contre-visite ou un entretien dépassé. Un seul code par rôle.",
   'maintenance.downtimeCodes.form.active': 'Active'
 }

@@ -1,6 +1,11 @@
 import { createCrudService } from '@/core/factories'
 import { vehicleApi } from '../api/vehicleApi'
+import type { ImportReport } from '@/core/utils/csvImport'
 import type { VehicleApi, VehicleEquipmentApi, VehicleSearchColumn } from '../types/vehicle.types'
+import type {
+  VehicleMaintenanceEntry,
+  VehicleOwnershipCostApi
+} from '../types/vehicleRecords.types'
 
 export interface VehicleRemovalInput {
   date: string
@@ -31,6 +36,15 @@ export const vehicleService = {
   },
   async removePhoto(no: string, fileNo: string): Promise<VehicleApi> {
     return (await vehicleApi.removePhoto(no, fileNo)).data.data
+  },
+  async importRows(rows: Record<string, unknown>[]): Promise<ImportReport> {
+    return (await vehicleApi.importRows(rows)).data.data
+  },
+  async maintenanceLog(no: string): Promise<VehicleMaintenanceEntry[]> {
+    return (await vehicleApi.maintenanceLog(no)).data.data
+  },
+  async ownershipCost(no: string): Promise<VehicleOwnershipCostApi> {
+    return (await vehicleApi.ownershipCost(no)).data.data
   },
   async getEquipment(no: string): Promise<VehicleEquipmentApi[]> {
     return (await vehicleApi.getEquipment(no)).data.data

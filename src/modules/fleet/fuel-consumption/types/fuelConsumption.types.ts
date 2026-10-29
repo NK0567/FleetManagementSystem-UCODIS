@@ -7,6 +7,9 @@ export interface FuelGapFile {
   qualifiedBy: string | null
   qualifiedAt: string | null
   proposedAmount: number | null
+  /** Net monthly salary of the driver given with the proposal, and what could be withheld that month. */
+  monthlySalary: number | null
+  withholdableAmount: number | null
   proposedBy: string | null
   proposedAt: string | null
   decisionComment: string
@@ -19,7 +22,11 @@ export interface FuelConsumptionApi extends FuelGapFile {
   no: string
   vehicleNo: string
   vehiclePlate: string
+  driverNo: string | null
   driverName: string
+  /** The corridor of the closing refill's trip, when it was on one. */
+  routeTemplateNo: string | null
+  routeName: string
   openingNo: string
   closingNo: string
   from: string
@@ -44,6 +51,10 @@ export interface FuelConsumptionSummary {
   /** Total litres over total distance of the measured periods. */
   averageL100: number | null
   co2Kg: number
+  /** Motorized vehicles in the park, and how many run on a low-emission energy. */
+  motorizedVehicles: number
+  lowEmissionVehicles: number
+  lowEmissionSharePct: number | null
   refillsToQualify: number
   gapsToQualify: number
 }

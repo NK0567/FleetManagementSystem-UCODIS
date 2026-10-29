@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, onMounted, reactive } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePermissions } from '@/composables/usePermissions'
 import { useUnsavedChangesRouteGuard } from '@/composables/useUnsavedChangesRouteGuard'
@@ -12,13 +12,16 @@ import {
   type PlanningSettingsSection
 } from '../domain/planningSettings'
 import { usePlanningSettingsStore } from '../stores/planningSettingsStore'
+import IncidentListsEditor from '../components/IncidentListsEditor.vue'
+import UserPerimetersEditor from '../components/UserPerimetersEditor.vue'
 
 const { t } = useI18n()
 const store = usePlanningSettingsStore()
 const { canUpdate } = usePermissions('PLANNINGSETTINGS')
 
 const dirtySections = reactive(new Set<PlanningSettingsSection>())
-useUnsavedChangesRouteGuard(computed(() => dirtySections.size > 0))
+const incidentsDirty = ref(false)
+useUnsavedChangesRouteGuard(computed(() => dirtySections.size > 0 || incidentsDirty.value))
 
 function setDirty(section: PlanningSettingsSection, dirty: boolean) {
   if (dirty) dirtySections.add(section)
@@ -76,6 +79,14 @@ onMounted(() => void store.fetchSettings())
         :save="saveSection(section)"
         @update:dirty="setDirty(section, $event)"
       />
+      <IncidentListsEditor
+        :lists="store.settings.incidents"
+        :can-edit="canUpdate"
+        :saving="store.savingIncidents"
+        :save="store.saveIncidents"
+        @update:dirty="incidentsDirty = $event"
+      />
+      <UserPerimetersEditor :can-edit="canUpdate" />
     </template>
   </div>
 </template>

@@ -13,7 +13,7 @@ import { formatDateTime } from '@/utils/format'
 interface NotificationApi {
   no: string
   at: string
-  kind: 'order_assigned' | 'order_cancelled'
+  kind: 'order_assigned' | 'order_cancelled' | 'order_withdrawn'
   orderNo: string
   detail: string
   readAt: string | null

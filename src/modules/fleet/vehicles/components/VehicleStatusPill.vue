@@ -10,6 +10,7 @@ const TONES: Record<VehicleStatus, StatusTone> = {
   available: 'success',
   assigned: 'info',
   in_mission: 'info',
+  in_maintenance: 'warning',
   immobilized: 'warning',
   out_of_service: 'danger',
   removed: 'neutral'

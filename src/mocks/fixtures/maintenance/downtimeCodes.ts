@@ -49,6 +49,27 @@ const SEED: Omit<DowntimeCodeRow, keyof typeof seedAudit>[] = [
     active: true
   },
   {
+    no: 'DOC',
+    name: 'Document obligatoire expiré',
+    family: 'regulatory',
+    systemRole: 'expired_document',
+    active: true
+  },
+  {
+    no: 'CVI',
+    name: 'Contre-visite à passer',
+    family: 'regulatory',
+    systemRole: 'recheck',
+    active: true
+  },
+  {
+    no: 'EDP',
+    name: 'Entretien dépassé',
+    family: 'technical',
+    systemRole: 'overdue_service',
+    active: true
+  },
+  {
     no: 'ADM',
     name: 'Démarche administrative en cours',
     family: 'administrative',

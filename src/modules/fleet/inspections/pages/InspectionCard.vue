@@ -1,13 +1,15 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { ClipboardCheck } from '@lucide/vue'
+import { ClipboardCheck, Printer } from '@lucide/vue'
 import { apiErrorMessage } from '@/core/api/apiError'
 import type { CardOpenMode } from '@/composables/cardOpenMode'
 import { useEntityCard } from '@/composables/useEntityCard'
 import { usePermissions } from '@/composables/usePermissions'
 import { todayIso } from '@/utils/date'
 import InspectionForm from '../components/InspectionForm.vue'
+import InspectionReport from '../components/InspectionReport.vue'
+import { printElement } from '@/utils/printElement'
 import { awaitsRecheck } from '../domain/inspection'
 import { inspectionService } from '../services/inspectionService'
 import { useInspectionStore } from '../stores/inspectionStore'
@@ -58,6 +60,15 @@ const {
 const pageTitle = computed(() =>
   item.value ? `${item.value.no} · ${item.value.vehiclePlate}` : t('fleet.inspections.card')
 )
+
+const report = ref<InstanceType<typeof InspectionReport> | null>(null)
+function printReport() {
+  if (!item.value) return
+  printElement(
+    report.value?.root ?? null,
+    t('fleet.inspections.report.title', { no: item.value.no })
+  )
+}
 
 const canRecheck = computed(
   () => canUpdate.value && !!item.value && !isEditMode.value && awaitsRecheck(item.value)
@@ -132,6 +143,13 @@ async function confirmRecheck() {
         :eligible="item.result === 'non_conforming' && !item.recheckDoneOn"
       />
       <button
+        type="button"
+        class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
+        @click="printReport"
+      >
+        <Printer class="w-5 h-5 text-primary" /> {{ t('fleet.inspections.action.printReport') }}
+      </button>
+      <button
         v-if="canRecheck"
         type="button"
         class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
@@ -160,6 +178,9 @@ async function confirmRecheck() {
             :disabled="!isEditMode || isSaving"
             :validation-errors="validationErrors"
           />
+          <div class="hidden">
+            <InspectionReport v-if="item" ref="report" :inspection="item" />
+          </div>
         </div>
       </div>
     </template>

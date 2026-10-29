@@ -21,7 +21,7 @@ describe('maintenance settings', () => {
   it('are saved one section at a time, within bounds, by the fleet manager only', async () => {
     const settings = (await call(server, 'get', '/maintenance/settings', { as: 'MNT001' })).data
       .data as MaintenanceSettingsApi
-    expect(settings.service).toMatchObject({ toleranceKm: 500, toleranceDays: 7 })
+    expect(settings.service).toMatchObject({ noticeKm: 1_000, noticeDays: 15, noticeHours: 50 })
     const workshop = { stations: 3, hoursPerDay: 9, workingDaysPerWeek: 6 }
     expect((await send('put', '/maintenance/settings/workshop', workshop, 'MNT001')).status).toBe(
       403

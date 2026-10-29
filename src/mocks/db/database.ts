@@ -14,6 +14,7 @@ import { equipmentTypesCollection } from '../fixtures/fleet/equipmentTypes'
 import { siteTypesCollection } from '../fixtures/fleet/siteTypes'
 import { sitesCollection } from '../fixtures/fleet/sites'
 import { providersCollection } from '../fixtures/fleet/providers'
+import { providerTypesCollection } from '../fixtures/fleet/providerTypes'
 import { vehiclesCollection } from '../fixtures/fleet/vehicles'
 import { vehicleEquipmentCollection } from '../fixtures/fleet/vehicleEquipment'
 import { couplingsCollection } from '../fixtures/fleet/couplings'
@@ -22,6 +23,7 @@ import { routeTemplatesCollection } from '../fixtures/fleet/routeTemplates'
 import { tripsCollection } from '../fixtures/fleet/trips'
 import {
   fleetStatusArchivesCollection,
+  fleetStatusDispatchesCollection,
   fleetStatusNotesCollection
 } from '../fixtures/fleet/fleetStatus'
 import { filesCollection } from '../fixtures/files'
@@ -36,6 +38,8 @@ import { infractionsCollection } from '../fixtures/fleet/infractions'
 import { trainingsCollection } from '../fixtures/fleet/trainings'
 import { checkPointsCollection } from '../fixtures/fleet/checkPoints'
 import { inspectionsCollection } from '../fixtures/fleet/inspections'
+import { inspectionItemsCollection } from '../fixtures/fleet/inspectionItems'
+import { fuelReferencesCollection } from '../fixtures/fleet/fuelReferences'
 import { roadChecklistsCollection } from '../fixtures/fleet/roadChecklists'
 import { departureAuthorizationsCollection } from '../fixtures/fleet/departureAuthorizations'
 import { deviationTypesCollection } from '../fixtures/fleet/deviationTypes'
@@ -58,6 +62,7 @@ import { downtimesCollection } from '../fixtures/maintenance/downtimes'
 import { workOrdersCollection } from '../fixtures/maintenance/workOrders'
 import { maintenancePlansCollection } from '../fixtures/maintenance/maintenancePlans'
 import { serviceRecordsCollection } from '../fixtures/maintenance/serviceRecords'
+import { engineHourReadingsCollection } from '../fixtures/maintenance/engineHourReadings'
 import { stockItemsCollection } from '../fixtures/maintenance/stockItems'
 import { stockMovementsCollection } from '../fixtures/maintenance/stockMovements'
 import { purchaseRequestsCollection } from '../fixtures/maintenance/purchaseRequests'
@@ -84,7 +89,7 @@ import { createCollection, type CollectionContext } from './collection'
 import { clearStoredCollections } from './storage'
 
 /** Bump when fixtures change shape: every collection is then reseeded. */
-export const MOCK_SEED_VERSION = 57
+export const MOCK_SEED_VERSION = 58
 
 export function createDatabase(
   context: CollectionContext = {
@@ -113,6 +118,7 @@ export function createDatabase(
     siteTypes: createCollection(siteTypesCollection, context),
     sites: createCollection(sitesCollection, context),
     providers: createCollection(providersCollection, context),
+    providerTypes: createCollection(providerTypesCollection, context),
     vehicles: createCollection(vehiclesCollection, context),
     vehicleEquipment: createCollection(vehicleEquipmentCollection, context),
     couplings: createCollection(couplingsCollection, context),
@@ -121,6 +127,7 @@ export function createDatabase(
     trips: createCollection(tripsCollection, context),
     fleetStatusNotes: createCollection(fleetStatusNotesCollection, context),
     fleetStatusArchives: createCollection(fleetStatusArchivesCollection, context),
+    fleetStatusDispatches: createCollection(fleetStatusDispatchesCollection, context),
     documentTypes: createCollection(documentTypesCollection, context),
     documents: createCollection(documentsCollection, context),
     companyDocuments: createCollection(companyDocumentsCollection, context),
@@ -131,6 +138,8 @@ export function createDatabase(
     trainings: createCollection(trainingsCollection, context),
     checkPoints: createCollection(checkPointsCollection, context),
     inspections: createCollection(inspectionsCollection, context),
+    inspectionItems: createCollection(inspectionItemsCollection, context),
+    fuelReferences: createCollection(fuelReferencesCollection, context),
     roadChecklists: createCollection(roadChecklistsCollection, context),
     departureAuthorizations: createCollection(departureAuthorizationsCollection, context),
     deviationTypes: createCollection(deviationTypesCollection, context),
@@ -153,6 +162,7 @@ export function createDatabase(
     workOrders: createCollection(workOrdersCollection, context),
     maintenancePlans: createCollection(maintenancePlansCollection, context),
     serviceRecords: createCollection(serviceRecordsCollection, context),
+    engineHourReadings: createCollection(engineHourReadingsCollection, context),
     stockItems: createCollection(stockItemsCollection, context),
     stockMovements: createCollection(stockMovementsCollection, context),
     purchaseRequests: createCollection(purchaseRequestsCollection, context),

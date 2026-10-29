@@ -11,12 +11,17 @@ import {
   DELIVERY_SLOTS,
   NOTIFICATION_CHANNELS
 } from '@/modules/planning/customers/types/customer.types'
-import type {
-  DeliveryFollowUp,
-  DeliveryRequestApi,
-  DeliveryRequestLine
+import {
+  DELIVERY_REQUEST_KINDS,
+  type DeliveryFollowUp,
+  type DeliveryRequestApi,
+  type DeliveryRequestLine,
+  type DeliveryRequestOrigin
 } from '@/modules/planning/delivery-requests/types/deliveryRequest.types'
-import { FREIGHT_PAYERS } from '@/modules/planning/planning-settings/domain/planningSettings'
+import {
+  FREIGHT_PAYERS,
+  offeredChannels
+} from '@/modules/planning/planning-settings/domain/planningSettings'
 import { nowIsoDateTime, todayIso } from '@/utils/date'
 import { normalizeSearchText } from '@/utils/search'
 import type { AuditFields } from '../../db/collection'
@@ -52,11 +57,19 @@ import { requestPlace, visibleTo } from './perimeter'
 import { PLANNING_MESSAGES } from './messages'
 import { readReason } from './planningReasons'
 import { planningSettings } from './settings'
+import { CIRCUIT_MESSAGES } from './circuitMessages'
+import { optionalReference } from '../../http/references'
+import { localize, toMockLanguage } from '../../i18n'
 
 const BASE_PATH = '/planning/delivery-requests'
 
 type Entry = Pick<
   DeliveryRequestRow,
+  | 'kind'
+  | 'pickupPointNo'
+  | 'content'
+  | 'unitCount'
+  | 'requiredEquipmentTypeNo'
   | 'ordererNo'
   | 'deliveryPointNo'
   | 'desiredDate'
@@ -87,6 +100,7 @@ export function deliveryRequestsApi(
   const reasons = new Map(db.planningReasons.all().map((reason) => [reason.no, reason.name]))
   const orders = db.transportOrders.all()
   const vehicles = new Map(db.vehicles.all().map((vehicle) => [vehicle.no, vehicle.plate]))
+  const equipment = new Map(db.equipmentTypes.all().map((type) => [type.no, type.name]))
   return db.deliveryRequests
     .all()
     .filter((row) => !userCode || visibleTo(db, userCode, requestPlace(db, row.deliveryPointNo)))
@@ -102,6 +116,13 @@ export function deliveryRequestsApi(
       }))
       return {
         ...row,
+        kind: row.kind ?? 'sale',
+        pickupPointNo: row.pickupPointNo ?? null,
+        pickupPointName: points.get(row.pickupPointNo ?? '')?.name ?? '',
+        content: row.content ?? '',
+        unitCount: row.unitCount ?? null,
+        requiredEquipmentTypeNo: row.requiredEquipmentTypeNo ?? null,
+        requiredEquipmentName: equipment.get(row.requiredEquipmentTypeNo ?? '') ?? '',
         lines,
         lineCount: lines.length,
         status: deliveryRequestStatus(row, today),
@@ -142,10 +163,17 @@ function followUpOf(
   }[],
   plateOf: (tripNo: string | null) => string
 ) {
-  const order = orders.find(
+  // A line replanned into another order is followed there: the live line wins over the old one.
+  const holding = orders.filter(
     (item) => !item.cancelledAt && item.lines.some((line) => line.deliveryRequestNo === no)
   )
-  const line = order?.lines.find((item) => item.deliveryRequestNo === no)
+  const order =
+    holding.find((item) =>
+      item.lines.some((line) => line.deliveryRequestNo === no && !line.replannedAt)
+    ) ?? holding[0]
+  const line =
+    order?.lines.find((item) => item.deliveryRequestNo === no && !item.replannedAt) ??
+    order?.lines.find((item) => item.deliveryRequestNo === no)
   if (!order || !line) {
     return {
       followUp: null as DeliveryFollowUp | null,
@@ -190,8 +218,43 @@ function assertOwn(row: DeliveryRequestRow, request: MockRequest): void {
 
 const statusOf = (row: DeliveryRequestRow) => deliveryRequestStatus(row, todayIso())
 
+/**
+ * A sale goes to a recipient's site; a transfer leaves a depot for a site of the company; a
+ * return leaves the recipient's site for a depot of the company (TRS01-US01).
+ */
+function checkPlaces(db: MockDatabase, entry: Entry): void {
+  const destination = db.deliveryPoints.findOrFail(entry.deliveryPointNo)
+  const pickup = entry.pickupPointNo ? db.deliveryPoints.find(entry.pickupPointNo) : undefined
+  if (entry.pickupPointNo && !pickup?.active) {
+    throw unprocessable(CIRCUIT_MESSAGES.requestPickupInvalid)
+  }
+  const isDepot = (point?: { kind?: string }) => point?.kind === 'depot'
+  const ours = (point?: { kind?: string; ownerName?: string }) =>
+    isDepot(point) && !point?.ownerName
+  switch (entry.kind ?? 'sale') {
+    case 'sale':
+      if (isDepot(destination)) throw unprocessable(CIRCUIT_MESSAGES.requestSaleDestination)
+      if (pickup && !isDepot(pickup)) throw unprocessable(CIRCUIT_MESSAGES.requestPickupInvalid)
+      return
+    case 'transfer':
+      if (!ours(destination) || !isDepot(pickup) || pickup?.no === destination.no) {
+        throw unprocessable(CIRCUIT_MESSAGES.requestTransferPoint)
+      }
+      return
+    case 'return':
+      if (!ours(destination) || !pickup || isDepot(pickup)) {
+        throw unprocessable(CIRCUIT_MESSAGES.requestReturnPoint)
+      }
+  }
+}
+
 /** Checks a request as it will be stored, whoever sent it and however it came in. */
-export function checkDeliveryRequest(db: MockDatabase, entry: Entry, no?: string): void {
+export function checkDeliveryRequest(
+  db: MockDatabase,
+  entry: Entry,
+  no?: string,
+  options: { weightRequired?: boolean } = {}
+): void {
   const orderer = db.customers.findOrFail(entry.ordererNo)
   if (!orderer.isOrderer || !orderer.active) {
     throw unprocessable(PLANNING_MESSAGES.requestOrdererInvalid)
@@ -199,11 +262,22 @@ export function checkDeliveryRequest(db: MockDatabase, entry: Entry, no?: string
   if (!db.deliveryPoints.findOrFail(entry.deliveryPointNo).active) {
     throw unprocessable(PLANNING_MESSAGES.requestPointInactive)
   }
+  checkPlaces(db, entry)
   if (!entry.lines.length) throw unprocessable(PLANNING_MESSAGES.requestNeedsLines)
   for (const line of entry.lines) {
     if (!db.products.findOrFail(line.productNo).active) {
       throw unprocessable(PLANNING_MESSAGES.requestProductInactive)
     }
+    // The weight decides the vehicle: it is always asked for a new or corrected order.
+    if (options.weightRequired && !(Number(line.weightKg) > 0)) {
+      throw unprocessable(CIRCUIT_MESSAGES.requestWeightRequired)
+    }
+  }
+  // Only the channels the company offers (TRS07-US05); « none » always stays possible.
+  if (
+    !offeredChannels(planningSettings(db).channels).includes(entry.notificationChannel as never)
+  ) {
+    throw unprocessable(CIRCUIT_MESSAGES.channelNotOffered)
   }
   const [issue] = deliveryRequestIssues(entry, todayIso())
   if (issue) throw unprocessable(PLANNING_MESSAGES[`request_${issue}`])
@@ -217,12 +291,16 @@ export function checkDeliveryRequest(db: MockDatabase, entry: Entry, no?: string
     }
     return
   }
-  // A customer's reference names one request: a second one is a duplicate.
+  // A customer's reference names one request: a second one is a duplicate. A part of the same
+  // order, split off or replanned, keeps its reference (TRS01-US06).
+  const self = no ? db.deliveryRequests.find(no) : undefined
+  const root = self?.parentNo ?? no
   const twin = db.deliveryRequests
     .all()
     .find(
       (other) =>
         other.no !== no &&
+        (!root || (other.no !== root && other.parentNo !== root)) &&
         other.ordererNo === entry.ordererNo &&
         !other.cancelledAt &&
         normalizeSearchText(other.externalReference) === reference
@@ -232,11 +310,17 @@ export function checkDeliveryRequest(db: MockDatabase, entry: Entry, no?: string
 
 // Only the entered fields: a part copied from a request must not carry its number or its history.
 function pickEntry(entry: Entry): Entry {
+  const { kind, pickupPointNo, content, unitCount, requiredEquipmentTypeNo } = entry
   const { ordererNo, deliveryPointNo, desiredDate, validUntil, externalReference } = entry
   const { freightPayer, comment, notificationChannel, confirmationRequired } = entry
   const { preferredSlot, fullDeliveryRequired } = entry
   const lines = requestLines(entry)
   return {
+    kind: kind ?? 'sale',
+    pickupPointNo: pickupPointNo ?? null,
+    content: content ?? '',
+    unitCount: unitCount ?? null,
+    requiredEquipmentTypeNo: requiredEquipmentTypeNo ?? null,
     ordererNo,
     deliveryPointNo,
     desiredDate,
@@ -321,12 +405,24 @@ export function entryFromLine(
   db: MockDatabase,
   fields: Omit<
     Entry,
-    'lines' | keyof ReturnType<typeof recipientPreferences> | 'fullDeliveryRequired'
+    | 'lines'
+    | keyof ReturnType<typeof recipientPreferences>
+    | 'fullDeliveryRequired'
+    | 'kind'
+    | 'pickupPointNo'
+    | 'content'
+    | 'unitCount'
+    | 'requiredEquipmentTypeNo'
   >,
   source?: DeliveryRequestRow
 ): Entry {
   const { productNo, quantity, weightKg, volumeM3 } = fields
   return {
+    kind: source?.kind ?? 'sale',
+    pickupPointNo: source?.pickupPointNo ?? null,
+    content: source?.content ?? '',
+    unitCount: null,
+    requiredEquipmentTypeNo: source?.requiredEquipmentTypeNo ?? null,
     ...fields,
     lines: [{ lineNo: 1, productNo, quantity, weightKg, volumeM3 }],
     ...(source
@@ -369,8 +465,88 @@ function splitLine(
   }
 }
 
+/** Each way of receiving orders is opened or not by the company (TRS01-US01, TRS07-US05). */
+function assertIntake(db: MockDatabase, origin: DeliveryRequestOrigin, request: MockRequest): void {
+  const intake = planningSettings(db).intake
+  const open: Record<DeliveryRequestOrigin, boolean> = {
+    request: intake.serviceTransmission,
+    planner: intake.manualEntry,
+    import: intake.fileImport,
+    connector: intake.erpConnector,
+    api: intake.ordererApi
+  }
+  if (open[origin]) return
+  if (origin === 'planner') throw forbidden(CIRCUIT_MESSAGES.plannerEntryClosed)
+  const mode = localize(toMockLanguage(request.language), {
+    fr: {
+      request: 'transmission par un service',
+      planner: 'saisie à la main',
+      import: 'import de fichier',
+      connector: 'connecteur du système de gestion',
+      api: 'API des ordonnateurs'
+    }[origin],
+    en: {
+      request: 'transmission by a service',
+      planner: 'manual entry',
+      import: 'file import',
+      connector: 'management system connector',
+      api: 'orderers API'
+    }[origin]
+  })
+  throw forbidden({
+    fr: CIRCUIT_MESSAGES.intakeClosed.fr.replace('{mode}', mode),
+    en: CIRCUIT_MESSAGES.intakeClosed.en.replace('{mode}', mode)
+  })
+}
+
+/** The simulated export of the management system: sales orders keyed by their ERP number. */
+function erpExport(db: MockDatabase): Record<string, unknown>[] {
+  const day = (offset: number) => {
+    const date = new Date(`${todayIso()}T00:00:00Z`)
+    date.setUTCDate(date.getUTCDate() + offset)
+    return date.toISOString().slice(0, 10)
+  }
+  const rows = [
+    {
+      ordererNo: 'CLI-002',
+      deliveryPointNo: 'DP-002',
+      pickupPointNo: 'DPT-002',
+      externalReference: `ERP-${todayIso().replace(/-/g, '')}-01`,
+      desiredDate: day(2),
+      content: 'Épicerie sèche, 20 palettes',
+      unitCount: 20,
+      lines: [{ productNo: 'PRD-001', quantity: 300, weightKg: 4500 }]
+    },
+    {
+      ordererNo: 'CLI-002',
+      deliveryPointNo: 'DP-005',
+      pickupPointNo: 'DPT-002',
+      externalReference: `ERP-${todayIso().replace(/-/g, '')}-02`,
+      desiredDate: day(2),
+      content: 'Textile, 8 palettes',
+      unitCount: 8,
+      lines: [{ productNo: 'PRD-004', quantity: 80, weightKg: 800 }]
+    }
+  ]
+  return rows.filter((row) => db.deliveryPoints.exists(row.deliveryPointNo))
+}
+
 export function registerDeliveryRequestsHandlers(router: MockRouter, db: MockDatabase): void {
   const readers: FieldReaders<Entry> = {
+    kind: (input) => readEnum(input, 'kind', DELIVERY_REQUEST_KINDS) ?? 'sale',
+    pickupPointNo: (input) => optionalReference(db.deliveryPoints, input, 'pickupPointNo'),
+    content: (input) => {
+      const value = readString(input, 'content')
+      if (value.length > 200) throw invalidField('content')
+      return value
+    },
+    unitCount: (input) => {
+      const value = readNumber(input, 'unitCount', { min: 0, max: 1000000 })
+      if (value !== null && !Number.isInteger(value)) throw invalidField('unitCount')
+      return value
+    },
+    requiredEquipmentTypeNo: (input) =>
+      optionalReference(db.equipmentTypes, input, 'requiredEquipmentTypeNo'),
     ordererNo: (input) => requireReference(db.customers, input, 'ordererNo'),
     deliveryPointNo: (input) => requireReference(db.deliveryPoints, input, 'deliveryPointNo'),
     desiredDate: (input) => readDate(input, 'desiredDate', { required: true }) ?? '',
@@ -411,10 +587,11 @@ export function registerDeliveryRequestsHandlers(router: MockRouter, db: MockDat
     searchColumns: ['no', 'ordererName', 'deliveryPointName', 'externalReference'],
     optionFields: { freightPayer: 'freightPayer', status: 'deliveryRequestStatus' },
     create: (input, request) => {
-      const entry = ownEntry(readEntry(input), request)
-      checkDeliveryRequest(db, entry)
-      // Back-office staff issue requests; the planners key them on a customer's behalf.
+      // A service transmits its orders; the planner keys them himself (TRS01-US04, TRS07-US05).
       const origin = sessionUser(request).profile === 'SALES' ? 'request' : 'planner'
+      assertIntake(db, origin, request)
+      const entry = ownEntry(readEntry(input), request)
+      checkDeliveryRequest(db, entry, undefined, { weightRequired: true })
       return newDeliveryRequest(nextDeliveryRequestNo(db), entry, origin)
     },
     // Correcting a rejected request sends it back to the planners.
@@ -427,7 +604,8 @@ export function registerDeliveryRequestsHandlers(router: MockRouter, db: MockDat
       checkDeliveryRequest(
         db,
         { ...existing, lines: requestLines(existing), ...patch },
-        existing.no
+        existing.no,
+        { weightRequired: !!patch.lines }
       )
       return {
         ...patch,
@@ -510,17 +688,76 @@ export function registerDeliveryRequestsHandlers(router: MockRouter, db: MockDat
   )
 
   // A request comes into the system the same way whether it is typed or read from a file.
-  router.post(`${BASE_PATH}/import`, { feature: 'DELIVERYREQUEST', action: 'insert' }, (request) =>
-    ok(
-      importRows(readBody(request).rows, request, (input) => {
-        const entry = ownEntry(readEntry(input), request)
-        checkDeliveryRequest(db, entry)
-        const no = nextDeliveryRequestNo(db)
-        db.deliveryRequests.insert(stampCreated(newDeliveryRequest(no, entry, 'import'), request))
-        return no
-      })
-    )
+  router.post(
+    `${BASE_PATH}/import`,
+    { feature: 'DELIVERYREQUEST', action: 'insert' },
+    (request) => {
+      assertIntake(db, 'import', request)
+      return ok(
+        importRows(readBody(request).rows, request, (input) => {
+          const entry = ownEntry(readEntry(input), request)
+          checkDeliveryRequest(db, entry, undefined, { weightRequired: true })
+          const no = nextDeliveryRequestNo(db)
+          db.deliveryRequests.insert(stampCreated(newDeliveryRequest(no, entry, 'import'), request))
+          return no
+        })
+      )
+    }
   )
+
+  /* The connector to the management system (TRS01-US01): the mock has no such system, so the
+   * synchronisation reads a fixed export of sales orders and keeps those not received yet. */
+  router.post(
+    `${BASE_PATH}/connector/sync`,
+    { feature: 'DELIVERYREQUEST', action: 'execute' },
+    (request) => {
+      assertIntake(db, 'connector', request)
+      const received: string[] = []
+      for (const input of erpExport(db)) {
+        const reference = normalizeSearchText(String(input.externalReference))
+        const known = db.deliveryRequests
+          .all()
+          .some(
+            (row) =>
+              row.ordererNo === input.ordererNo &&
+              normalizeSearchText(row.externalReference) === reference
+          )
+        if (known) continue
+        const entry = readEntry(input)
+        checkDeliveryRequest(db, entry, undefined, { weightRequired: true })
+        const no = nextDeliveryRequestNo(db)
+        db.deliveryRequests.insert(
+          stampCreated(newDeliveryRequest(no, entry, 'connector'), request)
+        )
+        received.push(no)
+      }
+      return ok({ received })
+    }
+  )
+
+  /* The API external orderers connect to, a delivery platform for instance, to send their own
+   * orders (TRS01-US01). The mock has no API gateway: the orderer is known by a demo key
+   * « demo-<orderer number> » sent in the body, and the order is checked as any other. */
+  router.post('/public/orderer-api/orders', { public: true }, (request) => {
+    assertIntake(db, 'api', request)
+    const body = readBody(request)
+    const key = typeof body.apiKey === 'string' ? body.apiKey.trim() : ''
+    const orderer = db.customers
+      .all()
+      .find((customer) => customer.isOrderer && customer.active && `demo-${customer.no}` === key)
+    if (!orderer) throw forbidden(CIRCUIT_MESSAGES.apiOrdererUnknown)
+    const entry = readEntry({ ...body, ordererNo: orderer.no })
+    checkDeliveryRequest(db, entry, undefined, { weightRequired: true })
+    const no = nextDeliveryRequestNo(db)
+    db.deliveryRequests.insert({
+      ...newDeliveryRequest(no, entry, 'api'),
+      createdAt: nowIsoDateTime(),
+      createdBy: 'api',
+      modifiedAt: nowIsoDateTime(),
+      modifiedBy: 'api'
+    })
+    return ok({ no })
+  })
 
   router.post(
     `${BASE_PATH}/:no/split`,

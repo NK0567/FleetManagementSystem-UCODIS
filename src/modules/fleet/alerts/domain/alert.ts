@@ -13,7 +13,8 @@ export const ALERT_CATEGORIES = [
   'insurance',
   'telematics',
   'driverScore',
-  'tyre'
+  'tyre',
+  'service'
 ] as const
 export type AlertCategory = (typeof ALERT_CATEGORIES)[number]
 
@@ -64,4 +65,26 @@ export function isVisibleTo(
   if (profile === 'ADMIN') return true
   if (audience.recipients.includes(profile)) return true
   return escalated && audience.escalateTo === profile
+}
+
+export interface AlertChannels {
+  email: boolean
+  sms: boolean
+  emailTo: readonly string[]
+  smsTo: readonly string[]
+}
+
+/**
+ * What goes out when an alert is raised, besides the application: an e-mail or an SMS to each
+ * address of its rule, at the moment the situation started.
+ */
+export function alertNotifications(
+  channels: AlertChannels | null,
+  since: string
+): { channel: 'email' | 'sms'; to: string; sentAt: string }[] {
+  if (!channels) return []
+  return [
+    ...(channels.email ? channels.emailTo.map((to) => ({ channel: 'email' as const, to })) : []),
+    ...(channels.sms ? channels.smsTo.map((to) => ({ channel: 'sms' as const, to })) : [])
+  ].map((item) => ({ ...item, sentAt: since }))
 }

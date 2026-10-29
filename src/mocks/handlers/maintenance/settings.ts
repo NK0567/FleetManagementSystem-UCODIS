@@ -1,4 +1,5 @@
 import {
+  DEFAULT_MAINTENANCE_SETTINGS,
   isMaintenanceSettingsSection,
   MAINTENANCE_SETTING_FIELDS,
   MAINTENANCE_SETTINGS_SECTIONS,
@@ -19,12 +20,20 @@ export function maintenanceSettings(db: MockDatabase): MaintenanceSettings {
   return db.maintenanceSettings.findOrFail(MAINTENANCE_SETTINGS_NO)
 }
 
+/** Targets of the indicators; a record saved before they existed falls back on the defaults. */
+export function maintenanceTargets(db: MockDatabase): MaintenanceSettings['targets'] {
+  return maintenanceSettings(db).targets ?? DEFAULT_MAINTENANCE_SETTINGS.targets
+}
+
 /** One settings record for the workshop, saved one section at a time. */
 export function registerMaintenanceSettingsHandlers(router: MockRouter, db: MockDatabase): void {
   const toApi = (): MaintenanceSettingsApi => {
     const row = db.maintenanceSettings.findOrFail(MAINTENANCE_SETTINGS_NO)
     const sections = Object.fromEntries(
-      MAINTENANCE_SETTINGS_SECTIONS.map((section) => [section, row[section]])
+      MAINTENANCE_SETTINGS_SECTIONS.map((section) => [
+        section,
+        row[section] ?? DEFAULT_MAINTENANCE_SETTINGS[section]
+      ])
     ) as unknown as MaintenanceSettings
     return { ...sections, modifiedAt: row.modifiedAt, modifiedBy: row.modifiedBy }
   }

@@ -8,6 +8,8 @@ import { apiErrorMessage } from '@/core/api/apiError'
 import { vehicleTypeService, type VehicleTypeApi } from '@/modules/fleet/vehicle-types'
 import type { FileMeta } from '@/types/file.types'
 import { vehicleService } from '../services/vehicleService'
+import { useOptionsStore } from '@/stores/optionsStore'
+import VehicleMaintenanceLog from './VehicleMaintenanceLog.vue'
 import { formatDate, formatDateTime, formatNumber } from '@/utils/format'
 import type {
   AcquisitionMode,
@@ -37,6 +39,7 @@ const props = withDefaults(
 const emit = defineEmits<{ updated: [vehicle: VehicleApi] }>()
 
 const { t } = useI18n()
+const optionsStore = useOptionsStore()
 const photoError = ref<string | null>(null)
 
 async function changePhotos(change: () => Promise<VehicleApi>) {
@@ -123,6 +126,7 @@ const expandedSections = ref({
   documents: true,
   photos: false,
   equipment: true,
+  maintenanceLog: false,
   history: false,
   audit: false
 })
@@ -144,6 +148,32 @@ const { hasValidationError } = useFormValidationUi({
 const setOption = (field: 'fuelType' | 'acquisitionMode') => (value: string | number) => {
   ;(draft as Record<string, unknown>)[field] = value === '' ? null : String(value)
 }
+
+/** The milestones of the vehicle, from its first registration to its removal. */
+const lifecycle = computed(() => {
+  const data = props.initialData
+  const steps: { key: string; value: string }[] = []
+  if (data.firstRegistrationDate) {
+    steps.push({ key: 'firstRegistration', value: formatDate(data.firstRegistrationDate) })
+  }
+  if (data.acquisitionDate) {
+    steps.push({ key: 'acquisition', value: formatDate(data.acquisitionDate) })
+  }
+  if (data.createdAt) steps.push({ key: 'recorded', value: formatDateTime(data.createdAt) })
+  if (data.outOfService) {
+    steps.push({
+      key: 'outOfService',
+      value: `${formatDateTime(data.outOfService.since)} · ${data.outOfService.reason}`
+    })
+  }
+  if (data.removal) {
+    steps.push({
+      key: 'removal',
+      value: `${formatDate(data.removal.date)} · ${data.removal.reason}`
+    })
+  }
+  return steps
+})
 
 const odometerReadings = computed(() => [...(props.initialData.odometerReadings ?? [])].reverse())
 const plateHistory = computed(() => [...(props.initialData.plateHistory ?? [])].reverse())
@@ -307,7 +337,15 @@ defineExpose(expose)
 
     <FormSection
       v-model:open="expandedSections.specifications"
-      :title="t('fleet.vehicles.form.specifications')"
+      :title="
+        t(
+          isNew && !draft.vehicleTypeNo
+            ? 'fleet.vehicles.form.specifications'
+            : vehicleShape.motorized
+              ? 'fleet.vehicles.form.engineAndFuel'
+              : 'fleet.vehicles.form.trailerSpecifications'
+        )
+      "
       :summary="[]"
     >
       <p v-if="isNew && !draft.vehicleTypeNo" class="xl:col-span-2 text-sm text-muted-foreground">
@@ -416,24 +454,51 @@ defineExpose(expose)
     <template v-if="!isNew">
       <FormSection
         v-model:open="expandedSections.status"
-        :title="t('fleet.vehicles.form.status')"
+        :title="t('fleet.vehicles.form.statusAndLinks')"
         :summary="[initialData.statusReason]"
       >
         <div class="space-y-3 min-w-0">
-          <BaseFormField :label="t('fleet.vehicles.form.status')">
-            <VehicleStatusPill v-if="initialData.status" :status="initialData.status" />
+          <BaseFormField :label="t('fleet.vehicles.form.administrativeStatus')">
+            <p class="text-sm text-card-foreground">
+              {{
+                optionsStore.getOptionLabel(
+                  'administrativeStatus',
+                  initialData.administrativeStatus ?? 'in_service'
+                )
+              }}
+            </p>
+          </BaseFormField>
+          <BaseFormField :label="t('fleet.vehicles.form.operationalStatus')">
+            <VehicleStatusPill
+              v-if="initialData.operationalStatus"
+              :status="initialData.operationalStatus"
+            />
+            <p v-else class="text-sm text-muted-foreground">
+              {{ t('fleet.vehicles.form.noOperationalStatus') }}
+            </p>
+            <p class="text-xs text-muted-foreground mt-1">
+              {{ t('fleet.vehicles.form.operationalStatusHint') }}
+            </p>
           </BaseFormField>
           <BaseFormField
             v-if="initialData.statusReason"
             :label="t('fleet.vehicles.form.statusReason')"
           >
             <p class="text-sm text-card-foreground">{{ initialData.statusReason }}</p>
+            <p v-if="initialData.statusCauseCode" class="text-xs text-muted-foreground mt-1">
+              {{
+                t('fleet.vehicles.form.statusCauseCode', {
+                  code: initialData.statusCauseCode,
+                  name: initialData.statusCauseCodeName
+                })
+              }}
+            </p>
           </BaseFormField>
           <BaseFormField :label="t('fleet.vehicles.col.driverName')">
-            <FormInput :model-value="initialData.driverName || '—'" disabled />
+            <FormInput :model-value="initialData.driverName || t('fleet.vehicles.form.noLink')" disabled />
           </BaseFormField>
           <BaseFormField :label="t('fleet.vehicles.col.coupledVehiclePlate')">
-            <FormInput :model-value="initialData.coupledVehiclePlate || '—'" disabled />
+            <FormInput :model-value="initialData.coupledVehiclePlate || t('fleet.vehicles.form.noLink')" disabled />
           </BaseFormField>
         </div>
         <div class="space-y-3 min-w-0">
@@ -509,13 +574,32 @@ defineExpose(expose)
       </FormSection>
 
       <FormSection
+        v-model:open="expandedSections.maintenanceLog"
+        :title="t('fleet.vehicles.form.maintenanceLog')"
+        :summary="[]"
+      >
+        <div class="xl:col-span-2 min-w-0">
+          <VehicleMaintenanceLog v-if="initialData.no" :vehicle-no="initialData.no" />
+        </div>
+      </FormSection>
+
+      <FormSection
         v-model:open="expandedSections.history"
-        :title="t('fleet.vehicles.form.history')"
+        :title="t('fleet.vehicles.form.lifecycle')"
         :summary="[
           t('fleet.vehicles.form.readingCount', odometerReadings.length),
           t('fleet.vehicles.form.plateChangeCount', plateHistory.length)
         ]"
       >
+        <dl
+          class="xl:col-span-2 min-w-0 grid grid-cols-[auto_1fr] gap-x-6 gap-y-1 text-sm"
+          data-testid="vehicle-lifecycle"
+        >
+          <template v-for="step in lifecycle" :key="step.key">
+            <dt class="text-muted-foreground">{{ t(`fleet.vehicles.lifecycle.${step.key}`) }}</dt>
+            <dd class="text-card-foreground">{{ step.value }}</dd>
+          </template>
+        </dl>
         <div class="min-w-0 space-y-2 xl:col-span-2">
           <h3 class="text-sm font-semibold text-card-foreground">
             {{ t('fleet.vehicles.form.odometerReadings') }}

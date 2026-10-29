@@ -1,9 +1,4 @@
-import {
-  checkDeliveryRequest,
-  entryFromLine,
-  newDeliveryRequest,
-  nextDeliveryRequestNo
-} from './deliveryRequests'
+import { replanLine } from './replanning'
 import {
   canHandBack,
   canReceiveReturn,
@@ -17,7 +12,7 @@ import type {
   TransportOrderLineRow,
   TransportOrderRow
 } from '../../fixtures/planning/transportOrders'
-import { readBody, routeParam, stampCreated, stampModified } from '../../http/crudResource'
+import { readBody, routeParam, stampModified } from '../../http/crudResource'
 import { conflict, unprocessable } from '../../http/errors'
 import { invalidField, readDate, readString } from '../../http/input'
 import { ok } from '../../http/responses'
@@ -320,52 +315,17 @@ export function registerReceptionHandlers(router: MockRouter, db: MockDatabase):
       const body = readBody(request)
       const date = readDate(body, 'date', { required: true })
       if (!date) throw unprocessable(PLANNING_MESSAGES.receptionNoRemainder)
-      const source = line.deliveryRequestNo
-        ? db.deliveryRequests.find(line.deliveryRequestNo)
-        : undefined
-      const point = db.deliveryPoints.findOrFail(line.deliveryPointNo)
-      const ordererNo =
-        source?.ordererNo ??
-        (db.customers.findOrFail(point.customerNo).isOrderer ? point.customerNo : '')
-      if (!ordererNo) throw unprocessable(PLANNING_MESSAGES.confirmationNeedsOrderer)
-      const entry = entryFromLine(
-        db,
-        {
-          ordererNo,
-          deliveryPointNo: line.deliveryPointNo,
-          desiredDate: date,
-          validUntil: null,
-          externalReference: '',
-          freightPayer: source?.freightPayer ?? ('orderer' as const),
-          comment: '',
-          productNo: line.productNo,
-          quantity: left,
-          weightKg:
-            line.weightKg === null || line.quantity <= 0
-              ? null
-              : Math.round((line.weightKg * left) / line.quantity),
-          volumeM3: source?.volumeM3 ?? null
-        },
-        source
+      // The remainder joins the pending order of that day, with the lines replanned to it, its
+      // weight estimated at the prorata of what was not delivered (TRS01-US17).
+      const pending = replanLine(db, order.no, line.lineNo, date, {
+        code: sessionUser(request).code,
+        request
+      })
+      const taken = pending.lines.find(
+        (item) =>
+          item.replannedFrom?.orderNo === order.no && item.replannedFrom.lineNo === line.lineNo
       )
-      checkDeliveryRequest(db, entry)
-      const no = nextDeliveryRequestNo(db)
-      db.deliveryRequests.insert(
-        stampCreated(
-          { ...newDeliveryRequest(no, entry, 'planner'), parentNo: source?.no ?? null },
-          request
-        )
-      )
-      replaceLine(
-        db,
-        order,
-        line.lineNo,
-        { ...line, remainderAt: nowIsoDateTime(), remainderRequestNo: no },
-        request,
-        'remainder',
-        no
-      )
-      return ok({ requestNo: no })
+      return ok({ requestNo: taken?.deliveryRequestNo ?? null, orderNo: pending.no })
     }
   )
 }

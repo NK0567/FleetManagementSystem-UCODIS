@@ -2,13 +2,23 @@
 import { useI18n } from 'vue-i18n'
 import { HISTORY_IMPORT_COLUMNS, HISTORY_REQUIRED, toHistoryRow } from '../domain/historyImport'
 import { workOrderService } from '../services/workOrderService'
+import { useImportMapping } from '@/modules/fleet/fleet-settings/composables/useImportMapping'
 
-defineProps<{ open: boolean }>()
+const props = defineProps<{ open: boolean }>()
 const emit = defineEmits<{ close: []; imported: [] }>()
 
 const { t } = useI18n()
+const mapping = useImportMapping('maintenanceHistory', () => props.open)
 
-const EXAMPLE = ['4021 TBA', '12/03/2025', 'préventif', 'Vidange et filtres', '120500', '450000']
+const EXAMPLE = [
+  '4021 TBA',
+  '12/03/2025',
+  'préventif',
+  'Vidange et filtres',
+  'Moteur',
+  '120500',
+  '450000'
+]
 </script>
 
 <template>
@@ -23,6 +33,7 @@ const EXAMPLE = ['4021 TBA', '12/03/2025', 'préventif', 'Vidange et filtres', '
     created-key="maintenance.workOrders.import.created"
     :to-row="toHistoryRow"
     :submit="workOrderService.importHistory"
+    :mapping="mapping"
     @close="emit('close')"
     @imported="emit('imported')"
   />

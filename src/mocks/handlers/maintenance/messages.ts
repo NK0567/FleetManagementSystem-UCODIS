@@ -1,6 +1,14 @@
 import type { LocalizedText } from '../../i18n'
 
 export const MAINTENANCE_MESSAGES = {
+  nomenclatureNotPending: {
+    fr: 'Cet ordre n’a pas de correspondance à valider.',
+    en: 'This order has no mapping to confirm.'
+  },
+  nomenclatureSubsystemMissing: {
+    fr: 'Choisissez le sous-système de la nomenclature.',
+    en: 'Choose the subsystem of the nomenclature.'
+  },
   unknownSettingsSection: {
     fr: 'Cette section de réglages n’existe pas.',
     en: 'This settings section does not exist.'
@@ -181,13 +189,21 @@ export const MAINTENANCE_MESSAGES = {
     fr: 'Opération {line} incomplète : libellé, sous-système et au moins un intervalle positif.',
     en: 'Operation {line} is incomplete: a label, a subsystem and at least one positive interval.'
   },
-  vehicleHasPlan: {
-    fr: 'Le véhicule {plate} suit déjà le plan « {plan} ».',
-    en: 'Vehicle {plate} already follows the "{plan}" plan.'
+  modelHasPlan: {
+    fr: 'Le modèle {model} suit déjà le plan actif « {plan} ».',
+    en: 'Model {model} already follows the active "{plan}" plan.'
   },
   planHasVehicles: {
-    fr: 'Retirez les véhicules du plan avant de le supprimer.',
-    en: 'Remove the vehicles from the plan before deleting it.'
+    fr: 'Des véhicules du parc suivent ce plan : retirez ses modèles avant de le supprimer.',
+    en: 'Vehicles in the park follow this plan: remove its models before deleting it.'
+  },
+  hoursBackwards: {
+    fr: 'Le compteur horaire ne peut pas reculer : dernier relevé {hours} h.',
+    en: 'The hour meter cannot go back: last reading {hours} h.'
+  },
+  passageBeyondHours: {
+    fr: 'Le passage ne peut pas dépasser le compteur horaire actuel ({hours} h).',
+    en: 'The passage cannot be beyond the current hour meter ({hours} h).'
   },
   operationNotInPlan: {
     fr: 'Cette opération ne fait pas partie du plan actif du véhicule.',

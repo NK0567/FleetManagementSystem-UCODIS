@@ -71,6 +71,28 @@ const tableColumns = computed<TableColumn[]>(() => [
     formatter: formatInteger
   },
   {
+    sortKey: 'nextHours',
+    label: t('maintenance.serviceDue.col.nextHours'),
+    minW: '110px',
+    align: 'right',
+    formatter: formatInteger
+  },
+  {
+    sortKey: 'hoursRemaining',
+    label: t('maintenance.serviceDue.col.hoursRemaining'),
+    minW: '110px',
+    align: 'right',
+    formatter: formatInteger
+  },
+  {
+    sortKey: 'currentHours',
+    label: t('maintenance.serviceDue.col.currentHours'),
+    minW: '120px',
+    align: 'right',
+    defaultHidden: true,
+    formatter: formatInteger
+  },
+  {
     sortKey: 'nextDate',
     label: t('maintenance.serviceDue.col.nextDate'),
     minW: '120px',
@@ -152,11 +174,36 @@ const selected = computed(() => store.selectedItem)
 const working = ref(false)
 const actionError = ref<string | null>(null)
 const recording = ref(false)
-const passage = ref({ km: null as number | null, date: todayIso() })
+const passage = ref({ km: null as number | null, hours: null as number | null, date: todayIso() })
 
 function openPassage() {
-  passage.value = { km: null, date: todayIso() }
+  passage.value = { km: null, hours: null, date: todayIso() }
   recording.value = true
+}
+
+const readingHours = ref(false)
+const engineHours = ref<number | null>(null)
+
+function openEngineHours() {
+  engineHours.value = selected.value?.currentHours ?? null
+  readingHours.value = true
+}
+
+async function recordEngineHours() {
+  const due = selected.value
+  if (!due || engineHours.value === null) return
+  working.value = true
+  actionError.value = null
+  try {
+    await serviceDueService.recordEngineHours(due.vehicleNo, engineHours.value)
+    readingHours.value = false
+    await store.fetchItems(store.pagination.page, store.pagination.limit)
+    store.selectItem(store.items.find((item) => item.no === due.no) ?? null)
+  } catch (error) {
+    actionError.value = apiErrorMessage(error, t('maintenance.serviceDue.actionError'))
+  } finally {
+    working.value = false
+  }
 }
 
 async function recordPassage() {
@@ -170,6 +217,7 @@ async function recordPassage() {
         vehicleNo: due.vehicleNo,
         operationNo: due.operationNo,
         km: passage.value.km,
+        hours: passage.value.hours,
         date: passage.value.date
       })
     )
@@ -203,6 +251,9 @@ async function openWorkOrder() {
 const interval = (due: ServiceDueApi) =>
   [
     due.intervalKm ? t('maintenance.serviceDue.everyKm', { km: formatNumber(due.intervalKm) }) : '',
+    due.intervalHours
+      ? t('maintenance.serviceDue.everyHours', { hours: formatNumber(due.intervalHours) })
+      : '',
     due.intervalDays ? t('maintenance.serviceDue.everyDays', due.intervalDays) : ''
   ]
     .filter(Boolean)
@@ -311,14 +362,30 @@ const interval = (due: ServiceDueApi) =>
                 <p v-if="selected.provisional" class="text-xs text-muted-foreground">
                   {{ t('maintenance.serviceDue.provisional') }}
                 </p>
+                <p v-if="selected.status === 'blocking'" class="text-xs text-destructive">
+                  {{ t('maintenance.serviceDue.blockingHint') }}
+                </p>
+                <p v-if="selected.status === 'due_soon'" class="text-xs text-warning">
+                  {{ t('maintenance.serviceDue.dueSoonHint') }}
+                </p>
                 <p class="text-card-foreground">
                   {{
                     selected.lastDate
                       ? t('maintenance.serviceDue.lastPassage', {
                           date: formatDate(selected.lastDate),
-                          km: selected.lastKm === null ? '—' : formatNumber(selected.lastKm)
+                          km: selected.lastKm === null ? '-' : formatNumber(selected.lastKm)
                         })
                       : t('maintenance.serviceDue.noPassage')
+                  }}
+                </p>
+                <p v-if="selected.intervalHours" class="text-card-foreground">
+                  {{
+                    selected.currentHours === null
+                      ? t('maintenance.serviceDue.noHourMeter')
+                      : t('maintenance.serviceDue.hourMeter', {
+                          hours: formatNumber(selected.currentHours),
+                          last: selected.lastHours === null ? '-' : formatNumber(selected.lastHours)
+                        })
                   }}
                 </p>
                 <p v-if="selected.openOrderNo" class="text-card-foreground">
@@ -351,6 +418,14 @@ const interval = (due: ServiceDueApi) =>
               >
                 {{ t('maintenance.serviceDue.action.recordPassage') }}
               </button>
+              <button
+                v-if="canInsert && selected.intervalHours"
+                type="button"
+                class="flex-1 px-3 py-2 border border-border text-card-foreground text-sm rounded hover:bg-accent transition font-medium"
+                @click="openEngineHours"
+              >
+                {{ t('maintenance.serviceDue.action.recordHours') }}
+              </button>
             </template>
           </ListDetailsPanel>
         </template>
@@ -376,6 +451,30 @@ const interval = (due: ServiceDueApi) =>
         </BaseFormField>
         <BaseFormField :label="t('maintenance.serviceDue.form.km')">
           <FormInput v-model="passage.km" type="number" :min="0" />
+        </BaseFormField>
+        <BaseFormField
+          v-if="selected?.intervalHours"
+          :label="t('maintenance.serviceDue.form.hours')"
+        >
+          <FormInput v-model="passage.hours" type="number" :min="0" />
+        </BaseFormField>
+      </div>
+    </ConfirmDialog>
+
+    <ConfirmDialog
+      :open="readingHours"
+      :title="t('maintenance.serviceDue.action.recordHours')"
+      :confirm-label="t('common.confirm')"
+      :confirm-disabled="engineHours === null || engineHours < 0"
+      :loading="working"
+      panel-class="max-w-md"
+      @confirm="recordEngineHours"
+      @cancel="readingHours = false"
+    >
+      <div class="space-y-3">
+        <p v-if="selected" class="text-sm text-muted-foreground">{{ selected.vehiclePlate }}</p>
+        <BaseFormField :label="t('maintenance.serviceDue.form.engineHours')" required>
+          <FormInput v-model="engineHours" type="number" :min="0" />
         </BaseFormField>
       </div>
     </ConfirmDialog>

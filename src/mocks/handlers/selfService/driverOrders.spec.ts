@@ -26,6 +26,11 @@ describe('driver space', () => {
   })
 
   it('declares only once arrived, and the planner no longer declares a fleet order', async () => {
+    // Back before the driver's arrival on the point, which the demo already marks.
+    const seeded = server.db.transportOrders.find('TR-2026-0003')!
+    server.db.transportOrders.update(seeded.no, {
+      lines: seeded.lines.map((item) => ({ ...item, arrivedAt: null }))
+    })
     const line = '/me/orders/TR-2026-0003/lines/1'
     expect((await as('CND001', 'post', `${line}/declare`, { receivedQuantity: 150 })).status).toBe(
       409

@@ -3,7 +3,8 @@ import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { CircleAlert, CircleCheck, Save } from '@lucide/vue'
 import type { FileMeta } from '@/types/file.types'
-import { formatDateTime } from '@/utils/format'
+import DocumentaryDossierList from '@/modules/planning/closing/components/DocumentaryDossierList.vue'
+import { EMPTY_CELL, formatDateTime, formatNumber } from '@/utils/format'
 import type { DebriefingInput, TransportOrderClosingApi } from '../types/transportOrder.types'
 
 const props = defineProps<{
@@ -59,6 +60,17 @@ watch(
   { immediate: true }
 )
 
+/* The fiche shows the compartments as saved; before saving, as read from the loading. */
+const compartments = computed(
+  () => props.closing.debriefing?.compartments ?? props.closing.derived.compartments
+)
+const compartmentLabel = (no: number) =>
+  no
+    ? t('planning.transportOrders.closing.compartmentNo', { no })
+    : t('planning.transportOrders.closing.oneSpace')
+const gapLabel = (qualification: 'gain' | 'loss' | null) =>
+  qualification ? t(`planning.dossier.gap.${qualification}`) : t('planning.dossier.gap.none')
+
 const buttonClass =
   'cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed'
 </script>
@@ -93,21 +105,51 @@ const buttonClass =
         {{ t('planning.transportOrders.closing.vehicle') }}
       </dt>
       <dd class="text-right font-medium text-card-foreground">
-        {{ closing.derived.vehicle || '—' }}
+        {{ closing.derived.vehicle || EMPTY_CELL }}
+        <template v-if="closing.derived.trailer"> · {{ closing.derived.trailer }}</template>
       </dd>
       <dt class="text-xs text-muted-foreground">
         {{ t('planning.transportOrders.closing.places') }}
       </dt>
       <dd class="text-right font-medium text-card-foreground">
-        {{ closing.derived.places || '—' }}
+        {{ closing.derived.places || EMPTY_CELL }}
       </dd>
       <dt class="text-xs text-muted-foreground">
         {{ t('planning.transportOrders.closing.gainLoss') }}
       </dt>
       <dd class="text-right font-medium text-card-foreground">
-        {{ closing.derived.gainLoss || '—' }}
+        <p v-for="gap in closing.derived.gaps" :key="gap.lineNo">
+          {{ gap.productName }} · {{ formatNumber(gap.gap, 2) }} {{ gap.unit }} ·
+          {{ gapLabel(gap.qualification) }}
+          <template v-if="gap.imputableToDriver !== null">
+            ·
+            {{
+              t(
+                gap.imputableToDriver
+                  ? 'planning.transportOrders.gaps.imputable'
+                  : 'planning.transportOrders.gaps.notImputable'
+              )
+            }}
+          </template>
+        </p>
+        <template v-if="!closing.derived.gaps.length">
+          {{ t('planning.transportOrders.closing.noGap') }}
+        </template>
+      </dd>
+      <dt class="text-xs text-muted-foreground">
+        {{ t('planning.transportOrders.closing.compartments') }}
+      </dt>
+      <dd class="text-right font-medium text-card-foreground">
+        <p v-for="item in compartments" :key="item.no">
+          {{ compartmentLabel(item.no) }} · {{ item.productName || EMPTY_CELL }}
+          <template v-if="item.quantity !== null">
+            · {{ formatNumber(item.quantity, 2) }} {{ item.unit }}
+          </template>
+        </p>
       </dd>
     </dl>
+
+    <DocumentaryDossierList :dossier="closing.dossier" />
   </div>
 
   <div class="space-y-3 min-w-0">

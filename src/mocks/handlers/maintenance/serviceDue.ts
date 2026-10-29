@@ -8,6 +8,7 @@ import { readDate, readNumber } from '../../http/input'
 import { requireReference } from '../../http/references'
 import { created } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
+import { engineHoursByVehicle } from './engineHours'
 import { planByVehicle } from './maintenancePlans'
 import { MAINTENANCE_MESSAGES } from './messages'
 import { lastPassages, recordPassages } from './serviceRecords'
@@ -21,6 +22,7 @@ export function serviceDueApi(db: MockDatabase): ServiceDueApi[] {
   const last = lastPassages(db)
   const subsystems = new Map(db.failureCodes.all().map((code) => [code.no, code.name]))
   const today = todayIso()
+  const hours = engineHoursByVehicle(db)
   const openOrders = db.workOrders.all().filter((order) => !order.validatedAt && !order.cancelledAt)
   return db.vehicles
     .all()
@@ -29,10 +31,11 @@ export function serviceDueApi(db: MockDatabase): ServiceDueApi[] {
       const plan = plans.get(vehicle.no)!
       return plan.operations.map((operation) => {
         const passage = last.get(`${vehicle.no} ${operation.no}`) ?? null
+        const currentHours = hours.get(vehicle.no) ?? null
         const due = serviceDue(
           operation,
           passage,
-          { km: vehicle.odometerKm, today },
+          { km: vehicle.odometerKm, today, hours: currentHours },
           thresholds,
           plan.provisional
         )
@@ -48,9 +51,12 @@ export function serviceDueApi(db: MockDatabase): ServiceDueApi[] {
           subsystemName: subsystems.get(operation.subsystemNo) ?? operation.subsystemNo,
           nature: operation.nature,
           intervalKm: operation.intervalKm,
+          intervalHours: operation.intervalHours ?? null,
           intervalDays: operation.intervalDays,
           lastKm: passage?.km ?? null,
+          lastHours: passage?.hours ?? null,
           lastDate: passage?.date ?? null,
+          currentHours,
           ...due,
           openOrderNo:
             openOrders.find(
@@ -62,7 +68,7 @@ export function serviceDueApi(db: MockDatabase): ServiceDueApi[] {
     })
 }
 
-/** The services run past their tolerance on a confirmed plan: each keeps its vehicle in. */
+/** The services past due on a confirmed plan: each makes its vehicle unavailable. */
 export function blockingServiceCauses(db: MockDatabase): Map<string, string[]> {
   const causes = new Map<string, string[]>()
   for (const due of serviceDueApi(db).filter((row) => row.status === 'blocking')) {
@@ -91,9 +97,17 @@ export function registerServiceDueHandlers(router: MockRouter, db: MockDatabase)
       if (km !== null && km > vehicle.odometerKm) {
         throw unprocessable(MAINTENANCE_MESSAGES.passageBeyondOdometer, { km: vehicle.odometerKm })
       }
+      const hours =
+        body.hours == null || body.hours === ''
+          ? null
+          : (readNumber(body, 'hours', { min: 0 }) ?? null)
+      const currentHours = engineHoursByVehicle(db).get(vehicle.no)
+      if (hours !== null && (currentHours === undefined || hours > currentHours)) {
+        throw unprocessable(MAINTENANCE_MESSAGES.passageBeyondHours, { hours: currentHours ?? 0 })
+      }
       recordPassages(
         db,
-        [{ vehicleNo: vehicle.no, operationNo, km, date, workOrderNo: null }],
+        [{ vehicleNo: vehicle.no, operationNo, km, hours, date, workOrderNo: null }],
         request
       )
       return created(serviceDueApi(db).find((row) => row.no === `${vehicle.no}_${operationNo}`))

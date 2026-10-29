@@ -4,6 +4,10 @@ import type { VehicleStatus } from '../types/vehicle.types'
 export interface Immobilization {
   kind: 'document' | 'inspection' | 'maintenance' | 'service'
   detail: string
+  /** Code of the cause in the unavailability codification, when one applies. */
+  code?: string | null
+  /** The vehicle is held at the workshop by a work order: it is in maintenance, not immobilized. */
+  workshop?: boolean
 }
 
 export interface VehicleStatusFacts {
@@ -18,7 +22,7 @@ export interface VehicleStatusFacts {
 export type VehicleStatusCause =
   | { kind: 'removed' }
   | { kind: 'out_of_service'; detail: string }
-  | { kind: Immobilization['kind']; detail: string }
+  | Immobilization
   | { kind: 'trip'; detail: string }
   | { kind: 'driver'; detail: string }
   | { kind: 'coupling'; detail: string }
@@ -40,6 +44,8 @@ export function vehicleStatus(facts: VehicleStatusFacts): VehicleStatusResult {
       cause: { kind: 'out_of_service', detail: facts.outOfServiceReason }
     }
   }
+  const workshop = facts.immobilizations.find((item) => item.workshop)
+  if (workshop) return { status: 'in_maintenance', cause: workshop }
   const [immobilization] = facts.immobilizations
   if (immobilization) return { status: 'immobilized', cause: immobilization }
   if (facts.activeTripNo) {
@@ -54,7 +60,12 @@ export function vehicleStatus(facts: VehicleStatusFacts): VehicleStatusResult {
   return { status: 'available', cause: null }
 }
 
-const UNUSABLE: readonly VehicleStatus[] = ['immobilized', 'out_of_service', 'removed']
+const UNUSABLE: readonly VehicleStatus[] = [
+  'in_maintenance',
+  'immobilized',
+  'out_of_service',
+  'removed'
+]
 
 /** A vehicle that may be coupled, assigned or sent on a trip. */
 export function isUsable(status: VehicleStatus): boolean {

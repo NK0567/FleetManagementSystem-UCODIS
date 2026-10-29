@@ -6,6 +6,8 @@ export interface ServiceRecordRow extends MockRow {
   vehicleNo: string
   operationNo: string
   km: number | null
+  /** Engine hours read at the passage, when the vehicle has an hour meter. */
+  hours: number | null
   date: string
   workOrderNo: string | null
   recordedBy: string
@@ -17,16 +19,17 @@ const record = (
   operationNo: string,
   km: number,
   date: string,
-  workOrderNo: string | null = null
-) => ({ no, vehicleNo, operationNo, km, date, workOrderNo, recordedBy: 'MNT001' })
+  workOrderNo: string | null = null,
+  hours: number | null = null
+) => ({ no, vehicleNo, operationNo, km, hours, date, workOrderNo, recordedBy: 'MNT001' })
 
 const SEED: Omit<ServiceRecordRow, keyof typeof seedAudit>[] = [
   record('PAS-00001', 'VEH-001', 'OP-010', 175_000, '2026-07-10'),
   record('PAS-00002', 'VEH-001', 'OP-011', 175_000, '2026-07-10'),
   record('PAS-00003', 'VEH-001', 'OP-012', 175_000, '2026-07-10'),
-  record('PAS-00004', 'VEH-001', 'OP-001', 180_420, '2026-08-18', 'OT-2026-0001'),
+  record('PAS-00004', 'VEH-001', 'OP-001', 180_420, '2026-08-18', 'OT-2026-0001', 5_900),
   record('PAS-00005', 'VEH-001', 'OP-002', 180_420, '2026-08-18', 'OT-2026-0001'),
-  record('PAS-00006', 'VEH-002', 'OP-001', 165_900, '2026-08-28'),
+  record('PAS-00006', 'VEH-002', 'OP-001', 165_900, '2026-08-28', null, 5_150),
   record('PAS-00007', 'VEH-002', 'OP-002', 165_900, '2026-08-28'),
   record('PAS-00008', 'VEH-002', 'OP-012', 155_000, '2026-06-02'),
   record('PAS-00009', 'VEH-010', 'OP-013', 103_000, '2026-07-21')

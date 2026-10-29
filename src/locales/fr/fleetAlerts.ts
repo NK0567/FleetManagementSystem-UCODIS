@@ -22,5 +22,17 @@ export default {
   'fleet.alerts.action.handle': 'Marquer traitée',
   'fleet.alerts.escalatedTo': 'Escaladée vers : {profile}',
   'fleet.alerts.acknowledgedBy': 'Prise en charge par {user} le {date}',
-  'fleet.alerts.handledBy': 'Traitée par {user} le {date}'
+  'fleet.alerts.handledBy': 'Traitée par {user} le {date}',
+  'fleet.alerts.bell.title': 'Alertes et demandes à traiter',
+  'fleet.alerts.bell.alerts': 'Alertes en cours | Alerte en cours (1) | Alertes en cours ({n})',
+  'fleet.alerts.bell.noAlert': 'Aucune alerte en cours.',
+  'fleet.alerts.bell.requests': 'Demandes à traiter | Demande à traiter (1) | Demandes à traiter ({n})',
+  'fleet.alerts.bell.noRequest': 'Aucune demande en attente de votre décision.',
+  'fleet.alerts.bell.kind.leave': 'Demande de congé',
+  'fleet.alerts.bell.kind.companyDocument': 'Document à valider',
+  'fleet.alerts.bell.kind.departure': 'Autorisation de départ',
+  'fleet.alerts.bell.seeAll': 'Voir le tableau des alertes',
+  'fleet.alerts.col.notifications': 'Notifications envoyées',
+  'fleet.alerts.notification.email': 'E-mail à {to}',
+  'fleet.alerts.notification.sms': 'SMS au {to}'
 }

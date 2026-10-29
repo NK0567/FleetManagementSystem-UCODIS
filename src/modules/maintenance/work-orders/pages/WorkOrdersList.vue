@@ -20,6 +20,7 @@ const { formatDateTime, formatDecimal, formatInteger, optionLabel } = useListCel
 
 const listViewOptions = computed<{ value: WorkOrderListView; label: string }[]>(() => [
   { value: 'active', label: t('maintenance.workOrders.listView.active') },
+  { value: 'awaiting_parts', label: t('maintenance.workOrders.listView.awaitingParts') },
   { value: 'to_validate', label: t('maintenance.workOrders.listView.toValidate') },
   { value: 'finished', label: t('maintenance.workOrders.listView.finished') },
   { value: 'all', label: t('maintenance.workOrders.listView.all') }
@@ -97,6 +98,13 @@ const tableColumns = computed<TableColumn[]>(() => [
     formatter: optionLabel('workOrderStatus')
   },
   {
+    sortKey: 'nomenclatureState',
+    label: t('maintenance.workOrders.col.nomenclatureState'),
+    minW: '140px',
+    defaultHidden: true,
+    formatter: optionLabel('nomenclatureState')
+  },
+  {
     sortKey: 'modifiedAt',
     label: t('common.audit.modifiedAt'),
     minW: '150px',
@@ -134,6 +142,13 @@ const filterDefs: FilterFieldDef[] = [
     valueType: 'string',
     kind: 'option',
     optionsKey: 'workOrderOrigin'
+  },
+  {
+    field: 'nomenclatureState',
+    labelKey: 'maintenance.workOrders.col.nomenclatureState',
+    valueType: 'string',
+    kind: 'option',
+    optionsKey: 'nomenclatureState'
   }
 ]
 

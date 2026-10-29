@@ -146,5 +146,6 @@ export default {
   'common.subList.all': 'all',
   'common.subList.clear': 'Clear',
   'common.subList.count': '{shown} of {total}',
-  'common.subList.noMatch': 'No line matches the filter.'
+  'common.subList.noMatch': 'No line matches the filter.',
+  'common.import.mapped': 'Column mapping set by the administrator for no field. | Column mapping set by the administrator for one field. | Column mapping set by the administrator for {n} fields.'
 }

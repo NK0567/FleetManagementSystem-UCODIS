@@ -61,10 +61,23 @@ export interface WorkOrderEvent {
     | 'external_update'
     | 'returned'
     | 'completed'
+    | 'nomenclature'
     | 'refused'
     | 'validated'
     | 'cancelled'
   comment: string
+}
+
+/**
+ * For an imported order: the subsystem of the nomenclature the application proposes from the
+ * former books, and who confirmed it. The order counts by subsystem once someone has confirmed it.
+ */
+export interface NomenclatureMapping {
+  /** What the former books said: their category, or else the work done. */
+  sourceText: string
+  proposedSubsystemNo: string | null
+  confirmedBy: string | null
+  confirmedAt: string | null
 }
 
 export interface WorkOrderApi {
@@ -100,6 +113,7 @@ export interface WorkOrderApi {
   external: ExternalWork | null
   /** Cost carried over from the books for an imported order, which has no parts or time of its own. */
   historicalCost: number | null
+  nomenclature: NomenclatureMapping | null
   history: WorkOrderEvent[]
   vehiclePlate: string
   subsystemName: string
@@ -110,6 +124,11 @@ export interface WorkOrderApi {
   labourCost: number
   partsCost: number
   pendingPartCount: number
+  /** Days from the order to the receipt of the parts bought for it, still running while one is missing. */
+  partsWaitDays: number
+  proposedSubsystemName: string
+  /** Imported orders only: whether a person still has to confirm the subsystem. */
+  nomenclatureState: 'to_confirm' | 'confirmed' | null
   providerName: string
   subcontractingCost: number
   totalCost: number

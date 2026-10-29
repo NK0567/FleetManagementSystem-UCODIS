@@ -20,6 +20,11 @@ export const deliveryQualityApi = {
       linePath(orderNo, lineNo, `protests/${encodeURIComponent(protestNo)}/issue`),
       {}
     ),
+  attachProtestFile: (orderNo: string, lineNo: number, protestNo: string, fileNo: string) =>
+    httpClient.post<SingleResponse<{ fileNos: string[] }>>(
+      linePath(orderNo, lineNo, `protests/${encodeURIComponent(protestNo)}/files`),
+      { fileNo }
+    ),
   closeProtest: (orderNo: string, lineNo: number, protestNo: string, outcome: string) =>
     httpClient.post<SingleResponse<{ status: string }>>(
       linePath(orderNo, lineNo, `protests/${encodeURIComponent(protestNo)}/close`),

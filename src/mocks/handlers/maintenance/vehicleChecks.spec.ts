@@ -80,6 +80,6 @@ describe('vehicle checks', () => {
       symptom: 'Vehicle check: Freinage failed. Pédale molle.'
     })
     expect(order.downtimeNo).not.toBeNull()
-    expect((await get<VehicleApi>('/fleet/vehicles/VEH-003')).status).toBe('immobilized')
+    expect((await get<VehicleApi>('/fleet/vehicles/VEH-003')).status).toBe('in_maintenance')
   })
 })

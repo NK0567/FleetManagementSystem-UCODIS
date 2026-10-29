@@ -29,15 +29,26 @@ describe('workOrderStatus', () => {
     expect(workOrderStatus({ ...blank, completedAt: 'c', validatedAt: 'v' })).toBe('closed')
     expect(workOrderStatus({ ...blank, startedAt: 's', cancelledAt: 'x' })).toBe('cancelled')
   })
+
+  it('waits for a part bought and not received, until the work is declared finished', () => {
+    const pending = [{ purchaseRequestNo: 'DA-1', receivedAt: null }]
+    expect(workOrderStatus({ ...blank, startedAt: 's', parts: pending })).toBe('awaiting_parts')
+    expect(
+      workOrderStatus({ ...blank, parts: [{ purchaseRequestNo: 'DA-1', receivedAt: 'r' }] })
+    ).toBe('open')
+    expect(
+      workOrderStatus({ ...blank, parts: [{ purchaseRequestNo: null, receivedAt: 'r' }] })
+    ).toBe('open')
+  })
 })
 
 describe('immobilization', () => {
-  it('stops the vehicle at once only for a serious breakdown', () => {
+  it('stops the vehicle as soon as a repair order opens, whatever its severity', () => {
     expect(immobilizesOnDeclaration({ maintenanceType: 'corrective', severity: 'critical' })).toBe(
       true
     )
     expect(immobilizesOnDeclaration({ maintenanceType: 'corrective', severity: 'minor' })).toBe(
-      false
+      true
     )
     expect(immobilizesOnDeclaration({ maintenanceType: 'preventive', severity: 'major' })).toBe(
       false

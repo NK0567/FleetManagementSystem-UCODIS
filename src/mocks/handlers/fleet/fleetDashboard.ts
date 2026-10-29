@@ -15,7 +15,9 @@ import { driversApi } from './drivers'
 import { fuelConsumptionApi } from './fuelConsumption'
 import { fuelRefillsApi } from './fuelRefills'
 import { infractionsApi } from './infractions'
-import { livePositions } from './livePositions'
+import { detectRouteDeviations } from './deviationDetection'
+import { fleetPark, fleetSupervision } from './fleetSupervision'
+import { livePositions, simulatedNow } from './livePositions'
 import { deviationSummary } from './routeDeviations'
 import { statusReason, vehicleStatuses } from './vehicleState'
 
@@ -37,13 +39,15 @@ export function fleetDashboard(db: MockDatabase, request: MockRequest): FleetDas
   })
 
   const documents = documentsApi(db).filter((document) => document.current && document.mandatory)
-  const positions = livePositions(db)
+  const positions = livePositions(db, request)
   const refills = fuelRefillsApi(db, request.language).filter((refill) =>
     refill.refueledAt.startsWith(month)
   )
   const drivers = driversApi(db, request.language)
 
   return {
+    supervision: fleetSupervision(positions),
+    park: fleetPark(db),
     availability: {
       tractors: availability(ofRole('tows')),
       trailers: availability(ofRole('towed')),
@@ -81,7 +85,9 @@ export function fleetDashboard(db: MockDatabase, request: MockRequest): FleetDas
         recordNo
       })),
     immobilized: vehicles
-      .filter((vehicle) => ['immobilized', 'out_of_service'].includes(statusOf(vehicle.no)))
+      .filter((vehicle) =>
+        ['in_maintenance', 'immobilized', 'out_of_service'].includes(statusOf(vehicle.no))
+      )
       .map((vehicle) => ({
         vehicleNo: vehicle.no,
         plate: vehicle.plate,
@@ -109,7 +115,9 @@ export function fleetDashboard(db: MockDatabase, request: MockRequest): FleetDas
 }
 
 export function registerFleetDashboardHandlers(router: MockRouter, db: MockDatabase): void {
-  router.get('/fleet/dashboard', { feature: 'FLEETDASHBOARD', action: 'read' }, (request) =>
-    ok(fleetDashboard(db, request))
-  )
+  router.get('/fleet/dashboard', { feature: 'FLEETDASHBOARD', action: 'read' }, (request) => {
+    // The board shows the vehicles in alert: what the trips show against their course counts.
+    detectRouteDeviations(db, simulatedNow())
+    return ok(fleetDashboard(db, request))
+  })
 }

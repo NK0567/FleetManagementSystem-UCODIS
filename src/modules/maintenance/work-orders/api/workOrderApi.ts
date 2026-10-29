@@ -19,6 +19,7 @@ export type WorkOrderAction =
   | 'validate'
   | 'refuse'
   | 'cancel'
+  | 'confirm-nomenclature'
 
 export const workOrderApi = {
   ...createCrudApi<WorkOrderApi>({ basePath }),

@@ -20,14 +20,23 @@ import type { ConfirmationState } from '../domain/confirmation'
 import { useConfirmationStore } from '../stores/confirmationStore'
 import {
   RECEPTION_STATES,
+  type AnsweredLineApi,
   type ConfirmationLineApi,
   type ReceptionLineApi,
   type ReceptionState
 } from '../types/confirmation.types'
 
-type DateAction = 'client-date' | 'propose-date' | 'accept-date'
+type DateAction = 'client-date'
+type QueueTab = ConfirmationState | 'answered'
 
-const CONFIRMATION_TABS: ConfirmationState[] = ['pending', 'unavailable', 'confirmed', 'replanned']
+/* « Déjà répondu » keeps every answer given, whatever has become of the order (TRS01-US15). */
+const CONFIRMATION_TABS: QueueTab[] = [
+  'pending',
+  'unavailable',
+  'confirmed',
+  'replanned',
+  'answered'
+]
 const STATE_TONES: Record<ConfirmationState, StatusTone> = {
   pending: 'warning',
   unavailable: 'danger',
@@ -57,7 +66,17 @@ const { canUpdate: canHandleContest } = usePermissions('TRANSPORTORDER')
 const userStore = useUserStore()
 const optionsStore = useOptionsStore()
 const me = computed(() => userStore.user?.code ?? '')
-const confirmationTab = ref<ConfirmationState>('pending')
+const confirmationTab = ref<QueueTab>('pending')
+/** Only the calls due now, by the company's call moment (TRS01-US15). */
+const onlyCalls = ref(false)
+const ACTIVITY_TONES: Record<NonNullable<ConfirmationLineApi['activity']>, StatusTone> = {
+  call: 'warning',
+  call_later: 'neutral',
+  await_answer: 'info'
+}
+const answeredRows = computed<AnsweredLineApi[]>(() => store.answered)
+const tabCount = (tab: QueueTab) =>
+  tab === 'answered' ? store.answered.length : countOf(store.lines, tab)
 /** A line taken by another agent is theirs: hidden by default, shown on demand. */
 const hideTakenByOthers = ref(true)
 const receptionTab = ref<ReceptionState>('awaiting')
@@ -78,10 +97,10 @@ const countOf = <T extends { state: string }>(rows: T[], state: string) =>
 
 const kpis = computed(() => [
   {
-    key: 'pending',
+    key: 'toCall',
     icon: PhoneCall,
-    value: countOf(store.lines, 'pending'),
-    label: t('planning.confirmations.kpi.pending')
+    value: store.lines.filter((line) => line.activity === 'call').length,
+    label: t('planning.confirmations.kpi.toCall')
   },
   {
     key: 'unavailable',
@@ -108,6 +127,7 @@ const visibleLines = computed(() =>
   store.lines.filter(
     (line) =>
       line.state === confirmationTab.value &&
+      (!onlyCalls.value || line.activity === 'call') &&
       !(hideTakenByOthers.value && isOpen(line) && takenByOther(line))
   )
 )
@@ -129,28 +149,17 @@ const orderCard = (orderNo: string) => ({
 })
 const isOpen = (line: ConfirmationLineApi) =>
   line.state === 'pending' || line.state === 'unavailable'
-const retainedDate = (line: ConfirmationLineApi) =>
-  line.clientProposedOn ?? line.plannerProposedOn ?? line.availableOn
 
 function openDate(line: ConfirmationLineApi, action: DateAction) {
-  const current = {
-    'client-date': line.clientProposedOn,
-    'propose-date': line.plannerProposedOn,
-    'accept-date': retainedDate(line)
-  }[action]
-  date.value = current ?? ''
+  date.value = line.clientProposedOn ?? line.availableOn ?? ''
   dating.value = { line, action }
 }
 
+/* The agent records the date the recipient gives on the phone; retaining it is the planner's. */
 async function onDate() {
   const pending = dating.value
   if (!pending || !date.value) return
-  const save = {
-    'client-date': store.setClientDate,
-    'propose-date': store.proposeDate,
-    'accept-date': store.acceptDate
-  }[pending.action]
-  if (await save(pending.line, date.value)) dating.value = null
+  if (await store.setClientDate(pending.line, date.value)) dating.value = null
 }
 
 async function onUnavailable(choice: { reasonNo: string; comment: string }) {
@@ -243,11 +252,21 @@ onMounted(() => {
         >
           {{ t(`planning.confirmations.state.${state}`) }}
           <span class="ml-1 text-xs tabular-nums text-muted-foreground">
-            {{ countOf(store.lines, state) }}
+            {{ tabCount(state) }}
           </span>
         </button>
       </nav>
-      <div class="flex flex-wrap items-center gap-3 px-4 py-2 border-b border-border">
+      <div
+        v-if="confirmationTab !== 'answered'"
+        class="flex flex-wrap items-center gap-3 px-4 py-2 border-b border-border"
+      >
+        <label
+          v-if="confirmationTab === 'pending'"
+          class="inline-flex items-center gap-2 text-sm text-card-foreground"
+        >
+          <input v-model="onlyCalls" type="checkbox" class="h-4 w-4 accent-primary" />
+          {{ t('planning.confirmations.queue.onlyCalls') }}
+        </label>
         <label class="inline-flex items-center gap-2 text-sm text-card-foreground">
           <input v-model="hideTakenByOthers" type="checkbox" class="h-4 w-4 accent-primary" />
           {{ t('planning.confirmations.queue.hideOthers') }}
@@ -259,7 +278,75 @@ onMounted(() => {
           {{ t('planning.confirmations.queue.order') }}
         </span>
       </div>
-      <table class="w-full text-sm">
+      <table v-if="confirmationTab === 'answered'" class="w-full text-sm">
+        <thead>
+          <tr class="bg-muted/40 text-xs text-muted-foreground">
+            <th class="px-3 py-2 font-semibold text-left">
+              {{ t('planning.confirmations.col.departure') }}
+            </th>
+            <th class="px-3 py-2 font-semibold text-left">
+              {{ t('planning.confirmations.col.order') }}
+            </th>
+            <th class="px-3 py-2 font-semibold text-left">
+              {{ t('planning.confirmations.col.recipient') }}
+            </th>
+            <th class="px-3 py-2 font-semibold text-left">
+              {{ t('planning.confirmations.col.answer') }}
+            </th>
+            <th class="px-3 py-2 font-semibold text-left">
+              {{ t('planning.confirmations.col.origin') }}
+            </th>
+            <th class="px-3 py-2 font-semibold text-left">
+              {{ t('planning.confirmations.col.orderStatus') }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-if="!answeredRows.length">
+            <td colspan="6" class="px-3 py-4 text-muted-foreground">
+              {{ t('planning.confirmations.answered.empty') }}
+            </td>
+          </tr>
+          <tr v-for="row in answeredRows" :key="keyOf(row)" class="border-t border-border">
+            <td class="px-3 py-2 whitespace-nowrap tabular-nums">
+              {{ row.plannedDeparture ? formatDateTime(row.plannedDeparture) : '' }}
+            </td>
+            <td class="px-3 py-2 whitespace-nowrap">
+              <RouterLink :to="orderCard(row.orderNo)" class="text-primary hover:underline">
+                {{ row.orderNo }}
+              </RouterLink>
+              <span class="text-xs text-muted-foreground">
+                · {{ t('planning.confirmations.lineNo', { no: row.lineNo }) }}
+              </span>
+            </td>
+            <td class="px-3 py-2">
+              <p class="text-card-foreground">{{ row.recipientName }}</p>
+              <p class="text-xs text-muted-foreground">
+                {{ row.productName }} · {{ formatNumber(row.quantity) }} {{ row.unit }}
+              </p>
+            </td>
+            <td class="px-3 py-2">
+              <StatusPill
+                :label="t(`planning.confirmations.state.${row.answer}`)"
+                :tone="row.answer === 'confirmed' ? 'success' : 'danger'"
+              />
+              <p v-if="row.answeredAt" class="text-xs text-muted-foreground mt-1">
+                {{ formatDateTime(row.answeredAt) }}
+              </p>
+              <p v-if="row.availableOn" class="text-xs text-muted-foreground">
+                {{ t('planning.confirmations.date.available') }} · {{ formatDate(row.availableOn) }}
+              </p>
+            </td>
+            <td class="px-3 py-2">
+              {{ t(`planning.confirmations.answered.origin.${row.origin}`) }}
+            </td>
+            <td class="px-3 py-2">
+              {{ optionsStore.getOptionLabel('transportOrderStatus', row.orderStatus) }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <table v-else class="w-full text-sm">
         <thead>
           <tr class="bg-muted/40 text-xs text-muted-foreground">
             <th class="px-3 py-2 font-semibold text-left">
@@ -314,7 +401,7 @@ onMounted(() => {
               </span>
             </td>
             <td class="px-3 py-2">
-              <p class="text-card-foreground">{{ line.recipientName || '—' }}</p>
+              <p class="text-card-foreground">{{ line.recipientName || '' }}</p>
               <p class="text-xs text-muted-foreground">{{ line.deliveryPointName }}</p>
             </td>
             <td class="px-3 py-2 whitespace-nowrap">
@@ -335,7 +422,7 @@ onMounted(() => {
                 {{ optionsStore.getOptionLabel('deliverySlot', line.preferredSlot) }}
               </p>
             </td>
-            <td class="px-3 py-2">{{ line.productName || '—' }}</td>
+            <td class="px-3 py-2">{{ line.productName || '' }}</td>
             <td class="px-3 py-2 text-right tabular-nums whitespace-nowrap">
               {{ formatNumber(line.quantity) }} {{ line.unit }}
             </td>
@@ -352,13 +439,19 @@ onMounted(() => {
                 {{ t('planning.confirmations.date.available') }} ·
                 {{ formatDate(line.availableOn) }}
               </p>
-              <p v-if="!line.clientProposedOn && !line.plannerProposedOn && !line.availableOn">—</p>
+              <p v-if="!line.clientProposedOn && !line.plannerProposedOn && !line.availableOn"></p>
             </td>
             <td class="px-3 py-2">
               <StatusPill
                 :label="t(`planning.confirmations.state.${line.state}`)"
                 :tone="STATE_TONES[line.state]"
               />
+              <div v-if="line.activity" class="mt-1">
+                <StatusPill
+                  :label="t(`planning.confirmations.activity.${line.activity}`)"
+                  :tone="ACTIVITY_TONES[line.activity]"
+                />
+              </div>
               <p v-if="line.byLink" class="mt-1 text-xs text-muted-foreground">
                 {{ t('planning.confirmations.queue.byLink') }}
               </p>
@@ -426,23 +519,6 @@ onMounted(() => {
                 >
                   <CalendarClock class="w-4 h-4 text-primary" />
                   {{ t('planning.confirmations.action.clientDate') }}
-                </button>
-                <button
-                  type="button"
-                  :class="buttonClass"
-                  :disabled="store.acting"
-                  @click="openDate(line, 'propose-date')"
-                >
-                  {{ t('planning.confirmations.action.propose') }}
-                </button>
-                <button
-                  v-if="retainedDate(line)"
-                  type="button"
-                  :class="buttonClass"
-                  :disabled="store.acting"
-                  @click="openDate(line, 'accept-date')"
-                >
-                  {{ t('planning.confirmations.action.accept') }}
                 </button>
               </div>
             </td>
@@ -517,10 +593,10 @@ onMounted(() => {
               </span>
             </td>
             <td class="px-3 py-2">
-              <p class="text-card-foreground">{{ line.recipientName || '—' }}</p>
+              <p class="text-card-foreground">{{ line.recipientName || '' }}</p>
               <p class="text-xs text-muted-foreground">{{ line.deliveryPointName }}</p>
             </td>
-            <td class="px-3 py-2">{{ line.productName || '—' }}</td>
+            <td class="px-3 py-2">{{ line.productName || '' }}</td>
             <td class="px-3 py-2 text-right tabular-nums whitespace-nowrap">
               {{ formatNumber(line.quantity) }} {{ line.unit }}
             </td>
@@ -609,8 +685,8 @@ onMounted(() => {
     <BaseFormField :label="t('planning.confirmations.dateDialog.date')" required>
       <DateFormInput v-model="date" />
     </BaseFormField>
-    <p v-if="dating?.action === 'accept-date'" class="text-xs text-muted-foreground mt-2">
-      {{ t('planning.confirmations.dateDialog.acceptHint') }}
+    <p class="text-xs text-muted-foreground mt-2">
+      {{ t('planning.confirmations.dateDialog.clientHint') }}
     </p>
   </ConfirmDialog>
   <ConfirmDialog

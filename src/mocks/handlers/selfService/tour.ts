@@ -13,6 +13,7 @@ import type { MockRouter } from '../../http/router'
 import { sessionUser } from '../../http/types'
 import { activeCheckPoints, readCheckResults } from '../fleet/checkPoints'
 import { FLEET_MESSAGES } from '../fleet/messages'
+import { toBringBack } from '../planning/execution'
 import { transportOrdersApi } from '../planning/transportOrders'
 import { SELF_SERVICE_MESSAGES } from './messages'
 
@@ -122,7 +123,9 @@ export function myOrders(db: MockDatabase, employeeNo: string) {
             returnedAt: line.returnedAt,
             handedBackAt: line.handedBackAt,
             receptionConfirmedAt: line.receptionConfirmedAt,
-            receptionContestedAt: line.receptionContestedAt
+            receptionContestedAt: line.receptionContestedAt,
+            isFuel: !!product?.isFuel,
+            undeliveredReasonNo: line.undeliveredReasonNo ?? null
           }
         })
       return {
@@ -143,7 +146,46 @@ export function myOrders(db: MockDatabase, employeeNo: string) {
     })
 }
 
+/**
+ * What the driver still has to bring back to the warehouse, from all his orders, even completed
+ * ones, until he confirms he brought it back (TRS03-US11).
+ */
+export function myReturns(db: MockDatabase, employeeNo: string) {
+  const trips = new Set(
+    db.trips
+      .all()
+      .filter((trip) => trip.driverNo === employeeNo)
+      .map((trip) => trip.no)
+  )
+  return db.transportOrders
+    .all()
+    .filter((order) => order.tripNo && trips.has(order.tripNo))
+    .flatMap((order) =>
+      order.lines.filter(toBringBack).map((line) => {
+        const product = db.products.find(line.productNo)
+        const point = db.deliveryPoints.find(line.deliveryPointNo)
+        const reasonNo =
+          line.refusalReasonNo ?? line.undeliveredReasonNo ?? line.postponementReasonNo
+        return {
+          orderNo: order.no,
+          lineNo: line.lineNo,
+          productName: product?.name ?? line.productNo,
+          unit: product?.unit ?? '',
+          quantity: line.loadedQuantity ?? line.quantity,
+          deliveryPointName: point?.name ?? line.deliveryPointNo,
+          reason: (reasonNo && db.planningReasons.find(reasonNo)?.name) || ''
+        }
+      })
+    )
+}
+
 export function registerTourHandlers(router: MockRouter, db: MockDatabase): void {
+  router.get('/me/returns', { feature: 'MYSPACE', action: 'read' }, (request) => {
+    const user = sessionUser(request)
+    if (!user.employeeNo) return ok([])
+    return ok(myReturns(db, user.employeeNo))
+  })
+
   router.get('/me/orders', { feature: 'MYSPACE' }, (request) => {
     const user = sessionUser(request)
     if (!user.employeeNo) throw notFound(SELF_SERVICE_MESSAGES.noEmployee)
@@ -159,12 +201,15 @@ export function registerTourHandlers(router: MockRouter, db: MockDatabase): void
   router.post('/me/checklist', { feature: 'MYSPACE', action: 'execute' }, (request) => {
     const user = sessionUser(request)
     if (!user.employeeNo) throw notFound(SELF_SERVICE_MESSAGES.noEmployee)
-    const trip = pickTour(driverTrips(db, user.employeeNo))
+    const input = readBody(request)
+    // A checklist kept on the phone without network names its trip: it must be one of the driver's.
+    const ownTrips = driverTrips(db, user.employeeNo)
+    const named = typeof input.tripNo === 'string' && input.tripNo ? input.tripNo : null
+    const trip = named ? ownTrips.find((row) => row.no === named) : pickTour(ownTrips)
     if (!trip) throw notFound(SELF_SERVICE_MESSAGES.noTour)
     if (trip.status === 'closed' || trip.status === 'cancelled') {
       throw conflict(FLEET_MESSAGES.checklistTripOver)
     }
-    const input = readBody(request)
     const takenAt = readDateTime(input, 'takenAt', { required: true }) ?? ''
     if (takenAt > nowIsoDateTime()) throw unprocessable(FLEET_MESSAGES.dateInFuture)
     const row = stampCreated<RoadChecklistRow>(

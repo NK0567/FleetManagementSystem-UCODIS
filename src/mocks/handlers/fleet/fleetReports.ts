@@ -13,7 +13,8 @@ import {
 } from '@/modules/fleet/reports/types/fleetReport.types'
 import { isUsable } from '@/modules/fleet/vehicles/domain/vehicleStatus'
 import { isValidCalendarDateYmd } from '@/utils/calendarDate'
-import { todayIso } from '@/utils/date'
+import { averageAgeYears } from '@/modules/fleet/dashboard/domain/park'
+import { addDays, daysBetween, minutesBetween, todayIso } from '@/utils/date'
 import type { MockDatabase } from '../../db/database'
 import { routeParam } from '../../http/crudResource'
 import { notFound, unprocessable } from '../../http/errors'
@@ -29,7 +30,10 @@ import { employeeNames, vehiclePlates } from './links'
 import { FLEET_MESSAGES } from './messages'
 import { routeDeviationsApi } from './routeDeviations'
 import { fleetSettings } from './settings'
+import { SUPERVISION_MESSAGES } from './supervisionMessages'
 import { tripsApi } from './trips'
+import { alertsApi } from './alerts'
+import { tyresApi } from '../maintenance/tyres'
 import { vehicleStatuses } from './vehicleState'
 
 interface ReportScope {
@@ -40,9 +44,19 @@ interface ReportScope {
   employees: Set<string>
   db: MockDatabase
   request: MockRequest
+  /** The second period or site the summary is compared with. */
+  compare?: ReportScope
+  /** How the performance of the drivers is grouped. */
+  groupBy?: 'day' | 'week'
 }
 
 const day = (value: string | null | undefined) => (value ?? '').slice(0, 10)
+
+function scopeVehicles(scope: ReportScope) {
+  return scope.db.vehicles
+    .all()
+    .filter((vehicle) => scope.vehicles.has(vehicle.no) && !vehicle.removal)
+}
 
 function within(scope: ReportScope, value: string | null | undefined): boolean {
   const date = day(value)
@@ -95,7 +109,8 @@ function infractions(scope: ReportScope) {
     )
 }
 
-function summary(scope: ReportScope): ReportSection[] {
+/** The indicators of the summary for one scope: key, value and unit. */
+function summaryIndicators(scope: ReportScope): [string, ReportCell, string][] {
   const trips = finishedTrips(scope)
   const deviated = new Set(unjustifiedDeviations(scope).map((deviation) => deviation.tripNo))
   const fuel = refills(scope)
@@ -150,16 +165,47 @@ function summary(scope: ReportScope): ReportSection[] {
       'averageDriverScore',
       scores.length ? Math.round(sum(scores.map((score) => score.score)) / scores.length) : null,
       'points'
-    ]
+    ],
+    ['averageFleetAge', averageAgeYears(scopeVehicles(scope), scope.to), 'years']
   ]
+  return indicators
+}
+
+const difference = (a: ReportCell, b: ReportCell) =>
+  typeof a === 'number' && typeof b === 'number' ? Math.round((a - b) * 10) / 10 : null
+
+function summary(scope: ReportScope): ReportSection[] {
+  const trips = finishedTrips(scope)
+  const indicators = summaryIndicators(scope)
+  // Compared with a second period or a second site: the same indicators side by side.
+  const other = scope.compare
+    ? new Map(summaryIndicators(scope.compare).map(([key, value]) => [key, value]))
+    : null
   return [
     {
       key: 'indicators',
       columns: [
         { key: 'indicator', type: 'indicator' },
-        { key: 'value', type: 'measure' }
+        { key: 'value', type: 'measure' },
+        ...(other
+          ? [
+              { key: 'compareValue', type: 'measure' as const },
+              { key: 'gap', type: 'measure' as const }
+            ]
+          : [])
       ],
-      rows: indicators.map(([indicator, value, unit]) => ({ indicator, value, unit }))
+      rows: indicators.map(
+        ([indicator, value, unit]): Record<string, ReportCell> =>
+          other
+            ? {
+                indicator,
+                value,
+                unit,
+                compareValue: other.get(indicator) ?? null,
+                gap: difference(value, other.get(indicator) ?? null)
+              }
+            : { indicator, value, unit }
+      )
     },
     {
       key: 'orders',
@@ -200,10 +246,14 @@ function fuelReport(scope: ReportScope): ReportSection[] {
         km: sum(ownPeriods.map((period) => Math.max(0, period.km))),
         l100,
         referenceL100: reference,
-        gapPct: l100 !== null && reference ? gapPercent(l100, reference) : null
+        gapPct: l100 !== null && reference ? gapPercent(l100, reference) : null,
+        anomalies: own.filter((refill) => refill.status === 'anomaly').length
       }
     })
   const months = [...new Set(fuel.map((refill) => refill.refueledAt.slice(0, 7)))].sort()
+  const drivers = [...new Set(fuel.map((refill) => refill.driverName))].sort((a, b) =>
+    (a || '￿').localeCompare(b || '￿')
+  )
   return [
     {
       key: 'byVehicle',
@@ -215,9 +265,30 @@ function fuelReport(scope: ReportScope): ReportSection[] {
         { key: 'km', type: 'integer' },
         { key: 'l100', type: 'decimal' },
         { key: 'referenceL100', type: 'decimal' },
-        { key: 'gapPct', type: 'percent' }
+        { key: 'gapPct', type: 'percent' },
+        { key: 'anomalies', type: 'integer' }
       ],
       rows: byVehicle
+    },
+    {
+      key: 'byDriver',
+      columns: [
+        { key: 'driverName', type: 'text' },
+        { key: 'refills', type: 'integer' },
+        { key: 'liters', type: 'integer' },
+        { key: 'amount', type: 'amount' },
+        { key: 'anomalies', type: 'integer' }
+      ],
+      rows: drivers.map((driverName) => {
+        const own = fuel.filter((refill) => refill.driverName === driverName)
+        return {
+          driverName: driverName || null,
+          refills: own.length,
+          liters: Math.round(sum(own.map((refill) => refill.liters))),
+          amount: sum(own.map((refill) => refill.amount)),
+          anomalies: own.filter((refill) => refill.status === 'anomaly').length
+        }
+      })
     },
     {
       key: 'byMonth',
@@ -257,8 +328,54 @@ function fuelReport(scope: ReportScope): ReportSection[] {
           gapPct: period.gapPct,
           status: period.status
         }))
-    }
+    },
+    tyreComparison(scope, 'make'),
+    tyreComparison(scope, 'supplierName')
   ]
+}
+
+/**
+ * Tyres compared by make or by supplier: what they cost, how far they ran, their cost per km
+ * and the life of those already scrapped. Every tyre that ran on a vehicle of the scope counts,
+ * whatever the period: a tyre lives longer than a report.
+ */
+function tyreComparison(scope: ReportScope, by: 'make' | 'supplierName'): ReportSection {
+  const tyres = tyresApi(scope.db).filter(
+    (tyre) =>
+      !tyre.stints.length || tyre.stints.some((stint) => scope.vehicles.has(stint.vehicleNo))
+  )
+  const names = [...new Set(tyres.map((tyre) => tyre[by]))].sort((a, b) =>
+    (a || '￿').localeCompare(b || '￿')
+  )
+  return {
+    key: by === 'make' ? 'tyresByMake' : 'tyresBySupplier',
+    columns: [
+      { key: by, type: 'text' },
+      { key: 'tyres', type: 'integer' },
+      { key: 'tyreCost', type: 'amount' },
+      { key: 'tyreKm', type: 'integer' },
+      { key: 'costPerKm', type: 'decimal' },
+      { key: 'scrapped', type: 'integer' },
+      { key: 'averageLifeKm', type: 'integer' }
+    ],
+    rows: names.map((name) => {
+      const own = tyres.filter((tyre) => tyre[by] === name)
+      const cost = sum(own.map((tyre) => tyre.totalCost))
+      const km = sum(own.map((tyre) => tyre.kmRun))
+      const scrapped = own.filter((tyre) => tyre.scrappedAt)
+      return {
+        [by]: name || null,
+        tyres: own.length,
+        tyreCost: cost,
+        tyreKm: km,
+        costPerKm: km ? Math.round((cost / km) * 100) / 100 : null,
+        scrapped: scrapped.length,
+        averageLifeKm: scrapped.length
+          ? Math.round(sum(scrapped.map((tyre) => tyre.kmRun)) / scrapped.length)
+          : null
+      }
+    })
+  }
 }
 
 function driversReport(scope: ReportScope): ReportSection[] {
@@ -301,6 +418,183 @@ function driversReport(scope: ReportScope): ReportSection[] {
             ).length
           }
         })
+    },
+    ...driverDashboard(scope)
+  ]
+}
+
+/** The Monday of the week of a day, or the day itself, as the key of a performance line. */
+function periodStart(value: string, groupBy: 'day' | 'week'): string {
+  const date = day(value)
+  if (groupBy === 'day') return date
+  const weekday = (new Date(`${date}T12:00:00`).getDay() + 6) % 7
+  return addDays(date, -weekday)
+}
+
+/**
+ * The drivers dashboard (FLT07-US05): their performance by day or by week, the documents coming
+ * due, the vehicles they hold today and the alerts that concern them.
+ */
+function driverDashboard(scope: ReportScope): ReportSection[] {
+  const groupBy = scope.groupBy ?? 'week'
+  const drivers = driverScoresApi(scope.db).filter((score) => scope.employees.has(score.driverNo))
+  const driverNos = new Set(drivers.map((score) => score.driverNo))
+  const names = new Map(drivers.map((score) => [score.driverNo, score.fullName]))
+  const tripDrivers = new Map(scope.db.trips.all().map((trip) => [trip.no, trip.driverNo]))
+  const lines = new Map<string, Record<string, ReportCell> & { driverNo: string }>()
+  const line = (driverNo: string, at: string) => {
+    const start = periodStart(at, groupBy)
+    const key = `${driverNo}|${start}`
+    const current = lines.get(key) ?? {
+      driverNo,
+      driverName: names.get(driverNo) ?? driverNo,
+      periodStart: start,
+      trips: 0,
+      km: 0,
+      hours: 0,
+      unjustifiedDeviations: 0,
+      infractions: 0,
+      telematicsEvents: 0
+    }
+    lines.set(key, current)
+    return current
+  }
+  const add = (row: Record<string, ReportCell>, field: string, value: number) => {
+    row[field] = Math.round((Number(row[field] ?? 0) + value) * 10) / 10
+  }
+  for (const trip of finishedTrips(scope).filter((row) => driverNos.has(row.driverNo))) {
+    const row = line(trip.driverNo, trip.actualArrival as string)
+    add(row, 'trips', 1)
+    add(row, 'km', trip.distanceKm ?? 0)
+    if (trip.actualDeparture && trip.actualArrival) {
+      add(row, 'hours', minutesBetween(trip.actualDeparture, trip.actualArrival) / 60)
+    }
+  }
+  for (const deviation of unjustifiedDeviations(scope)) {
+    const driverNo = tripDrivers.get(deviation.tripNo)
+    if (driverNo && driverNos.has(driverNo))
+      add(line(driverNo, deviation.detectedAt), 'unjustifiedDeviations', 1)
+  }
+  for (const infraction of infractions(scope)) {
+    if (infraction.driverNo && driverNos.has(infraction.driverNo)) {
+      add(line(infraction.driverNo, infraction.occurredAt), 'infractions', 1)
+    }
+  }
+  for (const event of scope.db.telematicsEvents.all()) {
+    if (event.driverNo && driverNos.has(event.driverNo) && within(scope, event.occurredAt)) {
+      add(line(event.driverNo, event.occurredAt), 'telematicsEvents', 1)
+    }
+  }
+
+  // Documents of the drivers expired, missing, or coming due by the end of the period.
+  const documents = [
+    ...documentsApi(scope.db)
+      .filter(
+        (document) =>
+          document.current &&
+          document.target !== 'vehicle' &&
+          driverNos.has(document.subjectNo) &&
+          (document.state === 'expired' ||
+            document.state === 'expiring' ||
+            (!!document.expiryDate && document.expiryDate <= scope.to))
+      )
+      .map((document) => ({
+        driverName: names.get(document.subjectNo) ?? document.subjectName,
+        documentTypeName: document.documentTypeName,
+        expiryDate: document.expiryDate,
+        state: document.state === 'valid' ? 'expiring' : document.state
+      })),
+    ...missingDocumentsApi(scope.db)
+      .filter(
+        (gap) =>
+          gap.reason === 'missing' && gap.target !== 'vehicle' && driverNos.has(gap.subjectNo)
+      )
+      .map((gap) => ({
+        driverName: names.get(gap.subjectNo) ?? gap.subjectName,
+        documentTypeName: gap.documentTypeName,
+        expiryDate: null,
+        state: 'missing'
+      }))
+  ].sort((a, b) => (a.expiryDate ?? '').localeCompare(b.expiryDate ?? ''))
+
+  const plates = vehiclePlates(scope.db)
+  const assignments = scope.db.driverAssignments
+    .all()
+    .filter((assignment) => !assignment.endDate && driverNos.has(assignment.employeeNo))
+    .map((assignment) => ({
+      driverName: names.get(assignment.employeeNo) ?? assignment.employeeNo,
+      plate: plates.get(assignment.vehicleNo) ?? assignment.vehicleNo,
+      startDate: assignment.startDate
+    }))
+    .sort((a, b) => String(a.driverName).localeCompare(String(b.driverName)))
+
+  // The alerts not resolved whose subject is one of the drivers, or whose detail names one.
+  const driverNames = [...names.values()]
+  const alerts = alertsApi(scope.db, scope.request)
+    .filter((alert) => alert.status !== 'resolved' && alert.since.slice(0, 10) <= scope.to)
+    .filter((alert) =>
+      driverNames.some((name) => alert.subject === name || alert.detail.includes(name))
+    )
+    .map((alert) => ({
+      category: alert.category,
+      subject: alert.subject,
+      detail: alert.detail,
+      since: day(alert.since)
+    }))
+
+  return [
+    {
+      key: groupBy === 'day' ? 'performanceByDay' : 'performanceByWeek',
+      columns: [
+        { key: 'driverName', type: 'text' },
+        { key: groupBy === 'day' ? 'day' : 'weekOf', type: 'date' },
+        { key: 'trips', type: 'integer' },
+        { key: 'km', type: 'integer' },
+        { key: 'hours', type: 'decimal' },
+        { key: 'unjustifiedDeviations', type: 'integer' },
+        { key: 'infractions', type: 'integer' },
+        { key: 'telematicsEvents', type: 'integer' }
+      ],
+      rows: [...lines.values()]
+        .sort(
+          (a, b) =>
+            String(a.driverName).localeCompare(String(b.driverName)) ||
+            String(a.periodStart).localeCompare(String(b.periodStart))
+        )
+        .map((row): Record<string, ReportCell> => {
+          const { driverNo, periodStart: start, ...cells } = row
+          void driverNo
+          return { ...cells, [groupBy === 'day' ? 'day' : 'weekOf']: start ?? null }
+        })
+    },
+    {
+      key: 'documentsDue',
+      columns: [
+        { key: 'driverName', type: 'text' },
+        { key: 'documentTypeName', type: 'text' },
+        { key: 'expiryDate', type: 'date' },
+        { key: 'state', type: 'option', optionsKey: 'auditDocumentState' }
+      ],
+      rows: documents
+    },
+    {
+      key: 'assignments',
+      columns: [
+        { key: 'driverName', type: 'text' },
+        { key: 'plate', type: 'text' },
+        { key: 'startDate', type: 'date' }
+      ],
+      rows: assignments
+    },
+    {
+      key: 'alerts',
+      columns: [
+        { key: 'category', type: 'option', optionsKey: 'alertCategory' },
+        { key: 'subject', type: 'text' },
+        { key: 'detail', type: 'text' },
+        { key: 'since', type: 'date' }
+      ],
+      rows: alerts
     }
   ]
 }
@@ -410,23 +704,53 @@ export function fleetReport(
   }
   const siteNo = read('siteNo') || null
   const site = siteNo ? db.sites.findOrFail(siteNo) : null
-  const scope: ReportScope = {
-    from,
-    to,
+  const scopeOf = (period: { from: string; to: string }, at: typeof site): ReportScope => ({
+    ...period,
     db,
     request,
     vehicles: new Set(
       db.vehicles
         .all()
-        .filter((vehicle) => !site || vehicle.homeSiteNo === site.no)
+        .filter((vehicle) => !at || vehicle.homeSiteNo === at.no)
         .map((vehicle) => vehicle.no)
     ),
     employees: new Set(
       db.employees
         .all()
-        .filter((employee) => !site || employee.siteCode === site.no)
+        .filter((employee) => !at || employee.siteCode === at.no)
         .map((employee) => employee.no)
     )
+  })
+  const scope = scopeOf({ from, to }, site)
+  scope.groupBy = read('groupBy') === 'day' ? 'day' : 'week'
+
+  // The summary compares with the previous period, another period, or another site.
+  let comparison: FleetReportApi['comparison'] = null
+  const compare = kind === 'summary' ? read('compare') : ''
+  if (compare === 'previous' || compare === 'period') {
+    const length = daysBetween(from, to)
+    const other =
+      compare === 'previous'
+        ? { from: addDays(from, -length - 1), to: addDays(from, -1) }
+        : { from: read('compareFrom'), to: read('compareTo') }
+    if (
+      !other.from ||
+      !other.to ||
+      !isValidCalendarDateYmd(other.from) ||
+      !isValidCalendarDateYmd(other.to) ||
+      other.from > other.to
+    ) {
+      throw unprocessable(SUPERVISION_MESSAGES.comparisonInvalid)
+    }
+    scope.compare = scopeOf(other, site)
+    comparison = { ...other, siteNo, siteName: site?.name ?? '' }
+  } else if (compare === 'site') {
+    const otherNo = read('compareSiteNo') || null
+    const other = otherNo ? db.sites.findOrFail(otherNo) : null
+    scope.compare = scopeOf({ from, to }, other)
+    comparison = { from, to, siteNo: otherNo, siteName: other?.name ?? '' }
+  } else if (compare) {
+    throw unprocessable(SUPERVISION_MESSAGES.comparisonInvalid)
   }
   return {
     kind,
@@ -434,6 +758,7 @@ export function fleetReport(
     to,
     siteNo,
     siteName: site?.name ?? '',
+    comparison,
     sections: BUILDERS[kind](scope)
   }
 }

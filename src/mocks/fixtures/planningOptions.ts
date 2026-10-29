@@ -53,9 +53,37 @@ export const PLANNING_OPTION_SETS: Record<string, Record<string, LocalizedText>>
     cancelled: { fr: 'Annulée', en: 'Cancelled' }
   },
   deliveryRequestOrigin: {
-    request: { fr: 'Commande', en: 'Order' },
-    import: { fr: 'Import', en: 'Import' },
-    planner: { fr: 'Saisie par le planificateur', en: 'Keyed by the planner' }
+    request: { fr: 'Transmise par un service', en: 'Sent by a service' },
+    import: { fr: 'Import de fichier', en: 'File import' },
+    planner: { fr: 'Saisie par le planificateur', en: 'Keyed by the planner' },
+    connector: { fr: 'Système de gestion', en: 'Management system' },
+    api: { fr: 'API des ordonnateurs', en: 'Orderers API' }
+  },
+  deliveryRequestKind: {
+    sale: { fr: 'Vente à livrer', en: 'Sale to deliver' },
+    transfer: { fr: 'Transfert entre sites', en: 'Transfer between sites' },
+    return: { fr: 'Retour vers la base', en: 'Return to the base' }
+  },
+  deliveryPointKind: {
+    delivery: { fr: 'Site de livraison', en: 'Delivery site' },
+    depot: { fr: 'Dépôt de chargement', en: 'Loading depot' }
+  },
+  transportMode: {
+    road: { fr: 'Camion', en: 'Truck' },
+    rail: { fr: 'Train', en: 'Train' },
+    sea: { fr: 'Bateau', en: 'Ship' },
+    air: { fr: 'Avion', en: 'Plane' }
+  },
+  productMeasure: {
+    quantity: { fr: 'Quantité', en: 'Quantity' },
+    weight: { fr: 'Poids', en: 'Weight' },
+    temperature: { fr: 'Température', en: 'Temperature' },
+    density: { fr: 'Densité', en: 'Density' },
+    volume15: { fr: 'Volume à 15 °C', en: 'Volume at 15 °C' }
+  },
+  callMoment: {
+    day_before: { fr: 'La veille de la livraison', en: 'The day before the delivery' },
+    same_day: { fr: 'Le jour même', en: 'On the day itself' }
   },
   freightPayer: {
     orderer: { fr: 'Ordonnateur', en: 'Orderer' },

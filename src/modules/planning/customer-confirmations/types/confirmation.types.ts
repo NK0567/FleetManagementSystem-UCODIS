@@ -26,16 +26,29 @@ export interface ConfirmationLineApi {
   agent: string | null
   takenAt: string | null
   byLink: boolean
+  /** A call to make now, a call to come by the company's call moment, or an automated answer. */
+  activity: 'call' | 'call_later' | 'await_answer' | null
 }
 
-export type ConfirmationAction =
-  | 'confirm'
-  | 'unavailable'
-  | 'client-date'
-  | 'propose-date'
-  | 'accept-date'
-  | 'take'
-  | 'release'
+/** An answer already given, kept for the « already answered » history (TRS01-US15). */
+export interface AnsweredLineApi {
+  orderNo: string
+  lineNo: number
+  recipientName: string
+  deliveryPointName: string
+  productName: string
+  quantity: number
+  unit: string
+  plannedDeparture: string | null
+  answer: 'confirmed' | 'unavailable'
+  origin: 'recipient' | 'call'
+  answeredAt: string | null
+  availableOn: string | null
+  orderStatus: string
+}
+
+/* Retaining or proposing a new date is the planner's, on the order card (TRS01-US16). */
+export type ConfirmationAction = 'confirm' | 'unavailable' | 'client-date' | 'take' | 'release'
 
 export const RECEPTION_STATES = ['awaiting', 'contested', 'to_rate'] as const
 export type ReceptionState = (typeof RECEPTION_STATES)[number]
@@ -97,7 +110,12 @@ export interface TrackingApi {
   vehiclePlate: string
   driverName: string
   expectedArrival: string | null
+  late: boolean
   satisfactionScore: number | null
   satisfactionComment: string
   messages: { at: string; channel: string; kind: string }[]
+  /** The day retained for what was not delivered or postponed, and the link of its new delivery
+   * once planned (TRS01-US16, US17). */
+  replannedOn: string | null
+  nextTrackingToken: string | null
 }

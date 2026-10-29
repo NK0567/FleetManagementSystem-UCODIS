@@ -117,5 +117,9 @@ export default {
   'nav.transportReports': 'Transport reports',
   'nav.deliveryRequests': 'Orders',
   'nav.planningCalendar': 'Calendar',
-  'nav.loadingPreparations': 'Loading preparations'
+  'nav.loadingPreparations': 'Loading preparations',
+  'nav.inspectionItems': 'Inspection grid',
+  'nav.fuelReferences': 'Reference consumptions',
+  'nav.myVehicle': 'My vehicle',
+  'nav.providerTypes': 'Provider types'
 }

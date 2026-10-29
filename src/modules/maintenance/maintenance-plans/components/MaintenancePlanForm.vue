@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useEntityForm, type FormValidationError } from '@/composables/useEntityForm'
 import { useFormValidationUi } from '@/composables/useFormValidationUi'
-import { operationIssues, type MaintenanceOperation } from '../domain/maintenancePlan'
+import { modelLabel, operationIssues, type MaintenanceOperation } from '../domain/maintenancePlan'
 import type { MaintenancePlanApi } from '../types/maintenancePlan.types'
 
 const props = withDefaults(
@@ -30,7 +30,7 @@ const { draft, isRequired, expose } = useEntityForm({
     provisional: false,
     active: true,
     source: '',
-    vehicleNos: [] as string[],
+    modelCodes: [] as string[],
     operations: [] as MaintenanceOperation[]
   }),
   required: ['name'],
@@ -97,11 +97,11 @@ defineExpose(expose)
 
     <FormSection
       v-model:open="expandedSections.vehicles"
-      :title="t('maintenance.maintenancePlans.form.vehicles')"
-      :summary="[t('maintenance.maintenancePlans.vehicles.count', draft.vehicleNos.length)]"
+      :title="t('maintenance.maintenancePlans.form.models')"
+      :summary="[draft.modelCodes.map(modelLabel).join(', ')]"
     >
       <div class="xl:col-span-2 min-w-0">
-        <PlanVehiclesEditor v-model="draft.vehicleNos" :disabled="disabled" />
+        <PlanVehiclesEditor v-model="draft.modelCodes" :disabled="disabled" />
       </div>
     </FormSection>
 

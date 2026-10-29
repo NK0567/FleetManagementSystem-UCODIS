@@ -4,7 +4,11 @@ import { createCrudApi, resourcePath } from '@/core/factories'
 import type { CrudApi } from '@/core/types/crud.types'
 import { serializeListFiltersParam } from '@/core/utils/listFilters'
 import type { SingleResponse } from '@/types/api-response.types'
-import type { FleetStatusApi, FleetStatusDay } from '../types/fleetStatus.types'
+import type {
+  FleetStatusApi,
+  FleetStatusDay,
+  FleetStatusDispatchApi
+} from '../types/fleetStatus.types'
 
 const basePath = '/fleet/fleet-status'
 
@@ -31,6 +35,13 @@ export function createFleetStatusApi(day: () => string): CrudApi<FleetStatusApi>
 export const fleetStatusDayApi = {
   days: () => httpClient.get<SingleResponse<FleetStatusDay[]>>(`${basePath}/days`),
   archive: () => httpClient.post<SingleResponse<null>>(`${basePath}/archive`, {}),
+  dispatches: () =>
+    httpClient.get<SingleResponse<FleetStatusDispatchApi[]>>(`${basePath}/dispatches`),
+  send: (date: string, recipients: string[]) =>
+    httpClient.post<SingleResponse<FleetStatusDispatchApi>>(`${basePath}/send`, {
+      date,
+      recipients
+    }),
   saveNote: (vehicleNo: string, observation: string, expectedBackOn: string | null) =>
     httpClient.put<SingleResponse<FleetStatusApi>>(resourcePath(`${basePath}/notes`, vehicleNo), {
       observation,

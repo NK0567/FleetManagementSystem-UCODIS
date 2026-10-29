@@ -2,7 +2,8 @@ import httpClient from '@/core/api/httpClient'
 import { createCrudApi, resourcePath } from '@/core/factories'
 import type { SingleResponse } from '@/types/api-response.types'
 import type { ManualEmployeeStatus } from '../domain/employee'
-import type { EmployeeApi } from '../types/employee.types'
+import type { ImportReport } from '@/core/utils/csvImport'
+import type { EmployeeApi, StaffSyncReport } from '../types/employee.types'
 
 const basePath = '/hr/employees'
 
@@ -15,5 +16,8 @@ export const employeeApi = {
     action(no, 'status', { status, reason }),
   archive: (no: string, reason: string) => action(no, 'archive', { reason }),
   setDrivingAuthorization: (no: string, authorized: boolean) =>
-    action(no, 'driving-authorization', { authorized })
+    action(no, 'driving-authorization', { authorized }),
+  importRows: (rows: Record<string, unknown>[]) =>
+    httpClient.post<SingleResponse<ImportReport>>(`${basePath}/import`, { rows }),
+  synchronize: () => httpClient.post<SingleResponse<StaffSyncReport>>(`${basePath}/sync`, {})
 }

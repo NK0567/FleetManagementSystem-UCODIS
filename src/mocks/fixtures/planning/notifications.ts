@@ -7,7 +7,7 @@ import type { CollectionDefinition, MockRow } from '../../db/collection'
 export interface NotificationRow extends MockRow {
   employeeNo: string
   at: string
-  kind: 'order_assigned' | 'order_cancelled'
+  kind: 'order_assigned' | 'order_cancelled' | 'order_withdrawn' | 'order_route_changed'
   orderNo: string
   detail: string
   readAt: string | null

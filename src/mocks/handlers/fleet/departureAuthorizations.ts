@@ -1,5 +1,6 @@
 import { blockingAnomalies } from '@/modules/fleet/check-points/domain/checkResult'
 import {
+  departureActivation,
   longestRestHours,
   readyToLeave,
   restBeforeHours,
@@ -10,6 +11,7 @@ import type { DepartureAuthorizationApi } from '@/modules/fleet/departure-author
 import { driverIneligibility } from '@/modules/fleet/drivers/domain/driver'
 import { isUsable } from '@/modules/fleet/vehicles/domain/vehicleStatus'
 import { employeeFullName } from '@/modules/hr/employees/domain/employee'
+import { equipmentApi } from './vehicles'
 import { nowIsoDateTime, todayIso } from '@/utils/date'
 import { nowIso } from '../../clock'
 import type { MockDatabase } from '../../db/database'
@@ -172,7 +174,8 @@ export function departureAuthorizationsApi(
       driverName: names.get(trip.driverNo) ?? trip.driverNo,
       checks,
       ready: readyToLeave(checks),
-      checklistNo: departureChecklist(db, trip.no)?.no ?? null
+      checklistNo: departureChecklist(db, trip.no)?.no ?? null,
+      activation: authorization.activation ?? null
     }
   })
 }
@@ -254,11 +257,23 @@ export function registerDepartureAuthorizationsHandlers(
           checks: failed.map((check) => check.detail).join(' ')
         })
       }
+      const trip = db.trips.findOrFail(authorization.tripNo)
+      const capabilities = new Set(
+        equipmentApi(db)
+          .filter((item) => item.vehicleNo === trip.vehicleNo && item.state === 'operational')
+          .map((item) => item.capability)
+      )
+      const decidedAt = nowIso()
       db.departureAuthorizations.update(authorization.no, {
         decision: 'granted',
         decidedBy: sessionUser(request).code,
-        decidedAt: nowIso(),
+        decidedAt,
         checksSnapshot: checks,
+        // The grant switches on the tracking of the vehicle and its camera (simulated).
+        activation: departureActivation(
+          { hasTracker: capabilities.has('tracker'), hasCamera: capabilities.has('camera') },
+          decidedAt
+        ),
         ...stampModified(request)
       })
       return respond(authorization.no, request.language)

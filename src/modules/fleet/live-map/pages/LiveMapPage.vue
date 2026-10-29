@@ -1,18 +1,22 @@
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Check, Pause, Play, RotateCcw } from '@lucide/vue'
+import { useRoute, useRouter } from 'vue-router'
+import { BellRing, Check, History, MapPinOff, Pause, Play, RotateCcw, Truck, X } from '@lucide/vue'
 import { liveMapApi, type SimulationState } from '../api/liveMapApi'
 import type { MapCircle, MapMarker, MapPolyline } from '@/components/shared/MapView.vue'
 import { apiErrorMessage } from '@/core/api/apiError'
+import { usePermissions } from '@/composables/usePermissions'
 import { useOptionsStore } from '@/stores/optionsStore'
-import { formatDateTime } from '@/utils/format'
+import { nowIsoDateTime, todayIso } from '@/utils/date'
+import { formatDateTime, formatNumber } from '@/utils/format'
 import { LIVE_SITUATIONS, type LiveSituation } from '../domain/livePosition'
 import { liveMapService } from '../services/liveMapService'
-import type { LivePositionApi } from '../types/liveMap.types'
+import type { LivePositionApi, TrackHistoryApi } from '../types/liveMap.types'
 
 const REFRESH_MS = 10_000
 const STOP_RADIUS_M = 1_500
+const REPLAY_STEP_MS = 250
 
 /** Leaflet draws in SVG attributes, which cannot read CSS variables. */
 const SITUATION_COLORS: Record<LiveSituation, string> = {
@@ -22,15 +26,23 @@ const SITUATION_COLORS: Record<LiveSituation, string> = {
   immobilized: '#dc2626',
   signal_lost: '#d97706'
 }
+const REPLAY_COLOR = '#7c3aed'
+
+type Flag = 'alert' | 'outOfZone'
 
 const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
 const optionsStore = useOptionsStore()
+const { canRead: canReadVehicle } = usePermissions('VEHICLE')
 
 const positions = ref<LivePositionApi[]>([])
 const loading = ref(true)
 const error = ref<string | null>(null)
 const situation = ref<LiveSituation | null>(null)
+const flag = ref<Flag | null>(null)
 const selectedNo = ref<string | null>(null)
+const cardNo = ref<string | null>(null)
 const fitKey = ref(0)
 let timer: ReturnType<typeof setInterval> | null = null
 
@@ -73,11 +85,19 @@ onMounted(async () => {
   }
   await refresh()
   schedule()
+  // Coming from another screen: the vehicle is chosen, and its history opened on a given day.
+  const vehicle = typeof route.query.vehicle === 'string' ? route.query.vehicle : null
+  if (vehicle && positions.value.some((position) => position.vehicleNo === vehicle)) {
+    selectedNo.value = vehicle
+    const day = typeof route.query.day === 'string' ? route.query.day : null
+    if (day && /^\d{4}-\d{2}-\d{2}$/.test(day)) openHistory(day)
+  }
 })
 
 // The map polls only while it is on screen.
 onBeforeUnmount(() => {
   if (timer) clearInterval(timer)
+  stopReplay()
 })
 
 const counts = computed(() =>
@@ -87,34 +107,166 @@ const counts = computed(() =>
   }))
 )
 
+const flagCounts = computed(() => [
+  {
+    value: 'alert' as const,
+    icon: BellRing,
+    count: positions.value.filter((position) => position.alertCount > 0).length
+  },
+  {
+    value: 'outOfZone' as const,
+    icon: MapPinOff,
+    count: positions.value.filter((position) => position.outOfZone).length
+  }
+])
+
 const visible = computed(() =>
-  situation.value
-    ? positions.value.filter((position) => position.situation === situation.value)
-    : positions.value
+  positions.value.filter(
+    (position) =>
+      (!situation.value || position.situation === situation.value) &&
+      (flag.value !== 'alert' || position.alertCount > 0) &&
+      (flag.value !== 'outOfZone' || position.outOfZone)
+  )
 )
 
 const selected = computed(
   () => positions.value.find((position) => position.vehicleNo === selectedNo.value) ?? null
 )
 
-const markers = computed<MapMarker[]>(() =>
-  visible.value.map((position) => ({
-    id: position.vehicleNo,
-    latitude: position.latitude,
-    longitude: position.longitude,
-    label: position.plate,
-    sublabel: [
-      position.driverName,
-      optionsStore.getOptionLabel('liveSituation', position.situation)
-    ]
-      .filter(Boolean)
-      .join(' · '),
-    color: SITUATION_COLORS[position.situation]
-  }))
+/* ── History: the recorded positions of a period, replayed on the map (FLT04-US01) ── */
+const historyOpen = ref(false)
+const historyFrom = ref('')
+const historyTo = ref('')
+const history = ref<TrackHistoryApi | null>(null)
+const historyLoading = ref(false)
+const historyError = ref<string | null>(null)
+const replayIndex = ref(0)
+const playing = ref(false)
+let replayTimer: ReturnType<typeof setInterval> | null = null
+
+const toInput = (value: string) => value.slice(0, 16)
+
+function defaultPeriod(day?: string) {
+  if (day) {
+    historyFrom.value = `${day}T00:00`
+    historyTo.value = `${day}T23:59`
+    return
+  }
+  historyFrom.value = `${todayIso()}T00:00`
+  historyTo.value = toInput(nowIsoDateTime())
+}
+
+const periodInvalid = computed(
+  () => !!historyFrom.value && !!historyTo.value && historyFrom.value > historyTo.value
 )
 
-const polylines = computed<MapPolyline[]>(() =>
-  selected.value && selected.value.stops.length > 1
+async function loadHistory() {
+  stopReplay()
+  history.value = null
+  historyError.value = null
+  if (!selectedNo.value || !historyFrom.value || !historyTo.value || periodInvalid.value) return
+  historyLoading.value = true
+  try {
+    history.value = await liveMapService.history(
+      selectedNo.value,
+      historyFrom.value,
+      historyTo.value
+    )
+    replayIndex.value = history.value.points.length ? history.value.points.length - 1 : 0
+  } catch (cause) {
+    historyError.value = apiErrorMessage(cause, t('fleet.liveMap.history.loadError'))
+  } finally {
+    historyLoading.value = false
+  }
+}
+
+function openHistory(day?: string) {
+  defaultPeriod(day)
+  historyOpen.value = true
+  void loadHistory()
+}
+
+function toggleHistory() {
+  if (historyOpen.value) closeHistory()
+  else openHistory()
+}
+
+function closeHistory() {
+  stopReplay()
+  historyOpen.value = false
+  history.value = null
+}
+
+watch([historyFrom, historyTo], () => {
+  if (historyOpen.value) void loadHistory()
+})
+
+const replayPoint = computed(() => {
+  const points = history.value?.points ?? []
+  return points[Math.min(replayIndex.value, points.length - 1)] ?? null
+})
+
+function stopReplay() {
+  playing.value = false
+  if (replayTimer) clearInterval(replayTimer)
+  replayTimer = null
+}
+
+function togglePlay() {
+  const points = history.value?.points ?? []
+  if (playing.value) {
+    stopReplay()
+    return
+  }
+  if (!points.length) return
+  if (replayIndex.value >= points.length - 1) replayIndex.value = 0
+  playing.value = true
+  replayTimer = setInterval(() => {
+    if (replayIndex.value >= points.length - 1) {
+      stopReplay()
+      return
+    }
+    replayIndex.value++
+  }, REPLAY_STEP_MS)
+}
+
+/* ── Map content ── */
+const markers = computed<MapMarker[]>(() =>
+  visible.value.map((position) => {
+    const replaying =
+      historyOpen.value && position.vehicleNo === selectedNo.value && replayPoint.value
+    return {
+      id: position.vehicleNo,
+      latitude: replaying ? replayPoint.value!.latitude : position.latitude,
+      longitude: replaying ? replayPoint.value!.longitude : position.longitude,
+      label: position.plate,
+      sublabel: [
+        position.driverName,
+        replaying
+          ? formatDateTime(replayPoint.value!.at)
+          : optionsStore.getOptionLabel('liveSituation', position.situation)
+      ]
+        .filter(Boolean)
+        .join(' · '),
+      color: replaying ? REPLAY_COLOR : SITUATION_COLORS[position.situation]
+    }
+  })
+)
+
+const polylines = computed<MapPolyline[]>(() => {
+  if (historyOpen.value && history.value) {
+    const travelled = history.value.points.slice(0, replayIndex.value + 1)
+    return travelled.length > 1
+      ? [
+          {
+            id: 'history',
+            points: travelled.map((point) => [point.latitude, point.longitude]),
+            color: REPLAY_COLOR
+          }
+        ]
+      : []
+  }
+  return selected.value && selected.value.stops.length > 1
     ? [
         {
           id: 'route',
@@ -124,7 +276,7 @@ const polylines = computed<MapPolyline[]>(() =>
         }
       ]
     : []
-)
+})
 
 const circles = computed<MapCircle[]>(() =>
   (selected.value?.stops ?? []).map((stop, index) => ({
@@ -141,8 +293,21 @@ function toggleSituation(value: LiveSituation) {
   fitKey.value++
 }
 
-function select(no: string) {
-  selectedNo.value = selectedNo.value === no ? null : no
+function toggleFlag(value: Flag) {
+  flag.value = flag.value === value ? null : value
+  fitKey.value++
+}
+
+/** A click on a vehicle, in the list or on the map, opens its card and keeps it selected. */
+function openVehicle(no: string) {
+  if (selectedNo.value !== no && historyOpen.value) closeHistory()
+  selectedNo.value = no
+  if (canReadVehicle.value) cardNo.value = no
+}
+
+function unselect() {
+  closeHistory()
+  selectedNo.value = null
 }
 
 const time = (value: string | null) => (value ? formatDateTime(value).slice(-5) : '')
@@ -212,6 +377,22 @@ function delayLabel(minutes: number | null) {
           {{ optionsStore.getOptionLabel('liveSituation', item.value) }}
           <span class="font-semibold text-card-foreground">{{ item.count }}</span>
         </button>
+        <button
+          v-for="item in flagCounts"
+          :key="item.value"
+          type="button"
+          class="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded border transition"
+          :class="
+            flag === item.value
+              ? 'border-primary bg-accent text-card-foreground'
+              : 'border-border text-muted-foreground hover:bg-accent'
+          "
+          @click="toggleFlag(item.value)"
+        >
+          <component :is="item.icon" class="w-4 h-4 text-destructive" />
+          {{ t(`fleet.liveMap.flag.${item.value}`) }}
+          <span class="font-semibold text-card-foreground">{{ item.count }}</span>
+        </button>
       </div>
     </header>
 
@@ -234,11 +415,24 @@ function delayLabel(minutes: number | null) {
               ? 'border-primary bg-accent'
               : 'border-border hover:bg-accent'
           "
-          @click="select(position.vehicleNo)"
+          :title="t('fleet.liveMap.openCard')"
+          @click="openVehicle(position.vehicleNo)"
         >
           <div class="flex items-center justify-between gap-2">
             <span class="font-medium text-card-foreground">{{ position.plate }}</span>
-            <LiveSituationPill :situation="position.situation" />
+            <span class="flex items-center gap-1">
+              <BellRing
+                v-if="position.alertCount"
+                class="w-4 h-4 text-destructive"
+                :aria-label="t('fleet.liveMap.alertCount', { count: position.alertCount })"
+              />
+              <MapPinOff
+                v-if="position.outOfZone"
+                class="w-4 h-4 text-destructive"
+                :aria-label="t('fleet.liveMap.flag.outOfZone')"
+              />
+              <LiveSituationPill :situation="position.situation" />
+            </span>
           </div>
           <p class="text-xs text-muted-foreground truncate">
             {{ [position.driverName, position.tripNo].filter(Boolean).join(' · ') }}
@@ -266,8 +460,105 @@ function delayLabel(minutes: number | null) {
           :selected-id="selectedNo"
           :fit-key="fitKey"
           height="460px"
-          @marker-click="select"
+          @marker-click="openVehicle"
         />
+
+        <section
+          v-if="historyOpen && selected"
+          class="rounded border border-border p-4 space-y-3"
+          :aria-label="t('fleet.liveMap.history.title')"
+        >
+          <div class="flex items-center justify-between gap-2">
+            <h2 class="font-semibold text-card-foreground">
+              {{ t('fleet.liveMap.history.title') }} · {{ selected.plate }}
+            </h2>
+            <button
+              type="button"
+              class="cursor-pointer text-muted-foreground hover:text-card-foreground"
+              :aria-label="t('common.close')"
+              @click="closeHistory"
+            >
+              <X class="w-4 h-4" />
+            </button>
+          </div>
+          <div class="grid gap-3 sm:grid-cols-2 max-w-xl">
+            <BaseFormField :label="t('fleet.liveMap.history.from')">
+              <FormInput v-model="historyFrom" type="datetime-local" :invalid="periodInvalid" />
+            </BaseFormField>
+            <BaseFormField :label="t('fleet.liveMap.history.to')">
+              <FormInput v-model="historyTo" type="datetime-local" :invalid="periodInvalid" />
+            </BaseFormField>
+          </div>
+          <p v-if="periodInvalid" class="text-sm text-destructive">
+            {{ t('fleet.liveMap.history.periodInvalid') }}
+          </p>
+          <p v-else-if="historyError" class="text-sm text-destructive">{{ historyError }}</p>
+          <LoadingBar v-else-if="historyLoading" :height="2" bar-color="var(--color-primary)" />
+          <p v-else-if="history && !history.points.length" class="text-sm text-muted-foreground">
+            {{ t('fleet.liveMap.history.empty') }}
+          </p>
+          <template v-else-if="history">
+            <div class="flex items-center gap-3">
+              <button
+                type="button"
+                class="cursor-pointer w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0"
+                :aria-label="
+                  playing ? t('fleet.liveMap.history.pause') : t('fleet.liveMap.history.play')
+                "
+                :title="
+                  playing ? t('fleet.liveMap.history.pause') : t('fleet.liveMap.history.play')
+                "
+                @click="togglePlay"
+              >
+                <component :is="playing ? Pause : Play" class="w-4 h-4" />
+              </button>
+              <input
+                v-model.number="replayIndex"
+                type="range"
+                min="0"
+                :max="history.points.length - 1"
+                class="flex-1"
+                :aria-label="t('fleet.liveMap.history.position')"
+              />
+            </div>
+            <dl v-if="replayPoint" class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+              <div>
+                <dt class="text-xs text-muted-foreground">{{ t('fleet.liveMap.history.at') }}</dt>
+                <dd>{{ formatDateTime(replayPoint.at) }}</dd>
+              </div>
+              <div>
+                <dt class="text-xs text-muted-foreground">
+                  {{ t('fleet.liveMap.history.speed') }}
+                </dt>
+                <dd>{{ t('fleet.liveMap.speed', { speed: replayPoint.speedKmh }) }}</dd>
+              </div>
+              <div>
+                <dt class="text-xs text-muted-foreground">
+                  {{ t('fleet.liveMap.history.place') }}
+                </dt>
+                <dd>
+                  {{
+                    replayPoint.placeName ||
+                    `${formatNumber(replayPoint.latitude, 4)}, ${formatNumber(replayPoint.longitude, 4)}`
+                  }}
+                </dd>
+              </div>
+              <div>
+                <dt class="text-xs text-muted-foreground">{{ t('fleet.liveMap.history.trip') }}</dt>
+                <dd>{{ replayPoint.tripNo }}</dd>
+              </div>
+            </dl>
+            <p class="text-xs text-muted-foreground">
+              {{
+                t('fleet.liveMap.history.summary', {
+                  points: history.points.length,
+                  trips: history.tripNos.length,
+                  events: history.eventCount
+                })
+              }}
+            </p>
+          </template>
+        </section>
 
         <section v-if="selected" class="rounded border border-border p-4 space-y-3">
           <div class="flex flex-wrap items-center justify-between gap-2">
@@ -277,18 +568,65 @@ function delayLabel(minutes: number | null) {
                 · {{ selected.routeName }}
               </span>
             </h2>
-            <RouterLink
-              v-if="selected.tripNo"
-              :to="{ path: '/fleet/trips', query: { no: selected.tripNo, cardMode: 'view' } }"
-              class="text-sm text-primary hover:underline"
-            >
-              {{ selected.tripNo }}
-            </RouterLink>
+            <div class="flex flex-wrap items-center gap-2">
+              <RouterLink
+                v-if="selected.tripNo"
+                :to="{ path: '/fleet/trips', query: { no: selected.tripNo, cardMode: 'view' } }"
+                class="text-sm text-primary hover:underline"
+              >
+                {{ selected.tripNo }}
+              </RouterLink>
+              <button
+                v-if="canReadVehicle"
+                type="button"
+                class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded bg-primary text-primary-foreground hover:opacity-90"
+                @click="cardNo = selected.vehicleNo"
+              >
+                <Truck class="w-4 h-4" /> {{ t('fleet.liveMap.openCard') }}
+              </button>
+              <button
+                type="button"
+                class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded border transition"
+                :class="
+                  historyOpen
+                    ? 'border-primary bg-primary/5 text-primary'
+                    : 'border-border text-card-foreground hover:bg-accent'
+                "
+                @click="toggleHistory"
+              >
+                <History class="w-4 h-4" /> {{ t('fleet.liveMap.history.button') }}
+              </button>
+              <button
+                type="button"
+                class="cursor-pointer text-muted-foreground hover:text-card-foreground"
+                :aria-label="t('common.close')"
+                @click="unselect"
+              >
+                <X class="w-4 h-4" />
+              </button>
+            </div>
           </div>
           <p class="text-xs text-muted-foreground">
             {{ t('fleet.liveMap.reportedAt', { date: formatDateTime(selected.reportedAt) }) }}
+            · {{ t('fleet.liveMap.speed', { speed: selected.speedKmh }) }} ·
+            {{ optionsStore.getOptionLabel('liveSituation', selected.situation) }}
             <template v-if="selected.delayMin !== null">
               · {{ delayLabel(selected.delayMin) }}
+            </template>
+          </p>
+          <p v-if="selected.alertCount || selected.outOfZone" class="text-xs text-destructive">
+            <template v-if="selected.alertCount">
+              {{ t('fleet.liveMap.alertCount', { count: selected.alertCount }) }}
+            </template>
+            <template v-if="selected.alertCount && selected.outOfZone"> · </template>
+            <template v-if="selected.outOfZone">
+              {{
+                selected.corridorGapM !== null
+                  ? t('fleet.liveMap.outOfCorridor', {
+                      km: formatNumber(selected.corridorGapM / 1000, 1)
+                    })
+                  : t('fleet.liveMap.outOfSites')
+              }}
             </template>
           </p>
           <table v-if="selected.stops.length" class="w-full text-sm">
@@ -325,5 +663,14 @@ function delayLabel(minutes: number | null) {
         </section>
       </div>
     </div>
+
+    <VehicleCard
+      v-if="cardNo"
+      :key="cardNo"
+      :vehicle-no="cardNo"
+      initial-open-mode="view"
+      @close="cardNo = null"
+      @create="router.push('/fleet/vehicles')"
+    />
   </div>
 </template>

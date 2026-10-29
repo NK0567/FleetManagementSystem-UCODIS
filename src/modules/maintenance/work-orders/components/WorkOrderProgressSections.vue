@@ -90,6 +90,23 @@ const historyColumns = computed<SubListColumn[]>(() => [
       :title="t('maintenance.workOrders.section.diagnosis')"
       :summary="[order.subsystemName]"
     >
+      <p
+        v-if="order.nomenclature"
+        class="text-sm xl:col-span-2"
+        :class="order.nomenclature.confirmedAt ? 'text-muted-foreground' : 'text-warning'"
+      >
+        {{
+          order.nomenclature.confirmedAt
+            ? t('maintenance.workOrders.progress.nomenclatureConfirmed', {
+                by: order.nomenclature.confirmedBy,
+                date: formatDateTime(order.nomenclature.confirmedAt)
+              })
+            : t('maintenance.workOrders.progress.nomenclaturePending', {
+                source: order.nomenclature.sourceText,
+                name: order.proposedSubsystemName || '-'
+              })
+        }}
+      </p>
       <p v-if="!order.diagnosis" class="text-sm text-muted-foreground xl:col-span-2">
         {{ t('maintenance.workOrders.progress.noDiagnosis') }}
       </p>
@@ -97,9 +114,9 @@ const historyColumns = computed<SubListColumn[]>(() => [
         <dt class="text-muted-foreground">{{ t('maintenance.workOrders.dialog.subsystem') }}</dt>
         <dd>{{ order.subsystemName }}</dd>
         <dt class="text-muted-foreground">{{ t('maintenance.workOrders.dialog.mode') }}</dt>
-        <dd>{{ order.modeName || '—' }}</dd>
+        <dd>{{ order.modeName || '-' }}</dd>
         <dt class="text-muted-foreground">{{ t('maintenance.workOrders.dialog.cause') }}</dt>
-        <dd>{{ order.causeName || '—' }}</dd>
+        <dd>{{ order.causeName || '-' }}</dd>
         <dt class="text-muted-foreground">{{ t('maintenance.workOrders.progress.by') }}</dt>
         <dd>{{ order.diagnosis.by }} · {{ formatDateTime(order.diagnosis.at) }}</dd>
       </dl>
@@ -146,6 +163,13 @@ const historyColumns = computed<SubListColumn[]>(() => [
       ]"
     >
       <div class="xl:col-span-2 min-w-0">
+        <p v-if="order.partsWaitDays > 0 || order.status === 'awaiting_parts'" class="text-sm mb-2">
+          {{
+            t('maintenance.workOrders.progress.partsWait', {
+              days: formatNumber(order.partsWaitDays, 1)
+            })
+          }}
+        </p>
         <RecordSubList
           :rows="parts"
           :columns="partColumns"
@@ -201,22 +225,22 @@ const historyColumns = computed<SubListColumn[]>(() => [
         <dt class="text-muted-foreground">
           {{ t('maintenance.workOrders.dialog.expectedReturnOn') }}
         </dt>
-        <dd>{{ formatDate(order.external.expectedReturnOn) || '—' }}</dd>
+        <dd>{{ formatDate(order.external.expectedReturnOn) || '-' }}</dd>
         <dt class="text-muted-foreground">{{ t('maintenance.workOrders.dialog.returnedAt') }}</dt>
-        <dd>{{ formatDateTime(order.external.returnedAt) || '—' }}</dd>
+        <dd>{{ formatDateTime(order.external.returnedAt) || '-' }}</dd>
         <dt class="text-muted-foreground">{{ t('maintenance.workOrders.dialog.progress') }}</dt>
-        <dd class="whitespace-pre-line">{{ order.external.progress || '—' }}</dd>
+        <dd class="whitespace-pre-line">{{ order.external.progress || '-' }}</dd>
         <dt class="text-muted-foreground">
           {{ t('maintenance.workOrders.dialog.quoteAmount') }}
         </dt>
         <dd class="tabular-nums">
-          {{ order.external.quoteAmount === null ? '—' : formatNumber(order.external.quoteAmount) }}
+          {{ order.external.quoteAmount === null ? '-' : formatNumber(order.external.quoteAmount) }}
         </dd>
         <dt class="text-muted-foreground">
           {{ t('maintenance.workOrders.dialog.finalAmount') }}
         </dt>
         <dd class="tabular-nums">
-          {{ order.external.finalAmount === null ? '—' : formatNumber(order.external.finalAmount) }}
+          {{ order.external.finalAmount === null ? '-' : formatNumber(order.external.finalAmount) }}
         </dd>
       </dl>
     </FormSection>
@@ -254,7 +278,7 @@ const historyColumns = computed<SubListColumn[]>(() => [
             {{ t('maintenance.workOrders.progress.cancelled') }}
           </dt>
           <dd>
-            {{ order.cancelledBy }} · {{ formatDateTime(order.cancelledAt) }} —
+            {{ order.cancelledBy }} · {{ formatDateTime(order.cancelledAt) }} ·
             {{ order.cancelReason }}
           </dd>
         </template>

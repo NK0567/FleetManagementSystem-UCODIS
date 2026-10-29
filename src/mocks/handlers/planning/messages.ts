@@ -1,6 +1,10 @@
 import type { LocalizedText } from '../../i18n'
 
 export const PLANNING_MESSAGES = {
+  executionNothingDelivered: {
+    fr: 'Au moins une ligne de produit doit rester livrée ; sinon, enregistrez un refus ou un report.',
+    en: 'At least one product line must stay delivered; otherwise record a refusal or a postponement.'
+  },
   prepValidated: {
     fr: 'La préparation est validée : elle ne se modifie plus que par les bons.',
     en: 'The preparation is validated: it now changes only through its notes.'
@@ -381,6 +385,18 @@ export const PLANNING_MESSAGES = {
     fr: 'Choisissez l’un des véhicules rattachés à ce transporteur.',
     en: 'Choose one of the vehicles attached to this carrier.'
   },
+  pickupNotLinked: {
+    fr: 'Le bon n’a pas été transmis au système de l’entrepôt : la confirmation se saisit dans le TMS.',
+    en: 'The note was not sent to the warehouse system: the confirmation is entered in the TMS.'
+  },
+  pickupFleetOnly: {
+    fr: 'Le changement de véhicule concerne un ordre de la flotte, déjà planifié sur un trajet.',
+    en: 'A vehicle change applies to a fleet order already planned on a trip.'
+  },
+  pickupDeviationRefused: {
+    fr: 'La déviation n’est possible que vers un destinataire qui attend le même produit, pour une quantité que le compartiment couvre.',
+    en: 'A deviation is possible only to a recipient waiting for the same product, for a quantity the compartment covers.'
+  },
   pickupNotIssued: {
     fr: 'Le bon d’enlèvement existe une fois l’ordre planifié sur un véhicule.',
     en: 'The pickup note exists once the order is planned on a vehicle.'
@@ -548,6 +564,14 @@ export const PLANNING_MESSAGES = {
   qualityProtestNotIssued: {
     fr: 'Seule une note émise se clôture.',
     en: 'Only an issued note can be closed.'
+  },
+  qualityProtestFileClosed: {
+    fr: 'Une note clôturée ne reçoit plus de pièce jointe.',
+    en: 'A closed note no longer takes attachments.'
+  },
+  qualityProtestFileTwice: {
+    fr: 'Cette pièce est déjà jointe à la note.',
+    en: 'This file is already attached to the note.'
   },
   qualityNoFact: {
     fr: 'Aucun fait n’est enregistré sur cette livraison.',

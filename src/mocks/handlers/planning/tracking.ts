@@ -1,5 +1,6 @@
 import {
   confirmationState,
+  firstArrivalMarked,
   linesConfirmed
 } from '@/modules/planning/customer-confirmations/domain/confirmation'
 import { transportOrderStatus } from '@/modules/planning/transport-orders/domain/transportOrder'
@@ -16,9 +17,11 @@ import { ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
 import { PLANNING_MESSAGES } from './messages'
 import { transportOrdersApi } from './transportOrders'
+import { orderEta } from './eta'
 import { readReason } from './planningReasons'
 import { deliveryNoteOf } from './deliveryNotes'
 import type { DeliveryNoteApi } from '@/modules/planning/delivery-notes/types/deliveryNote.types'
+import { replanLine } from './replanning'
 
 /**
  * The link sent to the recipient by SMS, WhatsApp or e-mail (review of 22 October): without
@@ -66,6 +69,7 @@ export interface TrackingApi {
   vehiclePlate: string
   driverName: string
   expectedArrival: string | null
+  late: boolean
   /** His own answer to the satisfaction survey, once he confirmed (TRS04-US06). */
   satisfactionScore: number | null
   satisfactionComment: string
@@ -73,6 +77,10 @@ export interface TrackingApi {
   messages: { at: string; channel: string; kind: string }[]
   /** His electronic delivery note, once the driver has declared (TRS05-US03). */
   deliveryNote: DeliveryNoteApi | null
+  /** The day retained for what was not delivered or postponed, and its new link once planned
+   * (TRS01-US16, US17). */
+  replannedOn: string | null
+  nextTrackingToken: string | null
 }
 
 function find(
@@ -98,7 +106,8 @@ function isOpen(db: MockDatabase, order: TransportOrderRow, line: TransportOrder
     cancelledAt: order.cancelledAt,
     means: order.means,
     tripStatus: trip?.status ?? null,
-    linesConfirmed: linesConfirmed(order.lines)
+    linesConfirmed: linesConfirmed(order.lines),
+    firstArrival: firstArrivalMarked(order.lines)
   })
   return (status === 'planned' || status === 'confirmed') && !line.replannedAt
 }
@@ -114,7 +123,9 @@ function vehicleOf(db: MockDatabase, order: TransportOrderRow) {
   return {
     vehiclePlate: (carrier ? item?.carrierVehiclePlate : item?.vehiclePlate) ?? '',
     driverName: (carrier ? item?.carrierDriverName : item?.driverName) ?? '',
-    expectedArrival: item?.plannedArrival ?? null
+    // The estimated arrival moves with the position of the vehicle (TRS02-US01).
+    expectedArrival: orderEta(db, order).expectedArrival,
+    late: orderEta(db, order).late
   }
 }
 
@@ -177,8 +188,21 @@ function trackingApi(
     ...vehicleOf(db, order),
     satisfactionScore: line.satisfactionScore,
     satisfactionComment: line.satisfactionComment,
-    messages: line.recipientMessages ?? []
+    messages: line.recipientMessages ?? [],
+    replannedOn: line.replannedOn ?? null,
+    nextTrackingToken: nextToken(db, order.no, line.lineNo)
   }
+}
+
+/** The link of the line that took this one over, once its order is planned. */
+function nextToken(db: MockDatabase, orderNo: string, lineNo: number): string | null {
+  for (const order of db.transportOrders.all()) {
+    const next = order.lines.find(
+      (item) => item.replannedFrom?.orderNo === orderNo && item.replannedFrom.lineNo === lineNo
+    )
+    if (next) return next.trackingToken
+  }
+  return null
 }
 
 /** Applies a change to every declared line of the recipient's delivery (same point). */
@@ -327,21 +351,20 @@ export function registerTrackingHandlers(router: MockRouter, db: MockDatabase): 
     return ok(trackingApi(db, updated.order, updated.line))
   })
 
+  /* The recipient agrees to the date the planner proposed: that date is retained and the line is
+   * taken into the pending order of that day at once (TRS01-US16). */
   router.post(`${base}/accept-proposal`, { public: true }, (request) => {
     const { order, line } = find(db, routeParam(request, 'token'))
     if (!isOpen(db, order, line)) throw conflict(PLANNING_MESSAGES.confirmationClosed)
     if (!line.plannerProposedOn) throw conflict(PLANNING_MESSAGES.confirmationDateMissing)
+    const date = line.plannerProposedOn
     save(
       db,
       order,
-      {
-        ...line,
-        clientProposedOn: line.plannerProposedOn,
-        availableOn: line.plannerProposedOn,
-        answerOrigin: 'link'
-      },
+      { ...line, clientProposedOn: date, availableOn: date, answerOrigin: 'link' },
       null
     )
+    replanLine(db, order.no, line.lineNo, date, { code: 'destinataire' })
     const updated = find(db, routeParam(request, 'token'))
     return ok(trackingApi(db, updated.order, updated.line))
   })
@@ -365,6 +388,8 @@ export function registerTrackingHandlers(router: MockRouter, db: MockDatabase): 
         unavailabilityComment: reason.comment,
         availableOn: date,
         clientProposedOn: date,
+        // Giving his own date refuses the one the planner proposed (TRS01-US16).
+        plannerProposedOn: null,
         answerOrigin: 'link',
         confirmedAt: null,
         confirmedBy: null

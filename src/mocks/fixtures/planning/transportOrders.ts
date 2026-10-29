@@ -1,6 +1,7 @@
 import { addDays } from '@/utils/date'
 import type {
   TransportMeans,
+  TransportMode,
   TransportOrderEventKind
 } from '@/modules/planning/transport-orders/domain/transportOrder'
 import {
@@ -24,6 +25,13 @@ export interface TransportOrderLineRow extends LineFollowUp, QualityFields {
   productNo: string
   quantity: number
   weightKg: number | null
+  /** Cubic metres, from the order (commande); absent reads as unknown. */
+  volumeM3?: number | null
+  /** Replanned (TRS01-US16, US17): the day retained and the pending order it went to. */
+  replannedOn?: string | null
+  replannedToOrderNo?: string | null
+  /** On a line taken back by replanning: the order and line it comes from. */
+  replannedFrom?: { orderNo: string; lineNo: number } | null
 }
 
 export interface TransportOrderEventRow {
@@ -52,9 +60,24 @@ export interface TransportOrderRow extends MockRow, OrderDossier {
   events: TransportOrderEventRow[]
   /** The pickup note: sent to the site, then confirmed with its data (TRS03-US03, US04). */
   pickup?: PickupRecord | null
+  /** Mode of transport (TRS01-US11); absent reads as road. */
+  transportMode?: TransportMode
+  /** The pending order gathering the lines replanned to one day (TRS01-US16). */
+  replanDate?: string | null
+  /** Vehicle proposed by the loading proposal, offered first when planning (TRS01-US10). */
+  proposedVehicleNo?: string | null
+  proposedTrailerNo?: string | null
+  proposedCarrierNo?: string | null
+  /** The trip plan validated by the planner: its corridor serves the FMS (TRS01-US11). */
+  routePlanValidatedAt?: string | null
+  corridorKm?: number | null
+  /** The routes followed before a change during the trip, newest last (TRS01-US11). */
+  routeHistory?: { at: string; by: string; routeTemplateNo: string | null; reason: string }[]
 }
 
 export interface PickupRecord {
+  /** Another pickup site chosen before the pickup is confirmed (TRS01-US24). */
+  siteNo?: string | null
   sentAt: string | null
   sentTo: string
   confirmedAt: string | null
@@ -166,7 +189,10 @@ const SEED: Omit<TransportOrderRow, keyof typeof seedAudit | keyof OrderDossier>
       {
         ...line(1, 'DL-2026-0010', 'DP-006', 'PRD-001', 150, 2200),
         loadedQuantity: 150,
-        conformingAt: '2026-09-04T05:40:00'
+        conformingAt: '2026-09-04T05:40:00',
+        confirmedAt: '2026-09-03T17:00:00',
+        // The driver marked his arrival on the first point: the order is in progress (TRS03-US09).
+        arrivedAt: '2026-09-04T09:20:00'
       }
     ],
     means: 'fleet',

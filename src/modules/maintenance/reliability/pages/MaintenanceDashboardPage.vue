@@ -11,7 +11,8 @@ import {
   Truck,
   Wrench
 } from '@lucide/vue'
-import { formatNumber } from '@/utils/format'
+import { EMPTY_CELL, formatNumber } from '@/utils/format'
+import MaintenanceTargetsPanel from '../components/MaintenanceTargetsPanel.vue'
 import { useReliabilityStore } from '../stores/reliabilityStore'
 
 const { t } = useI18n()
@@ -75,7 +76,7 @@ const tiles = computed(() => {
       icon: Factory,
       value:
         dashboard.last30Days.mttrHours === null
-          ? '—'
+          ? EMPTY_CELL
           : `${formatNumber(dashboard.last30Days.mttrHours, 1)} h`,
       sub: t('maintenance.dashboard.sub.mttr'),
       to: '/maintenance/reliability'
@@ -85,7 +86,7 @@ const tiles = computed(() => {
 
 const last30 = computed(() => store.dashboard?.last30Days ?? null)
 const dash = (value: number | null, unit = '', digits = 0) =>
-  value === null ? '—' : `${formatNumber(value, digits)}${unit}`
+  value === null ? EMPTY_CELL : `${formatNumber(value, digits)}${unit}`
 
 onMounted(() => void store.fetchDashboard())
 </script>
@@ -103,6 +104,34 @@ onMounted(() => void store.fetchDashboard())
     <LoadingSpinner v-if="store.loading && !store.dashboard" :text="t('common.loading')" />
 
     <template v-if="store.dashboard">
+      <section class="bg-card border border-border rounded">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-border">
+          <h2 class="text-sm font-semibold text-card-foreground">
+            {{ t('maintenance.dashboard.workload.title') }}
+          </h2>
+          <RouterLink to="/maintenance/work-orders" class="text-xs text-primary hover:underline">
+            {{ t('maintenance.dashboard.workload.open') }}
+          </RouterLink>
+        </div>
+        <dl class="grid grid-cols-3 gap-4 p-4 text-sm">
+          <div v-for="key in ['inProgress', 'planned', 'late'] as const" :key="key">
+            <dt class="text-muted-foreground">{{ t(`maintenance.dashboard.workload.${key}`) }}</dt>
+            <dd
+              class="text-2xl font-semibold tabular-nums"
+              :class="key === 'late' && store.dashboard.workload.late ? 'text-destructive' : ''"
+            >
+              {{ store.dashboard.workload[key] }}
+            </dd>
+          </div>
+        </dl>
+      </section>
+
+      <MaintenanceTargetsPanel
+        :kpis="store.dashboard.last30Days"
+        :preventive-completion="store.dashboard.preventiveCompletion"
+        :targets="store.dashboard.targets"
+      />
+
       <section class="grid grid-cols-2 xl:grid-cols-4 gap-3">
         <RouterLink
           v-for="tile in tiles"

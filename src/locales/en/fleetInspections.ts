@@ -34,5 +34,38 @@ export default {
   'fleet.inspections.action.recheck': 'Re-inspection passed',
   'fleet.inspections.form.recheckDueOn': 'Re-inspection by',
   'fleet.inspections.form.recheckDoneOn': 'Re-inspected on',
-  'fleet.inspections.form.recheckAwaited': 'Awaited: the vehicle is immobilized'
+  'fleet.inspections.form.recheckAwaited': 'Awaited: the vehicle is immobilized',
+  'fleet.inspections.form.resultHint':
+    'Derived from the grid: one non-conforming item makes the inspection non-conforming, schedules the re-inspection and keeps the vehicle from loading until then.',
+  'fleet.inspections.form.findingsHint':
+    'Left empty, it takes the non-conforming items and what was found.',
+  'fleet.inspections.form.items': 'Inspection grid',
+  'fleet.inspections.form.signature': 'Dated and signed report',
+  'fleet.inspections.form.inspector': 'Inspector',
+  'fleet.inspections.form.signed': "Inspector's signature",
+  'fleet.inspections.form.signedLabel': 'I certify this report is accurate and I sign it.',
+  'fleet.inspections.form.signedHint':
+    'The signature dates the report; its verdicts can no longer be changed afterwards.',
+  'fleet.inspections.form.signedBy': 'Report signed by {inspector}, recorded by {user} on {date}.',
+  'fleet.inspections.form.notSigned': 'Inspection recorded before the grid: no signed report.',
+  'fleet.inspections.form.signatureRequired': 'The inspector must sign the report.',
+  'fleet.inspections.form.recheckItems': 'Items to check again: {items}',
+  'fleet.inspections.grid.empty': 'No active item in the inspection grid.',
+  'fleet.inspections.grid.pickVehicle':
+    'Choose the vehicle: the grid shows the vehicle items and, when it carries one, the tank items.',
+  'fleet.inspections.grid.loading': 'Loading the grid…',
+  'fleet.inspections.grid.legacy':
+    'Inspection recorded before the grid: only the overall result is known.',
+  'fleet.inspections.grid.allConforming': 'Mark the remaining items conforming',
+  'fleet.inspections.grid.count': 'No item | 1 item | {count} items',
+  'fleet.inspections.grid.code': 'Code',
+  'fleet.inspections.grid.item': 'Item',
+  'fleet.inspections.grid.verdict': 'Verdict',
+  'fleet.inspections.grid.comment': 'Finding',
+  'fleet.inspections.grid.issue.incomplete': 'Give a verdict to every item of the grid.',
+  'fleet.inspections.grid.issue.observationRequired':
+    'Describe the finding of every item with an observation or not conforming.',
+  'fleet.inspections.report.title': 'Inspection report {no}',
+  'fleet.inspections.report.recheck': 'Re-inspection scheduled by {date} for the items: {items}.',
+  'fleet.inspections.action.printReport': 'Print the report'
 }

@@ -10,6 +10,10 @@ import { registerQuantityTolerancesHandlers } from './quantityTolerances'
 import { registerTransportTariffsHandlers } from './transportTariffs'
 import { registerDeliveryRequestsHandlers } from './deliveryRequests'
 import { registerTransportOrdersHandlers } from './transportOrders'
+import { registerOrderPlanHandlers } from './orderPlan'
+import { registerReplanningHandlers } from './replanning'
+import { registerLoadingProposalHandlers } from './loadingProposal'
+import { registerPerimeterAdminHandlers } from './perimeterAdmin'
 import { registerConfirmationsHandlers } from './confirmations'
 import { registerTrackingHandlers } from './tracking'
 import { registerLoadingHandlers } from './loading'
@@ -21,9 +25,10 @@ import { registerCustomerBillingHandlers } from './customerBilling'
 import { registerCarrierInvoiceHandlers } from './carrierInvoices'
 import { registerReportHandlers } from './reports'
 import { registerDeliveryNotesHandlers } from './deliveryNotes'
-import { registerPickupHandlers } from './pickup'
+import { registerPickupHandlers, registerPickupOperations } from './pickup'
 import { registerLoadingPreparationHandlers } from './loadingPreparations'
 import { registerNotificationHandlers } from './notifications'
+import { registerEtaHandlers } from './eta'
 
 export function registerPlanningHandlers(router: MockRouter, db: MockDatabase): void {
   registerPlanningSettingsHandlers(router, db)
@@ -36,6 +41,10 @@ export function registerPlanningHandlers(router: MockRouter, db: MockDatabase): 
   registerTransportTariffsHandlers(router, db)
   registerDeliveryRequestsHandlers(router, db)
   registerTransportOrdersHandlers(router, db)
+  registerOrderPlanHandlers(router, db)
+  registerReplanningHandlers(router, db)
+  registerLoadingProposalHandlers(router, db)
+  registerPerimeterAdminHandlers(router, db)
   registerConfirmationsHandlers(router, db)
   registerTrackingHandlers(router, db)
   registerLoadingHandlers(router, db)
@@ -43,8 +52,10 @@ export function registerPlanningHandlers(router: MockRouter, db: MockDatabase): 
   registerReceptionHandlers(router, db)
   registerDeliveryNotesHandlers(router, db)
   registerPickupHandlers(router, db)
+  registerPickupOperations(router, db)
   registerLoadingPreparationHandlers(router, db)
   registerNotificationHandlers(router, db)
+  registerEtaHandlers(router, db)
   registerDeliveryQualityHandlers(router, db)
   registerClosingHandlers(router, db)
   registerCustomerBillingHandlers(router, db)

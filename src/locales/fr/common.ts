@@ -149,5 +149,6 @@ export default {
   'common.subList.all': 'tous',
   'common.subList.clear': 'Effacer',
   'common.subList.count': '{shown} sur {total}',
-  'common.subList.noMatch': 'Aucune ligne ne correspond au filtre.'
+  'common.subList.noMatch': 'Aucune ligne ne correspond au filtre.',
+  'common.import.mapped': "Correspondance des colonnes réglée par l'administrateur pour aucun champ. | Correspondance des colonnes réglée par l'administrateur pour un champ. | Correspondance des colonnes réglée par l'administrateur pour {n} champs."
 }

@@ -153,10 +153,18 @@ describe('fuel consumption', () => {
     const act = (action: string, body: Record<string, unknown>) =>
       post(`/fleet/fuel-consumption/${encodeURIComponent(gap.no)}/${action}`, body)
     await act('qualify', { causeNo: 'DRIVING', comment: 'Ralenti prolongé.' })
-    expect((await act('propose', { amount: gap.excessCost + 1 })).status).toBe(422)
-    expect((await act('propose', { amount: 250_000 })).status).toBe(422)
-    expect((await act('propose', { amount: 40_000 })).data.data).toMatchObject({
-      status: 'deduction_proposed'
+    const salary = { monthlySalary: 1_000_000 }
+    expect((await act('propose', { amount: gap.excessCost + 1, ...salary })).status).toBe(422)
+    expect((await act('propose', { amount: 250_000, ...salary })).status).toBe(422)
+    // Labour law: without the salary nothing is proposed, and the month keeps within its share.
+    expect((await act('propose', { amount: 40_000 })).status).toBe(422)
+    const tooMuch = await act('propose', { amount: 40_000, monthlySalary: 300_000 })
+    expect(tooMuch.status).toBe(422)
+    expect(tooMuch.data.message).toContain('30')
+    expect((await act('propose', { amount: 40_000, ...salary })).data.data).toMatchObject({
+      status: 'deduction_proposed',
+      monthlySalary: 1_000_000,
+      withholdableAmount: 100_000
     })
   })
 })

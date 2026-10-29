@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import DriverDrivingTimeSection from './DriverDrivingTimeSection.vue'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useOptionsStore } from '@/stores/optionsStore'
@@ -102,6 +103,7 @@ const expandedSections = ref({
       <DriverScorePanel :driver-no="driver.no" />
     </FormSection>
 
+    <DriverDrivingTimeSection :driver-no="driver.no" />
     <DriverActivitySections :driver-no="driver.no" />
 
     <FormSection

@@ -26,5 +26,24 @@ export default {
   'fleet.alertRules.form.escalationHoursHint':
     'An alert still new after this delay goes up to the escalation profile.',
   'fleet.alertRules.form.escalateTo': 'Escalate to',
-  'fleet.alertRules.form.active': 'Active'
+  'fleet.alertRules.form.active': 'Active',
+  'fleet.alertRules.form.event': 'Event',
+  'fleet.alertRules.form.threshold': 'Threshold',
+  'fleet.alertRules.form.setThreshold': 'set',
+  'fleet.alertRules.form.thresholdHint': 'The threshold is set where the event is defined; it is read here.',
+  'fleet.alertRules.form.severity': 'Severity',
+  'fleet.alertRules.form.channels': 'Channels',
+  'fleet.alertRules.form.appHint': 'The alert always shows in the application, for the recipients.',
+  'fleet.alertRules.form.emailTo': 'E-mail addresses',
+  'fleet.alertRules.form.smsTo': 'Numbers for SMS',
+  'fleet.alertRules.form.channelsHint': 'Separate the addresses with commas. Sending is simulated in the mock-up.',
+  'fleet.alertRules.form.emailToRequired': 'Sending by e-mail needs at least one address',
+  'fleet.alertRules.form.emailToInvalid': 'An e-mail address is invalid',
+  'fleet.alertRules.form.smsToRequired': 'Sending by SMS needs at least one number',
+  'fleet.alertRules.channel.app': 'Application',
+  'fleet.alertRules.channel.email': 'E-mail',
+  'fleet.alertRules.channel.sms': 'SMS',
+  'fleet.alertRules.col.severity': 'Severity',
+  'fleet.alertRules.col.channels': 'Channels',
+  'fleet.alertRules.col.threshold': 'Threshold'
 }

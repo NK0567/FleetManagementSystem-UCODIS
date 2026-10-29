@@ -34,6 +34,8 @@ export interface DocumentApi {
   declaredAt: string | null
   declaredBy: string | null
   state: DocumentState
+  /** E-mails and SMS sent for this document by the document alert rule (simulated). */
+  notifications: { channel: 'email' | 'sms'; to: string; sentAt: string }[]
   version: number
   /** Set once a newer version replaces the document. */
   replacedByNo: string | null

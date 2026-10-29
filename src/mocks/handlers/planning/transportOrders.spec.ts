@@ -104,7 +104,11 @@ describe('transport orders', () => {
   })
 
   it('accepts an expired request, and blocks it when the setting says so', async () => {
-    expect((await draft({ deliveryRequestNos: ['DL-2026-0005'] })).status).toBe(201)
+    // In alert mode the planner is warned of the expired order and may go on (TRS07-US07).
+    const warned = await draft({ deliveryRequestNos: ['DL-2026-0005'] })
+    expect(warned.status).toBe(409)
+    expect(warned.data.message).toContain('expired')
+    expect((await draft({ deliveryRequestNos: ['DL-2026-0005'], force: true })).status).toBe(201)
     const blocked = createTestServer()
     const row = blocked.db.planningSettings.findOrFail('PLANNING')
     blocked.db.planningSettings.update('PLANNING', {
@@ -167,7 +171,15 @@ describe('transport orders', () => {
   it('refuses an overload and a tractor that carries nothing', async () => {
     const heavy = (await draft()).data.data as TransportOrderApi
     await send('put', `${path}/${heavy.no}/lines`, {
-      lines: [{ deliveryPointNo: 'DP-001', productNo: 'PRD-001', quantity: 1, weightKg: 40_000 }]
+      lines: [
+        {
+          ordererNo: 'CLI-004',
+          deliveryPointNo: 'DP-001',
+          productNo: 'PRD-001',
+          quantity: 1,
+          weightKg: 40_000
+        }
+      ]
     })
     const before = server.db.trips.all().length
     expect((await send('post', `${path}/${heavy.no}/plan`, fleet)).data.message).toContain(
@@ -182,7 +194,15 @@ describe('transport orders', () => {
   it('refuses a missing pump, a refused vehicle type and products that cannot travel together', async () => {
     const station = (await draft()).data.data as TransportOrderApi
     await send('put', `${path}/${station.no}/lines`, {
-      lines: [{ deliveryPointNo: 'DP-009', productNo: 'PRD-006', quantity: 1000, weightKg: null }]
+      lines: [
+        {
+          ordererNo: 'CLI-004',
+          deliveryPointNo: 'DP-009',
+          productNo: 'PRD-006',
+          quantity: 1000,
+          weightKg: 840
+        }
+      ]
     })
     const pump = await send('post', `${path}/${station.no}/plan`, {
       ...fleet,
@@ -194,7 +214,15 @@ describe('transport orders', () => {
     const typed = (await draft({ plannedDeparture: '2026-09-22T06:00' })).data
       .data as TransportOrderApi
     await send('put', `${path}/${typed.no}/lines`, {
-      lines: [{ deliveryPointNo: 'DP-003', productNo: 'PRD-001', quantity: 10, weightKg: 100 }]
+      lines: [
+        {
+          ordererNo: 'CLI-004',
+          deliveryPointNo: 'DP-003',
+          productNo: 'PRD-001',
+          quantity: 10,
+          weightKg: 100
+        }
+      ]
     })
     expect(
       (await send('post', `${path}/${typed.no}/plan`, { ...fleet, trailerNo: 'VEH-021' })).data
@@ -205,8 +233,20 @@ describe('transport orders', () => {
       .data as TransportOrderApi
     await send('put', `${path}/${mixed.no}/lines`, {
       lines: [
-        { deliveryPointNo: 'DP-001', productNo: 'PRD-007', quantity: 10, weightKg: null },
-        { deliveryPointNo: 'DP-001', productNo: 'PRD-008', quantity: 10, weightKg: null }
+        {
+          ordererNo: 'CLI-004',
+          deliveryPointNo: 'DP-001',
+          productNo: 'PRD-007',
+          quantity: 10,
+          weightKg: 8
+        },
+        {
+          ordererNo: 'CLI-004',
+          deliveryPointNo: 'DP-001',
+          productNo: 'PRD-008',
+          quantity: 10,
+          weightKg: 8
+        }
       ]
     })
     expect((await send('post', `${path}/${mixed.no}/plan`, fleet)).data.message).toContain(
@@ -219,7 +259,15 @@ describe('transport orders', () => {
     const food = (await draft({ plannedDeparture: '2026-09-24T06:00' })).data
       .data as TransportOrderApi
     await send('put', `${path}/${food.no}/lines`, {
-      lines: [{ deliveryPointNo: 'DP-001', productNo: 'PRD-001', quantity: 10, weightKg: 100 }]
+      lines: [
+        {
+          ordererNo: 'CLI-004',
+          deliveryPointNo: 'DP-001',
+          productNo: 'PRD-001',
+          quantity: 10,
+          weightKg: 100
+        }
+      ]
     })
     const refused = await send('post', `${path}/${food.no}/plan`, tanker)
     expect(refused.status).toBe(422)
@@ -230,8 +278,20 @@ describe('transport orders', () => {
       .data as TransportOrderApi
     await send('put', `${path}/${fuel.no}/lines`, {
       lines: [
-        { deliveryPointNo: 'DP-001', productNo: 'PRD-006', quantity: 25000, weightKg: null },
-        { deliveryPointNo: 'DP-001', productNo: 'PRD-007', quantity: 4000, weightKg: null }
+        {
+          ordererNo: 'CLI-004',
+          deliveryPointNo: 'DP-001',
+          productNo: 'PRD-006',
+          quantity: 25000,
+          weightKg: 21000
+        },
+        {
+          ordererNo: 'CLI-004',
+          deliveryPointNo: 'DP-001',
+          productNo: 'PRD-007',
+          quantity: 4000,
+          weightKg: 3000
+        }
       ]
     })
     const warned = await send('post', `${path}/${fuel.no}/plan`, tanker)

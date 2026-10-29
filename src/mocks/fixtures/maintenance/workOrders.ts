@@ -38,7 +38,8 @@ export type WorkOrderRow = MockRow &
     | 'historicalCost'
     | 'serviceOperationNos'
     | 'history'
-  >
+  > &
+  Partial<Pick<WorkOrderApi, 'nomenclature'>>
 
 type Seed = Omit<WorkOrderRow, keyof typeof seedAudit>
 
@@ -155,14 +156,14 @@ const SEED: Seed[] = [
   {
     ...open,
     no: 'OT-2026-0003',
-    vehicleNo: 'VEH-002',
+    vehicleNo: 'VEH-008',
     maintenanceType: 'corrective',
     severity: 'minor',
     origin: 'driver_report',
     symptom: 'Grincement au freinage à basse vitesse.',
     declaredAt: at(-1, '08:00'),
     declaredBy: 'FLT001',
-    odometerKmAtOpening: 165_900,
+    odometerKmAtOpening: 132_800,
     diagnosis: {
       subsystemNo: 'BRAKES',
       modeNo: 'WEAR',
@@ -172,6 +173,7 @@ const SEED: Seed[] = [
     },
     labour: [],
     planning: { date: day(1), estimatedHours: 3, technicianNos: ['UCT-003'] },
+    downtimeNo: 'IND-00006',
     history: []
   },
   {

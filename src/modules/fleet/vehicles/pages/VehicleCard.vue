@@ -9,6 +9,8 @@ import { usePermissions } from '@/composables/usePermissions'
 import { todayIso } from '@/utils/date'
 import { formatNumber } from '@/utils/format'
 import VehicleForm from '../components/VehicleForm.vue'
+import VehicleOwnershipSection from '../components/VehicleOwnershipSection.vue'
+import VehicleTelematicsJournal from '@/modules/fleet/live-map/components/VehicleTelematicsJournal.vue'
 import { vehicleService } from '../services/vehicleService'
 import { useVehicleStore } from '../stores/vehicleStore'
 import type { VehicleApi } from '../types/vehicle.types'
@@ -24,6 +26,7 @@ const { t } = useI18n()
 const store = useVehicleStore()
 const { canUpdate, canInsert, canExecute } = usePermissions('VEHICLE')
 const { canRead: canReadCosts } = usePermissions('RELIABILITY')
+const { canRead: canReadTelematics } = usePermissions('TELEMATICS')
 const formRef = ref<InstanceType<typeof VehicleForm> | null>(null)
 
 const isRemoved = computed(() => store.currentItem?.status === 'removed')
@@ -261,7 +264,9 @@ const dialogTitle = computed(() => (dialog.value ? t(`fleet.vehicles.action.${di
             :can-edit-directly="canEdit"
             @updated="store.setCurrentItem"
           />
+          <VehicleOwnershipSection v-if="item && canReadCosts" :vehicle-no="item.no" />
           <VehicleCostSection v-if="item && canReadCosts" :vehicle-no="item.no" />
+          <VehicleTelematicsJournal v-if="item && canReadTelematics" :vehicle-no="item.no" />
         </div>
       </div>
     </template>

@@ -51,12 +51,22 @@ export default {
   'maintenance.maintenancePlans.operations.add': 'Add an operation',
   'maintenance.maintenancePlans.operations.remove': 'Remove the operation',
   'maintenance.maintenancePlans.operations.invalid':
-    'Complete each operation: a label, a subsystem and at least one interval.',
+    'Complete every operation: a label, a subsystem and at least one threshold in kilometres, hours or days.',
   'maintenance.maintenancePlans.operations.issue.label': 'Label missing.',
   'maintenance.maintenancePlans.operations.issue.subsystem': 'Subsystem missing.',
-  'maintenance.maintenancePlans.operations.issue.interval': 'Give at least one interval.',
+  'maintenance.maintenancePlans.operations.issue.interval':
+    'Give at least one threshold: kilometres, hours or days.',
   'maintenance.maintenancePlans.operations.issue.intervalPositive': 'An interval must be positive.',
   'maintenance.maintenancePlans.action.duplicate': 'Duplicate',
   'maintenance.maintenancePlans.duplicateHint':
-    'The copy takes the operations, with no vehicle and no passage.'
+    'The copy takes the operations, with no model and no passage.',
+  'maintenance.maintenancePlans.col.modelNames': 'Models',
+  'maintenance.maintenancePlans.form.models': 'Vehicle models',
+  'maintenance.maintenancePlans.models.empty': 'No model follows this plan.',
+  'maintenance.maintenancePlans.models.add': 'Add a model',
+  'maintenance.maintenancePlans.models.vehicles': 'Vehicles in the park: {plates}',
+  'maintenance.maintenancePlans.models.noVehicle': 'No vehicle of this model in the park yet.',
+  'maintenance.maintenancePlans.models.inheritHint':
+    'every vehicle of the model inherits the plan, including those that will join the park.',
+  'maintenance.maintenancePlans.operations.intervalHours': 'Every (engine hours)'
 }

@@ -15,15 +15,15 @@ describe('list cell formatters', () => {
   })
 
   it('shows a dash for empty or invalid numbers', () => {
-    expect(formatIntegerCell(null, {})).toBe('—')
-    expect(formatIntegerCell('', {})).toBe('—')
-    expect(formatIntegerCell('abc', {})).toBe('—')
+    expect(formatIntegerCell(null, {})).toBe('-')
+    expect(formatIntegerCell('', {})).toBe('-')
+    expect(formatIntegerCell('abc', {})).toBe('-')
   })
 
   it('formats ISO dates and shows a dash otherwise', () => {
     expect(formatDateCell('2026-03-14', {})).toBe(formatDate('2026-03-14'))
-    expect(formatDateCell(null, {})).toBe('—')
-    expect(formatDateCell('not-a-date', {})).toBe('—')
-    expect(formatDateTimeCell(undefined, {})).toBe('—')
+    expect(formatDateCell(null, {})).toBe('-')
+    expect(formatDateCell('not-a-date', {})).toBe('-')
+    expect(formatDateTimeCell(undefined, {})).toBe('-')
   })
 })

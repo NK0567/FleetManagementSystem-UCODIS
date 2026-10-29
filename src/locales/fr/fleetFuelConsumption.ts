@@ -35,5 +35,15 @@ export default {
   'fleet.fuelConsumption.form.comment': 'Commentaire',
   'fleet.fuelConsumption.form.amount': 'Montant de la retenue',
   'fleet.fuelConsumption.form.amountHint':
-    'Au plus le surcoût de la période ({amount}) et le plafond réglé.'
+    'Au plus le surcoût de la période ({amount}) et le plafond réglé.',
+  'fleet.fuelConsumption.col.routeName': 'Corridor',
+  'fleet.fuelConsumption.col.referenceSource': 'Référence de',
+  'fleet.fuelConsumption.col.co2Kg': 'CO₂ (kg)',
+  'fleet.fuelConsumption.lowEmission':
+    'Véhicules à faibles émissions (électriques ou hybrides) : {low} sur {total} véhicules motorisés du parc, soit {share} %.',
+  'fleet.fuelConsumption.withholdable':
+    'Salaire mensuel net déclaré : {salary} ; retenue possible ce mois-ci selon le droit du travail : {max} au plus.',
+  'fleet.fuelConsumption.form.monthlySalary': 'Salaire mensuel net du conducteur',
+  'fleet.fuelConsumption.form.monthlySalaryHint':
+    'Avec les autres retenues du mois, la retenue ne peut dépasser la part du salaire fixée dans les réglages de la flotte selon le droit du travail applicable.'
 }

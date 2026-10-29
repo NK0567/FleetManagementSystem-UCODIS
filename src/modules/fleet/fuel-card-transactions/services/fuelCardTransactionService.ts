@@ -1,4 +1,5 @@
 import { createCrudService } from '@/core/factories'
+import type { ImportReport } from '@/core/utils/csvImport'
 import { fuelCardTransactionApi } from '../api/fuelCardTransactionApi'
 import type {
   FuelCardTransactionApi,
@@ -9,6 +10,9 @@ export const fuelCardTransactionService = {
   ...createCrudService<FuelCardTransactionApi, FuelCardTransactionSearchColumn>(
     fuelCardTransactionApi
   ),
+  async importRows(rows: Record<string, unknown>[]): Promise<ImportReport & { matched: number }> {
+    return (await fuelCardTransactionApi.importRows(rows)).data.data
+  },
   async matchAll(): Promise<number> {
     return (await fuelCardTransactionApi.matchAll()).data.data.matched
   },

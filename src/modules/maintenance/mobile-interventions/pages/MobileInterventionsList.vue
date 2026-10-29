@@ -43,7 +43,7 @@ const kpiText = computed(() => {
   const value = summary.value
   if (!value) return ''
   const { kpis, targets } = value
-  const dash = (n: number | null, unit = '') => (n === null ? '—' : `${n}${unit}`)
+  const dash = (n: number | null, unit = '') => (n === null ? '-' : `${n}${unit}`)
   return t('maintenance.mobileInterventions.summary', {
     interventions: kpis.interventions,
     interventionsTarget: targets.interventionsPerMonth,

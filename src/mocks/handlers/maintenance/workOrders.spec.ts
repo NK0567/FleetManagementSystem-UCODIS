@@ -73,26 +73,44 @@ describe('work orders', () => {
       no: 'OT-2026-0006',
       status: 'open',
       declaredBy: 'MNT001',
-      odometerKmAtOpening: 201_300,
-      downtimeNo: null
+      odometerKmAtOpening: 201_300
     })
+    expect(created.downtimeNo).not.toBeNull()
   })
 
-  it('stop the vehicle at once for a major fault, and when the severity rises', async () => {
-    const major = (await declare({ severity: 'major' })).data.data as WorkOrderApi
-    expect(major.downtimeNo).not.toBeNull()
-    expect((await vehicle('VEH-003')).status).toBe('immobilized')
-    expect((await get<DowntimeApi>(`/maintenance/downtimes/${major.downtimeNo}`)).origin).toBe(
-      'work_order'
-    )
-
-    const minor = (await declare({ vehicleNo: 'VEH-002' })).data.data as WorkOrderApi
-    expect(minor.downtimeNo).toBeNull()
-    const raised = await call(server, 'patch', `/maintenance/work-orders/${minor.no}`, {
-      as: 'FLT001',
-      body: { severity: 'critical' }
+  it('put the vehicle in maintenance as soon as a repair order opens, under its cause code', async () => {
+    const minor = (await declare()).data.data as WorkOrderApi
+    expect(minor.downtimeNo).not.toBeNull()
+    expect(await vehicle('VEH-003')).toMatchObject({
+      status: 'in_maintenance',
+      statusReason: expect.stringContaining('Panne')
     })
-    expect((raised.data.data as WorkOrderApi).downtimeNo).not.toBeNull()
+    const downtime = await get<DowntimeApi>(`/maintenance/downtimes/${minor.downtimeNo}`)
+    expect(downtime).toMatchObject({ origin: 'work_order', downtimeCodeNo: 'PNN' })
+    expect(downtime.startedAt).toBe(minor.declaredAt)
+  })
+
+  it('wait for a part bought for the order, the vehicle staying unavailable', async () => {
+    const { no } = (await declare()).data.data as WorkOrderApi
+    const bought = await call(server, 'post', '/maintenance/purchase-requests', {
+      as: 'MNT001',
+      body: { workOrderNo: no, label: 'Sonde de température moteur', quantity: 1 }
+    })
+    expect(bought.data.data).toMatchObject({ erpReference: expect.stringContaining('ERP-') })
+    expect((await order(no)).status).toBe('awaiting_parts')
+    const listed = await call(server, 'get', '/maintenance/work-orders', {
+      as: 'FLT001',
+      query: {
+        pageSize: 100,
+        filters: JSON.stringify([
+          { field: 'status', valueType: 'string', value: ['awaiting_parts'] }
+        ])
+      }
+    })
+    expect((listed.data.data as { items: WorkOrderApi[] }).items.map((item) => item.no)).toContain(
+      no
+    )
+    expect((await vehicle('VEH-003')).status).toBe('in_maintenance')
   })
 
   it('carry a minor fault from diagnosis to validation', async () => {
@@ -118,7 +136,7 @@ describe('work orders', () => {
     const logged = (await log({ hours: 4 })).data.data as WorkOrderApi
     expect(logged).toMatchObject({ status: 'in_progress', labourHours: 4 })
     expect(logged.downtimeNo).not.toBeNull()
-    expect((await vehicle('VEH-003')).status).toBe('immobilized')
+    expect((await vehicle('VEH-003')).status).toBe('in_maintenance')
     expect((await log({ hours: 9 })).status).toBe(422)
     expect(
       (
@@ -149,7 +167,7 @@ describe('work orders', () => {
     expect((await get<DowntimeApi>(`/maintenance/downtimes/${logged.downtimeNo}`)).status).toBe(
       'closed'
     )
-    expect((await vehicle('VEH-003')).status).not.toBe('immobilized')
+    expect((await vehicle('VEH-003')).status).not.toBe('in_maintenance')
     expect((await send(`/${no}/validate`)).status).toBe(409)
   })
 
@@ -178,7 +196,9 @@ describe('work orders', () => {
         .data
     ).toMatchObject({ status: 'cancelled' })
     expect((await get<DowntimeApi>('/maintenance/downtimes/IND-00004')).status).toBe('closed')
-    expect((await vehicle('VEH-008')).status).toBe('assigned')
+    // OT-2026-0003, still open on the same vehicle, keeps it in maintenance.
+    expect((await get<DowntimeApi>('/maintenance/downtimes/IND-00006')).status).not.toBe('closed')
+    expect((await vehicle('VEH-008')).status).toBe('in_maintenance')
     expect((await send('/OT-2026-0004/cancel', { reason: 'Une seconde fois.' })).status).toBe(409)
   })
 })
@@ -221,7 +241,7 @@ describe('external workshop', () => {
       subcontractingCost: 1_200_000
     })
     expect(handed.downtimeNo).not.toBeNull()
-    expect((await vehicle('VEH-003')).status).toBe('immobilized')
+    expect((await vehicle('VEH-003')).status).toBe('in_maintenance')
     expect((await handOver(no)).status).toBe(409)
     expect(
       (await send(`/${no}/labour`, { technicianNo: 'UCT-008', hours: 1 }, 'MNT001')).status
@@ -231,7 +251,7 @@ describe('external workshop', () => {
     ).toBe(409)
   })
 
-  it('stop the downtime at the return, then validate or send the job back', async () => {
+  it('keep the vehicle out until the closing is validated, even back from the garage', async () => {
     const { no } = (await declare()).data.data as WorkOrderApi
     await send(`/${no}/diagnose`, diagnosis)
     await handOver(no)
@@ -259,9 +279,10 @@ describe('external workshop', () => {
     expect((await back({ returnedAt: `${DEMO_REFERENCE_DATE}T07:00` })).status).toBe(422)
     const returned = (await back({})).data.data as WorkOrderApi
     expect(returned).toMatchObject({ status: 'awaiting_validation', subcontractingCost: 1_450_000 })
-    const downtime = await get<DowntimeApi>(`/maintenance/downtimes/${returned.downtimeNo}`)
-    expect(downtime).toMatchObject({ status: 'closed', endedAt: `${DEMO_REFERENCE_DATE}T09:30:00` })
-    expect((await vehicle('VEH-003')).status).not.toBe('immobilized')
+    expect(
+      (await get<DowntimeApi>(`/maintenance/downtimes/${returned.downtimeNo}`)).status
+    ).not.toBe('closed')
+    expect((await vehicle('VEH-003')).status).toBe('in_maintenance')
     expect((await send(`/${no}/external-progress`, { progress: 'Encore ?' })).status).toBe(409)
 
     const refused = (
@@ -269,10 +290,36 @@ describe('external workshop', () => {
     ).data.data as WorkOrderApi
     expect(refused).toMatchObject({ status: 'in_progress' })
     expect(refused.external?.returnedAt).toBeNull()
-    expect(refused.downtimeNo).not.toBe(returned.downtimeNo)
-    expect((await vehicle('VEH-003')).status).toBe('immobilized')
+    expect(refused.downtimeNo).toBe(returned.downtimeNo)
+    expect((await vehicle('VEH-003')).status).toBe('in_maintenance')
 
     await back({ returnedAt: undefined })
     expect((await send(`/${no}/validate`)).data.data).toMatchObject({ status: 'closed' })
+    expect((await get<DowntimeApi>(`/maintenance/downtimes/${returned.downtimeNo}`)).status).toBe(
+      'closed'
+    )
+    expect((await vehicle('VEH-003')).status).not.toBe('in_maintenance')
+  })
+})
+
+describe('driver space', () => {
+  it('let the driver report a breakdown of his own vehicle only', async () => {
+    const report = (body: Record<string, unknown>, as = 'CND002') =>
+      call(server, 'post', '/me/breakdowns', { as, body, language: 'en' })
+    expect((await report({ severity: 'major', symptom: 'Bruit' })).status).toBe(422)
+    expect(
+      (await report({ severity: 'major', symptom: 'Fuite d’huile sous le moteur.' }, 'FLT001'))
+        .status
+    ).toBe(403)
+    const reported = (await report({ severity: 'major', symptom: 'Fuite d’huile sous le moteur.' }))
+      .data.data as WorkOrderApi
+    expect(reported).toMatchObject({ vehiclePlate: '4022 TBA', status: 'open' })
+    expect(await order(reported.no)).toMatchObject({
+      origin: 'driver_report',
+      maintenanceType: 'corrective',
+      declaredBy: 'CND002'
+    })
+    const mine = await call(server, 'get', '/me/breakdowns', { as: 'CND002' })
+    expect((mine.data.data as { no: string }[]).map((row) => row.no)).toContain(reported.no)
   })
 })

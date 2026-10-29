@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref, watch } from 'vue'
-import { Upload, Truck } from '@lucide/vue'
+import { Cable, RefreshCw, Upload, Truck } from '@lucide/vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
@@ -9,6 +9,10 @@ import { useListCellFormatters } from '@/composables/useListCellFormatters'
 import { useListPage } from '@/composables/useListPage'
 import { usePermissions } from '@/composables/usePermissions'
 import { getListCellDisplay } from '@/utils/listCellDisplay'
+import { apiErrorMessage } from '@/core/api/apiError'
+import { useUserStore } from '@/stores/user'
+import { usePlanningCircuit } from '@/modules/planning/planning-settings'
+import OrdererApiDialog from '../components/OrdererApiDialog.vue'
 import { deliveryRequestApi } from '../api/deliveryRequestApi'
 import { deliveryRequestService } from '../services/deliveryRequestService'
 import { useDeliveryRequestStore } from '../stores/deliveryRequestStore'
@@ -22,6 +26,34 @@ const router = useRouter()
 const importing = ref(false)
 const creatingOrder = ref(false)
 const { canInsert: canCreateOrder } = usePermissions('TRANSPORTORDER')
+const { canExecute: canReceive } = usePermissions('DELIVERYREQUEST')
+
+/* The ways in the company opened (TRS01-US01, TRS07-US05): an orderer account transmits its
+ * orders as a service; the planner keys them, imports a file, synchronises the management
+ * system or follows what the external orderers send through the API. */
+const { circuit } = usePlanningCircuit()
+const isOrderer = computed(() => !!useUserStore().user?.ordererNo)
+const entryOpen = computed(() =>
+  isOrderer.value ? circuit.value.intake.serviceTransmission : circuit.value.intake.manualEntry
+)
+const syncing = ref(false)
+const syncMessage = ref<string | null>(null)
+const syncError = ref<string | null>(null)
+const showingApi = ref(false)
+async function syncConnector() {
+  syncing.value = true
+  syncMessage.value = null
+  syncError.value = null
+  try {
+    const received = await deliveryRequestService.syncConnector()
+    syncMessage.value = t('planning.deliveryRequests.intake.synced', received.length)
+    await store.fetchItems(store.pagination.page, store.pagination.limit)
+  } catch (cause) {
+    syncError.value = apiErrorMessage(cause, t('planning.deliveryRequests.saveError'))
+  } finally {
+    syncing.value = false
+  }
+}
 const store = useDeliveryRequestStore()
 const { formatDateTime, formatDate, optionLabel, formatDecimal } = useListCellFormatters()
 
@@ -87,8 +119,33 @@ const tableColumns = computed<TableColumn[]>(() => [
   },
   {
     sortKey: 'externalReference',
-    label: t('planning.deliveryRequests.col.externalReference'),
+    label: circuit.value.externalReferenceLabel,
     minW: '150px'
+  },
+  {
+    sortKey: 'kind',
+    label: t('planning.deliveryRequests.col.kind'),
+    minW: '150px',
+    formatter: optionLabel('deliveryRequestKind')
+  },
+  {
+    sortKey: 'origin',
+    label: t('planning.deliveryRequests.col.origin'),
+    minW: '170px',
+    defaultHidden: true,
+    formatter: optionLabel('deliveryRequestOrigin')
+  },
+  {
+    sortKey: 'pickupPointName',
+    label: t('planning.deliveryRequests.col.pickupPointName'),
+    minW: '180px',
+    defaultHidden: true
+  },
+  {
+    sortKey: 'content',
+    label: t('planning.deliveryRequests.col.content'),
+    minW: '200px',
+    defaultHidden: true
   },
   {
     sortKey: 'freightPayer',
@@ -168,6 +225,20 @@ const tableColumns = computed<TableColumn[]>(() => [
 ])
 
 const filterDefs: FilterFieldDef[] = [
+  {
+    field: 'kind',
+    labelKey: 'planning.deliveryRequests.col.kind',
+    valueType: 'string',
+    kind: 'option',
+    optionsKey: 'deliveryRequestKind'
+  },
+  {
+    field: 'origin',
+    labelKey: 'planning.deliveryRequests.col.origin',
+    valueType: 'string',
+    kind: 'option',
+    optionsKey: 'deliveryRequestOrigin'
+  },
   {
     field: 'freightPayer',
     labelKey: 'planning.deliveryRequests.col.freightPayer',
@@ -263,7 +334,7 @@ const {
         :show-export-excel="canExport"
         :export-excel="exportToExcel"
         :show-details-panel="showDetailsPanel"
-        :show-create="canInsert"
+        :show-create="canInsert && entryOpen"
         :show-card-actions="showCardActions"
         :can-view-selected="canViewSelected"
         :can-edit-selected="canEditSelected"
@@ -295,7 +366,7 @@ const {
             :reset-preferences="resetPreferences"
           />
         </template>
-        <template v-if="canInsert || canCreateOrder" #extra-actions>
+        <template v-if="canInsert || canCreateOrder || canReceive" #extra-actions>
           <button
             v-if="canCreateOrder"
             type="button"
@@ -306,7 +377,7 @@ const {
             {{ t('planning.transportOrders.action.createFromRequests') }}
           </button>
           <button
-            v-if="canInsert"
+            v-if="canInsert && circuit.intake.fileImport"
             type="button"
             class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
             @click="importing = true"
@@ -314,10 +385,46 @@ const {
             <Upload class="w-4 h-4 text-primary" />
             {{ t('planning.deliveryRequests.import.action') }}
           </button>
+          <button
+            v-if="canReceive && circuit.intake.erpConnector"
+            type="button"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60"
+            :disabled="syncing"
+            @click="syncConnector"
+          >
+            <RefreshCw class="w-4 h-4 text-primary" />
+            {{ t('planning.deliveryRequests.intake.sync') }}
+          </button>
+          <button
+            v-if="canReceive && circuit.intake.ordererApi"
+            type="button"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
+            @click="showingApi = true"
+          >
+            <Cable class="w-4 h-4 text-primary" />
+            {{ t('planning.deliveryRequests.intake.api') }}
+          </button>
         </template>
       </ListPageToolbar>
 
       <FormAlerts class="mx-4" :error="exportError" @clear:error="exportError = null" />
+      <FormAlerts
+        class="mx-4"
+        :error="syncError"
+        :success="syncMessage"
+        @clear:error="syncError = null"
+        @clear:success="syncMessage = null"
+      />
+      <p
+        v-if="canInsert && !entryOpen"
+        class="mx-4 mb-2 rounded border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground"
+      >
+        {{
+          isOrderer
+            ? t('planning.deliveryRequests.intake.serviceClosed')
+            : t('planning.deliveryRequests.intake.manualClosed')
+        }}
+      </p>
 
       <div class="mx-4 mb-2 flex flex-wrap gap-2">
         <span
@@ -432,6 +539,11 @@ const {
       v-if="showCreateModal"
       @close="showCreateModal = false"
       @created="onCreated"
+    />
+    <OrdererApiDialog
+      :open="showingApi"
+      @close="showingApi = false"
+      @sent="store.fetchItems(store.pagination.page, store.pagination.limit)"
     />
     <RequestImportDialog
       :open="importing"

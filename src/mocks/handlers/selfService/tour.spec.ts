@@ -58,3 +58,27 @@ describe('my tour', () => {
     expect(assistant.status).toBe(403)
   })
 })
+
+describe('checklists kept without network', () => {
+  it('are recorded on the trip they were taken for, and only on the driver own trips', async () => {
+    const tour = (await call(server, 'get', '/me/tour', { as: 'CND001' })).data.data as {
+      checkPoints: { no: string }[]
+    }
+    const results = tour.checkPoints.map((point) => ({
+      pointNo: point.no,
+      result: 'ok',
+      comment: ''
+    }))
+    const kept = await call(server, 'post', '/me/checklist', {
+      as: 'CND001',
+      body: { stage: 'stop', tripNo: 'TRP-00006', takenAt: '2026-09-04T05:50', results }
+    })
+    expect(kept.status).toBe(201)
+    expect(kept.data.data).toEqual(expect.objectContaining({ tripNo: 'TRP-00006', stage: 'stop' }))
+    const other = await call(server, 'post', '/me/checklist', {
+      as: 'CND001',
+      body: { stage: 'stop', tripNo: 'TRP-00007', takenAt: '2026-09-04T05:50', results }
+    })
+    expect(other.status).toBe(404)
+  })
+})

@@ -1,6 +1,46 @@
 import type { LocalizedText } from '../../i18n'
 
 export const FLEET_MESSAGES = {
+  driverNoEmployee: {
+    fr: "Ce compte n'est lié à aucun conducteur.",
+    en: 'This account is not linked to a driver.'
+  },
+  driverNoVehicle: {
+    fr: 'Aucun véhicule ne vous est affecté et aucun trajet ne vous est confié.',
+    en: 'No vehicle is assigned to you and no trip is given to you.'
+  },
+  refillReceiptRequired: {
+    fr: 'Joignez la photo du reçu du plein.',
+    en: 'Attach the photo of the refill receipt.'
+  },
+  cardNumberUnknown: {
+    fr: "Aucune carte carburant n'a le numéro « {number} ».",
+    en: 'No fuel card has the number "{number}".'
+  },
+  fuelReferenceDuplicate: {
+    fr: 'Ce véhicule a déjà une consommation de référence sur ce corridor.',
+    en: 'This vehicle already has a reference consumption on this corridor.'
+  },
+  gapSalaryRequired: {
+    fr: 'Indiquez le salaire mensuel net du conducteur pour vérifier la retenue.',
+    en: "Give the driver's net monthly salary to check the deduction."
+  },
+  gapDeductionAboveSalaryShare: {
+    fr: 'Avec les retenues déjà prévues ce mois-ci ({other}), la retenue dépasse la part du salaire qui peut être retenue ({max}).',
+    en: 'With the deductions already planned this month ({other}), the deduction exceeds the share of the salary that may be withheld ({max}).'
+  },
+  inspectionItemsIncomplete: {
+    fr: 'Chaque poste de la grille doit recevoir un verdict.',
+    en: 'Every item of the grid needs a verdict.'
+  },
+  inspectionObservationRequired: {
+    fr: 'Décrivez ce qui a été constaté sur chaque poste avec observation ou non conforme.',
+    en: 'Describe what was found on every item with an observation or not conforming.'
+  },
+  inspectionSignatureRequired: {
+    fr: 'Le contrôleur doit signer le rapport : son nom et sa confirmation sont obligatoires.',
+    en: 'The inspector must sign the report: his name and his confirmation are required.'
+  },
   documentTypeInUse: {
     fr: 'Des documents sont de ce type : il ne peut pas être supprimé. Désactivez-le plutôt.',
     en: 'Documents use this type: it cannot be deleted. Deactivate it instead.'

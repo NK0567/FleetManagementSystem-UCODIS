@@ -274,6 +274,40 @@ defineExpose(expose)
           <FormInput v-model="draft.sanction" :maxlength="200" :disabled="disabled" />
         </BaseFormField>
       </div>
+      <div v-if="!isNew" class="xl:col-span-2 min-w-0" data-testid="claim-repair">
+        <BaseFormField :label="t('fleet.claims.form.repair')">
+          <p v-if="!initialData.workOrderNo" class="text-sm text-muted-foreground">
+            {{ t('fleet.claims.form.noRepair') }}
+          </p>
+          <div v-else class="text-sm text-card-foreground space-y-1">
+            <RouterLink
+              :to="{
+                path: '/maintenance/work-orders',
+                query: { no: initialData.workOrderNo, cardMode: 'view' }
+              }"
+              class="text-primary hover:underline"
+            >
+              {{ t('fleet.claims.form.workOrder', { no: initialData.workOrderNo }) }}
+            </RouterLink>
+            <p v-if="initialData.downtimeCode">
+              {{
+                t('fleet.claims.form.downtimeCode', {
+                  code: initialData.downtimeCode,
+                  name: initialData.downtimeCodeName ?? ''
+                })
+              }}
+              <span class="text-muted-foreground">
+                ·
+                {{
+                  initialData.downtimeOpen
+                    ? t('fleet.claims.form.downtimeOpen')
+                    : t('fleet.claims.form.downtimeEnded')
+                }}
+              </span>
+            </p>
+          </div>
+        </BaseFormField>
+      </div>
     </FormSection>
 
     <FormSection

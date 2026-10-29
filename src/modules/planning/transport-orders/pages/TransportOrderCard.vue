@@ -4,7 +4,17 @@ import LoadingListView from '@/modules/planning/loading/components/LoadingListVi
 import { pickupApi } from '@/modules/planning/loading/api/pickupApi'
 import type { LoadingListApi } from '@/modules/planning/loading/types/pickup.types'
 import { printElement } from '@/utils/printElement'
+import TransportOrderDossierView from '@/modules/planning/closing/components/TransportOrderDossierView.vue'
+import { dossierApi } from '@/modules/planning/closing/api/dossierApi'
+import type { OrderDossierApi } from '@/modules/planning/closing/types/dossier.types'
+import { FolderOpen } from '@lucide/vue'
+import {
+  formatDateTime as formatDateTimeShort,
+  formatNumber as formatDecimal
+} from '@/utils/format'
+import httpClient from '@/core/api/httpClient'
 import TransportOrderDisputesPanel from '../components/TransportOrderDisputesPanel.vue'
+import GapQualificationPanel from '../components/GapQualificationPanel.vue'
 import { confirmationService } from '@/modules/planning/customer-confirmations/services/confirmationService'
 import { orderLineState } from '../domain/transportOrder'
 import DeliveryNoteView from '@/modules/planning/delivery-notes/components/DeliveryNoteView.vue'
@@ -12,7 +22,16 @@ import { deliveryNoteApi } from '@/modules/planning/delivery-notes/api/deliveryN
 import type { DeliveryNoteApi } from '@/modules/planning/delivery-notes/types/deliveryNote.types'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Ban, CalendarClock, ClipboardList, ListTree, Lock, Route, Truck } from '@lucide/vue'
+import {
+  Ban,
+  CalendarClock,
+  ClipboardList,
+  ListTree,
+  Lock,
+  PackageOpen,
+  Route,
+  Truck
+} from '@lucide/vue'
 import { transportOrderApi } from '../api/transportOrderApi'
 import { apiErrorBody, apiErrorMessage } from '@/core/api/apiError'
 import type { CardOpenMode } from '@/composables/cardOpenMode'
@@ -23,6 +42,13 @@ import TransportOrderForm from '../components/TransportOrderForm.vue'
 import { canCancel, canEditLines, canEditSchedule, canPlan } from '../domain/transportOrder'
 import { transportOrderService } from '../services/transportOrderService'
 import { useTransportOrderStore } from '../stores/transportOrderStore'
+/* Load gauge, replanning and trip plan (TRS01-US08, US11, US16, US17, TRS07-US07). */
+import LoadGauge from '../components/LoadGauge.vue'
+import ReplanningPanel from '../components/ReplanningPanel.vue'
+import RoutePlanPanel from '../components/RoutePlanPanel.vue'
+import { orderPlanningService } from '../api/orderPlanningApi'
+import { replanCandidate } from '../domain/replanning'
+import { usePlanningCircuit } from '@/modules/planning/planning-settings'
 import type {
   DebriefingInput,
   TransportOrderApi,
@@ -47,8 +73,11 @@ const { canRead: canReadLoading } = usePermissions('LOADING')
 /* The pickup note and the loading list follow the planned order (TRS03-US03, US06). */
 const LOADING_STATUSES = ['planned', 'confirmed', 'ready']
 const loadingList = ref<LoadingListApi | null>(null)
+/* The old « simulate the loading » shows the same list with the place of each recipient. */
+const simulating = ref(false)
 const listView = ref<InstanceType<typeof LoadingListView> | null>(null)
-async function openLoadingList() {
+async function openLoadingList(simulate = false) {
+  simulating.value = simulate
   const no = item.value?.no
   if (!no) return
   try {
@@ -61,6 +90,25 @@ function printLoadingList() {
   printElement(
     listView.value?.root ?? null,
     t('planning.loadingList.title', { no: loadingList.value?.orderNo ?? '' })
+  )
+}
+/* The complete file of the order in one place, to read or print (TRS02-US07, TRS05-US04). */
+const { canRead: canReadDossier } = usePermissions('DELIVERYQUALITY')
+const orderDossier = ref<OrderDossierApi | null>(null)
+const dossierView = ref<InstanceType<typeof TransportOrderDossierView> | null>(null)
+async function openDossier() {
+  const no = item.value?.no
+  if (!no) return
+  try {
+    orderDossier.value = await dossierApi.ofOrder(no)
+  } catch (error) {
+    saveError.value = apiErrorMessage(error, t('planning.transportOrders.saveError'))
+  }
+}
+function printDossier() {
+  printElement(
+    dossierView.value?.root ?? null,
+    t('planning.dossier.title', { no: orderDossier.value?.order.no ?? '' })
   )
 }
 async function onPickupChanged() {
@@ -127,7 +175,10 @@ const expandedSections = ref({
   deliveryNotes: true,
   pickup: true,
   disputes: true,
+  returns: true,
   satisfaction: true,
+  replan: true,
+  routePlan: false,
   history: false,
   audit: false
 })
@@ -164,8 +215,22 @@ async function perform(
   }
 }
 
+/* While the order runs, the estimated arrival follows the vehicle, and a delay shows (TRS02-US01). */
+const eta = ref<{ expectedArrival: string | null; late: boolean; delayMin: number | null } | null>(
+  null
+)
+
 async function loadClosing() {
   const current = item.value
+  eta.value =
+    current?.status === 'in_progress'
+      ? await httpClient
+          .get<{
+            data: { expectedArrival: string | null; late: boolean; delayMin: number | null }
+          }>(`/planning/transport-orders/${encodeURIComponent(current.no)}/eta`)
+          .then((response) => response.data.data)
+          .catch(() => null)
+      : null
   // The delivery notes are planned with the order and open at the declaration (TRS01-US23).
   deliveryNotes.value =
     current && current.means && current.status !== 'cancelled'
@@ -228,6 +293,42 @@ async function cancel(choice: { reasonNo: string; comment: string }) {
   }
 }
 
+/* Replanning: the recipient's date accepted, a date proposed to him, or a date chosen for a
+ * remainder; the line goes to the pending order of that day (TRS01-US16, US17). */
+const replanLine = (line: TransportOrderLineApi, date: string | null) =>
+  perform(async (no) => {
+    await orderPlanningService.replan(no, line.lineNo, date)
+  })
+const proposeReplan = (line: TransportOrderLineApi, date: string) =>
+  perform((no) => orderPlanningService.proposeReplanDate(no, line.lineNo, date))
+const toReplan = computed(
+  () =>
+    item.value?.lines.filter((line) => replanCandidate(line) || line.replannedToOrderNo).length ?? 0
+)
+/* The trip plan and its corridor, and a change of route on the road (TRS01-US11). */
+const validateRoute = (corridorKm: number) =>
+  perform((no) => orderPlanningService.validateRoutePlan(no, corridorKm))
+const changeRoute = (routeTemplateNo: string, reason: string) =>
+  perform((no) => orderPlanningService.changeRoute(no, routeTemplateNo, reason))
+/* An order past its date is rescheduled before it can be loaded (TRS07-US07). */
+const rescheduling = ref(false)
+const newDeparture = ref('')
+const { circuit } = usePlanningCircuit()
+/** The reference of each line's order, printed on the loading list (TRS01-US06). */
+const lineReferences = computed(() =>
+  Object.fromEntries(
+    (item.value?.lines ?? [])
+      .filter((line) => line.externalReference)
+      .map((line) => [line.lineNo, line.externalReference])
+  )
+)
+async function reschedule() {
+  if (!newDeparture.value) return
+  if (await perform((no) => orderPlanningService.reschedule(no, newDeparture.value))) {
+    rescheduling.value = false
+  }
+}
+
 const depart = () => perform((no) => transportOrderService.depart(no))
 const closeOrder = () => perform((no) => transportOrderService.close(no))
 const attachDocument = (kind: string, fileNo: string) =>
@@ -279,6 +380,19 @@ const linesSummary = computed(() => {
   return summary
 })
 const disputes = computed(() => item.value?.lines.filter((line) => line.receptionContestedAt) ?? [])
+/* The quantity gaps the declarations revealed, to qualify (TRS03-US17). */
+const gapLines = computed(
+  () =>
+    item.value?.lines.filter((line) => line.quantityGap !== null && line.quantityGap !== 0) ?? []
+)
+/* The goods coming back, with the recipient and the reason, and the warehouse's check (TRS04-US01). */
+const returnLines = computed(
+  () =>
+    item.value?.lines.filter(
+      (line) =>
+        line.refusalAt || line.returnedAt || line.undeliveredReasonNo || line.warehouseReceivedAt
+    ) ?? []
+)
 const disputesOpen = computed(() => disputes.value.filter((line) => !line.contestHandledAt).length)
 const disputeError = ref<string | null>(null)
 async function handleDispute(line: TransportOrderLineApi, note: string) {
@@ -341,6 +455,16 @@ const buttonClass =
   >
     <template #title-badges>
       <TransportOrderStatusPill v-if="item" :status="item.status" />
+      <span
+        v-if="eta?.expectedArrival"
+        class="text-xs ml-2"
+        :class="eta.late ? 'text-warning font-medium' : 'text-muted-foreground'"
+      >
+        {{ t('planning.tracking.eta') }} {{ formatDateTimeShort(eta.expectedArrival) }}
+        <template v-if="eta.late">
+          · {{ t('planning.transportOrders.late', { minutes: eta.delayMin }) }}
+        </template>
+      </span>
     </template>
     <template v-if="item && !isEditMode && !isFormDirty" #action-buttons>
       <button
@@ -396,10 +520,23 @@ const buttonClass =
         v-if="LOADING_STATUSES.includes(item.status)"
         type="button"
         :class="buttonClass"
-        @click="openLoadingList"
+        @click="openLoadingList(false)"
       >
         <ClipboardList class="w-5 h-5 text-primary" />
         {{ t('planning.loadingList.open') }}
+      </button>
+      <button
+        v-if="LOADING_STATUSES.includes(item.status)"
+        type="button"
+        :class="buttonClass"
+        @click="openLoadingList(true)"
+      >
+        <PackageOpen class="w-5 h-5 text-primary" />
+        {{ t('planning.loadingList.simulate') }}
+      </button>
+      <button v-if="canReadDossier" type="button" :class="buttonClass" @click="openDossier">
+        <FolderOpen class="w-5 h-5 text-primary" />
+        {{ t('planning.dossier.open') }}
       </button>
       <button
         v-if="canExecute && canCancel(item.status)"
@@ -441,6 +578,28 @@ const buttonClass =
               {{ item.cancellationComment }}
             </p>
           </div>
+          <div
+            v-if="item?.expired"
+            class="mx-6 mt-4 rounded border border-warning/50 bg-warning/10 px-4 py-3 text-sm flex flex-wrap items-center gap-3"
+          >
+            <p class="flex-1 min-w-60 text-card-foreground">
+              {{
+                circuit.expiredDateMode === 'block'
+                  ? t('planning.transportOrders.expired.blocked')
+                  : t('planning.transportOrders.expired.alert')
+              }}
+            </p>
+            <button
+              v-if="canUpdate"
+              type="button"
+              :class="buttonClass"
+              :disabled="acting"
+              @click="((newDeparture = ''), (rescheduling = true))"
+            >
+              <CalendarClock class="w-4 h-4 text-primary" />
+              {{ t('planning.transportOrders.expired.reschedule') }}
+            </button>
+          </div>
           <TransportOrderForm
             ref="formRef"
             :initial-data="item ?? {}"
@@ -456,6 +615,18 @@ const buttonClass =
             >
               <div class="xl:col-span-2 min-w-0">
                 <TransportOrderMeansPanel :order="item" />
+              </div>
+              <div class="xl:col-span-2 min-w-0 max-w-xl">
+                <p class="text-sm font-medium text-card-foreground mb-2">
+                  {{ t('planning.transportOrders.gauge.title') }}
+                </p>
+                <LoadGauge
+                  :fill="item.fill"
+                  :capacity="item.capacity"
+                  :weight-kg="item.totalWeightKg"
+                  :volume-m3="item.totalVolumeM3"
+                  :liters="item.totalFuelL"
+                />
               </div>
             </FormSection>
             <FormSection
@@ -495,6 +666,34 @@ const buttonClass =
               </div>
             </FormSection>
             <FormSection
+              v-if="toReplan"
+              v-model:open="expandedSections.replan"
+              :title="t('planning.transportOrders.replan.title')"
+              :summary="[t('planning.transportOrders.replan.count', toReplan)]"
+            >
+              <ReplanningPanel
+                :lines="item.lines"
+                :can-replan="canUpdate && !isEditMode"
+                :busy="acting"
+                @replan="replanLine"
+                @propose="proposeReplan"
+              />
+            </FormSection>
+            <FormSection
+              v-if="item.routePlan || item.routeHistory.length"
+              v-model:open="expandedSections.routePlan"
+              :title="t('planning.transportOrders.routePlan.title')"
+              :summary="[item.routePlan?.routeName ?? '']"
+            >
+              <RoutePlanPanel
+                :order="item"
+                :can-edit="canUpdate && !isEditMode"
+                :busy="acting"
+                @validate="validateRoute"
+                @change="changeRoute"
+              />
+            </FormSection>
+            <FormSection
               v-if="item.compartmentPlan"
               v-model:open="expandedSections.compartments"
               :title="t('planning.transportOrders.compartments.title')"
@@ -527,8 +726,60 @@ const buttonClass =
               <TransportOrderPickupPanel
                 :order-no="item.no"
                 :order-status="item.status"
+                :fleet="item.means === 'fleet'"
                 @changed="onPickupChanged"
               />
+            </FormSection>
+            <FormSection
+              v-if="gapLines.length"
+              v-model:open="expandedSections.returns"
+              :title="t('planning.transportOrders.gaps.title')"
+              :summary="[]"
+            >
+              <GapQualificationPanel
+                :order-no="item.no"
+                :lines="gapLines"
+                :can-qualify="canFileClosing"
+                @changed="onPickupChanged"
+              />
+            </FormSection>
+            <FormSection
+              v-if="returnLines.length"
+              v-model:open="expandedSections.returns"
+              :title="t('planning.transportOrders.returns.title')"
+              :summary="[t('planning.transportOrders.lines.count', returnLines.length)]"
+            >
+              <div
+                class="xl:col-span-2 min-w-0 rounded border border-border divide-y divide-border text-sm"
+              >
+                <div v-for="line in returnLines" :key="line.lineNo" class="px-3 py-2 space-y-0.5">
+                  <p class="font-medium text-card-foreground">
+                    {{ line.recipientName }} · {{ line.productName }} ·
+                    {{ formatDecimal(line.loadedQuantity ?? line.quantity) }} {{ line.unit }}
+                  </p>
+                  <p class="text-xs text-muted-foreground">
+                    {{ t('planning.transportOrders.returns.reason') }} :
+                    {{ line.returnReasonName || '-' }}
+                  </p>
+                  <p class="text-xs">
+                    <template v-if="line.warehouseReceivedAt">
+                      <span :class="line.warehouseConforming ? 'text-success' : 'text-destructive'">
+                        {{
+                          line.warehouseConforming
+                            ? t('planning.transportOrders.returns.conforming')
+                            : t('planning.transportOrders.returns.nonconforming', {
+                                reason: line.returnNonconformityReasonName || '-'
+                              })
+                        }}
+                      </span>
+                    </template>
+                    <template v-else-if="line.handedBackAt">
+                      {{ t('planning.transportOrders.returns.handedBack') }}
+                    </template>
+                    <template v-else>{{ t('planning.transportOrders.returns.onBoard') }}</template>
+                  </p>
+                </div>
+              </div>
             </FormSection>
             <FormSection
               v-if="disputes.length"
@@ -646,6 +897,20 @@ const buttonClass =
     </template>
   </CardModalShell>
 
+  <ConfirmDialog
+    :open="rescheduling"
+    :title="t('planning.transportOrders.expired.reschedule')"
+    :confirm-disabled="!newDeparture"
+    :loading="acting"
+    panel-class="max-w-md"
+    @confirm="reschedule"
+    @cancel="rescheduling = false"
+  >
+    <BaseFormField :label="t('planning.transportOrders.form.plannedDeparture')" required>
+      <FormInput v-model="newDeparture" type="datetime-local" />
+    </BaseFormField>
+    <FormAlerts class="mt-2" :error="dialogError" @clear:error="dialogError = null" />
+  </ConfirmDialog>
   <OrderPlanDialog
     :open="planning"
     :order="item"
@@ -695,6 +960,22 @@ const buttonClass =
     @confirm="printLoadingList"
     @cancel="loadingList = null"
   >
-    <LoadingListView v-if="loadingList" ref="listView" :list="loadingList" />
+    <LoadingListView
+      v-if="loadingList"
+      ref="listView"
+      :list="loadingList"
+      :simulate="simulating"
+      :references="lineReferences"
+    />
+  </ConfirmDialog>
+  <ConfirmDialog
+    :open="!!orderDossier"
+    :title="t('planning.dossier.open')"
+    :confirm-label="t('planning.dossier.print')"
+    panel-class="max-w-4xl"
+    @confirm="printDossier"
+    @cancel="orderDossier = null"
+  >
+    <TransportOrderDossierView v-if="orderDossier" ref="dossierView" :dossier="orderDossier" />
   </ConfirmDialog>
 </template>

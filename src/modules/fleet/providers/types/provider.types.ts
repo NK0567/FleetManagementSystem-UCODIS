@@ -10,6 +10,8 @@ export const PROVIDER_TYPES = [
 ] as const
 export type ProviderType = (typeof PROVIDER_TYPES)[number]
 
+export type ProviderSource = 'fms' | 'management_system'
+
 export interface ProviderContract {
   /** Numbered by the server when the contract is added. */
   reference: string
@@ -28,7 +30,12 @@ export interface CarrierVehicle {
 export interface ProviderApi {
   no: string
   name: string
-  providerType: ProviderType
+  /** Code of a provider type; the application's own types keep their role as code. */
+  providerType: string
+  providerTypeName: string
+  /** Typed in the fleet, or taken from the company management system. */
+  source: ProviderSource
+  externalId: string | null
   contactName: string
   phone: string
   email: string
@@ -46,3 +53,11 @@ export interface ProviderApi {
 }
 
 export type ProviderSearchColumn = 'no' | 'name' | 'contactName' | 'no,name,contactName'
+
+/** What a resumption from the company management system did. */
+export interface ProviderSyncReport {
+  created: string[]
+  updated: string[]
+  unchanged: number
+  skipped: { externalId: string; reason: string }[]
+}

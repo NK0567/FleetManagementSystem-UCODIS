@@ -26,6 +26,8 @@ function proposedDeduction(): Omit<FuelGapFileRow, keyof typeof seedAudit>[] {
       qualifiedBy: 'FLT001',
       qualifiedAt: at(-10),
       proposedAmount: 50_000,
+      monthlySalary: 900_000,
+      withholdableAmount: 90_000,
       proposedBy: 'FLT001',
       proposedAt: at(-9),
       decisionComment: '',

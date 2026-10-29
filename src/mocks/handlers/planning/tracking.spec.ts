@@ -59,17 +59,41 @@ describe('recipient tracking link', () => {
     expect(queue.find((item) => item.orderNo === 'TR-2026-0002')?.byLink).toBe(true)
   })
 
-  it('lets the recipient accept a date proposed by the planner', async () => {
+  it('lets the recipient agree to a date proposed by the planner, or refuse it with his own', async () => {
     const token = tokenOf()
-    await call(server, 'post', '/planning/transport-orders/TR-2026-0002/lines/1/propose-date', {
-      as: 'CLI001',
-      body: { date: '2026-12-15' }
-    })
     const shown = (await call(server, 'get', `/public/tracking/${token}`, {})).data
       .data as TrackingApi
-    expect(shown.plannerProposedOn).toBe('2026-12-15')
+    const reasonNo = shown.reasons[0]!.no
+    await call(server, 'post', `/public/tracking/${token}/unavailable`, { body: { reasonNo } })
+    const line = '/planning/transport-orders/TR-2026-0002/lines/1/replan'
+    // The planner proposes; the agent cannot.
+    expect(
+      (
+        await call(server, 'post', `${line}/propose`, {
+          as: 'CLI001',
+          body: { date: '2026-12-15' }
+        })
+      ).status
+    ).toBe(403)
+    await call(server, 'post', `${line}/propose`, { as: 'PLN001', body: { date: '2026-12-15' } })
+    const offered = (await call(server, 'get', `/public/tracking/${token}`, {})).data
+      .data as TrackingApi
+    expect(offered).toMatchObject({ plannerProposedOn: '2026-12-15', state: 'unavailable' })
+    // Only proposed: the planner cannot retain it in the recipient's place.
+    const forced = await call(server, 'post', line, { as: 'PLN001', body: { date: '2026-12-15' } })
+    expect(forced.status).toBe(409)
+    // The recipient refuses it by giving his own date back.
+    const own = await call(server, 'post', `/public/tracking/${token}/unavailable`, {
+      body: { reasonNo, date: '2026-12-20' }
+    })
+    expect(own.data.data).toMatchObject({ plannerProposedOn: null, availableOn: '2026-12-20' })
+    await call(server, 'post', `${line}/propose`, { as: 'PLN001', body: { date: '2026-12-18' } })
     const accepted = await call(server, 'post', `/public/tracking/${token}/accept-proposal`, {})
-    expect(accepted.data.data).toMatchObject({ availableOn: '2026-12-15' })
+    expect(accepted.data.data).toMatchObject({ state: 'replanned', replannedOn: '2026-12-18' })
+    const pending = server.db.transportOrders
+      .all()
+      .find((order) => order.replanDate === '2026-12-18')
+    expect(pending?.lines).toHaveLength(1)
   })
 
   it('refuses an unknown link', async () => {

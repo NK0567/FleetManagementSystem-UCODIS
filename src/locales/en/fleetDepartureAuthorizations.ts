@@ -37,5 +37,11 @@ export default {
   'fleet.departureAuthorizations.form.driverChecks': 'Driver checks',
   'fleet.departureAuthorizations.form.liveChecks': 'Checks, right now',
   'fleet.departureAuthorizations.form.frozenChecks': 'Checks when the decision was taken',
-  'fleet.departureAuthorizations.form.refusalReason': 'Reason for the refusal'
+  'fleet.departureAuthorizations.form.refusalReason': 'Reason for the refusal',
+  'fleet.departureAuthorizations.activation.title': 'Switched on at the grant',
+  'fleet.departureAuthorizations.activation.gps.activated': 'GPS tracking of the vehicle switched on.',
+  'fleet.departureAuthorizations.activation.gps.no_unit': 'No working tracker on the vehicle: GPS tracking not switched on.',
+  'fleet.departureAuthorizations.activation.camera.activated': 'Vehicle camera switched on.',
+  'fleet.departureAuthorizations.activation.camera.no_camera': 'No camera on the vehicle.',
+  'fleet.departureAuthorizations.activation.simulated': 'Order sent to the units on {date} (simulated in the mock-up).'
 }

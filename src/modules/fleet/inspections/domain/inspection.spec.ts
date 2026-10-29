@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { awaitsRecheck, inspectionState, recheckDueOn } from './inspection'
+import {
+  awaitsRecheck,
+  gridResult,
+  inspectionGridIssues,
+  inspectionState,
+  itemsToRecheck,
+  recheckDueOn,
+  type InspectionItemResult
+} from './inspection'
 
 const failed = { inspectedOn: '2026-09-01', result: 'non_conforming' as const, recheckDoneOn: null }
 
@@ -23,5 +31,29 @@ describe('inspections', () => {
   it('keep the vehicle off the road until it is re-inspected', () => {
     expect(awaitsRecheck(failed)).toBe(true)
     expect(awaitsRecheck({ ...failed, recheckDoneOn: '2026-09-12' })).toBe(false)
+  })
+})
+
+describe('inspection grid', () => {
+  const item = (verdict: InspectionItemResult['verdict'], comment = '') => ({
+    itemNo: 'VH-01',
+    label: 'Freinage',
+    part: 'vehicle' as const,
+    verdict,
+    comment
+  })
+
+  it('needs a verdict on every item and a word on every observation', () => {
+    expect(inspectionGridIssues([item('conforming')])).toEqual([])
+    expect(inspectionGridIssues([item(null)])).toEqual(['incomplete'])
+    expect(inspectionGridIssues([])).toEqual(['incomplete'])
+    expect(inspectionGridIssues([item('observation')])).toEqual(['observationRequired'])
+    expect(inspectionGridIssues([item('non_conforming', 'Fuite')])).toEqual([])
+  })
+
+  it('fails on one non-conforming item, not on an observation', () => {
+    expect(gridResult([item('conforming'), item('observation', 'Usure')])).toBe('conforming')
+    expect(gridResult([item('conforming'), item('non_conforming', 'Fuite')])).toBe('non_conforming')
+    expect(itemsToRecheck([item('observation', 'x'), item('non_conforming', 'y')])).toHaveLength(1)
   })
 })

@@ -37,14 +37,14 @@ const kpis = computed(() => {
     {
       key: 'occupancy',
       icon: Gauge,
-      value: load.occupancyRate === null ? '—' : `${load.occupancyRate} %`,
+      value: load.occupancyRate === null ? '-' : `${load.occupancyRate} %`,
       label: t('maintenance.workshopLoad.kpi.occupancy'),
       sub: t('maintenance.workshopLoad.kpi.occupancySub', { days: load.workingDaysPerWeek })
     },
     {
       key: 'days',
       icon: CalendarClock,
-      value: load.daysToAbsorb ?? '—',
+      value: load.daysToAbsorb ?? '-',
       label: t('maintenance.workshopLoad.kpi.days'),
       sub: t('maintenance.workshopLoad.kpi.daysSub')
     },

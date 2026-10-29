@@ -63,3 +63,11 @@ export type EmployeeSearchColumn =
   | 'phone'
   | 'no,fullName'
   | 'no,fullName,nationalId,phone'
+
+/** What a synchronization with the HR system did. */
+export interface StaffSyncReport {
+  created: string[]
+  updated: string[]
+  unchanged: number
+  skipped: { externalId: string; reason: string }[]
+}

@@ -38,7 +38,11 @@ export interface FleetStateFacts {
 }
 
 export function fleetState(facts: FleetStateFacts): FleetState {
-  if (facts.vehicleStatus === 'immobilized' || facts.vehicleStatus === 'out_of_service') {
+  if (
+    facts.vehicleStatus === 'in_maintenance' ||
+    facts.vehicleStatus === 'immobilized' ||
+    facts.vehicleStatus === 'out_of_service'
+  ) {
     return 'IMMOBILIZED'
   }
   if (facts.tripStatus === 'in_progress') {

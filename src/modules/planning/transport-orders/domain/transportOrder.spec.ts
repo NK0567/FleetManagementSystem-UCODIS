@@ -37,6 +37,24 @@ describe('transport order status', () => {
     ).toBe('cancelled')
   })
 
+  it('starts a fleet order with the arrival on its first point, and only then (TRS03-US09)', () => {
+    const ready = {
+      cancelledAt: null,
+      means: 'fleet' as const,
+      linesConfirmed: true,
+      loadingReady: true
+    }
+    expect(transportOrderStatus({ ...ready, tripStatus: 'in_progress', firstArrival: false })).toBe(
+      'ready'
+    )
+    expect(transportOrderStatus({ ...ready, tripStatus: 'in_progress', firstArrival: true })).toBe(
+      'in_progress'
+    )
+    expect(transportOrderStatus({ ...ready, tripStatus: 'planned', firstArrival: true })).toBe(
+      'ready'
+    )
+  })
+
   it('allows each action only from the states where it makes sense', () => {
     expect(canPlan('draft')).toBe(true)
     expect(canPlan('planned')).toBe(false)

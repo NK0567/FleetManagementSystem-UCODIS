@@ -18,6 +18,14 @@ async function get<T>(path: string) {
   return (await call(server, 'get', path, { as: 'FLT001' })).data.data as T
 }
 
+type Verdict = { verdict: string | null; comment?: string }
+
+async function inspectionGrid(vehicleNo: string) {
+  return (
+    await call(server, 'get', '/fleet/inspections/grid', { as: 'FLT001', query: { vehicleNo } })
+  ).data.data as { itemNo: string; part: string }[]
+}
+
 async function vehiclePoints() {
   const page = (
     await call(server, 'get', '/fleet/check-points', {
@@ -117,26 +125,75 @@ describe('inspections', () => {
     ).toBe(409)
   })
 
-  it('need the findings of a non-conforming inspection', async () => {
-    const record = (body: Record<string, unknown>) =>
+  it('follow the grid of the vehicle, item by item, and need a signed report', async () => {
+    const grid = await inspectionGrid('VEH-013')
+    expect(grid.some((item) => item.part === 'tank')).toBe(false)
+    expect((await inspectionGrid('VEH-022')).some((item) => item.part === 'tank')).toBe(true)
+    const record = (verdicts: Record<string, Verdict>, body: Record<string, unknown> = {}) =>
       post('/fleet/inspections', {
         vehicleNo: 'VEH-013',
         inspectedOn: '2026-09-02',
-        center: 'Centre de contrôle technique d’Alarobia',
-        result: 'non_conforming',
+        center: 'Atelier de Tanjombato',
+        items: grid.map((item) => ({
+          itemNo: item.itemNo,
+          ...(verdicts[item.itemNo] ?? { verdict: 'conforming' })
+        })),
+        inspector: 'Faly Rasolofo',
+        signed: true,
         ...body
       })
-    expect((await record({})).status).toBe(422)
-    expect((await record({ findings: 'Pneu lisse' })).status).toBe(201)
+    expect((await record({ 'VH-04': { verdict: null } })).status).toBe(422)
+    expect((await record({ 'VH-04': { verdict: 'non_conforming' } })).status).toBe(422)
+    expect((await record({}, { signed: false })).status).toBe(422)
+    expect((await record({}, { inspector: '' })).status).toBe(422)
+    expect((await record({}, {})).status).toBe(201)
+    expect((await get<VehicleApi>('/fleet/vehicles/VEH-013')).status).not.toBe('immobilized')
+    const failed = (
+      await record(
+        { 'VH-04': { verdict: 'non_conforming', comment: 'Pneu lisse' } },
+        {
+          inspectedOn: '2026-09-03'
+        }
+      )
+    ).data.data as InspectionApi
+    expect(failed).toMatchObject({
+      result: 'non_conforming',
+      state: 'recheck_pending',
+      recheckItemNos: ['VH-04'],
+      inspector: 'Faly Rasolofo',
+      signedBy: 'FLT001'
+    })
+    expect(failed.recheckDueOn).not.toBeNull()
     expect((await get<VehicleApi>('/fleet/vehicles/VEH-013')).status).toBe('immobilized')
   })
 
+  it('pass with an observation, which calls for no re-inspection', async () => {
+    const grid = await inspectionGrid('VEH-013')
+    const response = await post('/fleet/inspections', {
+      vehicleNo: 'VEH-013',
+      inspectedOn: '2026-09-02',
+      center: 'Atelier de Tanjombato',
+      items: grid.map((item) =>
+        item.itemNo === 'VH-04'
+          ? { itemNo: item.itemNo, verdict: 'observation', comment: 'Usure à surveiller' }
+          : { itemNo: item.itemNo, verdict: 'conforming' }
+      ),
+      inspector: 'Faly Rasolofo',
+      signed: true
+    })
+    expect(response.data.data).toMatchObject({ result: 'conforming', recheckDueOn: null })
+    expect((await post('/fleet/inspections', { vehicleNo: 'VEH-013' }, 'DIR001')).status).toBe(403)
+  })
+
   it('count a later conforming inspection as the re-inspection', async () => {
+    const grid = await inspectionGrid('VEH-022')
     await post('/fleet/inspections', {
       vehicleNo: 'VEH-022',
       inspectedOn: '2026-09-03',
       center: 'Centre de contrôle technique de Tanjombato',
-      result: 'conforming'
+      items: grid.map((item) => ({ itemNo: item.itemNo, verdict: 'conforming' })),
+      inspector: 'Faly Rasolofo',
+      signed: true
     })
     expect((await get<VehicleApi>('/fleet/vehicles/VEH-022')).status).not.toBe('immobilized')
   })

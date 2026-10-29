@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useEntityForm } from '@/composables/useEntityForm'
+import { useEntityForm, type FormValidationError } from '@/composables/useEntityForm'
 import { useFormValidationUi } from '@/composables/useFormValidationUi'
 import { useReferenceStore } from '@/stores/referenceStore'
 import type { DeliveryPointApi } from '../types/deliveryPoint.types'
@@ -35,11 +35,31 @@ const { draft, isRequired, expose } = useEntityForm({
     longitude: null as number | null,
     pumpRequired: false,
     acceptedVehicleTypeNos: [] as string[],
-    active: true
+    active: true,
+    kind: 'delivery' as 'delivery' | 'depot',
+    siteNo: null as string | null,
+    ownerName: ''
   }),
-  required: ['name', 'customerNo', 'latitude', 'longitude'],
-  labelOf: (field) => t(`planning.deliveryPoints.form.${field}`)
+  required: ['name'],
+  labelOf: (field) => t(`planning.deliveryPoints.form.${field}`),
+  /* A delivery site belongs to a recipient; a depot to the company or a third party. A point tied
+   * to a site of the FMS register takes its place from there (TRS07-US02). */
+  validate: (values) => {
+    const errors: FormValidationError[] = []
+    const label = (field: string) => t(`planning.deliveryPoints.form.${field}`)
+    if (values.kind === 'delivery' && !values.customerNo) {
+      errors.push({ fieldKey: 'customerNo', label: label('customerNo') })
+    }
+    if (!values.siteNo && values.latitude == null) {
+      errors.push({ fieldKey: 'latitude', label: label('latitude') })
+    }
+    if (!values.siteNo && values.longitude == null) {
+      errors.push({ fieldKey: 'longitude', label: label('longitude') })
+    }
+    return errors
+  }
 })
+const fromSite = computed(() => !!draft.siteNo)
 
 const expandedSections = ref({ general: true, location: true, constraints: true, audit: false })
 const { hasValidationError } = useFormValidationUi({
@@ -89,10 +109,19 @@ defineExpose(expose)
             :invalid="hasValidationError('name')"
           />
         </BaseFormField>
+        <BaseFormField :label="t('planning.deliveryPoints.form.kind')" required>
+          <OptionsSelect
+            :model-value="draft.kind"
+            options-key="deliveryPointKind"
+            :disabled="disabled || !isNew"
+            @update:model-value="draft.kind = String($event) as 'delivery' | 'depot'"
+          />
+        </BaseFormField>
         <BaseFormField
+          v-if="draft.kind === 'delivery'"
           field="customerNo"
           :label="t('planning.deliveryPoints.form.customerNo')"
-          :required="isRequired('customerNo')"
+          required
         >
           <ReferenceLookup
             v-model="draft.customerNo"
@@ -105,6 +134,27 @@ defineExpose(expose)
         </BaseFormField>
       </div>
       <div class="space-y-3 min-w-0">
+        <BaseFormField :label="t('planning.deliveryPoints.form.siteNo')">
+          <ReferenceLookup
+            v-model="draft.siteNo"
+            reference-key="sites"
+            :modal-title="t('planning.deliveryPoints.form.siteNo')"
+            detail-path="/fleet/sites"
+            :disabled="disabled"
+          />
+          <p class="text-xs text-muted-foreground mt-1">
+            {{ t('planning.deliveryPoints.form.siteNoHint') }}
+          </p>
+        </BaseFormField>
+        <BaseFormField
+          v-if="draft.kind === 'depot'"
+          :label="t('planning.deliveryPoints.form.ownerName')"
+        >
+          <FormInput v-model="draft.ownerName" :maxlength="120" :disabled="disabled || fromSite" />
+          <p class="text-xs text-muted-foreground mt-1">
+            {{ t('planning.deliveryPoints.form.ownerNameHint') }}
+          </p>
+        </BaseFormField>
         <BaseFormField :label="t('planning.deliveryPoints.form.active')">
           <ToggleSwitch v-model="draft.active" :disabled="disabled" />
         </BaseFormField>
@@ -118,38 +168,38 @@ defineExpose(expose)
     >
       <div class="space-y-3 min-w-0">
         <BaseFormField :label="t('planning.deliveryPoints.form.address')">
-          <FormInput v-model="draft.address" :maxlength="160" :disabled="disabled" />
+          <FormInput v-model="draft.address" :maxlength="160" :disabled="disabled || fromSite" />
         </BaseFormField>
         <BaseFormField :label="t('planning.deliveryPoints.form.city')">
-          <FormInput v-model="draft.city" :maxlength="80" :disabled="disabled" />
+          <FormInput v-model="draft.city" :maxlength="80" :disabled="disabled || fromSite" />
         </BaseFormField>
       </div>
       <div class="space-y-3 min-w-0">
         <BaseFormField
           field="latitude"
           :label="t('planning.deliveryPoints.form.latitude')"
-          :required="isRequired('latitude')"
+          :required="!fromSite"
         >
           <FormInput
             v-model="draft.latitude"
             type="number"
             :min="-90"
             :max="90"
-            :disabled="disabled"
+            :disabled="disabled || fromSite"
             :invalid="hasValidationError('latitude')"
           />
         </BaseFormField>
         <BaseFormField
           field="longitude"
           :label="t('planning.deliveryPoints.form.longitude')"
-          :required="isRequired('longitude')"
+          :required="!fromSite"
         >
           <FormInput
             v-model="draft.longitude"
             type="number"
             :min="-180"
             :max="180"
-            :disabled="disabled"
+            :disabled="disabled || fromSite"
             :invalid="hasValidationError('longitude')"
           />
         </BaseFormField>
@@ -205,7 +255,7 @@ defineExpose(expose)
           ? t('planning.deliveryPoints.map.readOnlyHint')
           : t('planning.deliveryPoints.map.editHint')
       "
-      :disabled="disabled"
+      :disabled="disabled || fromSite"
     />
 
     <AuditFormSection v-if="!isNew" v-model:open="expandedSections.audit" :record="initialData" />

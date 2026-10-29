@@ -63,7 +63,7 @@ const rows = computed(() =>
     <dl class="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-2">
       <div v-for="row in rows" :key="row.label" class="min-w-0">
         <dt class="text-xs text-muted-foreground">{{ row.label }}</dt>
-        <dd class="font-medium text-card-foreground truncate">{{ row.value || '—' }}</dd>
+        <dd class="font-medium text-card-foreground truncate">{{ row.value || '·' }}</dd>
       </div>
     </dl>
   </div>

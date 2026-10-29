@@ -6,7 +6,9 @@ import {
   deductionIssues,
   excessCost,
   gapPercent,
-  litersPer100
+  litersPer100,
+  lowEmissionShare,
+  withholdableAmount
 } from './consumption'
 
 const refill = (no: string, day: number, odometerKm: number, liters: number, fullTank = true) => ({
@@ -52,9 +54,10 @@ describe('consumption figures', () => {
   })
 
   it('take the route reference first, then the vehicle type, then the default', () => {
-    expect(consumptionReference(32, 37, 40)).toEqual({ value: 32, source: 'route' })
-    expect(consumptionReference(null, 37, 40)).toEqual({ value: 37, source: 'vehicleType' })
-    expect(consumptionReference(null, null, 40)).toEqual({ value: 40, source: 'default' })
+    expect(consumptionReference(34, 32, 37, 40)).toEqual({ value: 34, source: 'vehicle' })
+    expect(consumptionReference(null, 32, 37, 40)).toEqual({ value: 32, source: 'route' })
+    expect(consumptionReference(null, null, 37, 40)).toEqual({ value: 37, source: 'vehicleType' })
+    expect(consumptionReference(null, null, null, 40)).toEqual({ value: 40, source: 'default' })
   })
 
   it('price the litres beyond the reference', () => {
@@ -72,5 +75,24 @@ describe('deductionIssues', () => {
       'aboveExcessCost',
       'aboveCap'
     ])
+  })
+})
+
+describe('withholdableAmount', () => {
+  it('keeps the deductions of the month within the share of the salary', () => {
+    expect(withholdableAmount(1_000_000, 10, 0)).toBe(100_000)
+    expect(withholdableAmount(1_000_000, 10, 60_000)).toBe(40_000)
+    expect(withholdableAmount(1_000_000, 10, 150_000)).toBe(0)
+  })
+})
+
+describe('lowEmissionShare', () => {
+  it('counts motorized vehicles only, and the electric and hybrid ones among them', () => {
+    expect(lowEmissionShare(['diesel', 'electric', null, 'hybrid', 'diesel'])).toEqual({
+      motorized: 4,
+      lowEmission: 2,
+      sharePct: 50
+    })
+    expect(lowEmissionShare([null])).toEqual({ motorized: 0, lowEmission: 0, sharePct: null })
   })
 })

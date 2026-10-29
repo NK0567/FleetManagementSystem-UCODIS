@@ -16,7 +16,7 @@ export default {
   'fleet.fleetStatus.col.driverName': 'Driver',
   'fleet.fleetStatus.col.state': 'State',
   'fleet.fleetStatus.col.mission': 'Mission',
-  'fleet.fleetStatus.col.location': 'Location',
+  'fleet.fleetStatus.col.location': 'Place or next stop',
   'fleet.fleetStatus.col.immobilizationReason': 'Reason for immobilization',
   'fleet.fleetStatus.col.expectedBackOn': 'Expected back in service',
   'fleet.fleetStatus.col.observation': 'Note of the day',
@@ -29,5 +29,22 @@ export default {
   'fleet.fleetStatus.readOnlyDay':
     'Archived day: the status is shown as it was and no longer changes.',
   'fleet.fleetStatus.saveNote': 'Save the note',
-  'fleet.fleetStatus.noteError': 'The note could not be saved.'
+  'fleet.fleetStatus.noteError': 'The note could not be saved.',
+  'fleet.fleetStatus.col.position': 'Position',
+  'fleet.fleetStatus.send.button': 'Send by e-mail',
+  'fleet.fleetStatus.send.title': 'Send the fleet status of {day}',
+  'fleet.fleetStatus.send.hint':
+    "The full status of the day shown goes to the recipients, whatever the filters of the list. Today's status is archived as it is sent.",
+  'fleet.fleetStatus.send.recipients': 'Recipients',
+  'fleet.fleetStatus.send.placeholder': 'management@ucodis.mg, customer@example.com',
+  'fleet.fleetStatus.send.invalid': 'The address "{email}" is not valid.',
+  'fleet.fleetStatus.send.simulated':
+    'Mock-up: no e-mail really leaves, the sending is recorded and listed below.',
+  'fleet.fleetStatus.send.confirm': 'Send',
+  'fleet.fleetStatus.send.error': 'The fleet status could not be sent.',
+  'fleet.fleetStatus.send.done': 'Fleet status sent to {recipients}.',
+  'fleet.fleetStatus.send.last': 'Last sent on {date} (status of {day}) to {recipients}.',
+  'fleet.fleetStatus.send.history': 'Latest sendings',
+  'fleet.fleetStatus.send.line':
+    '{date} · status of {day} · {count} line(s) · {recipients} · by {user}'
 }

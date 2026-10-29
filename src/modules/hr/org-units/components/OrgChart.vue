@@ -48,7 +48,7 @@ const unitOf = (item: OrgChartNode) => (item as ChartNode).unit
               {{ unitOf(item).name }}
             </p>
             <p class="text-xs text-muted-foreground truncate">
-              {{ unitOf(item).managerName || '—' }}
+              {{ unitOf(item).managerName || '-' }}
             </p>
             <div class="flex items-center justify-between mt-2 text-xs text-muted-foreground">
               <span class="inline-flex items-center gap-1">

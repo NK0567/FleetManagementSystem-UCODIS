@@ -40,7 +40,8 @@ const { draft, isRequired, expose } = useEntityForm({
     ] as RouteStop[]
   }),
   createOnly: ['no'],
-  required: ['no', 'name', 'estimatedDistanceKm'],
+  // The distance follows the stops: recomputed by the server on each save (TRS07-US03).
+  required: ['no', 'name'],
   labelOf: (field) => t(`fleet.routeTemplates.form.${field}`),
   validate: (values) => {
     const errors: FormValidationError[] = []
@@ -109,17 +110,21 @@ defineExpose(expose)
         <BaseFormField
           field="estimatedDistanceKm"
           :label="t('fleet.routeTemplates.form.estimatedDistanceKm')"
-          :required="isRequired('estimatedDistanceKm')"
         >
           <FormInput
-            v-model="draft.estimatedDistanceKm"
-            type="number"
-            :min="1"
-            :disabled="disabled"
-            :invalid="hasValidationError('estimatedDistanceKm')"
+            :model-value="
+              isNew ? '' : `${formatNumber(initialData.estimatedDistanceKm ?? 0, 0)} km`
+            "
+            disabled
           />
           <p class="text-xs text-muted-foreground mt-1">
-            {{ t('fleet.routeTemplates.form.estimatedDistanceKmHint') }}
+            {{ t('fleet.routeTemplates.form.distanceComputedHint') }}
+          </p>
+        </BaseFormField>
+        <BaseFormField v-if="!isNew" :label="t('fleet.routeTemplates.form.referenceDuration')">
+          <FormInput :model-value="formatMinutes(initialData.referenceDurationMin ?? 0)" disabled />
+          <p class="text-xs text-muted-foreground mt-1">
+            {{ t('fleet.routeTemplates.form.referenceDurationHint') }}
           </p>
         </BaseFormField>
         <BaseFormField :label="t('fleet.routeTemplates.form.fuelReferenceL100')">

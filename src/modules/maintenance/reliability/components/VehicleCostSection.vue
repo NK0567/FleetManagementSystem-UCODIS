@@ -3,7 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { apiErrorMessage } from '@/core/api/apiError'
 import { addDays, todayIso } from '@/utils/date'
-import { formatNumber } from '@/utils/format'
+import { EMPTY_CELL, formatNumber } from '@/utils/format'
 import { reliabilityService } from '../services/reliabilityService'
 import type { VehicleCostApi } from '../types/reliability.types'
 
@@ -77,7 +77,7 @@ const lines = computed(() =>
             {{
               t('maintenance.vehicleCost.perKm', {
                 km: formatNumber(cost.km),
-                cost: cost.costPerKm === null ? '—' : formatNumber(cost.costPerKm, 2)
+                cost: cost.costPerKm === null ? EMPTY_CELL : formatNumber(cost.costPerKm, 2)
               })
             }}
           </p>

@@ -36,3 +36,23 @@ export const fleetStatusArchivesCollection: CollectionDefinition<FleetStatusArch
   seed: () => [],
   dateFields: ['date']
 }
+
+/**
+ * A sending of the fleet status by e-mail. The demonstration has no mail server: the sending is
+ * recorded here, with its recipients, and shown on the screen; nothing leaves the application.
+ */
+export interface FleetStatusDispatchRow extends MockRow {
+  /** The day of the fleet status sent. */
+  date: string
+  recipients: string[]
+  subject: string
+  lineCount: number
+  sentAt: string
+  sentBy: string
+}
+
+export const fleetStatusDispatchesCollection: CollectionDefinition<FleetStatusDispatchRow> = {
+  name: 'fleet-status-dispatches',
+  seed: () => [],
+  dateFields: ['date', 'sentAt']
+}

@@ -160,6 +160,30 @@ defineExpose(expose)
           {{ t('fleet.departureAuthorizations.form.refusalReason') }} :
           {{ initialData.refusalReason }}
         </p>
+        <div
+          v-if="initialData.activation"
+          class="rounded border border-border p-3 text-sm space-y-1"
+          data-testid="departure-activation"
+        >
+          <p class="font-medium text-card-foreground">
+            {{ t('fleet.departureAuthorizations.activation.title') }}
+          </p>
+          <p class="text-card-foreground">
+            {{ t(`fleet.departureAuthorizations.activation.gps.${initialData.activation.gps}`) }}
+          </p>
+          <p class="text-card-foreground">
+            {{
+              t(`fleet.departureAuthorizations.activation.camera.${initialData.activation.camera}`)
+            }}
+          </p>
+          <p class="text-xs text-muted-foreground">
+            {{
+              t('fleet.departureAuthorizations.activation.simulated', {
+                date: formatDateTime(initialData.activation.at)
+              })
+            }}
+          </p>
+        </div>
       </div>
     </FormSection>
 

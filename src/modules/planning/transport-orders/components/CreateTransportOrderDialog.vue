@@ -7,7 +7,7 @@ import {
   type DeliveryRequestApi
 } from '@/modules/planning/delivery-requests'
 import { transportOrderService } from '../services/transportOrderService'
-import { toLineInputs, type PickedLines } from '../domain/requestPick'
+import { toLineInputs, type PickedLines, type PickedQuantities } from '../domain/requestPick'
 
 const props = defineProps<{ open: boolean }>()
 const emit = defineEmits<{ close: []; created: [no: string] }>()
@@ -16,6 +16,7 @@ const { t } = useI18n()
 const requests = ref<DeliveryRequestApi[]>([])
 const picked = ref<string[]>([])
 const pickedLines = ref<PickedLines>({})
+const pickedQuantities = ref<PickedQuantities>({})
 /** A warning the planner may override (excess of capacity, partial delivery); the next confirm
  * sends the order anyway. */
 const warning = ref<string | null>(null)
@@ -33,6 +34,7 @@ watch(
     warning.value = null
     picked.value = []
     pickedLines.value = {}
+    pickedQuantities.value = {}
     loadingRequests.value = true
     try {
       const page = await deliveryRequestService.getAll({
@@ -59,7 +61,7 @@ async function confirm() {
     const created = await transportOrderService.create({
       routeTemplateNo: routeTemplateNo.value,
       plannedDeparture: plannedDeparture.value,
-      lines: toLineInputs(requests.value, picked.value, pickedLines.value),
+      lines: toLineInputs(requests.value, picked.value, pickedLines.value, pickedQuantities.value),
       ...(force ? { force: true } : {})
     })
     warning.value = null
@@ -125,6 +127,7 @@ watch([picked, pickedLines], () => (warning.value = null), { deep: true })
       <RequestPickerTable
         v-model="picked"
         v-model:lines="pickedLines"
+        v-model:quantities="pickedQuantities"
         :requests="requests"
         :loading="loadingRequests"
         :date="plannedDeparture || null"

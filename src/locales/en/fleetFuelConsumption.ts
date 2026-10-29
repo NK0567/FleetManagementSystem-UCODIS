@@ -34,5 +34,15 @@ export default {
   'fleet.fuelConsumption.form.comment': 'Comment',
   'fleet.fuelConsumption.form.amount': 'Deduction amount',
   'fleet.fuelConsumption.form.amountHint':
-    'At most the extra cost of the period ({amount}) and the set cap.'
+    'At most the extra cost of the period ({amount}) and the set cap.',
+  'fleet.fuelConsumption.col.routeName': 'Corridor',
+  'fleet.fuelConsumption.col.referenceSource': 'Reference from',
+  'fleet.fuelConsumption.col.co2Kg': 'CO₂ (kg)',
+  'fleet.fuelConsumption.lowEmission':
+    'Low-emission vehicles (electric or hybrid): {low} of {total} motorized vehicles in the park, that is {share}%.',
+  'fleet.fuelConsumption.withholdable':
+    'Declared net monthly salary: {salary}; deduction allowed this month under labour law: {max} at most.',
+  'fleet.fuelConsumption.form.monthlySalary': "Driver's net monthly salary",
+  'fleet.fuelConsumption.form.monthlySalaryHint':
+    'With the other deductions of the month, the deduction cannot exceed the share of the salary set in the fleet settings under the applicable labour law.'
 }

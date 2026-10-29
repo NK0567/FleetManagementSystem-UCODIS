@@ -22,12 +22,24 @@ export default {
   'maintenance.serviceDue.everyKm': 'every {km} km',
   'maintenance.serviceDue.everyDays': 'every day | every {count} days',
   'maintenance.serviceDue.provisional':
-    'Provisional plan: this service warns but does not immobilize the vehicle.',
+    'Provisional plan: this due date is real and must be handled, but its interval is still to be confirmed; it does not stop the vehicle.',
   'maintenance.serviceDue.lastPassage': 'Last done on {date}, at {km} km.',
   'maintenance.serviceDue.noPassage': 'No known passage: enter the last one.',
   'maintenance.serviceDue.coveredBy': 'Covered by order',
   'maintenance.serviceDue.action.openWorkOrder': 'Open the preventive order',
   'maintenance.serviceDue.action.recordPassage': 'Record a passage',
   'maintenance.serviceDue.form.date': 'Passage date',
-  'maintenance.serviceDue.form.km': 'Odometer'
+  'maintenance.serviceDue.form.km': 'Odometer',
+  'maintenance.serviceDue.col.nextHours': 'Due at (h)',
+  'maintenance.serviceDue.col.hoursRemaining': 'Hours left',
+  'maintenance.serviceDue.col.currentHours': 'Hour meter',
+  'maintenance.serviceDue.everyHours': 'every {hours} engine hours',
+  'maintenance.serviceDue.blockingHint':
+    'Overdue: the vehicle is unavailable until the service is done.',
+  'maintenance.serviceDue.dueSoonHint': 'Due soon: an alert went to the maintenance manager.',
+  'maintenance.serviceDue.hourMeter': 'Hour meter: {hours} h (at the last passage: {last} h).',
+  'maintenance.serviceDue.noHourMeter': 'No hour meter reading for this vehicle.',
+  'maintenance.serviceDue.action.recordHours': 'Read the hour meter',
+  'maintenance.serviceDue.form.hours': 'Engine hours at the passage',
+  'maintenance.serviceDue.form.engineHours': 'Engine hours shown'
 }

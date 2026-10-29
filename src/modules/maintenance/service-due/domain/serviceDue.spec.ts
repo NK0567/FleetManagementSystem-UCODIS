@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { needsService, serviceDue } from './serviceDue'
 
-const thresholds = { noticeKm: 1_000, noticeDays: 15, toleranceKm: 500, toleranceDays: 7 }
+const thresholds = { noticeKm: 1_000, noticeDays: 15, noticeHours: 50 }
 const today = '2026-09-04'
 const byKm = { intervalKm: 10_000, intervalDays: null }
 const both = { intervalKm: 10_000, intervalDays: 180 }
@@ -36,13 +36,24 @@ describe('serviceDue', () => {
     ).toBe('due_soon')
   })
 
-  it('blocks past the tolerance, but never on a provisional plan', () => {
+  it('counts engine hours from the hour meter, as a third threshold', () => {
+    const byHours = { intervalKm: 10_000, intervalHours: 500, intervalDays: null }
+    const last = { km: 40_000, hours: 2_000, date: null }
+    const at = (hours: number | null) =>
+      serviceDue(byHours, last, { km: 41_000, today, hours }, thresholds, false)
+    expect(at(2_300)).toMatchObject({ nextHours: 2_500, hoursRemaining: 200, status: 'upcoming' })
+    expect(at(2_460).status).toBe('due_soon')
+    expect(at(2_510).status).toBe('blocking')
+    expect(at(null)).toMatchObject({ hoursRemaining: null, status: 'upcoming' })
+  })
+
+  it('blocks as soon as it is past due, but never on a provisional plan', () => {
     const at = (km: number, provisional = false) =>
       serviceDue(byKm, { km: 40_000, date: null }, { km, today }, thresholds, provisional).status
     expect(at(49_100)).toBe('due_soon')
-    expect(at(50_400)).toBe('overdue')
-    expect(at(50_600)).toBe('blocking')
-    expect(at(50_600, true)).toBe('overdue')
+    expect(at(50_000)).toBe('due_soon')
+    expect(at(50_001)).toBe('blocking')
+    expect(at(50_400, true)).toBe('overdue')
   })
 
   it('asks for a service from the notice on', () => {

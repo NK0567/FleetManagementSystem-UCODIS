@@ -1081,13 +1081,6 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
-    '/planning/fuel-tours/': RouteRecordInfo<
-      '/planning/fuel-tours/',
-      '/planning/fuel-tours',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
     '/planning/loading/': RouteRecordInfo<
       '/planning/loading/',
       '/planning/loading',
@@ -2426,14 +2419,6 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | 'id'
-    }
-    'src/pages/planning/fuel-tours/index.vue': {
-      routes:
-        | '/planning/fuel-tours/'
-      views:
-        | never
-      pathParamNames:
-        | never
     }
     'src/pages/planning/loading/index.vue': {
       routes:

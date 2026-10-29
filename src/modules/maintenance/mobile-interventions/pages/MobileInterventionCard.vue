@@ -229,7 +229,7 @@ const buttonClass =
                   {{ t('maintenance.mobileInterventions.progress.arrivedAt') }}
                 </dt>
                 <dd>
-                  {{ item.arrivedAt ? formatDateTime(item.arrivedAt) : '—' }}
+                  {{ item.arrivedAt ? formatDateTime(item.arrivedAt) : '-' }}
                   <span v-if="item.delayMin !== null" class="text-muted-foreground">
                     ·
                     {{
@@ -244,7 +244,7 @@ const buttonClass =
                   <dd>
                     {{
                       item.checkCount === null
-                        ? '—'
+                        ? '-'
                         : t('maintenance.mobileInterventions.progress.checkCounts', {
                             checks: item.checkCount,
                             positives: item.positiveCount ?? 0
@@ -259,7 +259,7 @@ const buttonClass =
                   {{ t('maintenance.mobileInterventions.progress.closedAt') }}
                 </dt>
                 <dd>
-                  {{ item.closedAt ? `${formatDateTime(item.closedAt)} · ${item.closedBy}` : '—' }}
+                  {{ item.closedAt ? `${formatDateTime(item.closedAt)} · ${item.closedBy}` : '-' }}
                 </dd>
                 <template v-if="item.observation">
                   <dt class="text-muted-foreground">

@@ -21,9 +21,7 @@ export interface ServiceSettings {
   /** How early a service becomes due soon. */
   noticeKm: number
   noticeDays: number
-  /** How far past its due point a service may run before the vehicle is immobilized. */
-  toleranceKm: number
-  toleranceDays: number
+  noticeHours: number
 }
 
 export interface TyreSettings {
@@ -40,7 +38,18 @@ export interface MobileTeamSettings {
   checksPerMonth: number
 }
 
+/** Targets the maintenance indicators are compared with (FLT07-US03). */
+export interface MaintenanceTargetSettings {
+  preventiveShareTargetPct: number
+  preventiveCompletionTargetPct: number
+  /** Longest acceptable mean time to repair. */
+  mttrTargetHours: number
+  /** Shortest acceptable mean distance between failures. */
+  mtbfTargetKm: number
+}
+
 export interface MaintenanceSettings {
+  targets: MaintenanceTargetSettings
   workshop: WorkshopSettings
   labour: LabourSettings
   downtimeCost: DowntimeCostSettings
@@ -57,7 +66,8 @@ export const MAINTENANCE_SETTINGS_SECTIONS = [
   'downtimeCost',
   'service',
   'tyres',
-  'mobileTeam'
+  'mobileTeam',
+  'targets'
 ] as const
 
 export type MaintenanceSettingUnit =
@@ -75,6 +85,12 @@ export type MaintenanceSettingUnit =
 type Field = SettingField<MaintenanceSettingUnit>
 
 export const MAINTENANCE_SETTING_FIELDS: Record<MaintenanceSettingsSection, readonly Field[]> = {
+  targets: [
+    { key: 'preventiveShareTargetPct', kind: 'number', unit: 'percent', min: 0, max: 100 },
+    { key: 'preventiveCompletionTargetPct', kind: 'number', unit: 'percent', min: 0, max: 100 },
+    { key: 'mttrTargetHours', kind: 'number', unit: 'h', min: 1, max: 720 },
+    { key: 'mtbfTargetKm', kind: 'number', unit: 'km', min: 100, max: 1_000_000 }
+  ],
   workshop: [
     { key: 'stations', kind: 'number', unit: 'count', min: 1, max: 50 },
     { key: 'hoursPerDay', kind: 'number', unit: 'h', min: 1, max: 24 },
@@ -89,8 +105,7 @@ export const MAINTENANCE_SETTING_FIELDS: Record<MaintenanceSettingsSection, read
   service: [
     { key: 'noticeKm', kind: 'number', unit: 'km', min: 100, max: 10_000 },
     { key: 'noticeDays', kind: 'number', unit: 'days', min: 1, max: 90 },
-    { key: 'toleranceKm', kind: 'number', unit: 'km', min: 0, max: 5_000 },
-    { key: 'toleranceDays', kind: 'number', unit: 'days', min: 0, max: 60 }
+    { key: 'noticeHours', kind: 'number', unit: 'h', min: 1, max: 1_000 }
   ],
   tyres: [
     { key: 'minPressureBar', kind: 'number', unit: 'bar', min: 1, max: 15 },
@@ -107,10 +122,16 @@ export const MAINTENANCE_SETTING_FIELDS: Record<MaintenanceSettingsSection, read
 }
 
 export const DEFAULT_MAINTENANCE_SETTINGS: MaintenanceSettings = {
+  targets: {
+    preventiveShareTargetPct: 60,
+    preventiveCompletionTargetPct: 90,
+    mttrTargetHours: 24,
+    mtbfTargetKm: 20_000
+  },
   workshop: { stations: 2, hoursPerDay: 8, workingDaysPerWeek: 6 },
   labour: { hourlyRate: 10_000 },
   downtimeCost: { dayCost: 450_000, tractorDayCost: null, trailerDayCost: null },
-  service: { noticeKm: 1_000, noticeDays: 15, toleranceKm: 500, toleranceDays: 7 },
+  service: { noticeKm: 1_000, noticeDays: 15, noticeHours: 50 },
   tyres: { minPressureBar: 7, minTreadMm: 2, rotationKm: 30_000, rotationMonths: 6 },
   mobileTeam: {
     interventionsPerMonth: 10,

@@ -4,7 +4,7 @@ import {
   type SettingField as GenericSettingField,
   type SettingFieldIssue
 } from '@/core/utils/settingFields'
-import type { DriverScoreSettings } from '@/modules/fleet/drivers'
+import type { DriverScoreSettings } from '@/modules/fleet/drivers/domain/driverScore'
 
 export { timeToMinutes }
 
@@ -53,6 +53,11 @@ export interface FuelSettings {
   co2GramsPerL: number
   /** Highest amount charged to a driver for one consumption gap; no cap when empty. */
   deductionCapAmount: number | null
+  /**
+   * Share of the monthly salary that all the deductions of a month may take, as the applicable
+   * labour law sets it (FLT02-US05): to be set by the company.
+   */
+  deductionMaxSalaryPct: number
   /** Tolerances to match a fuel card transaction with a refill. */
   matchingToleranceMin: number
   matchingTolerancePct: number
@@ -63,6 +68,20 @@ export interface TelematicsSettings {
   signalLossMin: number
 }
 
+export interface ReportingSettings {
+  /** Share of the park expected to be ready to work, compared on the park dashboard. */
+  availabilityTargetPct: number
+}
+
+/**
+ * Outside systems of the company, simulated in the mock-up: when one is said to exist, its data is
+ * taken from it (people from the HR system, providers from the management system).
+ */
+export interface IntegrationSettings {
+  hrSystemConnected: boolean
+  managementSystemConnected: boolean
+}
+
 export interface FleetSettings {
   drivingTime: DrivingTimeSettings
   geofencing: GeofencingSettings
@@ -71,6 +90,8 @@ export interface FleetSettings {
   fuel: FuelSettings
   telematics: TelematicsSettings
   driverScore: DriverScoreSettings
+  reporting: ReportingSettings
+  integrations: IntegrationSettings
 }
 
 export type FleetSettingsSection = keyof FleetSettings
@@ -82,7 +103,9 @@ export const FLEET_SETTINGS_SECTIONS = [
   'safety',
   'fuel',
   'telematics',
-  'driverScore'
+  'driverScore',
+  'reporting',
+  'integrations'
 ] as const
 
 export type SettingUnit =
@@ -126,18 +149,14 @@ export const FLEET_SETTING_FIELDS: Record<FleetSettingsSection, readonly Setting
     { key: 'defaultL100', kind: 'number', unit: 'l100', min: 5, max: 100 },
     { key: 'co2GramsPerL', kind: 'number', unit: 'gPerL', min: 1000, max: 4000 },
     { key: 'deductionCapAmount', kind: 'optionalNumber', unit: 'amount', min: 0, max: 100000000 },
+    { key: 'deductionMaxSalaryPct', kind: 'number', unit: 'percent', min: 1, max: 100 },
     { key: 'matchingToleranceMin', kind: 'number', unit: 'min', min: 5, max: 1440 },
     { key: 'matchingTolerancePct', kind: 'number', unit: 'percent', min: 0, max: 20 }
   ],
   telematics: [{ key: 'signalLossMin', kind: 'number', unit: 'min', min: 5, max: 240 }],
+  reporting: [{ key: 'availabilityTargetPct', kind: 'number', unit: 'percent', min: 1, max: 100 }],
   driverScore: [
     { key: 'periodDays', kind: 'number', unit: 'days', min: 30, max: 365 },
-    { key: 'weightSafety', kind: 'number', unit: 'points', min: 0, max: 100 },
-    { key: 'weightRoute', kind: 'number', unit: 'points', min: 0, max: 100 },
-    { key: 'weightRegulatory', kind: 'number', unit: 'points', min: 0, max: 100 },
-    { key: 'weightDiscipline', kind: 'number', unit: 'points', min: 0, max: 100 },
-    { key: 'weightEcoDriving', kind: 'number', unit: 'points', min: 0, max: 100 },
-    { key: 'weightDeliveryQuality', kind: 'number', unit: 'points', min: 0, max: 100 },
     { key: 'criticalPoints', kind: 'number', unit: 'points', min: 0, max: 100 },
     { key: 'majorPoints', kind: 'number', unit: 'points', min: 0, max: 100 },
     { key: 'minorPoints', kind: 'number', unit: 'points', min: 0, max: 100 },
@@ -148,6 +167,10 @@ export const FLEET_SETTING_FIELDS: Record<FleetSettingsSection, readonly Setting
     { key: 'deliveryDisputePoints', kind: 'number', unit: 'points', min: 0, max: 100 },
     { key: 'missingDocumentCap', kind: 'number', unit: 'points', min: 0, max: 100 },
     { key: 'trainingThreshold', kind: 'number', unit: 'points', min: 0, max: 100 }
+  ],
+  integrations: [
+    { key: 'hrSystemConnected', kind: 'boolean' },
+    { key: 'managementSystemConnected', kind: 'boolean' }
   ]
 }
 
@@ -175,18 +198,14 @@ export const DEFAULT_FLEET_SETTINGS: FleetSettings = {
     defaultL100: 37,
     co2GramsPerL: 2680,
     deductionCapAmount: 200000,
+    deductionMaxSalaryPct: 10,
     matchingToleranceMin: 120,
     matchingTolerancePct: 2
   },
   telematics: { signalLossMin: 15 },
+  reporting: { availabilityTargetPct: 90 },
   driverScore: {
     periodDays: 90,
-    weightSafety: 30,
-    weightRoute: 25,
-    weightRegulatory: 20,
-    weightDiscipline: 15,
-    weightEcoDriving: 10,
-    weightDeliveryQuality: 10,
     criticalPoints: 15,
     majorPoints: 8,
     minorPoints: 3,
@@ -197,7 +216,8 @@ export const DEFAULT_FLEET_SETTINGS: FleetSettings = {
     deliveryDisputePoints: 20,
     missingDocumentCap: 60,
     trainingThreshold: 70
-  }
+  },
+  integrations: { hrSystemConnected: false, managementSystemConnected: false }
 }
 
 export type SettingIssue =

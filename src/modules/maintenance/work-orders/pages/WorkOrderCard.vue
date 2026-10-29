@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
   Ban,
@@ -8,6 +8,7 @@ import {
   CircleX,
   Clock,
   Factory,
+  ListChecks,
   NotebookPen,
   Package,
   Play,
@@ -18,6 +19,7 @@ import {
 } from '@lucide/vue'
 import { apiErrorMessage } from '@/core/api/apiError'
 import { purchaseRequestService } from '@/modules/maintenance/purchase-requests'
+import { stockItemService, type StockItemApi } from '@/modules/maintenance/stock-items'
 import type { CardOpenMode } from '@/composables/cardOpenMode'
 import { useEntityCard } from '@/composables/useEntityCard'
 import { usePermissions } from '@/composables/usePermissions'
@@ -160,6 +162,7 @@ type Dialog =
   | 'plan'
   | 'takePart'
   | 'buyPart'
+  | 'nomenclature'
   | 'validate'
   | null
 const dialog = ref<Dialog>(null)
@@ -189,6 +192,32 @@ const part = ref({
   quantity: 1 as number | null,
   estimatedAmount: null as number | null
 })
+
+/** The stock of the part picked in the dialog, read from the store before taking or buying it. */
+const stock = ref<StockItemApi | null>(null)
+watch(
+  () => part.value.itemNo,
+  async (itemNo) => {
+    stock.value = itemNo ? await stockItemService.getById(itemNo).catch(() => null) : null
+  }
+)
+const stockShort = computed(
+  () =>
+    dialog.value === 'takePart' &&
+    !!stock.value &&
+    (part.value.quantity ?? 0) > stock.value.stockQuantity
+)
+
+/** A missing part is bought: the same part and quantity go into a purchase request. */
+function buyMissingPart() {
+  part.value = { ...part.value, label: stock.value?.name ?? '' }
+  dialog.value = 'buyPart'
+}
+
+const canConfirmNomenclature = computed(
+  () => canExecute.value && !!item.value?.nomenclature && !item.value.nomenclature.confirmedAt
+)
+const nomenclatureSubsystemNo = ref('')
 const external = ref({
   providerNo: '',
   handedOverAt: '',
@@ -209,6 +238,7 @@ function open(next: Dialog) {
   labour.value = { technicianNo: '', date: todayIso(), hours: null }
   completion.value = { workDone: '', odometerKm: order?.odometerKmAtOpening ?? null }
   part.value = { itemNo: '', label: '', quantity: 1, estimatedAmount: null }
+  nomenclatureSubsystemNo.value = order?.nomenclature?.proposedSubsystemNo ?? ''
   planning.value = {
     date: order?.planning?.date ?? todayIso(),
     estimatedHours: order?.planning?.estimatedHours ?? null,
@@ -260,7 +290,11 @@ const confirmDisabled = computed(() => {
         !planning.value.technicianNos.length
       )
     case 'takePart':
-      return !part.value.itemNo || !part.value.quantity || part.value.quantity < 1
+      return (
+        !part.value.itemNo || !part.value.quantity || part.value.quantity < 1 || stockShort.value
+      )
+    case 'nomenclature':
+      return !nomenclatureSubsystemNo.value
     case 'buyPart':
       return (
         (!part.value.itemNo && !part.value.label.trim()) ||
@@ -308,6 +342,8 @@ async function confirm() {
         return act('take-part', { itemNo: part.value.itemNo, quantity: part.value.quantity })
       case 'buyPart':
         return requestPurchase()
+      case 'nomenclature':
+        return act('confirm-nomenclature', { subsystemNo: nomenclatureSubsystemNo.value })
       case 'handOver':
         return act('hand-over', {
           providerNo: external.value.providerNo,
@@ -445,6 +481,16 @@ const buttonClass =
           </button>
         </template>
       </template>
+      <button
+        v-if="canConfirmNomenclature"
+        type="button"
+        :class="buttonClass"
+        :disabled="acting"
+        @click="open('nomenclature')"
+      >
+        <ListChecks class="w-5 h-5 text-primary" />
+        {{ t('maintenance.workOrders.action.nomenclature') }}
+      </button>
       <template v-if="canExecute && awaitingValidation">
         <button
           type="button"
@@ -597,6 +643,28 @@ const buttonClass =
           </p>
         </BaseFormField>
       </template>
+      <template v-else-if="dialog === 'nomenclature' && item?.nomenclature">
+        <p class="text-sm">
+          {{ t('maintenance.workOrders.dialog.nomenclatureSource') }}
+          <span class="font-medium">« {{ item.nomenclature.sourceText }} »</span>
+        </p>
+        <p class="text-sm text-muted-foreground">
+          {{
+            item.proposedSubsystemName
+              ? t('maintenance.workOrders.dialog.nomenclatureProposed', {
+                  name: item.proposedSubsystemName
+                })
+              : t('maintenance.workOrders.dialog.nomenclatureNone')
+          }}
+        </p>
+        <BaseFormField :label="t('maintenance.workOrders.dialog.subsystem')" required>
+          <ReferenceLookup
+            v-model="nomenclatureSubsystemNo"
+            reference-key="failureSubsystems"
+            :modal-title="t('maintenance.workOrders.dialog.subsystem')"
+          />
+        </BaseFormField>
+      </template>
       <template v-else-if="dialog === 'takePart' || dialog === 'buyPart'">
         <BaseFormField
           :label="t('maintenance.workOrders.dialog.stockItem')"
@@ -607,6 +675,35 @@ const buttonClass =
             reference-key="stockItems"
             :modal-title="t('maintenance.workOrders.dialog.stockItem')"
           />
+          <p
+            v-if="stock"
+            class="text-xs mt-1"
+            :class="stockShort ? 'text-destructive' : 'text-muted-foreground'"
+          >
+            {{
+              t('maintenance.workOrders.dialog.stockLevel', {
+                quantity: formatNumber(stock.stockQuantity),
+                threshold: formatNumber(stock.alertThreshold),
+                days:
+                  stock.supplierLeadTimeDays === null
+                    ? '-'
+                    : formatNumber(stock.supplierLeadTimeDays, 1)
+              })
+            }}
+          </p>
+          <p v-if="stockShort" class="text-xs mt-1 text-destructive">
+            {{ t('maintenance.workOrders.dialog.stockShort') }}
+            <button
+              type="button"
+              class="cursor-pointer text-primary hover:underline"
+              @click="buyMissingPart"
+            >
+              {{ t('maintenance.workOrders.action.buyPart') }}
+            </button>
+          </p>
+          <p v-if="dialog === 'buyPart'" class="text-xs mt-1 text-muted-foreground">
+            {{ t('maintenance.workOrders.dialog.buyPartHint') }}
+          </p>
         </BaseFormField>
         <BaseFormField
           v-if="dialog === 'buyPart'"

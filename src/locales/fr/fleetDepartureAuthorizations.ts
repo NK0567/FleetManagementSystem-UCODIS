@@ -38,5 +38,11 @@ export default {
   'fleet.departureAuthorizations.form.driverChecks': 'Contrôles du conducteur',
   'fleet.departureAuthorizations.form.liveChecks': "Contrôles, à l'instant",
   'fleet.departureAuthorizations.form.frozenChecks': 'Contrôles au moment de la décision',
-  'fleet.departureAuthorizations.form.refusalReason': 'Motif du refus'
+  'fleet.departureAuthorizations.form.refusalReason': 'Motif du refus',
+  'fleet.departureAuthorizations.activation.title': 'Activé à la délivrance',
+  'fleet.departureAuthorizations.activation.gps.activated': 'Suivi GPS du véhicule activé.',
+  'fleet.departureAuthorizations.activation.gps.no_unit': 'Pas de boîtier de suivi en service sur le véhicule : suivi GPS non activé.',
+  'fleet.departureAuthorizations.activation.camera.activated': 'Caméra du véhicule activée.',
+  'fleet.departureAuthorizations.activation.camera.no_camera': 'Pas de caméra sur le véhicule.',
+  'fleet.departureAuthorizations.activation.simulated': 'Ordre envoyé aux équipements le {date} (simulé dans la maquette).'
 }

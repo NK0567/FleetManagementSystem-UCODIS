@@ -31,17 +31,17 @@ defineExpose({ root })
     </div>
     <dl class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 px-3 py-2 text-xs">
       <dt class="text-muted-foreground">{{ t('planning.pickup.site') }}</dt>
-      <dd>{{ note.pickupSiteName || '—' }}</dd>
+      <dd>{{ note.pickupSiteName || '-' }}</dd>
       <dt class="text-muted-foreground">{{ t('planning.pickup.date') }}</dt>
       <dd>{{ formatDateTime(note.plannedDeparture) }}</dd>
       <dt class="text-muted-foreground">{{ t('planning.pickup.vehicle') }}</dt>
       <dd>
-        {{ note.vehiclePlate || '—' }}
+        {{ note.vehiclePlate || '-' }}
         <template v-if="note.trailerPlate"> · {{ note.trailerPlate }}</template>
         <template v-if="note.carrierName"> · {{ note.carrierName }}</template>
       </dd>
       <dt class="text-muted-foreground">{{ t('planning.pickup.driver') }}</dt>
-      <dd>{{ note.driverName || '—' }}</dd>
+      <dd>{{ note.driverName || '-' }}</dd>
       <template v-if="note.documentRef">
         <dt class="text-muted-foreground">{{ t('planning.pickup.documentRef') }}</dt>
         <dd>{{ note.documentRef }}</dd>
@@ -88,7 +88,7 @@ defineExpose({ root })
                 <template v-if="entry.loadedQuantity !== null">
                   {{ formatNumber(entry.loadedQuantity) }} {{ entry.unit }}
                 </template>
-                <template v-else>—</template>
+                <template v-else>-</template>
               </td>
               <td class="px-3 py-1.5 text-muted-foreground whitespace-nowrap">
                 <template v-if="entry.isFuel && entry.temperatureC !== null">
@@ -103,7 +103,7 @@ defineExpose({ root })
                 <template v-else-if="entry.isFuel">{{
                   t('planning.pickup.fuelToMeasure')
                 }}</template>
-                <template v-else>—</template>
+                <template v-else>-</template>
               </td>
             </tr>
           </template>

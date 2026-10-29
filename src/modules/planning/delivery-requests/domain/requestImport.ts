@@ -14,7 +14,12 @@ export const REQUEST_IMPORT_COLUMNS = {
   notificationChannel: ['mode_notification', 'notification', 'notification_channel'],
   confirmationRequired: ['confirmation_requise', 'confirmation', 'confirmation_required'],
   preferredSlot: ['creneau', 'creneau_prefere', 'preferred_slot'],
-  fullDeliveryRequired: ['livraison_complete', 'full_delivery']
+  fullDeliveryRequired: ['livraison_complete', 'full_delivery'],
+  kind: ['type_commande', 'type', 'kind'],
+  pickupPointNo: ['lieu_enlevement', 'enlevement', 'pickup_point'],
+  content: ['contenu', 'content'],
+  unitCount: ['nombre_unites', 'unites', 'unit_count'],
+  volumeM3: ['volume_m3', 'volume']
 } as const satisfies ImportColumns<string>
 
 export type RequestImportField = keyof typeof REQUEST_IMPORT_COLUMNS
@@ -36,6 +41,11 @@ const CHANNELS: Record<string, string> = {
   telephone: 'call',
   mail: 'email',
   'e-mail': 'email'
+}
+const KINDS: Record<string, string> = {
+  vente: 'sale',
+  transfert: 'transfer',
+  retour: 'return'
 }
 const SLOTS: Record<string, string> = {
   matin: 'morning',
@@ -66,9 +76,24 @@ export function toRequestRow(
     const value = (record[header] ?? '').trim()
     if (field === 'desiredDate' || field === 'validUntil') {
       row[field] = value ? parseImportDateTime(value).slice(0, 10) : null
-    } else if (field === 'quantity' || field === 'weightKg') row[field] = parseImportNumber(value)
-    else if (field === 'ordererNo' || field === 'deliveryPointNo' || field === 'productNo') {
-      row[field] = value.toUpperCase()
+    } else if (
+      field === 'quantity' ||
+      field === 'weightKg' ||
+      field === 'volumeM3' ||
+      field === 'unitCount'
+    ) {
+      row[field] = value ? parseImportNumber(value) : null
+    } else if (
+      field === 'ordererNo' ||
+      field === 'deliveryPointNo' ||
+      field === 'productNo' ||
+      field === 'pickupPointNo'
+    ) {
+      row[field] = value ? value.toUpperCase() : field === 'pickupPointNo' ? null : ''
+    } else if (field === 'kind') {
+      // Left empty, the order is a sale.
+      const word = value.toLowerCase()
+      if (word) row[field] = KINDS[word] ?? word
     } else if (field === 'confirmationRequired' || field === 'fullDeliveryRequired') {
       const flag = parseYesNo(value)
       if (flag !== undefined) row[field] = flag

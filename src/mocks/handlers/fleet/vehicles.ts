@@ -36,6 +36,7 @@ import {
   type FieldReaders
 } from '../../http/input'
 import { optionalReference, requireReference } from '../../http/references'
+import { importRows } from '../../http/importRows'
 import { created, ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
 import { sessionUser, type MockRequest } from '../../http/types'
@@ -43,7 +44,7 @@ import type { MockLanguage } from '../../i18n'
 import { FLEET_MESSAGES } from './messages'
 import { activeLinks, coupledWith, employeeNames } from './links'
 import { tripIndex } from './tripIndex'
-import { statusReason, vehicleStatuses } from './vehicleState'
+import { statusCauseCode, statusReason, vehicleStatuses } from './vehicleState'
 import { fileMetaOf, filesMetaOf, releaseFiles } from '../files'
 import { documentCompliance, gapsText } from './documentCompliance'
 import { IMAGE_FILE_TYPES } from '@/utils/fileRules'
@@ -110,6 +111,7 @@ export function vehiclesApi(db: MockDatabase, language: MockLanguage = 'fr'): Ve
     const assignment = links.assignmentByVehicle.get(vehicle.no)
     const coupling = links.couplingByVehicle.get(vehicle.no)
     const coupledNo = coupling ? coupledWith(coupling, vehicle.no) : null
+    const causeCode = statusCauseCode(db, result.cause)
     return {
       ...vehicle,
       vehicleTypeName: type?.name ?? '',
@@ -124,6 +126,10 @@ export function vehiclesApi(db: MockDatabase, language: MockLanguage = 'fr'): Ve
       formerPlates: vehicle.plateHistory.map((change) => change.previousPlate).join(', '),
       status: result.status,
       statusReason: statusReason(result.cause, vehicle, language),
+      administrativeStatus: result.status === 'removed' ? 'removed' : 'in_service',
+      operationalStatus: result.status === 'removed' ? null : result.status,
+      statusCauseCode: causeCode.code,
+      statusCauseCodeName: causeCode.name,
       driverNo: assignment?.employeeNo ?? null,
       driverName: assignment ? (names.get(assignment.employeeNo) ?? '') : '',
       coupledVehicleNo: coupledNo,
@@ -260,40 +266,11 @@ export function registerVehiclesHandlers(router: MockRouter, db: MockDatabase): 
     optionFields: {
       fuelType: 'fuelType',
       acquisitionMode: 'acquisitionMode',
-      status: 'vehicleStatus'
+      status: 'vehicleStatus',
+      administrativeStatus: 'administrativeStatus',
+      operationalStatus: 'vehicleStatus'
     },
-    create: (input, request) => {
-      const plate = normalizePlate(readString(input, 'plate', { required: true }))
-      const owner = plateOwner(db, plate)
-      if (owner) throw conflict(FLEET_MESSAGES.duplicatePlate, { plate, no: owner.no })
-      const vehicleTypeNo = activeType(input)
-      const fields = readAll(input, readers)
-      assertUniqueVin(fields.vin)
-      const odometerKm = readNumber(input, 'odometerKm', { min: 0 }) ?? 0
-      return {
-        no: nextNo(
-          db.vehicles.all().map((vehicle) => vehicle.no),
-          'VEH-',
-          3
-        ),
-        plate,
-        vehicleTypeNo,
-        ...fitToType(vehicleTypeNo, fields),
-        odometerKm,
-        odometerReadings: [
-          {
-            readAt: nowIso(),
-            km: odometerKm,
-            source: 'manual' as const,
-            recordedBy: sessionUser(request).code
-          }
-        ],
-        plateHistory: [],
-        outOfService: null,
-        removal: null,
-        photoFileNos: []
-      }
-    },
+    create: (input, request) => buildVehicle(input, request),
     update: (existing, input) => {
       assertEditable(existing)
       const patch = readPatch(input, readers)
@@ -301,6 +278,70 @@ export function registerVehiclesHandlers(router: MockRouter, db: MockDatabase): 
       return fitToType(existing.vehicleTypeNo, patch)
     }
   })
+
+  /** A new vehicle, by the form or by a line of an import: the same rules apply. */
+  function buildVehicle(
+    input: Record<string, unknown>,
+    request: MockRequest
+  ): Omit<VehicleRow, keyof AuditFields> {
+    const plate = normalizePlate(readString(input, 'plate', { required: true }))
+    const owner = plateOwner(db, plate)
+    if (owner) throw conflict(FLEET_MESSAGES.duplicatePlate, { plate, no: owner.no })
+    const vehicleTypeNo = activeType(input)
+    const fields = readAll(input, readers)
+    assertUniqueVin(fields.vin)
+    const odometerKm = readNumber(input, 'odometerKm', { min: 0 }) ?? 0
+    return {
+      no: nextNo(
+        db.vehicles.all().map((vehicle) => vehicle.no),
+        'VEH-',
+        3
+      ),
+      plate,
+      vehicleTypeNo,
+      ...fitToType(vehicleTypeNo, fields),
+      odometerKm,
+      odometerReadings: [
+        {
+          readAt: nowIso(),
+          km: odometerKm,
+          source: 'manual' as const,
+          recordedBy: sessionUser(request).code
+        }
+      ],
+      plateHistory: [],
+      outOfService: null,
+      removal: null,
+      photoFileNos: []
+    }
+  }
+
+  /** A type or a site is given in a file by its code or by its name. */
+  const codeOrName = (rows: readonly { no: string; name: string }[], value: unknown) => {
+    const text = typeof value === 'string' ? value.trim() : ''
+    const wanted = text.toLowerCase()
+    return (
+      rows.find((row) => row.no.toLowerCase() === wanted || row.name.toLowerCase() === wanted)
+        ?.no ?? text
+    )
+  }
+
+  // Duplicates are refused line by line: a plate or a VIN already in the park, or met earlier in the file.
+  router.post(`${BASE_PATH}/import`, { feature: FEATURE, action: 'insert' }, (request) =>
+    ok(
+      importRows(readBody(request).rows, request, (input) => {
+        const row = buildVehicle(
+          {
+            ...input,
+            vehicleTypeNo: codeOrName(db.vehicleTypes.all(), input.vehicleTypeNo),
+            homeSiteNo: codeOrName(db.sites.all(), input.homeSiteNo)
+          },
+          request
+        )
+        return db.vehicles.insert(stampCreated(row, request)).no
+      })
+    )
+  )
 
   const vehicleOf = (request: MockRequest) => db.vehicles.findOrFail(routeParam(request, 'no'))
   const respond = (request: MockRequest) =>

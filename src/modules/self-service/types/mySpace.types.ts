@@ -93,6 +93,10 @@ export interface MyAbsenceInput {
 
 export interface MyChecklistInput {
   takenAt: string
+  /** Departure, a stop along the trip or the arrival. */
+  stage?: 'departure' | 'stop' | 'arrival'
+  /** The trip a checklist kept without network was taken for; the current one otherwise. */
+  tripNo?: string
   results: Pick<CheckResult, 'pointNo' | 'result' | 'comment'>[]
 }
 
@@ -118,6 +122,18 @@ export interface MyOrderLineApi {
   handedBackAt: string | null
   receptionConfirmedAt: string | null
   receptionContestedAt: string | null
+  isFuel: boolean
+  undeliveredReasonNo: string | null
+}
+
+export interface MyReturnApi {
+  orderNo: string
+  lineNo: number
+  productName: string
+  unit: string
+  quantity: number
+  deliveryPointName: string
+  reason: string
 }
 
 export interface MyOrderApi {

@@ -61,5 +61,9 @@ export default {
   'fleet.documents.form.status': 'Statut et historique',
   'fleet.documents.form.replacedBy': 'Remplacé par',
   'fleet.documents.form.declaredStatus': 'Déclaration',
-  'fleet.documents.form.declaredReason': 'Motif de la déclaration'
+  'fleet.documents.form.declaredReason': 'Motif de la déclaration',
+  'fleet.documents.alert.expired': 'Document expiré depuis le {date} : à régulariser.',
+  'fleet.documents.alert.expiring': 'Document à renouveler : il expire le {date} (préavis de {days} jours).',
+  'fleet.documents.alert.sent.email': 'E-mail envoyé à {to} le {date} (simulé).',
+  'fleet.documents.alert.sent.sms': 'SMS envoyé au {to} le {date} (simulé).'
 }

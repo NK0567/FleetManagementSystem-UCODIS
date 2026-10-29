@@ -89,7 +89,7 @@ const historyColumns = computed<SubListColumn[]>(() => [
       :summary="[
         t('maintenance.tyres.life.useSummary', {
           km: formatNumber(tyre.kmRun),
-          cost: tyre.costPerKm === null ? '—' : formatNumber(tyre.costPerKm, 2)
+          cost: tyre.costPerKm === null ? '-' : formatNumber(tyre.costPerKm, 2)
         })
       ]"
     >

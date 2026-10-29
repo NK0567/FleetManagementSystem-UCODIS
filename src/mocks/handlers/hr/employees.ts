@@ -11,7 +11,16 @@ import { nowIso } from '../../clock'
 import type { MockDatabase } from '../../db/database'
 import { nextNo } from '../../db/numbering'
 import { conflict, unprocessable } from '../../http/errors'
-import { readBody, registerCrudResource, routeParam, stampModified } from '../../http/crudResource'
+import {
+  readBody,
+  registerCrudResource,
+  routeParam,
+  stampCreated,
+  stampModified
+} from '../../http/crudResource'
+import { importRows } from '../../http/importRows'
+import { integrationSettings } from '../fleet/settingsLists'
+import { STAFF_SYNC_MESSAGES } from './staffSync'
 import {
   invalidField,
   readAll,
@@ -100,6 +109,58 @@ export function registerEmployeeHandlers(router: MockRouter, db: MockDatabase): 
 
   const apiRecord = (no: string) => employeesApi(db).find((employee) => employee.no === no)
 
+  /** With an HR system, people come from it: they are not typed in or imported a second time. */
+  function assertManualEntry() {
+    if (integrationSettings(db).hrSystemConnected) throw conflict(STAFF_SYNC_MESSAGES.hrSystemOwns)
+  }
+
+  /** A new person, from the form or from a line of an import: the same rules apply. */
+  function buildEmployee(input: Record<string, unknown>) {
+    const fields = readAll(input, readers)
+    assertUniqueNationalId(fields.nationalId, null)
+    return {
+      no: nextNo(
+        db.employees.all().map((employee) => employee.no),
+        COMPANY.employeeNoPrefix,
+        COMPANY.employeeNoWidth
+      ),
+      ...fields,
+      exitDate: null,
+      status: 'active' as const,
+      statusReason: '',
+      drivingAuthorized: false,
+      drivingAuthorizedBy: null,
+      drivingAuthorizedAt: null
+    }
+  }
+
+  /** A function, an entity, a category or a site is given in a file by its code or its name. */
+  const codeOrName = (rows: readonly { no: string; name: string }[], value: unknown) => {
+    const text = typeof value === 'string' ? value.trim() : ''
+    const wanted = text.toLowerCase()
+    const found = rows.find(
+      (row) => row.no.toLowerCase() === wanted || row.name.toLowerCase() === wanted
+    )
+    return found?.no ?? text
+  }
+
+  // Static path: registered before the record routes so that it is not read as a number.
+  router.post('/hr/employees/import', { feature: 'EMPLOYEE', action: 'insert' }, (request) => {
+    assertManualEntry()
+    return ok(
+      importRows(readBody(request).rows, request, (input) => {
+        const row = buildEmployee({
+          ...input,
+          jobPositionNo: codeOrName(db.jobPositions.all(), input.jobPositionNo),
+          orgUnitNo: codeOrName(db.orgUnits.all(), input.orgUnitNo),
+          categoryNo: codeOrName(db.employeeCategories.all(), input.categoryNo),
+          siteCode: codeOrName(db.sites.all(), input.siteCode)
+        })
+        return db.employees.insert(stampCreated(row, request)).no
+      })
+    )
+  })
+
   registerCrudResource(router, {
     basePath: '/hr/employees',
     feature: 'EMPLOYEE',
@@ -114,22 +175,8 @@ export function registerEmployeeHandlers(router: MockRouter, db: MockDatabase): 
       idDocumentType: 'idDocumentType'
     },
     create: (input) => {
-      const fields = readAll(input, readers)
-      assertUniqueNationalId(fields.nationalId, null)
-      return {
-        no: nextNo(
-          db.employees.all().map((employee) => employee.no),
-          COMPANY.employeeNoPrefix,
-          COMPANY.employeeNoWidth
-        ),
-        ...fields,
-        exitDate: null,
-        status: 'active' as const,
-        statusReason: '',
-        drivingAuthorized: false,
-        drivingAuthorizedBy: null,
-        drivingAuthorizedAt: null
-      }
+      assertManualEntry()
+      return buildEmployee(input)
     },
     update: (existing, input) => {
       if (existing.status === 'archived') throw conflict(HR_MESSAGES.employeeArchived)

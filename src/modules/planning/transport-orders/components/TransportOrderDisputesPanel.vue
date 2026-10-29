@@ -64,7 +64,7 @@ defineExpose({ done: () => (handling.value = null) })
         <dd>{{ formatDateTime(line.receptionContestedAt) }}</dd>
         <dt class="text-muted-foreground">{{ t('planning.transportOrders.disputes.reason') }}</dt>
         <dd>
-          {{ line.contestReasonName || '—' }}
+          {{ line.contestReasonName || '·' }}
           <span v-if="line.contestComment" class="text-muted-foreground">
             · {{ line.contestComment }}
           </span>

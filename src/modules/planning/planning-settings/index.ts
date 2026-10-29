@@ -6,3 +6,5 @@ export {
   type PlanningSettingsSection
 } from './domain/planningSettings'
 export type { PlanningSettingsApi } from './types/planningSettings.types'
+export { usePlanningCircuit } from './composables/usePlanningCircuit'
+export type { PlanningCircuitApi } from './types/planningSettings.types'

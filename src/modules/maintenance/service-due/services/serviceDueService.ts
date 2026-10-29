@@ -8,6 +8,9 @@ export const serviceDueService = {
   async recordPassage(passage: PassageInput): Promise<ServiceDueApi> {
     return (await serviceDueApi.recordPassage(passage)).data.data
   },
+  async recordEngineHours(vehicleNo: string, hours: number): Promise<void> {
+    await serviceDueApi.recordEngineHours(vehicleNo, hours)
+  },
   async openWorkOrder(vehicleNo: string): Promise<WorkOrderApi> {
     return (await serviceDueApi.openWorkOrder(vehicleNo)).data.data
   }

@@ -44,5 +44,10 @@ export default {
   'planning.deliveryPoints.map.point': 'Delivery point',
   'planning.deliveryPoints.map.editHint':
     'Click the map to place the delivery point: the driver is expected there.',
-  'planning.deliveryPoints.map.readOnlyHint': 'The point shows where the driver is expected.'
+  'planning.deliveryPoints.map.readOnlyHint': 'The point shows where the driver is expected.',
+  'planning.deliveryPoints.form.kind': 'Kind of site',
+  'planning.deliveryPoints.form.siteNo': 'Site of the FMS register',
+  'planning.deliveryPoints.form.siteNoHint': 'Tied to a site of the register, the point takes its location and, for a depot, its owner.',
+  'planning.deliveryPoints.form.ownerName': 'Owned by a third party',
+  'planning.deliveryPoints.form.ownerNameHint': "Empty when the depot is the company's."
 }

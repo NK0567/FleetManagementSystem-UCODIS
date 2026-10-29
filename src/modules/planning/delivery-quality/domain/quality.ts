@@ -37,6 +37,18 @@ export interface ProtestNote {
   issuedAt: string | null
   closedAt: string | null
   outcome: string
+  /** Files attached to the note (photos, reserves written on the delivery note); absent reads as none. */
+  fileNos?: string[]
+}
+
+/** A file is added to a note until it is closed; the same file is not attached twice. */
+export function attachmentIssue(
+  note: Pick<ProtestNote, 'issuedAt' | 'closedAt' | 'fileNos'>,
+  fileNo: string
+): 'closed' | 'duplicate' | null {
+  if (note.closedAt) return 'closed'
+  if ((note.fileNos ?? []).includes(fileNo)) return 'duplicate'
+  return null
 }
 
 export interface ResponsibilityShare {

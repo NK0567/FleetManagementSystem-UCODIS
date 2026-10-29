@@ -1,6 +1,8 @@
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { RefreshCw } from '@lucide/vue'
+import { apiErrorMessage } from '@/core/api/apiError'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
 import { useListCellFormatters } from '@/composables/useListCellFormatters'
@@ -13,7 +15,7 @@ import type { ProviderApi, ProviderSearchColumn } from '../types/provider.types'
 
 const { t } = useI18n()
 const store = useProviderStore()
-const { formatDateTime, optionLabel, booleanLabel, formatInteger } = useListCellFormatters()
+const { formatDateTime, booleanLabel, formatInteger } = useListCellFormatters()
 
 const searchColumnOptions = computed<{ value: ProviderSearchColumn; label: string }[]>(() => [
   { value: 'no,name,contactName', label: t('fleet.providers.search.all') },
@@ -26,10 +28,16 @@ const tableColumns = computed<TableColumn[]>(() => [
   { sortKey: 'no', label: t('fleet.providers.col.no'), minW: '110px', cell: 'link' },
   { sortKey: 'name', label: t('fleet.providers.col.name'), minW: '240px' },
   {
-    sortKey: 'providerType',
+    sortKey: 'providerTypeName',
     label: t('fleet.providers.col.providerType'),
-    minW: '170px',
-    formatter: optionLabel('providerType')
+    minW: '170px'
+  },
+  {
+    sortKey: 'source',
+    label: t('fleet.providers.col.source'),
+    minW: '150px',
+    defaultHidden: true,
+    formatter: (value) => t(`fleet.providers.source.${String(value)}`)
   },
   { sortKey: 'contactName', label: t('fleet.providers.col.contactName'), minW: '160px' },
   { sortKey: 'phone', label: t('fleet.providers.col.phone'), minW: '130px' },
@@ -68,12 +76,12 @@ const filterDefs: FilterFieldDef[] = [
     field: 'providerType',
     labelKey: 'fleet.providers.col.providerType',
     valueType: 'string',
-    kind: 'option',
-    optionsKey: 'providerType'
+    kind: 'reference',
+    referenceKey: 'providerTypes'
   }
 ]
 
-const detailKeys = ['providerType', 'contactName', 'phone', 'activeContractCount']
+const detailKeys = ['providerTypeName', 'contactName', 'phone', 'activeContractCount']
 const detailColumns = computed(() =>
   detailKeys
     .map((key) => tableColumns.value.find((column) => column.sortKey === key))
@@ -147,6 +155,31 @@ const {
   remove: providerService.remove,
   deleteErrorFallback: t('fleet.providers.deleteError')
 })
+
+const syncing = ref(false)
+const syncError = ref<string | null>(null)
+const syncMessage = ref<string | null>(null)
+
+/** Takes the third parties of the management system (simulated) and says what changed. */
+async function synchronize() {
+  syncing.value = true
+  syncError.value = null
+  syncMessage.value = null
+  try {
+    const report = await providerService.synchronize()
+    syncMessage.value = t('fleet.providers.sync.done', {
+      created: report.created.length,
+      updated: report.updated.length,
+      unchanged: report.unchanged,
+      skipped: report.skipped.length
+    })
+    await store.fetchItems(store.pagination.page, store.pagination.limit)
+  } catch (cause) {
+    syncError.value = apiErrorMessage(cause, t('fleet.providers.sync.error'))
+  } finally {
+    syncing.value = false
+  }
+}
 </script>
 
 <template>
@@ -192,12 +225,31 @@ const {
             :reset-preferences="resetPreferences"
           />
         </template>
+        <template v-if="canInsert" #extra-actions>
+          <button
+            type="button"
+            class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60"
+            :disabled="syncing"
+            :title="t('fleet.providers.sync.hint')"
+            @click="synchronize"
+          >
+            <RefreshCw class="w-4 h-4 text-primary" />
+            {{ t('fleet.providers.sync.action') }}
+          </button>
+        </template>
       </ListPageToolbar>
 
       <FormAlerts
         class="mx-4"
         :error="deleteError ?? exportError"
         @clear:error="deleteError = exportError = null"
+      />
+      <FormAlerts
+        class="mx-4"
+        :error="syncError"
+        :success="syncMessage"
+        @clear:error="syncError = null"
+        @clear:success="syncMessage = null"
       />
 
       <ListPageLayout

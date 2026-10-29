@@ -58,3 +58,24 @@ export function longestRestHours(periods: readonly WorkPeriod[], departure: stri
   }
   return Math.max(longest, hours(cursor, departure))
 }
+
+/**
+ * What granting a departure switches on in the vehicle: the GPS tracking and, when the vehicle has
+ * one, its camera. The order to the units is simulated in the mock-up.
+ */
+export interface DepartureActivation {
+  at: string
+  gps: 'activated' | 'no_unit'
+  camera: 'activated' | 'no_camera'
+}
+
+export function departureActivation(
+  equipment: { hasTracker: boolean; hasCamera: boolean },
+  at: string
+): DepartureActivation {
+  return {
+    at,
+    gps: equipment.hasTracker ? 'activated' : 'no_unit',
+    camera: equipment.hasCamera ? 'activated' : 'no_camera'
+  }
+}

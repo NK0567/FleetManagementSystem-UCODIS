@@ -10,6 +10,7 @@ import { appConfig } from '@/core/app/appConfig'
 import { SUPPORTED_LOCALES, type SupportedLocale } from '@/core/i18n'
 import { reloadApplicationForLocale } from '@/core/bootstrap/reloadApplicationForLocale'
 import { useUserStore } from '@/stores/user'
+import AlertBell from '@/modules/fleet/alerts/components/AlertBell.vue'
 
 const SETTINGS_PATH = '/settings/module-toggles'
 
@@ -85,6 +86,7 @@ function onConfirmLogout() {
           <PanelLeft v-if="navMode === 'topbar'" class="w-4 h-4" />
           <PanelTop v-else class="w-4 h-4" />
         </button>
+        <AlertBell />
         <RouterLink
           v-if="canOpenSettings"
           :to="SETTINGS_PATH"

@@ -46,5 +46,10 @@ export default {
   'planning.deliveryPoints.map.point': 'Point de livraison',
   'planning.deliveryPoints.map.editHint':
     "Cliquez sur la carte pour placer le point de livraison : c'est là que le conducteur est attendu.",
-  'planning.deliveryPoints.map.readOnlyHint': 'Le point montre où le conducteur est attendu.'
+  'planning.deliveryPoints.map.readOnlyHint': 'Le point montre où le conducteur est attendu.',
+  'planning.deliveryPoints.form.kind': 'Type de site',
+  'planning.deliveryPoints.form.siteNo': 'Site du référentiel FMS',
+  'planning.deliveryPoints.form.siteNoHint': 'Rattaché à un site du référentiel, le point en reprend la localisation et, pour un dépôt, le propriétaire.',
+  'planning.deliveryPoints.form.ownerName': 'Appartient à un tiers',
+  'planning.deliveryPoints.form.ownerNameHint': "Vide quand le dépôt est à l'entreprise."
 }

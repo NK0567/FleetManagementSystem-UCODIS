@@ -71,5 +71,21 @@ export default {
   'fleet.trips.needsAuthorization': 'The departure must be granted first.',
   'fleet.trips.form.authorization': 'Departure authorization',
   'fleet.trips.form.noAuthorization': 'No request yet.',
-  'fleet.trips.deviationsToQualify': 'Deviations still to qualify on this trip: {count}.'
+  'fleet.trips.deviationsToQualify': 'Deviations still to qualify on this trip: {count}.',
+  'fleet.trips.drivingTime.title': 'Driving time',
+  'fleet.trips.drivingTime.breachCount': 'No breach | 1 breach | {n} breaches',
+  'fleet.trips.drivingTime.duration': '{h} h {m}',
+  'fleet.trips.drivingTime.driven.actual': 'Driving read from the passages at the stops: {duration}.',
+  'fleet.trips.drivingTime.driven.planned': 'Driving planned from the route template: {duration}.',
+  'fleet.trips.drivingTime.noBreach': 'No driving or rest threshold exceeded.',
+  'fleet.trips.drivingTime.hint': 'Thresholds of the fleet settings; the time at a stop is its planned break.',
+  'fleet.trips.drivingTime.loadError': 'The driving time could not be computed.',
+  'fleet.trips.drivingTime.tripCount': 'No trip over the limits | 1 trip over the limits | {n} trips over the limits',
+  'fleet.trips.drivingTime.driverClean': 'No driving-time breach over the last {days} days.',
+  'fleet.trips.drivingTime.source.actual': 'recorded',
+  'fleet.trips.drivingTime.source.planned': 'planned',
+  'fleet.trips.drivingTime.breach.continuous': 'Continuous driving of {driven}, beyond {limit} without a long enough break.',
+  'fleet.trips.drivingTime.breach.daily': 'Driving of {driven} on {day}, beyond {limit} a day.',
+  'fleet.trips.drivingTime.breach.weekly': 'Driving of {driven} over seven days, beyond {limit} a week.',
+  'fleet.trips.drivingTime.breach.night': 'Night driving, not allowed, on {day}: {driven}.'
 }

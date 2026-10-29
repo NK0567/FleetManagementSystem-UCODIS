@@ -76,5 +76,11 @@ export default {
   'fleet.claims.form.history': 'Historique',
   'fleet.claims.action.training': 'Déclencher une formation',
   'fleet.claims.trainingHint': '{driver} sera inscrit à une formation liée à ce sinistre.',
-  'fleet.claims.closureBlock.repairOpen': 'la réparation est encore en cours'
+  'fleet.claims.closureBlock.repairOpen': 'la réparation est encore en cours',
+  'fleet.claims.form.repair': 'Réparation',
+  'fleet.claims.form.noRepair': "Aucun ordre de travail n'est ouvert pour ce dossier.",
+  'fleet.claims.form.workOrder': 'Ordre de travail {no}',
+  'fleet.claims.form.downtimeCode': "Code d'indisponibilité appliqué au véhicule : {code} · {name}",
+  'fleet.claims.form.downtimeOpen': 'en cours',
+  'fleet.claims.form.downtimeEnded': 'terminée'
 }

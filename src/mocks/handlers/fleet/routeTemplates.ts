@@ -1,6 +1,8 @@
 import {
   STOP_ROLES,
   plannedDurationMin,
+  referenceDurationMin,
+  routeDistanceKm,
   routeIssues,
   type RouteStop,
   type StopRole
@@ -24,6 +26,8 @@ import {
 import { unknownReference } from '../../http/references'
 import type { MockRouter } from '../../http/router'
 import { FLEET_MESSAGES } from './messages'
+import { distanceKm } from '@/utils/geo'
+import { planningSettings } from '../planning/settings'
 
 type Fields = Omit<RouteTemplateRow, 'no' | keyof AuditFields>
 
@@ -47,6 +51,12 @@ export function routeTemplatesApi(db: MockDatabase): RouteTemplateApi[] {
       destinationName: stopPoints.at(-1)?.siteName ?? '',
       stopCount: route.stops.length,
       plannedDurationMin: plannedDurationMin(route.stops),
+      // Driven at the average speed of the planning settings (TRS07-US03).
+      referenceDurationMin: referenceDurationMin(
+        route.estimatedDistanceKm,
+        route.stops,
+        planningSettings(db).schedule.averageSpeedKmh
+      ),
       tripCount: trips.filter((trip) => trip.routeTemplateNo === route.no).length
     }
   })
@@ -77,11 +87,32 @@ export function registerRouteTemplatesHandlers(router: MockRouter, db: MockDatab
   const readers: FieldReaders<Fields> = {
     name: (input) => readString(input, 'name', { required: true }),
     recurring: (input) => readBoolean(input, 'recurring'),
+    // Recomputed from the stops whenever they change; typed only when the sites have no place.
     estimatedDistanceKm: (input) =>
-      readNumber(input, 'estimatedDistanceKm', { required: true, min: 1 }) ?? 0,
+      distanceOfStops(input) ??
+      readNumber(input, 'estimatedDistanceKm', { required: true, min: 1 }) ??
+      0,
     fuelReferenceL100: (input) => readNumber(input, 'fuelReferenceL100', { min: 1, max: 100 }),
     active: (input) => readBoolean(input, 'active', true),
     stops: (input) => readStops(db, input)
+  }
+
+  /** The distance of the stops sent, when every site of them has a place; null otherwise. */
+  function distanceOfStops(input: Record<string, unknown>): number | null {
+    if (!Array.isArray(input.stops)) return null
+    const sites = (input.stops as { siteNo?: unknown }[]).map((stop) =>
+      db.sites.find(String(stop?.siteNo ?? ''))
+    )
+    if (sites.length < 2 || sites.some((site) => !site || (!site.latitude && !site.longitude))) {
+      return null
+    }
+    return Math.max(
+      1,
+      routeDistanceKm(
+        sites.map((site) => site!),
+        distanceKm
+      )
+    )
   }
 
   registerCrudResource(router, {
@@ -91,7 +122,12 @@ export function registerRouteTemplatesHandlers(router: MockRouter, db: MockDatab
     list: () => routeTemplatesApi(db),
     searchColumns: ['no', 'name'],
     create: (input) => ({ no: readCode(input), ...readAll(input, readers) }),
-    update: (_existing, input) => readPatch(input, readers),
+    update: (_existing, input) => {
+      const patch = readPatch(input, readers)
+      // New stops always bring their distance, whatever was typed.
+      const distance = distanceOfStops(input)
+      return distance === null ? patch : { ...patch, estimatedDistanceKm: distance }
+    },
     remove: (existing) => {
       if (db.trips.all().some((trip) => trip.routeTemplateNo === existing.no)) {
         throw conflict(FLEET_MESSAGES.routeInUse)

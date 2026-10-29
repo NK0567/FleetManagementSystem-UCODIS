@@ -58,5 +58,6 @@ export default {
   'fleet.companyDocuments.form.supersedesNo': 'Remplace',
   'fleet.companyDocuments.form.supersedesHint':
     "La version actuelle reste en vigueur jusqu'à la validation de celle-ci.",
-  'fleet.companyDocuments.form.replacedBy': 'Remplacé par'
+  'fleet.companyDocuments.form.replacedBy': 'Remplacé par',
+  'fleet.companyDocuments.col.filedOn': 'Déposé le'
 }

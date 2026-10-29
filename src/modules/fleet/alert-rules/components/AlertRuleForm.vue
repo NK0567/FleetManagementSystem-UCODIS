@@ -1,12 +1,13 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useEntityForm, type FormValidationError } from '@/composables/useEntityForm'
 import { useFormValidationUi } from '@/composables/useFormValidationUi'
 import { useOptionsStore } from '@/stores/optionsStore'
 import { USER_PROFILES, type UserProfileCode } from '@/types/auth.types'
 import { CODE_MAX_LENGTH, isValidCode } from '@/utils/code'
-import type { AlertRuleApi } from '../types/alertRule.types'
+import { isValidEmail } from '@/utils/email'
+import type { AlertRuleApi, AlertRuleSeverity } from '../types/alertRule.types'
 
 const props = withDefaults(
   defineProps<{
@@ -33,7 +34,12 @@ const { draft, isRequired, expose } = useEntityForm({
     recipients: [] as string[],
     escalationHours: 72,
     escalateTo: '',
-    active: true
+    active: true,
+    severity: 'by_case' as AlertRuleSeverity,
+    email: false,
+    sms: false,
+    emailTo: [] as string[],
+    smsTo: [] as string[]
   }),
   createOnly: ['no'],
   required: ['no', 'name', 'escalationHours'],
@@ -43,15 +49,30 @@ const { draft, isRequired, expose } = useEntityForm({
     if (values.no && !isValidCode(values.no)) {
       errors.push({ fieldKey: 'no', label: t('common.validation.codeFormat') })
     }
+    if (values.email && !values.emailTo.length) {
+      errors.push({ fieldKey: 'emailTo', label: t('fleet.alertRules.form.emailToRequired') })
+    }
+    if (values.email && values.emailTo.some((address) => !isValidEmail(address))) {
+      errors.push({ fieldKey: 'emailTo', label: t('fleet.alertRules.form.emailToInvalid') })
+    }
+    if (values.sms && !values.smsTo.length) {
+      errors.push({ fieldKey: 'smsTo', label: t('fleet.alertRules.form.smsToRequired') })
+    }
     return errors
   }
 })
 
-const expandedSections = ref({ general: true, audit: false })
+const expandedSections = ref({ general: true, channels: true, audit: false })
 const { hasValidationError } = useFormValidationUi({
   validationErrors: () => props.validationErrors,
   expandedSections,
-  fieldSections: { no: 'general', name: 'general', escalationHours: 'general' },
+  fieldSections: {
+    no: 'general',
+    name: 'general',
+    escalationHours: 'general',
+    emailTo: 'channels',
+    smsTo: 'channels'
+  },
   fieldValues: () => ({ ...draft })
 })
 
@@ -60,6 +81,31 @@ const optionsStore = useOptionsStore()
 const BACK_OFFICE = USER_PROFILES.filter(
   (profile) => profile !== 'DRIVER' && profile !== 'DRIVER_ASSISTANT'
 )
+
+/** Addresses are typed one after the other, separated by commas or semicolons. */
+const listText = (list: readonly string[] | undefined) => (list ?? []).join(', ')
+const splitList = (text: string) =>
+  text
+    .split(/[,;\n]/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+const emailText = ref(listText(props.initialData.emailTo))
+const smsText = ref(listText(props.initialData.smsTo))
+watch(
+  () => props.initialData,
+  (data) => {
+    emailText.value = listText(data.emailTo)
+    smsText.value = listText(data.smsTo)
+  }
+)
+function setEmailText(text: string) {
+  emailText.value = text
+  draft.emailTo = splitList(text)
+}
+function setSmsText(text: string) {
+  smsText.value = text
+  draft.smsTo = splitList(text)
+}
 
 function toggleRecipient(profile: UserProfileCode, checked: boolean) {
   draft.recipients = checked
@@ -148,6 +194,96 @@ defineExpose(expose)
         <BaseFormField :label="t('fleet.alertRules.form.active')">
           <ToggleSwitch v-model="draft.active" :disabled="disabled" />
         </BaseFormField>
+      </div>
+      <div class="xl:col-span-2 min-w-0 space-y-3">
+        <BaseFormField v-if="!isNew" :label="t('fleet.alertRules.form.event')">
+          <p class="text-sm text-card-foreground">
+            {{ optionsStore.getOptionLabel('alertCategory', initialData.no ?? '') }}
+          </p>
+        </BaseFormField>
+        <BaseFormField v-if="!isNew" :label="t('fleet.alertRules.form.threshold')">
+          <p class="text-sm text-card-foreground" data-testid="alert-rule-threshold">
+            {{ initialData.threshold }}
+            <RouterLink
+              v-if="initialData.thresholdPath"
+              :to="initialData.thresholdPath"
+              class="ml-1 text-xs text-primary hover:underline"
+            >
+              {{ t('fleet.alertRules.form.setThreshold') }}
+            </RouterLink>
+          </p>
+          <p class="text-xs text-muted-foreground mt-1">
+            {{ t('fleet.alertRules.form.thresholdHint') }}
+          </p>
+        </BaseFormField>
+        <BaseFormField :label="t('fleet.alertRules.form.severity')">
+          <OptionsSelect
+            :model-value="draft.severity"
+            options-key="alertRuleSeverity"
+            :disabled="disabled"
+            @update:model-value="draft.severity = String($event || 'by_case') as AlertRuleSeverity"
+          />
+        </BaseFormField>
+      </div>
+    </FormSection>
+
+    <FormSection
+      v-model:open="expandedSections.channels"
+      :title="t('fleet.alertRules.form.channels')"
+      :summary="[
+        [
+          t('fleet.alertRules.channel.app'),
+          draft.email ? t('fleet.alertRules.channel.email') : '',
+          draft.sms ? t('fleet.alertRules.channel.sms') : ''
+        ]
+          .filter(Boolean)
+          .join(', ')
+      ]"
+    >
+      <div class="space-y-3 min-w-0">
+        <BaseFormField :label="t('fleet.alertRules.channel.app')">
+          <ToggleSwitch :model-value="true" disabled />
+          <p class="text-xs text-muted-foreground mt-1">
+            {{ t('fleet.alertRules.form.appHint') }}
+          </p>
+        </BaseFormField>
+        <BaseFormField :label="t('fleet.alertRules.channel.email')">
+          <ToggleSwitch v-model="draft.email" :disabled="disabled" />
+        </BaseFormField>
+        <BaseFormField
+          v-if="draft.email"
+          field="emailTo"
+          :label="t('fleet.alertRules.form.emailTo')"
+          required
+        >
+          <FormInput
+            :model-value="emailText"
+            :maxlength="400"
+            :disabled="disabled"
+            :invalid="hasValidationError('emailTo')"
+            @update:model-value="setEmailText(String($event ?? ''))"
+          />
+        </BaseFormField>
+      </div>
+      <div class="space-y-3 min-w-0">
+        <BaseFormField :label="t('fleet.alertRules.channel.sms')">
+          <ToggleSwitch v-model="draft.sms" :disabled="disabled" />
+        </BaseFormField>
+        <BaseFormField
+          v-if="draft.sms"
+          field="smsTo"
+          :label="t('fleet.alertRules.form.smsTo')"
+          required
+        >
+          <FormInput
+            :model-value="smsText"
+            :maxlength="400"
+            :disabled="disabled"
+            :invalid="hasValidationError('smsTo')"
+            @update:model-value="setSmsText(String($event ?? ''))"
+          />
+        </BaseFormField>
+        <p class="text-xs text-muted-foreground">{{ t('fleet.alertRules.form.channelsHint') }}</p>
       </div>
     </FormSection>
 

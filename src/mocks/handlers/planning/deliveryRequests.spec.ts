@@ -24,6 +24,8 @@ const entry = {
   deliveryPointNo: 'DP-005',
   productNo: 'PRD-001',
   quantity: 120,
+  // The weight is always asked: it decides the vehicle (TRS01-US02).
+  weightKg: 1800,
   desiredDate: '2026-09-09'
 }
 

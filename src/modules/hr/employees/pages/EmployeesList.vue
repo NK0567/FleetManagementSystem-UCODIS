@@ -1,6 +1,8 @@
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { RefreshCw, Upload } from '@lucide/vue'
+import { apiErrorMessage } from '@/core/api/apiError'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
 import { useListCellFormatters } from '@/composables/useListCellFormatters'
@@ -9,6 +11,8 @@ import { EMPTY_CELL, formatDate } from '@/utils/format'
 import { employeeApi } from '../api/employeeApi'
 import { useEmployeeStore, type EmployeeListView } from '../stores/employeeStore'
 import type { EmployeeApi, EmployeeSearchColumn } from '../types/employee.types'
+import EmployeeImportDialog from '../components/EmployeeImportDialog.vue'
+import { employeeService } from '../services/employeeService'
 
 const { t } = useI18n()
 const store = useEmployeeStore()
@@ -235,6 +239,32 @@ const {
   exportFileBaseName: 'employees',
   exportApi: employeeApi.exportExcel
 })
+
+const importing = ref(false)
+const syncing = ref(false)
+const syncError = ref<string | null>(null)
+const syncMessage = ref<string | null>(null)
+
+/** Takes the people of the HR system (simulated in the mock-up) and says what changed. */
+async function synchronize() {
+  syncing.value = true
+  syncError.value = null
+  syncMessage.value = null
+  try {
+    const report = await employeeService.synchronize()
+    syncMessage.value = t('hr.employees.sync.done', {
+      created: report.created.length,
+      updated: report.updated.length,
+      unchanged: report.unchanged,
+      skipped: report.skipped.length
+    })
+    await store.fetchItems(store.pagination.page, store.pagination.limit)
+  } catch (cause) {
+    syncError.value = apiErrorMessage(cause, t('hr.employees.sync.error'))
+  } finally {
+    syncing.value = false
+  }
+}
 </script>
 
 <template>
@@ -282,9 +312,36 @@ const {
             :reset-preferences="resetPreferences"
           />
         </template>
+        <template v-if="canInsert" #extra-actions>
+          <button
+            type="button"
+            class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
+            @click="importing = true"
+          >
+            <Upload class="w-4 h-4 text-primary" />
+            {{ t('hr.employees.import.action') }}
+          </button>
+          <button
+            type="button"
+            class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60"
+            :disabled="syncing"
+            :title="t('hr.employees.sync.hint')"
+            @click="synchronize"
+          >
+            <RefreshCw class="w-4 h-4 text-primary" />
+            {{ t('hr.employees.sync.action') }}
+          </button>
+        </template>
       </ListPageToolbar>
 
       <FormAlerts class="mx-4" :error="exportError" @clear:error="exportError = null" />
+      <FormAlerts
+        class="mx-4"
+        :error="syncError"
+        :success="syncMessage"
+        @clear:error="syncError = null"
+        @clear:success="syncMessage = null"
+      />
 
       <ListPageLayout
         :filter-panel-open="showFilterPanel"
@@ -384,6 +441,11 @@ const {
       </ListPageLayout>
     </template>
 
+    <EmployeeImportDialog
+      :open="importing"
+      @close="importing = false"
+      @imported="store.fetchItems(store.pagination.page, store.pagination.limit)"
+    />
     <EmployeeCard
       v-if="showCard && cardNo"
       :key="`${cardNo}-${cardOpenMode}`"

@@ -55,3 +55,60 @@ export function plannedDurationMin(stops: readonly RouteStop[]): number {
     0
   )
 }
+
+/**
+ * The road is longer than the straight line between two stops. Without a routing service in the
+ * mock, a leg is read as the great-circle distance times this factor (a simulation, shown as such).
+ */
+export const ROAD_FACTOR = 1.25
+
+export interface RoutePoint {
+  latitude: number
+  longitude: number
+}
+
+/** Distance of the route, recomputed from its stops (TRS07-US03), in whole kilometres. */
+export function routeDistanceKm(
+  points: readonly RoutePoint[],
+  distance: (a: RoutePoint, b: RoutePoint) => number
+): number {
+  let total = 0
+  for (let index = 1; index < points.length; index++) {
+    total += distance(points[index - 1]!, points[index]!) * ROAD_FACTOR
+  }
+  return Math.round(total)
+}
+
+/**
+ * Reference time of the route (TRS07-US03): each leg driven at the average speed, plus the time
+ * planned at the stops before the last one.
+ */
+export function referenceDurationMin(
+  distanceKm: number,
+  stops: readonly Pick<RouteStop, 'breakMin'>[],
+  averageSpeedKmh: number
+): number {
+  const driving = averageSpeedKmh > 0 ? (distanceKm / averageSpeedKmh) * 60 : 0
+  const stopped = stops.slice(0, -1).reduce((total, stop) => total + stop.breakMin, 0)
+  return Math.round(driving + stopped)
+}
+
+/** Shortest distance from a point to a leg, in kilometres, on a flat local projection. */
+export function distanceToLegKm(point: RoutePoint, a: RoutePoint, b: RoutePoint): number {
+  const kmPerDegree = 111.32
+  const cos = Math.cos((((a.latitude + b.latitude) / 2) * Math.PI) / 180)
+  const project = (p: RoutePoint) => ({
+    x: p.longitude * kmPerDegree * cos,
+    y: p.latitude * kmPerDegree
+  })
+  const p = project(point)
+  const start = project(a)
+  const end = project(b)
+  const dx = end.x - start.x
+  const dy = end.y - start.y
+  const length = dx * dx + dy * dy
+  const t = length
+    ? Math.max(0, Math.min(1, ((p.x - start.x) * dx + (p.y - start.y) * dy) / length))
+    : 0
+  return Math.hypot(p.x - (start.x + t * dx), p.y - (start.y + t * dy))
+}

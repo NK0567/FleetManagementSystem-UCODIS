@@ -86,12 +86,15 @@ export function registerFleetModule(): void {
     },
     INSPECTION: { to: '/fleet/inspections', menuKey: 'inspection' },
     CHECKPOINT: { to: '/fleet/check-points', menuKey: 'checkPoint' },
+    INSPECTIONITEM: { to: '/fleet/inspection-items', menuKey: 'inspectionItem' },
+    FUELREFERENCE: { to: '/fleet/fuel-references', menuKey: 'fuelReference' },
     SITE: { to: '/fleet/sites', menuKey: 'site' },
     ROUTETEMPLATE: { to: '/fleet/route-templates', menuKey: 'routeTemplate' },
     PROVIDER: { to: '/fleet/providers', menuKey: 'provider' },
     VEHICLETYPE: { to: '/fleet/vehicle-types', menuKey: 'vehicleType' },
     EQUIPMENTTYPE: { to: '/fleet/equipment-types', menuKey: 'equipmentType' },
     SITETYPE: { to: '/fleet/site-types', menuKey: 'siteType' },
+    PROVIDERTYPE: { to: '/fleet/provider-types', menuKey: 'providerType' },
     DOCUMENTTYPE: { to: '/fleet/document-types', menuKey: 'documentType' },
     FLEETSETTINGS: { to: '/fleet/settings', menuKey: 'fleetSettings' }
   })
@@ -318,6 +321,13 @@ export function registerFleetModule(): void {
         menuKey: 'equipmentType'
       },
       {
+        labelKey: 'nav.providerTypes',
+        to: '/fleet/provider-types',
+        group: 'nav.group.setup',
+        icon: Handshake,
+        menuKey: 'providerType'
+      },
+      {
         labelKey: 'nav.siteTypes',
         to: '/fleet/site-types',
         group: 'nav.group.setup',
@@ -337,6 +347,13 @@ export function registerFleetModule(): void {
         group: 'nav.group.setup',
         icon: ListChecks,
         menuKey: 'checkPoint'
+      },
+      {
+        labelKey: 'nav.inspectionItems',
+        to: '/fleet/inspection-items',
+        group: 'nav.group.setup',
+        icon: ClipboardCheck,
+        menuKey: 'inspectionItem'
       },
       {
         labelKey: 'nav.deviationTypes',
@@ -365,6 +382,13 @@ export function registerFleetModule(): void {
         group: 'nav.group.setup',
         icon: Droplets,
         menuKey: 'fuelGapCause'
+      },
+      {
+        labelKey: 'nav.fuelReferences',
+        to: '/fleet/fuel-references',
+        group: 'nav.group.setup',
+        icon: Gauge,
+        menuKey: 'fuelReference'
       },
       {
         labelKey: 'nav.infractionTypes',

@@ -1,5 +1,5 @@
 import type { CheckResult } from '@/modules/fleet/check-points'
-import type { DepartureCheck, DepartureDecision } from '../domain/departure'
+import type { DepartureActivation, DepartureCheck, DepartureDecision } from '../domain/departure'
 
 export interface DepartureAuthorizationApi {
   no: string
@@ -21,6 +21,8 @@ export interface DepartureAuthorizationApi {
   checks: DepartureCheck[]
   ready: boolean
   checklistNo: string | null
+  /** GPS tracking and camera switched on by the grant; null until then. */
+  activation: DepartureActivation | null
   createdAt: string
   createdBy: string
   modifiedAt: string

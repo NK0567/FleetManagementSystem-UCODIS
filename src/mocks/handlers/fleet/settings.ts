@@ -1,4 +1,5 @@
 import {
+  DEFAULT_FLEET_SETTINGS,
   FLEET_SETTING_FIELDS,
   isFleetSettingsSection,
   settingsSectionIssues,
@@ -14,6 +15,7 @@ import { ok } from '../../http/responses'
 import { readSettingField, settingFieldError } from '../../http/settings'
 import type { MockRouter } from '../../http/router'
 import { FLEET_MESSAGES } from './messages'
+import { integrationSettings, settingsLists } from './settingsLists'
 
 function issueError(issue: SettingIssue) {
   switch (issue.code) {
@@ -28,6 +30,11 @@ function issueError(issue: SettingIssue) {
 
 export function fleetSettings(db: MockDatabase): FleetSettings {
   return db.fleetSettings.findOrFail(FLEET_SETTINGS_NO)
+}
+
+/** Reporting targets; a record saved before they existed falls back on the defaults. */
+export function reportingSettings(db: MockDatabase): FleetSettings['reporting'] {
+  return fleetSettings(db).reporting ?? DEFAULT_FLEET_SETTINGS.reporting
 }
 
 /** The fleet has a single settings record; each section is saved on its own. */
@@ -52,6 +59,9 @@ export function registerFleetSettingsHandlers(router: MockRouter, db: MockDataba
       fuel,
       telematics,
       driverScore,
+      reporting: reportingSettings(db),
+      integrations: integrationSettings(db),
+      ...settingsLists(db),
       modifiedAt,
       modifiedBy
     }

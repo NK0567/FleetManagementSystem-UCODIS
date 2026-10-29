@@ -1,6 +1,7 @@
 import { confirmationApi } from '../api/confirmationApi'
 import type {
   ActionBody,
+  AnsweredLineApi,
   ConfirmationAction,
   ConfirmationLineApi,
   ReceptionAction,
@@ -11,6 +12,9 @@ import type {
 export const confirmationService = {
   async list(): Promise<ConfirmationLineApi[]> {
     return (await confirmationApi.list()).data.data
+  },
+  async answered(): Promise<AnsweredLineApi[]> {
+    return (await confirmationApi.answered()).data.data
   },
   async tracking(token: string): Promise<TrackingApi> {
     return (await confirmationApi.tracking(token)).data.data

@@ -218,7 +218,7 @@ function referenceItems(def: FilterFieldDef) {
 function referenceDisplay(item: Record<string, unknown>): string {
   const code = String(item.code ?? '')
   const description = String(item.description ?? '')
-  return description ? `${code} — ${description}` : code
+  return description ? `${code} · ${description}` : code
 }
 
 function inputValue(value: unknown): string {
@@ -307,7 +307,7 @@ const inputClass =
             <span class="truncate">{{ option.description }}</span>
           </label>
           <p v-if="optionsFor(def).length === 0" class="px-2 py-1.5 text-xs text-muted-foreground">
-            —
+            -
           </p>
         </div>
 
@@ -343,7 +343,7 @@ const inputClass =
               :columns="referenceColumns(def)"
               value-key="code"
               :display-format="referenceDisplay"
-              placeholder="—"
+              placeholder="-"
               :full-list-title="fieldLabel(def)"
               @update:model-value="(value) => updateFilterAt(index, { value })"
             />
@@ -354,7 +354,7 @@ const inputClass =
               :value="inputValue(filter.value)"
               @change="(event) => onBooleanChange(index, event)"
             >
-              <option value="">—</option>
+              <option value="">-</option>
               <option value="1">{{ t('common.yes') }}</option>
               <option value="0">{{ t('common.no') }}</option>
             </select>
@@ -431,7 +431,7 @@ const inputClass =
           v-if="filteredAvailableFields.length === 0"
           class="px-3 py-2 text-xs text-muted-foreground"
         >
-          —
+          -
         </div>
       </div>
     </Teleport>

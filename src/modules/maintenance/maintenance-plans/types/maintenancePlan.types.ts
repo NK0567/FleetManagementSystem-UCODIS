@@ -6,6 +6,10 @@ export interface MaintenancePlanApi {
   provisional: boolean
   active: boolean
   source: string
+  /** The models the plan applies to; see `modelCode`. */
+  modelCodes: string[]
+  modelNames: string
+  /** The vehicles of those models, which inherit the plan. */
   vehicleNos: string[]
   operations: MaintenanceOperation[]
   vehiclePlates: string

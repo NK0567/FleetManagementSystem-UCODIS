@@ -1,7 +1,18 @@
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
-import { Archive, ClipboardCheck, Columns3, ListChecks, PhoneCall } from '@lucide/vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import {
+  AlertTriangle,
+  Archive,
+  ClipboardCheck,
+  Columns3,
+  Inbox,
+  ListChecks,
+  PhoneCall,
+  Sparkles
+} from '@lucide/vue'
 import TransportOrdersBoard from '../components/TransportOrdersBoard.vue'
+import LoadingProposalDialog from '../components/LoadingProposalDialog.vue'
+import { deliveryRequestService } from '@/modules/planning/delivery-requests'
 import { useI18n } from 'vue-i18n'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
@@ -14,6 +25,37 @@ import type { TransportOrderApi, TransportOrderSearchColumn } from '../types/tra
 
 const { t } = useI18n()
 const store = useTransportOrderStore()
+
+/* The board tells the planner how many orders wait for a transport order, and which orders or
+ * transport orders are past their date (TRS01-US04, TRS07-US07). */
+const pendingRequests = ref(0)
+const expiredRequests = ref(0)
+const expiredOrders = computed(() => store.items.filter((item) => item.expired).length)
+async function loadWaiting() {
+  try {
+    const [pending, expired] = await Promise.all(
+      (['pending', 'expired'] as const).map((status) =>
+        deliveryRequestService.getAll({
+          page: 1,
+          pageSize: 1,
+          filters: [{ field: 'status', valueType: 'string', value: status }]
+        })
+      )
+    )
+    pendingRequests.value = pending?.data.meta.total ?? 0
+    expiredRequests.value = expired?.data.meta.total ?? 0
+  } catch {
+    pendingRequests.value = 0
+    expiredRequests.value = 0
+  }
+}
+onMounted(loadWaiting)
+watch(() => store.items, loadWaiting)
+const proposing = ref(false)
+function onProposed() {
+  proposing.value = false
+  void store.fetchItems(store.pagination.page, store.pagination.limit)
+}
 const { formatDateTime, formatDecimal, optionLabel } = useListCellFormatters()
 const creatingFromRequests = ref(false)
 
@@ -351,10 +393,46 @@ function onCreatedFromRequests(no: string) {
             <ListChecks class="w-4 h-4 text-primary" />
             {{ t('planning.transportOrders.createDialog.title') }}
           </button>
+          <button
+            v-if="canInsert"
+            type="button"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
+            @click="proposing = true"
+          >
+            <Sparkles class="w-4 h-4 text-primary" />
+            {{ t('planning.transportOrders.proposal.title') }}
+          </button>
         </template>
       </ListPageToolbar>
 
       <FormAlerts class="mx-4" :error="exportError" @clear:error="exportError = null" />
+
+      <div class="mx-4 mb-2 flex flex-wrap gap-2 text-sm">
+        <button
+          type="button"
+          class="cursor-pointer inline-flex items-center gap-2 rounded border border-border bg-card px-3 py-1.5 hover:bg-accent"
+          :disabled="!canInsert"
+          @click="creatingFromRequests = true"
+        >
+          <Inbox class="w-4 h-4 text-primary" />
+          <span class="text-muted-foreground">
+            {{ t('planning.transportOrders.waiting.label') }}
+          </span>
+          <span class="font-semibold tabular-nums text-card-foreground">{{ pendingRequests }}</span>
+        </button>
+        <span
+          v-if="expiredRequests || expiredOrders"
+          class="inline-flex items-center gap-2 rounded border border-warning/50 bg-warning/10 px-3 py-1.5"
+        >
+          <AlertTriangle class="w-4 h-4 text-warning" />
+          {{
+            t('planning.transportOrders.waiting.expired', {
+              requests: expiredRequests,
+              orders: expiredOrders
+            })
+          }}
+        </span>
+      </div>
 
       <TransportOrdersBoard
         v-if="boardView"
@@ -434,7 +512,7 @@ function onCreatedFromRequests(no: string) {
                     {{ t('planning.transportOrders.col.recipientSummary') }}
                   </p>
                   <p class="font-semibold text-primary">
-                    {{ store.selectedItem.recipientSummary || '—' }}
+                    {{ store.selectedItem.recipientSummary || '·' }}
                   </p>
                 </div>
                 <dl class="grid grid-cols-2 gap-x-3 gap-y-2">
@@ -489,5 +567,6 @@ function onCreatedFromRequests(no: string) {
       @close="creatingFromRequests = false"
       @created="onCreatedFromRequests"
     />
+    <LoadingProposalDialog :open="proposing" @close="proposing = false" @created="onProposed" />
   </div>
 </template>

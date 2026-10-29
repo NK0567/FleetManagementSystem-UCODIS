@@ -134,7 +134,7 @@ const meansOf = (order: TransportOrderApi) =>
                 </span>
               </span>
               <span class="block text-sm text-card-foreground truncate">
-                {{ order.recipientSummary || '—' }}
+                {{ order.recipientSummary || '·' }}
               </span>
               <span class="block text-xs text-muted-foreground">
                 {{ formatDateTime(order.plannedDeparture) }}

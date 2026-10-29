@@ -33,9 +33,13 @@ const FLEET_REFERENCE = [
   'VEHICLETYPE',
   'EQUIPMENTTYPE',
   'SITETYPE',
+  'PROVIDERTYPE',
   'DOCUMENTTYPE',
   'INFRACTIONTYPE',
   'CHECKPOINT',
+  /* The periodic inspection grid (FLT01-US10) and the reference consumptions (FLT02-US04). */
+  'INSPECTIONITEM',
+  'FUELREFERENCE',
   'ALERTRULE',
   'FUELGAPCAUSE',
   'TELEMATICSEVENTTYPE',
@@ -210,7 +214,8 @@ export const ROLE_PERMISSIONS: Record<UserProfileCode, Record<string, Grant>> = 
     DELIVERYREQUEST: allRecords(['read', 'insert', 'update', 'execute', 'export']),
     TRANSPORTORDER: FULL,
     PLANNINGCALENDAR: READ,
-    CUSTOMERCONFIRMATION: READ,
+    /* The « Confirmations destinataires » tab is the agent's alone (TRS01-US15): the planner
+     * reads the answers on the order card. */
     LOADING: READ,
     LOADINGPLAN: READ,
     GOODSRETURN: READ,
@@ -232,14 +237,15 @@ export const ROLE_PERMISSIONS: Record<UserProfileCode, Record<string, Grant>> = 
     DELIVERYREQUEST: READ_EXPORT,
     TRANSPORTORDER: allRecords(['read', 'execute', 'export']),
     PLANNINGCALENDAR: READ,
-    CUSTOMERCONFIRMATION: READ,
     LOADING: FULL,
     /* He prepares the loading of several vehicles from a depot (TRS01-US20 to US23). */
     LOADINGPLAN: FULL,
     GOODSRETURN: READ,
     DELIVERYQUALITY: FULL,
-    PLANNINGDASHBOARD: READ_EXPORT,
-    TRANSPORTREPORT: READ_EXPORT
+    /* He follows the dashboard and the indicators (TRS08-US01 to US04); the director exports
+     * them (TRS08-US05). */
+    PLANNINGDASHBOARD: READ,
+    TRANSPORTREPORT: READ
   },
   BILLING: {
     ...backOffice,
@@ -248,7 +254,7 @@ export const ROLE_PERMISSIONS: Record<UserProfileCode, Record<string, Grant>> = 
     TRANSPORTORDER: READ_EXPORT,
     CUSTOMERBILLING: FULL,
     CARRIERINVOICE: FULL,
-    TRANSPORTREPORT: READ_EXPORT
+    TRANSPORTREPORT: READ
   },
   CUSTOMER_SERVICE: {
     ...backOffice,

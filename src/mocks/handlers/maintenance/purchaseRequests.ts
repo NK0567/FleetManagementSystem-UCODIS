@@ -17,6 +17,7 @@ import type { MockRouter } from '../../http/router'
 import { sessionUser, type MockRequest } from '../../http/types'
 import { MAINTENANCE_MESSAGES } from './messages'
 import { addMovement } from './stockLedger'
+import { openDowntime } from './workOrders'
 
 /** Shortest reason accepted for a cancellation. */
 const MIN_REASON = 10
@@ -102,7 +103,10 @@ export function registerPurchaseRequestsHandlers(router: MockRouter, db: MockDat
       )
       if (workOrderNo) {
         const order = workableOrder(workOrderNo)
+        // Waiting for a part keeps the vehicle unavailable, even for a service not started yet.
+        const downtimeNo = order.downtimeNo ?? openDowntime(db, order, at, request)
         db.workOrders.update(order.no, {
+          downtimeNo,
           parts: [
             ...order.parts,
             {
@@ -135,7 +139,10 @@ export function registerPurchaseRequestsHandlers(router: MockRouter, db: MockDat
         finalAmount: null,
         cancelledAt: null,
         cancelledBy: null,
-        cancelReason: ''
+        cancelReason: '',
+        // Simulated link: the request is handed to the ERP the moment it is made.
+        erpReference: `ERP-${no}`,
+        erpSentAt: at
       }
     },
     update: (existing, input) => {

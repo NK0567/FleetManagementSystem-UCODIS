@@ -69,8 +69,18 @@ const print = () =>
             <span :class="line.notDelivered ? 'line-through text-muted-foreground' : ''">
               {{ line.productName }}
             </span>
+            <p v-if="line.measures && !line.notDelivered" class="text-muted-foreground">
+              {{
+                t('planning.deliveryNote.measures', {
+                  volume: formatNumber(line.measures.deliveredVolumeL),
+                  temperature: formatNumber(line.measures.temperatureC, 1),
+                  density: formatNumber(line.measures.density, 3),
+                  volume15: formatNumber(line.measures.volume15L)
+                })
+              }}
+            </p>
             <p v-if="line.notDelivered" class="text-destructive">
-              {{ t('planning.deliveryNote.notDelivered', { reason: line.reason || '—' }) }}
+              {{ t('planning.deliveryNote.notDelivered', { reason: line.reason || '-' }) }}
             </p>
           </td>
           <td class="px-3 py-1.5 text-right tabular-nums whitespace-nowrap">

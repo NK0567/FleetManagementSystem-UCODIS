@@ -22,7 +22,9 @@ import type { MockRouter } from '../../http/router'
 import type { MockRequest } from '../../http/types'
 import { localize, localizeDay, type LocalizedText, type MockLanguage } from '../../i18n'
 import { activeLinks, coupledWith, employeeNames, vehiclePlates } from './links'
+import { livePositions } from './livePositions'
 import { FLEET_MESSAGES } from './messages'
+import { registerFleetStatusDispatchHandlers } from './fleetStatusDispatch'
 import { statusReason, vehicleStatuses } from './vehicleState'
 
 const MAX_OBSERVATION = 500
@@ -62,6 +64,13 @@ export function liveFleetStatus(db: MockDatabase, language: MockLanguage): Fleet
       .all()
       .filter((note) => note.date === today)
       .map((note) => [note.vehicleNo, note])
+  )
+  // Where the tracked vehicles are now: the site holding them, or else their coordinates.
+  const positions = new Map(
+    livePositions(db).map((position) => [
+      position.vehicleNo,
+      position.placeName || `${position.latitude.toFixed(4)}, ${position.longitude.toFixed(4)}`
+    ])
   )
 
   const inFleet = db.vehicles.all().filter((vehicle) => !vehicle.removal)
@@ -112,6 +121,7 @@ export function liveFleetStatus(db: MockDatabase, language: MockLanguage): Fleet
               .map((order) => order.no),
       mission,
       location: trip?.status === 'in_progress' ? nextSite : (sites.get(vehicle.homeSiteNo) ?? ''),
+      position: positions.get(vehicle.no) ?? '',
       immobilizationReason: immobilized ? statusReason(result.cause, vehicle, language) : '',
       observation: note?.observation ?? '',
       expectedBackOn: note?.expectedBackOn ?? null
@@ -223,6 +233,8 @@ export function registerFleetStatusHandlers(router: MockRouter, db: MockDatabase
       return ok(liveFleetStatus(db, request.language).find((line) => line.no === vehicle.no))
     }
   )
+
+  registerFleetStatusDispatchHandlers(router, db, (language) => liveFleetStatus(db, language))
 
   registerListResource(router, {
     basePath: '/fleet/fleet-status',
