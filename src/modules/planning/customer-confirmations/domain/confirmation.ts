@@ -51,6 +51,8 @@ export interface LineFollowUp {
   contestHandlingReasonNo: string | null
   satisfactionScore: number | null
   satisfactionComment: string
+  /** Messages sent to the recipient on his channel as the delivery moves on (TRS02-US02). */
+  recipientMessages?: { at: string; channel: string; kind: string }[]
   handedBackAt: string | null
   warehouseReceivedAt: string | null
   warehouseConforming: boolean | null

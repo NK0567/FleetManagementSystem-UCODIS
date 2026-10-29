@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Ban, CircleX, Combine, Split } from '@lucide/vue'
+import { Ban, CircleX, Combine, Split, Star } from '@lucide/vue'
 import { apiErrorMessage } from '@/core/api/apiError'
 import type { CardOpenMode } from '@/composables/cardOpenMode'
 import { useEntityCard } from '@/composables/useEntityCard'
@@ -87,6 +87,14 @@ async function split() {
   if (await run('split', { quantity: splitQuantity.value })) splitting.value = false
 }
 
+/* The orderer's survey, once the transport order is completed (TRS04-US07). */
+const surveying = ref(false)
+const survey = ref({ orderScore: 0, delayScore: 0, qualityScore: 0, comment: '' })
+const SURVEY_FIELDS = ['orderScore', 'delayScore', 'qualityScore'] as const
+async function sendSurvey() {
+  if (await run('satisfaction', { ...survey.value })) surveying.value = false
+}
+
 async function act(choice: { reasonNo: string; comment: string }) {
   if (dialog.value && (await run(dialog.value, choice))) dialog.value = null
 }
@@ -159,6 +167,15 @@ const buttonClass =
         <Combine class="w-5 h-5 text-primary" /> {{ t('planning.deliveryRequests.action.merge') }}
       </button>
       <button
+        v-if="canUpdate && item.orderCompleted && !item.ordererSurvey"
+        type="button"
+        :class="buttonClass"
+        :disabled="acting"
+        @click="surveying = true"
+      >
+        <Star class="w-5 h-5 text-primary" /> {{ t('planning.deliveryRequests.survey.open') }}
+      </button>
+      <button
         v-if="canUpdate && canCancel(item.status)"
         type="button"
         :class="buttonClass"
@@ -207,6 +224,19 @@ const buttonClass =
               {{ t('planning.deliveryRequests.resubmitHint') }}
             </p>
           </div>
+          <div
+            v-if="item?.ordererSurvey"
+            class="mx-6 mt-4 rounded border border-border px-4 py-3 text-sm space-y-1"
+          >
+            <p class="font-medium text-card-foreground">
+              {{ t('planning.deliveryRequests.survey.answered') }}
+            </p>
+            <p v-for="field in SURVEY_FIELDS" :key="field" class="text-muted-foreground">
+              {{ t(`planning.deliveryRequests.survey.${field}`) }} :
+              <span class="text-warning">{{ '★'.repeat(item.ordererSurvey[field]) }}</span>
+            </p>
+            <p v-if="item.ordererSurvey.comment">{{ item.ordererSurvey.comment }}</p>
+          </div>
           <DeliveryRequestForm
             ref="formRef"
             :initial-data="item ?? {}"
@@ -239,6 +269,42 @@ const buttonClass =
         {{ t('planning.deliveryRequests.splitHint', { quantity: item?.quantity ?? 0 }) }}
       </p>
     </BaseFormField>
+  </ConfirmDialog>
+
+  <ConfirmDialog
+    :open="surveying"
+    :title="t('planning.deliveryRequests.survey.open')"
+    :confirm-label="t('common.confirm')"
+    :confirm-disabled="SURVEY_FIELDS.some((field) => !survey[field])"
+    :loading="acting"
+    panel-class="max-w-md"
+    @confirm="sendSurvey"
+    @cancel="surveying = false"
+  >
+    <div class="space-y-3">
+      <p class="text-sm text-muted-foreground">{{ t('planning.deliveryRequests.survey.hint') }}</p>
+      <div v-for="field in SURVEY_FIELDS" :key="field">
+        <p class="text-sm text-card-foreground">
+          {{ t(`planning.deliveryRequests.survey.${field}`) }}
+        </p>
+        <div class="flex gap-1">
+          <button
+            v-for="value in 5"
+            :key="value"
+            type="button"
+            class="cursor-pointer text-2xl leading-none"
+            :class="value <= survey[field] ? 'text-warning' : 'text-muted-foreground'"
+            :aria-label="`${t(`planning.deliveryRequests.survey.${field}`)} ${value}`"
+            @click="survey[field] = value"
+          >
+            ★
+          </button>
+        </div>
+      </div>
+      <BaseFormField :label="t('planning.deliveryRequests.survey.comment')">
+        <FormTextarea v-model="survey.comment" :rows="2" :maxlength="300" />
+      </BaseFormField>
+    </div>
   </ConfirmDialog>
 
   <PlanningReasonDialog

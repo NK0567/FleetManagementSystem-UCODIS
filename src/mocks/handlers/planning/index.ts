@@ -23,6 +23,7 @@ import { registerReportHandlers } from './reports'
 import { registerDeliveryNotesHandlers } from './deliveryNotes'
 import { registerPickupHandlers } from './pickup'
 import { registerLoadingPreparationHandlers } from './loadingPreparations'
+import { registerNotificationHandlers } from './notifications'
 
 export function registerPlanningHandlers(router: MockRouter, db: MockDatabase): void {
   registerPlanningSettingsHandlers(router, db)
@@ -43,6 +44,7 @@ export function registerPlanningHandlers(router: MockRouter, db: MockDatabase): 
   registerDeliveryNotesHandlers(router, db)
   registerPickupHandlers(router, db)
   registerLoadingPreparationHandlers(router, db)
+  registerNotificationHandlers(router, db)
   registerDeliveryQualityHandlers(router, db)
   registerClosingHandlers(router, db)
   registerCustomerBillingHandlers(router, db)

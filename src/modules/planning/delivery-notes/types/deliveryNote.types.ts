@@ -22,9 +22,9 @@ export interface DeliveryNoteApi {
   deliveryPointName: string
   recipientName: string
   vehiclePlate: string
-  /** First declaration on this delivery; the note does not exist before. */
-  openedAt: string
-  state: 'awaiting' | 'signed' | 'contested'
+  /** First declaration on this delivery; before it, the note is only planned (TRS01-US23). */
+  openedAt: string | null
+  state: 'planned' | 'awaiting' | 'signed' | 'contested'
   signedAt: string | null
   signedBy: string
   contestedAt: string | null

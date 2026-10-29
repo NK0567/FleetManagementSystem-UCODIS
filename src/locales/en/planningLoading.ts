@@ -125,5 +125,11 @@ export default {
   'planning.preparation.line': 'Order and product',
   'planning.preparation.quantity': 'Quantity',
   'planning.preparation.addEntry': 'Add an order to this compartment',
-  'planning.preparation.saveError': 'The preparation could not be saved.'
+  'planning.preparation.saveError': 'The preparation could not be saved.',
+  'planning.preparation.route': 'Route type',
+  'planning.preparation.noRoute': 'Route to choose',
+  'planning.preparation.departureTime': 'Departure time',
+  'planning.preparation.validate': 'Validate the plan',
+  'planning.preparation.validatedOn': 'Plan validated on {at}: each vehicle became a planned transport order.',
+  'planning.preparation.orderMade': 'Order {no}'
 }

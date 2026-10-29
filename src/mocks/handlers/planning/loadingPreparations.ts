@@ -23,10 +23,12 @@ import { invalidField, readDate, readNumber, readString, readStringList } from '
 import { ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
 import { localize, toMockLanguage, type MockLanguage } from '../../i18n'
-import { driverEmployees } from '../fleet/drivers'
+import { driverEmployees, driverFacts } from '../fleet/drivers'
+import { driverIneligibility } from '@/modules/fleet/drivers/domain/driver'
 import { PLANNING_MESSAGES } from './messages'
 import { requestPlace } from './perimeter'
-import { goodsCarriers, serving } from './transportOrders'
+import { createPlannedOrder, goodsCarriers, serving } from './transportOrders'
+import { nowIsoDateTime } from '@/utils/date'
 
 const FEATURE = 'LOADINGPLAN'
 const BASE = '/planning/loading-preparations'
@@ -320,6 +322,30 @@ function issuesOf(
   return issues
 }
 
+function issueLabel(language: MockLanguage, issue: PreparationIssue): string {
+  const fr = language === 'fr'
+  switch (issue.code) {
+    case 'overCapacity':
+      return fr
+        ? `Quantité supérieure à la capacité (${issue.quantityL} L pour ${issue.capacityL} L).`
+        : `Quantity above capacity (${issue.quantityL} L for ${issue.capacityL} L).`
+    case 'incompatible':
+      return fr
+        ? `${issue.productA} et ${issue.productB} incompatibles sur ${issue.plate}.`
+        : `${issue.productA} and ${issue.productB} incompatible on ${issue.plate}.`
+    case 'compartmentRule':
+      return fr
+        ? `Le compartiment ${issue.compartmentNo} de ${issue.plate} doit être rempli entièrement.`
+        : `Compartment ${issue.compartmentNo} of ${issue.plate} must be filled completely.`
+    case 'equipmentMissing':
+      return fr
+        ? `${issue.point} : équipement exigé absent sur ${issue.plate}.`
+        : `${issue.point}: required equipment missing on ${issue.plate}.`
+    case 'unplaced':
+      return issue.requestNo
+  }
+}
+
 export function preparationApi(
   db: MockDatabase,
   row: LoadingPreparationRow
@@ -361,6 +387,7 @@ export function preparationApi(
     validUntil: row.validUntil,
     region: row.region,
     status: row.status,
+    validatedAt: row.validatedAt ?? null,
     requestNos: row.requestNos,
     vehicles,
     requestLines: lines.map((line) => ({
@@ -432,14 +459,21 @@ function readHeader(db: MockDatabase, body: Record<string, unknown>, except: str
     if (trailerNo && !db.vehicles.find(trailerNo)) throw invalidField('vehicles')
     const driverNo = readString(entry, 'driverNo') || null
     if (driverNo && !db.employees.find(driverNo)) throw invalidField('vehicles')
+    const routeTemplateNo = readString(entry, 'routeTemplateNo') || null
+    if (routeTemplateNo && !db.routeTemplates.find(routeTemplateNo)) throw invalidField('vehicles')
+    const departureTime = readString(entry, 'departureTime') || '06:00'
+    if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(departureTime)) throw invalidField('vehicles')
     const plate = plateOf(db, trailerNo) || plateOf(db, vehicleNo)
+    // The vehicle drives: a tanker or a semi-trailer comes as the trailer of a tractor.
+    const type = db.vehicleTypes.find(db.vehicles.find(vehicleNo)!.vehicleTypeNo)
+    if (!type?.motorized) throw unprocessable(PLANNING_MESSAGES.prepVehicleNotMotorized, { plate })
     if (vehicles.some((v) => v.vehicleNo === vehicleNo)) {
       throw unprocessable(PLANNING_MESSAGES.prepVehicleTwice, { plate })
     }
     if (!goodsCarriers(db, vehicleNo, trailerNo).length) {
       throw unprocessable(PLANNING_MESSAGES.prepVehicleNoGoods, { plate })
     }
-    vehicles.push({ vehicleNo, trailerNo, driverNo })
+    vehicles.push({ vehicleNo, trailerNo, driverNo, routeTemplateNo, departureTime })
   }
   return { depotSiteNo, loadingDate, validUntil, region, requestNos, vehicles }
 }
@@ -602,10 +636,17 @@ export function registerLoadingPreparationHandlers(router: MockRouter, db: MockD
         typeName: types.get(vehicle.vehicleTypeNo)?.name ?? '',
         carriesGoods: types.get(vehicle.vehicleTypeNo)?.carriesGoods ?? false
       })),
-      drivers: driverEmployees(db).map((employee) => ({
-        no: employee.no,
-        name: `${employee.firstName} ${employee.lastName}`
-      }))
+      // Only the drivers who may drive today are offered (licence, documents, status).
+      drivers: driverEmployees(db)
+        .filter((employee) => !driverIneligibility(driverFacts(db, employee, todayIso())).length)
+        .map((employee) => ({
+          no: employee.no,
+          name: `${employee.firstName} ${employee.lastName}`
+        })),
+      routes: db.routeTemplates
+        .all()
+        .filter((route) => route.active)
+        .map((route) => ({ no: route.no, name: route.name }))
     }
     return ok(options)
   })
@@ -640,6 +681,82 @@ export function registerLoadingPreparationHandlers(router: MockRouter, db: MockD
         header.vehicles.some((vehicle) => vehicle.vehicleNo === entry.vehicleNo)
     )
     db.loadingPreparations.update(row.no, { ...header, plan, ...stampModified(request) })
+    return ok(preparationApi(db, db.loadingPreparations.findOrFail(row.no)))
+  })
+
+  /* Validating freezes the plan: each vehicle with orders becomes a transport order planned
+   * with its driver, who is notified; its pickup note and the delivery notes follow from the
+   * order (TRS01-US23). Orders left out of the plan stay pending. */
+  router.post(`${BASE}/:no/validate`, { feature: FEATURE, action: 'update' }, (request) => {
+    const row = editable(routeParam(request, 'no'))
+    const language = toMockLanguage(request.language)
+    const lines = requestLinesOf(db, row.requestNos)
+    // What the vehicles cannot take stays pending; a broken rule on the plan blocks.
+    const blocking = issuesOf(db, row, lines).filter(
+      (issue) => issue.code !== 'unplaced' && issue.code !== 'overCapacity'
+    )
+    if (blocking.length) {
+      throw unprocessable(PLANNING_MESSAGES.prepNotValidable, {
+        details: blocking.map((issue) => issueLabel(language, issue)).join(' ')
+      })
+    }
+    if (!row.plan.length) throw unprocessable(PLANNING_MESSAGES.prepEmptyPlan)
+    // A request becomes an order line only whole and on one vehicle.
+    const byRequest = new Map<string, Set<string>>()
+    for (const entry of row.plan) {
+      byRequest.set(
+        entry.requestNo,
+        (byRequest.get(entry.requestNo) ?? new Set()).add(entry.vehicleNo)
+      )
+    }
+    for (const [requestNo, vehicles] of byRequest) {
+      const full = lines
+        .filter((line) => line.requestNo === requestNo)
+        .every(
+          (line) =>
+            row.plan
+              .filter((e) => e.requestNo === requestNo && e.requestLineNo === line.requestLineNo)
+              .reduce((sum, e) => sum + e.quantity, 0) === line.quantity
+        )
+      if (vehicles.size > 1 || !full) {
+        throw unprocessable(PLANNING_MESSAGES.prepRequestSpread, { no: requestNo })
+      }
+    }
+    const used = row.vehicles.filter((vehicle) =>
+      row.plan.some((e) => e.vehicleNo === vehicle.vehicleNo)
+    )
+    for (const vehicle of used) {
+      if (!vehicle.driverNo || !vehicle.routeTemplateNo) {
+        throw unprocessable(PLANNING_MESSAGES.prepVehicleIncomplete, {
+          plate: plateOf(db, vehicle.trailerNo) || plateOf(db, vehicle.vehicleNo)
+        })
+      }
+    }
+    const vehicles = row.vehicles.map((vehicle) => {
+      if (!used.includes(vehicle)) return vehicle
+      const requests = [...byRequest]
+        .filter(([, set]) => set.has(vehicle.vehicleNo))
+        .map(([no]) => ({
+          no,
+          lineNos: lines.filter((line) => line.requestNo === no).map((line) => line.requestLineNo)
+        }))
+      const orderNo = createPlannedOrder(db, request, {
+        requests,
+        routeTemplateNo: vehicle.routeTemplateNo!,
+        plannedDeparture: `${row.loadingDate}T${vehicle.departureTime ?? '06:00'}:00`,
+        vehicleNo: vehicle.vehicleNo,
+        trailerNo: vehicle.trailerNo,
+        driverNo: vehicle.driverNo!,
+        comment: row.no
+      })
+      return { ...vehicle, orderNo }
+    })
+    db.loadingPreparations.update(row.no, {
+      status: 'validated',
+      validatedAt: nowIsoDateTime(),
+      vehicles,
+      ...stampModified(request)
+    })
     return ok(preparationApi(db, db.loadingPreparations.findOrFail(row.no)))
   })
 

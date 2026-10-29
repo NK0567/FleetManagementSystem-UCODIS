@@ -1,5 +1,8 @@
 <script lang="ts" setup>
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { Printer } from '@lucide/vue'
+import { printElement } from '@/utils/printElement'
 import { formatDateTime, formatNumber } from '@/utils/format'
 import type { DeliveryNoteApi } from '../types/deliveryNote.types'
 
@@ -8,19 +11,34 @@ import type { DeliveryNoteApi } from '../types/deliveryNote.types'
  * was delivered, the lines not delivered with their reason, and the signature, which is the
  * recipient's name once he confirms; until then it awaits his confirmation.
  */
-defineProps<{ note: DeliveryNoteApi }>()
+const props = defineProps<{ note: DeliveryNoteApi; printable?: boolean }>()
 const { t } = useI18n()
+const root = ref<HTMLElement | null>(null)
+const print = () =>
+  printElement(root.value, `${t('planning.deliveryNote.title')} ${props.note.orderNo}`)
 </script>
 
 <template>
-  <div class="rounded border border-border text-sm text-card-foreground">
+  <div ref="root" class="rounded border border-border text-sm text-card-foreground">
     <div
       class="flex flex-wrap items-baseline justify-between gap-2 px-3 py-2 border-b border-border"
     >
       <p class="font-semibold">{{ t('planning.deliveryNote.title') }}</p>
       <p class="text-xs text-muted-foreground">
         {{ note.orderNo }} ·
-        {{ t('planning.deliveryNote.openedAt', { at: formatDateTime(note.openedAt) }) }}
+        {{
+          note.openedAt
+            ? t('planning.deliveryNote.openedAt', { at: formatDateTime(note.openedAt) })
+            : t('planning.deliveryNote.plannedHint')
+        }}
+        <button
+          v-if="printable"
+          type="button"
+          class="print-hide cursor-pointer inline-flex items-center gap-1 ml-2 text-primary hover:underline"
+          @click="print"
+        >
+          <Printer class="w-3.5 h-3.5" /> {{ t('planning.pickup.print') }}
+        </button>
       </p>
     </div>
     <dl class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 px-3 py-2 text-xs">
@@ -75,7 +93,9 @@ const { t } = useI18n()
           ? 'text-success'
           : note.state === 'contested'
             ? 'text-destructive'
-            : 'text-warning'
+            : note.state === 'planned'
+              ? 'text-muted-foreground'
+              : 'text-warning'
       "
     >
       <template v-if="note.state === 'signed'">
@@ -94,6 +114,9 @@ const { t } = useI18n()
           })
         }}
       </template>
+      <template v-else-if="note.state === 'planned'">{{
+        t('planning.deliveryNote.planned')
+      }}</template>
       <template v-else>{{ t('planning.deliveryNote.awaiting') }}</template>
     </p>
   </div>

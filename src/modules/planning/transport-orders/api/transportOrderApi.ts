@@ -21,6 +21,8 @@ export const transportOrderApi = {
   ...createCrudApi<TransportOrderApi>({ basePath }),
   replaceLines: (no: string, lines: TransportOrderLineInput[], force = false) =>
     httpClient.put<SingleResponse<TransportOrderApi>>(`${orderPath(no)}/lines`, { lines, force }),
+  proposedSequence: (no: string) =>
+    httpClient.get<SingleResponse<number[]>>(`${orderPath(no)}/proposed-sequence`),
   reorderLines: (no: string, lineNos: number[]) =>
     httpClient.put<SingleResponse<TransportOrderApi>>(`${orderPath(no)}/sequence`, { lineNos }),
   act: (no: string, action: TransportOrderAction, body: Record<string, unknown> = {}) =>

@@ -125,5 +125,11 @@ export default {
   'planning.preparation.line': 'Commande et produit',
   'planning.preparation.quantity': 'Quantité',
   'planning.preparation.addEntry': 'Ajouter une commande dans ce compartiment',
-  'planning.preparation.saveError': 'La préparation n’a pas pu être enregistrée.'
+  'planning.preparation.saveError': 'La préparation n’a pas pu être enregistrée.',
+  'planning.preparation.route': 'Itinéraire type',
+  'planning.preparation.noRoute': 'Itinéraire à choisir',
+  'planning.preparation.departureTime': 'Heure de départ',
+  'planning.preparation.validate': 'Valider le plan',
+  'planning.preparation.validatedOn': 'Plan validé le {at} : chaque véhicule est devenu un ordre de transport planifié.',
+  'planning.preparation.orderMade': 'Ordre {no}'
 }

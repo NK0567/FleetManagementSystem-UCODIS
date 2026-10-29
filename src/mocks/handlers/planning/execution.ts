@@ -24,6 +24,7 @@ import { ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
 import { sessionUser, type MockRequest } from '../../http/types'
 import { PLANNING_MESSAGES } from './messages'
+import { messageRecipients } from './recipientMessages'
 import { planningSettings } from './settings'
 import { readReason } from './planningReasons'
 
@@ -83,6 +84,8 @@ export function driverOrder(
 }
 
 export function registerExecutionHandlers(router: MockRouter, db: MockDatabase): void {
+  /* Orders the driver's arrival has just started: their recipients are told (TRS02-US02). */
+  const startedOrders = new Set<string>()
   router.post(
     '/planning/transport-orders/:no/depart',
     { feature: 'TRANSPORTORDER', action: 'execute' },
@@ -91,6 +94,7 @@ export function registerExecutionHandlers(router: MockRouter, db: MockDatabase):
       if (order.means !== 'carrier') throw conflict(PLANNING_MESSAGES.executionNotCarrier)
       if (statusOf(db, order) !== 'ready') throw conflict(PLANNING_MESSAGES.executionNotReady)
       save(db, order, { carrierDepartedAt: nowIsoDateTime() }, request, 'departed', order.no)
+      messageRecipients(db, order.no, 'started')
       return ok({ status: statusOf(db, db.transportOrders.findOrFail(order.no)) })
     }
   )
@@ -140,6 +144,8 @@ export function registerExecutionHandlers(router: MockRouter, db: MockDatabase):
             : 'postponed',
       String(lineNo)
     )
+    if (name === 'declare')
+      messageRecipients(db, order.no, 'declared', (item) => item.lineNo === lineNo)
     const updated = db.transportOrders.findOrFail(order.no)
     return ok({ status: statusOf(db, updated), delivered: linesDelivered(updated.lines) })
   }
@@ -210,6 +216,7 @@ export function registerExecutionHandlers(router: MockRouter, db: MockDatabase):
         const trip = db.trips.findOrFail(order.tripNo)
         if (trip.status === 'planned') {
           db.trips.update(trip.no, { status: 'in_progress', actualDeparture: nowIsoDateTime() })
+          startedOrders.add(order.no)
         }
       }
       const at = nowIsoDateTime()
@@ -227,6 +234,7 @@ export function registerExecutionHandlers(router: MockRouter, db: MockDatabase):
         'departed',
         `arrivée ${target.deliveryPointNo}`
       )
+      if (startedOrders.delete(order.no)) messageRecipients(db, order.no, 'started')
       return ok({ status: statusOf(db, db.transportOrders.findOrFail(order.no)) })
     }
   )

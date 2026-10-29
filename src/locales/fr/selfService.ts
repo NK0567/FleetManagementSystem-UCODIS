@@ -94,5 +94,9 @@ export default {
   'selfService.orders.state.toReturn': "À rapporter à l'entrepôt",
   'selfService.orders.state.awaitingRecipient': 'Déclarée, en attente de la confirmation du destinataire',
   'selfService.orders.state.confirmed': 'Confirmée par le destinataire',
-  'selfService.orders.state.contested': 'Contestée par le destinataire'
+  'selfService.orders.state.contested': 'Contestée par le destinataire',
+  'selfService.notifications.title': 'Mes notifications',
+  'selfService.notifications.markRead': 'Marquer comme lues',
+  'selfService.notifications.order_assigned': 'L’ordre de transport {no} vous est confié. Livraisons : {reason}',
+  'selfService.notifications.order_cancelled': 'L’ordre de transport {no} est annulé. Motif : {reason}'
 }

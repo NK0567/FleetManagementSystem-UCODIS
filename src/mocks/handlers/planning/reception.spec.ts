@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import type { DeliveryRequestApi } from '@/modules/planning/delivery-requests/types/deliveryRequest.types'
 import { call, createTestServer } from '../../testing'
 import type { MockServer } from '../../index'
-import type { ReceptionLineApi } from './reception'
 
 let server: MockServer
 
@@ -111,51 +110,36 @@ describe('reception', () => {
     ).toBe(409)
   })
 
-  it('records satisfaction once the recipient has confirmed', async () => {
+  it('lets the recipient answer the survey himself, after his own confirmation (TRS04-US06)', async () => {
     await driverDeclare('TR-2026-0003', 1, { receivedQuantity: 150 })
+    const token = server.db.transportOrders.find('TR-2026-0003')!.lines[0]!.trackingToken!
+    const survey = (body: Record<string, unknown>) =>
+      call(server, 'post', `/public/tracking/${token}/satisfaction`, { body, language: 'en' })
+    expect((await survey({ score: 5 })).status).toBe(409)
+    await call(server, 'post', `/public/tracking/${token}/receive-confirm`, {
+      body: { signer: 'Rabe' }
+    })
+    expect((await survey({ score: 6 })).status).toBe(400)
+    const rated = (await survey({ score: 4, comment: 'Ponctuel' })).data.data as {
+      satisfactionScore: number
+    }
+    expect(rated.satisfactionScore).toBe(4)
+    expect((await survey({ score: 3 })).status).toBe(409)
+    // The planner reads it on the order card.
+    const card = (
+      await call(server, 'get', '/planning/transport-orders/TR-2026-0003', { as: 'PLN001' })
+    ).data.data as { lines: { satisfactionScore: number | null; satisfactionComment: string }[] }
+    expect(card.lines[0]).toMatchObject({ satisfactionScore: 4, satisfactionComment: 'Ponctuel' })
+    // Nobody answers it in his place.
     expect(
       (
         await post(
           '/planning/transport-orders/TR-2026-0003/lines/1/satisfaction',
-          { score: 5 },
+          { score: 2 },
           'CLI001'
         )
       ).status
-    ).toBe(409)
-    await post(
-      '/planning/transport-orders/TR-2026-0003/lines/1/receive-confirm',
-      { signer: 'Rabe' },
-      'CLI001'
-    )
-    expect(
-      (
-        await post(
-          '/planning/transport-orders/TR-2026-0003/lines/1/satisfaction',
-          { score: 6 },
-          'CLI001'
-        )
-      ).status
-    ).toBe(400)
-    const rated = await post(
-      '/planning/transport-orders/TR-2026-0003/lines/1/satisfaction',
-      { score: 4 },
-      'CLI001'
-    )
-    expect(rated.data.data).toMatchObject({ score: 4 })
-    expect(
-      (
-        await post(
-          '/planning/transport-orders/TR-2026-0003/lines/1/satisfaction',
-          { score: 3 },
-          'CLI001'
-        )
-      ).status
-    ).toBe(409)
-    const listed = await call(server, 'get', '/planning/receptions', { as: 'CLI001' })
-    const line = (listed.data.data as ReceptionLineApi[]).find(
-      (item) => item.orderNo === 'TR-2026-0003'
-    )
-    expect(line).toBeUndefined()
+    ).toBe(404)
   })
 
   it('receives a refused load at the warehouse', async () => {

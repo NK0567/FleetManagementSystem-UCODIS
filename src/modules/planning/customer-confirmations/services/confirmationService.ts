@@ -23,7 +23,8 @@ export const confirmationService = {
       | 'accept-proposal'
       | 'receive-confirm'
       | 'receive-contest'
-      | 'refuse',
+      | 'refuse'
+      | 'satisfaction',
     body: ActionBody = {}
   ): Promise<TrackingApi> {
     return (await confirmationApi.trackingAnswer(token, answer, body)).data.data

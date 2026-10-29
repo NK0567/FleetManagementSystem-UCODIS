@@ -71,6 +71,16 @@ export interface DeliveryRequestApi {
   followUp: DeliveryFollowUp | null
   plannedOn: string | null
   vehiclePlate: string
+  /** Its transport order is completed: the orderer's survey is open (TRS04-US07). */
+  orderCompleted: boolean
+  ordererSurvey: {
+    orderScore: number
+    delayScore: number
+    qualityScore: number
+    comment: string
+    at: string
+    by: string
+  } | null
   rejectionReasonName: string
   cancellationReasonName: string
   ordererName: string

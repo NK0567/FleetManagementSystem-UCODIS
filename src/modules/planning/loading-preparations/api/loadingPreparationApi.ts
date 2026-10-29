@@ -33,6 +33,13 @@ export const loadingPreparationApi = {
     data(httpClient.post<SingleResponse<LoadingPreparationApi>>(BASE, body)),
   update: (no: string, body: PreparationHeaderInput) =>
     data(httpClient.patch<SingleResponse<LoadingPreparationApi>>(resourcePath(BASE, no), body)),
+  validate: (no: string) =>
+    data(
+      httpClient.post<SingleResponse<LoadingPreparationApi>>(
+        `${resourcePath(BASE, no)}/validate`,
+        {}
+      )
+    ),
   propose: (no: string) =>
     data(
       httpClient.post<SingleResponse<LoadingPreparationApi>>(

@@ -11,7 +11,7 @@ import type {
 } from '../../fixtures/planning/transportOrders'
 import { readBody, routeParam } from '../../http/crudResource'
 import { conflict, notFound, unprocessable } from '../../http/errors'
-import { readDate, readString } from '../../http/input'
+import { invalidField, readDate, readNumber, readString } from '../../http/input'
 import { ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
 import { PLANNING_MESSAGES } from './messages'
@@ -62,6 +62,15 @@ export interface TrackingApi {
   contestReason: string
   contestReasons: { no: string; name: string }[]
   refusalReasons: { no: string; name: string }[]
+  /** What the planned message gives him: vehicle, driver and estimated arrival (TRS02-US02). */
+  vehiclePlate: string
+  driverName: string
+  expectedArrival: string | null
+  /** His own answer to the satisfaction survey, once he confirmed (TRS04-US06). */
+  satisfactionScore: number | null
+  satisfactionComment: string
+  /** The messages sent to him as his delivery moves on (TRS02-US02). */
+  messages: { at: string; channel: string; kind: string }[]
   /** His electronic delivery note, once the driver has declared (TRS05-US03). */
   deliveryNote: DeliveryNoteApi | null
 }
@@ -97,6 +106,16 @@ function isOpen(db: MockDatabase, order: TransportOrderRow, line: TransportOrder
 /** The order's status as everywhere else in the application. */
 function statusOf(db: MockDatabase, order: TransportOrderRow): string {
   return transportOrdersApi(db).find((item) => item.no === order.no)?.status ?? 'draft'
+}
+
+function vehicleOf(db: MockDatabase, order: TransportOrderRow) {
+  const item = transportOrdersApi(db).find((row) => row.no === order.no)
+  const carrier = item?.means === 'carrier'
+  return {
+    vehiclePlate: (carrier ? item?.carrierVehiclePlate : item?.vehiclePlate) ?? '',
+    driverName: (carrier ? item?.carrierDriverName : item?.driverName) ?? '',
+    expectedArrival: item?.plannedArrival ?? null
+  }
 }
 
 const reasonList = (db: MockDatabase, kind: string) =>
@@ -154,7 +173,11 @@ function trackingApi(
     contestReason: db.planningReasons.find(line.contestReasonNo ?? '')?.name ?? '',
     contestReasons: reasonList(db, 'contestation'),
     refusalReasons: reasonList(db, 'delivery_refusal'),
-    deliveryNote: deliveryNoteOf(db, order, line.deliveryPointNo)
+    deliveryNote: deliveryNoteOf(db, order, line.deliveryPointNo),
+    ...vehicleOf(db, order),
+    satisfactionScore: line.satisfactionScore,
+    satisfactionComment: line.satisfactionComment,
+    messages: line.recipientMessages ?? []
   }
 }
 
@@ -280,6 +303,26 @@ export function registerTrackingHandlers(router: MockRouter, db: MockDatabase): 
       },
       'refused'
     )
+    const updated = find(db, routeParam(request, 'token'))
+    return ok(trackingApi(db, updated.order, updated.line))
+  })
+
+  /* Once he confirmed the receipt himself, the recipient may answer the survey: a score from
+   * 1 to 5 and a comment, optional; the planner reads it on the order card (TRS04-US06). */
+  router.post(`${base}/satisfaction`, { public: true }, (request) => {
+    const { order, line } = find(db, routeParam(request, 'token'))
+    if (!line.receptionConfirmedAt || line.satisfactionScore !== null) {
+      throw conflict(PLANNING_MESSAGES.receptionSatisfactionClosed)
+    }
+    const body = readBody(request)
+    const score = readNumber(body, 'score', { required: true, min: 1, max: 5 })!
+    if (!Number.isInteger(score)) throw invalidField('score')
+    const comment = readString(body, 'comment')
+    saveDelivery(db, order, line.deliveryPointNo, (item) => ({
+      ...item,
+      satisfactionScore: score,
+      satisfactionComment: comment
+    }))
     const updated = find(db, routeParam(request, 'token'))
     return ok(trackingApi(db, updated.order, updated.line))
   })

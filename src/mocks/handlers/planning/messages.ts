@@ -5,6 +5,22 @@ export const PLANNING_MESSAGES = {
     fr: 'La préparation est validée : elle ne se modifie plus que par les bons.',
     en: 'The preparation is validated: it now changes only through its notes.'
   },
+  prepNotValidable: {
+    fr: 'La préparation ne peut pas être validée : {details}',
+    en: 'The preparation cannot be validated: {details}'
+  },
+  prepVehicleIncomplete: {
+    fr: 'Le véhicule {plate} a des commandes : choisissez son conducteur et son itinéraire type.',
+    en: 'Vehicle {plate} has orders: choose its driver and its route type.'
+  },
+  prepRequestSpread: {
+    fr: 'La commande {no} doit être chargée en entier sur un seul véhicule pour devenir un ordre de transport.',
+    en: 'Order {no} must be loaded whole on one vehicle to become a transport order.'
+  },
+  prepEmptyPlan: {
+    fr: 'Le plan ne contient aucune commande à charger.',
+    en: 'The plan holds no order to load.'
+  },
   prepDepotRequired: {
     fr: 'Choisissez un dépôt de chargement.',
     en: 'Choose a loading depot.'
@@ -16,6 +32,10 @@ export const PLANNING_MESSAGES = {
   prepVehicleNoGoods: {
     fr: 'Le véhicule {plate} ne porte pas de marchandise : ajoutez sa remorque.',
     en: 'Vehicle {plate} carries no goods: add its trailer.'
+  },
+  prepVehicleNotMotorized: {
+    fr: '{plate} ne roule pas seul : choisissez son tracteur, puis {plate} comme remorque.',
+    en: '{plate} does not drive itself: choose its tractor, then {plate} as trailer.'
   },
   prepVehicleTwice: {
     fr: 'Le véhicule {plate} est déjà dans la préparation.',

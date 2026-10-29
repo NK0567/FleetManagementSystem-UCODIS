@@ -6,7 +6,7 @@ import type { DeliveryRequestApi } from '../types/deliveryRequest.types'
 
 const basePath = '/planning/delivery-requests'
 
-export type DeliveryRequestAction = 'reject' | 'cancel' | 'split' | 'merge'
+export type DeliveryRequestAction = 'reject' | 'cancel' | 'split' | 'merge' | 'satisfaction'
 
 export const deliveryRequestApi = {
   ...createCrudApi<DeliveryRequestApi>({ basePath }),

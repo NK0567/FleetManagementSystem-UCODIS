@@ -28,7 +28,8 @@ export const confirmationApi = {
       | 'accept-proposal'
       | 'receive-confirm'
       | 'receive-contest'
-      | 'refuse',
+      | 'refuse'
+      | 'satisfaction',
     body: ActionBody = {}
   ) =>
     httpClient.post<SingleResponse<TrackingApi>>(

@@ -6,7 +6,7 @@ import { CalendarClock, CircleCheck, CircleX, PackageCheck, TriangleAlert } from
 import logo from '@/assets/logo-ucodis.png'
 import { apiErrorMessage } from '@/core/api/apiError'
 import { appConfig } from '@/core/app/appConfig'
-import { formatDate, formatNumber } from '@/utils/format'
+import { formatDate, formatDateTime, formatNumber } from '@/utils/format'
 import { confirmationService } from '../services/confirmationService'
 import type { TrackingApi } from '../types/confirmation.types'
 import DeliveryNoteView from '@/modules/planning/delivery-notes/components/DeliveryNoteView.vue'
@@ -51,6 +51,24 @@ function startActing(kind: 'receive-confirm' | 'receive-contest' | 'refuse') {
   signer.value = ''
   reasonNo.value = ''
   comment.value = ''
+}
+
+/* The survey, his own and optional, once he confirmed the receipt (TRS04-US06). */
+const score = ref(0)
+const opinion = ref('')
+async function sendSurvey() {
+  sending.value = true
+  error.value = null
+  try {
+    tracking.value = await confirmationService.answer(token.value, 'satisfaction', {
+      score: score.value,
+      comment: opinion.value
+    })
+  } catch (cause) {
+    error.value = apiErrorMessage(cause, t('planning.tracking.saveError'))
+  } finally {
+    sending.value = false
+  }
 }
 
 async function sendActing() {
@@ -183,6 +201,78 @@ onMounted(load)
         </div>
 
         <DeliveryNoteView v-if="tracking.deliveryNote" :note="tracking.deliveryNote" />
+
+        <div
+          v-if="tracking.receptionConfirmedAt"
+          class="rounded border border-border px-3 py-2 space-y-2"
+        >
+          <p class="font-medium">{{ t('planning.tracking.survey.title') }}</p>
+          <template v-if="tracking.satisfactionScore !== null">
+            <p>
+              {{ '★'.repeat(tracking.satisfactionScore)
+              }}{{ '☆'.repeat(5 - tracking.satisfactionScore) }}
+              <span v-if="tracking.satisfactionComment" class="text-muted-foreground">
+                · {{ tracking.satisfactionComment }}
+              </span>
+            </p>
+            <p class="text-xs text-muted-foreground">{{ t('planning.tracking.survey.thanks') }}</p>
+          </template>
+          <template v-else>
+            <p class="text-xs text-muted-foreground">{{ t('planning.tracking.survey.hint') }}</p>
+            <div
+              class="flex gap-1"
+              role="radiogroup"
+              :aria-label="t('planning.tracking.survey.score')"
+            >
+              <button
+                v-for="value in 5"
+                :key="value"
+                type="button"
+                class="cursor-pointer text-2xl leading-none"
+                :class="value <= score ? 'text-warning' : 'text-muted-foreground'"
+                :aria-label="String(value)"
+                @click="score = value"
+              >
+                ★
+              </button>
+            </div>
+            <FormInput
+              v-model="opinion"
+              :maxlength="300"
+              :placeholder="t('planning.tracking.survey.comment')"
+            />
+            <button
+              type="button"
+              class="cursor-pointer px-3 py-2 rounded bg-primary text-primary-foreground text-sm disabled:opacity-60"
+              :disabled="sending || !score"
+              @click="sendSurvey"
+            >
+              {{ t('planning.tracking.send') }}
+            </button>
+          </template>
+        </div>
+
+        <div
+          v-if="tracking.messages.length"
+          class="rounded border border-border px-3 py-2 space-y-1"
+        >
+          <p class="font-medium">{{ t('planning.tracking.messages.title') }}</p>
+          <p v-for="(message, index) in tracking.messages" :key="index" class="text-xs">
+            <span class="text-muted-foreground">
+              {{ formatDateTime(message.at) }} ·
+              {{ t(`planning.tracking.messages.channel.${message.channel}`) }}
+            </span>
+            <br />
+            {{
+              t(`planning.tracking.messages.${message.kind}`, {
+                date: formatDate(tracking.plannedDeparture),
+                vehicle: tracking.vehiclePlate || '—',
+                driver: tracking.driverName || '—',
+                eta: formatDateTime(tracking.expectedArrival)
+              })
+            }}
+          </p>
+        </div>
 
         <div
           v-if="tracking.refusedAt"

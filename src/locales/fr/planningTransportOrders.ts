@@ -282,5 +282,13 @@ export default {
   'planning.transportOrders.history.pickup_confirmed': 'Enlèvement confirmé',
   'planning.transportOrders.board.toggle': 'Kanban',
   'planning.transportOrders.board.empty': 'Aucun ordre',
-  'planning.transportOrders.loadError': 'Les ordres de transport n’ont pas pu être chargés.'
+  'planning.transportOrders.loadError': 'Les ordres de transport n’ont pas pu être chargés.',
+  'planning.deliveryNote.plannedHint': 'prévu, s’ouvre à la déclaration du conducteur',
+  'planning.deliveryNote.planned': 'Prévu : il s’ouvrira à la déclaration du conducteur et sera signé par le destinataire.',
+  'planning.transportOrders.history.recipients_notified': 'Destinataires notifiés',
+  'planning.transportOrders.satisfaction.title': 'Satisfaction',
+  'planning.transportOrders.satisfaction.recipients': 'Destinataires',
+  'planning.transportOrders.satisfaction.orderers': 'Ordonnateurs',
+  'planning.transportOrders.satisfaction.none': 'Pas encore de réponse.',
+  'planning.transportOrders.lines.proposeSequence': 'Proposer l’ordre par proximité'
 }

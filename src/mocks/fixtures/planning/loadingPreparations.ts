@@ -12,6 +12,7 @@ export interface LoadingPreparationRow extends MockRow {
   validUntil: string | null
   region: string
   status: PreparationStatus
+  validatedAt?: string | null
   requestNos: string[]
   vehicles: PreparationVehicleInput[]
   plan: PlanEntry[]

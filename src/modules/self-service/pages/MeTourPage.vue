@@ -67,6 +67,7 @@ onMounted(() => void store.fetchTour())
     </header>
 
     <FormAlerts :error="store.error" @clear:error="store.clearError" />
+    <MyNotifications />
     <LoadingSpinner v-if="store.loading && !store.tour" :text="t('common.loading')" />
 
     <section

@@ -42,6 +42,7 @@ import { emptyQuality } from '@/modules/planning/delivery-quality/domain/quality
 import { emptyDossier } from '@/modules/planning/closing/domain/closing'
 import { combinationCapacity, type LoadCapacity } from '@/modules/fleet/vehicles/domain/capacity'
 import { nowIsoDateTime, todayIso } from '@/utils/date'
+import { distanceKm } from '@/utils/geo'
 import type { MockDatabase } from '../../db/database'
 import { nextNo } from '../../db/numbering'
 import type { TripRow } from '../../fixtures/fleet/trips'
@@ -72,6 +73,8 @@ import type { MockRouter } from '../../http/router'
 import { sessionUser, type MockRequest } from '../../http/types'
 import { localize, toMockLanguage, type MockLanguage } from '../../i18n'
 import { orderPlace, visibleTo } from './perimeter'
+import { notifyDriver } from './notifications'
+import { messageRecipients } from './recipientMessages'
 import { buildTrip, overlapWarnings } from '../fleet/trips'
 import { equipmentApi } from '../fleet/vehicles'
 import { employeeNames, vehiclePlates } from '../fleet/links'
@@ -185,6 +188,17 @@ export function transportOrdersApi(db: MockDatabase, userCode?: string): Transpo
         status: statusOf(db, row),
         awaitingClosing: awaitingClosing(statusOf(db, row), linesDelivered(row.lines)),
         archived: statusOf(db, row) === 'completed',
+        // The recipients' answers are on the lines; the orderers' ones on their orders (TRS04-US07).
+        ordererSurveys: [
+          ...new Set(row.lines.map((line) => line.deliveryRequestNo).filter(Boolean))
+        ]
+          .map((no) => db.deliveryRequests.find(no!))
+          .filter((request) => !!request?.ordererSurvey)
+          .map((request) => ({
+            requestNo: request!.no,
+            ordererName: customers.get(request!.ordererNo) ?? request!.ordererNo,
+            ...request!.ordererSurvey!
+          })),
         // A planned order still waiting for recipients to confirm shows an icon in the list.
         awaitingConfirmations:
           statusOf(db, row) === 'planned'
@@ -949,6 +963,46 @@ export function registerTransportOrdersHandlers(router: MockRouter, db: MockData
     }
   )
 
+  /* A delivery order proposed by geographic proximity (TRS01-US05): from the start of the route,
+   * the nearest delivery point each time; the planner applies it or keeps his own. */
+  router.get(
+    `${BASE_PATH}/:no/proposed-sequence`,
+    { feature: 'TRANSPORTORDER', action: 'read' },
+    (request) => {
+      const order = orderOf(request)
+      const route = order.routeTemplateNo
+        ? db.routeTemplates.find(order.routeTemplateNo)
+        : undefined
+      const startSite = route?.stops[0] ? db.sites.find(route.stops[0].siteNo) : undefined
+      let here = startSite ? { latitude: startSite.latitude, longitude: startSite.longitude } : null
+      const left = [...order.lines]
+      const sequence: number[] = []
+      while (left.length) {
+        const point = (line: TransportOrderLineRow) => db.deliveryPoints.find(line.deliveryPointNo)
+        let best = 0
+        if (here) {
+          let bestKm = Infinity
+          left.forEach((line, index) => {
+            const p = point(line)
+            const km = p ? distanceKm(here!, p) : Infinity
+            if (km < bestKm) {
+              bestKm = km
+              best = index
+            }
+          })
+        }
+        const [next] = left.splice(best, 1)
+        // The lines of one delivery point stay together.
+        const same = left.filter((line) => line.deliveryPointNo === next!.deliveryPointNo)
+        sequence.push(next!.lineNo, ...same.map((line) => line.lineNo))
+        for (const line of same) left.splice(left.indexOf(line), 1)
+        const p = point(next!)
+        if (p) here = { latitude: p.latitude, longitude: p.longitude }
+      }
+      return ok(sequence)
+    }
+  )
+
   router.post(
     `${BASE_PATH}/:no/plan`,
     { feature: 'TRANSPORTORDER', action: 'update' },
@@ -960,6 +1014,8 @@ export function registerTransportOrdersHandlers(router: MockRouter, db: MockData
       const means = readEnum(body, 'means', TRANSPORT_MEANS, { required: true }) as TransportMeans
       const planned = planOrder(db, order, means, body, request)
       db.transportOrders.update(order.no, { ...planned, ...stampModified(request) })
+      // The recipients and the driver are told (TRS01-US12, TRS03-US08).
+      announcePlanned(db, order.no, request)
       return ok(oneOf(db, order.no))
     }
   )
@@ -982,9 +1038,120 @@ export function registerTransportOrdersHandlers(router: MockRouter, db: MockData
         events: [...order.events, eventOf(request, 'cancelled', reason.reasonNo)],
         ...stampModified(request)
       })
+      // The driver is told of the cancellation, with its reason (TRS01-US18).
+      if (order.tripNo) {
+        notifyDriver(
+          db,
+          db.trips.find(order.tripNo)?.driverNo,
+          'order_cancelled',
+          order.no,
+          db.planningReasons.find(reason.reasonNo)?.name ?? ''
+        )
+      }
       return ok(oneOf(db, order.no))
     }
   )
+}
+
+/** The detail of the deliveries, as the driver's notification gives it (TRS01-US12). */
+function deliveriesDetail(db: MockDatabase, lines: readonly TransportOrderLineRow[]): string {
+  const names = lines.map((line) => db.deliveryPoints.find(line.deliveryPointNo)?.name ?? '')
+  return [...new Set(names.filter(Boolean))].join(', ')
+}
+
+/**
+ * Planning notifies each recipient by the channel of his order (TRS01-US12): the mock has no
+ * SMS or e-mail gateway, so the sending is recorded in the history of the order.
+ */
+function notifyRecipients(
+  db: MockDatabase,
+  order: TransportOrderRow,
+  request: MockRequest
+): TransportOrderEventRow | null {
+  const sent: string[] = []
+  for (const line of order.lines) {
+    const row = line.deliveryRequestNo ? db.deliveryRequests.find(line.deliveryRequestNo) : null
+    const channel = row?.notificationChannel ?? 'sms'
+    if (channel === 'none') continue
+    const point = db.deliveryPoints.find(line.deliveryPointNo)
+    const name = (point && db.customers.find(point.customerNo)?.name) || line.deliveryPointNo
+    const label = `${name} (${channel})`
+    if (!sent.includes(label)) sent.push(label)
+  }
+  return sent.length ? eventOf(request, 'recipients_notified', sent.join(', ')) : null
+}
+
+export function announcePlanned(db: MockDatabase, orderNo: string, request: MockRequest): void {
+  const order = db.transportOrders.findOrFail(orderNo)
+  const event = notifyRecipients(db, order, request)
+  if (event) db.transportOrders.update(order.no, { events: [...order.events, event] })
+  const driverNo = order.tripNo ? db.trips.find(order.tripNo)?.driverNo : null
+  notifyDriver(db, driverNo, 'order_assigned', order.no, deliveriesDetail(db, order.lines))
+  messageRecipients(db, order.no, 'planned')
+}
+
+/**
+ * A transport order made from a validated loading preparation (TRS01-US23): its lines are the
+ * orders placed on one vehicle, and it is planned at once on a new fleet trip with its driver.
+ */
+export function createPlannedOrder(
+  db: MockDatabase,
+  request: MockRequest,
+  spec: {
+    requests: { no: string; lineNos: number[] }[]
+    routeTemplateNo: string
+    plannedDeparture: string
+    vehicleNo: string
+    trailerNo: string | null
+    driverNo: string
+    comment: string
+  }
+): string {
+  const { lines, splits } = resolveLines(
+    db,
+    null,
+    spec.requests.map((item) => ({
+      deliveryRequestNo: item.no,
+      requestLineNos: item.lineNos,
+      deliveryPointNo: '',
+      productNo: '',
+      quantity: 0,
+      weightKg: null
+    })),
+    toMockLanguage(request.language)
+  )
+  applySplits(db, splits, request)
+  const no = nextTransportOrderNo(db)
+  syncRequests(db, no, [], requestNos(lines), request)
+  const row = stampCreated<TransportOrderRow>(
+    {
+      no,
+      routeTemplateNo: spec.routeTemplateNo,
+      plannedDeparture: spec.plannedDeparture,
+      comment: spec.comment,
+      lines,
+      means: null,
+      tripNo: null,
+      ...blankCarrier(),
+      ...emptyDossier(),
+      cancellationReasonNo: null,
+      cancellationComment: '',
+      cancelledAt: null,
+      cancelledBy: null,
+      events: [eventOf(request, 'created', spec.comment)]
+    },
+    request
+  )
+  db.transportOrders.insert(row)
+  const planned = planNewTrip(
+    db,
+    row,
+    { vehicleNo: spec.vehicleNo, trailerNo: spec.trailerNo, driverNo: spec.driverNo, force: true },
+    request
+  )
+  db.transportOrders.update(no, { ...planned, ...stampModified(request) })
+  announcePlanned(db, no, request)
+  return no
 }
 
 function planOrder(

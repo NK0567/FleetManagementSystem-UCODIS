@@ -44,6 +44,8 @@ export interface TransportOrderLineApi {
   contestHandledAt: string | null
   contestHandledBy: string | null
   contestNote: string
+  satisfactionScore: number | null
+  satisfactionComment: string
 }
 
 /** What the lines action accepts: a request, or a line keyed without one. */
@@ -108,6 +110,15 @@ export interface TransportOrderApi {
   awaitingClosing: boolean
   /** A completed order is final and joins the archives (TRS05-US06). */
   archived: boolean
+  ordererSurveys: {
+    requestNo: string
+    ordererName: string
+    orderScore: number
+    delayScore: number
+    qualityScore: number
+    comment: string
+    at: string
+  }[]
   /** Lines of a planned order still waiting for their recipient to confirm. */
   awaitingConfirmations: number
   createdAt: string

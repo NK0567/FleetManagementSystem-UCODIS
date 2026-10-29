@@ -87,5 +87,12 @@ export default {
   'planning.deliveryRequests.counter.pending': 'Pending',
   'planning.deliveryRequests.counter.planned': 'Planned',
   'planning.deliveryRequests.counter.rejected': 'Rejected',
-  'planning.deliveryRequests.counter.delivered': 'Delivered'
+  'planning.deliveryRequests.counter.delivered': 'Delivered',
+  'planning.deliveryRequests.survey.open': 'Give my opinion',
+  'planning.deliveryRequests.survey.hint': 'Your opinion on the execution of your order, once the transport order is completed.',
+  'planning.deliveryRequests.survey.orderScore': 'Order respected',
+  'planning.deliveryRequests.survey.delayScore': 'Delays respected',
+  'planning.deliveryRequests.survey.qualityScore': 'Expected quality',
+  'planning.deliveryRequests.survey.comment': 'Comment',
+  'planning.deliveryRequests.survey.answered': 'Your opinion on the execution'
 }

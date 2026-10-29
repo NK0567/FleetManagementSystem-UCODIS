@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Plus, Save, Sparkles, Trash2 } from '@lucide/vue'
+import { CheckCheck, Plus, Save, Sparkles, Trash2 } from '@lucide/vue'
 import { apiErrorMessage } from '@/core/api/apiError'
 import { usePermissions } from '@/composables/usePermissions'
 import { formatDate, formatNumber } from '@/utils/format'
@@ -65,10 +65,12 @@ async function open(prep: LoadingPreparationApi) {
     validUntil: prep.validUntil,
     region: prep.region,
     requestNos: [...prep.requestNos],
-    vehicles: prep.vehicles.map(({ vehicleNo, trailerNo, driverNo }) => ({
-      vehicleNo,
-      trailerNo,
-      driverNo
+    vehicles: prep.vehicles.map((vehicle) => ({
+      vehicleNo: vehicle.vehicleNo,
+      trailerNo: vehicle.trailerNo,
+      driverNo: vehicle.driverNo,
+      routeTemplateNo: vehicle.routeTemplateNo ?? null,
+      departureTime: vehicle.departureTime ?? '06:00'
     }))
   }
 }
@@ -129,7 +131,20 @@ function toggleRequest(no: string) {
 }
 const goodsVehicles = computed(() => (options.value?.vehicles ?? []).filter((v) => v.carriesGoods))
 const addVehicle = () =>
-  header.value?.vehicles.push({ vehicleNo: '', trailerNo: null, driverNo: null })
+  header.value?.vehicles.push({
+    vehicleNo: '',
+    trailerNo: null,
+    driverNo: null,
+    routeTemplateNo: null,
+    departureTime: '06:00'
+  })
+/* Validating makes one planned transport order per vehicle (TRS01-US23). */
+const validate = async () =>
+  current.value && applied(await run(() => loadingPreparationApi.validate(current.value!.no)))
+const orderLink = (no: string) => ({
+  path: '/planning/transport-orders',
+  query: { no, cardMode: 'view' }
+})
 
 const lineLabel = (requestNo: string, requestLineNo: number) => {
   const line = current.value?.requestLines.find(
@@ -339,6 +354,24 @@ onMounted(loadList)
                   {{ item.name }}
                 </option>
               </select>
+              <select
+                v-model="vehicle.routeTemplateNo"
+                :class="inputClass"
+                :disabled="!editable"
+                :aria-label="t('planning.preparation.route')"
+              >
+                <option :value="null">{{ t('planning.preparation.noRoute') }}</option>
+                <option v-for="item in options?.routes ?? []" :key="item.no" :value="item.no">
+                  {{ item.name }}
+                </option>
+              </select>
+              <input
+                v-model="vehicle.departureTime"
+                type="time"
+                :class="[inputClass, 'w-28']"
+                :disabled="!editable"
+                :aria-label="t('planning.preparation.departureTime')"
+              />
               <button
                 v-if="editable"
                 type="button"
@@ -400,7 +433,10 @@ onMounted(loadList)
             <h2 class="text-sm font-semibold text-card-foreground">
               {{ t('planning.preparation.check') }}
             </h2>
-            <p v-if="!blocking.length && !unplaced.length" class="text-sm text-success">
+            <p v-if="current.status === 'validated'" class="text-sm text-success">
+              {{ t('planning.preparation.validatedOn', { at: formatDate(current.validatedAt) }) }}
+            </p>
+            <p v-else-if="!blocking.length && !unplaced.length" class="text-sm text-success">
               {{ t('planning.preparation.possible') }}
             </p>
             <p
@@ -432,6 +468,14 @@ onMounted(loadList)
                 <button type="button" :class="buttonClass" :disabled="busy" @click="savePlan">
                   <Save class="w-4 h-4 text-primary" /> {{ t('planning.preparation.savePlan') }}
                 </button>
+                <button
+                  type="button"
+                  class="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1 text-sm rounded bg-primary text-primary-foreground disabled:opacity-60"
+                  :disabled="busy || !current.plan.length"
+                  @click="validate"
+                >
+                  <CheckCheck class="w-4 h-4" /> {{ t('planning.preparation.validate') }}
+                </button>
               </div>
             </div>
             <p v-if="!current.vehicles.length" class="text-sm text-muted-foreground">
@@ -443,6 +487,13 @@ onMounted(loadList)
               class="rounded border border-border"
             >
               <p class="px-3 py-2 border-b border-border text-sm font-medium">
+                <RouterLink
+                  v-if="vehicle.orderNo"
+                  :to="orderLink(vehicle.orderNo)"
+                  class="float-right text-xs font-normal text-primary hover:underline"
+                >
+                  {{ t('planning.preparation.orderMade', { no: vehicle.orderNo }) }}
+                </RouterLink>
                 {{ vehicle.plate
                 }}<template v-if="vehicle.trailerPlate"> · {{ vehicle.trailerPlate }}</template>
                 <span class="text-xs font-normal text-muted-foreground">

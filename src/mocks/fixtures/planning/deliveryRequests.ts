@@ -45,7 +45,18 @@ function request(
   }
 }
 
+/** The orderer's answer to the survey on the execution of his order (TRS04-US07). */
+export interface OrdererSurvey {
+  orderScore: number
+  delayScore: number
+  qualityScore: number
+  comment: string
+  at: string
+  by: string
+}
+
 export interface DeliveryRequestRow extends MockRow {
+  ordererSurvey?: OrdererSurvey | null
   ordererNo: string
   deliveryPointNo: string
   desiredDate: string

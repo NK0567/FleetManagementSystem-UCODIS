@@ -94,5 +94,9 @@ export default {
   'selfService.orders.state.toReturn': 'To bring back to the warehouse',
   'selfService.orders.state.awaitingRecipient': "Declared, waiting for the recipient's confirmation",
   'selfService.orders.state.confirmed': 'Confirmed by the recipient',
-  'selfService.orders.state.contested': 'Contested by the recipient'
+  'selfService.orders.state.contested': 'Contested by the recipient',
+  'selfService.notifications.title': 'My notifications',
+  'selfService.notifications.markRead': 'Mark as read',
+  'selfService.notifications.order_assigned': 'Transport order {no} is entrusted to you. Deliveries: {reason}',
+  'selfService.notifications.order_cancelled': 'Transport order {no} is cancelled. Reason: {reason}'
 }

@@ -109,5 +109,18 @@ export default {
   'planning.tracking.receiveConfirm': 'I confirm receipt',
   'planning.tracking.receiveContest': 'I contest',
   'planning.tracking.refuse': 'Refuse the order',
-  'planning.tracking.signer': 'Your name'
+  'planning.tracking.signer': 'Your name',
+  'planning.tracking.survey.title': 'Your opinion on the delivery',
+  'planning.tracking.survey.hint': 'Optional: give a score and, if you wish, a comment.',
+  'planning.tracking.survey.score': 'Score',
+  'planning.tracking.survey.comment': 'Your comment (optional)',
+  'planning.tracking.survey.thanks': 'Thank you, your opinion is passed on.',
+  'planning.tracking.messages.title': 'Messages received',
+  'planning.tracking.messages.planned': 'Your delivery is planned on {date}, vehicle {vehicle}, driver {driver}, estimated arrival {eta}. Follow it with this link.',
+  'planning.tracking.messages.started': 'Your delivery is under way: vehicle {vehicle} has left.',
+  'planning.tracking.messages.declared': 'The driver declared your delivery: confirm or contest it from this link.',
+  'planning.tracking.messages.channel.sms': 'SMS',
+  'planning.tracking.messages.channel.call': 'Call',
+  'planning.tracking.messages.channel.email': 'E-mail',
+  'planning.tracking.messages.channel.whatsapp': 'WhatsApp'
 }

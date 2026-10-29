@@ -9,6 +9,11 @@ export interface PreparationVehicleInput {
   vehicleNo: string
   trailerNo: string | null
   driverNo: string | null
+  /** The route type and the departure hour the order of this vehicle will follow. */
+  routeTemplateNo?: string | null
+  departureTime?: string
+  /** The transport order made at validation (TRS01-US23). */
+  orderNo?: string | null
 }
 
 export interface PlanEntry {
@@ -63,6 +68,7 @@ export interface LoadingPreparationApi {
   validUntil: string | null
   region: string
   status: PreparationStatus
+  validatedAt: string | null
   requestNos: string[]
   vehicles: PreparationVehicleApi[]
   requestLines: PreparationRequestLineApi[]
@@ -89,4 +95,5 @@ export interface PreparationOptionsApi {
   }[]
   vehicles: { no: string; plate: string; typeName: string; carriesGoods: boolean }[]
   drivers: { no: string; name: string }[]
+  routes: { no: string; name: string }[]
 }

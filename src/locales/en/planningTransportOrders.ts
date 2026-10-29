@@ -280,5 +280,13 @@ export default {
   'planning.transportOrders.history.pickup_confirmed': 'Pickup confirmed',
   'planning.transportOrders.board.toggle': 'Kanban',
   'planning.transportOrders.board.empty': 'No order',
-  'planning.transportOrders.loadError': 'The transport orders could not be loaded.'
+  'planning.transportOrders.loadError': 'The transport orders could not be loaded.',
+  'planning.deliveryNote.plannedHint': "planned, opens at the driver's declaration",
+  'planning.deliveryNote.planned': "Planned: it opens at the driver's declaration and is signed by the recipient.",
+  'planning.transportOrders.history.recipients_notified': 'Recipients notified',
+  'planning.transportOrders.satisfaction.title': 'Satisfaction',
+  'planning.transportOrders.satisfaction.recipients': 'Recipients',
+  'planning.transportOrders.satisfaction.orderers': 'Orderers',
+  'planning.transportOrders.satisfaction.none': 'No answer yet.',
+  'planning.transportOrders.lines.proposeSequence': 'Propose the order by proximity'
 }

@@ -94,4 +94,10 @@ export interface TrackingApi {
   contestReasons: { no: string; name: string }[]
   refusalReasons: { no: string; name: string }[]
   deliveryNote: DeliveryNoteApi | null
+  vehiclePlate: string
+  driverName: string
+  expectedArrival: string | null
+  satisfactionScore: number | null
+  satisfactionComment: string
+  messages: { at: string; channel: string; kind: string }[]
 }

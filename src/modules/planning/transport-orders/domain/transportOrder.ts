@@ -21,6 +21,7 @@ export const TRANSPORT_ORDER_EVENT_KINDS = [
   'planned',
   'confirmed',
   'replanned',
+  'recipients_notified',
   'pickup_sent',
   'pickup_confirmed',
   'departed',

@@ -119,7 +119,8 @@ export function deliveryRequestsApi(
           return trip ? (vehicles.get(trip.vehicleNo) ?? '') : ''
         }),
         rejectionReasonName: reasons.get(row.rejectionReasonNo ?? '') ?? '',
-        cancellationReasonName: reasons.get(row.cancellationReasonNo ?? '') ?? ''
+        cancellationReasonName: reasons.get(row.cancellationReasonNo ?? '') ?? '',
+        ordererSurvey: row.ordererSurvey ?? null
       }
     })
 }
@@ -137,6 +138,7 @@ function followUpOf(
     carrierVehiclePlate: string
     plannedDeparture: string | null
     lines: readonly TransportOrderLineRow[]
+    closedAt?: string | null
   }[],
   plateOf: (tripNo: string | null) => string
 ) {
@@ -148,7 +150,8 @@ function followUpOf(
     return {
       followUp: null as DeliveryFollowUp | null,
       plannedOn: null as string | null,
-      vehiclePlate: ''
+      vehiclePlate: '',
+      orderCompleted: false
     }
   }
   const followUp: DeliveryFollowUp = line.replannedAt
@@ -167,7 +170,9 @@ function followUpOf(
   return {
     followUp,
     plannedOn: order.plannedDeparture,
-    vehiclePlate: plateOf(order.tripNo) || order.carrierVehiclePlate
+    vehiclePlate: plateOf(order.tripNo) || order.carrierVehiclePlate,
+    // The orderer's survey opens once the transport order is completed (TRS04-US07).
+    orderCompleted: !!order.closedAt
   }
 }
 
@@ -449,6 +454,39 @@ export function registerDeliveryRequestsHandlers(router: MockRouter, db: MockDat
         ...stampModified(request)
       })
       return ok(deliveryRequestsApi(db).find((item) => item.no === updated.no))
+    }
+  )
+
+  /* The orderer answers a survey on the execution of his order once its transport order is
+   * completed: order, delays and quality, from 1 to 5, and a comment (TRS04-US07). */
+  router.post(
+    `${BASE_PATH}/:no/satisfaction`,
+    { feature: 'DELIVERYREQUEST', action: 'update' },
+    (request) => {
+      const row = db.deliveryRequests.findOrFail(routeParam(request, 'no'))
+      assertOwn(row, request)
+      const item = deliveryRequestsApi(db).find((entry) => entry.no === row.no)
+      if (!item?.orderCompleted || row.ordererSurvey) {
+        throw conflict(PLANNING_MESSAGES.receptionSatisfactionClosed)
+      }
+      const body = readBody(request)
+      const score = (field: string) => {
+        const value = readNumber(body, field, { required: true, min: 1, max: 5 })!
+        if (!Number.isInteger(value)) throw invalidField(field)
+        return value
+      }
+      db.deliveryRequests.update(row.no, {
+        ordererSurvey: {
+          orderScore: score('orderScore'),
+          delayScore: score('delayScore'),
+          qualityScore: score('qualityScore'),
+          comment: readString(body, 'comment'),
+          at: nowIsoDateTime(),
+          by: sessionUser(request).code
+        },
+        ...stampModified(request)
+      })
+      return ok(deliveryRequestsApi(db).find((entry) => entry.no === row.no))
     }
   )
 

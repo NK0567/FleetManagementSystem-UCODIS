@@ -110,7 +110,6 @@ function assertDeclared(line: TransportOrderLineRow): void {
 function receptionState(line: TransportOrderLineRow): ReceptionState | null {
   if (!line.declaredAt) return null
   if (line.receptionContestedAt && !line.contestHandledAt) return 'contested'
-  if (line.receptionConfirmedAt && line.satisfactionScore === null) return 'to_rate'
   if (!line.receptionConfirmedAt && !line.receptionContestedAt) return 'awaiting'
   return null
 }
@@ -254,28 +253,7 @@ export function registerReceptionHandlers(router: MockRouter, db: MockDatabase):
     }
   )
 
-  router.post(
-    '/planning/transport-orders/:no/lines/:lineNo/satisfaction',
-    { feature: 'CUSTOMERCONFIRMATION', action: 'execute' },
-    (request) => {
-      const { order, line } = findLine(db, request)
-      if (!line.receptionConfirmedAt || line.satisfactionScore !== null) {
-        throw conflict(PLANNING_MESSAGES.receptionSatisfactionClosed)
-      }
-      const body = readBody(request)
-      const score = readNumberScore(body)
-      replaceLine(
-        db,
-        order,
-        line.lineNo,
-        { ...line, satisfactionScore: score, satisfactionComment: readString(body, 'comment') },
-        request,
-        'satisfaction',
-        String(score)
-      )
-      return ok({ score })
-    }
-  )
+  /* The satisfaction survey is answered by the recipient himself, from his link (TRS04-US06). */
 
   router.post(
     '/planning/transport-orders/:no/lines/:lineNo/hand-back',
@@ -390,12 +368,4 @@ export function registerReceptionHandlers(router: MockRouter, db: MockDatabase):
       return ok({ requestNo: no })
     }
   )
-}
-
-function readNumberScore(body: Record<string, unknown>): number {
-  const raw = body.score
-  const score =
-    typeof raw === 'number' ? raw : typeof raw === 'string' && raw.trim() !== '' ? Number(raw) : NaN
-  if (!Number.isInteger(score) || score < 1 || score > 5) throw invalidField('score')
-  return score
 }

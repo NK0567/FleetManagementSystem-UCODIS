@@ -12,7 +12,8 @@ import { deliveryNoteApi } from '@/modules/planning/delivery-notes/api/deliveryN
 import type { DeliveryNoteApi } from '@/modules/planning/delivery-notes/types/deliveryNote.types'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Ban, CalendarClock, ClipboardList, ListTree, Lock, Truck } from '@lucide/vue'
+import { Ban, CalendarClock, ClipboardList, ListTree, Lock, Route, Truck } from '@lucide/vue'
+import { transportOrderApi } from '../api/transportOrderApi'
 import { apiErrorBody, apiErrorMessage } from '@/core/api/apiError'
 import type { CardOpenMode } from '@/composables/cardOpenMode'
 import { useEntityCard } from '@/composables/useEntityCard'
@@ -126,6 +127,7 @@ const expandedSections = ref({
   deliveryNotes: true,
   pickup: true,
   disputes: true,
+  satisfaction: true,
   history: false,
   audit: false
 })
@@ -164,14 +166,17 @@ async function perform(
 
 async function loadClosing() {
   const current = item.value
+  // The delivery notes are planned with the order and open at the declaration (TRS01-US23).
+  deliveryNotes.value =
+    current && current.means && current.status !== 'cancelled'
+      ? await deliveryNoteApi.ofOrder(current.no).catch(() => [])
+      : []
   if (!current || (current.status !== 'in_progress' && current.status !== 'completed')) {
     closing.value = null
-    deliveryNotes.value = []
     return
   }
   try {
     closing.value = await transportOrderService.closing(current.no)
-    deliveryNotes.value = await deliveryNoteApi.ofOrder(current.no)
   } catch (error) {
     saveError.value = apiErrorMessage(error, t('planning.transportOrders.saveError'))
   }
@@ -207,6 +212,14 @@ async function overrideWarning() {
 
 async function reorderLines(lineNos: number[]) {
   await perform((no) => transportOrderService.reorderLines(no, lineNos))
+}
+
+/* The delivery order proposed by proximity, applied at once and still changeable by hand. */
+async function proposeSequence() {
+  await perform(async (no) => {
+    const lineNos = (await transportOrderApi.proposedSequence(no)).data.data
+    return transportOrderService.reorderLines(no, lineNos)
+  })
 }
 
 async function cancel(choice: { reasonNo: string; comment: string }) {
@@ -451,6 +464,20 @@ const buttonClass =
               :summary="linesSummary"
             >
               <div class="xl:col-span-2 min-w-0">
+                <div
+                  v-if="canUpdate && canEditLines(item.status) && item.lines.length > 1"
+                  class="flex justify-end mb-2"
+                >
+                  <button
+                    type="button"
+                    :class="buttonClass"
+                    :disabled="acting"
+                    @click="proposeSequence"
+                  >
+                    <Route class="w-4 h-4 text-primary" />
+                    {{ t('planning.transportOrders.lines.proposeSequence') }}
+                  </button>
+                </div>
                 <TransportOrderLinesTable
                   :lines="item.lines"
                   :status="item.status"
@@ -522,6 +549,59 @@ const buttonClass =
               />
             </FormSection>
             <FormSection
+              v-if="
+                item.lines.some((line) => line.satisfactionScore !== null) ||
+                item.ordererSurveys.length
+              "
+              v-model:open="expandedSections.satisfaction"
+              :title="t('planning.transportOrders.satisfaction.title')"
+              :summary="[]"
+            >
+              <div class="xl:col-span-2 grid gap-3 lg:grid-cols-2 min-w-0 text-sm">
+                <div class="rounded border border-border p-3 space-y-1">
+                  <p class="font-medium">
+                    {{ t('planning.transportOrders.satisfaction.recipients') }}
+                  </p>
+                  <p
+                    v-for="line in item.lines.filter((l) => l.satisfactionScore !== null)"
+                    :key="line.lineNo"
+                  >
+                    {{ line.recipientName }}
+                    <span class="text-warning">{{ '★'.repeat(line.satisfactionScore ?? 0) }}</span>
+                    <span v-if="line.satisfactionComment" class="text-muted-foreground">
+                      · {{ line.satisfactionComment }}
+                    </span>
+                  </p>
+                  <p
+                    v-if="!item.lines.some((l) => l.satisfactionScore !== null)"
+                    class="text-muted-foreground"
+                  >
+                    {{ t('planning.transportOrders.satisfaction.none') }}
+                  </p>
+                </div>
+                <div class="rounded border border-border p-3 space-y-1">
+                  <p class="font-medium">
+                    {{ t('planning.transportOrders.satisfaction.orderers') }}
+                  </p>
+                  <div v-for="survey in item.ordererSurveys" :key="survey.requestNo">
+                    <p>{{ survey.ordererName }} · {{ survey.requestNo }}</p>
+                    <p class="text-xs text-muted-foreground">
+                      {{ t('planning.deliveryRequests.survey.orderScore') }}
+                      {{ survey.orderScore }}/5 ·
+                      {{ t('planning.deliveryRequests.survey.delayScore') }}
+                      {{ survey.delayScore }}/5 ·
+                      {{ t('planning.deliveryRequests.survey.qualityScore') }}
+                      {{ survey.qualityScore }}/5
+                    </p>
+                    <p v-if="survey.comment" class="text-xs">{{ survey.comment }}</p>
+                  </div>
+                  <p v-if="!item.ordererSurveys.length" class="text-muted-foreground">
+                    {{ t('planning.transportOrders.satisfaction.none') }}
+                  </p>
+                </div>
+              </div>
+            </FormSection>
+            <FormSection
               v-if="deliveryNotes.length"
               v-model:open="expandedSections.deliveryNotes"
               :title="t('planning.deliveryNote.sectionTitle')"
@@ -532,6 +612,7 @@ const buttonClass =
                   v-for="note in deliveryNotes"
                   :key="note.deliveryPointNo"
                   :note="note"
+                  printable
                 />
               </div>
             </FormSection>

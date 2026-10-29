@@ -15,11 +15,15 @@ import { vehiclePlates } from '../fleet/links'
 export function deliveryNoteOf(
   db: MockDatabase,
   order: TransportOrderRow,
-  deliveryPointNo: string
+  deliveryPointNo: string,
+  options: { planned?: boolean } = {}
 ): DeliveryNoteApi | null {
   const lines = order.lines.filter((line) => line.deliveryPointNo === deliveryPointNo)
   const declared = lines.filter((line) => line.declaredAt)
-  if (!declared.length) return null
+  // Before the declaration, the order card shows the note planned for each recipient once the
+  // order is planned (TRS01-US23); the recipient's page shows it only once opened (TRS05-US03).
+  const planned = !declared.length && options.planned && !!order.means && !order.cancelledAt
+  if (!declared.length && !planned) return null
   const point = db.deliveryPoints.find(deliveryPointNo)
   const recipient = point ? db.customers.find(point.customerNo) : undefined
   const reasonName = (no: string | null | undefined) =>
@@ -34,15 +38,15 @@ export function deliveryNoteOf(
     deliveryPointName: point?.name ?? '',
     recipientName: recipient?.name ?? '',
     vehiclePlate: plate,
-    openedAt: declared.map((line) => line.declaredAt!).sort()[0]!,
-    state: contested ? 'contested' : signed ? 'signed' : 'awaiting',
+    openedAt: declared.map((line) => line.declaredAt!).sort()[0] ?? null,
+    state: planned ? 'planned' : contested ? 'contested' : signed ? 'signed' : 'awaiting',
     signedAt: signed?.receptionConfirmedAt ?? null,
     signedBy: signed?.receptionConfirmedBy ?? '',
     contestedAt: contested?.receptionContestedAt ?? null,
     contestReason: reasonName(contested?.contestReasonNo),
     lines: lines
       // A line still on its way back or never loaded is not part of the delivery.
-      .filter((line) => line.declaredAt || line.refusalAt || line.postponedAt)
+      .filter((line) => planned || line.declaredAt || line.refusalAt || line.postponedAt)
       .map((line) => {
         const product = db.products.find(line.productNo)
         return {
@@ -51,7 +55,7 @@ export function deliveryNoteOf(
           unit: product?.unit ?? '',
           quantity: line.loadedQuantity ?? line.quantity,
           deliveredQuantity: line.declaredAt ? line.receivedQuantity : null,
-          notDelivered: !line.declaredAt,
+          notDelivered: !planned && !line.declaredAt,
           reason: line.refusalAt
             ? reasonName(line.refusalReasonNo)
             : line.postponedAt
@@ -65,7 +69,7 @@ export function deliveryNoteOf(
 export function deliveryNotesOf(db: MockDatabase, order: TransportOrderRow): DeliveryNoteApi[] {
   const points = [...new Set(order.lines.map((line) => line.deliveryPointNo))]
   return points
-    .map((point) => deliveryNoteOf(db, order, point))
+    .map((point) => deliveryNoteOf(db, order, point, { planned: true }))
     .filter((note): note is DeliveryNoteApi => note !== null)
 }
 
