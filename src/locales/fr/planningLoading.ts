@@ -1,8 +1,9 @@
 export default {
   'planning.loading.title': 'Chargement',
-  'planning.loading.subtitle': 'Ordres à charger, confirmation du chargement et contrôle du conducteur.',
+  'planning.loading.subtitle':
+    'Ordres à charger, confirmation du chargement et contrôle du conducteur.',
   'planning.loading.loading': 'Chargement des lignes à contrôler…',
-  'planning.loading.empty': 'Aucune ligne à charger.',
+  'planning.loading.empty': 'Aucun ordre à charger pour le moment.',
   'planning.loading.loadError': 'Le chargement n’a pas pu être affiché.',
   'planning.loading.saveError': 'Le chargement n’a pas pu être enregistré.',
   'planning.loading.declare': 'Déclarer',
@@ -36,7 +37,7 @@ export default {
   'planning.loading.returns.notHandedBack': 'Pas encore remis',
   'planning.loading.returns.receiveMessage':
     'Le retour de l’ordre {no} ({product}) est réceptionné conforme à l’entrepôt.',
-  'planning.loading.byDriver': 'Contrôle par le conducteur depuis son espace',
+  'planning.loading.byDriver': 'Contrôlé par le conducteur',
   'planning.pickup.section': 'Enlèvement',
   'planning.pickup.title': 'Bon d’enlèvement {no}',
   'planning.pickup.status.issued': 'Émis',
@@ -77,10 +78,12 @@ export default {
   'planning.loadingList.open': 'Liste de chargement',
   'planning.loadingList.title': 'Liste de chargement {no}',
   'planning.loadingList.rank': 'Ordre de chargement',
-  'planning.loadingList.mode.one_space': 'Espace unique : le dernier livré est chargé en premier, au fond ; le premier livré en dernier, près des portes.',
-  'planning.loadingList.mode.compartments': 'Chaque compartiment a son propre accès : la liste suit les compartiments.',
+  'planning.loadingList.mode.one_space':
+    'Espace unique : le dernier livré est chargé en premier, au fond ; le premier livré en dernier, près des portes.',
+  'planning.loadingList.mode.compartments':
+    'Chaque compartiment a son propre accès : la liste suit les compartiments.',
   'planning.preparation.title': 'Préparations de chargement',
-  'planning.preparation.subtitle': 'Préparer en une fois le chargement de plusieurs véhicules depuis un même dépôt, puis répartir les commandes compartiment par compartiment.',
+  'planning.preparation.subtitle': "Charger plusieurs véhicules d'un même dépôt en une fois.",
   'planning.preparation.new': 'Nouvelle préparation',
   'planning.preparation.empty': 'Aucune préparation pour l’instant.',
   'planning.preparation.status.pending': 'En attente',
@@ -107,12 +110,18 @@ export default {
   'planning.preparation.capacity': 'Capacité totale des véhicules choisis',
   'planning.preparation.check': 'Vérification de la répartition',
   'planning.preparation.possible': 'La répartition est possible.',
-  'planning.preparation.issue.overCapacity': 'Quantité supérieure à la capacité : {quantity} L à livrer pour {capacity} L.',
-  'planning.preparation.issue.incompatible': 'Produits incompatibles sur {plate} : {productA} et {productB}.',
-  'planning.preparation.issue.fullFill': 'Règle du compartiment {compartmentNo} de {plate} : il doit être rempli entièrement.',
-  'planning.preparation.issue.equipment.pump': 'Équipement exigé absent : {point} demande une pompe, que {plate} n’a pas.',
-  'planning.preparation.issue.equipment.vehicleType': 'Équipement exigé absent : {point} n’accepte pas le type de {plate}.',
-  'planning.preparation.issue.unplaced': 'Reste à répartir : {requestNo}, {product}, {quantity} {unit}.',
+  'planning.preparation.issue.overCapacity':
+    'Quantité supérieure à la capacité : {quantity} L à livrer pour {capacity} L.',
+  'planning.preparation.issue.incompatible':
+    'Produits incompatibles sur {plate} : {productA} et {productB}.',
+  'planning.preparation.issue.fullFill':
+    'Règle du compartiment {compartmentNo} de {plate} : il doit être rempli entièrement.',
+  'planning.preparation.issue.equipment.pump':
+    'Équipement exigé absent : {point} demande une pompe, que {plate} n’a pas.',
+  'planning.preparation.issue.equipment.vehicleType':
+    'Équipement exigé absent : {point} n’accepte pas le type de {plate}.',
+  'planning.preparation.issue.unplaced':
+    'Reste à répartir : {requestNo}, {product}, {quantity} {unit}.',
   'planning.preparation.plan': 'Plan de chargement',
   'planning.preparation.propose': 'Proposer une répartition',
   'planning.preparation.savePlan': 'Enregistrer le plan',
@@ -129,7 +138,8 @@ export default {
   'planning.preparation.noRoute': 'Itinéraire à choisir',
   'planning.preparation.departureTime': 'Heure de départ',
   'planning.preparation.validate': 'Valider le plan',
-  'planning.preparation.validatedOn': 'Plan validé le {at} : chaque véhicule est devenu un ordre de transport planifié.',
+  'planning.preparation.validatedOn':
+    'Plan validé le {at} : chaque véhicule est devenu un ordre de transport planifié.',
   'planning.preparation.orderMade': 'Ordre {no}',
   'planning.pickup.ops.changeVehicle': 'Changer de véhicule',
   'planning.pickup.ops.changeSite': 'Changer de dépôt',
@@ -142,7 +152,8 @@ export default {
   'planning.pickup.ops.state.deviated': 'Déviée vers {no}',
   'planning.pickup.ops.state.returned': 'Retour au dépôt',
   'planning.pickup.ops.state.out': 'Sortie de l’ordre',
-  'planning.pickup.ops.candidate': 'Conducteur : {driver} · permis {licence} valable jusqu’au {expiry} · transporteur : {carrier}',
+  'planning.pickup.ops.candidate':
+    'Conducteur : {driver} · permis {licence} valable jusqu’au {expiry} · transporteur : {carrier}',
   'planning.pickup.ops.ownFleet': 'flotte de l’entreprise',
   'planning.pickup.ops.incidentType': 'Type d’incident',
   'planning.pickup.ops.reasonType': 'Type de motif',
@@ -150,8 +161,10 @@ export default {
   'planning.pickup.ops.pick': 'Choisissez',
   'planning.pickup.ops.target': 'Nouveau destinataire',
   'planning.pickup.ops.toDepot': 'Aucune déviation : retour du produit au dépôt',
-  'planning.pickup.ops.noCandidate': 'Aucun destinataire n’attend ce produit pour une quantité que le compartiment couvre.',
-  'planning.pickup.ops.noLists': 'Les listes d’incidents ne sont pas encore paramétrées par l’administrateur.',
+  'planning.pickup.ops.noCandidate':
+    'Aucun destinataire n’attend ce produit pour une quantité que le compartiment couvre.',
+  'planning.pickup.ops.noLists':
+    'Les listes d’incidents ne sont pas encore paramétrées par l’administrateur.',
   'planning.loadingList.simulate': 'Simuler le chargement',
   'planning.loadingList.back': 'Fond',
   'planning.loadingList.doors': 'Portes',
@@ -160,8 +173,11 @@ export default {
   'planning.loadingList.places.middle': 'Au milieu',
   'planning.loadingList.places.doors': 'Près des portes',
   'planning.loadingList.deliveryRank': 'Livré en {rank}',
-  'planning.loadingList.simulationHint': 'Chargez de gauche à droite : le dernier livré entre en premier, au fond ; le premier livré sort en premier, près des portes.',
+  'planning.loadingList.simulationHint':
+    'Chargez de gauche à droite : le dernier livré entre en premier, au fond ; le premier livré sort en premier, près des portes.',
   'planning.pickup.sendElectronic': 'Transmettre au système de l’entrepôt',
   'planning.pickup.systemConfirm': 'Confirmation par le système de l’entrepôt (simulée)',
-  'planning.loadingList.reference': 'Réf. commande : {reference}'
+  'planning.loadingList.reference': 'Réf. commande : {reference}',
+  'planning.loading.tab.loading': 'Ordres à charger',
+  'planning.preparation.emptyCreate': 'Aucune préparation. Créez-en une avec Nouvelle préparation.'
 }

@@ -46,5 +46,6 @@ export default {
   'fleet.documentTypes.form.vehicleTypesHint':
     'Aucun type coché : le document concerne tous les véhicules.',
   'fleet.documentTypes.form.vehicleTypeCount': '{n} type de véhicule | {n} types de véhicules',
-  'fleet.documentTypes.form.allVehicleTypes': 'Tous les véhicules'
+  'fleet.documentTypes.form.allVehicleTypes': 'Tous les véhicules',
+  'fleet.documentTypes.noResultsCreate': 'Aucun type de document. Créez-en un avec Nouveau.'
 }

@@ -29,5 +29,6 @@ export default {
   'maintenance.tyreLayouts.form.removeAxle': 'Remove the axle',
   'maintenance.tyreLayouts.form.positions': 'Positions:',
   'maintenance.tyreLayouts.form.positionCount': 'No position | 1 position | {count} positions',
-  'maintenance.tyreLayouts.form.layoutInvalid': 'Name each axle; 0 to 4 spare wheels.'
+  'maintenance.tyreLayouts.form.layoutInvalid': 'Name each axle; 0 to 4 spare wheels.',
+  'maintenance.tyreLayouts.noResultsCreate': 'No tyre layout. Create one with New.'
 }

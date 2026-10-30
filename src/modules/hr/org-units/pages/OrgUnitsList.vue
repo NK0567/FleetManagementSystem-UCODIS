@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import ReferenceImportDialog from '@/modules/hr/reference-import/ReferenceImportDialog.vue'
 import { List, ListTree, Network, Upload } from '@lucide/vue'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
+import type { MoreAction } from '@/components/shared/MoreActionsMenu.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
 import { useListCellFormatters } from '@/composables/useListCellFormatters'
 import { useListPage } from '@/composables/useListPage'
@@ -204,12 +205,24 @@ watch(
   },
   { immediate: true }
 )
+
+/** Secondary gestures of the list, behind « Plus d'actions ». */
+const moreActions = computed<MoreAction[]>(() => [
+  {
+    key: 'import',
+    label: t('hr.referenceImport.action'),
+    icon: Upload,
+    hidden: !canInsert.value,
+    onSelect: () => (importing.value = true)
+  }
+])
 </script>
 
 <template>
   <div class="h-full flex flex-col bg-white">
     <template v-if="!hideListContent">
       <ListPageToolbar
+        :more-actions="moreActions"
         :title="t('hr.orgUnits.title')"
         :exporting="exporting"
         :show-filter-panel="showFilterPanel"
@@ -254,16 +267,6 @@ watch(
             :reset-preferences="resetPreferences"
           />
         </template>
-        <template v-if="canInsert" #extra-actions>
-          <button
-            type="button"
-            class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
-            @click="importing = true"
-          >
-            <Upload class="w-4 h-4 text-primary" />
-            {{ t('hr.referenceImport.action') }}
-          </button>
-        </template>
       </ListPageToolbar>
 
       <FormAlerts
@@ -300,7 +303,9 @@ watch(
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('hr.orgUnits.noResults')"
+        :no-results-message="
+          canInsert ? t('hr.orgUnits.noResultsCreate') : t('hr.orgUnits.noResults')
+        "
         :no-search-results-message="t('hr.orgUnits.noSearchResults', { query: store.searchQuery })"
         :page="store.pagination.page"
         :total-pages="store.pagination.totalPages"

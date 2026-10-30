@@ -6,7 +6,7 @@ export default {
   'planning.billing.loadError': 'Billing could not be displayed.',
   'planning.billing.saveError': 'The invoice could not be saved.',
   'planning.billing.reference': 'Invoice reference',
-  'planning.billing.invoice': 'Mark invoiced',
+  'planning.billing.invoice': 'Invoice',
   'planning.billing.issue.not_delivered': 'Not delivered',
   'planning.billing.issue.internal': 'Internal department',
   'planning.billing.issue.reception': 'Reception not attested',
@@ -32,5 +32,9 @@ export default {
   'planning.billing.col.delivery': 'Delivery point',
   'planning.billing.col.quantity': 'Quantity',
   'planning.billing.col.amount': 'Amount',
-  'planning.billing.col.status': 'State'
+  'planning.billing.col.status': 'State',
+  'planning.billing.emptyOf.all': 'No delivery to invoice for now.',
+  'planning.billing.emptyOf.ready': 'No delivery ready to invoice.',
+  'planning.billing.emptyOf.blocked': 'No blocked delivery.',
+  'planning.billing.emptyOf.invoiced': 'No invoiced delivery.'
 }

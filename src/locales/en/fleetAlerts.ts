@@ -35,5 +35,5 @@ export default {
   'fleet.alerts.col.notifications': 'Notifications sent',
   'fleet.alerts.notification.email': 'E-mail to {to}',
   'fleet.alerts.notification.sms': 'SMS to {to}',
-  'fleet.alerts.averageHandling': 'Average handling time: {hours} h over {count} handled alert(s)'
+  'fleet.alerts.averageHandling': 'Average handling time: {hours} h · alerts handled: {count}'
 }

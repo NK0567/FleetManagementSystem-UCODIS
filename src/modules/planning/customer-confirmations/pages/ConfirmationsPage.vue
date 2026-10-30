@@ -12,6 +12,7 @@ import {
   UserX
 } from '@lucide/vue'
 import type { StatusTone } from '@/components/ui/status-pill/StatusPill.vue'
+import MoreActionsMenu, { type MoreAction } from '@/components/shared/MoreActionsMenu.vue'
 import { usePermissions } from '@/composables/usePermissions'
 import { useOptionsStore } from '@/stores/optionsStore'
 import { useUserStore } from '@/stores/user'
@@ -127,6 +128,46 @@ const orderCard = (orderNo: string) => ({
 const isOpen = (line: ConfirmationLineApi) =>
   line.state === 'pending' || line.state === 'unavailable'
 
+/* One gesture per line, « Confirmer »; taking, releasing, unavailability and the date the
+ * recipient gives wait in the menu of the line. */
+function rowActions(line: ConfirmationLineApi): MoreAction[] {
+  const busy = store.acting
+  return [
+    {
+      key: 'take',
+      label: t('planning.confirmations.queue.take'),
+      icon: Hand,
+      hidden: !!line.agent,
+      disabled: busy,
+      onSelect: () => void store.take(line)
+    },
+    {
+      key: 'release',
+      label: t('planning.confirmations.queue.release'),
+      icon: Undo2,
+      hidden: !line.agent,
+      disabled: busy,
+      onSelect: () => void store.release(line)
+    },
+    {
+      key: 'unavailable',
+      label: t('planning.confirmations.action.unavailable'),
+      icon: UserX,
+      hidden: line.state !== 'pending',
+      disabled: busy,
+      onSelect: () => (unavailable.value = line)
+    },
+    {
+      key: 'clientDate',
+      label: t('planning.confirmations.action.clientDate'),
+      icon: CalendarClock,
+      hidden: line.state !== 'pending',
+      disabled: busy,
+      onSelect: () => openDate(line, 'client-date')
+    }
+  ]
+}
+
 function openDate(line: ConfirmationLineApi, action: DateAction) {
   date.value = line.clientProposedOn ?? line.availableOn ?? ''
   dating.value = { line, action }
@@ -168,13 +209,22 @@ onMounted(() => {
         v-for="kpi in kpis"
         :key="kpi.key"
         class="bg-card border border-border rounded p-4 flex items-start gap-3"
+        :class="kpi.value ? '' : 'opacity-60'"
       >
-        <span class="p-2 rounded bg-primary/10 text-primary shrink-0">
+        <span
+          class="p-2 rounded shrink-0"
+          :class="kpi.value ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'"
+        >
           <component :is="kpi.icon" class="w-5 h-5" />
         </span>
         <div class="min-w-0">
           <p class="text-xs text-muted-foreground">{{ kpi.label }}</p>
-          <p class="text-2xl font-semibold tabular-nums text-card-foreground">{{ kpi.value }}</p>
+          <p
+            class="text-2xl font-semibold tabular-nums"
+            :class="kpi.value ? 'text-card-foreground' : 'text-muted-foreground'"
+          >
+            {{ kpi.value }}
+          </p>
         </div>
       </div>
     </section>
@@ -193,7 +243,10 @@ onMounted(() => {
           @click="openTab(state)"
         >
           {{ t(`planning.confirmations.state.${state}`) }}
-          <span class="ml-1 text-xs tabular-nums text-muted-foreground">
+          <span
+            class="ml-1 rounded-full px-1.5 text-xs tabular-nums"
+            :class="tabCount(state) ? 'bg-primary/10 text-primary' : 'text-muted-foreground'"
+          >
             {{ tabCount(state) }}
           </span>
         </button>
@@ -418,48 +471,22 @@ onMounted(() => {
               >
                 {{ t('planning.confirmations.queue.takenBy', { agent: line.agent }) }}
               </p>
-              <div v-else-if="canExecute && isOpen(line)" class="flex flex-wrap justify-end gap-1">
-                <button
-                  v-if="!line.agent"
-                  type="button"
-                  :class="buttonClass"
-                  :disabled="store.acting"
-                  @click="store.take(line)"
-                >
-                  <Hand class="w-4 h-4 text-primary" />
-                  {{ t('planning.confirmations.queue.take') }}
-                </button>
-                <button
-                  v-else
-                  type="button"
-                  :class="buttonClass"
-                  :disabled="store.acting"
-                  @click="store.release(line)"
-                >
-                  <Undo2 class="w-4 h-4 text-primary" />
-                  {{ t('planning.confirmations.queue.release') }}
-                </button>
+              <div
+                v-else-if="canExecute && isOpen(line)"
+                class="flex items-center justify-end gap-1"
+              >
                 <button
                   v-if="line.state === 'pending'"
                   type="button"
-                  :class="buttonClass"
+                  class="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1 text-sm font-medium text-primary-foreground bg-primary rounded hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                   :disabled="store.acting"
                   @click="store.confirm(line)"
                 >
-                  <CircleCheck class="w-4 h-4 text-primary" />
+                  <CircleCheck class="w-4 h-4" />
                   {{ t('planning.confirmations.action.confirm') }}
                 </button>
                 <button
-                  v-if="line.state === 'pending'"
-                  type="button"
-                  :class="buttonClass"
-                  :disabled="store.acting"
-                  @click="unavailable = line"
-                >
-                  <UserX class="w-4 h-4 text-primary" />
-                  {{ t('planning.confirmations.action.unavailable') }}
-                </button>
-                <button
+                  v-else
                   type="button"
                   :class="buttonClass"
                   :disabled="store.acting"
@@ -468,6 +495,7 @@ onMounted(() => {
                   <CalendarClock class="w-4 h-4 text-primary" />
                   {{ t('planning.confirmations.action.clientDate') }}
                 </button>
+                <MoreActionsMenu icon-only :actions="rowActions(line)" />
               </div>
             </td>
           </tr>

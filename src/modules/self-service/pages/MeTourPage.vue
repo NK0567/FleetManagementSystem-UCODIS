@@ -113,6 +113,20 @@ onMounted(() => void store.fetchTour())
           <component :is="departure.icon" class="w-5 h-5 shrink-0" />
           {{ t(`selfService.tour.departure.${departure.key}`) }}
         </p>
+        <RouterLink
+          to="/me/checklist"
+          class="w-full h-11 inline-flex items-center justify-center gap-2 px-4 rounded border border-border text-sm font-medium text-card-foreground hover:bg-accent transition"
+        >
+          <ClipboardCheck class="w-5 h-5 text-primary" />
+          {{ t('selfService.tour.openChecklist') }}
+        </RouterLink>
+      </section>
+
+      <section class="space-y-2">
+        <h2 class="text-sm font-semibold text-card-foreground">
+          {{ t('selfService.tour.lines') }}
+        </h2>
+        <MyTransportOrders />
       </section>
 
       <section v-if="markers.length" class="bg-card border border-border rounded overflow-hidden">
@@ -160,25 +174,6 @@ onMounted(() => void store.fetchTour())
           </li>
         </ol>
       </section>
-
-      <section class="space-y-2">
-        <h2 class="text-sm font-semibold text-card-foreground">
-          {{ t('selfService.tour.lines') }}
-        </h2>
-        <MyTransportOrders />
-      </section>
-
-      <div
-        class="sticky bottom-0 -mx-2 px-2 py-3 bg-background border-t border-border sm:static sm:mx-0 sm:p-0 sm:bg-transparent sm:border-0 sm:flex sm:justify-end"
-      >
-        <RouterLink
-          to="/me/checklist"
-          class="w-full sm:w-auto h-11 inline-flex items-center justify-center gap-2 px-4 rounded bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 transition"
-        >
-          <ClipboardCheck class="w-5 h-5" />
-          {{ t('selfService.tour.openChecklist') }}
-        </RouterLink>
-      </div>
     </template>
   </div>
 </template>

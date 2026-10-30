@@ -42,7 +42,9 @@ export default {
   'maintenance.serviceDue.action.recordHours': 'Read the hour meter',
   'maintenance.serviceDue.form.hours': 'Engine hours at the passage',
   'maintenance.serviceDue.form.engineHours': 'Engine hours shown',
-  'maintenance.serviceDue.summary.overdue': 'No overdue item | 1 overdue item | {count} overdue items',
+  'maintenance.serviceDue.summary.overdue':
+    'No overdue item | 1 overdue item | {count} overdue items',
   'maintenance.serviceDue.summary.blocking': 'none blocking | 1 blocking | {count} blocking',
-  'maintenance.serviceDue.summary.dueSoon': 'None close to the threshold | 1 close to the threshold | {count} close to the threshold'
+  'maintenance.serviceDue.summary.dueSoon':
+    'None close to the threshold | 1 close to the threshold | {count} close to the threshold'
 }

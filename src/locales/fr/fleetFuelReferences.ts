@@ -3,8 +3,7 @@ export default {
   'fleet.fuelReferences.card': 'Fiche consommation de référence',
   'fleet.fuelReferences.new': 'Nouvelle consommation de référence',
   'fleet.fuelReferences.loadingList': 'Chargement des consommations de référence…',
-  'fleet.fuelReferences.noResults':
-    "Aucune consommation de référence par véhicule : la référence vient de l'itinéraire type, du type de véhicule ou de la valeur par défaut.",
+  'fleet.fuelReferences.noResults': 'Aucune consommation de référence par véhicule.',
   'fleet.fuelReferences.noSearchResults': 'Aucune référence ne correspond à « {query} ».',
   'fleet.fuelReferences.saveSuccess': 'Consommation de référence enregistrée.',
   'fleet.fuelReferences.saveError': "La consommation de référence n'a pas pu être enregistrée.",
@@ -24,5 +23,6 @@ export default {
   'fleet.fuelReferences.form.routeTemplateHint':
     'Laissez vide pour une référence valable sur tous les corridors du véhicule.',
   'fleet.fuelReferences.form.referenceL100': 'Consommation de référence (L/100 km)',
-  'fleet.fuelReferences.form.comment': 'Commentaire'
+  'fleet.fuelReferences.form.comment': 'Commentaire',
+  'fleet.fuelReferences.noResultsCreate': 'Aucune consommation de référence par véhicule. Créez-en une avec Nouveau.'
 }

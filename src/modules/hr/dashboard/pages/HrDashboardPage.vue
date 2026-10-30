@@ -78,7 +78,12 @@ onMounted(() => void store.fetchDashboard())
           </span>
           <div class="min-w-0">
             <p class="text-xs text-muted-foreground">{{ kpi.label }}</p>
-            <p class="text-2xl font-semibold text-card-foreground tabular-nums">{{ kpi.value }}</p>
+            <p
+              class="text-2xl font-semibold tabular-nums"
+              :class="kpi.value ? 'text-card-foreground' : 'text-muted-foreground/60'"
+            >
+              {{ kpi.value }}
+            </p>
             <p class="text-xs text-muted-foreground truncate">{{ kpi.sub }}</p>
           </div>
         </div>

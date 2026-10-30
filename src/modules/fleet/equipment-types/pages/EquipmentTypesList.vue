@@ -66,6 +66,12 @@ const filterDefs: FilterFieldDef[] = [
     valueType: 'string',
     kind: 'option',
     optionsKey: 'equipmentCapability'
+  },
+  {
+    field: 'active',
+    labelKey: 'fleet.equipmentTypes.col.active',
+    valueType: 'boolean',
+    kind: 'boolean'
   }
 ]
 
@@ -212,7 +218,11 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('fleet.equipmentTypes.noResults')"
+        :no-results-message="
+          canInsert
+            ? t('fleet.equipmentTypes.noResultsCreate')
+            : t('fleet.equipmentTypes.noResults')
+        "
         :no-search-results-message="
           t('fleet.equipmentTypes.noSearchResults', { query: store.searchQuery })
         "

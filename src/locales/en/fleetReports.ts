@@ -7,9 +7,8 @@ export default {
   'fleet.reports.filter.from': 'From',
   'fleet.reports.filter.to': 'To',
   'fleet.reports.filter.site': 'Home site',
-  'fleet.reports.export.xlsx': 'Excel',
-  'fleet.reports.export.pdf': 'PDF',
-
+  'fleet.reports.export.xlsx': 'Export to Excel',
+  'fleet.reports.export.pdf': 'Export to PDF',
   'fleet.reports.kind.summary': 'Summary',
   'fleet.reports.kind.fuel': 'Fuel and tyres',
   'fleet.reports.kind.drivers': 'Drivers',
@@ -139,5 +138,6 @@ export default {
   'fleet.reports.col.authorizationNo': 'Authorization',
   'fleet.reports.col.plannedDeparture': 'Planned departure',
   'fleet.reports.col.decision': 'Decision',
-  'fleet.reports.col.failedChecks': 'Failed checks'
+  'fleet.reports.col.failedChecks': 'Failed checks',
+  'fleet.reports.exportBlocked': 'Choose a valid period first.'
 }

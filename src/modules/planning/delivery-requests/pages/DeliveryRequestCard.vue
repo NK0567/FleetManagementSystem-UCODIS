@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Ban, CircleX, Combine, Split, Star } from '@lucide/vue'
 import { apiErrorMessage } from '@/core/api/apiError'
+import type { MoreAction } from '@/components/shared/MoreActionsMenu.vue'
 import type { CardOpenMode } from '@/composables/cardOpenMode'
 import { useEntityCard } from '@/composables/useEntityCard'
 import { usePermissions } from '@/composables/usePermissions'
@@ -99,8 +100,50 @@ async function act(choice: { reasonNo: string; comment: string }) {
   if (dialog.value && (await run(dialog.value, choice))) dialog.value = null
 }
 
-const buttonClass =
-  'cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed'
+/* The orderer's survey is the one gesture put forward; the planner's corrections of a waiting
+ * order (reject, split, merge, cancel) wait in « Plus d'actions ». */
+const canSurvey = computed(
+  () => !!item.value && canUpdate.value && item.value.orderCompleted && !item.value.ordererSurvey
+)
+const moreActions = computed<MoreAction[]>(() => {
+  const order = item.value
+  if (!order) return []
+  return [
+    {
+      key: 'reject',
+      label: t('planning.deliveryRequests.action.reject'),
+      icon: CircleX,
+      hidden: !canExecute.value || !canReject(order.status),
+      disabled: acting.value,
+      onSelect: () => (dialog.value = 'reject')
+    },
+    {
+      key: 'split',
+      label: t('planning.deliveryRequests.action.split'),
+      icon: Split,
+      hidden: !canExecute.value || order.status !== 'pending' || order.lineCount > 1,
+      disabled: acting.value,
+      onSelect: () => ((splitQuantity.value = null), (splitting.value = true))
+    },
+    {
+      key: 'merge',
+      label: t('planning.deliveryRequests.action.merge'),
+      icon: Combine,
+      hidden: !canExecute.value || order.status !== 'pending' || !!order.parentNo,
+      disabled: acting.value,
+      onSelect: () => void run('merge')
+    },
+    {
+      key: 'cancel',
+      label: t('planning.deliveryRequests.action.cancel'),
+      icon: Ban,
+      danger: true,
+      hidden: !canUpdate.value || !canCancel(order.status),
+      disabled: acting.value,
+      onSelect: () => (dialog.value = 'cancel')
+    }
+  ]
+})
 </script>
 
 <template>
@@ -125,6 +168,7 @@ const buttonClass =
     :show-title-new-button="canInsert"
     :has-unsaved-changes="isFormDirty"
     :can-save="isFormDirty"
+    :more-actions="item && !isEditMode && !isFormDirty ? moreActions : []"
     @close="emit('close')"
     @save="saveItem"
     @enter-edit="enterEditMode"
@@ -138,51 +182,14 @@ const buttonClass =
     <template #title-badges>
       <DeliveryRequestStatusPill v-if="item" :status="item.status" />
     </template>
-    <template v-if="item && !isEditMode && !isFormDirty" #action-buttons>
+    <template v-if="item && !isEditMode && !isFormDirty && canSurvey" #action-buttons>
       <button
-        v-if="canExecute && canReject(item.status)"
         type="button"
-        :class="buttonClass"
-        :disabled="acting"
-        @click="dialog = 'reject'"
-      >
-        <CircleX class="w-5 h-5 text-primary" /> {{ t('planning.deliveryRequests.action.reject') }}
-      </button>
-      <button
-        v-if="canExecute && item.status === 'pending' && item.lineCount <= 1"
-        type="button"
-        :class="buttonClass"
-        :disabled="acting"
-        @click="((splitQuantity = null), (splitting = true))"
-      >
-        <Split class="w-5 h-5 text-primary" /> {{ t('planning.deliveryRequests.action.split') }}
-      </button>
-      <button
-        v-if="canExecute && item.status === 'pending' && !item.parentNo"
-        type="button"
-        :class="buttonClass"
-        :disabled="acting"
-        @click="run('merge')"
-      >
-        <Combine class="w-5 h-5 text-primary" /> {{ t('planning.deliveryRequests.action.merge') }}
-      </button>
-      <button
-        v-if="canUpdate && item.orderCompleted && !item.ordererSurvey"
-        type="button"
-        :class="buttonClass"
+        class="cursor-pointer inline-flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium text-primary-foreground bg-primary rounded hover:opacity-90 transition disabled:opacity-50"
         :disabled="acting"
         @click="surveying = true"
       >
-        <Star class="w-5 h-5 text-primary" /> {{ t('planning.deliveryRequests.survey.open') }}
-      </button>
-      <button
-        v-if="canUpdate && canCancel(item.status)"
-        type="button"
-        :class="buttonClass"
-        :disabled="acting"
-        @click="dialog = 'cancel'"
-      >
-        <Ban class="w-5 h-5 text-primary" /> {{ t('planning.deliveryRequests.action.cancel') }}
+        <Star class="w-4 h-4" /> {{ t('planning.deliveryRequests.survey.open') }}
       </button>
     </template>
     <template #form>

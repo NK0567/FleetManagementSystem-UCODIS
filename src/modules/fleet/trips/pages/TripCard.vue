@@ -1,5 +1,7 @@
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, ref, type Component } from 'vue'
+import type { MoreAction } from '@/components/shared/MoreActionsMenu.vue'
+import PrimaryActionButton from '@/modules/fleet/shared/components/PrimaryActionButton.vue'
 import { useI18n } from 'vue-i18n'
 import { Ban, Flag, FlagTriangleRight, Lock, MapPinCheck } from '@lucide/vue'
 import { apiErrorMessage } from '@/core/api/apiError'
@@ -142,6 +144,70 @@ const nextStopName = computed(() => {
   const index = item.value ? nextStopIndex(item.value.stops) : null
   return index === null ? '' : (item.value?.stops[index]?.siteName ?? '')
 })
+
+/* One main action by status, the next step of the trip; cancelling waits in « Plus d'actions ». */
+interface CardAction {
+  label: string
+  icon: Component
+  run: () => void
+  disabledReason?: string
+}
+const primaryAction = computed<CardAction | null>(() => {
+  const trip = item.value
+  if (!trip) return null
+  if (can('start')) {
+    return {
+      label: t('fleet.trips.action.start'),
+      icon: FlagTriangleRight,
+      run: () => open('start'),
+      disabledReason: awaitsAuthorization.value ? t('fleet.trips.needsAuthorization') : undefined
+    }
+  }
+  if (canPassStop.value) {
+    return {
+      label: t('fleet.trips.action.passStop', { site: nextStopName.value }),
+      icon: MapPinCheck,
+      run: passStop
+    }
+  }
+  if (can('complete')) {
+    return { label: t('fleet.trips.action.complete'), icon: Flag, run: () => open('complete') }
+  }
+  if (can('close')) {
+    return {
+      label: t('fleet.trips.action.close'),
+      icon: Lock,
+      run: closeTrip,
+      disabledReason: trip.deviationsToQualify
+        ? t('fleet.trips.deviationsToQualify', { count: trip.deviationsToQualify })
+        : undefined
+    }
+  }
+  return null
+})
+const moreActions = computed<MoreAction[]>(() =>
+  showActions.value
+    ? [
+        {
+          key: 'complete',
+          label: t('fleet.trips.action.complete'),
+          icon: Flag,
+          hidden: !canPassStop.value || !can('complete'),
+          disabled: acting.value,
+          onSelect: () => open('complete')
+        },
+        {
+          key: 'cancel',
+          label: t('fleet.trips.action.cancel'),
+          icon: Ban,
+          hidden: !can('cancel'),
+          disabled: acting.value,
+          danger: true,
+          onSelect: () => open('cancel')
+        }
+      ]
+    : []
+)
 </script>
 
 <template>
@@ -166,6 +232,7 @@ const nextStopName = computed(() => {
     :show-title-new-button="canInsert"
     :has-unsaved-changes="isFormDirty"
     :can-save="isFormDirty"
+    :more-actions="moreActions"
     @close="emit('close')"
     @save="saveItem"
     @enter-edit="enterEditMode"
@@ -179,59 +246,14 @@ const nextStopName = computed(() => {
     <template #title-badges>
       <TripStatusPill v-if="item" :status="item.status" />
     </template>
-    <template v-if="showActions" #action-buttons>
-      <button
-        v-if="can('start')"
-        type="button"
-        class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
-        :disabled="acting || awaitsAuthorization"
-        :title="awaitsAuthorization ? t('fleet.trips.needsAuthorization') : undefined"
-        @click="open('start')"
-      >
-        <FlagTriangleRight class="w-5 h-5 text-primary" /> {{ t('fleet.trips.action.start') }}
-      </button>
-      <button
-        v-if="canPassStop"
-        type="button"
-        class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
+    <template v-if="showActions && primaryAction" #action-buttons>
+      <PrimaryActionButton
+        :label="primaryAction.label"
+        :icon="primaryAction.icon"
         :disabled="acting"
-        @click="passStop"
-      >
-        <MapPinCheck class="w-5 h-5 text-primary" />
-        {{ t('fleet.trips.action.passStop', { site: nextStopName }) }}
-      </button>
-      <button
-        v-if="can('complete')"
-        type="button"
-        class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
-        :disabled="acting"
-        @click="open('complete')"
-      >
-        <Flag class="w-5 h-5 text-primary" /> {{ t('fleet.trips.action.complete') }}
-      </button>
-      <button
-        v-if="can('close')"
-        type="button"
-        class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
-        :disabled="acting || !!item?.deviationsToQualify"
-        :title="
-          item?.deviationsToQualify
-            ? t('fleet.trips.deviationsToQualify', { count: item.deviationsToQualify })
-            : undefined
-        "
-        @click="closeTrip"
-      >
-        <Lock class="w-5 h-5 text-primary" /> {{ t('fleet.trips.action.close') }}
-      </button>
-      <button
-        v-if="can('cancel')"
-        type="button"
-        class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
-        :disabled="acting"
-        @click="open('cancel')"
-      >
-        <Ban class="w-5 h-5 text-primary" /> {{ t('fleet.trips.action.cancel') }}
-      </button>
+        :disabled-reason="primaryAction.disabledReason"
+        @click="primaryAction.run()"
+      />
     </template>
     <template #form>
       <div class="min-h-0 flex flex-col h-full">

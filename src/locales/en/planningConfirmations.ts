@@ -169,5 +169,10 @@ export default {
   'planning.tracking.giveDate': 'Give a date',
   'planning.tracking.pendingConfirm': 'Receipt confirmed by {name}',
   'planning.tracking.pendingContest': 'Contest recorded: {reason}',
-  'planning.tracking.pendingNetwork': 'Offline: recorded, will be sent'
+  'planning.tracking.pendingNetwork': 'Offline: recorded, will be sent',
+  'planning.tracking.deliveryNoteTitle': 'Delivery note',
+  'planning.tracking.survey.pickScore': 'Pick a score first',
+  'planning.tracking.needSigner': 'Enter the name of the person receiving',
+  'planning.tracking.needReason': 'Pick a reason',
+  'planning.tracking.needDate': 'Pick a date'
 }

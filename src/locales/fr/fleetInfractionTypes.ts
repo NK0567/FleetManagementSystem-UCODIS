@@ -25,5 +25,6 @@ export default {
   'fleet.infractionTypes.form.name': 'Libellé',
   'fleet.infractionTypes.form.defaultSeverity': 'Gravité par défaut',
   'fleet.infractionTypes.form.active': 'Actif',
-  'fleet.infractionTypes.form.infractionCount': 'Infractions de ce type'
+  'fleet.infractionTypes.form.infractionCount': 'Infractions de ce type',
+  'fleet.infractionTypes.noResultsCreate': "Aucun type d'infraction. Créez-en un avec Nouveau."
 }

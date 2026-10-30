@@ -27,5 +27,6 @@ export default {
   'hr.employeeCategories.form.description': 'Description',
   'hr.employeeCategories.form.annualLeaveDays': 'Annual leave (days per year)',
   'hr.employeeCategories.form.active': 'Active',
-  'hr.employeeCategories.form.employeeCount': 'Employees on staff'
+  'hr.employeeCategories.form.employeeCount': 'Employees on staff',
+  'hr.employeeCategories.noResultsCreate': 'No category. Create one with New.'
 }

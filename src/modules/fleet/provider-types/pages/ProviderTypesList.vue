@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
 import { useListCellFormatters } from '@/composables/useListCellFormatters'
 import { useListPage } from '@/composables/useListPage'
@@ -51,6 +52,23 @@ const tableColumns = computed<TableColumn[]>(() => [
   },
   { sortKey: 'modifiedBy', label: t('common.audit.modifiedBy'), minW: '110px', defaultHidden: true }
 ])
+
+/* Coded columns are filtered with a choice, never typed. */
+const filterDefs: FilterFieldDef[] = [
+  {
+    field: 'systemRole',
+    labelKey: 'fleet.providerTypes.col.systemRole',
+    valueType: 'string',
+    kind: 'option',
+    optionsKey: 'providerRole'
+  },
+  {
+    field: 'active',
+    labelKey: 'fleet.providerTypes.col.active',
+    valueType: 'boolean',
+    kind: 'boolean'
+  }
+]
 
 const detailKeys = ['systemRole', 'providerCount', 'active']
 const detailColumns = computed(() =>
@@ -120,6 +138,7 @@ const {
   feature: 'PROVIDERTYPE',
   store,
   columns: tableColumns,
+  filterDefs,
   exportFileBaseName: 'provider-types',
   exportApi: providerTypeApi.exportExcel,
   remove: providerTypeService.remove,
@@ -194,7 +213,9 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('fleet.providerTypes.noResults')"
+        :no-results-message="
+          canInsert ? t('fleet.providerTypes.noResultsCreate') : t('fleet.providerTypes.noResults')
+        "
         :no-search-results-message="
           t('fleet.providerTypes.noSearchResults', { query: store.searchQuery })
         "

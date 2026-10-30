@@ -44,7 +44,12 @@ const tableColumns = computed<TableColumn[]>(() => [
     minW: '150px',
     formatter: formatDateTime
   },
-  { sortKey: 'location', label: t('fleet.claims.col.location'), minW: '180px' },
+  {
+    sortKey: 'location',
+    label: t('fleet.claims.col.location'),
+    minW: '180px',
+    defaultHidden: true
+  },
   {
     sortKey: 'severity',
     label: t('fleet.claims.col.severity'),
@@ -86,7 +91,8 @@ const tableColumns = computed<TableColumn[]>(() => [
     label: t('fleet.claims.col.residualCost'),
     minW: '130px',
     align: 'right',
-    formatter: formatInteger
+    formatter: formatInteger,
+    defaultHidden: true
   },
   {
     sortKey: 'status',
@@ -297,7 +303,9 @@ watch(() => store.items, loadSummary)
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('fleet.claims.noResults')"
+        :no-results-message="
+          canInsert ? t('fleet.claims.noResultsCreate') : t('fleet.claims.noResults')
+        "
         :no-search-results-message="t('fleet.claims.noSearchResults', { query: store.searchQuery })"
         :page="store.pagination.page"
         :total-pages="store.pagination.totalPages"

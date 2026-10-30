@@ -3,6 +3,8 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Archive, Mail } from '@lucide/vue'
 import { isValidEmailAddress, parseRecipients } from '../domain/fleetStatusDispatch'
+import type { MoreAction } from '@/components/shared/MoreActionsMenu.vue'
+import PrimaryActionButton from '@/modules/fleet/shared/components/PrimaryActionButton.vue'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
 import { apiErrorMessage } from '@/core/api/apiError'
@@ -131,6 +133,18 @@ async function archiveToday() {
   }
 }
 
+/** Sending the state is the gesture of the day; archiving it by hand waits in « Plus d'actions ». */
+const moreActions = computed<MoreAction[]>(() => [
+  {
+    key: 'archive',
+    label: t('fleet.fleetStatus.archive'),
+    icon: Archive,
+    hidden: !canExecute.value || !store.isLive,
+    disabled: archiving.value,
+    onSelect: () => void archiveToday()
+  }
+])
+
 /** The note of the day, edited in the details panel of the selected line. */
 const observation = ref('')
 const expectedBackOn = ref<string | null>(null)
@@ -201,6 +215,12 @@ onMounted(() => {
   void store.fetchDays()
   void store.fetchDispatches().catch(() => undefined)
 })
+
+/* These lines have no card: their actions sit in the details panel, opened with the selection. */
+function selectAndShow(item: FleetStatusApi) {
+  store.selectItem(item)
+  showDetailsPanel.value = true
+}
 </script>
 
 <template>
@@ -215,6 +235,7 @@ onMounted(() => {
         :export-excel="exportToExcel"
         :show-details-panel="showDetailsPanel"
         :show-create="false"
+        :more-actions="moreActions"
         :list-view-options="listViewOptions"
         :list-view="store.listView"
         :search-column="store.searchColumn"
@@ -256,24 +277,13 @@ onMounted(() => {
                 </option>
               </select>
             </div>
-            <button
-              v-if="canExecute && store.isLive"
-              type="button"
-              class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm border border-border rounded hover:bg-accent transition disabled:opacity-50"
-              :disabled="archiving"
-              @click="archiveToday"
-            >
-              <Archive class="w-4 h-4 text-primary" /> {{ t('fleet.fleetStatus.archive') }}
-            </button>
-            <button
+            <PrimaryActionButton
               v-if="canExecute"
-              type="button"
-              class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm border border-border rounded hover:bg-accent transition disabled:opacity-50"
+              :label="t('fleet.fleetStatus.send.button')"
+              :icon="Mail"
               :disabled="sending"
               @click="openSend"
-            >
-              <Mail class="w-4 h-4 text-primary" /> {{ t('fleet.fleetStatus.send.button') }}
-            </button>
+            />
           </div>
         </template>
       </ListPageToolbar>
@@ -337,7 +347,7 @@ onMounted(() => {
         @update:width="setColumnWidth"
         @update:page="store.changePage"
         @update:limit="store.changeLimit"
-        @select-item="(item) => store.selectItem(item as FleetStatusApi)"
+        @select-item="(item) => selectAndShow(item as FleetStatusApi)"
       >
         <template #cell-state="{ item }">
           <FleetStatePill :state="(item as FleetStatusApi).state" />

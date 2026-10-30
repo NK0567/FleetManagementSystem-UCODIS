@@ -25,5 +25,6 @@ export default {
   'maintenance.competences.form.active': 'Active',
   'maintenance.competences.form.technicianCount': 'Technicians holding it',
   'maintenance.competences.form.hourlyRate': 'Specialty hourly rate',
-  'maintenance.competences.col.hourlyRate': 'Hourly rate'
+  'maintenance.competences.col.hourlyRate': 'Hourly rate',
+  'maintenance.competences.noResultsCreate': 'No skill. Create one with New.'
 }

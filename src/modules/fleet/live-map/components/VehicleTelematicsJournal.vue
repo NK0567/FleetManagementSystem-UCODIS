@@ -89,7 +89,15 @@ const recordLink = (entry: VehicleJournalEntry) => ({
       v-model:open="open"
       :title="t('fleet.liveMap.journal.title')"
       :summary="
-        journal ? [t('fleet.liveMap.journal.summary', { count: journal.entries.length })] : []
+        journal
+          ? [
+              t(
+                'fleet.liveMap.journal.summary',
+                { count: journal.entries.length },
+                journal.entries.length
+              )
+            ]
+          : []
       "
     >
       <div class="xl:col-span-2 min-w-0 space-y-3 text-sm">

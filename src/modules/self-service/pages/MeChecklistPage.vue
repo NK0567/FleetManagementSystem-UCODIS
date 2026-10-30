@@ -341,6 +341,7 @@ onMounted(async () => {
             type="submit"
             class="w-full sm:w-auto h-11 inline-flex items-center justify-center gap-2 px-4 rounded bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
             :disabled="!canSubmit"
+            :title="issues.length ? t(`selfService.checklist.issue.${issues[0]}`) : undefined"
           >
             <LoaderCircle v-if="store.saving" class="w-5 h-5 animate-spin" />
             <ClipboardCheck v-else class="w-5 h-5" />

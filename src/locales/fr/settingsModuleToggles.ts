@@ -153,5 +153,9 @@ export default {
   'settings.activityLog.col.detail': 'Détail',
   'settings.activityLog.loadingList': 'Chargement du journal…',
   'settings.activityLog.noResults': 'Aucune action enregistrée.',
-  'settings.activityLog.noSearchResults': 'Aucune action ne correspond à « {query} ».'
+  'settings.activityLog.noSearchResults': 'Aucune action ne correspond à « {query} ».',
+  'settings.userAccounts.noResultsCreate': 'Aucun compte. Créez-en un avec Nouveau.',
+  'settings.company.seeVehicles': 'Voir les véhicules',
+  'settings.company.noChange': 'Aucune modification à enregistrer.',
+  'settings.company.missingFields': 'Renseignez les champs obligatoires.'
 }

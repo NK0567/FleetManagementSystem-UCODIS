@@ -25,5 +25,6 @@ export default {
   'fleet.inspectionItems.form.partHint':
     "Les postes de la citerne ne s'inspectent que sur un véhicule qui en porte une.",
   'fleet.inspectionItems.form.sortOrder': 'Ordre',
-  'fleet.inspectionItems.form.active': 'Actif'
+  'fleet.inspectionItems.form.active': 'Actif',
+  'fleet.inspectionItems.noResultsCreate': 'Aucun poste dans la grille. Créez-en un avec Nouveau.'
 }

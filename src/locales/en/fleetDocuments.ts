@@ -45,7 +45,7 @@ export default {
   'fleet.documents.listView.toRenew': 'To renew',
   'fleet.documents.listView.current': 'Current',
   'fleet.documents.listView.all': 'All, history included',
-  'fleet.documents.action.renew': 'Renew',
+  'fleet.documents.action.renew': 'Renew the document',
   'fleet.documents.action.declare': 'Declare cancelled or lost',
   'fleet.documents.declareHint': 'The document stops being valid. To replace it, create a new one.',
   'fleet.documents.issue.expiryRequired': 'The expiry date is required for this document type.',
@@ -62,5 +62,6 @@ export default {
   'fleet.documents.alert.expired': 'Document expired since {date}: to be put in order.',
   'fleet.documents.alert.expiring': 'Document to renew: it expires on {date} ({days} days notice).',
   'fleet.documents.alert.sent.email': 'E-mail sent to {to} on {date} (simulated).',
-  'fleet.documents.alert.sent.sms': 'SMS sent to {to} on {date} (simulated).'
+  'fleet.documents.alert.sent.sms': 'SMS sent to {to} on {date} (simulated).',
+  'fleet.documents.noResultsCreate': 'No document. Create one with New.'
 }

@@ -70,6 +70,13 @@ const tableColumns = computed<TableColumn[]>(() => [
 
 const filterDefs: FilterFieldDef[] = [
   {
+    field: 'state',
+    labelKey: 'fleet.couplings.col.state',
+    valueType: 'string',
+    kind: 'option',
+    optionsKey: 'periodState'
+  },
+  {
     field: 'tractorNo',
     labelKey: 'fleet.couplings.col.tractorNo',
     valueType: 'string',
@@ -218,7 +225,9 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('fleet.couplings.noResults')"
+        :no-results-message="
+          canInsert ? t('fleet.couplings.noResultsCreate') : t('fleet.couplings.noResults')
+        "
         :no-search-results-message="
           t('fleet.couplings.noSearchResults', { query: store.searchQuery })
         "

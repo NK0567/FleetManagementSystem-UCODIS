@@ -219,19 +219,6 @@ watch(token, load)
         <p class="text-sm text-muted-foreground">{{ t('planning.tracking.title') }}</p>
       </header>
 
-      <button
-        type="button"
-        class="cursor-pointer inline-flex items-center gap-1.5 px-3 h-8 rounded border text-sm transition"
-        :class="
-          offline
-            ? 'border-warning text-warning bg-warning/10'
-            : 'border-border text-muted-foreground hover:bg-accent'
-        "
-        @click="toggleNetwork"
-      >
-        <component :is="offline ? CloudOff : Wifi" class="w-4 h-4" />
-        {{ offline ? t('selfService.offline.on') : t('selfService.offline.off') }}
-      </button>
       <LoadingSpinner v-if="loading" :text="t('common.loading')" />
       <FormAlerts :error="error" @clear:error="error = null" />
 
@@ -264,44 +251,6 @@ watch(token, load)
           </template>
         </dl>
 
-        <div v-if="tracking.parts.length" class="rounded border border-border px-3 py-2 space-y-1">
-          <p class="font-medium">
-            {{ t('planning.tracking.parts.title', { count: tracking.parts.length }) }}
-          </p>
-          <div
-            v-for="(part, index) in tracking.parts"
-            :key="part.requestNo"
-            class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs border-t border-border pt-1 first-of-type:border-t-0"
-          >
-            <span class="font-medium">
-              {{ t('planning.tracking.parts.delivery', { no: index + 1 }) }}
-            </span>
-            <span class="flex-1 min-w-0 text-muted-foreground">
-              {{ formatNumber(part.quantity) }} {{ part.unit }}
-              <template v-if="part.vehiclePlate">
-                · {{ t('planning.tracking.parts.truck', { plate: part.vehiclePlate }) }}
-              </template>
-              <template v-if="part.plannedDeparture">
-                · {{ formatDate(part.plannedDeparture) }}
-              </template>
-              <template v-if="part.expectedArrival">
-                · {{ t('planning.tracking.eta') }} {{ formatDateTime(part.expectedArrival) }}
-              </template>
-              · {{ t(`planning.tracking.parts.state.${part.state}`) }}
-            </span>
-            <span v-if="part.current" class="text-primary">
-              {{ t('planning.tracking.parts.current') }}
-            </span>
-            <a
-              v-else-if="part.trackingToken"
-              :href="`#/suivi/${part.trackingToken}`"
-              class="text-primary hover:underline"
-            >
-              {{ t('planning.tracking.parts.follow') }}
-            </a>
-          </div>
-        </div>
-
         <ol class="grid grid-cols-4 gap-1 text-[11px] leading-tight text-center">
           <li v-for="(step, index) in STEPS" :key="step" class="space-y-1">
             <span
@@ -317,100 +266,6 @@ watch(token, load)
             </span>
           </li>
         </ol>
-
-        <div class="rounded border border-border px-3 py-2 space-y-1">
-          <p class="font-medium">{{ t('planning.tracking.loadedTitle') }}</p>
-          <p v-if="tracking.notLoaded" class="text-warning">
-            {{ t('planning.tracking.notLoaded') }}
-          </p>
-          <p v-else-if="tracking.loadedQuantity === null" class="text-muted-foreground">
-            {{ t('planning.tracking.notLoadedYet') }}
-          </p>
-          <template v-else>
-            <p :class="tracking.refusedAt ? 'line-through text-muted-foreground' : ''">
-              {{ tracking.productName }} · {{ formatNumber(tracking.loadedQuantity) }}
-              {{ tracking.unit }}
-            </p>
-            <p class="text-xs text-muted-foreground">
-              {{ t('planning.tracking.loadedOn', { date: formatDate(tracking.loadedOn) }) }}
-            </p>
-          </template>
-        </div>
-
-        <DeliveryNoteView v-if="tracking.deliveryNote" :note="tracking.deliveryNote" />
-
-        <div
-          v-if="tracking.receptionConfirmedAt"
-          class="rounded border border-border px-3 py-2 space-y-2"
-        >
-          <p class="font-medium">{{ t('planning.tracking.survey.title') }}</p>
-          <template v-if="tracking.satisfactionScore !== null">
-            <p>
-              {{ '★'.repeat(tracking.satisfactionScore)
-              }}{{ '☆'.repeat(5 - tracking.satisfactionScore) }}
-              <span v-if="tracking.satisfactionComment" class="text-muted-foreground">
-                · {{ tracking.satisfactionComment }}
-              </span>
-            </p>
-            <p class="text-xs text-muted-foreground">{{ t('planning.tracking.survey.thanks') }}</p>
-          </template>
-          <template v-else>
-            <p class="text-xs text-muted-foreground">{{ t('planning.tracking.survey.hint') }}</p>
-            <div
-              class="flex gap-1"
-              role="radiogroup"
-              :aria-label="t('planning.tracking.survey.score')"
-            >
-              <button
-                v-for="value in 5"
-                :key="value"
-                type="button"
-                class="cursor-pointer text-2xl leading-none"
-                :class="value <= score ? 'text-warning' : 'text-muted-foreground'"
-                :aria-label="String(value)"
-                @click="score = value"
-              >
-                ★
-              </button>
-            </div>
-            <FormInput
-              v-model="opinion"
-              :maxlength="300"
-              :placeholder="t('planning.tracking.survey.comment')"
-            />
-            <button
-              type="button"
-              class="cursor-pointer px-3 py-2 rounded bg-primary text-primary-foreground text-sm disabled:opacity-60"
-              :disabled="sending || !score"
-              @click="sendSurvey"
-            >
-              {{ t('planning.tracking.send') }}
-            </button>
-          </template>
-        </div>
-
-        <div
-          v-if="tracking.messages.length"
-          class="rounded border border-border px-3 py-2 space-y-1"
-        >
-          <p class="font-medium">{{ t('planning.tracking.messages.title') }}</p>
-          <p v-for="(message, index) in tracking.messages" :key="index" class="text-xs">
-            <span class="text-muted-foreground">
-              {{ formatDateTime(message.at) }} ·
-              {{ t(`planning.tracking.messages.channel.${message.channel}`) }}
-              <template v-if="message.to"> · {{ message.to }}</template>
-            </span>
-            <br />
-            {{
-              t(`planning.tracking.messages.${message.kind}`, {
-                date: formatDate(tracking.plannedDeparture),
-                vehicle: tracking.vehiclePlate || '·',
-                driver: tracking.driverName || '·',
-                eta: formatDateTime(tracking.expectedArrival)
-              })
-            }}
-          </p>
-        </div>
 
         <div
           v-if="tracking.cancelledAt"
@@ -544,6 +399,15 @@ watch(token, load)
               type="button"
               class="cursor-pointer flex-1 px-4 py-2.5 rounded bg-primary text-primary-foreground font-medium disabled:opacity-60"
               :disabled="sending || (acting === 'receive-confirm' ? !signer.trim() : !reasonNo)"
+              :title="
+                acting === 'receive-confirm'
+                  ? !signer.trim()
+                    ? t('planning.tracking.needSigner')
+                    : undefined
+                  : !reasonNo
+                    ? t('planning.tracking.needReason')
+                    : undefined
+              "
               @click="sendActing"
             >
               {{ t('planning.tracking.send') }}
@@ -712,6 +576,15 @@ watch(token, load)
               type="button"
               class="cursor-pointer flex-1 px-4 py-2.5 rounded bg-primary text-primary-foreground font-medium disabled:opacity-60"
               :disabled="sending || (replanMode ? !date : !reasonNo)"
+              :title="
+                replanMode
+                  ? !date
+                    ? t('planning.tracking.needDate')
+                    : undefined
+                  : !reasonNo
+                    ? t('planning.tracking.needReason')
+                    : undefined
+              "
               @click="answer('unavailable')"
             >
               {{ t('planning.tracking.send') }}
@@ -729,7 +602,163 @@ watch(token, load)
         <p v-if="!tracking.open && tracking.step === 'planned'" class="text-muted-foreground">
           {{ t('planning.tracking.closed') }}
         </p>
+        <div
+          v-if="tracking.receptionConfirmedAt"
+          class="rounded border border-border px-3 py-2 space-y-2"
+        >
+          <p class="font-medium">{{ t('planning.tracking.survey.title') }}</p>
+          <template v-if="tracking.satisfactionScore !== null">
+            <p>
+              {{ '★'.repeat(tracking.satisfactionScore)
+              }}{{ '☆'.repeat(5 - tracking.satisfactionScore) }}
+              <span v-if="tracking.satisfactionComment" class="text-muted-foreground">
+                · {{ tracking.satisfactionComment }}
+              </span>
+            </p>
+            <p class="text-xs text-muted-foreground">{{ t('planning.tracking.survey.thanks') }}</p>
+          </template>
+          <template v-else>
+            <p class="text-xs text-muted-foreground">{{ t('planning.tracking.survey.hint') }}</p>
+            <div
+              class="flex gap-1"
+              role="radiogroup"
+              :aria-label="t('planning.tracking.survey.score')"
+            >
+              <button
+                v-for="value in 5"
+                :key="value"
+                type="button"
+                class="cursor-pointer text-2xl leading-none"
+                :class="value <= score ? 'text-warning' : 'text-muted-foreground'"
+                :aria-label="String(value)"
+                @click="score = value"
+              >
+                ★
+              </button>
+            </div>
+            <FormInput
+              v-model="opinion"
+              :maxlength="300"
+              :placeholder="t('planning.tracking.survey.comment')"
+            />
+            <button
+              type="button"
+              class="cursor-pointer px-3 py-2 rounded bg-primary text-primary-foreground text-sm disabled:opacity-60"
+              :disabled="sending || !score"
+              :title="!score ? t('planning.tracking.survey.pickScore') : undefined"
+              @click="sendSurvey"
+            >
+              {{ t('planning.tracking.send') }}
+            </button>
+          </template>
+        </div>
+
+        <div class="rounded border border-border px-3 py-2 space-y-1">
+          <p class="font-medium">{{ t('planning.tracking.loadedTitle') }}</p>
+          <p v-if="tracking.notLoaded" class="text-warning">
+            {{ t('planning.tracking.notLoaded') }}
+          </p>
+          <p v-else-if="tracking.loadedQuantity === null" class="text-muted-foreground">
+            {{ t('planning.tracking.notLoadedYet') }}
+          </p>
+          <template v-else>
+            <p :class="tracking.refusedAt ? 'line-through text-muted-foreground' : ''">
+              {{ tracking.productName }} · {{ formatNumber(tracking.loadedQuantity) }}
+              {{ tracking.unit }}
+            </p>
+            <p class="text-xs text-muted-foreground">
+              {{ t('planning.tracking.loadedOn', { date: formatDate(tracking.loadedOn) }) }}
+            </p>
+          </template>
+        </div>
+
+        <div v-if="tracking.parts.length" class="rounded border border-border px-3 py-2 space-y-1">
+          <p class="font-medium">
+            {{ t('planning.tracking.parts.title', { count: tracking.parts.length }) }}
+          </p>
+          <div
+            v-for="(part, index) in tracking.parts"
+            :key="part.requestNo"
+            class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs border-t border-border pt-1 first-of-type:border-t-0"
+          >
+            <span class="font-medium">
+              {{ t('planning.tracking.parts.delivery', { no: index + 1 }) }}
+            </span>
+            <span class="flex-1 min-w-0 text-muted-foreground">
+              {{ formatNumber(part.quantity) }} {{ part.unit }}
+              <template v-if="part.vehiclePlate">
+                · {{ t('planning.tracking.parts.truck', { plate: part.vehiclePlate }) }}
+              </template>
+              <template v-if="part.plannedDeparture">
+                · {{ formatDate(part.plannedDeparture) }}
+              </template>
+              <template v-if="part.expectedArrival">
+                · {{ t('planning.tracking.eta') }} {{ formatDateTime(part.expectedArrival) }}
+              </template>
+              · {{ t(`planning.tracking.parts.state.${part.state}`) }}
+            </span>
+            <span v-if="part.current" class="text-primary">
+              {{ t('planning.tracking.parts.current') }}
+            </span>
+            <a
+              v-else-if="part.trackingToken"
+              :href="`#/suivi/${part.trackingToken}`"
+              class="text-primary hover:underline"
+            >
+              {{ t('planning.tracking.parts.follow') }}
+            </a>
+          </div>
+        </div>
+
+        <details
+          v-if="tracking.deliveryNote"
+          :open="!!tracking.declaredAt"
+          class="rounded border border-border px-3 py-2"
+        >
+          <summary class="cursor-pointer font-medium">
+            {{ t('planning.tracking.deliveryNoteTitle') }}
+          </summary>
+          <DeliveryNoteView class="mt-2" :note="tracking.deliveryNote" />
+        </details>
+        <details
+          v-if="tracking.messages.length"
+          class="rounded border border-border px-3 py-2 space-y-1"
+        >
+          <summary class="cursor-pointer font-medium">
+            {{ t('planning.tracking.messages.title') }}
+          </summary>
+          <p v-for="(message, index) in tracking.messages" :key="index" class="text-xs">
+            <span class="text-muted-foreground">
+              {{ formatDateTime(message.at) }} ·
+              {{ t(`planning.tracking.messages.channel.${message.channel}`) }}
+              <template v-if="message.to"> · {{ message.to }}</template>
+            </span>
+            <br />
+            {{
+              t(`planning.tracking.messages.${message.kind}`, {
+                date: formatDate(tracking.plannedDeparture),
+                vehicle: tracking.vehiclePlate || '·',
+                driver: tracking.driverName || '·',
+                eta: formatDateTime(tracking.expectedArrival)
+              })
+            }}
+          </p>
+        </details>
       </section>
+
+      <button
+        type="button"
+        class="cursor-pointer inline-flex items-center gap-1.5 px-3 h-8 rounded border text-xs transition"
+        :class="
+          offline
+            ? 'border-warning text-warning bg-warning/10'
+            : 'border-border text-muted-foreground hover:bg-accent'
+        "
+        @click="toggleNetwork"
+      >
+        <component :is="offline ? CloudOff : Wifi" class="w-4 h-4" />
+        {{ offline ? t('selfService.offline.on') : t('selfService.offline.off') }}
+      </button>
     </div>
   </div>
 </template>

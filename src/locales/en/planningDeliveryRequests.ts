@@ -129,10 +129,18 @@ export default {
   'planning.deliveryRequests.intake.apiSent': 'Order {no} received through the API.',
   'planning.deliveryRequests.intake.apiInvalid': 'The content sent is not valid JSON.',
   'planning.deliveryRequests.intake.serviceClosed':
-    'The company does not take orders transmitted by a service: you follow your past orders here.',
-  'planning.deliveryRequests.intake.manualClosed':
-    'The company does not allow the planner to key an order himself.',
+    'Order transmission closed: you follow your past orders here.',
+  'planning.deliveryRequests.intake.manualClosed': 'Order entry by the planner closed.',
   'planning.deliveryRequests.form.recipientPhone': "Recipient's phone",
   'planning.deliveryRequests.form.recipientEmail': "Recipient's e-mail",
-  'planning.deliveryRequests.form.contactFallback': 'Otherwise the one of the customer record'
+  'planning.deliveryRequests.form.contactFallback': 'Otherwise the one of the customer record',
+  'planning.deliveryRequests.view.all': 'All',
+  'planning.deliveryRequests.view.pending': 'Pending',
+  'planning.deliveryRequests.view.planned': 'Planned',
+  'planning.deliveryRequests.view.expired': 'Expired',
+  'planning.deliveryRequests.view.rejected': 'Rejected',
+  'planning.deliveryRequests.view.cancelled': 'Cancelled',
+  'planning.deliveryRequests.action.new': 'New order',
+  'planning.deliveryRequests.import.actionLong': 'Import orders',
+  'planning.deliveryRequests.noResultsCreate': 'No order. Create one with New.'
 }

@@ -10,7 +10,8 @@ import DrivingBreachList from './DrivingBreachList.vue'
 const props = defineProps<{ tripNo: string; refreshKey?: string }>()
 
 const { t } = useI18n()
-const open = ref(true)
+/* Opened only when a limit is broken; the summary on the title says so. */
+const open = ref(false)
 const detail = ref<TripDrivingTimeApi | null>(null)
 const error = ref<string | null>(null)
 
@@ -18,6 +19,7 @@ async function load() {
   error.value = null
   try {
     detail.value = await drivingTimeService.ofTrip(props.tripNo)
+    open.value = detail.value.breaches.length > 0
   } catch (cause) {
     error.value = apiErrorMessage(cause, t('fleet.trips.drivingTime.loadError'))
   }
@@ -55,7 +57,6 @@ const duration = (minutes: number) =>
           </p>
           <DrivingBreachList v-if="detail.breaches.length" :breaches="detail.breaches" />
           <p v-else class="text-success">{{ t('fleet.trips.drivingTime.noBreach') }}</p>
-          <p class="text-xs text-muted-foreground">{{ t('fleet.trips.drivingTime.hint') }}</p>
         </template>
       </div>
     </FormSection>

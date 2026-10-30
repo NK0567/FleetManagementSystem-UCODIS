@@ -5,6 +5,7 @@ import { RotateCcw } from '@lucide/vue'
 import { apiErrorMessage } from '@/core/api/apiError'
 import { usePermissions } from '@/composables/usePermissions'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
+import type { MoreAction } from '@/components/shared/MoreActionsMenu.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
 import { useListCellFormatters } from '@/composables/useListCellFormatters'
 import { useListPage } from '@/composables/useListPage'
@@ -165,12 +166,24 @@ const {
   remove: downtimeCodeService.remove,
   deleteErrorFallback: t('maintenance.downtimeCodes.deleteError')
 })
+
+/** Secondary gestures of the list, behind « Plus d'actions ». */
+const moreActions = computed<MoreAction[]>(() => [
+  {
+    key: 'reset',
+    label: t('maintenance.downtimeCodes.reset'),
+    icon: RotateCcw,
+    hidden: !canExecute.value,
+    onSelect: () => (confirmingReset.value = true)
+  }
+])
 </script>
 
 <template>
   <div class="h-full flex flex-col bg-white">
     <template v-if="!hideListContent">
       <ListPageToolbar
+        :more-actions="moreActions"
         :title="t('maintenance.downtimeCodes.title')"
         :exporting="exporting"
         :show-filter-panel="showFilterPanel"
@@ -210,16 +223,6 @@ const {
             :reset-preferences="resetPreferences"
           />
         </template>
-        <template v-if="canExecute" #extra-actions>
-          <button
-            type="button"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
-            @click="confirmingReset = true"
-          >
-            <RotateCcw class="w-4 h-4 text-primary" />
-            {{ t('maintenance.downtimeCodes.reset') }}
-          </button>
-        </template>
       </ListPageToolbar>
 
       <FormAlerts
@@ -254,7 +257,11 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('maintenance.downtimeCodes.noResults')"
+        :no-results-message="
+          canInsert
+            ? t('maintenance.downtimeCodes.noResultsCreate')
+            : t('maintenance.downtimeCodes.noResults')
+        "
         :no-search-results-message="
           t('maintenance.downtimeCodes.noSearchResults', { query: store.searchQuery })
         "

@@ -173,5 +173,10 @@ export default {
   'planning.tracking.giveDate': 'Indiquer une date',
   'planning.tracking.pendingConfirm': 'Réception confirmée par {name}',
   'planning.tracking.pendingContest': 'Contestation enregistrée : {reason}',
-  'planning.tracking.pendingNetwork': 'Hors réseau : enregistré, sera transmis'
+  'planning.tracking.pendingNetwork': 'Hors réseau : enregistré, sera transmis',
+  'planning.tracking.deliveryNoteTitle': 'Bon de livraison',
+  'planning.tracking.survey.pickScore': "Choisissez d'abord une note",
+  'planning.tracking.needSigner': 'Indiquez le nom de la personne qui reçoit',
+  'planning.tracking.needReason': 'Choisissez un motif',
+  'planning.tracking.needDate': 'Choisissez une date'
 }

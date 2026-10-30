@@ -88,11 +88,24 @@ const tableColumns = computed<TableColumn[]>(() => [
 
 const filterDefs: FilterFieldDef[] = [
   {
+    field: 'decision',
+    labelKey: 'fleet.departureAuthorizations.col.decision',
+    valueType: 'string',
+    kind: 'option',
+    optionsKey: 'departureDecision'
+  },
+  {
     field: 'tripNo',
     labelKey: 'fleet.departureAuthorizations.col.tripNo',
     valueType: 'string',
     kind: 'reference',
     referenceKey: 'plannedTrips'
+  },
+  {
+    field: 'ready',
+    labelKey: 'fleet.departureAuthorizations.col.ready',
+    valueType: 'boolean',
+    kind: 'boolean'
   }
 ]
 
@@ -229,7 +242,11 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('fleet.departureAuthorizations.noResults')"
+        :no-results-message="
+          canInsert
+            ? t('fleet.departureAuthorizations.noResultsCreate')
+            : t('fleet.departureAuthorizations.noResults')
+        "
         :no-search-results-message="
           t('fleet.departureAuthorizations.noSearchResults', { query: store.searchQuery })
         "

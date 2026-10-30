@@ -24,5 +24,6 @@ export default {
   'fleet.fuelGapCauses.form.name': 'Name',
   'fleet.fuelGapCauses.form.chargeable': 'Chargeable to the driver',
   'fleet.fuelGapCauses.form.chargeableHint': 'Only a chargeable cause allows a deduction.',
-  'fleet.fuelGapCauses.form.active': 'Active'
+  'fleet.fuelGapCauses.form.active': 'Active',
+  'fleet.fuelGapCauses.noResultsCreate': 'No cause. Create one with New.'
 }

@@ -43,9 +43,9 @@ export default {
   'fleet.companyDocuments.listView.current': 'En vigueur',
   'fleet.companyDocuments.listView.toReview': 'À examiner',
   'fleet.companyDocuments.listView.all': 'Tous, historique compris',
-  'fleet.companyDocuments.action.approve': 'Valider',
-  'fleet.companyDocuments.action.reject': 'Refuser',
-  'fleet.companyDocuments.action.newVersion': 'Nouvelle version',
+  'fleet.companyDocuments.action.approve': 'Valider le document',
+  'fleet.companyDocuments.action.reject': 'Refuser le document',
+  'fleet.companyDocuments.action.newVersion': 'Déposer une nouvelle version',
   'fleet.companyDocuments.action.submit': 'Déposer',
   'fleet.companyDocuments.action.withdraw': 'Retirer',
   'fleet.companyDocuments.col.keywordText': 'Mots-clés',
@@ -59,5 +59,6 @@ export default {
   'fleet.companyDocuments.form.supersedesHint':
     "La version actuelle reste en vigueur jusqu'à la validation de celle-ci.",
   'fleet.companyDocuments.form.replacedBy': 'Remplacé par',
-  'fleet.companyDocuments.col.filedOn': 'Déposé le'
+  'fleet.companyDocuments.col.filedOn': 'Déposé le',
+  'fleet.companyDocuments.noResultsCreate': "Aucun document d'entreprise. Créez-en un avec Nouveau."
 }

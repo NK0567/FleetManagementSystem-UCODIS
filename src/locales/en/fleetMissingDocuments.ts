@@ -1,7 +1,6 @@
 export default {
   'fleet.missingDocuments.title': 'Missing documents',
-  'fleet.missingDocuments.hint':
-    'Mandatory documents that are missing or out of validity, for vehicles in service and staff on hand.',
+  'fleet.missingDocuments.hint': 'Mandatory documents missing or expired.',
   'fleet.missingDocuments.loadingList': 'Looking for missing documents…',
   'fleet.missingDocuments.noResults': 'No missing document: everything is in order.',
   'fleet.missingDocuments.noSearchResults': 'No missing document matches “{query}”.',

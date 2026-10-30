@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, type Component } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
   Ban,
@@ -17,6 +17,7 @@ import {
   Undo2,
   Wrench
 } from '@lucide/vue'
+import type { MoreAction } from '@/components/shared/MoreActionsMenu.vue'
 import { apiErrorMessage } from '@/core/api/apiError'
 import { purchaseRequestService } from '@/modules/maintenance/purchase-requests'
 import { stockItemService, type StockItemApi } from '@/modules/maintenance/stock-items'
@@ -375,8 +376,152 @@ async function confirmReason(reason: string) {
   if (reasonDialog.value && (await act(reasonDialog.value, { reason }))) reasonDialog.value = null
 }
 
-const buttonClass =
-  'cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed'
+const primaryClass =
+  'cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-primary text-primary-foreground rounded hover:opacity-90 transition disabled:opacity-60 disabled:cursor-not-allowed'
+
+/**
+ * Every gesture the order allows now, for the role and the status. The next step of the work
+ * is shown as the main button; the others go in « Plus d'actions ».
+ */
+const actions = computed<(MoreAction & { icon: Component })[]>(() => {
+  const order = item.value
+  if (!order) return []
+  const label = (key: string) => t(`maintenance.workOrders.action.${key}`)
+  const onSite = canWork.value && !atGarage.value
+  const completeBlocked = !order.diagnosis || !order.labour.length
+  return [
+    {
+      key: 'validate',
+      label: label('validate'),
+      icon: CircleCheck,
+      hidden: !(canExecute.value && awaitingValidation.value),
+      disabled: !!fourEyes.value,
+      title: t('maintenance.workOrders.hint.fourEyes'),
+      onSelect: () => open('validate')
+    },
+    {
+      key: 'refuse',
+      label: label('refuse'),
+      icon: CircleX,
+      hidden: !(canExecute.value && awaitingValidation.value),
+      disabled: !!fourEyes.value,
+      title: t('maintenance.workOrders.hint.fourEyes'),
+      onSelect: () => (reasonDialog.value = 'refuse')
+    },
+    {
+      key: 'nomenclature',
+      label: label('nomenclature'),
+      icon: ListChecks,
+      hidden: !canConfirmNomenclature.value,
+      onSelect: () => open('nomenclature')
+    },
+    {
+      key: 'return',
+      label: label('return'),
+      icon: Undo2,
+      hidden: !(canWork.value && atGarage.value),
+      onSelect: () => open('return')
+    },
+    {
+      key: 'followUp',
+      label: label('followUp'),
+      icon: NotebookPen,
+      hidden: !(canWork.value && atGarage.value),
+      onSelect: () => open('followUp')
+    },
+    {
+      key: 'start',
+      label: label('start'),
+      icon: Play,
+      hidden: !onSite || !!order.startedAt,
+      onSelect: () => void act('start')
+    },
+    {
+      key: 'diagnose',
+      label: label('diagnose'),
+      icon: Stethoscope,
+      hidden: !canWork.value,
+      onSelect: () => open('diagnose')
+    },
+    {
+      key: 'labour',
+      label: label('labour'),
+      icon: Clock,
+      hidden: !onSite,
+      onSelect: () => open('labour')
+    },
+    {
+      key: 'complete',
+      label: label('complete'),
+      icon: Wrench,
+      hidden: !onSite,
+      disabled: completeBlocked,
+      title: t('maintenance.workOrders.hint.completeNeeds'),
+      onSelect: () => open('complete')
+    },
+    {
+      key: 'plan',
+      label: label('plan'),
+      icon: CalendarClock,
+      hidden: !onSite,
+      onSelect: () => open('plan')
+    },
+    {
+      key: 'takePart',
+      label: label('takePart'),
+      icon: Package,
+      hidden: !onSite,
+      onSelect: () => open('takePart')
+    },
+    {
+      key: 'buyPart',
+      label: label('buyPart'),
+      icon: ShoppingCart,
+      hidden: !onSite,
+      onSelect: () => open('buyPart')
+    },
+    {
+      key: 'handOver',
+      label: label('handOver'),
+      icon: Factory,
+      hidden: !onSite || !!order.external,
+      onSelect: () => open('handOver')
+    },
+    {
+      key: 'cancel',
+      label: label('cancel'),
+      icon: Ban,
+      hidden: !(canExecute.value && !finished.value),
+      danger: true,
+      onSelect: () => (reasonDialog.value = 'cancel')
+    }
+  ]
+})
+
+/** The next step: validate, confirm the nomenclature, take the vehicle back from the garage,
+ * then start, diagnose, clock the time and declare the end. */
+const primaryKey = computed(() => {
+  const order = item.value
+  const available = new Set(actions.value.filter((a) => !a.hidden).map((a) => a.key))
+  const sequence = [
+    'validate',
+    'nomenclature',
+    'return',
+    order && !order.startedAt ? 'start' : '',
+    order && !order.diagnosis ? 'diagnose' : '',
+    order && !order.labour.length ? 'labour' : '',
+    'complete'
+  ]
+  return sequence.find((key) => key && available.has(key)) ?? null
+})
+const primaryAction = computed(
+  () => actions.value.find((action) => action.key === primaryKey.value && !action.hidden) ?? null
+)
+const secondaryActions = computed(() =>
+  actions.value
+    .filter((action) => action.key !== primaryKey.value)
+    .map((action) => ({ ...action, disabled: action.disabled || acting.value }))
+)
 </script>
 
 <template>
@@ -399,6 +544,7 @@ const buttonClass =
     :has-next="hasNext"
     :show-edit="editable"
     :show-title-new-button="canInsert"
+    :more-actions="showActions ? secondaryActions : []"
     :has-unsaved-changes="isFormDirty"
     :can-save="isFormDirty"
     @close="emit('close')"
@@ -414,113 +560,17 @@ const buttonClass =
     <template #title-badges>
       <WorkOrderStatusPill v-if="item" :status="item.status" />
     </template>
-    <template v-if="showActions && item" #action-buttons>
-      <template v-if="canWork">
-        <button type="button" :class="buttonClass" :disabled="acting" @click="open('diagnose')">
-          <Stethoscope class="w-5 h-5 text-primary" />
-          {{ t('maintenance.workOrders.action.diagnose') }}
-        </button>
-        <template v-if="atGarage">
-          <button type="button" :class="buttonClass" :disabled="acting" @click="open('followUp')">
-            <NotebookPen class="w-5 h-5 text-primary" />
-            {{ t('maintenance.workOrders.action.followUp') }}
-          </button>
-          <button type="button" :class="buttonClass" :disabled="acting" @click="open('return')">
-            <Undo2 class="w-5 h-5 text-primary" />
-            {{ t('maintenance.workOrders.action.return') }}
-          </button>
-        </template>
-        <template v-else>
-          <button
-            v-if="!item.startedAt"
-            type="button"
-            :class="buttonClass"
-            :disabled="acting"
-            @click="act('start')"
-          >
-            <Play class="w-5 h-5 text-primary" /> {{ t('maintenance.workOrders.action.start') }}
-          </button>
-          <button type="button" :class="buttonClass" :disabled="acting" @click="open('labour')">
-            <Clock class="w-5 h-5 text-primary" /> {{ t('maintenance.workOrders.action.labour') }}
-          </button>
-          <button
-            type="button"
-            :class="buttonClass"
-            :disabled="acting || !item.diagnosis || !item.labour.length"
-            :title="
-              !item.diagnosis || !item.labour.length
-                ? t('maintenance.workOrders.hint.completeNeeds')
-                : undefined
-            "
-            @click="open('complete')"
-          >
-            <Wrench class="w-5 h-5 text-primary" />
-            {{ t('maintenance.workOrders.action.complete') }}
-          </button>
-          <button type="button" :class="buttonClass" :disabled="acting" @click="open('plan')">
-            <CalendarClock class="w-5 h-5 text-primary" />
-            {{ t('maintenance.workOrders.action.plan') }}
-          </button>
-          <button type="button" :class="buttonClass" :disabled="acting" @click="open('takePart')">
-            <Package class="w-5 h-5 text-primary" />
-            {{ t('maintenance.workOrders.action.takePart') }}
-          </button>
-          <button type="button" :class="buttonClass" :disabled="acting" @click="open('buyPart')">
-            <ShoppingCart class="w-5 h-5 text-primary" />
-            {{ t('maintenance.workOrders.action.buyPart') }}
-          </button>
-          <button
-            v-if="!item.external"
-            type="button"
-            :class="buttonClass"
-            :disabled="acting"
-            @click="open('handOver')"
-          >
-            <Factory class="w-5 h-5 text-primary" />
-            {{ t('maintenance.workOrders.action.handOver') }}
-          </button>
-        </template>
-      </template>
+    <template v-if="showActions && primaryAction" #action-buttons>
       <button
-        v-if="canConfirmNomenclature"
         type="button"
-        :class="buttonClass"
-        :disabled="acting"
-        @click="open('nomenclature')"
+        :class="primaryClass"
+        :disabled="acting || primaryAction.disabled"
+        :title="primaryAction.disabled ? primaryAction.title : undefined"
+        data-testid="work-order-primary-action"
+        @click="primaryAction.onSelect?.()"
       >
-        <ListChecks class="w-5 h-5 text-primary" />
-        {{ t('maintenance.workOrders.action.nomenclature') }}
-      </button>
-      <template v-if="canExecute && awaitingValidation">
-        <button
-          type="button"
-          :class="buttonClass"
-          :disabled="acting || !!fourEyes"
-          :title="fourEyes ? t('maintenance.workOrders.hint.fourEyes') : undefined"
-          @click="open('validate')"
-        >
-          <CircleCheck class="w-5 h-5 text-primary" />
-          {{ t('maintenance.workOrders.action.validate') }}
-        </button>
-        <button
-          type="button"
-          :class="buttonClass"
-          :disabled="acting || !!fourEyes"
-          :title="fourEyes ? t('maintenance.workOrders.hint.fourEyes') : undefined"
-          @click="reasonDialog = 'refuse'"
-        >
-          <CircleX class="w-5 h-5 text-primary" />
-          {{ t('maintenance.workOrders.action.refuse') }}
-        </button>
-      </template>
-      <button
-        v-if="canExecute && !finished"
-        type="button"
-        :class="buttonClass"
-        :disabled="acting"
-        @click="reasonDialog = 'cancel'"
-      >
-        <Ban class="w-5 h-5 text-primary" /> {{ t('maintenance.workOrders.action.cancel') }}
+        <component :is="primaryAction.icon" class="w-5 h-5" />
+        {{ primaryAction.label }}
       </button>
     </template>
     <template #form>

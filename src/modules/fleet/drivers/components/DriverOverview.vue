@@ -6,16 +6,18 @@ import { useOptionsStore } from '@/stores/optionsStore'
 import { formatDate } from '@/utils/format'
 import type { DriverApi } from '../types/driver.types'
 
-defineProps<{ driver: DriverApi }>()
+const props = defineProps<{ driver: DriverApi }>()
 
 const { t } = useI18n()
 const optionsStore = useOptionsStore()
+/* What needs attention stays open: the documents when one is missing; the past assignments
+ * wait folded, their count shown on the title. */
 const expandedSections = ref({
   identity: true,
   assignment: true,
   score: true,
-  documents: true,
-  history: true
+  documents: !props.driver.documentsCompliant,
+  history: false
 })
 </script>
 

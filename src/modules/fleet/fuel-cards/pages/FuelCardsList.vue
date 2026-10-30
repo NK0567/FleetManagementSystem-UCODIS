@@ -76,6 +76,13 @@ const filterDefs: FilterFieldDef[] = [
     valueType: 'string',
     kind: 'option',
     optionsKey: 'cardHolderType'
+  },
+  {
+    field: 'status',
+    labelKey: 'fleet.fuelCards.col.status',
+    valueType: 'string',
+    kind: 'option',
+    optionsKey: 'cardStatus'
   }
 ]
 
@@ -210,7 +217,9 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('fleet.fuelCards.noResults')"
+        :no-results-message="
+          canInsert ? t('fleet.fuelCards.noResultsCreate') : t('fleet.fuelCards.noResults')
+        "
         :no-search-results-message="
           t('fleet.fuelCards.noSearchResults', { query: store.searchQuery })
         "

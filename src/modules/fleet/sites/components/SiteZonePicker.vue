@@ -90,6 +90,7 @@ function onClick(lat: number, lng: number) {
             : 'border-border hover:bg-accent'
         "
         :disabled="item === 'edge' && !hasPoint"
+        :title="item === 'edge' && !hasPoint ? t('fleet.sites.map.centreFirst') : undefined"
         @click="mode = item"
       >
         {{ t(`fleet.sites.map.modes.${item}`) }}

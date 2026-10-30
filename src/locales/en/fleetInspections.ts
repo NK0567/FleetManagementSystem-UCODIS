@@ -31,12 +31,11 @@ export default {
   'fleet.inspections.form.result': 'Result',
   'fleet.inspections.form.findings': 'Findings',
   'fleet.inspections.actionError': 'The action could not be completed.',
-  'fleet.inspections.action.recheck': 'Re-inspection passed',
+  'fleet.inspections.action.recheck': 'Record the re-inspection',
   'fleet.inspections.form.recheckDueOn': 'Re-inspection by',
   'fleet.inspections.form.recheckDoneOn': 'Re-inspected on',
   'fleet.inspections.form.recheckAwaited': 'Awaited: the vehicle is immobilized',
-  'fleet.inspections.form.resultHint':
-    'Derived from the grid: one non-conforming item makes the inspection non-conforming, schedules the re-inspection and keeps the vehicle from loading until then.',
+  'fleet.inspections.form.resultHint': 'One non-conforming item makes the inspection non-conforming and schedules the re-inspection.',
   'fleet.inspections.form.findingsHint':
     'Left empty, it takes the non-conforming items and what was found.',
   'fleet.inspections.form.items': 'Inspection grid',
@@ -51,8 +50,7 @@ export default {
   'fleet.inspections.form.signatureRequired': 'The inspector must sign the report.',
   'fleet.inspections.form.recheckItems': 'Items to check again: {items}',
   'fleet.inspections.grid.empty': 'No active item in the inspection grid.',
-  'fleet.inspections.grid.pickVehicle':
-    'Choose the vehicle: the grid shows the vehicle items and, when it carries one, the tank items.',
+  'fleet.inspections.grid.pickVehicle': 'Choose the vehicle to show its grid.',
   'fleet.inspections.grid.loading': 'Loading the grid…',
   'fleet.inspections.grid.legacy':
     'Inspection recorded before the grid: only the overall result is known.',
@@ -67,5 +65,6 @@ export default {
     'Describe the finding of every item with an observation or not conforming.',
   'fleet.inspections.report.title': 'Inspection report {no}',
   'fleet.inspections.report.recheck': 'Re-inspection scheduled by {date} for the items: {items}.',
-  'fleet.inspections.action.printReport': 'Print the report'
+  'fleet.inspections.action.printReport': 'Print the report',
+  'fleet.inspections.noResultsCreate': 'No technical inspection. Create one with New.'
 }

@@ -28,5 +28,6 @@ export default {
   'maintenance.technicians.form.competencesHint':
     'Codes des compétences, séparés par des virgules.',
   'maintenance.technicians.form.active': 'Actif',
-  'maintenance.technicians.form.competencesRequired': 'Cochez au moins une compétence.'
+  'maintenance.technicians.form.competencesRequired': 'Cochez au moins une compétence.',
+  'maintenance.technicians.noResultsCreate': 'Aucun technicien. Créez-en un avec Nouveau.'
 }

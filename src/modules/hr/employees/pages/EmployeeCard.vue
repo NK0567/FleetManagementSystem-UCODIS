@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Archive, BadgeCheck, BadgeX, UserCog } from '@lucide/vue'
+import type { MoreAction } from '@/components/shared/MoreActionsMenu.vue'
 import { apiErrorMessage } from '@/core/api/apiError'
 import type { CardOpenMode } from '@/composables/cardOpenMode'
 import { useEntityCard } from '@/composables/useEntityCard'
@@ -131,6 +132,19 @@ async function toggleDrivingAuthorization() {
   const { no, drivingAuthorized } = item.value
   await runAction(() => employeeService.setDrivingAuthorization(no, !drivingAuthorized))
 }
+
+/** Archiving is rare and final: it goes in « Plus d'actions ». */
+const moreActions = computed<MoreAction[]>(() => [
+  {
+    key: 'archive',
+    label: t('hr.employees.action.archive'),
+    icon: Archive,
+    hidden: !canAct.value,
+    disabled: acting.value,
+    danger: true,
+    onSelect: openArchiveDialog
+  }
+])
 </script>
 
 <template>
@@ -153,6 +167,7 @@ async function toggleDrivingAuthorization() {
     :has-next="hasNext"
     :show-edit="canEdit"
     :show-title-new-button="canInsert"
+    :more-actions="moreActions"
     :has-unsaved-changes="isFormDirty"
     :can-save="isFormDirty"
     @close="emit('close')"
@@ -191,14 +206,6 @@ async function toggleDrivingAuthorization() {
           <BadgeCheck class="w-5 h-5 text-primary" />
           {{ t('hr.employees.action.authorizeDriving') }}
         </template>
-      </button>
-      <button
-        type="button"
-        class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
-        :disabled="acting"
-        @click="openArchiveDialog"
-      >
-        <Archive class="w-5 h-5 text-primary" /> {{ t('hr.employees.action.archive') }}
       </button>
     </template>
     <template #form>

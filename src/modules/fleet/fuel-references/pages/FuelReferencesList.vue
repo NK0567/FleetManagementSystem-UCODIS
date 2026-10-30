@@ -190,7 +190,11 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('fleet.fuelReferences.noResults')"
+        :no-results-message="
+          canInsert
+            ? t('fleet.fuelReferences.noResultsCreate')
+            : t('fleet.fuelReferences.noResults')
+        "
         :no-search-results-message="
           t('fleet.fuelReferences.noSearchResults', { query: store.searchQuery })
         "

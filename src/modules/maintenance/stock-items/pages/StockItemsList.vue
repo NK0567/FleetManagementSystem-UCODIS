@@ -271,7 +271,11 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('maintenance.stockItems.noResults')"
+        :no-results-message="
+          canInsert
+            ? t('maintenance.stockItems.noResultsCreate')
+            : t('maintenance.stockItems.noResults')
+        "
         :no-search-results-message="
           t('maintenance.stockItems.noSearchResults', { query: store.searchQuery })
         "

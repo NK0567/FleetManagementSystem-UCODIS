@@ -36,5 +36,6 @@ export default {
   'fleet.deviationTypes.form.autoDetectedHint':
     'On-board units record this deviation without any entry.',
   'fleet.deviationTypes.form.active': 'Active',
-  'fleet.deviationTypes.form.deviationCount': 'Deviations of this type'
+  'fleet.deviationTypes.form.deviationCount': 'Deviations of this type',
+  'fleet.deviationTypes.noResultsCreate': 'No deviation type. Create one with New.'
 }

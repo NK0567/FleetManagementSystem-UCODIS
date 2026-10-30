@@ -2,15 +2,15 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import {
   AlertTriangle,
-  Archive,
-  ClipboardCheck,
   Clock,
   Columns3,
   Inbox,
+  List,
   ListChecks,
   PhoneCall,
   Sparkles
 } from '@lucide/vue'
+import type { MoreAction } from '@/components/shared/MoreActionsMenu.vue'
 import TransportOrdersBoard from '../components/TransportOrdersBoard.vue'
 import LoadingProposalDialog from '../components/LoadingProposalDialog.vue'
 import { deliveryRequestService } from '@/modules/planning/delivery-requests'
@@ -19,6 +19,7 @@ import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
 import { useListCellFormatters } from '@/composables/useListCellFormatters'
 import { useListPage } from '@/composables/useListPage'
+import { usePermissions } from '@/composables/usePermissions'
 import { getListCellDisplay } from '@/utils/listCellDisplay'
 import { transportOrderApi } from '../api/transportOrderApi'
 import { transportOrderService } from '../services/transportOrderService'
@@ -27,6 +28,8 @@ import type { TransportOrderApi, TransportOrderSearchColumn } from '../types/tra
 
 const { t } = useI18n()
 const store = useTransportOrderStore()
+/* The orders waiting for a transport order are counted only for who may read them. */
+const { canRead: canReadRequests } = usePermissions('DELIVERYREQUEST')
 
 /* The board tells the planner how many orders wait for a transport order, and which orders or
  * transport orders are past their date (TRS01-US04, TRS07-US07). */
@@ -300,40 +303,34 @@ const {
   exportApi: transportOrderApi.exportExcel
 })
 
-/** The « awaiting closing » view is a filter, not a status: orders in progress whose lines are all dealt with. */
-const awaitingClosingView = computed(() =>
-  store.userFilters.some((filter) => filter.field === 'awaitingClosing' && filter.value === true)
+/* The views of the list (« En attente de clôture », « En retard », « Archives ») are filters, not
+ * statuses: they live in the view selector of the toolbar and stay in sync with the filter panel.
+ * Completed orders join the archives (TRS05-US06). */
+type OrderListView = 'all' | 'awaitingClosing' | 'late' | 'archived'
+const VIEW_FIELDS = ['awaitingClosing', 'late', 'archived'] as const
+const listViewOptions = computed<{ value: OrderListView; label: string }[]>(() => [
+  { value: 'all', label: t('planning.transportOrders.view.all') },
+  { value: 'awaitingClosing', label: t('planning.transportOrders.view.awaitingClosing') },
+  { value: 'late', label: t('planning.transportOrders.view.late') },
+  { value: 'archived', label: t('planning.transportOrders.view.archives') }
+])
+const listView = computed<OrderListView>(
+  () =>
+    VIEW_FIELDS.find((field) =>
+      store.userFilters.some((filter) => filter.field === field && filter.value === true)
+    ) ?? 'all'
 )
-function toggleAwaitingClosing() {
-  const others = store.userFilters.filter((filter) => filter.field !== 'awaitingClosing')
+function setListView(value: string) {
+  const others = store.userFilters.filter(
+    (filter) => !(VIEW_FIELDS as readonly string[]).includes(filter.field)
+  )
   onUpdateUserFilters(
-    awaitingClosingView.value
-      ? others
-      : [...others, { field: 'awaitingClosing', valueType: 'boolean', value: true }]
+    value === 'all' ? others : [...others, { field: value, valueType: 'boolean', value: true }]
   )
 }
-
-const lateView = computed(() =>
-  store.userFilters.some((filter) => filter.field === 'late' && filter.value === true)
-)
+const lateView = computed(() => listView.value === 'late')
 function toggleLate() {
-  const others = store.userFilters.filter((filter) => filter.field !== 'late')
-  onUpdateUserFilters(
-    lateView.value ? others : [...others, { field: 'late', valueType: 'boolean', value: true }]
-  )
-}
-
-/* Completed orders are final and join the archives (TRS05-US06). */
-const archivesView = computed(() =>
-  store.userFilters.some((filter) => filter.field === 'archived' && filter.value === true)
-)
-function toggleArchives() {
-  const others = store.userFilters.filter((filter) => filter.field !== 'archived')
-  onUpdateUserFilters(
-    archivesView.value
-      ? others
-      : [...others, { field: 'archived', valueType: 'boolean', value: true }]
-  )
+  setListView(lateView.value ? 'all' : 'late')
 }
 
 /* The board view (kanban), remembered for the viewer on this browser. */
@@ -347,14 +344,36 @@ const readBoard = () => {
 }
 const boardView = ref(readBoard())
 const boardReload = ref(0)
-function toggleBoard() {
-  boardView.value = !boardView.value
+const displayOptions = computed(() => [
+  { value: 'list', label: t('planning.transportOrders.board.list'), icon: List },
+  { value: 'board', label: t('planning.transportOrders.board.toggle'), icon: Columns3 }
+])
+function setBoard(on: boolean) {
+  boardView.value = on
   try {
     localStorage.setItem(BOARD_KEY, boardView.value ? '1' : '0')
   } catch {
     /* the view simply is not remembered */
   }
 }
+
+/* Secondary ways to create orders: from the waiting orders, or from a loading proposal. */
+const moreActions = computed<MoreAction[]>(() => [
+  {
+    key: 'fromRequests',
+    label: t('planning.transportOrders.createDialog.title'),
+    icon: ListChecks,
+    hidden: !canInsert.value,
+    onSelect: () => (creatingFromRequests.value = true)
+  },
+  {
+    key: 'proposal',
+    label: t('planning.transportOrders.proposal.title'),
+    icon: Sparkles,
+    hidden: !canInsert.value,
+    onSelect: () => (proposing.value = true)
+  }
+])
 
 function onCreatedFromRequests(no: string) {
   creatingFromRequests.value = false
@@ -378,7 +397,11 @@ function onCreatedFromRequests(no: string) {
         :show-card-actions="showCardActions"
         :can-view-selected="canViewSelected"
         :can-edit-selected="canEditSelected"
-        :show-list-view="false"
+        :list-view-options="listViewOptions"
+        :list-view="listView"
+        :view-options="displayOptions"
+        :view="boardView ? 'board' : 'list'"
+        :more-actions="moreActions"
         :search-column="store.searchColumn"
         :search-query="store.searchQuery"
         :column-options="searchColumnOptions"
@@ -391,6 +414,8 @@ function onCreatedFromRequests(no: string) {
         @search="store.search"
         @clear="store.clearSearch()"
         @update:search-column="onSearchColumnChange"
+        @update:list-view="setListView"
+        @update:view="setBoard($event === 'board')"
       >
         <template #column-picker>
           <TableColumnPicker
@@ -406,111 +431,61 @@ function onCreatedFromRequests(no: string) {
             :reset-preferences="resetPreferences"
           />
         </template>
-        <template #extra-actions>
-          <button
-            type="button"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm hover:bg-accent border rounded transition"
-            :class="
-              boardView
-                ? 'border-primary text-primary bg-primary/5'
-                : 'border-border text-card-foreground'
-            "
-            :aria-pressed="boardView"
-            @click="toggleBoard"
-          >
-            <Columns3 class="w-4 h-4 text-primary" />
-            {{ t('planning.transportOrders.board.toggle') }}
-          </button>
-          <button
-            type="button"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm hover:bg-accent border rounded transition"
-            :class="
-              awaitingClosingView
-                ? 'border-primary text-primary bg-primary/5'
-                : 'border-border text-card-foreground'
-            "
-            :aria-pressed="awaitingClosingView"
-            @click="toggleAwaitingClosing"
-          >
-            <ClipboardCheck class="w-4 h-4 text-primary" />
-            {{ t('planning.transportOrders.view.awaitingClosing') }}
-          </button>
-          <button
-            type="button"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm hover:bg-accent border rounded transition"
-            :class="
-              archivesView
-                ? 'border-primary text-primary bg-primary/5'
-                : 'border-border text-card-foreground'
-            "
-            :aria-pressed="archivesView"
-            @click="toggleArchives"
-          >
-            <Archive class="w-4 h-4 text-primary" />
-            {{ t('planning.transportOrders.view.archives') }}
-          </button>
-          <button
-            v-if="canInsert"
-            type="button"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
-            @click="creatingFromRequests = true"
-          >
-            <ListChecks class="w-4 h-4 text-primary" />
-            {{ t('planning.transportOrders.createDialog.title') }}
-          </button>
-          <button
-            v-if="canInsert"
-            type="button"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
-            @click="proposing = true"
-          >
-            <Sparkles class="w-4 h-4 text-primary" />
-            {{ t('planning.transportOrders.proposal.title') }}
-          </button>
-        </template>
       </ListPageToolbar>
 
       <FormAlerts class="mx-4" :error="exportError" @clear:error="exportError = null" />
 
-      <div class="mx-4 mb-2 flex flex-wrap gap-2 text-sm">
+      <div
+        class="mx-4 my-1.5 flex flex-wrap items-center gap-2 text-sm"
+        data-testid="order-counters"
+      >
         <button
+          v-if="canInsert && pendingRequests > 0"
           type="button"
-          class="cursor-pointer inline-flex items-center gap-2 rounded border border-border bg-card px-3 py-1.5 hover:bg-accent"
-          :disabled="!canInsert"
+          class="cursor-pointer inline-flex items-center gap-2 rounded border border-primary/40 bg-primary/5 px-3 py-1 text-primary hover:bg-primary/10"
           @click="creatingFromRequests = true"
         >
-          <Inbox class="w-4 h-4 text-primary" />
-          <span class="text-muted-foreground">
-            {{ t('planning.transportOrders.waiting.label') }}
-          </span>
-          <span class="font-semibold tabular-nums text-card-foreground">{{ pendingRequests }}</span>
+          <Inbox class="w-4 h-4" />
+          {{ t('planning.transportOrders.waiting.toPlan', pendingRequests) }}
         </button>
+        <span
+          v-else-if="canReadRequests"
+          class="inline-flex items-center gap-2 rounded border border-border px-3 py-1"
+          :class="pendingRequests ? 'text-card-foreground' : 'text-muted-foreground'"
+        >
+          <Inbox class="w-4 h-4" />
+          {{ t('planning.transportOrders.waiting.toPlan', pendingRequests) }}
+        </span>
         <button
           type="button"
-          class="cursor-pointer inline-flex items-center gap-2 rounded border px-3 py-1.5"
+          class="cursor-pointer inline-flex items-center gap-2 rounded border px-3 py-1"
           :class="
             lateView
               ? 'border-destructive bg-destructive text-white'
-              : 'border-destructive/40 bg-card text-destructive hover:bg-destructive/5'
+              : lateOrders
+                ? 'border-destructive/40 bg-card text-destructive hover:bg-destructive/5'
+                : 'border-border bg-card text-muted-foreground hover:bg-accent'
           "
           :aria-pressed="lateView"
+          :title="t('planning.transportOrders.view.lateHint')"
           @click="toggleLate"
         >
           <Clock class="w-4 h-4" />
-          {{ t('planning.transportOrders.view.late') }}
-          <span class="font-semibold tabular-nums">{{ lateOrders }}</span>
+          {{ t('planning.transportOrders.waiting.late', lateOrders) }}
         </button>
         <span
-          v-if="expiredRequests || expiredOrders"
-          class="inline-flex items-center gap-2 rounded border border-warning/50 bg-warning/10 px-3 py-1.5"
+          v-if="canReadRequests && expiredRequests"
+          class="inline-flex items-center gap-2 rounded border border-warning/50 bg-warning/10 px-3 py-1"
         >
           <AlertTriangle class="w-4 h-4 text-warning" />
-          {{
-            t('planning.transportOrders.waiting.expired', {
-              requests: expiredRequests,
-              orders: expiredOrders
-            })
-          }}
+          {{ t('planning.transportOrders.waiting.expiredRequests', expiredRequests) }}
+        </span>
+        <span
+          v-if="expiredOrders"
+          class="inline-flex items-center gap-2 rounded border border-warning/50 bg-warning/10 px-3 py-1"
+        >
+          <AlertTriangle class="w-4 h-4 text-warning" />
+          {{ t('planning.transportOrders.waiting.expiredOrders', expiredOrders) }}
         </span>
       </div>
 
@@ -538,7 +513,11 @@ function onCreatedFromRequests(no: string) {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('planning.transportOrders.noResults')"
+        :no-results-message="
+          canInsert
+            ? t('planning.transportOrders.noResultsCreate')
+            : t('planning.transportOrders.noResults')
+        "
         :no-search-results-message="
           t('planning.transportOrders.noSearchResults', { query: store.searchQuery })
         "

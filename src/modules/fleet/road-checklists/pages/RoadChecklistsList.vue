@@ -66,13 +66,15 @@ const tableColumns = computed<TableColumn[]>(() => [
     sortKey: 'syncedAt',
     label: t('fleet.roadChecklists.col.syncedAt'),
     minW: '150px',
-    formatter: formatDateTime
+    formatter: formatDateTime,
+    defaultHidden: true
   },
   {
     sortKey: 'capturedOffline',
     label: t('fleet.roadChecklists.col.capturedOffline'),
     minW: '120px',
-    formatter: booleanLabel
+    formatter: booleanLabel,
+    defaultHidden: true
   },
   {
     sortKey: 'modifiedAt',
@@ -108,6 +110,12 @@ const filterDefs: FilterFieldDef[] = [
   {
     field: 'capturedOffline',
     labelKey: 'fleet.roadChecklists.col.capturedOffline',
+    valueType: 'boolean',
+    kind: 'boolean'
+  },
+  {
+    field: 'blocking',
+    labelKey: 'fleet.roadChecklists.col.blocking',
     valueType: 'boolean',
     kind: 'boolean'
   }
@@ -244,7 +252,11 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('fleet.roadChecklists.noResults')"
+        :no-results-message="
+          canInsert
+            ? t('fleet.roadChecklists.noResultsCreate')
+            : t('fleet.roadChecklists.noResults')
+        "
         :no-search-results-message="
           t('fleet.roadChecklists.noSearchResults', { query: store.searchQuery })
         "

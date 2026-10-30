@@ -6,7 +6,7 @@ export default {
   'planning.billing.loadError': 'La facturation n’a pas pu être affichée.',
   'planning.billing.saveError': 'La facture n’a pas pu être enregistrée.',
   'planning.billing.reference': 'Référence de facture',
-  'planning.billing.invoice': 'Marquer facturée',
+  'planning.billing.invoice': 'Facturer',
   'planning.billing.issue.not_delivered': 'Pas livrée',
   'planning.billing.issue.internal': 'Service interne',
   'planning.billing.issue.reception': 'Réception non attestée',
@@ -32,5 +32,9 @@ export default {
   'planning.billing.col.delivery': 'Point de livraison',
   'planning.billing.col.quantity': 'Quantité',
   'planning.billing.col.amount': 'Montant',
-  'planning.billing.col.status': 'État'
+  'planning.billing.col.status': 'État',
+  'planning.billing.emptyOf.all': 'Aucune livraison à facturer pour le moment.',
+  'planning.billing.emptyOf.ready': 'Aucune livraison prête à facturer.',
+  'planning.billing.emptyOf.blocked': 'Aucune livraison bloquée.',
+  'planning.billing.emptyOf.invoiced': 'Aucune livraison facturée.'
 }

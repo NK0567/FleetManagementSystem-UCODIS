@@ -197,7 +197,11 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('planning.deliveryPoints.noResults')"
+        :no-results-message="
+          canInsert
+            ? `${t('planning.deliveryPoints.noResults')} ${t('common.createWithNew')}`
+            : t('planning.deliveryPoints.noResults')
+        "
         :no-search-results-message="
           t('planning.deliveryPoints.noSearchResults', { query: store.searchQuery })
         "

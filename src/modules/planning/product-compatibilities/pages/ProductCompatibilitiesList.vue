@@ -222,7 +222,11 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('planning.productCompatibilities.noResults')"
+        :no-results-message="
+          canInsert
+            ? `${t('planning.productCompatibilities.noResults')} ${t('common.createWithNew')}`
+            : t('planning.productCompatibilities.noResults')
+        "
         :no-search-results-message="
           t('planning.productCompatibilities.noSearchResults', { query: store.searchQuery })
         "

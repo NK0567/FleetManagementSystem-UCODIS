@@ -128,5 +128,9 @@ export default {
   'nav.confirmations.unavailable': 'Unavailable',
   'nav.confirmations.confirmed': 'Confirmed',
   'nav.confirmations.replanned': 'Replanned',
-  'nav.confirmations.answered': 'Already answered'
+  'nav.confirmations.answered': 'Already answered',
+  'guide.title': 'My role guide',
+  'guide.button': 'Guide',
+  'guide.open': 'Open the screen',
+  'guide.empty': 'No guide for this account.'
 }

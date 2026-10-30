@@ -217,7 +217,11 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('maintenance.vehicleCheckPoints.noResults')"
+        :no-results-message="
+          canInsert
+            ? t('maintenance.vehicleCheckPoints.noResultsCreate')
+            : t('maintenance.vehicleCheckPoints.noResults')
+        "
         :no-search-results-message="
           t('maintenance.vehicleCheckPoints.noSearchResults', { query: store.searchQuery })
         "

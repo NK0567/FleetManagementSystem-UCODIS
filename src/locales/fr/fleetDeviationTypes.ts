@@ -36,5 +36,6 @@ export default {
   'fleet.deviationTypes.form.autoDetectedHint':
     'Les boîtiers embarqués relèvent cet écart sans saisie.',
   'fleet.deviationTypes.form.active': 'Actif',
-  'fleet.deviationTypes.form.deviationCount': 'Écarts de ce type'
+  'fleet.deviationTypes.form.deviationCount': 'Écarts de ce type',
+  'fleet.deviationTypes.noResultsCreate': "Aucun type d'écart. Créez-en un avec Nouveau."
 }

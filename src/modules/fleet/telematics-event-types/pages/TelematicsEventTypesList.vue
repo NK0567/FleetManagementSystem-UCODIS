@@ -118,6 +118,24 @@ const filterDefs: FilterFieldDef[] = [
     valueType: 'string',
     kind: 'option',
     optionsKey: 'telematicsUnit'
+  },
+  {
+    field: 'raisesAlert',
+    labelKey: 'fleet.telematicsEventTypes.col.raisesAlert',
+    valueType: 'boolean',
+    kind: 'boolean'
+  },
+  {
+    field: 'affectsScore',
+    labelKey: 'fleet.telematicsEventTypes.col.affectsScore',
+    valueType: 'boolean',
+    kind: 'boolean'
+  },
+  {
+    field: 'active',
+    labelKey: 'fleet.telematicsEventTypes.col.active',
+    valueType: 'boolean',
+    kind: 'boolean'
   }
 ]
 
@@ -264,7 +282,11 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('fleet.telematicsEventTypes.noResults')"
+        :no-results-message="
+          canInsert
+            ? t('fleet.telematicsEventTypes.noResultsCreate')
+            : t('fleet.telematicsEventTypes.noResults')
+        "
         :no-search-results-message="
           t('fleet.telematicsEventTypes.noSearchResults', { query: store.searchQuery })
         "

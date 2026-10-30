@@ -170,7 +170,9 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('hr.publicHolidays.noResults')"
+        :no-results-message="
+          canInsert ? t('hr.publicHolidays.noResultsCreate') : t('hr.publicHolidays.noResults')
+        "
         :no-search-results-message="
           t('hr.publicHolidays.noSearchResults', { query: store.searchQuery })
         "

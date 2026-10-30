@@ -56,7 +56,7 @@ export default {
   'fleet.claims.listView.open': 'Open files',
   'fleet.claims.listView.closed': 'Closed files',
   'fleet.claims.listView.all': 'All',
-  'fleet.claims.action.insurance': 'Insurance follow-up',
+  'fleet.claims.action.insurance': 'Update the insurance follow-up',
   'fleet.claims.action.close': 'Close the file',
   'fleet.claims.closureBlock.alreadyClosed': 'The file is already closed',
   'fleet.claims.closureBlock.analysisRequired': 'Write the root cause analysis',
@@ -83,5 +83,6 @@ export default {
   'fleet.claims.form.downtimeCode': 'Unavailability code put on the vehicle: {code} · {name}',
   'fleet.claims.form.downtimeOpen': 'ongoing',
   'fleet.claims.form.downtimeEnded': 'ended',
-  'fleet.claims.summary': '{claims} accident(s) and incident(s) · {rate} accident(s) per million km · damage {damage} Ar · left to pay {residual} Ar'
+  'fleet.claims.summary': 'Accidents and incidents: {claims} · per million km: {rate} · damage {damage} Ar · left to pay {residual} Ar',
+  'fleet.claims.noResultsCreate': 'No claim. Create one with New.'
 }

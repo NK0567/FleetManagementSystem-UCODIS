@@ -16,7 +16,8 @@ const optionsStore = useOptionsStore()
 
 const activity = ref<DriverActivityApi | null>(null)
 const error = ref<string | null>(null)
-const expandedSections = ref({ trips: true, fuel: true, compliance: true })
+/* Folded by default: their summary on the title says enough until the user opens one. */
+const expandedSections = ref({ trips: false, fuel: false, compliance: false })
 
 watch(
   () => props.driverNo,

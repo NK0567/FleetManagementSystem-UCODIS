@@ -1,52 +1,50 @@
 export default {
   'planning.settings.title': 'Planning settings',
-  'planning.settings.subtitle':
-    'Times, recipient confirmation, goods, requests, quantity control, billing and closing.',
+  'planning.settings.subtitle': 'Planning and transport rules.',
   'planning.settings.lastModified': 'Changed on {date} by {user}',
   'planning.settings.loadError': 'The planning settings could not be loaded.',
   'planning.settings.saveError': 'The settings could not be saved.',
 
   'planning.settings.section.schedule': 'Times',
-  'planning.settings.section.schedule.hint':
-    'The time offered for a new order, the speed that times the stops when the route template gives no duration, and the margin before a stop counts as late.',
+  'planning.settings.section.schedule.hint': 'Proposed time, stop speed and margin before a delay.',
   'planning.settings.field.schedule.defaultDepartureTime': 'Departure time offered',
   'planning.settings.field.schedule.averageSpeedKmh': 'Average speed',
   'planning.settings.field.schedule.lateMarginMin': 'Margin before late',
 
   'planning.settings.section.confirmation': 'Recipient confirmation',
   'planning.settings.section.confirmation.hint':
-    'With no answer from the recipient after this delay, the delivery is held as confirmed, for billing as for closing. Leave empty to never confirm by default.',
+    'Delay after which an unanswered delivery counts as confirmed. Empty: never.',
   'planning.settings.field.confirmation.tacitConfirmationDays': 'Tacit confirmation after',
 
   'planning.settings.section.goods': 'Goods',
   'planning.settings.section.goods.hint':
-    'The unit parcels are counted in, and whether delivered quantities start from the loaded ones.',
+    'Unit of parcels and starting point of the delivered quantities.',
   'planning.settings.field.goods.countingUnit': 'Counting unit',
   'planning.settings.field.goods.prefillQuantities': 'Prefill delivered quantities',
 
   'planning.settings.section.requests': 'Requests and orders',
   'planning.settings.section.requests.hint':
-    'The reference the orderer gives to its order, and what happens when an order or a transport order passes its date without being carried out.',
+    'Orderer reference and what happens to expired orders.',
   'planning.settings.field.requests.externalReferenceLabel': "Orderer's reference label",
   'planning.settings.field.requests.externalReferenceRequired': "Orderer's reference required",
   'planning.settings.field.requests.expiredDateMode': 'Date passed',
 
   'planning.settings.section.quantities': 'Quantity control',
   'planning.settings.section.quantities.hint':
-    'What happens when the received quantity falls outside the tolerance. The tolerances themselves are set per customer and per product.',
+    'What to do when the received quantity is out of tolerance.',
   'planning.settings.field.quantities.overToleranceMode': 'Outside tolerance',
   'planning.settings.field.quantities.volume15Method': 'Volume at 15 °C',
 
   'planning.settings.section.billing': 'Billing',
   'planning.settings.section.billing.hint':
-    'Who pays the freight when the request does not say, and the gap accepted between a carrier invoice and the agreed amount.',
+    'Default freight payer and accepted gap on carrier invoices.',
   'planning.settings.field.billing.defaultFreightPayer': 'Freight paid by',
   'planning.settings.field.billing.carrierInvoiceToleranceAmount':
     'Gap accepted on a carrier invoice',
 
   'planning.settings.section.closing': 'Closing',
   'planning.settings.section.closing.hint':
-    'Documents to file before an order can be closed, separated by commas. A dash requires none.',
+    'Documents required before completing an order, separated by commas; « - » for none.',
   'planning.settings.field.closing.requiredDocuments': 'Mandatory documents',
 
   'planning.settings.unit.kmh': 'km/h',
@@ -61,26 +59,29 @@ export default {
   'planning.settings.issue.invalidChoice': 'Pick one of the offered values.',
   'planning.settings.section.controls': 'Strictness of the checks',
   'planning.settings.section.controls.hint':
-    'By default, an excess of capacity or an overlap in the schedule is flagged and the planner decides. A strict check blocks the planning.',
+    'Capacity and overlap: flagged by default, blocking in strict mode.',
   'planning.settings.field.controls.strictCapacity': 'Strict capacity check',
   'planning.settings.field.controls.strictCalendar': 'Strict calendar',
   'planning.settings.section.intake': 'Order circuit',
-  'planning.settings.section.intake.hint': 'How orders come in. Manual entry and import: by the planner; connector: from the management system; API: sent by external orderers; transmission by a service: by the orderer accounts (sales team). No way is imposed.',
+  'planning.settings.section.intake.hint': 'The ways orders come in. None is mandatory.',
   'planning.settings.field.intake.manualEntry': 'Manual entry by the planner',
   'planning.settings.field.intake.fileImport': 'File import',
   'planning.settings.field.intake.erpConnector': 'Management system connector',
   'planning.settings.field.intake.ordererApi': 'API for external orderers',
-  'planning.settings.field.intake.serviceTransmission': 'Transmission by a service (internal orderers)',
+  'planning.settings.field.intake.serviceTransmission':
+    'Transmission by a service (internal orderers)',
   'planning.settings.field.intake.plannerDirectEntry': 'Order keyed in the transport order card',
   'planning.settings.section.channels': 'Notification channels',
-  'planning.settings.section.channels.hint': 'The channels offered to the recipients in their preferences. « No notification » always stays possible.',
+  'planning.settings.section.channels.hint':
+    'The channels offered to the recipients in their preferences. « No notification » always stays possible.',
   'planning.settings.field.channels.sms': 'SMS',
   'planning.settings.field.channels.call': 'Call',
   'planning.settings.field.channels.email': 'E-mail',
   'planning.settings.field.channels.whatsapp': 'WhatsApp',
   'planning.settings.field.confirmation.callMoment': 'Time of the calls',
   'planning.settings.incidents.title': 'Incident types, reason types and reason codes',
-  'planning.settings.incidents.hint': 'The lists used to cancel or deviate a note. Each reason code belongs to a reason type.',
+  'planning.settings.incidents.hint':
+    'The lists used to cancel or deviate a note. Each reason code belongs to a reason type.',
   'planning.settings.incidents.incidentTypes': 'Incident types',
   'planning.settings.incidents.reasonTypes': 'Reason types',
   'planning.settings.incidents.reasonCodes': 'Reason codes',
@@ -94,14 +95,17 @@ export default {
   'planning.settings.incidents.issue.nameRequired': 'Every item needs a label.',
   'planning.settings.incidents.issue.codeRequired': 'Every item needs a code.',
   'planning.settings.incidents.issue.codeTaken': 'A code appears twice in the same list.',
-  'planning.settings.incidents.issue.unknownReasonType': 'Every reason code must belong to a reason type of the list.',
+  'planning.settings.incidents.issue.unknownReasonType':
+    'Every reason code must belong to a reason type of the list.',
   'planning.settings.perimeters.title': "Users' scope",
-  'planning.settings.perimeters.hint': 'Each user sees only the transport orders and the orders of his depots and regions. Tied to nothing, he sees everything.',
+  'planning.settings.perimeters.hint':
+    'Each user sees only the transport orders and the orders of his depots and regions. Tied to nothing, he sees everything.',
   'planning.settings.perimeters.user': 'User',
   'planning.settings.perimeters.depots': 'Depots',
   'planning.settings.perimeters.regions': 'Regions',
   'planning.settings.perimeters.all': 'Everything',
   'planning.settings.perimeters.editTitle': 'Scope of {name}',
   'planning.settings.perimeters.owner': 'Owned by {owner}',
-  'planning.settings.perimeters.noneHint': 'With no depot nor region ticked, the user sees everything.'
+  'planning.settings.perimeters.noneHint':
+    'With no depot nor region ticked, the user sees everything.'
 }

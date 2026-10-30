@@ -33,5 +33,6 @@ export default {
   'maintenance.failureCodes.form.competenceNo': 'Compétence requise',
   'maintenance.failureCodes.form.competenceNoHint':
     'Pour un sous-système : la compétence de qui le répare.',
-  'maintenance.failureCodes.form.active': 'Actif'
+  'maintenance.failureCodes.form.active': 'Actif',
+  'maintenance.failureCodes.noResultsCreate': 'Aucun code de panne. Créez-en un avec Nouveau.'
 }

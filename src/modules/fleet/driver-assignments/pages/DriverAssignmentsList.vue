@@ -79,6 +79,13 @@ const tableColumns = computed<TableColumn[]>(() => [
 
 const filterDefs: FilterFieldDef[] = [
   {
+    field: 'state',
+    labelKey: 'fleet.driverAssignments.col.state',
+    valueType: 'string',
+    kind: 'option',
+    optionsKey: 'periodState'
+  },
+  {
     field: 'employeeNo',
     labelKey: 'fleet.driverAssignments.col.employeeNo',
     valueType: 'string',
@@ -227,7 +234,11 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('fleet.driverAssignments.noResults')"
+        :no-results-message="
+          canInsert
+            ? t('fleet.driverAssignments.noResultsCreate')
+            : t('fleet.driverAssignments.noResults')
+        "
         :no-search-results-message="
           t('fleet.driverAssignments.noSearchResults', { query: store.searchQuery })
         "

@@ -20,7 +20,8 @@ import { orderLineState } from '../domain/transportOrder'
 import DeliveryNoteView from '@/modules/planning/delivery-notes/components/DeliveryNoteView.vue'
 import { deliveryNoteApi } from '@/modules/planning/delivery-notes/api/deliveryNoteApi'
 import type { DeliveryNoteApi } from '@/modules/planning/delivery-notes/types/deliveryNote.types'
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, type Component } from 'vue'
+import type { MoreAction } from '@/components/shared/MoreActionsMenu.vue'
 import { useI18n } from 'vue-i18n'
 import {
   Ban,
@@ -167,16 +168,19 @@ const dialogError = ref<string | null>(null)
 /** A warning the planner may override (excess of capacity, overlap in the calendar). */
 const warning = ref<{ message: string; retry: () => Promise<void> } | null>(null)
 
+/* Sections open by default only when they hold something useful for the current status: the
+ * means once chosen, the delivery notes while the order runs; the rest stays folded. */
 const expandedSections = ref({
-  means: true,
+  means: false,
+  gaps: true,
   lines: true,
   compartments: true,
   closing: true,
-  deliveryNotes: true,
+  deliveryNotes: false,
   pickup: true,
   disputes: true,
   returns: true,
-  satisfaction: true,
+  satisfaction: false,
   replan: true,
   routePlan: false,
   history: false,
@@ -250,6 +254,16 @@ async function loadClosing() {
 watch(
   () => [item.value?.no, item.value?.status],
   () => void loadClosing(),
+  { immediate: true }
+)
+watch(
+  () => item.value?.no,
+  () => {
+    const order = item.value
+    if (!order) return
+    expandedSections.value.means = !!order.means
+    expandedSections.value.deliveryNotes = order.status === 'in_progress'
+  },
   { immediate: true }
 )
 
@@ -417,6 +431,106 @@ const closingBlocked = computed(() =>
     .join(', ')
 )
 
+/* One main action by status, the gesture the planner or the delivery manager makes next; the
+ * others wait in « Plus d'actions ». A disabled action says why on hover. */
+interface CardAction {
+  key: string
+  label: string
+  icon: Component
+  run: () => unknown
+  disabledReason?: string
+  hint?: string
+}
+const openPlan = () => ((dialogError.value = null), (planning.value = true))
+const openLines = () => ((dialogError.value = null), (editingLines.value = true))
+const primaryAction = computed<CardAction | null>(() => {
+  const order = item.value
+  if (!order) return null
+  if (canUpdate.value && canPlan(order.status)) {
+    return order.lines.length
+      ? {
+          key: 'plan',
+          label: t('planning.transportOrders.action.plan'),
+          icon: CalendarClock,
+          run: openPlan
+        }
+      : {
+          key: 'lines',
+          label: t('planning.transportOrders.action.addLines'),
+          icon: ListTree,
+          run: openLines
+        }
+  }
+  if (canExecute.value && order.means === 'carrier' && order.status === 'ready') {
+    return {
+      key: 'depart',
+      label: t('planning.transportOrders.action.depart'),
+      icon: Truck,
+      run: depart
+    }
+  }
+  if (canExecute.value && order.status === 'in_progress') {
+    return {
+      key: 'close',
+      label: t('planning.transportOrders.action.close'),
+      icon: Lock,
+      run: closeOrder,
+      disabledReason: closingBlocked.value || undefined,
+      hint: t('planning.transportOrders.lines.progress', {
+        done: lineProgress.value.done,
+        total: lineProgress.value.done + lineProgress.value.pending
+      })
+    }
+  }
+  return null
+})
+const moreActions = computed<MoreAction[]>(() => {
+  const order = item.value
+  if (!order) return []
+  const primary = primaryAction.value?.key
+  const loadingOpen = LOADING_STATUSES.includes(order.status)
+  return [
+    {
+      key: 'lines',
+      label: t('planning.transportOrders.action.lines'),
+      icon: ListTree,
+      hidden: primary === 'lines' || !canUpdate.value || !canEditLines(order.status),
+      disabled: acting.value,
+      onSelect: openLines
+    },
+    {
+      key: 'loadingList',
+      label: t('planning.loadingList.open'),
+      icon: ClipboardList,
+      hidden: !loadingOpen,
+      onSelect: () => void openLoadingList(false)
+    },
+    {
+      key: 'simulate',
+      label: t('planning.loadingList.simulate'),
+      icon: PackageOpen,
+      hidden: !loadingOpen,
+      onSelect: () => void openLoadingList(true)
+    },
+    {
+      key: 'dossier',
+      label: t('planning.dossier.open'),
+      icon: FolderOpen,
+      hidden: !canReadDossier.value,
+      onSelect: () => void openDossier()
+    },
+    {
+      key: 'cancel',
+      label: t('planning.transportOrders.action.cancel'),
+      icon: Ban,
+      danger: true,
+      hidden: !canExecute.value || !canCancel(order.status),
+      disabled: acting.value,
+      onSelect: () => (cancelling.value = true)
+    }
+  ]
+})
+
 const buttonClass =
   'cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed'
 </script>
@@ -443,6 +557,7 @@ const buttonClass =
     :show-title-new-button="canInsert"
     :has-unsaved-changes="isFormDirty"
     :can-save="isFormDirty"
+    :more-actions="item && !isEditMode && !isFormDirty ? moreActions : []"
     @close="emit('close')"
     @save="saveItem"
     @enter-edit="enterEditMode"
@@ -466,87 +581,20 @@ const buttonClass =
         </template>
       </span>
     </template>
-    <template v-if="item && !isEditMode && !isFormDirty" #action-buttons>
+    <template v-if="item && !isEditMode && !isFormDirty && primaryAction" #action-buttons>
       <button
-        v-if="canUpdate && canPlan(item.status)"
         type="button"
-        :class="buttonClass"
-        :disabled="acting"
-        @click="((dialogError = null), (planning = true))"
+        class="cursor-pointer inline-flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium text-primary-foreground bg-primary rounded hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        :disabled="acting || !!primaryAction.disabledReason"
+        :title="primaryAction.disabledReason || undefined"
+        data-testid="order-primary-action"
+        @click="primaryAction.run()"
       >
-        <CalendarClock class="w-5 h-5 text-primary" />
-        {{ t('planning.transportOrders.action.plan') }}
-      </button>
-      <button
-        v-if="canUpdate && canEditLines(item.status)"
-        type="button"
-        :class="buttonClass"
-        :disabled="acting"
-        @click="((dialogError = null), (editingLines = true))"
-      >
-        <ListTree class="w-5 h-5 text-primary" />
-        {{ t('planning.transportOrders.action.lines') }}
-      </button>
-      <button
-        v-if="canExecute && item.means === 'carrier' && item.status === 'ready'"
-        type="button"
-        :class="buttonClass"
-        :disabled="acting"
-        @click="depart"
-      >
-        <Truck class="w-5 h-5 text-primary" />
-        {{ t('planning.transportOrders.action.depart') }}
-      </button>
-      <button
-        v-if="canExecute && item.status === 'in_progress'"
-        type="button"
-        :class="buttonClass"
-        :disabled="acting || !!closingBlocked"
-        :title="closingBlocked || undefined"
-        @click="closeOrder"
-      >
-        <Lock class="w-5 h-5 text-primary" />
-        {{ t('planning.transportOrders.action.close') }}
-        <span class="text-xs text-muted-foreground tabular-nums">
-          {{
-            t('planning.transportOrders.lines.progress', {
-              done: lineProgress.done,
-              total: lineProgress.done + lineProgress.pending
-            })
-          }}
+        <component :is="primaryAction.icon" class="w-4 h-4" />
+        {{ primaryAction.label }}
+        <span v-if="primaryAction.hint" class="text-xs opacity-80 tabular-nums">
+          {{ primaryAction.hint }}
         </span>
-      </button>
-      <button
-        v-if="LOADING_STATUSES.includes(item.status)"
-        type="button"
-        :class="buttonClass"
-        @click="openLoadingList(false)"
-      >
-        <ClipboardList class="w-5 h-5 text-primary" />
-        {{ t('planning.loadingList.open') }}
-      </button>
-      <button
-        v-if="LOADING_STATUSES.includes(item.status)"
-        type="button"
-        :class="buttonClass"
-        @click="openLoadingList(true)"
-      >
-        <PackageOpen class="w-5 h-5 text-primary" />
-        {{ t('planning.loadingList.simulate') }}
-      </button>
-      <button v-if="canReadDossier" type="button" :class="buttonClass" @click="openDossier">
-        <FolderOpen class="w-5 h-5 text-primary" />
-        {{ t('planning.dossier.open') }}
-      </button>
-      <button
-        v-if="canExecute && canCancel(item.status)"
-        type="button"
-        :class="buttonClass"
-        :disabled="acting"
-        @click="cancelling = true"
-      >
-        <Ban class="w-5 h-5 text-primary" />
-        {{ t('planning.transportOrders.action.cancel') }}
       </button>
     </template>
     <template #form>
@@ -732,7 +780,7 @@ const buttonClass =
             </FormSection>
             <FormSection
               v-if="gapLines.length"
-              v-model:open="expandedSections.returns"
+              v-model:open="expandedSections.gaps"
               :title="t('planning.transportOrders.gaps.title')"
               :summary="[]"
             >

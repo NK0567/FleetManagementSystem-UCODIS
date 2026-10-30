@@ -26,25 +26,21 @@ export default {
   'fleet.fleetStatus.archive': "Archive today's status",
   'fleet.fleetStatus.archiveError': "Today's status could not be archived.",
   'fleet.fleetStatus.archivedAt': 'Archived on {date} by {user}.',
-  'fleet.fleetStatus.readOnlyDay':
-    'Archived day: the status is shown as it was and no longer changes.',
+  'fleet.fleetStatus.readOnlyDay': 'Archived day: read only.',
   'fleet.fleetStatus.saveNote': 'Save the note',
   'fleet.fleetStatus.noteError': 'The note could not be saved.',
   'fleet.fleetStatus.col.position': 'Position',
   'fleet.fleetStatus.send.button': 'Send by e-mail',
   'fleet.fleetStatus.send.title': 'Send the fleet status of {day}',
-  'fleet.fleetStatus.send.hint':
-    "The full status of the day shown goes to the recipients, whatever the filters of the list. Today's status is archived as it is sent.",
+  'fleet.fleetStatus.send.hint': 'The whole state of the day is sent, without the filters, then archived.',
   'fleet.fleetStatus.send.recipients': 'Recipients',
   'fleet.fleetStatus.send.placeholder': 'management@ucodis.mg, customer@example.com',
   'fleet.fleetStatus.send.invalid': 'The address "{email}" is not valid.',
-  'fleet.fleetStatus.send.simulated':
-    'Mock-up: no e-mail really leaves, the sending is recorded and listed below.',
+  'fleet.fleetStatus.send.simulated': 'Mockup: the sending is recorded, no e-mail is sent.',
   'fleet.fleetStatus.send.confirm': 'Send',
   'fleet.fleetStatus.send.error': 'The fleet status could not be sent.',
   'fleet.fleetStatus.send.done': 'Fleet status sent to {recipients}.',
   'fleet.fleetStatus.send.last': 'Last sent on {date} (status of {day}) to {recipients}.',
   'fleet.fleetStatus.send.history': 'Latest sendings',
-  'fleet.fleetStatus.send.line':
-    '{date} · status of {day} · {count} line(s) · {recipients} · by {user}'
+  'fleet.fleetStatus.send.line': '{date} · status of {day} · lines: {count} · {recipients} · by {user}'
 }

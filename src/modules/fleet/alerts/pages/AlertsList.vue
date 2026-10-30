@@ -98,6 +98,12 @@ const filterDefs: FilterFieldDef[] = [
     valueType: 'string',
     kind: 'option',
     optionsKey: 'alertStatus'
+  },
+  {
+    field: 'escalated',
+    labelKey: 'fleet.alerts.col.escalated',
+    valueType: 'boolean',
+    kind: 'boolean'
   }
 ]
 
@@ -177,6 +183,12 @@ async function loadStats() {
 
 onMounted(loadStats)
 watch(() => store.items, loadStats)
+
+/* These lines have no card: their actions sit in the details panel, opened with the selection. */
+function selectAndShow(item: AlertApi) {
+  store.selectItem(item)
+  showDetailsPanel.value = true
+}
 </script>
 
 <template>
@@ -263,7 +275,7 @@ watch(() => store.items, loadStats)
         @update:width="setColumnWidth"
         @update:page="store.changePage"
         @update:limit="store.changeLimit"
-        @select-item="(item) => store.selectItem(item as AlertApi)"
+        @select-item="(item) => selectAndShow(item as AlertApi)"
         @row-dblclick="(item) => (item as AlertApi).path && openRecord(item as AlertApi)"
       >
         <template #cell-severity="{ item }">

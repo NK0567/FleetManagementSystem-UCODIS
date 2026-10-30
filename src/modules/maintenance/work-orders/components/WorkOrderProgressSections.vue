@@ -13,14 +13,16 @@ const { t } = useI18n()
 const optionsStore = useOptionsStore()
 const referenceStore = useReferenceStore()
 
+/* A section opens by default only when it has something to show for the current status. */
 const expandedSections = ref({
-  diagnosis: true,
-  labour: true,
-  parts: true,
+  diagnosis: !!props.order.diagnosis || !!props.order.nomenclature,
+  labour: props.order.labour.length > 0 || !!props.order.planning,
+  parts: props.order.parts.length > 0,
   external: true,
   completion: true,
   history: false
 })
+const finishedOrCancelled = computed(() => !!props.order.completedAt || !!props.order.cancelledAt)
 const technician = (no: string) => referenceStore.getLabel('technicians', no) || no
 
 const asRows = (items: readonly object[]) =>
@@ -246,6 +248,7 @@ const historyColumns = computed<SubListColumn[]>(() => [
     </FormSection>
 
     <FormSection
+      v-if="finishedOrCancelled"
       v-model:open="expandedSections.completion"
       :title="t('maintenance.workOrders.section.completion')"
       :summary="[]"

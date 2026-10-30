@@ -128,10 +128,10 @@ async function confirmQualify() {
     >
       <button
         type="button"
-        class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
+        class="cursor-pointer inline-flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium text-primary-foreground bg-primary rounded hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
         @click="openQualify"
       >
-        <Scale class="w-5 h-5 text-primary" /> {{ t('fleet.fuelRefills.action.qualify') }}
+        <Scale class="w-4 h-4" /> {{ t('fleet.fuelRefills.action.qualify') }}
       </button>
     </template>
     <template #form>

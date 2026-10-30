@@ -205,7 +205,11 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('maintenance.failureCodes.noResults')"
+        :no-results-message="
+          canInsert
+            ? t('maintenance.failureCodes.noResultsCreate')
+            : t('maintenance.failureCodes.noResults')
+        "
         :no-search-results-message="
           t('maintenance.failureCodes.noSearchResults', { query: store.searchQuery })
         "

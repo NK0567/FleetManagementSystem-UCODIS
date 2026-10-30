@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { FileWarning, HandCoins, ListChecks, Scale, Send, ShieldAlert } from '@lucide/vue'
 import type { StatusTone } from '@/components/ui/status-pill/StatusPill.vue'
+import MoreActionsMenu, { type MoreAction } from '@/components/shared/MoreActionsMenu.vue'
 import { usePermissions } from '@/composables/usePermissions'
 import { reasonListKey } from '@/modules/planning/reasons/domain/reasonLists'
 import { useOptionsStore } from '@/stores/optionsStore'
@@ -38,6 +39,50 @@ const chipClass = (active: boolean) =>
 
 const { t } = useI18n()
 const store = useDeliveryQualityStore()
+
+/* Each line shows the next step of its file as the main gesture (the responsibility to set,
+ * then the credit note to issue); preparing a protest waits in the menu of the line. */
+function rowActions(row: QualityRowApi): MoreAction[] {
+  return [
+    {
+      key: 'responsibility',
+      label: t('planning.quality.responsibility'),
+      icon: Scale,
+      hidden: !row.facts.length,
+      disabled: store.acting,
+      onSelect: () => openResponsibility(row)
+    },
+    {
+      key: 'credit',
+      label: t('planning.quality.issueCredit'),
+      icon: HandCoins,
+      hidden: !creditPending(row),
+      disabled: store.acting,
+      onSelect: () => openCredit(row)
+    },
+    {
+      key: 'prepare',
+      label: t('planning.quality.prepare'),
+      icon: FileWarning,
+      disabled: store.acting,
+      onSelect: () => openPrepare(row)
+    }
+  ]
+}
+function primaryOf(row: QualityRowApi): MoreAction | undefined {
+  const actions = rowActions(row)
+  const key =
+    row.facts.length && !row.responsibility
+      ? 'responsibility'
+      : creditPending(row)
+        ? 'credit'
+        : null
+  return actions.find((action) => action.key === key && !action.hidden)
+}
+function secondaryOf(row: QualityRowApi): MoreAction[] {
+  const primary = primaryOf(row)?.key
+  return rowActions(row).filter((action) => action.key !== primary)
+}
 const optionsStore = useOptionsStore()
 const { canExecute } = usePermissions('DELIVERYQUALITY')
 
@@ -245,13 +290,22 @@ onMounted(() => void store.fetchRows())
         v-for="kpi in kpis"
         :key="kpi.key"
         class="bg-card border border-border rounded p-4 flex items-start gap-3"
+        :class="kpi.value ? '' : 'opacity-60'"
       >
-        <span class="p-2 rounded bg-primary/10 text-primary shrink-0">
+        <span
+          class="p-2 rounded shrink-0"
+          :class="kpi.value ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'"
+        >
           <component :is="kpi.icon" class="w-5 h-5" />
         </span>
         <div class="min-w-0">
           <p class="text-xs text-muted-foreground">{{ kpi.label }}</p>
-          <p class="text-2xl font-semibold tabular-nums text-card-foreground">{{ kpi.value }}</p>
+          <p
+            class="text-2xl font-semibold tabular-nums"
+            :class="kpi.value ? 'text-card-foreground' : 'text-muted-foreground'"
+          >
+            {{ kpi.value }}
+          </p>
         </div>
       </div>
     </section>
@@ -365,36 +419,18 @@ onMounted(() => void store.fetchRows())
               </p>
             </td>
             <td class="px-3 py-2">
-              <div v-if="canExecute" class="flex flex-wrap justify-end gap-1">
+              <div v-if="canExecute" class="flex items-center justify-end gap-1">
                 <button
+                  v-if="primaryOf(row)"
                   type="button"
-                  :class="buttonClass"
+                  class="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1 text-sm font-medium text-primary-foreground bg-primary rounded hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                   :disabled="store.acting"
-                  @click="openPrepare(row)"
+                  @click="primaryOf(row)?.onSelect?.()"
                 >
-                  <FileWarning class="w-4 h-4 text-primary" />
-                  {{ t('planning.quality.prepare') }}
+                  <component :is="primaryOf(row)?.icon" class="w-4 h-4" />
+                  {{ primaryOf(row)?.label }}
                 </button>
-                <button
-                  v-if="row.facts.length"
-                  type="button"
-                  :class="buttonClass"
-                  :disabled="store.acting"
-                  @click="openResponsibility(row)"
-                >
-                  <Scale class="w-4 h-4 text-primary" />
-                  {{ t('planning.quality.responsibility') }}
-                </button>
-                <button
-                  v-if="creditPending(row)"
-                  type="button"
-                  :class="buttonClass"
-                  :disabled="store.acting"
-                  @click="openCredit(row)"
-                >
-                  <HandCoins class="w-4 h-4 text-primary" />
-                  {{ t('planning.quality.issueCredit') }}
-                </button>
+                <MoreActionsMenu icon-only :actions="secondaryOf(row)" />
               </div>
             </td>
           </tr>

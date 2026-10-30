@@ -1,7 +1,6 @@
 export default {
   'fleet.settings.title': 'Réglages de la flotte',
-  'fleet.settings.subtitle':
-    "Seuils et préavis utilisés par les contrôles de la flotte. Chaque section s'enregistre séparément.",
+  'fleet.settings.subtitle': 'Seuils et préavis des contrôles de la flotte.',
   'fleet.settings.lastModified': 'Modifié le {date} par {user}',
   'fleet.settings.loadError': "Les réglages de la flotte n'ont pas pu être chargés.",
   'fleet.settings.saveError': "Les réglages n'ont pas pu être enregistrés.",
@@ -93,12 +92,12 @@ export default {
   'fleet.settings.field.reporting.availabilityTargetPct': 'Taux de disponibilité visé',
   'fleet.settings.field.fuel.deductionMaxSalaryPct': 'Part maximale du salaire retenue par mois (droit du travail)',
   'fleet.settings.section.integrations': 'Systèmes de l’entreprise',
-  'fleet.settings.section.integrations.hint': "Simulés dans la maquette : quand un système existe, les personnes ou les prestataires en sont repris au lieu d'être ressaisis.",
+  'fleet.settings.section.integrations.hint': "Simulé dans la maquette : les données sont reprises au lieu d'être ressaisies.",
   'fleet.settings.field.integrations.hrSystemConnected': 'Système de gestion du personnel',
   'fleet.settings.field.integrations.managementSystemConnected': "Système de gestion de l'entreprise",
   'fleet.settings.scoreFamilies.title': 'Familles du score de conduite',
   'fleet.settings.scoreFamilies.count': 'Aucune famille | 1 famille | {n} familles',
-  'fleet.settings.scoreFamilies.hint': "Chaque famille a un code, un libellé et un poids, et compte les éléments qu'on lui donne ; un élément n'est compté que dans une famille. Une famille de poids 0 est laissée de côté.",
+  'fleet.settings.scoreFamilies.hint': 'Code, libellé et poids de chaque famille. Poids 0 : famille ignorée.',
   'fleet.settings.scoreFamilies.formulaTitle': 'Formule :',
   'fleet.settings.scoreFamilies.formula': "note de la famille = 100 - somme (nombre de faits × points), jamais sous 0 et plafonnée tant qu'un document manque ; score = somme (note × poids) / somme des poids.",
   'fleet.settings.scoreFamilies.saved': 'Les familles du score sont enregistrées.',
@@ -134,7 +133,7 @@ export default {
   'fleet.settings.scoreSource.deliveryDispute': 'Livraisons contestées',
   'fleet.settings.scoreSource.deliveryDispute.formula': 'points par contestation encore ouverte',
   'fleet.settings.importMappings.title': 'Imports de données',
-  'fleet.settings.importMappings.hint': "Pour chaque import, indiquez l'intitulé de la colonne du fichier source qui alimente chaque champ. Sans intitulé, les noms par défaut sont reconnus ; ils le restent après réglage.",
+  'fleet.settings.importMappings.hint': 'Intitulé de la colonne du fichier pour chaque champ. Vide : nom par défaut.',
   'fleet.settings.importMappings.saved': 'La correspondance des colonnes est enregistrée.',
   'fleet.settings.importMappings.field': 'Champ',
   'fleet.settings.importMappings.heading': 'Intitulé dans le fichier source',
@@ -185,7 +184,7 @@ export default {
   'fleet.settings.importField.maintenanceHistory.odometerKm': 'Kilométrage',
   'fleet.settings.importField.maintenanceHistory.cost': 'Coût',
   'fleet.settings.indicators.title': 'Indicateurs : codes, libellés et cibles',
-  'fleet.settings.indicators.hint': "Donnez à chaque indicateur le code et le libellé de l'entreprise, et sa cible. Les cibles de disponibilité et de maintenance sont les mêmes que celles des tableaux de bord.",
+  'fleet.settings.indicators.hint': 'Code, libellé et cible de chaque indicateur.',
   'fleet.settings.indicators.saved': 'Les indicateurs sont enregistrés.',
   'fleet.settings.indicators.code': 'Code',
   'fleet.settings.indicators.label': 'Libellé',
@@ -214,5 +213,6 @@ export default {
   'fleet.settings.indicatorDefinition.costPerKm': "Coût de maintenance, de carburant, de pneus et d'assurance divisé par les kilomètres parcourus.",
   'fleet.settings.indicatorDefinition.fuelConsumption': "Litres consommés pour 100 km parcourus, d'un plein complet au suivant.",
   'fleet.settings.indicatorDefinition.documentCompliance': 'Part des véhicules et des conducteurs dont tous les documents obligatoires sont valides.',
-  'fleet.settings.indicatorDefinition.driverScore': 'Moyenne des scores de conduite des conducteurs sur la période du score.'
+  'fleet.settings.indicatorDefinition.driverScore': 'Moyenne des scores de conduite des conducteurs sur la période du score.',
+  'fleet.settings.importMappings.saveFirst': "Enregistrez d'abord les changements en cours."
 }

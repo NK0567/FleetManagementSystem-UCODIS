@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import ReferenceImportDialog from '@/modules/hr/reference-import/ReferenceImportDialog.vue'
 import { Upload } from '@lucide/vue'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
+import type { MoreAction } from '@/components/shared/MoreActionsMenu.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
 import { useListCellFormatters } from '@/composables/useListCellFormatters'
 import { useListPage } from '@/composables/useListPage'
@@ -148,12 +149,24 @@ const {
   remove: jobPositionService.remove,
   deleteErrorFallback: t('hr.jobPositions.deleteError')
 })
+
+/** Secondary gestures of the list, behind « Plus d'actions ». */
+const moreActions = computed<MoreAction[]>(() => [
+  {
+    key: 'import',
+    label: t('hr.referenceImport.action'),
+    icon: Upload,
+    hidden: !canInsert.value,
+    onSelect: () => (importing.value = true)
+  }
+])
 </script>
 
 <template>
   <div class="h-full flex flex-col bg-white">
     <template v-if="!hideListContent">
       <ListPageToolbar
+        :more-actions="moreActions"
         :title="t('hr.jobPositions.title')"
         :exporting="exporting"
         :show-filter-panel="showFilterPanel"
@@ -193,16 +206,6 @@ const {
             :reset-preferences="resetPreferences"
           />
         </template>
-        <template v-if="canInsert" #extra-actions>
-          <button
-            type="button"
-            class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
-            @click="importing = true"
-          >
-            <Upload class="w-4 h-4 text-primary" />
-            {{ t('hr.referenceImport.action') }}
-          </button>
-        </template>
       </ListPageToolbar>
 
       <FormAlerts
@@ -227,7 +230,9 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('hr.jobPositions.noResults')"
+        :no-results-message="
+          canInsert ? t('hr.jobPositions.noResultsCreate') : t('hr.jobPositions.noResults')
+        "
         :no-search-results-message="
           t('hr.jobPositions.noSearchResults', { query: store.searchQuery })
         "

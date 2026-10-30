@@ -315,7 +315,9 @@ function showMissedStops() {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('fleet.trips.noResults')"
+        :no-results-message="
+          canInsert ? t('fleet.trips.noResultsCreate') : t('fleet.trips.noResults')
+        "
         :no-search-results-message="t('fleet.trips.noSearchResults', { query: store.searchQuery })"
         :page="store.pagination.page"
         :total-pages="store.pagination.totalPages"

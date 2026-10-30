@@ -36,5 +36,6 @@ export default {
   'fleet.checkPoints.results.comment': 'Comment',
   'fleet.checkPoints.results.blocking': 'blocking',
   'fleet.checkPoints.issue.incomplete': 'Fill in every check point.',
-  'fleet.checkPoints.issue.commentRequired': 'Explain every anomaly found.'
+  'fleet.checkPoints.issue.commentRequired': 'Explain every anomaly found.',
+  'fleet.checkPoints.noResultsCreate': 'No check point. Create one with New.'
 }

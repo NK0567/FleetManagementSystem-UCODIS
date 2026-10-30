@@ -42,7 +42,7 @@ export default {
   'fleet.fuelRefills.actionError': "L'action n'a pas pu être effectuée.",
   'fleet.fuelRefills.listView.all': 'Tous les pleins',
   'fleet.fuelRefills.listView.anomaly': 'En anomalie',
-  'fleet.fuelRefills.action.qualify': 'Qualifier',
+  'fleet.fuelRefills.action.qualify': "Qualifier l'anomalie",
   'fleet.fuelRefills.form.driverHint': 'Laissé vide, le conducteur affecté au véhicule ce jour-là.',
   'fleet.fuelRefills.form.receipt': 'Reçu',
   'fleet.fuelRefills.form.amount': 'Montant',
@@ -52,7 +52,7 @@ export default {
   'fleet.fuelRefills.form.comment': 'Commentaire',
   'fleet.fuelRefills.import.action': 'Importer',
   'fleet.fuelRefills.import.title': 'Importer des pleins',
-  'fleet.fuelRefills.import.hint':
-    "Fichier CSV (séparateur ; ou ,) avec une ligne d'en-têtes. Le véhicule est retrouvé par son immatriculation, le conducteur par son matricule ; laissé vide, il est déduit de l'affectation ou du trajet. Chaque ligne est contrôlée comme un plein saisi à la main.",
-  'fleet.fuelRefills.import.created': 'Aucun plein créé. | Un plein créé. | {n} pleins créés.'
+  'fleet.fuelRefills.import.hint': "Fichier CSV avec une ligne d'en-têtes : véhicule par immatriculation, conducteur par matricule (déduit s'il manque).",
+  'fleet.fuelRefills.import.created': 'Aucun plein créé. | Un plein créé. | {n} pleins créés.',
+  'fleet.fuelRefills.noResultsCreate': 'Aucun plein. Créez-en un avec Nouveau.'
 }

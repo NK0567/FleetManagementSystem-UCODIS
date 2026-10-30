@@ -223,7 +223,7 @@ export default {
   'planning.transportOrders.lines.state.not_loaded': 'Non chargée',
   'planning.transportOrders.compartments.title': 'Répartition par compartiment',
   'planning.transportOrders.compartments.hint':
-    'Proposition qui essaie les combinaisons permises par les règles des compartiments et garde celle qui laisse le moins à quai. Le planificateur garde la main.',
+    'Proposition calculée selon les règles des compartiments. Vous gardez la main.',
   'planning.transportOrders.compartments.issues':
     'Aucun point à vérifier | {n} point à vérifier | {n} points à vérifier',
   'planning.transportOrders.compartments.noRoom':
@@ -491,10 +491,9 @@ export default {
   'planning.transportOrders.routePlan.changeConfirm': "Modifier l'itinéraire",
   'planning.transportOrders.routePlan.history': 'Itinéraires précédents',
   'planning.transportOrders.routePlan.mode': 'Mode de transport : {mode}',
-  'planning.transportOrders.expired.alert':
-    'Cet ordre a dépassé sa date sans être exécuté : il est expiré. Reprogrammez-le ou annulez-le.',
+  'planning.transportOrders.expired.alert': 'Ordre expiré : reprogrammez-le ou annulez-le.',
   'planning.transportOrders.expired.blocked':
-    "Cet ordre a dépassé sa date sans être exécuté : il ne peut plus être chargé tant qu'il n'est pas reprogrammé ou annulé.",
+    'Ordre expiré : il ne peut plus être chargé. Reprogrammez-le ou annulez-le.',
   'planning.transportOrders.expired.reschedule': 'Reprogrammer',
   'planning.transportOrders.proposal.title': 'Proposition de chargement',
   'planning.transportOrders.proposal.hint':
@@ -546,5 +545,18 @@ export default {
   'planning.transportOrders.delay': '+{min} min',
   'planning.transportOrders.board.eta': 'Arrivée estimée',
   'planning.transportOrders.replan.proposedOn': 'Proposée au destinataire : {date}',
-  'planning.transportOrders.lines.trackingLink': 'Lien de suivi du destinataire'
+  'planning.transportOrders.lines.trackingLink': 'Lien de suivi du destinataire',
+  'planning.transportOrders.view.all': 'Tous',
+  'planning.transportOrders.view.lateHint': 'Afficher seulement les ordres en retard',
+  'planning.transportOrders.board.list': 'Liste',
+  'planning.transportOrders.waiting.toPlan':
+    'Aucune commande à planifier | 1 commande à planifier | {n} commandes à planifier',
+  'planning.transportOrders.waiting.late':
+    'Aucun ordre en retard | 1 ordre en retard | {n} ordres en retard',
+  'planning.transportOrders.waiting.expiredRequests':
+    'Aucune commande expirée | 1 commande expirée | {n} commandes expirées',
+  'planning.transportOrders.waiting.expiredOrders':
+    'Aucun ordre expiré sur cette page | 1 ordre expiré sur cette page | {n} ordres expirés sur cette page',
+  'planning.transportOrders.noResultsCreate': 'Aucun ordre de transport. Créez-en un avec Nouveau.',
+  'planning.transportOrders.action.addLines': 'Ajouter des lignes'
 }

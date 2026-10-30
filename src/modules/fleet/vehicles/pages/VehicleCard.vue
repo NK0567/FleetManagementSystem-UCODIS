@@ -1,5 +1,7 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
+import type { MoreAction } from '@/components/shared/MoreActionsMenu.vue'
+import PrimaryActionButton from '@/modules/fleet/shared/components/PrimaryActionButton.vue'
 import { useI18n } from 'vue-i18n'
 import { Ban, Gauge, LogOut, RectangleHorizontal, Wrench } from '@lucide/vue'
 import { apiErrorMessage } from '@/core/api/apiError'
@@ -156,6 +158,47 @@ const confirmDisabled = computed(() => {
   }
 })
 
+/** Reading the odometer is the everyday gesture; the rarer ones wait in « Plus d'actions ». */
+const moreActions = computed<MoreAction[]>(() => {
+  const vehicle = item.value
+  if (!showActions.value || !vehicle) return []
+  return [
+    {
+      key: 'plate',
+      label: t('fleet.vehicles.action.plate'),
+      icon: RectangleHorizontal,
+      hidden: !canUpdate.value,
+      disabled: acting.value,
+      onSelect: () => open('plate')
+    },
+    {
+      key: 'returnToService',
+      label: t('fleet.vehicles.action.returnToService'),
+      icon: Wrench,
+      hidden: !canExecute.value || !vehicle.outOfService,
+      disabled: acting.value,
+      onSelect: returnToService
+    },
+    {
+      key: 'outOfService',
+      label: t('fleet.vehicles.action.outOfService'),
+      icon: Ban,
+      hidden: !canExecute.value || !!vehicle.outOfService,
+      disabled: acting.value,
+      onSelect: () => open('outOfService')
+    },
+    {
+      key: 'removal',
+      label: t('fleet.vehicles.action.removal'),
+      icon: LogOut,
+      hidden: !canExecute.value,
+      disabled: acting.value,
+      danger: true,
+      onSelect: () => open('removal')
+    }
+  ]
+})
+
 const dialogTitle = computed(() => (dialog.value ? t(`fleet.vehicles.action.${dialog.value}`) : ''))
 </script>
 
@@ -181,6 +224,7 @@ const dialogTitle = computed(() => (dialog.value ? t(`fleet.vehicles.action.${di
     :show-title-new-button="canInsert"
     :has-unsaved-changes="isFormDirty"
     :can-save="isFormDirty"
+    :more-actions="moreActions"
     @close="emit('close')"
     @save="saveItem"
     @enter-edit="enterEditMode"
@@ -194,54 +238,13 @@ const dialogTitle = computed(() => (dialog.value ? t(`fleet.vehicles.action.${di
     <template #title-badges>
       <VehicleStatusPill v-if="item" :status="item.status" />
     </template>
-    <template v-if="showActions && item" #action-buttons>
-      <template v-if="canUpdate">
-        <button
-          type="button"
-          class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
-          :disabled="acting"
-          @click="open('odometer')"
-        >
-          <Gauge class="w-5 h-5 text-primary" /> {{ t('fleet.vehicles.action.odometer') }}
-        </button>
-        <button
-          type="button"
-          class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
-          :disabled="acting"
-          @click="open('plate')"
-        >
-          <RectangleHorizontal class="w-5 h-5 text-primary" />
-          {{ t('fleet.vehicles.action.plate') }}
-        </button>
-      </template>
-      <template v-if="canExecute">
-        <button
-          v-if="item.outOfService"
-          type="button"
-          class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
-          :disabled="acting"
-          @click="returnToService"
-        >
-          <Wrench class="w-5 h-5 text-primary" /> {{ t('fleet.vehicles.action.returnToService') }}
-        </button>
-        <button
-          v-else
-          type="button"
-          class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
-          :disabled="acting"
-          @click="open('outOfService')"
-        >
-          <Ban class="w-5 h-5 text-primary" /> {{ t('fleet.vehicles.action.outOfService') }}
-        </button>
-        <button
-          type="button"
-          class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
-          :disabled="acting"
-          @click="open('removal')"
-        >
-          <LogOut class="w-5 h-5 text-primary" /> {{ t('fleet.vehicles.action.removal') }}
-        </button>
-      </template>
+    <template v-if="showActions && item && canUpdate" #action-buttons>
+      <PrimaryActionButton
+        :label="t('fleet.vehicles.action.odometer')"
+        :icon="Gauge"
+        :disabled="acting"
+        @click="open('odometer')"
+      />
     </template>
     <template #form>
       <div class="min-h-0 flex flex-col h-full">

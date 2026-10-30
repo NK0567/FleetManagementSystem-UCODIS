@@ -38,8 +38,8 @@ export default {
   'fleet.routeDeviations.listView.toQualify': 'To qualify',
   'fleet.routeDeviations.listView.qualified': 'Qualified',
   'fleet.routeDeviations.listView.all': 'All',
-  'fleet.routeDeviations.action.justify': 'Justify',
-  'fleet.routeDeviations.action.qualify': 'Qualify',
+  'fleet.routeDeviations.action.justify': 'Justify the deviation',
+  'fleet.routeDeviations.action.qualify': 'Qualify the deviation',
   'fleet.routeDeviations.form.justification': 'Justification',
   'fleet.routeDeviations.form.justifyBefore': 'Not justified yet; possible until {date}.',
   'fleet.routeDeviations.form.qualification': 'Qualification',
@@ -47,5 +47,6 @@ export default {
   'fleet.routeDeviations.form.nature': 'Nature',
   'fleet.routeDeviations.form.decision': 'Decision',
   'fleet.routeDeviations.form.reason': 'Reason',
-  'fleet.routeDeviations.form.map': 'Place on the map'
+  'fleet.routeDeviations.form.map': 'Place on the map',
+  'fleet.routeDeviations.noResultsCreate': 'No deviation. Create one with New.'
 }

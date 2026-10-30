@@ -33,5 +33,6 @@ export default {
   'fleet.couplings.endHint': 'The tractor and the trailer become free again from this date.',
   'fleet.couplings.listView.active': 'Running',
   'fleet.couplings.listView.ended': 'Ended',
-  'fleet.couplings.listView.all': 'All couplings'
+  'fleet.couplings.listView.all': 'All couplings',
+  'fleet.couplings.noResultsCreate': 'No coupling. Create one with New.'
 }

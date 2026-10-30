@@ -38,5 +38,6 @@ export default {
   'maintenance.vehicleChecks.results.allOk': 'All OK',
   'maintenance.vehicleChecks.results.toAnswer': 'Answer every point.',
   'maintenance.vehicleChecks.results.orderOpened': 'Blocking anomaly: order opened',
-  'maintenance.vehicleChecks.col.vehiclePlate': 'Vehicle'
+  'maintenance.vehicleChecks.col.vehiclePlate': 'Vehicle',
+  'maintenance.vehicleChecks.noResultsCreate': 'No check. Create one with New.'
 }

@@ -108,6 +108,18 @@ const filterDefs: FilterFieldDef[] = [
     valueType: 'string',
     kind: 'option',
     optionsKey: 'documentValidity'
+  },
+  {
+    field: 'mandatory',
+    labelKey: 'fleet.documentTypes.col.mandatory',
+    valueType: 'boolean',
+    kind: 'boolean'
+  },
+  {
+    field: 'active',
+    labelKey: 'fleet.documentTypes.col.active',
+    valueType: 'boolean',
+    kind: 'boolean'
   }
 ]
 
@@ -254,7 +266,9 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('fleet.documentTypes.noResults')"
+        :no-results-message="
+          canInsert ? t('fleet.documentTypes.noResultsCreate') : t('fleet.documentTypes.noResults')
+        "
         :no-search-results-message="
           t('fleet.documentTypes.noSearchResults', { query: store.searchQuery })
         "

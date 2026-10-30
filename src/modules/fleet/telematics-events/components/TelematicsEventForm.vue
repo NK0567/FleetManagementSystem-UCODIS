@@ -62,7 +62,12 @@ const markers = computed<MapMarker[]>(() =>
     : []
 )
 
-const expandedSections = ref({ general: true, handling: true, map: true, audit: false })
+const expandedSections = ref({
+  general: true,
+  handling: props.initialData.status !== 'new',
+  map: true,
+  audit: false
+})
 const { hasValidationError } = useFormValidationUi({
   validationErrors: () => props.validationErrors,
   expandedSections,

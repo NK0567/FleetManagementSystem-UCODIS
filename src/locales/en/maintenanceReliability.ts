@@ -89,7 +89,8 @@ export default {
   'maintenance.reliability.subsystem': 'Subsystem',
   'maintenance.reliability.failures': 'Failures',
   'maintenance.reliability.breakdownPlace': 'Breakdowns on the road or at the workshop',
-  'maintenance.reliability.breakdownPlaceLine': '{road} roadside repair(s), {workshop} breakdown(s) handled at the workshop',
+  'maintenance.reliability.breakdownPlaceLine':
+    '{road} roadside repair(s), {workshop} breakdown(s) handled at the workshop',
   'maintenance.reliability.lostDaysPer10000Km': 'Days lost per 10,000 km',
   'maintenance.reliability.noLostDays': 'No day lost on a vehicle that ran in the period.',
   'maintenance.reliability.vehicle': 'Vehicle',

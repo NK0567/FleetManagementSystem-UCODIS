@@ -62,6 +62,12 @@ const filterDefs: FilterFieldDef[] = [
     valueType: 'string',
     kind: 'option',
     optionsKey: 'inspectionPart'
+  },
+  {
+    field: 'active',
+    labelKey: 'fleet.inspectionItems.col.active',
+    valueType: 'boolean',
+    kind: 'boolean'
   }
 ]
 
@@ -208,7 +214,11 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('fleet.inspectionItems.noResults')"
+        :no-results-message="
+          canInsert
+            ? t('fleet.inspectionItems.noResultsCreate')
+            : t('fleet.inspectionItems.noResults')
+        "
         :no-search-results-message="
           t('fleet.inspectionItems.noSearchResults', { query: store.searchQuery })
         "

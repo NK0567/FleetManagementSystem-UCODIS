@@ -25,5 +25,6 @@ export default {
   'fleet.inspectionItems.form.partHint':
     'Tank items are only inspected on a vehicle that carries one.',
   'fleet.inspectionItems.form.sortOrder': 'Order',
-  'fleet.inspectionItems.form.active': 'Active'
+  'fleet.inspectionItems.form.active': 'Active',
+  'fleet.inspectionItems.noResultsCreate': 'No item in the grid. Create one with New.'
 }

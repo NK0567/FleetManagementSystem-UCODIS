@@ -153,5 +153,9 @@ export default {
   'settings.activityLog.col.detail': 'Detail',
   'settings.activityLog.loadingList': 'Loading the log…',
   'settings.activityLog.noResults': 'No action recorded.',
-  'settings.activityLog.noSearchResults': 'No action matches "{query}".'
+  'settings.activityLog.noSearchResults': 'No action matches "{query}".',
+  'settings.userAccounts.noResultsCreate': 'No account. Create one with New.',
+  'settings.company.seeVehicles': 'See the vehicles',
+  'settings.company.noChange': 'No change to save.',
+  'settings.company.missingFields': 'Fill in the required fields.'
 }

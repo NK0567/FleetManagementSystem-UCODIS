@@ -49,7 +49,8 @@ export default {
   'maintenance.stockItems.movements.col.delta': 'Quantité',
   'maintenance.stockItems.movements.col.reason': 'Motif',
   'maintenance.stockItems.movements.col.by': 'Par',
-  'maintenance.stockItems.summary': 'Valeur du stock : {value} Ar · {items} références · {toReorder} à réapprovisionner',
+  'maintenance.stockItems.summary':
+    'Valeur du stock : {value} Ar · {items} références · {toReorder} à réapprovisionner',
   'maintenance.stockMovements.title': 'Mouvements de stock',
   'maintenance.stockMovements.search.all': 'Toutes les colonnes',
   'maintenance.stockMovements.col.at': 'Date',
@@ -74,5 +75,6 @@ export default {
   'maintenance.supplierSupply.days': '{days} j',
   'maintenance.supplierSupply.receivedCount': 'Commandes reçues',
   'maintenance.supplierSupply.items': 'Références fournies',
-  'maintenance.supplierSupply.noItem': "Aucun article du stock n'est rattaché à ce fournisseur."
+  'maintenance.supplierSupply.noItem': "Aucun article du stock n'est rattaché à ce fournisseur.",
+  'maintenance.stockItems.noResultsCreate': 'Aucun article. Créez-en un avec Nouveau.'
 }

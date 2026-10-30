@@ -115,9 +115,11 @@ function toggle(vehicleNo: string) {
                         class="w-4 h-4"
                       />
                       {{
-                        t('fleet.fuelConsumption.emissions.ecoCount', {
-                          count: row.ecoEvents.length
-                        })
+                        t(
+                          'fleet.fuelConsumption.emissions.ecoCount',
+                          { count: row.ecoEvents.length },
+                          row.ecoEvents.length
+                        )
                       }}
                     </button>
                     <span v-else class="text-muted-foreground">

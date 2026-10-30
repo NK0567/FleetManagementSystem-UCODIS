@@ -237,7 +237,11 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('planning.transportTariffs.noResults')"
+        :no-results-message="
+          canInsert
+            ? `${t('planning.transportTariffs.noResults')} ${t('common.createWithNew')}`
+            : t('planning.transportTariffs.noResults')
+        "
         :no-search-results-message="
           t('planning.transportTariffs.noSearchResults', { query: store.searchQuery })
         "

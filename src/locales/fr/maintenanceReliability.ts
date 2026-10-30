@@ -90,9 +90,11 @@ export default {
   'maintenance.reliability.subsystem': 'Sous-système',
   'maintenance.reliability.failures': 'Pannes',
   'maintenance.reliability.breakdownPlace': 'Pannes sur route ou en atelier',
-  'maintenance.reliability.breakdownPlaceLine': '{road} dépannage(s) sur route, {workshop} panne(s) traitée(s) en atelier',
+  'maintenance.reliability.breakdownPlaceLine':
+    '{road} dépannage(s) sur route, {workshop} panne(s) traitée(s) en atelier',
   'maintenance.reliability.lostDaysPer10000Km': 'Jours perdus pour 10 000 km',
-  'maintenance.reliability.noLostDays': 'Aucun jour perdu sur un véhicule qui a roulé dans la période.',
+  'maintenance.reliability.noLostDays':
+    'Aucun jour perdu sur un véhicule qui a roulé dans la période.',
   'maintenance.reliability.vehicle': 'Véhicule',
   'maintenance.reliability.kmRun': 'Km parcourus',
   'maintenance.reliability.daysLost': 'Jours perdus',

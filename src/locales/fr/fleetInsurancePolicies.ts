@@ -45,11 +45,12 @@ export default {
   'fleet.insurancePolicies.listView.inForce': 'En vigueur ou à venir',
   'fleet.insurancePolicies.listView.toRenew': 'À renouveler',
   'fleet.insurancePolicies.listView.all': 'Toutes, historique compris',
-  'fleet.insurancePolicies.action.terminate': 'Résilier',
+  'fleet.insurancePolicies.action.terminate': 'Résilier la police',
   'fleet.insurancePolicies.form.termination': 'Résiliation',
   'fleet.insurancePolicies.form.terminatedOn': 'Date de résiliation',
   'fleet.insurancePolicies.form.terminationReason': 'Motif de la résiliation',
   'fleet.insurancePolicies.issue.endBeforeStart': "L'échéance précède le début de la police.",
   'fleet.insurancePolicies.issue.terminationOutsidePeriod':
-    'La résiliation doit tomber pendant la période de la police.'
+    'La résiliation doit tomber pendant la période de la police.',
+  'fleet.insurancePolicies.noResultsCreate': "Aucune police d'assurance. Créez-en une avec Nouveau."
 }

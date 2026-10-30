@@ -222,7 +222,11 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('maintenance.vehicleChecks.noResults')"
+        :no-results-message="
+          canInsert
+            ? t('maintenance.vehicleChecks.noResultsCreate')
+            : t('maintenance.vehicleChecks.noResults')
+        "
         :no-search-results-message="
           t('maintenance.vehicleChecks.noSearchResults', { query: store.searchQuery })
         "

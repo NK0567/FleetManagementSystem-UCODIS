@@ -495,10 +495,16 @@ defineExpose(expose)
             </p>
           </BaseFormField>
           <BaseFormField :label="t('fleet.vehicles.col.driverName')">
-            <FormInput :model-value="initialData.driverName || t('fleet.vehicles.form.noLink')" disabled />
+            <FormInput
+              :model-value="initialData.driverName || t('fleet.vehicles.form.noLink')"
+              disabled
+            />
           </BaseFormField>
           <BaseFormField :label="t('fleet.vehicles.col.coupledVehiclePlate')">
-            <FormInput :model-value="initialData.coupledVehiclePlate || t('fleet.vehicles.form.noLink')" disabled />
+            <FormInput
+              :model-value="initialData.coupledVehiclePlate || t('fleet.vehicles.form.noLink')"
+              disabled
+            />
           </BaseFormField>
         </div>
         <div class="space-y-3 min-w-0">

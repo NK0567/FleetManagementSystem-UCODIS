@@ -41,5 +41,6 @@ export default {
   'maintenance.downtimes.action.end': "Terminer l'indisponibilité",
   'maintenance.downtimes.listView.open': 'En cours',
   'maintenance.downtimes.listView.closed': 'Terminées',
-  'maintenance.downtimes.listView.all': 'Toutes'
+  'maintenance.downtimes.listView.all': 'Toutes',
+  'maintenance.downtimes.noResultsCreate': 'Aucune indisponibilité. Créez-en une avec Nouveau.'
 }

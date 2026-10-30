@@ -30,5 +30,8 @@ export default {
   'planning.carrierInvoices.kpi.untariffedSub': 'À valider avec un motif',
   'planning.carrierInvoices.kpi.validated': 'Validées',
   'planning.carrierInvoices.kpi.refused': 'Refusées',
-  'planning.carrierInvoices.kpi.refusedSub': 'Leurs ordres peuvent être refacturés'
+  'planning.carrierInvoices.kpi.refusedSub': 'Leurs ordres peuvent être refacturés',
+  'planning.carrierInvoices.recordNew': 'Enregistrer une facture',
+  'planning.carrierInvoices.emptyCreate':
+    'Aucune facture transporteur. Enregistrez-en une avec Enregistrer une facture.'
 }

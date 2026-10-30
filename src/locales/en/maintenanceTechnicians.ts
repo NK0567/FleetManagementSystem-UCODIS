@@ -27,5 +27,6 @@ export default {
   'maintenance.technicians.form.competences': 'Skills',
   'maintenance.technicians.form.competencesHint': 'Skill codes, separated by commas.',
   'maintenance.technicians.form.active': 'Active',
-  'maintenance.technicians.form.competencesRequired': 'Tick at least one skill.'
+  'maintenance.technicians.form.competencesRequired': 'Tick at least one skill.',
+  'maintenance.technicians.noResultsCreate': 'No technician. Create one with New.'
 }

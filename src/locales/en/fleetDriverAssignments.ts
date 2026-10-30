@@ -33,5 +33,6 @@ export default {
   'fleet.driverAssignments.endHint': 'The driver and the vehicle become free again from this date.',
   'fleet.driverAssignments.listView.active': 'Running',
   'fleet.driverAssignments.listView.ended': 'Ended',
-  'fleet.driverAssignments.listView.all': 'All assignments'
+  'fleet.driverAssignments.listView.all': 'All assignments',
+  'fleet.driverAssignments.noResultsCreate': 'No assignment. Create one with New.'
 }

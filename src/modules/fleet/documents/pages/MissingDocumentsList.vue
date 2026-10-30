@@ -122,6 +122,12 @@ async function onCreated() {
 function openDocument(no: string) {
   void router.push({ path: '/fleet/documents', query: { no, cardMode: 'view' } })
 }
+
+/* These lines have no card: their actions sit in the details panel, opened with the selection. */
+function selectAndShow(item: MissingDocumentApi) {
+  store.selectItem(item)
+  showDetailsPanel.value = true
+}
 </script>
 
 <template>
@@ -197,7 +203,7 @@ function openDocument(no: string) {
         @update:width="setColumnWidth"
         @update:page="store.changePage"
         @update:limit="store.changeLimit"
-        @select-item="(item) => store.selectItem(item as MissingDocumentApi)"
+        @select-item="(item) => selectAndShow(item as MissingDocumentApi)"
         @row-dblclick="(item) => fill(item as MissingDocumentApi)"
       >
         <template #filter-panel>

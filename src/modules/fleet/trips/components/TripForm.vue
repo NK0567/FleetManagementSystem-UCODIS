@@ -58,7 +58,13 @@ const departureInput = computed({
   }
 })
 
-const expandedSections = ref({ plan: true, execution: true, stops: true, audit: false })
+/* A planned trip has nothing executed yet: its execution stays folded unless it awaits an authorization. */
+const expandedSections = ref({
+  plan: true,
+  execution: props.initialData.status !== 'planned' || !!props.initialData.authorizationRequired,
+  stops: true,
+  audit: false
+})
 const { hasValidationError } = useFormValidationUi({
   validationErrors: () => props.validationErrors,
   expandedSections,

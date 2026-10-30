@@ -26,25 +26,21 @@ export default {
   'fleet.fleetStatus.archive': "Archiver l'état du jour",
   'fleet.fleetStatus.archiveError': "L'état du jour n'a pas pu être archivé.",
   'fleet.fleetStatus.archivedAt': 'Archivé le {date} par {user}.',
-  'fleet.fleetStatus.readOnlyDay':
-    "Jour archivé : l'état est affiché tel qu'il était, il ne se modifie plus.",
+  'fleet.fleetStatus.readOnlyDay': 'Jour archivé : lecture seule.',
   'fleet.fleetStatus.saveNote': "Enregistrer l'observation",
   'fleet.fleetStatus.noteError': "L'observation n'a pas pu être enregistrée.",
   'fleet.fleetStatus.col.position': 'Position',
   'fleet.fleetStatus.send.button': 'Envoyer par e-mail',
   'fleet.fleetStatus.send.title': "Envoyer l'état de flotte du {day}",
-  'fleet.fleetStatus.send.hint':
-    "L'état complet du jour affiché part aux destinataires, quels que soient les filtres de la liste. L'état du jour est archivé tel qu'il est envoyé.",
+  'fleet.fleetStatus.send.hint': "Tout l'état du jour est envoyé, sans les filtres, puis archivé.",
   'fleet.fleetStatus.send.recipients': 'Destinataires',
   'fleet.fleetStatus.send.placeholder': 'direction@ucodis.mg, client@exemple.com',
   'fleet.fleetStatus.send.invalid': "L'adresse « {email} » n'est pas valide.",
-  'fleet.fleetStatus.send.simulated':
-    "Maquette : aucun e-mail ne part réellement, l'envoi est enregistré et listé ci-dessous.",
+  'fleet.fleetStatus.send.simulated': "Maquette : l'envoi est enregistré, aucun e-mail ne part.",
   'fleet.fleetStatus.send.confirm': 'Envoyer',
   'fleet.fleetStatus.send.error': "L'état de flotte n'a pas pu être envoyé.",
   'fleet.fleetStatus.send.done': 'État de flotte envoyé à {recipients}.',
   'fleet.fleetStatus.send.last': 'Dernier envoi le {date} (état du {day}) à {recipients}.',
   'fleet.fleetStatus.send.history': 'Derniers envois',
-  'fleet.fleetStatus.send.line':
-    '{date} · état du {day} · {count} ligne(s) · {recipients} · par {user}'
+  'fleet.fleetStatus.send.line': '{date} · état du {day} · lignes : {count} · {recipients} · par {user}'
 }

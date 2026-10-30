@@ -45,7 +45,7 @@ export default {
   'fleet.infractions.listView.closed': 'Clôturées',
   'fleet.infractions.listView.all': 'Toutes',
   'fleet.infractions.action.take': 'Prendre en charge',
-  'fleet.infractions.action.close': 'Clôturer',
+  'fleet.infractions.action.close': "Clôturer l'infraction",
   'fleet.infractions.event.recorded': 'Infraction enregistrée',
   'fleet.infractions.event.taken': 'Prise en charge',
   'fleet.infractions.event.closed': 'Clôture',
@@ -55,5 +55,6 @@ export default {
   'fleet.infractions.form.outcomeComment': 'Explication',
   'fleet.infractions.form.noOutcome': 'Pas encore de suite donnée.',
   'fleet.infractions.form.training': 'Formation',
-  'fleet.infractions.form.history': 'Historique'
+  'fleet.infractions.form.history': 'Historique',
+  'fleet.infractions.noResultsCreate': 'Aucune infraction. Créez-en une avec Nouveau.'
 }

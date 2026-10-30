@@ -148,12 +148,12 @@ onMounted(() => void store.fetchInvoices())
       <button
         v-if="canExecute"
         type="button"
-        :class="buttonClass"
+        class="cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded bg-primary text-primary-foreground hover:opacity-90 transition disabled:opacity-50"
         :disabled="store.saving"
         @click="openRecord"
       >
-        <Plus class="w-5 h-5 text-primary" />
-        {{ t('planning.carrierInvoices.record') }}
+        <Plus class="w-4 h-4" />
+        {{ t('planning.carrierInvoices.recordNew') }}
       </button>
     </header>
 
@@ -169,13 +169,22 @@ onMounted(() => void store.fetchInvoices())
           v-for="kpi in kpis"
           :key="kpi.key"
           class="bg-card border border-border rounded p-4 flex items-start gap-3"
+          :class="kpi.value ? '' : 'opacity-60'"
         >
-          <span class="p-2 rounded bg-primary/10 text-primary shrink-0">
+          <span
+            class="p-2 rounded shrink-0"
+            :class="kpi.value ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'"
+          >
             <component :is="kpi.icon" class="w-5 h-5" />
           </span>
           <div class="min-w-0">
             <p class="text-xs text-muted-foreground">{{ kpi.label }}</p>
-            <p class="text-2xl font-semibold text-card-foreground tabular-nums">{{ kpi.value }}</p>
+            <p
+              class="text-2xl font-semibold tabular-nums"
+              :class="kpi.value ? 'text-card-foreground' : 'text-muted-foreground'"
+            >
+              {{ kpi.value }}
+            </p>
             <p class="text-xs text-muted-foreground truncate">{{ kpi.sub }}</p>
           </div>
         </div>
@@ -217,7 +226,11 @@ onMounted(() => void store.fetchInvoices())
           <tbody>
             <tr v-if="!store.invoices.length">
               <td :colspan="canExecute ? 8 : 7" class="px-3 py-4 text-muted-foreground">
-                {{ t('planning.carrierInvoices.empty') }}
+                {{
+                  canExecute
+                    ? t('planning.carrierInvoices.emptyCreate')
+                    : t('planning.carrierInvoices.empty')
+                }}
               </td>
             </tr>
             <tr
@@ -290,11 +303,11 @@ onMounted(() => void store.fetchInvoices())
                 <span v-if="invoice.status === 'to_check'" class="flex justify-end gap-2">
                   <button
                     type="button"
-                    :class="buttonClass"
+                    class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded bg-primary text-primary-foreground hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
                     :disabled="store.saving"
                     @click="validating = invoice"
                   >
-                    <CircleCheck class="w-5 h-5 text-primary" />
+                    <CircleCheck class="w-4 h-4" />
                     {{ t('planning.carrierInvoices.validate') }}
                   </button>
                   <button

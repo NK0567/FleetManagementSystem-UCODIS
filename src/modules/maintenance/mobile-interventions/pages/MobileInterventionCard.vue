@@ -125,6 +125,8 @@ function confirm() {
   })
 }
 
+const primaryClass =
+  'cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-primary text-primary-foreground rounded hover:opacity-90 transition disabled:opacity-60 disabled:cursor-not-allowed'
 const buttonClass =
   'cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed'
 </script>
@@ -168,11 +170,11 @@ const buttonClass =
       <button
         v-if="!item.arrivedAt"
         type="button"
-        :class="buttonClass"
+        :class="primaryClass"
         :disabled="acting"
         @click="openDialog('arrive')"
       >
-        <MapPinCheck class="w-5 h-5 text-primary" />
+        <MapPinCheck class="w-5 h-5" />
         {{ t('maintenance.mobileInterventions.action.arrive') }}
       </button>
       <button
@@ -187,11 +189,14 @@ const buttonClass =
       </button>
       <button
         type="button"
-        :class="buttonClass"
+        :class="item.arrivedAt ? primaryClass : buttonClass"
         :disabled="acting || !item.arrivedAt"
+        :title="
+          item.arrivedAt ? undefined : t('maintenance.mobileInterventions.hint.closeNeedsArrival')
+        "
         @click="openDialog('close')"
       >
-        <Flag class="w-5 h-5 text-primary" />
+        <Flag class="w-5 h-5" :class="item.arrivedAt ? '' : 'text-primary'" />
         {{ t('maintenance.mobileInterventions.action.close') }}
       </button>
     </template>

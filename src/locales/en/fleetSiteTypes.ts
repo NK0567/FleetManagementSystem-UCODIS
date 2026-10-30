@@ -38,5 +38,6 @@ export default {
   'fleet.siteTypes.form.restricted': 'Restricted zone',
   'fleet.siteTypes.form.restrictedHint': 'A vehicle entering a site of this type is reported.',
   'fleet.siteTypes.form.active': 'Active',
-  'fleet.siteTypes.form.siteCount': 'Sites of this type'
+  'fleet.siteTypes.form.siteCount': 'Sites of this type',
+  'fleet.siteTypes.noResultsCreate': 'No site type. Create one with New.'
 }

@@ -44,12 +44,12 @@ export default {
   'fleet.routeTemplates.stops.remove': "Retirer l'arrêt",
   'fleet.routeTemplates.stops.add': 'Ajouter un arrêt',
   'fleet.routeTemplates.stops.duration': 'Durée prévue : {duration}',
-  'fleet.routeTemplates.stops.invalid':
-    'Les arrêts sont incohérents : au moins deux arrêts, un départ en premier, un site par arrêt, jamais deux fois le même site à la suite.',
+  'fleet.routeTemplates.stops.invalid': 'Au moins deux arrêts, le départ en premier, un site par arrêt, jamais deux fois le même site à la suite.',
   'fleet.routeTemplates.form.fuelReferenceL100': 'Consommation de référence (L/100 km)',
   'fleet.routeTemplates.form.fuelReferenceL100Hint':
     'Prime sur celle du type de véhicule pour les trajets de cet itinéraire.',
-  'fleet.routeTemplates.form.distanceComputedHint': "Recalculée à partir des étapes à chaque enregistrement. Simulation : distance à vol d'oiseau entre les sites, majorée d'un coefficient routier de 1,25.",
+  'fleet.routeTemplates.form.distanceComputedHint': "Recalculée à chaque enregistrement (simulation : vol d'oiseau × 1,25).",
   'fleet.routeTemplates.form.referenceDuration': 'Temps de référence',
-  'fleet.routeTemplates.form.referenceDurationHint': 'La distance parcourue à la vitesse moyenne des réglages de la planification, plus les arrêts. Il sert de base au plan de trajet des ordres de transport.'
+  'fleet.routeTemplates.form.referenceDurationHint': 'Distance à la vitesse moyenne, plus les arrêts. Base du plan de trajet.',
+  'fleet.routeTemplates.noResultsCreate': 'Aucun itinéraire type. Créez-en un avec Nouveau.'
 }

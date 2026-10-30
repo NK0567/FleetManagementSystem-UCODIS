@@ -26,5 +26,6 @@ export default {
   'maintenance.competences.form.active': 'Active',
   'maintenance.competences.form.technicianCount': 'Techniciens qui la détiennent',
   'maintenance.competences.form.hourlyRate': 'Tarif horaire de la spécialité',
-  'maintenance.competences.col.hourlyRate': 'Tarif horaire'
+  'maintenance.competences.col.hourlyRate': 'Tarif horaire',
+  'maintenance.competences.noResultsCreate': 'Aucune compétence. Créez-en une avec Nouveau.'
 }

@@ -109,6 +109,20 @@ const filterDefs: FilterFieldDef[] = [
     valueType: 'string',
     kind: 'option',
     optionsKey: 'infractionSeverity'
+  },
+  {
+    field: 'source',
+    labelKey: 'fleet.infractions.col.source',
+    valueType: 'string',
+    kind: 'option',
+    optionsKey: 'infractionSource'
+  },
+  {
+    field: 'outcome',
+    labelKey: 'fleet.infractions.col.outcome',
+    valueType: 'string',
+    kind: 'option',
+    optionsKey: 'infractionOutcome'
   }
 ]
 
@@ -245,7 +259,9 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('fleet.infractions.noResults')"
+        :no-results-message="
+          canInsert ? t('fleet.infractions.noResultsCreate') : t('fleet.infractions.noResults')
+        "
         :no-search-results-message="
           t('fleet.infractions.noSearchResults', { query: store.searchQuery })
         "

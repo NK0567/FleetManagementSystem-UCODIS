@@ -41,5 +41,6 @@ export default {
   'maintenance.downtimes.action.end': 'End the downtime',
   'maintenance.downtimes.listView.open': 'Open',
   'maintenance.downtimes.listView.closed': 'Ended',
-  'maintenance.downtimes.listView.all': 'All'
+  'maintenance.downtimes.listView.all': 'All',
+  'maintenance.downtimes.noResultsCreate': 'No downtime. Create one with New.'
 }

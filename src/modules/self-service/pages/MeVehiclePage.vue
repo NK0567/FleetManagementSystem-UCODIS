@@ -41,6 +41,8 @@ const emptyRefill = (): MyRefillInput => ({
 const refill = ref<MyRefillInput>(emptyRefill())
 const receipt = ref<FileMeta | null>(null)
 const breakdown = ref({ severity: 'major', symptom: '' })
+/** One declaration at a time: the refill (the usual one) or the breakdown. */
+const tab = ref<'refill' | 'breakdown'>('refill')
 
 const canDeclareRefill = computed(
   () =>
@@ -145,12 +147,40 @@ onMounted(load)
     />
     <LoadingSpinner v-if="loading && !vehicle" :text="t('common.loading')" />
 
+    <section
+      v-if="!loading && !vehicle && !error"
+      class="bg-card border border-border rounded p-6 flex flex-col items-center gap-2 text-center"
+    >
+      <Fuel class="w-8 h-8 text-muted-foreground" />
+      <p class="text-sm text-muted-foreground">{{ t('selfService.vehicle.subtitleNone') }}</p>
+    </section>
+
     <template v-if="vehicle">
-      <section class="bg-card border border-border rounded p-4 space-y-3">
-        <h2 class="flex items-center gap-2 font-semibold text-card-foreground">
-          <Fuel class="w-5 h-5 text-primary" /> {{ t('selfService.vehicle.refillTitle') }}
-        </h2>
-        <div class="grid gap-3 sm:grid-cols-2">
+      <div class="grid grid-cols-2 gap-2" role="tablist">
+        <button
+          v-for="item in [
+            { key: 'refill', icon: Fuel, label: t('selfService.vehicle.refillTitle') },
+            { key: 'breakdown', icon: Wrench, label: t('selfService.vehicle.breakdownTitle') }
+          ] as const"
+          :key="item.key"
+          type="button"
+          role="tab"
+          class="h-11 inline-flex items-center justify-center gap-2 rounded border text-sm font-medium transition"
+          :class="
+            tab === item.key
+              ? 'border-primary bg-primary/10 text-primary'
+              : 'border-border text-muted-foreground hover:bg-accent'
+          "
+          :aria-selected="tab === item.key"
+          @click="tab = item.key"
+        >
+          <component :is="item.icon" class="w-5 h-5" />
+          {{ item.label }}
+        </button>
+      </div>
+
+      <section v-show="tab === 'refill'" class="bg-card border border-border rounded p-4 space-y-3">
+        <div v-if="canExecute" class="grid gap-3 sm:grid-cols-2">
           <BaseFormField :label="t('fleet.fuelRefills.form.liters')" required>
             <FormInput v-model="refill.liters" type="number" :min="0.1" :step="0.1" />
           </BaseFormField>
@@ -178,7 +208,10 @@ onMounted(load)
             </p>
           </BaseFormField>
         </div>
-        <p v-if="refill.liters && refill.unitPrice" class="text-sm text-muted-foreground">
+        <p
+          v-if="canExecute && refill.liters && refill.unitPrice"
+          class="text-sm text-muted-foreground"
+        >
           {{
             t('selfService.vehicle.amount', {
               amount: formatNumber(Math.round(refill.liters * refill.unitPrice))
@@ -188,19 +221,26 @@ onMounted(load)
         <button
           v-if="canExecute"
           type="button"
-          class="w-full sm:w-auto px-4 py-2 bg-primary text-primary-foreground text-sm rounded hover:opacity-90 transition font-medium disabled:opacity-60"
+          class="w-full sm:w-auto h-11 sm:h-auto px-4 py-2 bg-primary text-primary-foreground text-sm rounded hover:opacity-90 transition font-medium disabled:opacity-60"
           :disabled="!canDeclareRefill"
+          :title="canDeclareRefill ? undefined : t('selfService.vehicle.refillIncomplete')"
           @click="declareRefill"
         >
           {{ t('selfService.vehicle.declareRefill') }}
         </button>
-        <ul v-if="vehicle.refills.length" class="text-sm divide-y divide-border">
+        <p v-if="!vehicle.refills.length" class="text-sm text-muted-foreground">
+          {{ t('selfService.vehicle.noRefill') }}
+        </p>
+        <ul v-else class="text-sm divide-y divide-border">
           <li
             v-for="row in vehicle.refills"
             :key="row.no"
             class="py-1.5 flex justify-between gap-2"
           >
-            <span>{{ formatDateTime(row.refueledAt) }} · {{ row.stationLabel || '-' }}</span>
+            <span
+              >{{ formatDateTime(row.refueledAt) }} ·
+              {{ row.stationLabel || t('selfService.vehicle.noStation') }}</span
+            >
             <span class="text-muted-foreground">
               {{ formatNumber(row.liters, 1) }} L ·
               {{ optionsStore.getOptionLabel('refillStatus', row.status) }}
@@ -209,39 +249,51 @@ onMounted(load)
         </ul>
       </section>
 
-      <section class="bg-card border border-border rounded p-4 space-y-3">
-        <h2 class="flex items-center gap-2 font-semibold text-card-foreground">
-          <Wrench class="w-5 h-5 text-primary" /> {{ t('selfService.vehicle.breakdownTitle') }}
-        </h2>
-        <BaseFormField :label="t('maintenance.workOrders.col.severity')" required>
-          <OptionsSelect
-            :model-value="breakdown.severity"
-            options-key="workOrderSeverity"
-            @update:model-value="breakdown.severity = String($event)"
-          />
-        </BaseFormField>
-        <BaseFormField :label="t('selfService.vehicle.symptom')" required>
-          <FormTextarea v-model="breakdown.symptom" :rows="3" :maxlength="500" />
-          <p class="text-xs text-muted-foreground mt-1">
-            {{
-              t('common.minLength', {
-                count: breakdown.symptom.trim().length,
-                min: MIN_SYMPTOM
-              })
-            }}
-          </p>
-        </BaseFormField>
-        <p class="text-xs text-muted-foreground">{{ t('selfService.vehicle.breakdownHint') }}</p>
-        <button
-          v-if="canExecute"
-          type="button"
-          class="w-full sm:w-auto px-4 py-2 bg-primary text-primary-foreground text-sm rounded hover:opacity-90 transition font-medium disabled:opacity-60"
-          :disabled="!canReport"
-          @click="reportBreakdown"
-        >
-          {{ t('selfService.vehicle.reportBreakdown') }}
-        </button>
-        <ul v-if="breakdowns.length" class="text-sm divide-y divide-border">
+      <section
+        v-show="tab === 'breakdown'"
+        class="bg-card border border-border rounded p-4 space-y-3"
+      >
+        <template v-if="canExecute">
+          <BaseFormField :label="t('maintenance.workOrders.col.severity')" required>
+            <OptionsSelect
+              :model-value="breakdown.severity"
+              options-key="workOrderSeverity"
+              @update:model-value="breakdown.severity = String($event)"
+            />
+          </BaseFormField>
+          <BaseFormField :label="t('selfService.vehicle.symptom')" required>
+            <FormTextarea v-model="breakdown.symptom" :rows="3" :maxlength="500" />
+            <p class="text-xs text-muted-foreground mt-1">
+              {{
+                t('common.minLength', {
+                  count: breakdown.symptom.trim().length,
+                  min: MIN_SYMPTOM
+                })
+              }}
+            </p>
+          </BaseFormField>
+          <p class="text-xs text-muted-foreground">{{ t('selfService.vehicle.breakdownHint') }}</p>
+          <button
+            type="button"
+            class="w-full sm:w-auto h-11 sm:h-auto px-4 py-2 bg-primary text-primary-foreground text-sm rounded hover:opacity-90 transition font-medium disabled:opacity-60"
+            :disabled="!canReport"
+            :title="
+              canReport
+                ? undefined
+                : t('common.minLength', {
+                    count: breakdown.symptom.trim().length,
+                    min: MIN_SYMPTOM
+                  })
+            "
+            @click="reportBreakdown"
+          >
+            {{ t('selfService.vehicle.reportBreakdown') }}
+          </button>
+        </template>
+        <p v-if="!breakdowns.length" class="text-sm text-muted-foreground">
+          {{ t('selfService.vehicle.noBreakdown') }}
+        </p>
+        <ul v-else class="text-sm divide-y divide-border">
           <li v-for="row in breakdowns" :key="row.no" class="py-1.5 flex justify-between gap-2">
             <span>{{ formatDateTime(row.declaredAt) }} · {{ row.symptom }}</span>
             <span class="text-muted-foreground whitespace-nowrap">

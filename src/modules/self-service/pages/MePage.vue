@@ -8,6 +8,7 @@ import {
   ClipboardCheck,
   Clock,
   FileText,
+  Fuel,
   ListChecks,
   MapPin,
   Phone,
@@ -33,6 +34,7 @@ const initials = computed(() =>
 const shortcuts = computed(() => [
   { to: '/me/tour', icon: Route, label: t('selfService.tour.title') },
   { to: '/me/checklist', icon: ClipboardCheck, label: t('selfService.checklist.title') },
+  { to: '/me/vehicle', icon: Fuel, label: t('selfService.vehicle.title') },
   { to: '/me/absences', icon: CalendarDays, label: t('selfService.profile.absences') }
 ])
 
@@ -120,7 +122,7 @@ onMounted(() => void store.fetchProfile())
       </section>
 
       <nav
-        class="grid grid-cols-1 sm:grid-cols-3 gap-3"
+        class="grid grid-cols-1 sm:grid-cols-2 gap-3"
         :aria-label="t('selfService.profile.shortcuts')"
       >
         <RouterLink

@@ -199,7 +199,11 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('planning.reasons.noResults')"
+        :no-results-message="
+          canInsert
+            ? `${t('planning.reasons.noResults')} ${t('common.createWithNew')}`
+            : t('planning.reasons.noResults')
+        "
         :no-search-results-message="
           t('planning.reasons.noSearchResults', { query: store.searchQuery })
         "

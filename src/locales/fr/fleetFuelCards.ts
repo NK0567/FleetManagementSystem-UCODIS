@@ -53,5 +53,6 @@ export default {
   'fleet.fuelCards.form.monthLiters': 'Litres consommés',
   'fleet.fuelCards.form.blockReason': 'Motif du blocage',
   'fleet.fuelCards.form.unblockComment': 'Commentaire (facultatif)',
-  'fleet.fuelCards.form.history': 'Historique'
+  'fleet.fuelCards.form.history': 'Historique',
+  'fleet.fuelCards.noResultsCreate': 'Aucune carte carburant. Créez-en une avec Nouveau.'
 }

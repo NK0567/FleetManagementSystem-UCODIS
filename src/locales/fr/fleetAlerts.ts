@@ -19,7 +19,7 @@ export default {
   'fleet.alerts.form.comment': 'Ce qui a été fait',
   'fleet.alerts.action.open': 'Ouvrir la fiche',
   'fleet.alerts.action.acknowledge': 'Prendre en charge',
-  'fleet.alerts.action.handle': 'Marquer traitée',
+  'fleet.alerts.action.handle': 'Marquer comme traitée',
   'fleet.alerts.escalatedTo': 'Escaladée vers : {profile}',
   'fleet.alerts.acknowledgedBy': 'Prise en charge par {user} le {date}',
   'fleet.alerts.handledBy': 'Traitée par {user} le {date}',
@@ -35,5 +35,5 @@ export default {
   'fleet.alerts.col.notifications': 'Notifications envoyées',
   'fleet.alerts.notification.email': 'E-mail à {to}',
   'fleet.alerts.notification.sms': 'SMS au {to}',
-  'fleet.alerts.averageHandling': 'Délai moyen de traitement : {hours} h sur {count} alerte(s) traitée(s)'
+  'fleet.alerts.averageHandling': 'Délai moyen de traitement : {hours} h · alertes traitées : {count}'
 }

@@ -58,12 +58,11 @@ export default {
   'fleet.trips.stops.planned': 'Prévu {time}',
   'fleet.trips.stops.passed': 'passé {time}',
   'fleet.trips.action.start': 'Démarrer le trajet',
-  'fleet.trips.action.passStop': 'Passage à {site}',
-  'fleet.trips.action.complete': 'Arrivée',
-  'fleet.trips.action.close': 'Clôturer',
+  'fleet.trips.action.passStop': 'Valider le passage à {site}',
+  'fleet.trips.action.complete': "Déclarer l'arrivée",
+  'fleet.trips.action.close': 'Clôturer le trajet',
   'fleet.trips.action.cancel': 'Annuler le trajet',
-  'fleet.trips.dialog.startHint':
-    'Le véhicule, la remorque et le conducteur sont vérifiés une dernière fois avant le départ.',
+  'fleet.trips.dialog.startHint': 'Le véhicule, la remorque et le conducteur sont vérifiés avant le départ.',
   'fleet.trips.dialog.startKm': 'Kilométrage au départ (dernier relevé par défaut)',
   'fleet.trips.dialog.endKm': "Kilométrage à l'arrivée",
   'fleet.trips.dialog.startWas': 'Au départ : {km} km.',
@@ -71,7 +70,7 @@ export default {
   'fleet.trips.needsAuthorization': "Le départ doit d'abord être accordé.",
   'fleet.trips.form.authorization': 'Autorisation de départ',
   'fleet.trips.form.noAuthorization': "Aucune demande pour l'instant.",
-  'fleet.trips.deviationsToQualify': 'Écarts encore à qualifier sur ce trajet : {count}.',
+  'fleet.trips.deviationsToQualify': "Qualifiez d'abord les écarts de ce trajet ({count}).",
   'fleet.trips.drivingTime.title': 'Temps de conduite',
   'fleet.trips.drivingTime.breachCount': 'Aucun dépassement | 1 dépassement | {n} dépassements',
   'fleet.trips.drivingTime.duration': '{h} h {m}',
@@ -89,6 +88,7 @@ export default {
   'fleet.trips.drivingTime.breach.weekly': 'Conduite de {driven} sur sept jours, au-delà de {limit} par semaine.',
   'fleet.trips.drivingTime.breach.night': 'Conduite de nuit interdite le {day} : {driven}.',
   'fleet.trips.col.missedStopCount': 'Sites manqués',
-  'fleet.trips.filter.hasMissedStops': 'Site(s) manqué(s)',
-  'fleet.trips.missedStopsSummary': '{stops} site(s) manqué(s) sur {trips} trajet(s)'
+  'fleet.trips.filter.hasMissedStops': 'Sites manqués',
+  'fleet.trips.missedStopsSummary': 'Sites manqués : {stops} · trajets concernés : {trips}',
+  'fleet.trips.noResultsCreate': 'Aucun trajet. Créez-en un avec Nouveau.'
 }

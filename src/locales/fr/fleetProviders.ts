@@ -57,8 +57,7 @@ export default {
   'fleet.providers.contracts.issue.endBeforeStart': 'La fin précède le début.',
   'fleet.providers.contracts.issue.negativeAmount': 'Le montant ne peut pas être négatif.',
   'fleet.providers.carrierVehicles.title': 'Véhicules du transporteur',
-  'fleet.providers.carrierVehicles.hint':
-    'Les moyens de transport rattachés à ce transporteur : à la planification, choisir ce transporteur limite la liste des véhicules à ceux-ci.',
+  'fleet.providers.carrierVehicles.hint': 'Véhicules de ce transporteur, seuls proposés quand il est choisi à la planification.',
   'fleet.providers.carrierVehicles.count': 'Aucun véhicule | Un véhicule | {n} véhicules',
   'fleet.providers.carrierVehicles.empty': 'Aucun véhicule rattaché.',
   'fleet.providers.carrierVehicles.plate': 'Immatriculation',
@@ -71,7 +70,7 @@ export default {
   'fleet.providers.form.fromManagementSystem': "Repris du système de gestion de l'entreprise (référence {id}).",
   'fleet.providers.sync.action': 'Reprendre du système de gestion',
   'fleet.providers.sync.hint': "Reprend les tiers du système de gestion de l'entreprise (simulé dans la maquette).",
-  'fleet.providers.sync.done': 'Reprise terminée : {created} créé(s), {updated} mis à jour, {unchanged} inchangé(s), {skipped} écarté(s).',
+  'fleet.providers.sync.done': 'Reprise terminée : créés {created} · mis à jour {updated} · inchangés {unchanged} · écartés {skipped}.',
   'fleet.providers.sync.error': "La reprise n'a pas pu être faite.",
   'fleet.providerTypes.title': 'Types de prestataires',
   'fleet.providerTypes.card': 'Type de prestataire',
@@ -96,11 +95,13 @@ export default {
   'fleet.providerTypes.form.name': 'Libellé',
   'fleet.providerTypes.form.systemRole': "Rôle dans l'application",
   'fleet.providerTypes.form.noRole': 'Aucun : type propre à l’entreprise',
-  'fleet.providerTypes.form.systemRoleHint': "Un type qui porte un rôle est celui que l'application cherche (ateliers, transporteurs…) : son rôle ne change pas et il ne se supprime pas.",
+  'fleet.providerTypes.form.systemRoleHint': "Type utilisé par l'application : son rôle ne change pas et il ne se supprime pas.",
   'fleet.providerTypes.form.active': 'Actif',
   'fleet.providerTypes.form.providerCount': 'Prestataires de ce type',
   'fleet.providers.import.action': 'Importer des prestataires',
   'fleet.providers.import.title': 'Importer des prestataires',
-  'fleet.providers.import.hint': 'Chaque ligne suit les règles de la fiche : un prestataire déjà connu sous le même nom et le même type, ou présent deux fois dans le fichier, est refusé et signalé dans le rapport. Le type se donne par son code ou son nom.',
-  'fleet.providers.import.created': 'Aucun prestataire créé. | Un prestataire créé. | {n} prestataires créés.'
+  'fleet.providers.import.hint': 'Type par son code ou son nom. Un prestataire déjà connu ou en double est refusé.',
+  'fleet.providers.import.created': 'Aucun prestataire créé. | Un prestataire créé. | {n} prestataires créés.',
+  'fleet.providerTypes.noResultsCreate': 'Aucun type de prestataire. Créez-en un avec Nouveau.',
+  'fleet.providers.noResultsCreate': 'Aucun prestataire. Créez-en un avec Nouveau.'
 }

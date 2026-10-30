@@ -34,5 +34,6 @@ export default {
     'Le conducteur et le véhicule redeviennent libres à partir de cette date.',
   'fleet.driverAssignments.listView.active': 'En cours',
   'fleet.driverAssignments.listView.ended': 'Terminées',
-  'fleet.driverAssignments.listView.all': 'Toutes les affectations'
+  'fleet.driverAssignments.listView.all': 'Toutes les affectations',
+  'fleet.driverAssignments.noResultsCreate': 'Aucune affectation. Créez-en une avec Nouveau.'
 }

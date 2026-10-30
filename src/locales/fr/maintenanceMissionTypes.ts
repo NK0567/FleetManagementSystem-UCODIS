@@ -25,5 +25,6 @@ export default {
   'maintenance.missionTypes.form.isControl': 'Mission de contrôle',
   'maintenance.missionTypes.form.isControlHint':
     'Une mission de contrôle compte les contrôles faits et les cas positifs ; elle ne compte pas dans le taux de résolution.',
-  'maintenance.missionTypes.form.active': 'Actif'
+  'maintenance.missionTypes.form.active': 'Actif',
+  'maintenance.missionTypes.noResultsCreate': 'Aucun type de mission. Créez-en un avec Nouveau.'
 }

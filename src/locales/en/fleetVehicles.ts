@@ -113,7 +113,7 @@ export default {
   'fleet.vehicles.equipment.state': 'State',
   'fleet.vehicles.equipment.dueDate': 'Due date',
   'fleet.vehicles.equipment.installedOn': 'Installed on',
-  'fleet.vehicles.action.odometer': 'Odometer reading',
+  'fleet.vehicles.action.odometer': 'Record the odometer',
   'fleet.vehicles.action.plate': 'Change the plate',
   'fleet.vehicles.action.outOfService': 'Put out of service',
   'fleet.vehicles.action.returnToService': 'Return to service',
@@ -124,10 +124,8 @@ export default {
   'fleet.vehicles.dialog.reason': 'Reason',
   'fleet.vehicles.dialog.km': 'Mileage read',
   'fleet.vehicles.dialog.lastReading': 'Last reading: {km} km. The mileage cannot go down.',
-  'fleet.vehicles.dialog.outOfServiceHint':
-    'The vehicle will no longer be offered for a coupling, an assignment or a trip until it returns to service.',
-  'fleet.vehicles.dialog.removalHint':
-    '{plate} will leave the fleet. Its record will stay in the Left the fleet view but can no longer be changed.',
+  'fleet.vehicles.dialog.outOfServiceHint': 'The vehicle will not be offered again until it is back in service.',
+  'fleet.vehicles.dialog.removalHint': '{plate} will leave the fleet and its record will no longer be editable.',
   'fleet.vehicles.dialog.removalDate': 'Removal date',
   'fleet.vehicles.dialog.finalKm': 'Mileage at removal',
   'fleet.vehicles.dialog.comment': 'Comment',
@@ -148,8 +146,7 @@ export default {
   'fleet.vehicles.families.any': 'Any category',
   'fleet.vehicles.families.loadError': 'The product categories could not be read.',
   'fleet.vehicles.form.productFamilies': 'Product categories carried',
-  'fleet.vehicles.form.productFamiliesHint':
-    'None ticked: the vehicle carries any product. Choosing the vehicle then filters the orders offered.',
+  'fleet.vehicles.form.productFamiliesHint': 'None ticked: any kind of product.',
   'fleet.vehicles.form.noReading': 'No reading.',
   'fleet.vehicles.col.statusCauseCode': 'Coded cause',
   'fleet.vehicles.col.administrativeStatus': 'Administrative status',
@@ -195,13 +192,14 @@ export default {
   'fleet.vehicles.ownership.noKm': 'No kilometre run over the period: no cost per kilometre.',
   'fleet.vehicles.ownership.perKm': '{km} km run, that is {cost} per kilometre.',
   'fleet.vehicles.ownership.residualValue': 'Residual value recorded: {value} (not deducted from the total).',
-  'fleet.vehicles.ownership.hint': 'The costs come with no new entry from the work orders, refills, tyres and insurance policies.',
+  'fleet.vehicles.ownership.hint': 'Taken from work orders, refills, tyres and insurance policies.',
   'fleet.vehicles.import.action': 'Import',
   'fleet.vehicles.import.title': 'Import vehicles',
-  'fleet.vehicles.import.hint': 'Each line follows the rules of the record: a plate or VIN already known, or present twice in the file, is refused and reported. The type and the site are given by code or name; the compartments of a tanker are written 8000+8000+6000.',
+  'fleet.vehicles.import.hint': 'Type and site by code or name; compartments written 8000+8000+6000. A vehicle already known or duplicated is refused.',
   'fleet.vehicles.import.created': 'No vehicle created. | One vehicle created. | {n} vehicles created.',
   'fleet.vehicles.form.noLink': 'None',
   'fleet.vehicles.col.currentSiteNo': 'Current site',
   'fleet.vehicles.filter.driverAssignment': 'Assignment',
-  'fleet.vehicles.filter.couplingState': 'Coupling'
+  'fleet.vehicles.filter.couplingState': 'Coupling',
+  'fleet.vehicles.noResultsCreate': 'No vehicle. Create one with New.'
 }

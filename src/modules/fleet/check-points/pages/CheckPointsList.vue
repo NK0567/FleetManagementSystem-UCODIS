@@ -66,6 +66,18 @@ const filterDefs: FilterFieldDef[] = [
     valueType: 'string',
     kind: 'option',
     optionsKey: 'checkPointScope'
+  },
+  {
+    field: 'blocking',
+    labelKey: 'fleet.checkPoints.col.blocking',
+    valueType: 'boolean',
+    kind: 'boolean'
+  },
+  {
+    field: 'active',
+    labelKey: 'fleet.checkPoints.col.active',
+    valueType: 'boolean',
+    kind: 'boolean'
   }
 ]
 
@@ -212,7 +224,9 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('fleet.checkPoints.noResults')"
+        :no-results-message="
+          canInsert ? t('fleet.checkPoints.noResultsCreate') : t('fleet.checkPoints.noResults')
+        "
         :no-search-results-message="
           t('fleet.checkPoints.noSearchResults', { query: store.searchQuery })
         "

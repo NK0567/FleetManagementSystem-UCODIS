@@ -10,14 +10,9 @@ import type { BillRow } from '../types/customerBilling.types'
 type BillState = 'ready' | 'blocked' | 'invoiced'
 type BillFilter = 'all' | BillState
 
-const FILTERS: readonly BillFilter[] = ['all', 'ready', 'blocked', 'invoiced']
-
 const { t } = useI18n()
 const store = useCustomerBillingStore()
 const { canExecute } = usePermissions('CUSTOMERBILLING')
-
-const buttonClass =
-  'cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed'
 
 const filter = ref<BillFilter>('all')
 const target = ref<BillRow | null>(null)
@@ -67,8 +62,6 @@ const kpis = computed(() => {
 
 const visibleRows = computed(() => (filter.value === 'all' ? store.rows : rowsOf(filter.value)))
 
-const countOf = (item: BillFilter) => (item === 'all' ? store.rows.length : rowsOf(item).length)
-
 function pill(row: BillRow): { label: string; tone: 'success' | 'info' | 'warning' | 'neutral' } {
   const state = stateOf(row)
   if (state === 'invoiced') return { label: t('planning.billing.state.invoiced'), tone: 'success' }
@@ -95,14 +88,18 @@ async function confirmInvoice() {
   if (await store.invoice(target.value, reference.value.trim())) target.value = null
 }
 
-onMounted(() => void store.fetchRows())
+/* The billing manager comes to invoice: the list opens on the deliveries ready to invoice when
+ * there are some, on all of them otherwise. The cards above switch the view. */
+onMounted(async () => {
+  await store.fetchRows()
+  filter.value = rowsOf('ready').length ? 'ready' : 'all'
+})
 </script>
 
 <template>
   <div class="px-2 py-4 space-y-4">
     <header>
       <h1 class="text-xl font-semibold text-card-foreground">{{ t('planning.billing.title') }}</h1>
-      <p class="text-sm text-muted-foreground">{{ t('planning.billing.subtitle') }}</p>
     </header>
 
     <FormAlerts v-if="!target" :error="store.error" @clear:error="store.error = null" />
@@ -117,10 +114,18 @@ onMounted(() => void store.fetchRows())
           v-for="kpi in kpis"
           :key="kpi.key"
           type="button"
-          class="cursor-pointer text-left bg-card border border-border rounded p-4 flex items-start gap-3 hover:bg-accent transition"
+          class="cursor-pointer text-left bg-card border rounded p-4 flex items-start gap-3 hover:bg-accent transition"
+          :class="[
+            filter === kpi.key ? 'border-primary ring-1 ring-primary' : 'border-border',
+            kpi.value ? '' : 'opacity-60'
+          ]"
+          :aria-pressed="filter === kpi.key"
           @click="filter = kpi.key as BillFilter"
         >
-          <span class="p-2 rounded bg-primary/10 text-primary shrink-0">
+          <span
+            class="p-2 rounded shrink-0"
+            :class="kpi.value ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'"
+          >
             <component :is="kpi.icon" class="w-5 h-5" />
           </span>
           <span class="min-w-0">
@@ -135,24 +140,6 @@ onMounted(() => void store.fetchRows())
           </span>
         </button>
       </section>
-
-      <nav class="flex flex-wrap gap-1 border-b border-border">
-        <button
-          v-for="item in FILTERS"
-          :key="item"
-          type="button"
-          class="cursor-pointer px-3 py-2 text-sm border-b-2 -mb-px transition"
-          :class="
-            filter === item
-              ? 'border-primary text-card-foreground font-medium'
-              : 'border-transparent text-muted-foreground hover:text-card-foreground'
-          "
-          @click="filter = item"
-        >
-          {{ t(`planning.billing.filter.${item}`) }}
-          <span class="ml-1 text-xs text-muted-foreground tabular-nums">{{ countOf(item) }}</span>
-        </button>
-      </nav>
 
       <LoadingBar v-if="store.loading" :height="2" bar-color="var(--color-primary)" />
 
@@ -187,7 +174,7 @@ onMounted(() => void store.fetchRows())
           <tbody>
             <tr v-if="!visibleRows.length">
               <td :colspan="canExecute ? 8 : 7" class="px-3 py-4 text-muted-foreground">
-                {{ t('planning.billing.empty') }}
+                {{ t(`planning.billing.emptyOf.${filter}`) }}
               </td>
             </tr>
             <tr
@@ -236,11 +223,11 @@ onMounted(() => void store.fetchRows())
                 <button
                   v-if="stateOf(row) === 'ready'"
                   type="button"
-                  :class="buttonClass"
+                  class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-primary-foreground bg-primary rounded hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                   :disabled="store.saving"
                   @click="openInvoice(row)"
                 >
-                  <Receipt class="w-5 h-5 text-primary" />
+                  <Receipt class="w-4 h-4" />
                   {{ t('planning.billing.invoice') }}
                 </button>
               </td>

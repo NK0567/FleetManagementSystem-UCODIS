@@ -31,7 +31,7 @@ export default {
   'fleet.departureAuthorizations.listView.refused': 'Refusées',
   'fleet.departureAuthorizations.listView.all': 'Toutes',
   'fleet.departureAuthorizations.action.grant': 'Accorder le départ',
-  'fleet.departureAuthorizations.action.refuse': 'Refuser',
+  'fleet.departureAuthorizations.action.refuse': 'Refuser le départ',
   'fleet.departureAuthorizations.form.plannedDeparture': 'Départ prévu',
   'fleet.departureAuthorizations.form.vehicle': 'Véhicule',
   'fleet.departureAuthorizations.form.driver': 'Conducteur',
@@ -44,5 +44,6 @@ export default {
   'fleet.departureAuthorizations.activation.gps.no_unit': 'Pas de boîtier de suivi en service sur le véhicule : suivi GPS non activé.',
   'fleet.departureAuthorizations.activation.camera.activated': 'Caméra du véhicule activée.',
   'fleet.departureAuthorizations.activation.camera.no_camera': 'Pas de caméra sur le véhicule.',
-  'fleet.departureAuthorizations.activation.simulated': 'Ordre envoyé aux équipements le {date} (simulé dans la maquette).'
+  'fleet.departureAuthorizations.activation.simulated': 'Ordre envoyé aux équipements le {date} (simulé dans la maquette).',
+  'fleet.departureAuthorizations.noResultsCreate': 'Aucune autorisation de départ. Créez-en une avec Nouveau.'
 }

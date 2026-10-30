@@ -72,10 +72,15 @@ export default {
   'hr.employees.form.drivingAuthorizedAt': 'Dernière décision',
   'hr.employees.import.action': 'Importer',
   'hr.employees.import.title': 'Importer des personnes',
-  'hr.employees.import.hint': "Chaque ligne suit les règles de la fiche ; une pièce d'identité déjà connue est refusée. La fonction, l'entité, la catégorie et le site se donnent par leur code ou leur nom.",
-  'hr.employees.import.created': 'Aucune personne créée. | Une personne créée. | {n} personnes créées.',
+  'hr.employees.import.hint':
+    "Chaque ligne suit les règles de la fiche ; une pièce d'identité déjà connue est refusée. La fonction, l'entité, la catégorie et le site se donnent par leur code ou leur nom.",
+  'hr.employees.import.created':
+    'Aucune personne créée. | Une personne créée. | {n} personnes créées.',
   'hr.employees.sync.action': 'Synchroniser avec le SIRH',
-  'hr.employees.sync.hint': 'Reprend les personnes du système de gestion du personnel (simulé dans la maquette).',
-  'hr.employees.sync.done': 'Synchronisation terminée : {created} créée(s), {updated} mise(s) à jour, {unchanged} inchangée(s), {skipped} écartée(s).',
-  'hr.employees.sync.error': "La synchronisation n'a pas pu être faite."
+  'hr.employees.sync.hint':
+    'Reprend les personnes du système de gestion du personnel (simulé dans la maquette).',
+  'hr.employees.sync.done':
+    'Synchronisation terminée : {created} créée(s), {updated} mise(s) à jour, {unchanged} inchangée(s), {skipped} écartée(s).',
+  'hr.employees.sync.error': "La synchronisation n'a pas pu être faite.",
+  'hr.employees.noResultsCreate': 'Aucun employé. Créez-en un avec Nouveau.'
 }

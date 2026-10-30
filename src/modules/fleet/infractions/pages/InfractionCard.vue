@@ -146,17 +146,22 @@ async function confirmClose() {
       <button
         v-if="item?.status === 'new'"
         type="button"
-        class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
+        class="cursor-pointer inline-flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium text-primary-foreground bg-primary rounded hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
         @click="take"
       >
-        <UserCheck class="w-5 h-5 text-primary" /> {{ t('fleet.infractions.action.take') }}
+        <UserCheck class="w-4 h-4" /> {{ t('fleet.infractions.action.take') }}
       </button>
       <button
         type="button"
-        class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
+        :class="
+          item?.status === 'new'
+            ? 'cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed'
+            : 'cursor-pointer inline-flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium text-primary-foreground bg-primary rounded hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed'
+        "
         @click="openClose"
       >
-        <FolderCheck class="w-5 h-5 text-primary" /> {{ t('fleet.infractions.action.close') }}
+        <FolderCheck class="w-4 h-4" :class="item?.status === 'new' ? 'text-primary' : ''" />
+        {{ t('fleet.infractions.action.close') }}
       </button>
     </template>
     <template #form>

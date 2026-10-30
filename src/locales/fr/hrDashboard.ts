@@ -1,10 +1,10 @@
 export default {
   'hr.dashboard.title': 'Tableau de bord RH',
-  'hr.dashboard.subtitle': 'Effectifs, absences et points à suivre, au jour le jour.',
+  'hr.dashboard.subtitle': 'Effectifs, absences et points à suivre.',
   'hr.dashboard.loadError': "Le tableau de bord n'a pas pu être chargé.",
   'hr.dashboard.kpi.onStaff': 'Employés en poste',
   'hr.dashboard.kpi.drivers': 'dont {count} au volant',
-  'hr.dashboard.kpi.pending': 'Demandes en attente',
+  'hr.dashboard.kpi.pending': "Demandes d'absence en attente",
   'hr.dashboard.kpi.pendingSub': 'à traiter',
   'hr.dashboard.kpi.approvedThisMonth': 'Absences approuvées ce mois-ci',
   'hr.dashboard.kpi.approvedSub': 'congés et absences',

@@ -43,5 +43,7 @@ export default {
     "La pièce entre en stock puis sort aussitôt pour l'ordre {no}.",
   'maintenance.purchaseRequests.receiveToStock': 'La pièce entre en stock.',
   'maintenance.purchaseRequests.form.erpSent':
-    "Transmise à l'ERP le {date} sous la référence {reference} (liaison simulée dans la maquette)."
+    "Transmise à l'ERP le {date} sous la référence {reference} (liaison simulée dans la maquette).",
+  'maintenance.purchaseRequests.noResultsCreate':
+    "Aucune demande d'achat. Créez-en une avec Nouveau."
 }

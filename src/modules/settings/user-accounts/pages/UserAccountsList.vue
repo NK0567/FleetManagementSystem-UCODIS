@@ -257,7 +257,11 @@ const dialogTitle = computed(() =>
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('settings.userAccounts.noResults')"
+        :no-results-message="
+          canInsert
+            ? t('settings.userAccounts.noResultsCreate')
+            : t('settings.userAccounts.noResults')
+        "
         :no-search-results-message="
           t('settings.userAccounts.noSearchResults', { query: store.searchQuery })
         "

@@ -23,5 +23,6 @@ export default {
   'hr.publicHolidays.form.no': 'N°',
   'hr.publicHolidays.form.name': 'Libellé',
   'hr.publicHolidays.form.date': 'Date',
-  'hr.publicHolidays.form.recurring': 'Revient chaque année'
+  'hr.publicHolidays.form.recurring': 'Revient chaque année',
+  'hr.publicHolidays.noResultsCreate': 'Aucun jour férié. Créez-en un avec Nouveau.'
 }

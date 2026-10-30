@@ -140,5 +140,6 @@ export default {
     'Historique importé « {source} » : correspondance proposée {name}, à valider.',
   'maintenance.workOrders.progress.nomenclatureConfirmed':
     'Correspondance avec la nomenclature validée par {by} le {date}.',
-  'maintenance.workOrders.listView.external': 'Chez un atelier externe'
+  'maintenance.workOrders.listView.external': 'Chez un atelier externe',
+  'maintenance.workOrders.noResultsCreate': 'Aucun ordre de travail. Créez-en un avec Nouveau.'
 }

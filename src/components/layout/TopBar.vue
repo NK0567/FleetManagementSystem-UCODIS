@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Globe, LogOut, PanelLeft, PanelTop, Search, Settings } from '@lucide/vue'
+import { BookOpen, Globe, LogOut, PanelLeft, PanelTop, Search, Settings } from '@lucide/vue'
 import { useAuth } from '@/composables/useAuth'
 import { useCommandPalette } from '@/composables/useCommandPalette'
 import { useNavLayout } from '@/composables/useNavLayout'
@@ -11,6 +11,7 @@ import { SUPPORTED_LOCALES, type SupportedLocale } from '@/core/i18n'
 import { reloadApplicationForLocale } from '@/core/bootstrap/reloadApplicationForLocale'
 import { useUserStore } from '@/stores/user'
 import AlertBell from '@/modules/fleet/alerts/components/AlertBell.vue'
+import RoleGuidePanel from '@/modules/guide/components/RoleGuidePanel.vue'
 
 const SETTINGS_PATH = '/settings/module-toggles'
 
@@ -26,6 +27,25 @@ const userInitial = computed(() => userName.value.charAt(0).toUpperCase() || '?'
 const isProfileOpen = ref(false)
 const isLangOpen = ref(false)
 const showLogoutConfirm = ref(false)
+
+/* The guide of the user's role: opened on the first sign-in of an account, then from the button. */
+const guideOpen = ref(false)
+const GUIDE_SEEN_KEY = 'guide.seen.'
+watch(
+  () => userStore.user?.code,
+  (code) => {
+    if (!code) return
+    try {
+      if (!localStorage.getItem(GUIDE_SEEN_KEY + code)) {
+        guideOpen.value = true
+        localStorage.setItem(GUIDE_SEEN_KEY + code, '1')
+      }
+    } catch {
+      // Without storage the guide simply waits for its button.
+    }
+  },
+  { immediate: true }
+)
 
 function toggleProfile() {
   isProfileOpen.value = !isProfileOpen.value
@@ -85,6 +105,15 @@ function onConfirmLogout() {
         >
           <PanelLeft v-if="navMode === 'topbar'" class="w-4 h-4" />
           <PanelTop v-else class="w-4 h-4" />
+        </button>
+        <button
+          type="button"
+          class="p-2 hover:bg-white/10 rounded flex items-center gap-1.5"
+          :title="t('guide.title')"
+          @click="guideOpen = true"
+        >
+          <BookOpen class="w-4 h-4" />
+          <span class="hidden sm:inline text-sm">{{ t('guide.button') }}</span>
         </button>
         <AlertBell />
         <RouterLink
@@ -166,5 +195,8 @@ function onConfirmLogout() {
       @confirm="onConfirmLogout"
       @cancel="showLogoutConfirm = false"
     />
+    <Teleport to="body">
+      <RoleGuidePanel v-if="guideOpen" @close="guideOpen = false" />
+    </Teleport>
   </div>
 </template>

@@ -114,7 +114,7 @@ export default {
   'fleet.vehicles.equipment.state': 'État',
   'fleet.vehicles.equipment.dueDate': 'Échéance',
   'fleet.vehicles.equipment.installedOn': 'Installé le',
-  'fleet.vehicles.action.odometer': 'Relevé kilométrique',
+  'fleet.vehicles.action.odometer': 'Relever le kilométrage',
   'fleet.vehicles.action.plate': "Changer l'immatriculation",
   'fleet.vehicles.action.outOfService': 'Mettre hors service',
   'fleet.vehicles.action.returnToService': 'Remettre en service',
@@ -126,10 +126,8 @@ export default {
   'fleet.vehicles.dialog.km': 'Kilométrage relevé',
   'fleet.vehicles.dialog.lastReading':
     'Dernier relevé : {km} km. Le kilométrage ne peut pas baisser.',
-  'fleet.vehicles.dialog.outOfServiceHint':
-    "Le véhicule ne sera plus proposé pour un attelage, une affectation ou un trajet jusqu'à sa remise en service.",
-  'fleet.vehicles.dialog.removalHint':
-    '{plate} quittera le parc. Sa fiche restera consultable dans la vue « Sortis du parc », mais ne pourra plus être modifiée.',
+  'fleet.vehicles.dialog.outOfServiceHint': "Le véhicule ne sera plus proposé jusqu'à sa remise en service.",
+  'fleet.vehicles.dialog.removalHint': '{plate} quittera le parc et sa fiche ne sera plus modifiable.',
   'fleet.vehicles.dialog.removalDate': 'Date de sortie',
   'fleet.vehicles.dialog.finalKm': 'Kilométrage à la sortie',
   'fleet.vehicles.dialog.comment': 'Commentaire',
@@ -150,8 +148,7 @@ export default {
   'fleet.vehicles.families.any': 'Toute catégorie',
   'fleet.vehicles.families.loadError': "Les catégories de produits n'ont pas pu être lues.",
   'fleet.vehicles.form.productFamilies': 'Catégories de produits transportées',
-  'fleet.vehicles.form.productFamiliesHint':
-    'Aucune cochée : le véhicule transporte tout type de produit. Le choix du véhicule filtre ensuite les commandes proposées.',
+  'fleet.vehicles.form.productFamiliesHint': 'Aucune cochée : tout type de produit.',
   'fleet.vehicles.form.noReading': 'Aucun relevé.',
   'fleet.vehicles.col.statusCauseCode': 'Cause codifiée',
   'fleet.vehicles.col.administrativeStatus': 'Statut administratif',
@@ -197,13 +194,14 @@ export default {
   'fleet.vehicles.ownership.noKm': 'Aucun kilomètre parcouru sur la période : pas de coût au kilomètre.',
   'fleet.vehicles.ownership.perKm': '{km} km parcourus, soit {cost} par kilomètre.',
   'fleet.vehicles.ownership.residualValue': 'Valeur résiduelle saisie : {value} (non déduite du total).',
-  'fleet.vehicles.ownership.hint': 'Les coûts viennent sans ressaisie des ordres de travail, des pleins, des pneus et des polices d’assurance.',
+  'fleet.vehicles.ownership.hint': "Repris des ordres de travail, pleins, pneus et polices d'assurance.",
   'fleet.vehicles.import.action': 'Importer',
   'fleet.vehicles.import.title': 'Importer des véhicules',
-  'fleet.vehicles.import.hint': "Chaque ligne suit les règles de la fiche : une immatriculation ou un VIN déjà connu, ou présent deux fois dans le fichier, est refusé et signalé dans le rapport. Le type et le site se donnent par leur code ou leur nom ; les compartiments d'une citerne s'écrivent 8000+8000+6000.",
+  'fleet.vehicles.import.hint': 'Type et site par leur code ou leur nom ; compartiments sous la forme 8000+8000+6000. Un véhicule déjà connu ou en double est refusé.',
   'fleet.vehicles.import.created': 'Aucun véhicule créé. | Un véhicule créé. | {n} véhicules créés.',
   'fleet.vehicles.form.noLink': 'Aucun',
   'fleet.vehicles.col.currentSiteNo': 'Site actuel',
   'fleet.vehicles.filter.driverAssignment': 'Affectation',
-  'fleet.vehicles.filter.couplingState': 'Attelage'
+  'fleet.vehicles.filter.couplingState': 'Attelage',
+  'fleet.vehicles.noResultsCreate': 'Aucun véhicule. Créez-en un avec Nouveau.'
 }

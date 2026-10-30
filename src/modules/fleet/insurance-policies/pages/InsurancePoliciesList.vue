@@ -264,7 +264,11 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('fleet.insurancePolicies.noResults')"
+        :no-results-message="
+          canInsert
+            ? t('fleet.insurancePolicies.noResultsCreate')
+            : t('fleet.insurancePolicies.noResults')
+        "
         :no-search-results-message="
           t('fleet.insurancePolicies.noSearchResults', { query: store.searchQuery })
         "

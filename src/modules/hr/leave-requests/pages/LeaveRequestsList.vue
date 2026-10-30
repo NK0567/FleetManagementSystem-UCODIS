@@ -179,6 +179,7 @@ const {
         :export-excel="exportToExcel"
         :show-details-panel="showDetailsPanel"
         :show-create="canInsert"
+        :create-label="t('selfService.absences.new')"
         :show-card-actions="showCardActions"
         :can-view-selected="canViewSelected"
         :can-edit-selected="canEditSelected"
@@ -232,7 +233,9 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('hr.leaveRequests.noResults')"
+        :no-results-message="
+          canInsert ? t('hr.leaveRequests.noResultsCreate') : t('hr.leaveRequests.noResults')
+        "
         :no-search-results-message="
           t('hr.leaveRequests.noSearchResults', { query: store.searchQuery })
         "

@@ -49,5 +49,6 @@ export default {
   'hr.leaveRequests.form.status': 'Status',
   'hr.leaveRequests.form.submittedAt': 'Sent on',
   'hr.leaveRequests.form.decidedAt': 'Decision',
-  'hr.leaveRequests.form.decisionComment': 'Comment'
+  'hr.leaveRequests.form.decisionComment': 'Comment',
+  'hr.leaveRequests.noResultsCreate': 'No leave request. Make one with Request leave.'
 }

@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { CircleDot } from '@lucide/vue'
 import VehicleTyrePlan from '../components/VehicleTyrePlan.vue'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
+import type { MoreAction } from '@/components/shared/MoreActionsMenu.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
 import { useListCellFormatters } from '@/composables/useListCellFormatters'
 import { useListPage } from '@/composables/useListPage'
@@ -188,12 +189,24 @@ const {
   exportFileBaseName: 'tyres',
   exportApi: tyreApi.exportExcel
 })
+
+/** Secondary gestures of the list, behind « Plus d'actions ». */
+const moreActions = computed<MoreAction[]>(() => [
+  {
+    key: 'plan',
+    label: t('maintenance.tyres.plan.action'),
+    icon: CircleDot,
+    active: showPlan.value,
+    onSelect: () => (showPlan.value = !showPlan.value)
+  }
+])
 </script>
 
 <template>
   <div class="h-full flex flex-col bg-white">
     <template v-if="!hideListContent">
       <ListPageToolbar
+        :more-actions="moreActions"
         :title="t('maintenance.tyres.title')"
         :exporting="exporting"
         :show-filter-panel="showFilterPanel"
@@ -235,18 +248,6 @@ const {
             :reset-preferences="resetPreferences"
           />
         </template>
-        <template #extra-actions>
-          <button
-            type="button"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
-            :class="showPlan ? 'bg-accent' : ''"
-            :aria-pressed="showPlan"
-            @click="showPlan = !showPlan"
-          >
-            <CircleDot class="w-4 h-4 text-primary" />
-            {{ t('maintenance.tyres.plan.action') }}
-          </button>
-        </template>
       </ListPageToolbar>
 
       <FormAlerts class="mx-4" :error="exportError" @clear:error="exportError = null" />
@@ -271,7 +272,9 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('maintenance.tyres.noResults')"
+        :no-results-message="
+          canInsert ? t('maintenance.tyres.noResultsCreate') : t('maintenance.tyres.noResults')
+        "
         :no-search-results-message="
           t('maintenance.tyres.noSearchResults', { query: store.searchQuery })
         "

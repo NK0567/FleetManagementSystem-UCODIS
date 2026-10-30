@@ -60,6 +60,12 @@ const filterDefs: FilterFieldDef[] = [
     valueType: 'string',
     kind: 'option',
     optionsKey: 'infractionSeverity'
+  },
+  {
+    field: 'active',
+    labelKey: 'fleet.infractionTypes.col.active',
+    valueType: 'boolean',
+    kind: 'boolean'
   }
 ]
 
@@ -206,7 +212,11 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('fleet.infractionTypes.noResults')"
+        :no-results-message="
+          canInsert
+            ? t('fleet.infractionTypes.noResultsCreate')
+            : t('fleet.infractionTypes.noResults')
+        "
         :no-search-results-message="
           t('fleet.infractionTypes.noSearchResults', { query: store.searchQuery })
         "

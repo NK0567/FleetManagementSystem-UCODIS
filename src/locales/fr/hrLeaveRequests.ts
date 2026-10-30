@@ -49,5 +49,7 @@ export default {
   'hr.leaveRequests.form.status': 'Statut',
   'hr.leaveRequests.form.submittedAt': 'Envoyée le',
   'hr.leaveRequests.form.decidedAt': 'Décision',
-  'hr.leaveRequests.form.decisionComment': 'Commentaire'
+  'hr.leaveRequests.form.decisionComment': 'Commentaire',
+  'hr.leaveRequests.noResultsCreate':
+    "Aucune demande d'absence. Faites-en une avec Demander une absence."
 }

@@ -218,7 +218,11 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('planning.quantityTolerances.noResults')"
+        :no-results-message="
+          canInsert
+            ? `${t('planning.quantityTolerances.noResults')} ${t('common.createWithNew')}`
+            : t('planning.quantityTolerances.noResults')
+        "
         :no-search-results-message="
           t('planning.quantityTolerances.noSearchResults', { query: store.searchQuery })
         "

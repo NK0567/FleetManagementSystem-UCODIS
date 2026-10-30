@@ -3,6 +3,7 @@ import { ref, computed, watch, useSlots, onMounted, onUnmounted, type Component 
 import { useI18n } from 'vue-i18n'
 import { Search, Funnel, Info, ChevronDown, LayoutList, Download, Eye, Pencil } from '@lucide/vue'
 import SearchBar from './SearchBar.vue'
+import MoreActionsMenu, { type MoreAction } from './MoreActionsMenu.vue'
 
 const { t } = useI18n()
 const slots = useSlots()
@@ -73,6 +74,10 @@ const props = withDefaults(
     showCardActions?: boolean
     canViewSelected?: boolean
     canEditSelected?: boolean
+    /** Secondary actions, grouped in a « Plus d'actions » menu (optional, empty by default). */
+    moreActions?: MoreAction[]
+    /** Label of the create button (default « Nouveau »). */
+    createLabel?: string
   }>(),
   {
     showCreate: true,
@@ -93,7 +98,9 @@ const props = withDefaults(
     exporting: false,
     showCardActions: false,
     canViewSelected: false,
-    canEditSelected: false
+    canEditSelected: false,
+    moreActions: () => [],
+    createLabel: undefined
   }
 )
 
@@ -332,6 +339,8 @@ const toggleSearch = () => {
 
         <slot name="extra-actions" />
 
+        <MoreActionsMenu v-if="moreActions.length" :actions="moreActions" />
+
         <div v-if="showCreate" class="border-l border-border h-6 mx-1"></div>
 
         <button
@@ -340,7 +349,7 @@ const toggleSearch = () => {
           class="px-4 py-2 bg-primary text-primary-foreground rounded hover:opacity-90 transition font-medium text-sm"
           @click="emit('create')"
         >
-          {{ t('common.new') }}
+          {{ createLabel ?? t('common.new') }}
         </button>
       </div>
     </div>

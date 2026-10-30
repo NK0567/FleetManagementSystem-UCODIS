@@ -30,5 +30,7 @@ export default {
   'maintenance.vehicleCheckPoints.form.blockingHint':
     'Une anomalie sur ce point ouvre un ordre de travail et immobilise le véhicule.',
   'maintenance.vehicleCheckPoints.form.sortOrder': 'Ordre',
-  'maintenance.vehicleCheckPoints.form.active': 'Actif'
+  'maintenance.vehicleCheckPoints.form.active': 'Actif',
+  'maintenance.vehicleCheckPoints.noResultsCreate':
+    'Aucun point de contrôle. Créez-en un avec Nouveau.'
 }

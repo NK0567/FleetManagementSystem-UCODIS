@@ -16,12 +16,12 @@ export default {
   'selfService.profile.shortcuts': 'Shortcuts',
   'selfService.profile.absences': 'My absences',
   'selfService.absences.title': 'My absences',
-  'selfService.absences.subtitle': 'Requests and balances of the signed-in account.',
+  'selfService.absences.subtitle': 'Your leave requests and balances.',
   'selfService.absences.loadError': 'Absences could not be loaded.',
   'selfService.absences.sendError': 'The request could not be sent.',
-  'selfService.absences.requests': 'My requests',
-  'selfService.absences.empty': 'No request yet.',
-  'selfService.absences.new': 'New request',
+  'selfService.absences.requests': 'My leave requests',
+  'selfService.absences.empty': 'No request. Make one with Request leave.',
+  'selfService.absences.new': 'Request leave',
   'selfService.absences.period': 'From {from} to {to}',
   'selfService.absences.decision': 'Answer: {comment}',
   'selfService.absences.type': 'Absence type',
@@ -86,8 +86,7 @@ export default {
   'selfService.orders.pickReason': 'Pick a reason',
   'selfService.orders.comment': 'Detail (optional)',
   'selfService.orders.receivedQuantity': 'Quantity delivered',
-  'selfService.orders.declareHint':
-    'You enter no name: only the recipient confirms, from his tracking link.',
+  'selfService.orders.declareHint': 'The recipient confirms the receipt himself.',
   'selfService.orders.withReturn':
     'Postponement asked by the recipient: the goods go back to the warehouse',
   'selfService.orders.state.toDeliver': 'To deliver',
@@ -171,5 +170,9 @@ export default {
   'selfService.profile.limits.weeklyDriving': 'Maximum driving per week',
   'selfService.checklist.sign': 'I, {name}, sign this checklist',
   'selfService.checklist.location': 'Stopping place',
-  'selfService.checklist.locationPlaceholder': 'e.g. Moramanga truck stop'
+  'selfService.checklist.locationPlaceholder': 'e.g. Moramanga truck stop',
+  'selfService.vehicle.refillIncomplete': 'Fill in the litres, price, odometer and receipt photo.',
+  'selfService.vehicle.noRefill': 'No refill declared.',
+  'selfService.vehicle.noBreakdown': 'No breakdown reported.',
+  'selfService.vehicle.noStation': 'Station not given'
 }

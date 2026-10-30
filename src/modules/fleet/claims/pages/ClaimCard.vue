@@ -1,5 +1,7 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
+import type { MoreAction } from '@/components/shared/MoreActionsMenu.vue'
+import PrimaryActionButton from '@/modules/fleet/shared/components/PrimaryActionButton.vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { FolderCheck, GraduationCap, ShieldCheck } from '@lucide/vue'
@@ -79,6 +81,41 @@ const blocks = computed(() => (item.value ? closureBlocks(item.value) : []))
 const blockText = computed(() =>
   blocks.value.map((block) => t(`fleet.claims.closureBlock.${block}`)).join(' · ')
 )
+
+/* The insurance follow-up leads while it blocks the closing; then closing becomes the main action. */
+const canFollowInsurance = computed(() => canEdit.value && nextSteps.value.length > 0)
+const insuranceFirst = computed(
+  () => canFollowInsurance.value && (!canExecute.value || blocks.value.length > 0)
+)
+const moreActions = computed<MoreAction[]>(() => {
+  const claim = item.value
+  if (!showActions.value || !claim || claim.status !== 'open') return []
+  return [
+    {
+      key: 'insurance',
+      label: t('fleet.claims.action.insurance'),
+      icon: ShieldCheck,
+      hidden: insuranceFirst.value || !canFollowInsurance.value,
+      onSelect: openInsurance
+    },
+    {
+      key: 'training',
+      label: t('fleet.claims.action.training'),
+      icon: GraduationCap,
+      hidden: !canEdit.value || !canTrain.value || !claim.driverNo,
+      onSelect: openTraining
+    },
+    {
+      key: 'close',
+      label: t('fleet.claims.action.close'),
+      icon: FolderCheck,
+      hidden: !insuranceFirst.value || !canExecute.value,
+      disabled: blocks.value.length > 0,
+      title: blockText.value || undefined,
+      onSelect: () => (showClose.value = true)
+    }
+  ]
+})
 
 const working = ref(false)
 
@@ -177,6 +214,7 @@ async function confirmClose() {
     :show-title-new-button="canInsert"
     :has-unsaved-changes="isFormDirty"
     :can-save="isFormDirty"
+    :more-actions="moreActions"
     @close="emit('close')"
     @save="saveItem"
     @enter-edit="enterEditMode"
@@ -194,40 +232,27 @@ async function confirmClose() {
       </template>
     </template>
     <template v-if="showActions && item" #action-buttons>
+      <template v-if="item.status === 'open'">
+        <PrimaryActionButton
+          v-if="insuranceFirst"
+          :label="t('fleet.claims.action.insurance')"
+          :icon="ShieldCheck"
+          @click="openInsurance"
+        />
+        <PrimaryActionButton
+          v-else-if="canExecute"
+          :label="t('fleet.claims.action.close')"
+          :icon="FolderCheck"
+          :disabled-reason="blockText || undefined"
+          @click="showClose = true"
+        />
+      </template>
       <SourceWorkOrder
         origin="claim"
         :origin-no="item.no"
         :work-order-no="item.workOrderNo"
         :eligible="item.status === 'open'"
       />
-      <template v-if="item.status === 'open'">
-        <button
-          v-if="canEdit && nextSteps.length"
-          type="button"
-          class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
-          @click="openInsurance"
-        >
-          <ShieldCheck class="w-5 h-5 text-primary" /> {{ t('fleet.claims.action.insurance') }}
-        </button>
-        <button
-          v-if="canEdit && canTrain && item?.driverNo"
-          type="button"
-          class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
-          @click="openTraining"
-        >
-          <GraduationCap class="w-5 h-5 text-primary" /> {{ t('fleet.claims.action.training') }}
-        </button>
-        <button
-          v-if="canExecute"
-          type="button"
-          class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
-          :disabled="blocks.length > 0"
-          :title="blockText || undefined"
-          @click="showClose = true"
-        >
-          <FolderCheck class="w-5 h-5 text-primary" /> {{ t('fleet.claims.action.close') }}
-        </button>
-      </template>
     </template>
     <template #form>
       <div class="min-h-0 flex flex-col h-full">

@@ -48,7 +48,8 @@ export default {
   'maintenance.stockItems.movements.col.delta': 'Quantity',
   'maintenance.stockItems.movements.col.reason': 'Reason',
   'maintenance.stockItems.movements.col.by': 'By',
-  'maintenance.stockItems.summary': 'Stock value: {value} Ar · {items} items · {toReorder} to reorder',
+  'maintenance.stockItems.summary':
+    'Stock value: {value} Ar · {items} items · {toReorder} to reorder',
   'maintenance.stockMovements.title': 'Stock movements',
   'maintenance.stockMovements.search.all': 'All columns',
   'maintenance.stockMovements.col.at': 'Date',
@@ -73,5 +74,6 @@ export default {
   'maintenance.supplierSupply.days': '{days} d',
   'maintenance.supplierSupply.receivedCount': 'Orders received',
   'maintenance.supplierSupply.items': 'Items supplied',
-  'maintenance.supplierSupply.noItem': 'No stock item is linked to this supplier.'
+  'maintenance.supplierSupply.noItem': 'No stock item is linked to this supplier.',
+  'maintenance.stockItems.noResultsCreate': 'No item. Create one with New.'
 }

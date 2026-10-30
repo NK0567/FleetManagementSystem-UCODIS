@@ -31,12 +31,11 @@ export default {
   'fleet.inspections.form.result': 'Résultat',
   'fleet.inspections.form.findings': 'Défauts relevés',
   'fleet.inspections.actionError': "L'action n'a pas pu être effectuée.",
-  'fleet.inspections.action.recheck': 'Contre-visite passée',
+  'fleet.inspections.action.recheck': 'Enregistrer la contre-visite',
   'fleet.inspections.form.recheckDueOn': 'Contre-visite avant le',
   'fleet.inspections.form.recheckDoneOn': 'Contre-visite passée le',
   'fleet.inspections.form.recheckAwaited': 'En attente : le véhicule est immobilisé',
-  'fleet.inspections.form.resultHint':
-    "Déduit de la grille : un seul poste non conforme rend l'inspection non conforme, programme la contre-visite et rend le véhicule inapte à charger jusqu'à celle-ci.",
+  'fleet.inspections.form.resultHint': 'Un poste non conforme rend la visite non conforme et programme la contre-visite.',
   'fleet.inspections.form.findingsHint':
     'Laissé vide, il reprend les postes non conformes et leurs constats.',
   'fleet.inspections.form.items': "Grille d'inspection",
@@ -53,8 +52,7 @@ export default {
   'fleet.inspections.form.signatureRequired': 'Le contrôleur doit signer le rapport.',
   'fleet.inspections.form.recheckItems': 'Postes à revoir : {items}',
   'fleet.inspections.grid.empty': "Aucun poste actif dans la grille d'inspection.",
-  'fleet.inspections.grid.pickVehicle':
-    "Choisissez le véhicule : la grille s'affiche avec les postes du véhicule et, s'il en porte une, de la citerne.",
+  'fleet.inspections.grid.pickVehicle': 'Choisissez le véhicule pour afficher sa grille.',
   'fleet.inspections.grid.loading': 'Chargement de la grille…',
   'fleet.inspections.grid.legacy':
     'Inspection enregistrée avant la grille : seul le résultat global est connu.',
@@ -70,5 +68,6 @@ export default {
   'fleet.inspections.report.title': "Rapport d'inspection {no}",
   'fleet.inspections.report.recheck':
     'Contre-visite programmée au plus tard le {date} pour les postes : {items}.',
-  'fleet.inspections.action.printReport': 'Imprimer le rapport'
+  'fleet.inspections.action.printReport': 'Imprimer le rapport',
+  'fleet.inspections.noResultsCreate': 'Aucune visite technique. Créez-en une avec Nouveau.'
 }

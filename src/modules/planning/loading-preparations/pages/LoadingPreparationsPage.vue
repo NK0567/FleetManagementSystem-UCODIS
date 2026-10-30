@@ -217,8 +217,13 @@ onMounted(loadList)
         </h1>
         <p class="text-sm text-muted-foreground">{{ t('planning.preparation.subtitle') }}</p>
       </div>
-      <button v-if="canInsert" type="button" :class="buttonClass" @click="startNew">
-        <Plus class="w-4 h-4 text-primary" /> {{ t('planning.preparation.new') }}
+      <button
+        v-if="canInsert"
+        type="button"
+        class="cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded bg-primary text-primary-foreground hover:opacity-90 transition"
+        @click="startNew"
+      >
+        <Plus class="w-4 h-4" /> {{ t('planning.preparation.new') }}
       </button>
     </header>
     <FormAlerts :error="error" @clear:error="error = null" />
@@ -226,7 +231,7 @@ onMounted(loadList)
     <div class="grid gap-4 lg:grid-cols-[18rem_1fr]">
       <aside class="bg-card border border-border rounded divide-y divide-border self-start">
         <p v-if="!list.length" class="p-3 text-sm text-muted-foreground">
-          {{ t('planning.preparation.empty') }}
+          {{ canInsert ? t('planning.preparation.emptyCreate') : t('planning.preparation.empty') }}
         </p>
         <button
           v-for="prep in list"

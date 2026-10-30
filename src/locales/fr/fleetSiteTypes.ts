@@ -40,5 +40,6 @@ export default {
   'fleet.siteTypes.form.restrictedHint':
     "L'entrée d'un véhicule dans un site de ce type est signalée.",
   'fleet.siteTypes.form.active': 'Actif',
-  'fleet.siteTypes.form.siteCount': 'Sites de ce type'
+  'fleet.siteTypes.form.siteCount': 'Sites de ce type',
+  'fleet.siteTypes.noResultsCreate': 'Aucun type de site. Créez-en un avec Nouveau.'
 }

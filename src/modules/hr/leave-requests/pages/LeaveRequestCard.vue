@@ -133,11 +133,11 @@ async function decide(comment: string) {
     <template v-if="canDecideHere" #action-buttons>
       <button
         type="button"
-        class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
+        class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-primary text-primary-foreground rounded hover:opacity-90 transition disabled:opacity-60 disabled:cursor-not-allowed"
         :disabled="deciding"
         @click="pendingDecision = 'approve'"
       >
-        <CircleCheck class="w-5 h-5 text-primary" /> {{ t('hr.leaveRequests.action.approve') }}
+        <CircleCheck class="w-5 h-5" /> {{ t('hr.leaveRequests.action.approve') }}
       </button>
       <button
         type="button"

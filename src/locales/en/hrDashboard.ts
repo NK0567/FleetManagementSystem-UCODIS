@@ -1,10 +1,10 @@
 export default {
   'hr.dashboard.title': 'HR dashboard',
-  'hr.dashboard.subtitle': 'Headcount, absences and follow-ups, day by day.',
+  'hr.dashboard.subtitle': 'Headcount, absences and points to follow.',
   'hr.dashboard.loadError': 'The dashboard could not be loaded.',
   'hr.dashboard.kpi.onStaff': 'Employees on staff',
   'hr.dashboard.kpi.drivers': 'including {count} at the wheel',
-  'hr.dashboard.kpi.pending': 'Pending requests',
+  'hr.dashboard.kpi.pending': 'Pending leave requests',
   'hr.dashboard.kpi.pendingSub': 'to handle',
   'hr.dashboard.kpi.approvedThisMonth': 'Absences approved this month',
   'hr.dashboard.kpi.approvedSub': 'leave and absences',

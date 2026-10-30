@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Upload } from '@lucide/vue'
+import type { MoreAction } from '@/components/shared/MoreActionsMenu.vue'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
 import { useListCellFormatters } from '@/composables/useListCellFormatters'
@@ -36,7 +37,7 @@ const tableColumns = computed<TableColumn[]>(() => [
   { sortKey: 'plate', label: t('fleet.vehicles.col.plate'), minW: '130px' },
   { sortKey: 'vin', label: t('fleet.vehicles.col.vin'), minW: '170px', defaultHidden: true },
   { sortKey: 'vehicleTypeName', label: t('fleet.vehicles.col.vehicleTypeNo'), minW: '140px' },
-  { sortKey: 'make', label: t('fleet.vehicles.col.make'), minW: '120px' },
+  { sortKey: 'make', label: t('fleet.vehicles.col.make'), minW: '120px', defaultHidden: true },
   { sortKey: 'model', label: t('fleet.vehicles.col.model'), minW: '160px' },
   {
     sortKey: 'category',
@@ -226,6 +227,13 @@ const filterDefs: FilterFieldDef[] = [
     valueType: 'string',
     kind: 'option',
     optionsKey: 'acquisitionMode'
+  },
+  {
+    field: 'administrativeStatus',
+    labelKey: 'fleet.vehicles.col.administrativeStatus',
+    valueType: 'string',
+    kind: 'option',
+    optionsKey: 'administrativeStatus'
   }
 ]
 
@@ -295,6 +303,17 @@ const {
   exportFileBaseName: 'vehicles',
   exportApi: vehicleApi.exportExcel
 })
+
+/** Importing a file is occasional: it waits in « Plus d'actions ». */
+const moreActions = computed<MoreAction[]>(() => [
+  {
+    key: 'import',
+    label: t('fleet.vehicles.import.action'),
+    icon: Upload,
+    hidden: !canInsert.value,
+    onSelect: () => (importing.value = true)
+  }
+])
 </script>
 
 <template>
@@ -308,6 +327,7 @@ const {
         :show-export-excel="canExport"
         :export-excel="exportToExcel"
         :show-details-panel="showDetailsPanel"
+        :more-actions="moreActions"
         :show-create="canInsert"
         :show-card-actions="showCardActions"
         :can-view-selected="canViewSelected"
@@ -328,16 +348,6 @@ const {
         @clear="store.clearSearch()"
         @update:search-column="onSearchColumnChange"
       >
-        <template v-if="canInsert" #extra-actions>
-          <button
-            type="button"
-            class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
-            @click="importing = true"
-          >
-            <Upload class="w-4 h-4 text-primary" />
-            {{ t('fleet.vehicles.import.action') }}
-          </button>
-        </template>
         <template #column-picker>
           <TableColumnPicker
             :all-columns="tableColumns"
@@ -372,7 +382,9 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('fleet.vehicles.noResults')"
+        :no-results-message="
+          canInsert ? t('fleet.vehicles.noResultsCreate') : t('fleet.vehicles.noResults')
+        "
         :no-search-results-message="
           t('fleet.vehicles.noSearchResults', { query: store.searchQuery })
         "

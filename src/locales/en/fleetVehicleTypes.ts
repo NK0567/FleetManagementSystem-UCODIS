@@ -41,5 +41,6 @@ export default {
     'Vehicles use this type: only the name and the activation can still change.',
   'fleet.vehicleTypes.form.fuelReferenceL100': 'Reference consumption (L/100 km)',
   'fleet.vehicleTypes.form.fuelReferenceL100Hint':
-    'Left empty, the default reference of the settings applies.'
+    'Left empty, the default reference of the settings applies.',
+  'fleet.vehicleTypes.noResultsCreate': 'No vehicle type. Create one with New.'
 }

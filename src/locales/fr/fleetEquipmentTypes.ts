@@ -25,9 +25,9 @@ export default {
   'fleet.equipmentTypes.form.no': 'Code',
   'fleet.equipmentTypes.form.name': 'Libellé',
   'fleet.equipmentTypes.form.capability': 'Fonction',
-  'fleet.equipmentTypes.form.capabilityHint':
-    "Un boîtier de suivi fait remonter la position du véhicule ; une caméra s'active au départ ; une pompe permet le dépotage.",
+  'fleet.equipmentTypes.form.capabilityHint': "Ce que l'équipement apporte au véhicule (position, caméra, dépotage).",
   'fleet.equipmentTypes.form.hasDueDate': 'Avec échéance',
   'fleet.equipmentTypes.form.noticeDays': "Préavis avant l'échéance (jours)",
-  'fleet.equipmentTypes.form.active': 'Actif'
+  'fleet.equipmentTypes.form.active': 'Actif',
+  'fleet.equipmentTypes.noResultsCreate': "Aucun type d'équipement. Créez-en un avec Nouveau."
 }

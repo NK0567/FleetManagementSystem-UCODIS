@@ -52,6 +52,7 @@ const router = useRouter()
 const optionsStore = useOptionsStore()
 const { canRead: canReadVehicle } = usePermissions('VEHICLE')
 const { canRead: canReadAlerts } = usePermissions('ALERT')
+const { canRead: canReadTelematics } = usePermissions('TELEMATICS')
 
 /** A gauge at a quarter or below is shown as low. */
 const LOW_FUEL_PCT = 25
@@ -420,11 +421,12 @@ function delayLabel(minutes: number | null) {
           :key="item.value"
           type="button"
           class="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded border transition"
-          :class="
+          :class="[
             situation === item.value
               ? 'border-primary bg-accent text-card-foreground'
-              : 'border-border text-muted-foreground hover:bg-accent'
-          "
+              : 'border-border text-muted-foreground hover:bg-accent',
+            item.count === 0 && situation !== item.value ? 'opacity-50' : ''
+          ]"
           @click="toggleSituation(item.value)"
         >
           <span
@@ -439,11 +441,12 @@ function delayLabel(minutes: number | null) {
           :key="item.value"
           type="button"
           class="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded border transition"
-          :class="
+          :class="[
             flag === item.value
               ? 'border-primary bg-accent text-card-foreground'
-              : 'border-border text-muted-foreground hover:bg-accent'
-          "
+              : 'border-border text-muted-foreground hover:bg-accent',
+            item.count === 0 && flag !== item.value ? 'opacity-50' : ''
+          ]"
           @click="toggleFlag(item.value)"
         >
           <component :is="item.icon" class="w-4 h-4 text-destructive" />
@@ -493,7 +496,9 @@ function delayLabel(minutes: number | null) {
               <BellRing
                 v-if="position.alertCount"
                 class="w-4 h-4 text-destructive"
-                :aria-label="t('fleet.liveMap.alertCount', { count: position.alertCount })"
+                :aria-label="
+                  t('fleet.liveMap.alertCount', { count: position.alertCount }, position.alertCount)
+                "
               />
               <MapPinOff
                 v-if="position.outOfZone"
@@ -601,9 +606,20 @@ function delayLabel(minutes: number | null) {
               </template>
             </p>
             <p v-if="selected.alertCount || selected.outOfZone" class="text-xs text-destructive">
-              <RouterLink v-if="selected.alertCount" to="/fleet/alerts" class="hover:underline">
-                {{ t('fleet.liveMap.alertCount', { count: selected.alertCount }) }}
+              <RouterLink
+                v-if="selected.alertCount && canReadAlerts"
+                to="/fleet/alerts"
+                class="hover:underline"
+              >
+                {{
+                  t('fleet.liveMap.alertCount', { count: selected.alertCount }, selected.alertCount)
+                }}
               </RouterLink>
+              <template v-else-if="selected.alertCount">
+                {{
+                  t('fleet.liveMap.alertCount', { count: selected.alertCount }, selected.alertCount)
+                }}
+              </template>
               <template v-if="selected.alertCount && selected.outOfZone"> · </template>
               <template v-if="selected.outOfZone">
                 {{
@@ -637,6 +653,7 @@ function delayLabel(minutes: number | null) {
                 <History class="w-3.5 h-3.5" /> {{ t('fleet.liveMap.history.button') }}
               </button>
               <RouterLink
+                v-if="canReadTelematics"
                 :to="{ path: '/fleet/telematics-events', query: { plate: selected.plate } }"
                 class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded border border-border text-card-foreground hover:bg-accent"
               >
@@ -718,8 +735,8 @@ function delayLabel(minutes: number | null) {
               type="button"
               class="cursor-pointer relative w-12 h-12 rounded-full shadow-lg flex items-center justify-center text-white"
               :class="alertTotal ? 'bg-destructive' : 'bg-primary'"
-              :title="t('fleet.liveMap.alerts.button', { count: alertTotal })"
-              :aria-label="t('fleet.liveMap.alerts.button', { count: alertTotal })"
+              :title="t('fleet.liveMap.alerts.button', { count: alertTotal }, alertTotal)"
+              :aria-label="t('fleet.liveMap.alerts.button', { count: alertTotal }, alertTotal)"
               :aria-expanded="alertsOpen"
               @click="alertsOpen = !alertsOpen"
             >

@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Upload } from '@lucide/vue'
+import type { MoreAction } from '@/components/shared/MoreActionsMenu.vue'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
 import { useListCellFormatters } from '@/composables/useListCellFormatters'
@@ -106,6 +107,12 @@ const filterDefs: FilterFieldDef[] = [
     valueType: 'string',
     kind: 'reference',
     referenceKey: 'motorizedVehicles'
+  },
+  {
+    field: 'fullTank',
+    labelKey: 'fleet.fuelRefills.col.fullTank',
+    valueType: 'boolean',
+    kind: 'boolean'
   }
 ]
 
@@ -177,6 +184,17 @@ const {
   exportFileBaseName: 'fuel-refills',
   exportApi: fuelRefillApi.exportExcel
 })
+
+/** Importing a file is occasional: it waits in « Plus d'actions ». */
+const moreActions = computed<MoreAction[]>(() => [
+  {
+    key: 'import',
+    label: t('fleet.fuelRefills.import.action'),
+    icon: Upload,
+    hidden: !canInsert.value,
+    onSelect: () => (importing.value = true)
+  }
+])
 </script>
 
 <template>
@@ -190,6 +208,7 @@ const {
         :show-export-excel="canExport"
         :export-excel="exportToExcel"
         :show-details-panel="showDetailsPanel"
+        :more-actions="moreActions"
         :show-create="canInsert"
         :show-card-actions="showCardActions"
         :can-view-selected="canViewSelected"
@@ -224,16 +243,6 @@ const {
             :reset-preferences="resetPreferences"
           />
         </template>
-        <template v-if="canInsert" #extra-actions>
-          <button
-            type="button"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
-            @click="importing = true"
-          >
-            <Upload class="w-4 h-4 text-primary" />
-            {{ t('fleet.fuelRefills.import.action') }}
-          </button>
-        </template>
       </ListPageToolbar>
 
       <FormAlerts class="mx-4" :error="exportError" @clear:error="exportError = null" />
@@ -254,7 +263,9 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('fleet.fuelRefills.noResults')"
+        :no-results-message="
+          canInsert ? t('fleet.fuelRefills.noResultsCreate') : t('fleet.fuelRefills.noResults')
+        "
         :no-search-results-message="
           t('fleet.fuelRefills.noSearchResults', { query: store.searchQuery })
         "

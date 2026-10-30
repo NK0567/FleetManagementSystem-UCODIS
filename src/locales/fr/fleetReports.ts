@@ -7,9 +7,8 @@ export default {
   'fleet.reports.filter.from': 'Du',
   'fleet.reports.filter.to': 'Au',
   'fleet.reports.filter.site': 'Site de rattachement',
-  'fleet.reports.export.xlsx': 'Excel',
-  'fleet.reports.export.pdf': 'PDF',
-
+  'fleet.reports.export.xlsx': 'Exporter en Excel',
+  'fleet.reports.export.pdf': 'Exporter en PDF',
   'fleet.reports.kind.summary': 'Synthèse',
   'fleet.reports.kind.fuel': 'Carburant et pneumatiques',
   'fleet.reports.kind.drivers': 'Conducteurs',
@@ -140,5 +139,6 @@ export default {
   'fleet.reports.col.authorizationNo': 'Autorisation',
   'fleet.reports.col.plannedDeparture': 'Départ prévu',
   'fleet.reports.col.decision': 'Décision',
-  'fleet.reports.col.failedChecks': 'Contrôles non conformes'
+  'fleet.reports.col.failedChecks': 'Contrôles non conformes',
+  'fleet.reports.exportBlocked': "Choisissez d'abord une période valide."
 }

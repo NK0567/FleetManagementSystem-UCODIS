@@ -32,5 +32,6 @@ export default {
   'maintenance.failureCodes.form.competenceNo': 'Skill needed',
   'maintenance.failureCodes.form.competenceNoHint':
     'For a subsystem: the skill of whoever repairs it.',
-  'maintenance.failureCodes.form.active': 'Active'
+  'maintenance.failureCodes.form.active': 'Active',
+  'maintenance.failureCodes.noResultsCreate': 'No failure code. Create one with New.'
 }

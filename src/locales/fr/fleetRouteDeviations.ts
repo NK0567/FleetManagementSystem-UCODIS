@@ -38,8 +38,8 @@ export default {
   'fleet.routeDeviations.listView.toQualify': 'À qualifier',
   'fleet.routeDeviations.listView.qualified': 'Qualifiés',
   'fleet.routeDeviations.listView.all': 'Tous',
-  'fleet.routeDeviations.action.justify': 'Justifier',
-  'fleet.routeDeviations.action.qualify': 'Qualifier',
+  'fleet.routeDeviations.action.justify': "Justifier l'écart",
+  'fleet.routeDeviations.action.qualify': "Qualifier l'écart",
   'fleet.routeDeviations.form.justification': 'Justification',
   'fleet.routeDeviations.form.justifyBefore': "Pas encore justifié ; possible jusqu'au {date}.",
   'fleet.routeDeviations.form.qualification': 'Qualification',
@@ -47,5 +47,6 @@ export default {
   'fleet.routeDeviations.form.nature': 'Nature',
   'fleet.routeDeviations.form.decision': 'Décision',
   'fleet.routeDeviations.form.reason': 'Motif',
-  'fleet.routeDeviations.form.map': 'Lieu sur la carte'
+  'fleet.routeDeviations.form.map': 'Lieu sur la carte',
+  'fleet.routeDeviations.noResultsCreate': 'Aucun écart. Créez-en un avec Nouveau.'
 }

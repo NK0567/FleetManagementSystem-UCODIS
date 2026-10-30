@@ -102,6 +102,8 @@ async function cancel(reason: string) {
   if (await act('cancel', { reason })) cancelling.value = false
 }
 
+const primaryClass =
+  'cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-primary text-primary-foreground rounded hover:opacity-90 transition disabled:opacity-60 disabled:cursor-not-allowed'
 const buttonClass =
   'cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed'
 </script>
@@ -145,21 +147,21 @@ const buttonClass =
       <button
         v-if="canUpdate && item.status === 'requested'"
         type="button"
-        :class="buttonClass"
+        :class="primaryClass"
         :disabled="acting"
         @click="open('order')"
       >
-        <ShoppingCart class="w-5 h-5 text-primary" />
+        <ShoppingCart class="w-5 h-5" />
         {{ t('maintenance.purchaseRequests.action.order') }}
       </button>
       <button
         v-if="canUpdate && item.status === 'ordered'"
         type="button"
-        :class="buttonClass"
+        :class="primaryClass"
         :disabled="acting"
         @click="open('receive')"
       >
-        <PackageCheck class="w-5 h-5 text-primary" />
+        <PackageCheck class="w-5 h-5" />
         {{ t('maintenance.purchaseRequests.action.receive') }}
       </button>
       <button

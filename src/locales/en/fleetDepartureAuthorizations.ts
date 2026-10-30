@@ -30,7 +30,7 @@ export default {
   'fleet.departureAuthorizations.listView.refused': 'Refused',
   'fleet.departureAuthorizations.listView.all': 'All',
   'fleet.departureAuthorizations.action.grant': 'Grant the departure',
-  'fleet.departureAuthorizations.action.refuse': 'Refuse',
+  'fleet.departureAuthorizations.action.refuse': 'Refuse the departure',
   'fleet.departureAuthorizations.form.plannedDeparture': 'Planned departure',
   'fleet.departureAuthorizations.form.vehicle': 'Vehicle',
   'fleet.departureAuthorizations.form.driver': 'Driver',
@@ -43,5 +43,6 @@ export default {
   'fleet.departureAuthorizations.activation.gps.no_unit': 'No working tracker on the vehicle: GPS tracking not switched on.',
   'fleet.departureAuthorizations.activation.camera.activated': 'Vehicle camera switched on.',
   'fleet.departureAuthorizations.activation.camera.no_camera': 'No camera on the vehicle.',
-  'fleet.departureAuthorizations.activation.simulated': 'Order sent to the units on {date} (simulated in the mock-up).'
+  'fleet.departureAuthorizations.activation.simulated': 'Order sent to the units on {date} (simulated in the mock-up).',
+  'fleet.departureAuthorizations.noResultsCreate': 'No departure authorization. Create one with New.'
 }

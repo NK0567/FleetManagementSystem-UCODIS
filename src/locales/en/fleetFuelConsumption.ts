@@ -24,7 +24,7 @@ export default {
     '{km} km, {liters} L: {l100} L/100 against a reference of {reference} ({source})',
   'fleet.fuelConsumption.excess': 'Extra cost: {amount}',
   'fleet.fuelConsumption.proposed': 'Deduction of {amount} proposed by {user}',
-  'fleet.fuelConsumption.ownProposal': 'You proposed this deduction: someone else must decide it.',
+  'fleet.fuelConsumption.ownProposal': 'Proposed by you: another person must decide.',
   'fleet.fuelConsumption.action.qualify': 'Qualify the gap',
   'fleet.fuelConsumption.action.propose': 'Propose a deduction',
   'fleet.fuelConsumption.action.approve': 'Approve the deduction',
@@ -38,15 +38,12 @@ export default {
   'fleet.fuelConsumption.col.routeName': 'Corridor',
   'fleet.fuelConsumption.col.referenceSource': 'Reference from',
   'fleet.fuelConsumption.col.co2Kg': 'CO₂ (kg)',
-  'fleet.fuelConsumption.lowEmission':
-    'Low-emission vehicles (electric or hybrid): {low} of {total} motorized vehicles in the park, that is {share}%.',
-  'fleet.fuelConsumption.withholdable':
-    'Declared net monthly salary: {salary}; deduction allowed this month under labour law: {max} at most.',
+  'fleet.fuelConsumption.lowEmission': 'Low emission: {low} of {total} motorised vehicles ({share} %).',
+  'fleet.fuelConsumption.withholdable': 'Declared net salary: {salary} · possible deduction this month: {max} at most.',
   'fleet.fuelConsumption.form.monthlySalary': "Driver's net monthly salary",
-  'fleet.fuelConsumption.form.monthlySalaryHint':
-    'With the other deductions of the month, the deduction cannot exceed the share of the salary set in the fleet settings under the applicable labour law.',
+  'fleet.fuelConsumption.form.monthlySalaryHint': 'Other deductions of the month included, at most the share of salary set in the settings.',
   'fleet.fuelConsumption.emissions.title': 'Emissions and eco-driving by vehicle',
-  'fleet.fuelConsumption.emissions.summary': '{count} vehicle(s) · {tons} t of CO₂',
+  'fleet.fuelConsumption.emissions.summary': 'Vehicles: {count} · {tons} t of CO₂',
   'fleet.fuelConsumption.emissions.loadError': 'The emissions could not be loaded.',
   'fleet.fuelConsumption.emissions.empty': 'No refill recorded.',
   'fleet.fuelConsumption.emissions.col.fuelType': 'Energy',
@@ -54,6 +51,6 @@ export default {
   'fleet.fuelConsumption.emissions.col.co2Kg': 'CO₂ emitted (kg)',
   'fleet.fuelConsumption.emissions.col.gramsPerKm': 'g of CO₂ / km',
   'fleet.fuelConsumption.emissions.col.ecoEvents': 'Eco-driving',
-  'fleet.fuelConsumption.emissions.ecoCount': '{count} event(s)',
+  'fleet.fuelConsumption.emissions.ecoCount': 'No event | {count} event | {count} events',
   'fleet.fuelConsumption.emissions.noEco': 'None'
 }

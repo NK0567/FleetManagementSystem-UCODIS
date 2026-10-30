@@ -3,6 +3,8 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { FileDown, FileSpreadsheet } from '@lucide/vue'
 import { apiErrorMessage } from '@/core/api/apiError'
+import { usePermissions } from '@/composables/usePermissions'
+import PrimaryActionButton from '@/modules/fleet/shared/components/PrimaryActionButton.vue'
 import { todayIso } from '@/utils/date'
 import { formatDate } from '@/utils/format'
 import { useReportFormat } from '../composables/useReportFormat'
@@ -19,6 +21,7 @@ import {
 
 const { t } = useI18n()
 const { toTable } = useReportFormat()
+const { canExport } = usePermissions('FLEETREPORT')
 
 const today = todayIso()
 const kind = ref<ReportKind>('summary')
@@ -107,6 +110,13 @@ const fileName = computed(() =>
     : ''
 )
 
+/** Why the report cannot be exported yet, shown on hover. */
+const exportBlocked = computed(() =>
+  periodInvalid.value || comparisonIncomplete.value || !report.value
+    ? t('fleet.reports.exportBlocked')
+    : undefined
+)
+
 async function exportAs(format: 'xlsx' | 'pdf') {
   if (!report.value) return
   exporting.value = true
@@ -136,18 +146,23 @@ async function exportAs(format: 'xlsx' | 'pdf') {
         <h1 class="text-xl font-semibold text-card-foreground">{{ t('fleet.reports.title') }}</h1>
         <p class="text-sm text-muted-foreground">{{ subtitle }}</p>
       </div>
-      <div class="flex gap-2">
+      <div v-if="canExport" class="flex gap-2">
+        <PrimaryActionButton
+          :label="t('fleet.reports.export.xlsx')"
+          :icon="FileSpreadsheet"
+          :disabled="loading || exporting"
+          :disabled-reason="exportBlocked"
+          @click="exportAs('xlsx')"
+        />
         <button
-          v-for="format in ['xlsx', 'pdf'] as const"
-          :key="format"
           type="button"
           class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
-          :disabled="!report || loading || exporting"
-          @click="exportAs(format)"
+          :disabled="loading || exporting || !!exportBlocked"
+          :title="exportBlocked"
+          @click="exportAs('pdf')"
         >
-          <FileSpreadsheet v-if="format === 'xlsx'" class="w-5 h-5 text-primary" />
-          <FileDown v-else class="w-5 h-5 text-primary" />
-          {{ t(`fleet.reports.export.${format}`) }}
+          <FileDown class="w-4 h-4 text-primary" />
+          {{ t('fleet.reports.export.pdf') }}
         </button>
       </div>
     </header>

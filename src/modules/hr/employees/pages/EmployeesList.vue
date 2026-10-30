@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { RefreshCw, Upload } from '@lucide/vue'
 import { apiErrorMessage } from '@/core/api/apiError'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
+import type { MoreAction } from '@/components/shared/MoreActionsMenu.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
 import { useListCellFormatters } from '@/composables/useListCellFormatters'
 import { useListPage } from '@/composables/useListPage'
@@ -265,12 +266,33 @@ async function synchronize() {
     syncing.value = false
   }
 }
+
+/** Secondary gestures of the list, behind « Plus d'actions ». */
+const moreActions = computed<MoreAction[]>(() => [
+  {
+    key: 'import',
+    label: t('hr.employees.import.action'),
+    icon: Upload,
+    hidden: !canInsert.value,
+    onSelect: () => (importing.value = true)
+  },
+  {
+    key: 'sync',
+    label: t('hr.employees.sync.action'),
+    icon: RefreshCw,
+    hidden: !canInsert.value,
+    disabled: syncing.value,
+    title: t('hr.employees.sync.hint'),
+    onSelect: () => void synchronize()
+  }
+])
 </script>
 
 <template>
   <div class="h-full flex flex-col bg-white">
     <template v-if="!hideListContent">
       <ListPageToolbar
+        :more-actions="moreActions"
         :title="t('hr.employees.title')"
         :exporting="exporting"
         :show-filter-panel="showFilterPanel"
@@ -312,26 +334,6 @@ async function synchronize() {
             :reset-preferences="resetPreferences"
           />
         </template>
-        <template v-if="canInsert" #extra-actions>
-          <button
-            type="button"
-            class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
-            @click="importing = true"
-          >
-            <Upload class="w-4 h-4 text-primary" />
-            {{ t('hr.employees.import.action') }}
-          </button>
-          <button
-            type="button"
-            class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60"
-            :disabled="syncing"
-            :title="t('hr.employees.sync.hint')"
-            @click="synchronize"
-          >
-            <RefreshCw class="w-4 h-4 text-primary" />
-            {{ t('hr.employees.sync.action') }}
-          </button>
-        </template>
       </ListPageToolbar>
 
       <FormAlerts class="mx-4" :error="exportError" @clear:error="exportError = null" />
@@ -359,7 +361,9 @@ async function synchronize() {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('hr.employees.noResults')"
+        :no-results-message="
+          canInsert ? t('hr.employees.noResultsCreate') : t('hr.employees.noResults')
+        "
         :no-search-results-message="t('hr.employees.noSearchResults', { query: store.searchQuery })"
         :page="store.pagination.page"
         :total-pages="store.pagination.totalPages"

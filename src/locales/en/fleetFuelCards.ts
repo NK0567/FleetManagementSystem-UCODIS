@@ -53,5 +53,6 @@ export default {
   'fleet.fuelCards.form.monthLiters': 'Litres used',
   'fleet.fuelCards.form.blockReason': 'Reason for blocking',
   'fleet.fuelCards.form.unblockComment': 'Comment (optional)',
-  'fleet.fuelCards.form.history': 'History'
+  'fleet.fuelCards.form.history': 'History',
+  'fleet.fuelCards.noResultsCreate': 'No fuel card. Create one with New.'
 }

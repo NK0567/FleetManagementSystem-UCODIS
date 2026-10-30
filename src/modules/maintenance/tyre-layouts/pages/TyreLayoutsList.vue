@@ -200,7 +200,11 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('maintenance.tyreLayouts.noResults')"
+        :no-results-message="
+          canInsert
+            ? t('maintenance.tyreLayouts.noResultsCreate')
+            : t('maintenance.tyreLayouts.noResults')
+        "
         :no-search-results-message="
           t('maintenance.tyreLayouts.noSearchResults', { query: store.searchQuery })
         "

@@ -30,5 +30,7 @@ export default {
   'planning.carrierInvoices.kpi.untariffedSub': 'To validate with a reason',
   'planning.carrierInvoices.kpi.validated': 'Validated',
   'planning.carrierInvoices.kpi.refused': 'Refused',
-  'planning.carrierInvoices.kpi.refusedSub': 'Their orders can be invoiced again'
+  'planning.carrierInvoices.kpi.refusedSub': 'Their orders can be invoiced again',
+  'planning.carrierInvoices.recordNew': 'Record an invoice',
+  'planning.carrierInvoices.emptyCreate': 'No carrier invoice. Record one with Record an invoice.'
 }

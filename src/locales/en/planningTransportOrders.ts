@@ -221,7 +221,7 @@ export default {
   'planning.transportOrders.lines.state.not_loaded': 'Not loaded',
   'planning.transportOrders.compartments.title': 'Split by compartment',
   'planning.transportOrders.compartments.hint':
-    'A proposal that tries the combinations the compartment rules allow and keeps the one that leaves the least behind. The planner keeps the last word.',
+    'Proposal computed from the compartment rules. You stay in control.',
   'planning.transportOrders.compartments.issues':
     'Nothing to check | {n} point to check | {n} points to check',
   'planning.transportOrders.compartments.noRoom':
@@ -488,10 +488,9 @@ export default {
   'planning.transportOrders.routePlan.changeConfirm': 'Change the route',
   'planning.transportOrders.routePlan.history': 'Former routes',
   'planning.transportOrders.routePlan.mode': 'Transport mode: {mode}',
-  'planning.transportOrders.expired.alert':
-    'This order is past its date without being carried out: it has expired. Reschedule or cancel it.',
+  'planning.transportOrders.expired.alert': 'Expired order: reschedule or cancel it.',
   'planning.transportOrders.expired.blocked':
-    'This order is past its date without being carried out: it can no longer be loaded until rescheduled or cancelled.',
+    'Expired order: it can no longer be loaded. Reschedule or cancel it.',
   'planning.transportOrders.expired.reschedule': 'Reschedule',
   'planning.transportOrders.proposal.title': 'Loading proposal',
   'planning.transportOrders.proposal.hint':
@@ -542,5 +541,18 @@ export default {
   'planning.transportOrders.delay': '+{min} min',
   'planning.transportOrders.board.eta': 'Estimated arrival',
   'planning.transportOrders.replan.proposedOn': 'Proposed to the recipient: {date}',
-  'planning.transportOrders.lines.trackingLink': 'Recipient tracking link'
+  'planning.transportOrders.lines.trackingLink': 'Recipient tracking link',
+  'planning.transportOrders.view.all': 'All',
+  'planning.transportOrders.view.lateHint': 'Show only late orders',
+  'planning.transportOrders.board.list': 'List',
+  'planning.transportOrders.waiting.toPlan':
+    'No order to plan | 1 order to plan | {n} orders to plan',
+  'planning.transportOrders.waiting.late':
+    'No late transport order | 1 late transport order | {n} late transport orders',
+  'planning.transportOrders.waiting.expiredRequests':
+    'No expired order | 1 expired order | {n} expired orders',
+  'planning.transportOrders.waiting.expiredOrders':
+    'No expired transport order on this page | 1 expired transport order on this page | {n} expired transport orders on this page',
+  'planning.transportOrders.noResultsCreate': 'No transport order. Create one with New.',
+  'planning.transportOrders.action.addLines': 'Add lines'
 }

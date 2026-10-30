@@ -45,11 +45,12 @@ export default {
   'fleet.insurancePolicies.listView.inForce': 'In force or upcoming',
   'fleet.insurancePolicies.listView.toRenew': 'To renew',
   'fleet.insurancePolicies.listView.all': 'All, history included',
-  'fleet.insurancePolicies.action.terminate': 'Terminate',
+  'fleet.insurancePolicies.action.terminate': 'Terminate the policy',
   'fleet.insurancePolicies.form.termination': 'Termination',
   'fleet.insurancePolicies.form.terminatedOn': 'Termination date',
   'fleet.insurancePolicies.form.terminationReason': 'Reason for the termination',
   'fleet.insurancePolicies.issue.endBeforeStart': 'The end date is before the start of the policy.',
   'fleet.insurancePolicies.issue.terminationOutsidePeriod':
-    'The termination must fall within the policy period.'
+    'The termination must fall within the policy period.',
+  'fleet.insurancePolicies.noResultsCreate': 'No insurance policy. Create one with New.'
 }

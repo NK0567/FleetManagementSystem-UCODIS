@@ -44,5 +44,6 @@ export default {
   'hr.leaveTypes.form.monthlyAccrualDays': 'Days accrued per month',
   'hr.leaveTypes.form.maxCarryOverDays': 'Maximum carried over to the next year',
   'hr.leaveTypes.form.noticeDays': 'Request notice (days)',
-  'hr.leaveTypes.form.tracksBalance': 'Tracked in balances'
+  'hr.leaveTypes.form.tracksBalance': 'Tracked in balances',
+  'hr.leaveTypes.noResultsCreate': 'No leave type. Create one with New.'
 }

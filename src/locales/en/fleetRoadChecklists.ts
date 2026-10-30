@@ -37,5 +37,6 @@ export default {
   'fleet.roadChecklists.signedBy': 'Signed by {name} on {date}',
   'fleet.roadChecklists.unsigned': 'Not signed',
   'fleet.roadChecklists.syncedOnline': 'Synchronized on {date}',
-  'fleet.roadChecklists.syncedOffline': 'Taken offline, synchronized on {date}'
+  'fleet.roadChecklists.syncedOffline': 'Taken offline, synchronized on {date}',
+  'fleet.roadChecklists.noResultsCreate': 'No checklist. Create one with New.'
 }

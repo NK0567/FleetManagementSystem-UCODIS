@@ -29,5 +29,6 @@ export default {
   'maintenance.tyreLayouts.form.removeAxle': "Retirer l'essieu",
   'maintenance.tyreLayouts.form.positions': 'Positions :',
   'maintenance.tyreLayouts.form.positionCount': 'Aucune position | 1 position | {count} positions',
-  'maintenance.tyreLayouts.form.layoutInvalid': 'Nommez chaque essieu ; de 0 à 4 roues de secours.'
+  'maintenance.tyreLayouts.form.layoutInvalid': 'Nommez chaque essieu ; de 0 à 4 roues de secours.',
+  'maintenance.tyreLayouts.noResultsCreate': 'Aucun plan de pneus. Créez-en un avec Nouveau.'
 }

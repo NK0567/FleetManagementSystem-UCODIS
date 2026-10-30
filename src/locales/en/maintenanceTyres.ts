@@ -104,5 +104,6 @@ export default {
   'maintenance.tyres.plan.mount': 'Mount',
   'maintenance.tyres.plan.tyre': 'Tyre in stock',
   'maintenance.tyres.plan.pickTyre': 'Pick a tyre',
-  'maintenance.tyres.plan.noStock': 'No tyre in stock.'
+  'maintenance.tyres.plan.noStock': 'No tyre in stock.',
+  'maintenance.tyres.noResultsCreate': 'No tyre. Create one with New.'
 }

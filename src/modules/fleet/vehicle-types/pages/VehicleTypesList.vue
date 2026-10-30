@@ -78,6 +78,24 @@ const filterDefs: FilterFieldDef[] = [
     valueType: 'string',
     kind: 'option',
     optionsKey: 'couplingRole'
+  },
+  {
+    field: 'motorized',
+    labelKey: 'fleet.vehicleTypes.col.motorized',
+    valueType: 'boolean',
+    kind: 'boolean'
+  },
+  {
+    field: 'carriesGoods',
+    labelKey: 'fleet.vehicleTypes.col.carriesGoods',
+    valueType: 'boolean',
+    kind: 'boolean'
+  },
+  {
+    field: 'active',
+    labelKey: 'fleet.vehicleTypes.col.active',
+    valueType: 'boolean',
+    kind: 'boolean'
   }
 ]
 
@@ -224,7 +242,9 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('fleet.vehicleTypes.noResults')"
+        :no-results-message="
+          canInsert ? t('fleet.vehicleTypes.noResultsCreate') : t('fleet.vehicleTypes.noResults')
+        "
         :no-search-results-message="
           t('fleet.vehicleTypes.noSearchResults', { query: store.searchQuery })
         "

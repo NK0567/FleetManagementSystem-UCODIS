@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
 import { useListCellFormatters } from '@/composables/useListCellFormatters'
 import { useListPage } from '@/composables/useListPage'
@@ -44,6 +45,22 @@ const tableColumns = computed<TableColumn[]>(() => [
   },
   { sortKey: 'modifiedBy', label: t('common.audit.modifiedBy'), minW: '110px', defaultHidden: true }
 ])
+
+/* Coded columns are filtered with a choice, never typed. */
+const filterDefs: FilterFieldDef[] = [
+  {
+    field: 'chargeable',
+    labelKey: 'fleet.fuelGapCauses.col.chargeable',
+    valueType: 'boolean',
+    kind: 'boolean'
+  },
+  {
+    field: 'active',
+    labelKey: 'fleet.fuelGapCauses.col.active',
+    valueType: 'boolean',
+    kind: 'boolean'
+  }
+]
 
 const detailKeys = ['chargeable', 'active']
 const detailColumns = computed(() =>
@@ -113,6 +130,7 @@ const {
   feature: 'FUELGAPCAUSE',
   store,
   columns: tableColumns,
+  filterDefs,
   exportFileBaseName: 'fuel-gap-causes',
   exportApi: fuelGapCauseApi.exportExcel,
   remove: fuelGapCauseService.remove,
@@ -187,7 +205,9 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('fleet.fuelGapCauses.noResults')"
+        :no-results-message="
+          canInsert ? t('fleet.fuelGapCauses.noResultsCreate') : t('fleet.fuelGapCauses.noResults')
+        "
         :no-search-results-message="
           t('fleet.fuelGapCauses.noSearchResults', { query: store.searchQuery })
         "

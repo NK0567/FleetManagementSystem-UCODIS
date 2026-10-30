@@ -30,6 +30,8 @@ export default {
     "La cause que l'application choisit seule pour une panne, un entretien, un accident, un document expiré, une contre-visite ou un entretien dépassé. Un seul code par rôle.",
   'maintenance.downtimeCodes.form.active': 'Active',
   'maintenance.downtimeCodes.reset': 'Revenir aux causes proposées',
-  'maintenance.downtimeCodes.resetConfirm': 'Les causes proposées retrouvent leur libellé, leur famille et leur rôle. Les causes ajoutées depuis sont supprimées, sauf celles qui qualifient déjà une indisponibilité.',
-  'maintenance.downtimeCodes.resetError': "Les causes proposées n'ont pas pu être rétablies."
+  'maintenance.downtimeCodes.resetConfirm':
+    'Les causes proposées retrouvent leur libellé, leur famille et leur rôle. Les causes ajoutées depuis sont supprimées, sauf celles qui qualifient déjà une indisponibilité.',
+  'maintenance.downtimeCodes.resetError': "Les causes proposées n'ont pas pu être rétablies.",
+  'maintenance.downtimeCodes.noResultsCreate': 'Aucune cause. Créez-en une avec Nouveau.'
 }

@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
 import { useListCellFormatters } from '@/composables/useListCellFormatters'
 import { useListPage } from '@/composables/useListPage'
@@ -71,6 +72,29 @@ const tableColumns = computed<TableColumn[]>(() => [
   { sortKey: 'modifiedBy', label: t('common.audit.modifiedBy'), minW: '110px', defaultHidden: true }
 ])
 
+/* Coded columns are filtered with a choice, never typed. */
+const filterDefs: FilterFieldDef[] = [
+  {
+    field: 'loadingDepot',
+    labelKey: 'fleet.siteTypes.col.loadingDepot',
+    valueType: 'boolean',
+    kind: 'boolean'
+  },
+  {
+    field: 'restAllowed',
+    labelKey: 'fleet.siteTypes.col.restAllowed',
+    valueType: 'boolean',
+    kind: 'boolean'
+  },
+  {
+    field: 'restricted',
+    labelKey: 'fleet.siteTypes.col.restricted',
+    valueType: 'boolean',
+    kind: 'boolean'
+  },
+  { field: 'active', labelKey: 'fleet.siteTypes.col.active', valueType: 'boolean', kind: 'boolean' }
+]
+
 const detailKeys = ['defaultRadiusM', 'siteCount', 'loadingDepot', 'restAllowed', 'restricted']
 const detailColumns = computed(() =>
   detailKeys
@@ -139,6 +163,7 @@ const {
   feature: 'SITETYPE',
   store,
   columns: tableColumns,
+  filterDefs,
   exportFileBaseName: 'site-types',
   exportApi: siteTypeApi.exportExcel,
   remove: siteTypeService.remove,
@@ -213,7 +238,9 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('fleet.siteTypes.noResults')"
+        :no-results-message="
+          canInsert ? t('fleet.siteTypes.noResultsCreate') : t('fleet.siteTypes.noResults')
+        "
         :no-search-results-message="
           t('fleet.siteTypes.noSearchResults', { query: store.searchQuery })
         "

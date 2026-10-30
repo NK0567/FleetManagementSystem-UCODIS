@@ -216,7 +216,9 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('hr.leaveTypes.noResults')"
+        :no-results-message="
+          canInsert ? t('hr.leaveTypes.noResultsCreate') : t('hr.leaveTypes.noResults')
+        "
         :no-search-results-message="
           t('hr.leaveTypes.noSearchResults', { query: store.searchQuery })
         "

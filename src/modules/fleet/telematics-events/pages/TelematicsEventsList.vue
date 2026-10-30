@@ -68,12 +68,18 @@ const tableColumns = computed<TableColumn[]>(() => [
   { sortKey: 'eventTypeName', label: t('fleet.telematicsEvents.col.eventTypeName'), minW: '200px' },
   { sortKey: 'vehiclePlate', label: t('fleet.telematicsEvents.col.vehiclePlate'), minW: '120px' },
   { sortKey: 'driverName', label: t('fleet.telematicsEvents.col.driverName'), minW: '170px' },
-  { sortKey: 'siteName', label: t('fleet.telematicsEvents.col.siteName'), minW: '170px' },
+  {
+    sortKey: 'siteName',
+    label: t('fleet.telematicsEvents.col.siteName'),
+    minW: '170px',
+    defaultHidden: true
+  },
   {
     sortKey: 'family',
     label: t('fleet.telematicsEvents.col.family'),
     minW: '120px',
-    formatter: optionLabel('telematicsFamily')
+    formatter: optionLabel('telematicsFamily'),
+    defaultHidden: true
   },
   {
     sortKey: 'severity',
@@ -81,7 +87,12 @@ const tableColumns = computed<TableColumn[]>(() => [
     minW: '110px',
     formatter: optionLabel('telematicsSeverity')
   },
-  { sortKey: 'status', label: t('fleet.telematicsEvents.col.status'), minW: '120px' },
+  {
+    sortKey: 'status',
+    label: t('fleet.telematicsEvents.col.status'),
+    minW: '120px',
+    formatter: optionLabel('telematicsEventStatus')
+  },
   {
     sortKey: 'modifiedAt',
     label: t('common.audit.modifiedAt'),
@@ -92,7 +103,15 @@ const tableColumns = computed<TableColumn[]>(() => [
   { sortKey: 'modifiedBy', label: t('common.audit.modifiedBy'), minW: '110px', defaultHidden: true }
 ])
 
+/* The status is chosen among its labels, never typed: the views fill it with raw codes. */
 const filterDefs: FilterFieldDef[] = [
+  {
+    field: 'status',
+    labelKey: 'fleet.telematicsEvents.col.status',
+    valueType: 'string',
+    kind: 'option',
+    optionsKey: 'telematicsEventStatus'
+  },
   {
     field: 'source',
     labelKey: 'fleet.telematicsEvents.col.source',
@@ -249,7 +268,11 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('fleet.telematicsEvents.noResults')"
+        :no-results-message="
+          canInsert
+            ? t('fleet.telematicsEvents.noResultsCreate')
+            : t('fleet.telematicsEvents.noResults')
+        "
         :no-search-results-message="
           t('fleet.telematicsEvents.noSearchResults', { query: store.searchQuery })
         "

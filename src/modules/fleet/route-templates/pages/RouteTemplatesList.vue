@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
 import { useListCellFormatters } from '@/composables/useListCellFormatters'
 import { useListPage } from '@/composables/useListPage'
@@ -80,6 +81,22 @@ const tableColumns = computed<TableColumn[]>(() => [
   { sortKey: 'modifiedBy', label: t('common.audit.modifiedBy'), minW: '110px', defaultHidden: true }
 ])
 
+/* Coded columns are filtered with a choice, never typed. */
+const filterDefs: FilterFieldDef[] = [
+  {
+    field: 'recurring',
+    labelKey: 'fleet.routeTemplates.col.recurring',
+    valueType: 'boolean',
+    kind: 'boolean'
+  },
+  {
+    field: 'active',
+    labelKey: 'fleet.routeTemplates.col.active',
+    valueType: 'boolean',
+    kind: 'boolean'
+  }
+]
+
 const detailKeys = [
   'originName',
   'destinationName',
@@ -154,6 +171,7 @@ const {
   feature: 'ROUTETEMPLATE',
   store,
   columns: tableColumns,
+  filterDefs,
   exportFileBaseName: 'route-templates',
   exportApi: routeTemplateApi.exportExcel,
   remove: routeTemplateService.remove,
@@ -228,7 +246,11 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('fleet.routeTemplates.noResults')"
+        :no-results-message="
+          canInsert
+            ? t('fleet.routeTemplates.noResultsCreate')
+            : t('fleet.routeTemplates.noResults')
+        "
         :no-search-results-message="
           t('fleet.routeTemplates.noSearchResults', { query: store.searchQuery })
         "

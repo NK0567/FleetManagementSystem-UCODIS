@@ -51,12 +51,19 @@ export default {
   'hr.orgUnits.form.totalHeadcount': 'Headcount including sub-units',
   'hr.referenceImport.action': 'Import',
   'hr.referenceImport.orgUnits.title': 'Import units',
-  'hr.referenceImport.orgUnits.hint': 'Each line follows the rules of the form: code and name required, a code already used is refused, the parent unit and the site are found by their code or name. An imported unit waits for its validation.',
-  'hr.referenceImport.orgUnits.created': 'No unit created. | One unit created. | {n} units created.',
+  'hr.referenceImport.orgUnits.hint':
+    'Each line follows the rules of the form: code and name required, a code already used is refused, the parent unit and the site are found by their code or name. An imported unit waits for its validation.',
+  'hr.referenceImport.orgUnits.created':
+    'No unit created. | One unit created. | {n} units created.',
   'hr.referenceImport.employeeCategories.title': 'Import categories',
-  'hr.referenceImport.employeeCategories.hint': 'Each line follows the rules of the form: code, name and annual leave days required, a code already used is refused.',
-  'hr.referenceImport.employeeCategories.created': 'No category created. | One category created. | {n} categories created.',
+  'hr.referenceImport.employeeCategories.hint':
+    'Each line follows the rules of the form: code, name and annual leave days required, a code already used is refused.',
+  'hr.referenceImport.employeeCategories.created':
+    'No category created. | One category created. | {n} categories created.',
   'hr.referenceImport.jobPositions.title': 'Import job positions',
-  'hr.referenceImport.jobPositions.hint': 'Each line follows the rules of the form: code, name, unit and category required, a code already used is refused. The unit and the category are given by their code or name; responsibilities are separated by a semicolon.',
-  'hr.referenceImport.jobPositions.created': 'No job position created. | One job position created. | {n} job positions created.'
+  'hr.referenceImport.jobPositions.hint':
+    'Each line follows the rules of the form: code, name, unit and category required, a code already used is refused. The unit and the category are given by their code or name; responsibilities are separated by a semicolon.',
+  'hr.referenceImport.jobPositions.created':
+    'No job position created. | One job position created. | {n} job positions created.',
+  'hr.orgUnits.noResultsCreate': 'No unit. Create one with New.'
 }

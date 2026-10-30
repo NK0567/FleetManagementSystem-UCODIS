@@ -19,6 +19,17 @@ const REQUIRED = new Set<keyof CompanySettingsInput>(['legalName', 'entityName',
 
 const { t } = useI18n()
 const { canUpdate } = usePermissions('COMPANYSETTINGS')
+/* The tiles open the vehicle list, for whoever may read it. */
+const { canRead: canSeeVehicles } = usePermissions('VEHICLE')
+const parkTiles = computed(() =>
+  company.value
+    ? [
+        { key: 'tractors', count: company.value.tractorCount, highlight: false },
+        { key: 'trailers', count: company.value.trailerCount, highlight: false },
+        { key: 'vehicles', count: company.value.vehicleCount, highlight: true }
+      ]
+    : []
+)
 
 const company = ref<CompanySettingsApi | null>(null)
 const draft = reactive<CompanySettingsInput>({
@@ -90,6 +101,13 @@ onMounted(load)
           type="button"
           class="px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded hover:opacity-90 transition disabled:opacity-60"
           :disabled="!dirty || missing || saving"
+          :title="
+            !dirty
+              ? t('settings.company.noChange')
+              : missing
+                ? t('settings.company.missingFields')
+                : undefined
+          "
           @click="save"
         >
           {{ t('common.save') }}
@@ -131,24 +149,29 @@ onMounted(load)
           <Truck class="w-4 h-4 text-primary" /> {{ t('settings.company.park') }}
         </h2>
         <div class="grid grid-cols-3 gap-3">
-          <div class="rounded bg-accent/40 p-3 text-center">
-            <p class="text-2xl font-semibold tabular-nums text-card-foreground">
-              {{ company.tractorCount }}
+          <component
+            :is="canSeeVehicles ? 'RouterLink' : 'div'"
+            v-for="tile in parkTiles"
+            :key="tile.key"
+            v-bind="canSeeVehicles ? { to: '/fleet/vehicles' } : {}"
+            :title="canSeeVehicles ? t('settings.company.seeVehicles') : undefined"
+            class="rounded p-3 text-center transition"
+            :class="[
+              tile.highlight ? 'bg-primary/10' : 'bg-accent/40',
+              canSeeVehicles ? 'hover:ring-1 hover:ring-primary cursor-pointer' : ''
+            ]"
+            :data-testid="`park-${tile.key}`"
+          >
+            <p
+              class="text-2xl font-semibold tabular-nums"
+              :class="tile.highlight ? 'text-primary' : 'text-card-foreground'"
+            >
+              {{ tile.count }}
             </p>
-            <p class="text-xs text-muted-foreground">{{ t('settings.company.tractors') }}</p>
-          </div>
-          <div class="rounded bg-accent/40 p-3 text-center">
-            <p class="text-2xl font-semibold tabular-nums text-card-foreground">
-              {{ company.trailerCount }}
+            <p class="text-xs" :class="tile.highlight ? 'text-primary' : 'text-muted-foreground'">
+              {{ t(`settings.company.${tile.key}`) }}
             </p>
-            <p class="text-xs text-muted-foreground">{{ t('settings.company.trailers') }}</p>
-          </div>
-          <div class="rounded bg-primary/10 p-3 text-center">
-            <p class="text-2xl font-semibold tabular-nums text-primary">
-              {{ company.vehicleCount }}
-            </p>
-            <p class="text-xs text-primary">{{ t('settings.company.vehicles') }}</p>
-          </div>
+          </component>
         </div>
       </section>
     </div>

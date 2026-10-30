@@ -23,5 +23,6 @@ export default {
   'hr.publicHolidays.form.no': 'No.',
   'hr.publicHolidays.form.name': 'Name',
   'hr.publicHolidays.form.date': 'Date',
-  'hr.publicHolidays.form.recurring': 'Comes back every year'
+  'hr.publicHolidays.form.recurring': 'Comes back every year',
+  'hr.publicHolidays.noResultsCreate': 'No public holiday. Create one with New.'
 }

@@ -45,5 +45,6 @@ export default {
   'hr.leaveTypes.form.monthlyAccrualDays': 'Jours acquis par mois',
   'hr.leaveTypes.form.maxCarryOverDays': "Report maximal d'une année sur l'autre",
   'hr.leaveTypes.form.noticeDays': 'Préavis de demande (jours)',
-  'hr.leaveTypes.form.tracksBalance': 'Suivi dans les soldes'
+  'hr.leaveTypes.form.tracksBalance': 'Suivi dans les soldes',
+  'hr.leaveTypes.noResultsCreate': 'Aucun type de congé. Créez-en un avec Nouveau.'
 }

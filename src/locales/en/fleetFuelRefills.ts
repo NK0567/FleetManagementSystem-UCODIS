@@ -42,7 +42,7 @@ export default {
   'fleet.fuelRefills.actionError': 'The action could not be completed.',
   'fleet.fuelRefills.listView.all': 'All refills',
   'fleet.fuelRefills.listView.anomaly': 'With an anomaly',
-  'fleet.fuelRefills.action.qualify': 'Qualify',
+  'fleet.fuelRefills.action.qualify': 'Qualify the anomaly',
   'fleet.fuelRefills.form.driverHint': 'Left empty, the driver assigned to the vehicle that day.',
   'fleet.fuelRefills.form.receipt': 'Receipt',
   'fleet.fuelRefills.form.amount': 'Amount',
@@ -52,8 +52,8 @@ export default {
   'fleet.fuelRefills.form.comment': 'Comment',
   'fleet.fuelRefills.import.action': 'Import',
   'fleet.fuelRefills.import.title': 'Import refills',
-  'fleet.fuelRefills.import.hint':
-    'CSV file (; or , separated) with a header line. The vehicle is found by its plate, the driver by their employee number; left empty, it is worked out from the assignment or the trip. Each line is checked like a refill typed in by hand.',
+  'fleet.fuelRefills.import.hint': 'CSV file with a header line: vehicle by plate, driver by employee number (deduced when missing).',
   'fleet.fuelRefills.import.created':
-    'No refill created. | One refill created. | {n} refills created.'
+    'No refill created. | One refill created. | {n} refills created.',
+  'fleet.fuelRefills.noResultsCreate': 'No refill. Create one with New.'
 }

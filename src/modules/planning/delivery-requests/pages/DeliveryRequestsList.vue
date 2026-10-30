@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref, watch } from 'vue'
-import { Cable, RefreshCw, Upload, Truck } from '@lucide/vue'
+import { Cable, Plus, RefreshCw, Upload, Truck } from '@lucide/vue'
+import type { MoreAction } from '@/components/shared/MoreActionsMenu.vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
@@ -66,13 +67,22 @@ async function loadCounters() {
     all.value = []
   }
 }
-const counters = computed(() => [
-  { key: 'pending', value: all.value.filter((row) => row.status === 'pending').length },
+const counters = computed<{ key: string; value: number; view?: string }[]>(() => [
+  {
+    key: 'pending',
+    view: 'pending',
+    value: all.value.filter((row) => row.status === 'pending').length
+  },
   {
     key: 'planned',
+    view: 'planned',
     value: all.value.filter((row) => row.status === 'planned' && !delivered(row)).length
   },
-  { key: 'rejected', value: all.value.filter((row) => row.status === 'rejected').length },
+  {
+    key: 'rejected',
+    view: 'rejected',
+    value: all.value.filter((row) => row.status === 'rejected').length
+  },
   { key: 'delivered', value: all.value.filter(delivered).length }
 ])
 function delivered(row: DeliveryRequestApi) {
@@ -226,6 +236,13 @@ const tableColumns = computed<TableColumn[]>(() => [
 
 const filterDefs: FilterFieldDef[] = [
   {
+    field: 'status',
+    labelKey: 'planning.deliveryRequests.col.status',
+    valueType: 'string',
+    kind: 'option',
+    optionsKey: 'deliveryRequestStatus'
+  },
+  {
     field: 'kind',
     labelKey: 'planning.deliveryRequests.col.kind',
     valueType: 'string',
@@ -321,6 +338,62 @@ const {
   exportFileBaseName: 'delivery-requests',
   exportApi: deliveryRequestApi.exportExcel
 })
+
+/* The status views of the list, in the view selector of the toolbar, in sync with the filter. */
+const STATUS_VIEWS = ['pending', 'planned', 'expired', 'rejected', 'cancelled'] as const
+const listViewOptions = computed(() => [
+  { value: 'all', label: t('planning.deliveryRequests.view.all') },
+  ...STATUS_VIEWS.map((status) => ({
+    value: status,
+    label: t(`planning.deliveryRequests.view.${status}`)
+  }))
+])
+const listView = computed(
+  () =>
+    (store.userFilters.find((filter) => filter.field === 'status')?.value as string | undefined) ??
+    'all'
+)
+function setListView(value: string) {
+  const others = store.userFilters.filter((filter) => filter.field !== 'status')
+  onUpdateUserFilters(
+    value === 'all' ? others : [...others, { field: 'status', valueType: 'string', value }]
+  )
+}
+
+/* The planner's main gesture here is to turn the waiting orders into a transport order; the
+ * orderer's is to place an order. The other ways in wait in « Plus d'actions ». */
+const orderFirst = computed(() => canCreateOrder.value)
+const moreActions = computed<MoreAction[]>(() => [
+  {
+    key: 'new',
+    label: t('planning.deliveryRequests.action.new'),
+    icon: Plus,
+    hidden: !orderFirst.value || !canInsert.value || !entryOpen.value,
+    onSelect: openCreateModal
+  },
+  {
+    key: 'import',
+    label: t('planning.deliveryRequests.import.actionLong'),
+    icon: Upload,
+    hidden: !canInsert.value || !circuit.value.intake.fileImport,
+    onSelect: () => (importing.value = true)
+  },
+  {
+    key: 'sync',
+    label: t('planning.deliveryRequests.intake.sync'),
+    icon: RefreshCw,
+    hidden: !canReceive.value || !circuit.value.intake.erpConnector,
+    disabled: syncing.value,
+    onSelect: () => void syncConnector()
+  },
+  {
+    key: 'api',
+    label: t('planning.deliveryRequests.intake.api'),
+    icon: Cable,
+    hidden: !canReceive.value || !circuit.value.intake.ordererApi,
+    onSelect: () => (showingApi.value = true)
+  }
+])
 </script>
 
 <template>
@@ -334,11 +407,13 @@ const {
         :show-export-excel="canExport"
         :export-excel="exportToExcel"
         :show-details-panel="showDetailsPanel"
-        :show-create="canInsert && entryOpen"
+        :show-create="!orderFirst && canInsert && entryOpen"
         :show-card-actions="showCardActions"
         :can-view-selected="canViewSelected"
         :can-edit-selected="canEditSelected"
-        :show-list-view="false"
+        :list-view-options="listViewOptions"
+        :list-view="listView"
+        :more-actions="moreActions"
         :search-column="store.searchColumn"
         :search-query="store.searchQuery"
         :column-options="searchColumnOptions"
@@ -351,6 +426,7 @@ const {
         @search="store.search"
         @clear="store.clearSearch()"
         @update:search-column="onSearchColumnChange"
+        @update:list-view="setListView"
       >
         <template #column-picker>
           <TableColumnPicker
@@ -366,43 +442,14 @@ const {
             :reset-preferences="resetPreferences"
           />
         </template>
-        <template v-if="canInsert || canCreateOrder || canReceive" #extra-actions>
+        <template v-if="orderFirst" #extra-actions>
           <button
-            v-if="canCreateOrder"
             type="button"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
+            class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded hover:opacity-90 transition"
             @click="creatingOrder = true"
           >
-            <Truck class="w-4 h-4 text-primary" />
+            <Truck class="w-4 h-4" />
             {{ t('planning.transportOrders.action.createFromRequests') }}
-          </button>
-          <button
-            v-if="canInsert && circuit.intake.fileImport"
-            type="button"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
-            @click="importing = true"
-          >
-            <Upload class="w-4 h-4 text-primary" />
-            {{ t('planning.deliveryRequests.import.action') }}
-          </button>
-          <button
-            v-if="canReceive && circuit.intake.erpConnector"
-            type="button"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60"
-            :disabled="syncing"
-            @click="syncConnector"
-          >
-            <RefreshCw class="w-4 h-4 text-primary" />
-            {{ t('planning.deliveryRequests.intake.sync') }}
-          </button>
-          <button
-            v-if="canReceive && circuit.intake.ordererApi"
-            type="button"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
-            @click="showingApi = true"
-          >
-            <Cable class="w-4 h-4 text-primary" />
-            {{ t('planning.deliveryRequests.intake.api') }}
           </button>
         </template>
       </ListPageToolbar>
@@ -415,10 +462,7 @@ const {
         @clear:error="syncError = null"
         @clear:success="syncMessage = null"
       />
-      <p
-        v-if="canInsert && !entryOpen"
-        class="mx-4 mb-2 rounded border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground"
-      >
+      <p v-if="canInsert && !entryOpen" class="mx-4 mb-1 text-xs text-muted-foreground">
         {{
           isOrderer
             ? t('planning.deliveryRequests.intake.serviceClosed')
@@ -426,17 +470,32 @@ const {
         }}
       </p>
 
-      <div class="mx-4 mb-2 flex flex-wrap gap-2">
-        <span
+      <div class="mx-4 my-1.5 flex flex-wrap gap-2" data-testid="request-counters">
+        <component
+          :is="counter.view ? 'button' : 'span'"
           v-for="counter in counters"
           :key="counter.key"
-          class="inline-flex items-center gap-2 rounded border border-border bg-card px-3 py-1.5 text-sm"
+          :type="counter.view ? 'button' : undefined"
+          class="inline-flex items-center gap-2 rounded border px-3 py-1 text-sm"
+          :class="[
+            counter.view && listView === counter.view
+              ? 'border-primary bg-primary/10 text-primary'
+              : 'border-border bg-card',
+            counter.view ? 'cursor-pointer hover:bg-accent' : '',
+            counter.value ? '' : 'opacity-60'
+          ]"
+          :aria-pressed="counter.view ? listView === counter.view : undefined"
+          @click="counter.view && setListView(listView === counter.view ? 'all' : counter.view)"
         >
           <span class="text-muted-foreground">{{
             t(`planning.deliveryRequests.counter.${counter.key}`)
           }}</span>
-          <span class="font-semibold tabular-nums text-card-foreground">{{ counter.value }}</span>
-        </span>
+          <span
+            class="font-semibold tabular-nums"
+            :class="counter.value ? 'text-card-foreground' : 'text-muted-foreground'"
+            >{{ counter.value }}</span
+          >
+        </component>
       </div>
 
       <ListPageLayout
@@ -455,7 +514,11 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('planning.deliveryRequests.noResults')"
+        :no-results-message="
+          !orderFirst && canInsert && entryOpen
+            ? t('planning.deliveryRequests.noResultsCreate')
+            : t('planning.deliveryRequests.noResults')
+        "
         :no-search-results-message="
           t('planning.deliveryRequests.noSearchResults', { query: store.searchQuery })
         "

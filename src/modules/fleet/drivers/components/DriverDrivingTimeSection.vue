@@ -11,7 +11,8 @@ import { formatDateTime } from '@/utils/format'
 const props = defineProps<{ driverNo: string }>()
 
 const { t } = useI18n()
-const open = ref(true)
+/* Opened only when a breach needs reading. */
+const open = ref(false)
 const detail = ref<DriverDrivingTimeApi | null>(null)
 const error = ref<string | null>(null)
 
@@ -19,6 +20,7 @@ async function load() {
   error.value = null
   try {
     detail.value = await drivingTimeService.ofDriver(props.driverNo)
+    open.value = detail.value.trips.length > 0
   } catch (cause) {
     error.value = apiErrorMessage(cause, t('fleet.trips.drivingTime.loadError'))
   }

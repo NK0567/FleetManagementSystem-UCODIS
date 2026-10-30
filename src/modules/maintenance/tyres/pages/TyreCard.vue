@@ -1,7 +1,8 @@
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, type Component } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ArrowLeftRight, CircleArrowDown, Gauge, RotateCcw, Trash2, Wrench } from '@lucide/vue'
+import type { MoreAction } from '@/components/shared/MoreActionsMenu.vue'
 import { apiErrorMessage } from '@/core/api/apiError'
 import { useReferenceStore } from '@/stores/referenceStore'
 import type { TyreAction } from '../api/tyreApi'
@@ -175,8 +176,76 @@ const slotLabel = (slot: TyrePositionSlot) =>
     .filter(Boolean)
     .join(' · ')
 
-const buttonClass =
-  'cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed'
+const primaryClass =
+  'cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-primary text-primary-foreground rounded hover:opacity-90 transition disabled:opacity-60 disabled:cursor-not-allowed'
+
+/** The gestures of the tyre for its status: the usual one is the main button, the others go in
+ * « Plus d'actions ». */
+const actions = computed<(MoreAction & { icon: Component })[]>(() => {
+  const tyre = item.value
+  if (!tyre || !canUpdate.value || isEditMode.value || isFormDirty.value) return []
+  const label = (key: string) => t(`maintenance.tyres.action.${key}`)
+  return [
+    {
+      key: 'mount',
+      label: label('mount'),
+      icon: Wrench,
+      hidden: tyre.status !== 'stock',
+      onSelect: () => void openDialog('mount')
+    },
+    {
+      key: 'reading',
+      label: label('reading'),
+      icon: Gauge,
+      hidden: tyre.status !== 'mounted',
+      onSelect: () => void openDialog('reading')
+    },
+    {
+      key: 'backFromRetread',
+      label: label('backFromRetread'),
+      icon: RotateCcw,
+      hidden: tyre.status !== 'retreading',
+      onSelect: () => void openDialog('backFromRetread')
+    },
+    {
+      key: 'retread',
+      label: label('retread'),
+      icon: RotateCcw,
+      hidden: tyre.status !== 'stock',
+      onSelect: () => void act('retread')
+    },
+    {
+      key: 'rotate',
+      label: label('rotate'),
+      icon: ArrowLeftRight,
+      hidden: tyre.status !== 'mounted',
+      onSelect: () => void openDialog('rotate')
+    },
+    {
+      key: 'dismount',
+      label: label('dismount'),
+      icon: CircleArrowDown,
+      hidden: tyre.status !== 'mounted',
+      onSelect: () => void openDialog('dismount')
+    },
+    {
+      key: 'scrap',
+      label: label('scrap'),
+      icon: Trash2,
+      hidden: !canExecute.value || tyre.status === 'scrapped',
+      danger: true,
+      onSelect: () => (scrapping.value = true)
+    }
+  ]
+})
+const primaryAction = computed(
+  () => actions.value.find((action) => !action.hidden && !action.danger) ?? null
+)
+const secondaryActions = computed(() =>
+  actions.value
+    .filter((action) => action !== primaryAction.value)
+    .map((action) => ({ ...action, disabled: acting.value }))
+)
 </script>
 
 <template>
@@ -199,6 +268,7 @@ const buttonClass =
     :has-next="hasNext"
     :show-edit="canUpdate"
     :show-title-new-button="canInsert"
+    :more-actions="secondaryActions"
     :has-unsaved-changes="isFormDirty"
     :can-save="isFormDirty"
     @close="emit('close')"
@@ -214,55 +284,15 @@ const buttonClass =
     <template #title-badges>
       <TyreStatusPill v-if="item" :status="item.status" />
     </template>
-    <template v-if="item && canUpdate && !isEditMode && !isFormDirty" #action-buttons>
-      <template v-if="item.status === 'stock'">
-        <button type="button" :class="buttonClass" :disabled="acting" @click="openDialog('mount')">
-          <Wrench class="w-5 h-5 text-primary" /> {{ t('maintenance.tyres.action.mount') }}
-        </button>
-        <button type="button" :class="buttonClass" :disabled="acting" @click="act('retread')">
-          <RotateCcw class="w-5 h-5 text-primary" /> {{ t('maintenance.tyres.action.retread') }}
-        </button>
-      </template>
-      <template v-if="item.status === 'mounted'">
-        <button
-          type="button"
-          :class="buttonClass"
-          :disabled="acting"
-          @click="openDialog('reading')"
-        >
-          <Gauge class="w-5 h-5 text-primary" /> {{ t('maintenance.tyres.action.reading') }}
-        </button>
-        <button type="button" :class="buttonClass" :disabled="acting" @click="openDialog('rotate')">
-          <ArrowLeftRight class="w-5 h-5 text-primary" /> {{ t('maintenance.tyres.action.rotate') }}
-        </button>
-        <button
-          type="button"
-          :class="buttonClass"
-          :disabled="acting"
-          @click="openDialog('dismount')"
-        >
-          <CircleArrowDown class="w-5 h-5 text-primary" />
-          {{ t('maintenance.tyres.action.dismount') }}
-        </button>
-      </template>
+    <template v-if="primaryAction" #action-buttons>
       <button
-        v-if="item.status === 'retreading'"
         type="button"
-        :class="buttonClass"
+        :class="primaryClass"
         :disabled="acting"
-        @click="openDialog('backFromRetread')"
+        @click="primaryAction.onSelect?.()"
       >
-        <RotateCcw class="w-5 h-5 text-primary" />
-        {{ t('maintenance.tyres.action.backFromRetread') }}
-      </button>
-      <button
-        v-if="canExecute && item.status !== 'scrapped'"
-        type="button"
-        :class="buttonClass"
-        :disabled="acting"
-        @click="scrapping = true"
-      >
-        <Trash2 class="w-5 h-5 text-primary" /> {{ t('maintenance.tyres.action.scrap') }}
+        <component :is="primaryAction.icon" class="w-5 h-5" />
+        {{ primaryAction.label }}
       </button>
     </template>
     <template #form>

@@ -88,6 +88,17 @@ const kpis = computed(() => [
   }
 ])
 
+/* Two tabs: the orders to load and check, the goods coming back to receive (TRS03, TRS04-US01). */
+const tab = ref<'loading' | 'returns'>('loading')
+const tabs = computed(() => [
+  { key: 'loading' as const, label: t('planning.loading.tab.loading'), count: orders.value.length },
+  {
+    key: 'returns' as const,
+    label: t('planning.loading.returnsTitle'),
+    count: store.returns.length
+  }
+])
+
 const keyOf = (line: { orderNo: string; lineNo: number }) => `${line.orderNo}-${line.lineNo}`
 const orderCard = (orderNo: string) => ({
   path: '/planning/transport-orders',
@@ -143,7 +154,6 @@ onMounted(() => void store.fetchAll())
   <div class="px-2 py-4 space-y-4">
     <header>
       <h1 class="text-xl font-semibold text-card-foreground">{{ t('planning.loading.title') }}</h1>
-      <p class="text-sm text-muted-foreground">{{ t('planning.loading.subtitle') }}</p>
     </header>
 
     <FormAlerts :error="store.error" @clear:error="store.error = null" />
@@ -154,26 +164,60 @@ onMounted(() => void store.fetchAll())
         v-for="kpi in kpis"
         :key="kpi.key"
         class="bg-card border border-border rounded p-4 flex items-start gap-3"
+        :class="kpi.value ? '' : 'opacity-60'"
       >
-        <span class="p-2 rounded bg-primary/10 text-primary shrink-0">
+        <span
+          class="p-2 rounded shrink-0"
+          :class="kpi.value ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'"
+        >
           <component :is="kpi.icon" class="w-5 h-5" />
         </span>
         <div class="min-w-0">
           <p class="text-xs text-muted-foreground">{{ kpi.label }}</p>
-          <p class="text-2xl font-semibold tabular-nums text-card-foreground">{{ kpi.value }}</p>
+          <p
+            class="text-2xl font-semibold tabular-nums"
+            :class="kpi.value ? 'text-card-foreground' : 'text-muted-foreground'"
+          >
+            {{ kpi.value }}
+          </p>
         </div>
       </div>
     </section>
 
+    <div class="flex gap-1 border-b border-border" role="tablist">
+      <button
+        v-for="option in tabs"
+        :key="option.key"
+        type="button"
+        role="tab"
+        :aria-selected="tab === option.key"
+        class="cursor-pointer px-3 py-2 text-sm -mb-px border-b-2 transition inline-flex items-center gap-2"
+        :class="
+          tab === option.key
+            ? 'border-primary text-primary font-medium'
+            : 'border-transparent text-muted-foreground hover:text-card-foreground'
+        "
+        @click="tab = option.key"
+      >
+        {{ option.label }}
+        <span
+          class="rounded-full px-1.5 text-xs tabular-nums"
+          :class="option.count ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'"
+        >
+          {{ option.count }}
+        </span>
+      </button>
+    </div>
+
     <section
-      v-if="!orders.length"
+      v-if="tab === 'loading' && !orders.length"
       class="bg-card border border-border rounded p-4 text-sm text-muted-foreground"
     >
       {{ store.loading ? t('planning.loading.loading') : t('planning.loading.empty') }}
     </section>
 
     <section
-      v-for="order in orders"
+      v-for="order in tab === 'loading' ? orders : []"
       :key="order.orderNo"
       class="bg-card border border-border rounded overflow-x-auto"
     >
@@ -196,11 +240,11 @@ onMounted(() => void store.fetchAll())
         <button
           v-if="canUpdate && order.lines.some((line) => line.loadedQuantity === null)"
           type="button"
-          :class="buttonClass"
+          class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-primary-foreground bg-primary rounded hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
           :disabled="store.acting"
           @click="openConfirm(order.orderNo)"
         >
-          <PackageCheck class="w-5 h-5 text-primary" />
+          <PackageCheck class="w-4 h-4" />
           {{ t('planning.pickup.confirm') }}
         </button>
       </div>
@@ -284,10 +328,7 @@ onMounted(() => void store.fetchAll())
       </table>
     </section>
 
-    <section class="bg-card border border-border rounded overflow-x-auto">
-      <h2 class="px-4 py-3 border-b border-border text-sm font-semibold text-card-foreground">
-        {{ t('planning.loading.returnsTitle') }}
-      </h2>
+    <section v-if="tab === 'returns'" class="bg-card border border-border rounded overflow-x-auto">
       <table class="w-full text-sm">
         <thead>
           <tr class="bg-muted/40 text-xs text-muted-foreground">

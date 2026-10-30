@@ -43,9 +43,9 @@ export default {
   'fleet.companyDocuments.listView.current': 'Current',
   'fleet.companyDocuments.listView.toReview': 'To review',
   'fleet.companyDocuments.listView.all': 'All, history included',
-  'fleet.companyDocuments.action.approve': 'Approve',
-  'fleet.companyDocuments.action.reject': 'Reject',
-  'fleet.companyDocuments.action.newVersion': 'New version',
+  'fleet.companyDocuments.action.approve': 'Approve the document',
+  'fleet.companyDocuments.action.reject': 'Reject the document',
+  'fleet.companyDocuments.action.newVersion': 'Submit a new version',
   'fleet.companyDocuments.action.submit': 'Upload',
   'fleet.companyDocuments.action.withdraw': 'Withdraw',
   'fleet.companyDocuments.col.keywordText': 'Keywords',
@@ -59,5 +59,6 @@ export default {
   'fleet.companyDocuments.form.supersedesHint':
     'The current version stays in force until this one is approved.',
   'fleet.companyDocuments.form.replacedBy': 'Replaced by',
-  'fleet.companyDocuments.col.filedOn': 'Filed on'
+  'fleet.companyDocuments.col.filedOn': 'Filed on',
+  'fleet.companyDocuments.noResultsCreate': 'No company document. Create one with New.'
 }

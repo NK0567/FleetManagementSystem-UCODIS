@@ -16,6 +16,7 @@ import {
 } from '@lucide/vue'
 import LoadingSpinner from './LoadingSpinner.vue'
 import ConfirmDialog from './ConfirmDialog.vue'
+import MoreActionsMenu, { type MoreAction } from './MoreActionsMenu.vue'
 
 const { t } = useI18n()
 
@@ -47,6 +48,8 @@ const props = withDefaults(
     hasUnsavedChanges?: boolean
     /** Hides Save in edit mode, e.g. until the form is dirty. */
     canSave?: boolean
+    /** Secondary actions of the card, grouped in a « Plus d'actions » menu at the end of the action bar. */
+    moreActions?: MoreAction[]
   }>(),
   {
     pageNumber: undefined,
@@ -58,9 +61,12 @@ const props = withDefaults(
     hideActionBar: false,
     statusLabel: undefined,
     hasUnsavedChanges: false,
-    canSave: true
+    canSave: true,
+    moreActions: () => []
   }
 )
+
+const hasMoreActions = computed(() => props.moreActions.some((action) => !action.hidden))
 
 const emit = defineEmits<{
   close: []
@@ -324,10 +330,11 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
               </div>
 
               <div
-                v-if="!hideActionBar && $slots['action-buttons']"
+                v-if="!hideActionBar && ($slots['action-buttons'] || hasMoreActions)"
                 class="bg-card border-b border-border px-6 py-2 flex items-center gap-2 flex-wrap shrink-0"
               >
                 <slot name="action-buttons" />
+                <MoreActionsMenu v-if="hasMoreActions" :actions="moreActions" align="left" />
               </div>
 
               <div class="flex-1 min-h-0 overflow-hidden px-2 flex flex-col">

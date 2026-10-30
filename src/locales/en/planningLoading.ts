@@ -2,7 +2,7 @@ export default {
   'planning.loading.title': 'Loading',
   'planning.loading.subtitle': 'Orders to load, loading confirmation and driver check.',
   'planning.loading.loading': 'Loading the lines to check…',
-  'planning.loading.empty': 'No line to load.',
+  'planning.loading.empty': 'No order to load for now.',
   'planning.loading.loadError': 'Loading could not be displayed.',
   'planning.loading.saveError': 'Loading could not be saved.',
   'planning.loading.declare': 'Declare',
@@ -36,7 +36,7 @@ export default {
   'planning.loading.returns.notHandedBack': 'Not handed back yet',
   'planning.loading.returns.receiveMessage':
     'The return of order {no} ({product}) is received as conforming at the warehouse.',
-  'planning.loading.byDriver': 'Checked by the driver from his space',
+  'planning.loading.byDriver': 'Checked by the driver',
   'planning.pickup.section': 'Pickup',
   'planning.pickup.title': 'Pickup note {no}',
   'planning.pickup.status.issued': 'Issued',
@@ -77,10 +77,12 @@ export default {
   'planning.loadingList.open': 'Loading list',
   'planning.loadingList.title': 'Loading list {no}',
   'planning.loadingList.rank': 'Loading order',
-  'planning.loadingList.mode.one_space': 'Single space: the last delivered is loaded first, at the back; the first delivered last, near the doors.',
-  'planning.loadingList.mode.compartments': 'Each compartment has its own access: the list follows the compartments.',
+  'planning.loadingList.mode.one_space':
+    'Single space: the last delivered is loaded first, at the back; the first delivered last, near the doors.',
+  'planning.loadingList.mode.compartments':
+    'Each compartment has its own access: the list follows the compartments.',
   'planning.preparation.title': 'Loading preparations',
-  'planning.preparation.subtitle': 'Prepare the loading of several vehicles from one depot at once, then share the orders compartment by compartment.',
+  'planning.preparation.subtitle': 'Load several vehicles from one depot at once.',
   'planning.preparation.new': 'New preparation',
   'planning.preparation.empty': 'No preparation yet.',
   'planning.preparation.status.pending': 'Pending',
@@ -107,12 +109,18 @@ export default {
   'planning.preparation.capacity': 'Total capacity of the chosen vehicles',
   'planning.preparation.check': 'Sharing check',
   'planning.preparation.possible': 'The sharing is possible.',
-  'planning.preparation.issue.overCapacity': 'Quantity above capacity: {quantity} L to deliver for {capacity} L.',
-  'planning.preparation.issue.incompatible': 'Incompatible products on {plate}: {productA} and {productB}.',
-  'planning.preparation.issue.fullFill': 'Rule of compartment {compartmentNo} of {plate}: it must be filled completely.',
-  'planning.preparation.issue.equipment.pump': 'Required equipment missing: {point} needs a pump, which {plate} lacks.',
-  'planning.preparation.issue.equipment.vehicleType': 'Required equipment missing: {point} does not accept the type of {plate}.',
-  'planning.preparation.issue.unplaced': 'Left to share: {requestNo}, {product}, {quantity} {unit}.',
+  'planning.preparation.issue.overCapacity':
+    'Quantity above capacity: {quantity} L to deliver for {capacity} L.',
+  'planning.preparation.issue.incompatible':
+    'Incompatible products on {plate}: {productA} and {productB}.',
+  'planning.preparation.issue.fullFill':
+    'Rule of compartment {compartmentNo} of {plate}: it must be filled completely.',
+  'planning.preparation.issue.equipment.pump':
+    'Required equipment missing: {point} needs a pump, which {plate} lacks.',
+  'planning.preparation.issue.equipment.vehicleType':
+    'Required equipment missing: {point} does not accept the type of {plate}.',
+  'planning.preparation.issue.unplaced':
+    'Left to share: {requestNo}, {product}, {quantity} {unit}.',
   'planning.preparation.plan': 'Loading plan',
   'planning.preparation.propose': 'Propose a sharing',
   'planning.preparation.savePlan': 'Save the plan',
@@ -129,7 +137,8 @@ export default {
   'planning.preparation.noRoute': 'Route to choose',
   'planning.preparation.departureTime': 'Departure time',
   'planning.preparation.validate': 'Validate the plan',
-  'planning.preparation.validatedOn': 'Plan validated on {at}: each vehicle became a planned transport order.',
+  'planning.preparation.validatedOn':
+    'Plan validated on {at}: each vehicle became a planned transport order.',
   'planning.preparation.orderMade': 'Order {no}',
   'planning.pickup.ops.changeVehicle': 'Change the vehicle',
   'planning.pickup.ops.changeSite': 'Change the depot',
@@ -142,7 +151,8 @@ export default {
   'planning.pickup.ops.state.deviated': 'Deviated to {no}',
   'planning.pickup.ops.state.returned': 'Back to the depot',
   'planning.pickup.ops.state.out': 'Out of the order',
-  'planning.pickup.ops.candidate': 'Driver: {driver} · licence {licence} valid until {expiry} · carrier: {carrier}',
+  'planning.pickup.ops.candidate':
+    'Driver: {driver} · licence {licence} valid until {expiry} · carrier: {carrier}',
   'planning.pickup.ops.ownFleet': 'company fleet',
   'planning.pickup.ops.incidentType': 'Incident type',
   'planning.pickup.ops.reasonType': 'Reason type',
@@ -150,7 +160,8 @@ export default {
   'planning.pickup.ops.pick': 'Choose',
   'planning.pickup.ops.target': 'New recipient',
   'planning.pickup.ops.toDepot': 'No deviation: the product goes back to the depot',
-  'planning.pickup.ops.noCandidate': 'No recipient waits for this product for a quantity the compartment covers.',
+  'planning.pickup.ops.noCandidate':
+    'No recipient waits for this product for a quantity the compartment covers.',
   'planning.pickup.ops.noLists': 'The incident lists are not set up by the administrator yet.',
   'planning.loadingList.simulate': 'Simulate the loading',
   'planning.loadingList.back': 'Back',
@@ -160,8 +171,11 @@ export default {
   'planning.loadingList.places.middle': 'In the middle',
   'planning.loadingList.places.doors': 'Near the doors',
   'planning.loadingList.deliveryRank': 'Delivered {rank}',
-  'planning.loadingList.simulationHint': 'Load from left to right: the last delivered goes in first, at the back; the first delivered comes out first, near the doors.',
+  'planning.loadingList.simulationHint':
+    'Load from left to right: the last delivered goes in first, at the back; the first delivered comes out first, near the doors.',
   'planning.pickup.sendElectronic': 'Send to the warehouse system',
   'planning.pickup.systemConfirm': 'Confirmation by the warehouse system (simulated)',
-  'planning.loadingList.reference': 'Order ref.: {reference}'
+  'planning.loadingList.reference': 'Order ref.: {reference}',
+  'planning.loading.tab.loading': 'Orders to load',
+  'planning.preparation.emptyCreate': 'No preparation. Create one with New preparation.'
 }

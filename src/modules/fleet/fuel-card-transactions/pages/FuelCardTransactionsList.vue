@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { Link2, Upload } from '@lucide/vue'
 import TransactionImportDialog from '../components/TransactionImportDialog.vue'
+import type { MoreAction } from '@/components/shared/MoreActionsMenu.vue'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
 import { apiErrorMessage } from '@/core/api/apiError'
@@ -57,7 +58,12 @@ const tableColumns = computed<TableColumn[]>(() => [
   { sortKey: 'cardNumber', label: t('fleet.fuelCardTransactions.col.cardNumber'), minW: '170px' },
   { sortKey: 'holderName', label: t('fleet.fuelCardTransactions.col.holderName'), minW: '160px' },
   { sortKey: 'station', label: t('fleet.fuelCardTransactions.col.station'), minW: '180px' },
-  { sortKey: 'city', label: t('fleet.fuelCardTransactions.col.city'), minW: '120px' },
+  {
+    sortKey: 'city',
+    label: t('fleet.fuelCardTransactions.col.city'),
+    minW: '120px',
+    defaultHidden: true
+  },
   {
     sortKey: 'liters',
     label: t('fleet.fuelCardTransactions.col.liters'),
@@ -159,6 +165,25 @@ async function onImported(matched: number) {
   await store.fetchItems(store.pagination.page, store.pagination.limit)
 }
 
+/** Importing the statement and matching it run from « Plus d'actions ». */
+const moreActions = computed<MoreAction[]>(() => [
+  {
+    key: 'import',
+    label: t('fleet.fuelCardTransactions.import.action'),
+    icon: Upload,
+    hidden: !canInsert.value,
+    onSelect: () => (importing.value = true)
+  },
+  {
+    key: 'matchAll',
+    label: t('fleet.fuelCardTransactions.action.matchAll'),
+    icon: Link2,
+    hidden: !canUpdate.value,
+    disabled: working.value,
+    onSelect: () => void matchAll()
+  }
+])
+
 async function matchAll() {
   working.value = true
   actionError.value = null
@@ -209,6 +234,12 @@ function openRefillCard(no: string) {
 async function onCreated() {
   await store.fetchItems(store.pagination.page, store.pagination.limit)
 }
+
+/* These lines have no card: their actions sit in the details panel, opened with the selection. */
+function selectAndShow(item: FuelCardTransactionApi) {
+  store.selectItem(item)
+  showDetailsPanel.value = true
+}
 </script>
 
 <template>
@@ -222,6 +253,7 @@ async function onCreated() {
         :show-export-excel="canExport"
         :export-excel="exportToExcel"
         :show-details-panel="showDetailsPanel"
+        :more-actions="moreActions"
         :show-create="canInsert"
         :list-view-options="listViewOptions"
         :list-view="store.listView"
@@ -251,27 +283,6 @@ async function onCreated() {
             :reset-preferences="resetPreferences"
           />
         </template>
-        <template v-if="canUpdate || canInsert" #extra-actions>
-          <button
-            v-if="canInsert"
-            type="button"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
-            @click="importing = true"
-          >
-            <Upload class="w-4 h-4 text-primary" />
-            {{ t('fleet.fuelCardTransactions.import.action') }}
-          </button>
-          <button
-            v-if="canUpdate"
-            type="button"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60"
-            :disabled="working"
-            @click="matchAll"
-          >
-            <Link2 class="w-4 h-4 text-primary" />
-            {{ t('fleet.fuelCardTransactions.action.matchAll') }}
-          </button>
-        </template>
       </ListPageToolbar>
 
       <p v-if="info" class="mx-4 mt-2 text-xs text-muted-foreground">{{ info }}</p>
@@ -294,7 +305,11 @@ async function onCreated() {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('fleet.fuelCardTransactions.noResults')"
+        :no-results-message="
+          canInsert
+            ? t('fleet.fuelCardTransactions.noResultsCreate')
+            : t('fleet.fuelCardTransactions.noResults')
+        "
         :no-search-results-message="
           t('fleet.fuelCardTransactions.noSearchResults', { query: store.searchQuery })
         "
@@ -309,7 +324,7 @@ async function onCreated() {
         @update:width="setColumnWidth"
         @update:page="store.changePage"
         @update:limit="store.changeLimit"
-        @select-item="(item) => store.selectItem(item as FuelCardTransactionApi)"
+        @select-item="(item) => selectAndShow(item as FuelCardTransactionApi)"
       >
         <template #filter-panel>
           <AdvancedFilterPanel

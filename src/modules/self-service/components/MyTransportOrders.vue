@@ -13,6 +13,7 @@ import {
   Wifi
 } from '@lucide/vue'
 import { apiErrorMessage } from '@/core/api/apiError'
+import { usePermissions } from '@/composables/usePermissions'
 import { formatDateTime, formatNumber } from '@/utils/format'
 import { quantityGap } from '@/modules/planning/quantity-tolerances/domain/quantityTolerance'
 import { mySpaceApi } from '../api/mySpaceApi'
@@ -24,6 +25,8 @@ import type { MyOrderApi, MyOrderLineApi, MyReturnApi } from '../types/mySpace.t
  * records a postponement or the recipient's refusal. He never enters the recipient's name.
  */
 const { t } = useI18n()
+/** Only the driver records; his assistant follows the same order without the buttons. */
+const { canExecute } = usePermissions('MYSPACE')
 const orders = ref<MyOrderApi[]>([])
 const loading = ref(true)
 const acting = ref(false)
@@ -254,6 +257,11 @@ function canArrive(order: MyOrderApi, point: Point): boolean {
   const points = pointsOf(order)
   const index = points.findIndex((item) => item.no === point.no)
   return index === 0 || points[index - 1]!.lines.every(settled)
+}
+/** The point to handle now: the first one that is not settled yet. */
+function currentPointNo(order: MyOrderApi): string | null {
+  if (order.status !== 'ready' && order.status !== 'in_progress') return null
+  return pointsOf(order).find((point) => !point.lines.every(settled))?.no ?? null
 }
 /* A point simply postponed can be retried at any time while the order runs (TRS03-US12); a
  * line postponed at the recipient's request leaves the order and goes back (TRS03-US13). */
@@ -502,19 +510,19 @@ const pendingDisabled = computed(() => {
 })
 
 const buttonClass =
-  'cursor-pointer inline-flex items-center justify-center gap-1.5 px-3 h-9 text-sm rounded border border-border hover:bg-accent transition disabled:opacity-60 disabled:cursor-not-allowed'
+  'cursor-pointer inline-flex items-center justify-center gap-1.5 px-3 h-11 sm:h-9 text-sm rounded border border-border hover:bg-accent transition disabled:opacity-60 disabled:cursor-not-allowed'
 const primaryClass =
-  'cursor-pointer inline-flex items-center justify-center gap-1.5 px-3 h-9 text-sm rounded bg-primary text-primary-foreground font-medium hover:opacity-90 transition disabled:opacity-60 disabled:cursor-not-allowed'
+  'cursor-pointer inline-flex items-center justify-center gap-1.5 px-3 h-11 sm:h-9 text-sm rounded bg-primary text-primary-foreground font-medium hover:opacity-90 transition disabled:opacity-60 disabled:cursor-not-allowed'
 
 onMounted(load)
 </script>
 
 <template>
   <div class="space-y-4">
-    <div class="flex flex-wrap items-center gap-2 text-sm">
+    <div v-if="canExecute" class="flex flex-wrap items-center gap-2 text-sm">
       <button
         type="button"
-        class="cursor-pointer inline-flex items-center gap-1.5 px-3 h-8 rounded border transition"
+        class="cursor-pointer inline-flex items-center gap-1.5 px-3 h-8 rounded border text-xs transition"
         :class="
           offline
             ? 'border-warning text-warning bg-warning/10'
@@ -547,7 +555,13 @@ onMounted(load)
             }}<template v-if="item.reason"> · {{ item.reason }}</template>
           </span>
         </span>
-        <button type="button" :class="buttonClass" :disabled="acting" @click="handBack(item)">
+        <button
+          v-if="canExecute"
+          type="button"
+          :class="buttonClass"
+          :disabled="acting"
+          @click="handBack(item)"
+        >
           <Undo2 class="w-4 h-4 text-primary" /> {{ t('selfService.returns.handBack') }}
         </button>
       </div>
@@ -583,6 +597,7 @@ onMounted(load)
           </h3>
           <button
             v-if="
+              canExecute &&
               groupsOf(order).filter((group) => toCheck(group).length && !awaitingWarehouse(group))
                 .length > 1
             "
@@ -623,7 +638,7 @@ onMounted(load)
                 · {{ line.nonconformityReason }}
               </span>
               <button
-                v-if="canCancelNonconformity(order, line)"
+                v-if="canExecute && canCancelNonconformity(order, line)"
                 type="button"
                 class="cursor-pointer text-xs text-muted-foreground underline hover:text-primary disabled:opacity-60"
                 :disabled="acting"
@@ -636,7 +651,10 @@ onMounted(load)
           <p v-if="awaitingWarehouse(group)" class="text-xs text-muted-foreground">
             {{ t('selfService.orders.awaitingWarehouse') }}
           </p>
-          <div v-else-if="toCheck(group).length" class="flex flex-wrap gap-2">
+          <div
+            v-else-if="canExecute && toCheck(group).length"
+            class="grid grid-cols-1 sm:flex sm:flex-wrap gap-2"
+          >
             <button
               type="button"
               :class="primaryClass"
@@ -659,8 +677,13 @@ onMounted(load)
 
       <!-- Delivery points, in their order -->
       <ol class="divide-y divide-border">
-        <li v-for="(point, index) in pointsOf(order)" :key="point.no" class="px-4 py-3 space-y-2">
-          <div class="flex items-start gap-3">
+        <li
+          v-for="(point, index) in pointsOf(order)"
+          :key="point.no"
+          class="px-4 py-3 space-y-2"
+          :class="point.no === currentPointNo(order) ? 'bg-primary/5' : ''"
+        >
+          <div class="flex flex-wrap items-start gap-3">
             <span
               class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold shrink-0"
               :class="
@@ -676,10 +699,18 @@ onMounted(load)
                 {{ point.recipientName || point.name }}
               </p>
               <p class="text-xs text-muted-foreground">{{ point.name }} · {{ point.address }}</p>
+              <p v-if="arrived(point)" class="text-xs text-muted-foreground">
+                {{
+                  t('selfService.orders.arrivedAt', {
+                    at: formatDateTime(point.lines.find((line) => line.arrivedAt)!.arrivedAt)
+                  })
+                }}
+              </p>
             </div>
             <button
-              v-if="canArrive(order, point)"
+              v-if="canExecute && canArrive(order, point)"
               type="button"
+              class="w-full sm:w-auto"
               :class="primaryClass"
               :disabled="acting"
               @click="
@@ -696,24 +727,21 @@ onMounted(load)
             </button>
             <button
               v-else-if="
-                order.status === 'in_progress' && arrived(point) && openLines(point).length
+                canExecute &&
+                order.status === 'in_progress' &&
+                arrived(point) &&
+                openLines(point).length
               "
               type="button"
+              class="w-full sm:w-auto"
               :class="primaryClass"
               :disabled="acting"
               @click="openDeclare(order, point)"
             >
               <PackageCheck class="w-4 h-4" /> {{ t('selfService.orders.declare') }}
             </button>
-            <span v-if="arrived(point)" class="text-xs text-muted-foreground shrink-0">
-              {{
-                t('selfService.orders.arrivedAt', {
-                  at: formatDateTime(point.lines.find((line) => line.arrivedAt)!.arrivedAt)
-                })
-              }}
-            </span>
           </div>
-          <ul class="ml-10 space-y-2">
+          <ul class="ml-0 sm:ml-10 space-y-2">
             <li v-for="line in point.lines" :key="line.lineNo" class="text-sm">
               <div class="flex flex-wrap items-center justify-between gap-2">
                 <span>
@@ -726,7 +754,10 @@ onMounted(load)
                   lineState(line).label
                 }}</span>
               </div>
-              <div v-if="canAct(order, point, line)" class="mt-1.5 flex flex-wrap gap-2">
+              <div
+                v-if="canExecute && canAct(order, point, line)"
+                class="mt-1.5 grid grid-cols-2 sm:flex sm:flex-wrap gap-2"
+              >
                 <button
                   v-if="!retry(line)"
                   type="button"
@@ -747,7 +778,7 @@ onMounted(load)
                 </button>
               </div>
               <button
-                v-if="canCancelRefusal(order, point, line)"
+                v-if="canExecute && canCancelRefusal(order, point, line)"
                 type="button"
                 class="mt-1 cursor-pointer text-xs text-muted-foreground underline hover:text-primary disabled:opacity-60"
                 :disabled="acting"
@@ -758,8 +789,8 @@ onMounted(load)
             </li>
           </ul>
           <div
-            v-if="canRetry(order, point) || canCancelDeclaration(order, point)"
-            class="ml-10 flex flex-wrap items-center gap-3"
+            v-if="canExecute && (canRetry(order, point) || canCancelDeclaration(order, point))"
+            class="ml-0 sm:ml-10 flex flex-wrap items-center gap-3"
           >
             <button
               v-if="canRetry(order, point)"

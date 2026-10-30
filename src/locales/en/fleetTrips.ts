@@ -58,12 +58,11 @@ export default {
   'fleet.trips.stops.planned': 'Planned {time}',
   'fleet.trips.stops.passed': 'passed {time}',
   'fleet.trips.action.start': 'Start the trip',
-  'fleet.trips.action.passStop': 'Passed {site}',
-  'fleet.trips.action.complete': 'Arrival',
-  'fleet.trips.action.close': 'Close',
+  'fleet.trips.action.passStop': 'Confirm the stop at {site}',
+  'fleet.trips.action.complete': 'Record the arrival',
+  'fleet.trips.action.close': 'Close the trip',
   'fleet.trips.action.cancel': 'Cancel the trip',
-  'fleet.trips.dialog.startHint':
-    'The vehicle, the trailer and the driver are checked one last time before leaving.',
+  'fleet.trips.dialog.startHint': 'The vehicle, trailer and driver are checked before departure.',
   'fleet.trips.dialog.startKm': 'Mileage at departure (last reading by default)',
   'fleet.trips.dialog.endKm': 'Mileage at arrival',
   'fleet.trips.dialog.startWas': 'At departure: {km} km.',
@@ -71,7 +70,7 @@ export default {
   'fleet.trips.needsAuthorization': 'The departure must be granted first.',
   'fleet.trips.form.authorization': 'Departure authorization',
   'fleet.trips.form.noAuthorization': 'No request yet.',
-  'fleet.trips.deviationsToQualify': 'Deviations still to qualify on this trip: {count}.',
+  'fleet.trips.deviationsToQualify': 'Qualify the deviations of this trip first ({count}).',
   'fleet.trips.drivingTime.title': 'Driving time',
   'fleet.trips.drivingTime.breachCount': 'No breach | 1 breach | {n} breaches',
   'fleet.trips.drivingTime.duration': '{h} h {m}',
@@ -89,6 +88,7 @@ export default {
   'fleet.trips.drivingTime.breach.weekly': 'Driving of {driven} over seven days, beyond {limit} a week.',
   'fleet.trips.drivingTime.breach.night': 'Night driving, not allowed, on {day}: {driven}.',
   'fleet.trips.col.missedStopCount': 'Missed stops',
-  'fleet.trips.filter.hasMissedStops': 'Missed stop(s)',
-  'fleet.trips.missedStopsSummary': '{stops} missed stop(s) on {trips} trip(s)'
+  'fleet.trips.filter.hasMissedStops': 'Missed stops',
+  'fleet.trips.missedStopsSummary': 'Missed stops: {stops} · trips concerned: {trips}',
+  'fleet.trips.noResultsCreate': 'No trip. Create one with New.'
 }

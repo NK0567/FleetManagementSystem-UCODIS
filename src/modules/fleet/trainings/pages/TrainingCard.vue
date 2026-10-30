@@ -146,12 +146,12 @@ async function cancelTraining(reason: string) {
     <template v-if="showActions" #action-buttons>
       <button
         type="button"
-        class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
+        class="cursor-pointer inline-flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium text-primary-foreground bg-primary rounded hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
         :disabled="item?.status !== 'planned'"
         :title="item?.status !== 'planned' ? t('fleet.trainings.planFirst') : undefined"
         @click="openAttend"
       >
-        <CircleCheck class="w-5 h-5 text-primary" /> {{ t('fleet.trainings.action.attend') }}
+        <CircleCheck class="w-4 h-4" /> {{ t('fleet.trainings.action.attend') }}
       </button>
       <button
         type="button"

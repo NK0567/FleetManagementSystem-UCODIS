@@ -282,7 +282,11 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('maintenance.mobileInterventions.noResults')"
+        :no-results-message="
+          canInsert
+            ? t('maintenance.mobileInterventions.noResultsCreate')
+            : t('maintenance.mobileInterventions.noResults')
+        "
         :no-search-results-message="
           t('maintenance.mobileInterventions.noSearchResults', { query: store.searchQuery })
         "

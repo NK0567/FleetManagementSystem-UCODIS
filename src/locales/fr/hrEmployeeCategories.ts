@@ -28,5 +28,6 @@ export default {
   'hr.employeeCategories.form.description': 'Description',
   'hr.employeeCategories.form.annualLeaveDays': 'Congés annuels (jours par an)',
   'hr.employeeCategories.form.active': 'Active',
-  'hr.employeeCategories.form.employeeCount': 'Employés en poste'
+  'hr.employeeCategories.form.employeeCount': 'Employés en poste',
+  'hr.employeeCategories.noResultsCreate': 'Aucune catégorie. Créez-en une avec Nouveau.'
 }

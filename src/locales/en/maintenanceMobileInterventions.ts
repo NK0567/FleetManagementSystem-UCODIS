@@ -49,5 +49,7 @@ export default {
   'maintenance.mobileInterventions.progress.checks': 'Checks',
   'maintenance.mobileInterventions.progress.checkCounts': '{checks} checks, {positives} positive',
   'maintenance.mobileInterventions.progress.closedAt': 'Closing',
-  'maintenance.mobileInterventions.col.vehiclePlate': 'Vehicle'
+  'maintenance.mobileInterventions.col.vehiclePlate': 'Vehicle',
+  'maintenance.mobileInterventions.noResultsCreate': 'No intervention. Create one with New.',
+  'maintenance.mobileInterventions.hint.closeNeedsArrival': 'Record the arrival on site first.'
 }

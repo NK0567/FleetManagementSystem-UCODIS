@@ -3,7 +3,8 @@ export default {
   'planning.dashboard.subtitle': 'Ordres par statut, retards, alertes et commandes en attente.',
   'planning.dashboard.loadError': 'Le tableau de bord n’a pas pu être affiché.',
   'planning.reports.title': 'Rapports transport',
-  'planning.reports.subtitle': 'Ponctualité, coûts, qualité de livraison, moyens et transporteurs, calculés sur les mêmes ordres du périmètre.',
+  'planning.reports.subtitle':
+    'Ponctualité, coûts, qualité de livraison, moyens et transporteurs, calculés sur les mêmes ordres du périmètre.',
   'planning.reports.loadError': 'Les rapports n’ont pas pu être affichés.',
   'planning.reports.empty': 'Aucun transporteur dans le périmètre.',
   'planning.dashboard.kpi.orders': 'Ordres',
@@ -58,11 +59,16 @@ export default {
   'planning.reports.tab.quality': 'Qualité de livraison',
   'planning.reports.tab.means': 'Moyens',
   'planning.reports.tab.carriers': 'Transporteurs',
-  'planning.reports.hint.punctuality': 'Pour chaque livraison, l’arrivée réelle au point (sinon la déclaration du conducteur) est comparée à l’heure prévue de l’étape ; elle est à l’heure jusqu’à {margin} min de retard (réglages planning).',
-  'planning.reports.hint.costs': 'Ordres partis : coût du véhicule (entretien, pneus et assurance du FMS sur douze mois, rapportés au kilomètre, fois la distance) et carburant des pleins du trajet ; pour un transporteur externe, sa facture.',
-  'planning.reports.hint.quality': 'Lignes arrivées chez le destinataire : livrées, refusées ou reportées. Les écarts de carburant sont mesurés à 15 °C.',
-  'planning.reports.hint.means': 'Remplissage du véhicule et de sa remorque en poids et en volume (compartiments ou volume utile), livraisons par ordre et distance parcourue.',
-  'planning.reports.hint.carriers': 'Pour chaque transporteur externe : ordres confiés, ponctualité, qualité de livraison et écarts entre facture et tarif convenu.',
+  'planning.reports.hint.punctuality':
+    'Pour chaque livraison, l’arrivée réelle au point (sinon la déclaration du conducteur) est comparée à l’heure prévue de l’étape ; elle est à l’heure jusqu’à {margin} min de retard (réglages planning).',
+  'planning.reports.hint.costs':
+    'Ordres partis : coût du véhicule (entretien, pneus et assurance du FMS sur douze mois, rapportés au kilomètre, fois la distance) et carburant des pleins du trajet ; pour un transporteur externe, sa facture.',
+  'planning.reports.hint.quality':
+    'Lignes arrivées chez le destinataire : livrées, refusées ou reportées. Les écarts de carburant sont mesurés à 15 °C.',
+  'planning.reports.hint.means':
+    'Remplissage du véhicule et de sa remorque en poids et en volume (compartiments ou volume utile), livraisons par ordre et distance parcourue.',
+  'planning.reports.hint.carriers':
+    'Pour chaque transporteur externe : ordres confiés, ponctualité, qualité de livraison et écarts entre facture et tarif convenu.',
   'planning.reports.punctuality.byPeriod': 'Ponctualité par mois',
   'planning.reports.punctuality.byRecipient': 'Ponctualité par destinataire',
   'planning.reports.punctuality.byCarrier': 'Ponctualité par transporteur',

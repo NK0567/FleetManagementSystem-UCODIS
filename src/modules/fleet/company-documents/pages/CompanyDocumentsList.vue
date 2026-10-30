@@ -136,6 +136,13 @@ const filterDefs: FilterFieldDef[] = [
     labelKey: 'fleet.companyDocuments.col.filedOn',
     valueType: 'date',
     kind: 'date'
+  },
+  {
+    field: 'state',
+    labelKey: 'fleet.companyDocuments.col.state',
+    valueType: 'string',
+    kind: 'option',
+    optionsKey: 'documentState'
   }
 ]
 
@@ -284,7 +291,11 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('fleet.companyDocuments.noResults')"
+        :no-results-message="
+          canInsert
+            ? t('fleet.companyDocuments.noResultsCreate')
+            : t('fleet.companyDocuments.noResults')
+        "
         :no-search-results-message="
           t('fleet.companyDocuments.noSearchResults', { query: store.searchQuery })
         "

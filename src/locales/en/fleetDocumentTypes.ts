@@ -46,5 +46,6 @@ export default {
   'fleet.documentTypes.form.vehicleTypesHint':
     'No type ticked: the document applies to every vehicle.',
   'fleet.documentTypes.form.vehicleTypeCount': '{n} vehicle type | {n} vehicle types',
-  'fleet.documentTypes.form.allVehicleTypes': 'Every vehicle'
+  'fleet.documentTypes.form.allVehicleTypes': 'Every vehicle',
+  'fleet.documentTypes.noResultsCreate': 'No document type. Create one with New.'
 }

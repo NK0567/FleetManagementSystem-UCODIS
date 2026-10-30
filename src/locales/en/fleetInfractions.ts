@@ -46,7 +46,7 @@ export default {
   'fleet.infractions.listView.closed': 'Closed',
   'fleet.infractions.listView.all': 'All',
   'fleet.infractions.action.take': 'Take charge',
-  'fleet.infractions.action.close': 'Close',
+  'fleet.infractions.action.close': 'Close the infraction',
   'fleet.infractions.event.recorded': 'Infraction recorded',
   'fleet.infractions.event.taken': 'Taken in charge',
   'fleet.infractions.event.closed': 'Closed',
@@ -56,5 +56,6 @@ export default {
   'fleet.infractions.form.outcomeComment': 'Explanation',
   'fleet.infractions.form.noOutcome': 'No outcome yet.',
   'fleet.infractions.form.training': 'Training',
-  'fleet.infractions.form.history': 'History'
+  'fleet.infractions.form.history': 'History',
+  'fleet.infractions.noResultsCreate': 'No infraction. Create one with New.'
 }

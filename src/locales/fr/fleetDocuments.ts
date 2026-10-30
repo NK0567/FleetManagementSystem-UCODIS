@@ -45,7 +45,7 @@ export default {
   'fleet.documents.listView.toRenew': 'À renouveler',
   'fleet.documents.listView.current': 'En vigueur',
   'fleet.documents.listView.all': 'Tous, historique compris',
-  'fleet.documents.action.renew': 'Renouveler',
+  'fleet.documents.action.renew': 'Renouveler le document',
   'fleet.documents.action.declare': 'Déclarer annulé ou perdu',
   'fleet.documents.declareHint':
     "Le document cesse d'être valable. Pour le remplacer, créez-en un nouveau.",
@@ -65,5 +65,6 @@ export default {
   'fleet.documents.alert.expired': 'Document expiré depuis le {date} : à régulariser.',
   'fleet.documents.alert.expiring': 'Document à renouveler : il expire le {date} (préavis de {days} jours).',
   'fleet.documents.alert.sent.email': 'E-mail envoyé à {to} le {date} (simulé).',
-  'fleet.documents.alert.sent.sms': 'SMS envoyé au {to} le {date} (simulé).'
+  'fleet.documents.alert.sent.sms': 'SMS envoyé au {to} le {date} (simulé).',
+  'fleet.documents.noResultsCreate': 'Aucun document. Créez-en un avec Nouveau.'
 }

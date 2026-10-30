@@ -35,5 +35,6 @@ export default {
   'hr.jobPositions.form.responsibilities': 'Responsibilities',
   'hr.jobPositions.form.responsibilityCount':
     'No responsibility | {count} responsibility | {count} responsibilities',
-  'hr.jobPositions.form.responsibilitiesHint': 'One responsibility per line.'
+  'hr.jobPositions.form.responsibilitiesHint': 'One responsibility per line.',
+  'hr.jobPositions.noResultsCreate': 'No job position. Create one with New.'
 }

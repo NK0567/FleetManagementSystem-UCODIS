@@ -57,8 +57,7 @@ export default {
   'fleet.providers.contracts.issue.endBeforeStart': 'The end is before the start.',
   'fleet.providers.contracts.issue.negativeAmount': 'The amount cannot be negative.',
   'fleet.providers.carrierVehicles.title': "Carrier's vehicles",
-  'fleet.providers.carrierVehicles.hint':
-    'The means of transport attached to this carrier: when planning, choosing this carrier limits the vehicles offered to these.',
+  'fleet.providers.carrierVehicles.hint': 'Vehicles of this carrier, the only ones offered when it is chosen in planning.',
   'fleet.providers.carrierVehicles.count': 'No vehicle | One vehicle | {n} vehicles',
   'fleet.providers.carrierVehicles.empty': 'No vehicle attached.',
   'fleet.providers.carrierVehicles.plate': 'Plate',
@@ -71,7 +70,7 @@ export default {
   'fleet.providers.form.fromManagementSystem': 'Taken from the company management system (reference {id}).',
   'fleet.providers.sync.action': 'Take from the management system',
   'fleet.providers.sync.hint': 'Takes the third parties of the company management system (simulated in the mock-up).',
-  'fleet.providers.sync.done': 'Resumption done: {created} created, {updated} updated, {unchanged} unchanged, {skipped} left out.',
+  'fleet.providers.sync.done': 'Resumption done: created {created} · updated {updated} · unchanged {unchanged} · left out {skipped}.',
   'fleet.providers.sync.error': 'The resumption could not be done.',
   'fleet.providerTypes.title': 'Provider types',
   'fleet.providerTypes.card': 'Provider type',
@@ -96,11 +95,13 @@ export default {
   'fleet.providerTypes.form.name': 'Name',
   'fleet.providerTypes.form.systemRole': 'Role in the application',
   'fleet.providerTypes.form.noRole': 'None: a type of the company',
-  'fleet.providerTypes.form.systemRoleHint': 'A type with a role is the one the application looks for (garages, carriers…): its role does not change and it cannot be deleted.',
+  'fleet.providerTypes.form.systemRoleHint': 'Type used by the application: its role does not change and it cannot be deleted.',
   'fleet.providerTypes.form.active': 'Active',
   'fleet.providerTypes.form.providerCount': 'Providers of this type',
   'fleet.providers.import.action': 'Import providers',
   'fleet.providers.import.title': 'Import providers',
-  'fleet.providers.import.hint': 'Each line follows the rules of the form: a provider already known under the same name and type, or present twice in the file, is refused and reported. The type is given by its code or its name.',
-  'fleet.providers.import.created': 'No provider created. | One provider created. | {n} providers created.'
+  'fleet.providers.import.hint': 'Type by its code or name. A provider already known or duplicated is refused.',
+  'fleet.providers.import.created': 'No provider created. | One provider created. | {n} providers created.',
+  'fleet.providerTypes.noResultsCreate': 'No provider type. Create one with New.',
+  'fleet.providers.noResultsCreate': 'No provider. Create one with New.'
 }

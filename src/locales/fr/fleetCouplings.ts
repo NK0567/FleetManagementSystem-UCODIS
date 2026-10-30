@@ -34,5 +34,6 @@ export default {
     'Le tracteur et la remorque redeviennent libres à partir de cette date.',
   'fleet.couplings.listView.active': 'En cours',
   'fleet.couplings.listView.ended': 'Terminés',
-  'fleet.couplings.listView.all': 'Tous les attelages'
+  'fleet.couplings.listView.all': 'Tous les attelages',
+  'fleet.couplings.noResultsCreate': 'Aucun attelage. Créez-en un avec Nouveau.'
 }

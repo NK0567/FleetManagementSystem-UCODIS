@@ -77,6 +77,7 @@ async function save() {
               : 'border-border hover:bg-accent'
           "
           :disabled="dirty && kind !== item"
+          :title="dirty && kind !== item ? t('fleet.settings.importMappings.saveFirst') : undefined"
           @click="kind = item"
         >
           {{ t(`fleet.settings.importKind.${item}`) }}

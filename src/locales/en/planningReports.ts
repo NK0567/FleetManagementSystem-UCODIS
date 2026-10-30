@@ -3,7 +3,8 @@ export default {
   'planning.dashboard.subtitle': 'Orders by status, delays, alerts and waiting orders.',
   'planning.dashboard.loadError': 'The dashboard could not be displayed.',
   'planning.reports.title': 'Transport reports',
-  'planning.reports.subtitle': 'Punctuality, costs, delivery quality, means and carriers, computed over the same orders of the perimeter.',
+  'planning.reports.subtitle':
+    'Punctuality, costs, delivery quality, means and carriers, computed over the same orders of the perimeter.',
   'planning.reports.loadError': 'The reports could not be displayed.',
   'planning.reports.empty': 'No carrier in the perimeter.',
   'planning.dashboard.kpi.orders': 'Orders',
@@ -59,11 +60,16 @@ export default {
   'planning.reports.tab.quality': 'Delivery quality',
   'planning.reports.tab.means': 'Means',
   'planning.reports.tab.carriers': 'Carriers',
-  'planning.reports.hint.punctuality': 'For each delivery, the actual arrival at the point (otherwise the driver’s declaration) is compared to the planned time of the stop; it is on time up to {margin} min late (planning settings).',
-  'planning.reports.hint.costs': 'Orders that left: vehicle cost (maintenance, tyres and insurance from the FMS over twelve months, per kilometre, times the distance) and fuel of the trip’s refills; for an external carrier, its invoice.',
-  'planning.reports.hint.quality': 'Lines that reached the recipient: delivered, refused or postponed. Fuel gaps are measured at 15 °C.',
-  'planning.reports.hint.means': 'Fill of the vehicle and its trailer by weight and volume (compartments or useful volume), deliveries per order and distance run.',
-  'planning.reports.hint.carriers': 'For each external carrier: orders entrusted, punctuality, delivery quality and gaps between invoice and agreed tariff.',
+  'planning.reports.hint.punctuality':
+    'For each delivery, the actual arrival at the point (otherwise the driver’s declaration) is compared to the planned time of the stop; it is on time up to {margin} min late (planning settings).',
+  'planning.reports.hint.costs':
+    'Orders that left: vehicle cost (maintenance, tyres and insurance from the FMS over twelve months, per kilometre, times the distance) and fuel of the trip’s refills; for an external carrier, its invoice.',
+  'planning.reports.hint.quality':
+    'Lines that reached the recipient: delivered, refused or postponed. Fuel gaps are measured at 15 °C.',
+  'planning.reports.hint.means':
+    'Fill of the vehicle and its trailer by weight and volume (compartments or useful volume), deliveries per order and distance run.',
+  'planning.reports.hint.carriers':
+    'For each external carrier: orders entrusted, punctuality, delivery quality and gaps between invoice and agreed tariff.',
   'planning.reports.punctuality.byPeriod': 'Punctuality by month',
   'planning.reports.punctuality.byRecipient': 'Punctuality by recipient',
   'planning.reports.punctuality.byCarrier': 'Punctuality by carrier',

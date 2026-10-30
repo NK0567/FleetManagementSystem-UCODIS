@@ -61,7 +61,8 @@ const filterDefs: FilterFieldDef[] = [
     valueType: 'string',
     kind: 'reference',
     referenceKey: 'siteTypes'
-  }
+  },
+  { field: 'active', labelKey: 'fleet.sites.col.active', valueType: 'boolean', kind: 'boolean' }
 ]
 
 const detailKeys = ['siteTypeName', 'city', 'effectiveRadiusM', 'active']
@@ -207,7 +208,9 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('fleet.sites.noResults')"
+        :no-results-message="
+          canInsert ? t('fleet.sites.noResultsCreate') : t('fleet.sites.noResults')
+        "
         :no-search-results-message="t('fleet.sites.noSearchResults', { query: store.searchQuery })"
         :page="store.pagination.page"
         :total-pages="store.pagination.totalPages"

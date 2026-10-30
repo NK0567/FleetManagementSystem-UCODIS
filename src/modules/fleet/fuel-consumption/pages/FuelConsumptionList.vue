@@ -89,7 +89,8 @@ const tableColumns = computed<TableColumn[]>(() => [
     sortKey: 'referenceSource',
     label: t('fleet.fuelConsumption.col.referenceSource'),
     minW: '130px',
-    formatter: optionLabel('fuelReferenceSource')
+    formatter: optionLabel('fuelReferenceSource'),
+    defaultHidden: true
   },
   {
     sortKey: 'co2Kg',
@@ -135,6 +136,13 @@ const filterDefs: FilterFieldDef[] = [
     valueType: 'string',
     kind: 'reference',
     referenceKey: 'motorizedVehicles'
+  },
+  {
+    field: 'referenceSource',
+    labelKey: 'fleet.fuelConsumption.col.referenceSource',
+    valueType: 'string',
+    kind: 'option',
+    optionsKey: 'fuelReferenceSource'
   }
 ]
 
@@ -245,6 +253,12 @@ async function confirm() {
   })
   if (done) dialog.value = null
 }
+
+/* These lines have no card: their actions sit in the details panel, opened with the selection. */
+function selectAndShow(item: FuelConsumptionApi) {
+  store.selectItem(item)
+  showDetailsPanel.value = true
+}
 </script>
 
 <template>
@@ -344,7 +358,7 @@ async function confirm() {
         @update:width="setColumnWidth"
         @update:page="store.changePage"
         @update:limit="store.changeLimit"
-        @select-item="(item) => store.selectItem(item as FuelConsumptionApi)"
+        @select-item="(item) => selectAndShow(item as FuelConsumptionApi)"
       >
         <template #cell-status="{ item }">
           <FuelGapStatusPill :status="(item as FuelConsumptionApi).status" />
@@ -409,12 +423,6 @@ async function confirm() {
                 <p v-if="selected.decisionComment" class="text-muted-foreground">
                   {{ selected.decisionComment }}
                 </p>
-                <p
-                  v-if="ownProposal && selected.status === 'deduction_proposed'"
-                  class="text-xs text-muted-foreground"
-                >
-                  {{ t('fleet.fuelConsumption.ownProposal') }}
-                </p>
               </div>
             </template>
             <template #footer>
@@ -435,19 +443,21 @@ async function confirm() {
               >
                 {{ t('fleet.fuelConsumption.action.propose') }}
               </button>
-              <template
-                v-if="canExecute && selected.status === 'deduction_proposed' && !ownProposal"
-              >
+              <template v-if="canExecute && selected.status === 'deduction_proposed'">
                 <button
                   type="button"
-                  class="flex-1 px-3 py-2 bg-primary text-primary-foreground text-sm rounded hover:opacity-90 transition font-medium"
+                  class="flex-1 px-3 py-2 bg-primary text-primary-foreground text-sm rounded hover:opacity-90 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  :disabled="ownProposal"
+                  :title="ownProposal ? t('fleet.fuelConsumption.ownProposal') : undefined"
                   @click="open('approve')"
                 >
                   {{ t('fleet.fuelConsumption.action.approve') }}
                 </button>
                 <button
                   type="button"
-                  class="flex-1 px-3 py-2 border border-border text-card-foreground text-sm rounded hover:bg-accent transition font-medium"
+                  class="flex-1 px-3 py-2 border border-border text-card-foreground text-sm rounded hover:bg-accent transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  :disabled="ownProposal"
+                  :title="ownProposal ? t('fleet.fuelConsumption.ownProposal') : undefined"
                   @click="open('reject')"
                 >
                   {{ t('fleet.fuelConsumption.action.reject') }}

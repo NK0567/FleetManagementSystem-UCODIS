@@ -42,5 +42,6 @@ export default {
   'fleet.trainings.form.attendedOn': 'Attended on',
   'fleet.trainings.form.result': 'Result',
   'fleet.trainings.form.cancelledAt': 'Cancelled on',
-  'fleet.trainings.form.cancelReason': 'Reason for the cancellation'
+  'fleet.trainings.form.cancelReason': 'Reason for the cancellation',
+  'fleet.trainings.noResultsCreate': 'No training. Create one with New.'
 }

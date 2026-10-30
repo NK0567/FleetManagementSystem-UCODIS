@@ -24,13 +24,12 @@ export default {
     '{km} km, {liters} L : {l100} L/100 pour une référence de {reference} ({source})',
   'fleet.fuelConsumption.excess': 'Surcoût : {amount}',
   'fleet.fuelConsumption.proposed': 'Retenue de {amount} proposée par {user}',
-  'fleet.fuelConsumption.ownProposal':
-    'Vous avez proposé cette retenue : une autre personne doit la décider.',
+  'fleet.fuelConsumption.ownProposal': 'Proposée par vous : une autre personne doit décider.',
   'fleet.fuelConsumption.action.qualify': "Qualifier l'écart",
   'fleet.fuelConsumption.action.propose': 'Proposer une retenue',
   'fleet.fuelConsumption.action.approve': 'Valider la retenue',
   'fleet.fuelConsumption.action.reject': 'Refuser la retenue',
-  'fleet.fuelConsumption.action.dismiss': 'Classer',
+  'fleet.fuelConsumption.action.dismiss': 'Classer sans suite',
   'fleet.fuelConsumption.form.cause': 'Cause',
   'fleet.fuelConsumption.form.comment': 'Commentaire',
   'fleet.fuelConsumption.form.amount': 'Montant de la retenue',
@@ -39,15 +38,12 @@ export default {
   'fleet.fuelConsumption.col.routeName': 'Corridor',
   'fleet.fuelConsumption.col.referenceSource': 'Référence de',
   'fleet.fuelConsumption.col.co2Kg': 'CO₂ (kg)',
-  'fleet.fuelConsumption.lowEmission':
-    'Véhicules à faibles émissions (électriques ou hybrides) : {low} sur {total} véhicules motorisés du parc, soit {share} %.',
-  'fleet.fuelConsumption.withholdable':
-    'Salaire mensuel net déclaré : {salary} ; retenue possible ce mois-ci selon le droit du travail : {max} au plus.',
+  'fleet.fuelConsumption.lowEmission': 'Faibles émissions : {low} sur {total} véhicules motorisés ({share} %).',
+  'fleet.fuelConsumption.withholdable': 'Salaire net déclaré : {salary} · retenue possible ce mois-ci : {max} au plus.',
   'fleet.fuelConsumption.form.monthlySalary': 'Salaire mensuel net du conducteur',
-  'fleet.fuelConsumption.form.monthlySalaryHint':
-    'Avec les autres retenues du mois, la retenue ne peut dépasser la part du salaire fixée dans les réglages de la flotte selon le droit du travail applicable.',
+  'fleet.fuelConsumption.form.monthlySalaryHint': 'Retenues du mois comprises, au plus la part du salaire fixée dans les réglages.',
   'fleet.fuelConsumption.emissions.title': 'Émissions et écoconduite par véhicule',
-  'fleet.fuelConsumption.emissions.summary': '{count} véhicule(s) · {tons} t de CO₂',
+  'fleet.fuelConsumption.emissions.summary': 'Véhicules : {count} · {tons} t de CO₂',
   'fleet.fuelConsumption.emissions.loadError': "Les émissions n'ont pas pu être chargées.",
   'fleet.fuelConsumption.emissions.empty': 'Aucun plein enregistré.',
   'fleet.fuelConsumption.emissions.col.fuelType': 'Énergie',
@@ -55,6 +51,6 @@ export default {
   'fleet.fuelConsumption.emissions.col.co2Kg': 'CO₂ émis (kg)',
   'fleet.fuelConsumption.emissions.col.gramsPerKm': 'g de CO₂ / km',
   'fleet.fuelConsumption.emissions.col.ecoEvents': 'Écoconduite',
-  'fleet.fuelConsumption.emissions.ecoCount': '{count} événement(s)',
+  'fleet.fuelConsumption.emissions.ecoCount': 'Aucun événement | {count} événement | {count} événements',
   'fleet.fuelConsumption.emissions.noEco': 'Aucun'
 }

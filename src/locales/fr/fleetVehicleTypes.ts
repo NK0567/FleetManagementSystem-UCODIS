@@ -42,5 +42,6 @@ export default {
     "Des véhicules utilisent ce type : seuls le libellé et l'activation se modifient encore.",
   'fleet.vehicleTypes.form.fuelReferenceL100': 'Consommation de référence (L/100 km)',
   'fleet.vehicleTypes.form.fuelReferenceL100Hint':
-    "Laissée vide, la référence par défaut des réglages s'applique."
+    "Laissée vide, la référence par défaut des réglages s'applique.",
+  'fleet.vehicleTypes.noResultsCreate': 'Aucun type de véhicule. Créez-en un avec Nouveau.'
 }

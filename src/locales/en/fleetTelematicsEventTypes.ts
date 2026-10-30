@@ -45,5 +45,6 @@ export default {
   'fleet.telematicsEventTypes.form.infractionTypeNoHint':
     'Lets an infraction be opened from the event.',
   'fleet.telematicsEventTypes.form.active': 'Active',
-  'fleet.telematicsEventTypes.form.eventCount': 'Events of this type'
+  'fleet.telematicsEventTypes.form.eventCount': 'Events of this type',
+  'fleet.telematicsEventTypes.noResultsCreate': 'No event type. Create one with New.'
 }

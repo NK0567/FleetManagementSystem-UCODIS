@@ -54,5 +54,6 @@ export default {
   'fleet.telematicsEvents.action.openInfraction': 'Ouvrir une infraction',
   'fleet.telematicsEvents.listView.toHandle': 'À traiter',
   'fleet.telematicsEvents.listView.handled': 'Traités',
-  'fleet.telematicsEvents.listView.all': 'Tous'
+  'fleet.telematicsEvents.listView.all': 'Tous',
+  'fleet.telematicsEvents.noResultsCreate': 'Aucun événement. Créez-en un avec Nouveau.'
 }

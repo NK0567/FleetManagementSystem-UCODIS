@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RefreshCw, Upload } from '@lucide/vue'
 import { apiErrorMessage } from '@/core/api/apiError'
+import type { MoreAction } from '@/components/shared/MoreActionsMenu.vue'
 import type { FilterFieldDef } from '@/components/shared/AdvancedFilterPanel.vue'
 import type { TableColumn } from '@/components/shared/SortableTableHeader.vue'
 import { useListCellFormatters } from '@/composables/useListCellFormatters'
@@ -79,6 +80,12 @@ const filterDefs: FilterFieldDef[] = [
     valueType: 'string',
     kind: 'reference',
     referenceKey: 'providerTypes'
+  },
+  {
+    field: 'authorized',
+    labelKey: 'fleet.providers.col.authorized',
+    valueType: 'boolean',
+    kind: 'boolean'
   }
 ]
 
@@ -163,6 +170,26 @@ const syncError = ref<string | null>(null)
 const syncMessage = ref<string | null>(null)
 
 /** Takes the third parties of the management system (simulated) and says what changed. */
+/** Bringing in providers from elsewhere is occasional: it waits in « Plus d'actions ». */
+const moreActions = computed<MoreAction[]>(() => [
+  {
+    key: 'sync',
+    label: t('fleet.providers.sync.action'),
+    icon: RefreshCw,
+    hidden: !canInsert.value,
+    disabled: syncing.value,
+    title: t('fleet.providers.sync.hint'),
+    onSelect: () => void synchronize()
+  },
+  {
+    key: 'import',
+    label: t('fleet.providers.import.action'),
+    icon: Upload,
+    hidden: !canInsert.value,
+    onSelect: () => (importing.value = true)
+  }
+])
+
 async function synchronize() {
   syncing.value = true
   syncError.value = null
@@ -195,6 +222,7 @@ async function synchronize() {
         :show-export-excel="canExport"
         :export-excel="exportToExcel"
         :show-details-panel="showDetailsPanel"
+        :more-actions="moreActions"
         :show-create="canInsert"
         :show-card-actions="showCardActions"
         :can-view-selected="canViewSelected"
@@ -227,26 +255,6 @@ async function synchronize() {
             :reset-preferences="resetPreferences"
           />
         </template>
-        <template v-if="canInsert" #extra-actions>
-          <button
-            type="button"
-            class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60"
-            :disabled="syncing"
-            :title="t('fleet.providers.sync.hint')"
-            @click="synchronize"
-          >
-            <RefreshCw class="w-4 h-4 text-primary" />
-            {{ t('fleet.providers.sync.action') }}
-          </button>
-          <button
-            type="button"
-            class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition"
-            @click="importing = true"
-          >
-            <Upload class="w-4 h-4 text-primary" />
-            {{ t('fleet.providers.import.action') }}
-          </button>
-        </template>
       </ListPageToolbar>
 
       <FormAlerts
@@ -278,7 +286,9 @@ async function synchronize() {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('fleet.providers.noResults')"
+        :no-results-message="
+          canInsert ? t('fleet.providers.noResultsCreate') : t('fleet.providers.noResults')
+        "
         :no-search-results-message="
           t('fleet.providers.noSearchResults', { query: store.searchQuery })
         "

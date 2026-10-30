@@ -25,5 +25,6 @@ export default {
   'fleet.fuelGapCauses.form.chargeable': 'Imputable au conducteur',
   'fleet.fuelGapCauses.form.chargeableHint':
     'Seule une cause imputable permet de proposer une retenue.',
-  'fleet.fuelGapCauses.form.active': 'Active'
+  'fleet.fuelGapCauses.form.active': 'Active',
+  'fleet.fuelGapCauses.noResultsCreate': 'Aucune cause. Créez-en une avec Nouveau.'
 }

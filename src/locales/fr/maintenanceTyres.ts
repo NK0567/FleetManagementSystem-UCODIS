@@ -104,5 +104,6 @@ export default {
   'maintenance.tyres.plan.mount': 'Monter',
   'maintenance.tyres.plan.tyre': 'Pneu en stock',
   'maintenance.tyres.plan.pickTyre': 'Choisir un pneu',
-  'maintenance.tyres.plan.noStock': 'Aucun pneu en stock.'
+  'maintenance.tyres.plan.noStock': 'Aucun pneu en stock.',
+  'maintenance.tyres.noResultsCreate': 'Aucun pneu. Créez-en un avec Nouveau.'
 }

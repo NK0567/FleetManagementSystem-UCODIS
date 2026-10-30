@@ -36,5 +36,6 @@ export default {
   'fleet.checkPoints.results.comment': 'Commentaire',
   'fleet.checkPoints.results.blocking': 'bloquant',
   'fleet.checkPoints.issue.incomplete': 'Renseignez tous les points de contrôle.',
-  'fleet.checkPoints.issue.commentRequired': 'Expliquez chaque anomalie relevée.'
+  'fleet.checkPoints.issue.commentRequired': 'Expliquez chaque anomalie relevée.',
+  'fleet.checkPoints.noResultsCreate': 'Aucun point de contrôle. Créez-en un avec Nouveau.'
 }

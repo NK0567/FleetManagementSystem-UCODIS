@@ -52,12 +52,19 @@ export default {
   'hr.orgUnits.form.totalHeadcount': 'Effectif avec les sous-entités',
   'hr.referenceImport.action': 'Importer',
   'hr.referenceImport.orgUnits.title': 'Importer des entités',
-  'hr.referenceImport.orgUnits.hint': 'Chaque ligne suit les règles de la fiche : code et nom obligatoires, code déjà utilisé refusé, entité parente et site reconnus par leur code ou leur nom. Une entité importée attend sa validation.',
-  'hr.referenceImport.orgUnits.created': 'Aucune entité créée. | Une entité créée. | {n} entités créées.',
+  'hr.referenceImport.orgUnits.hint':
+    'Chaque ligne suit les règles de la fiche : code et nom obligatoires, code déjà utilisé refusé, entité parente et site reconnus par leur code ou leur nom. Une entité importée attend sa validation.',
+  'hr.referenceImport.orgUnits.created':
+    'Aucune entité créée. | Une entité créée. | {n} entités créées.',
   'hr.referenceImport.employeeCategories.title': 'Importer des catégories',
-  'hr.referenceImport.employeeCategories.hint': 'Chaque ligne suit les règles de la fiche : code, libellé et jours de congé annuels obligatoires, code déjà utilisé refusé.',
-  'hr.referenceImport.employeeCategories.created': 'Aucune catégorie créée. | Une catégorie créée. | {n} catégories créées.',
+  'hr.referenceImport.employeeCategories.hint':
+    'Chaque ligne suit les règles de la fiche : code, libellé et jours de congé annuels obligatoires, code déjà utilisé refusé.',
+  'hr.referenceImport.employeeCategories.created':
+    'Aucune catégorie créée. | Une catégorie créée. | {n} catégories créées.',
   'hr.referenceImport.jobPositions.title': 'Importer des fonctions',
-  'hr.referenceImport.jobPositions.hint': "Chaque ligne suit les règles de la fiche : code, libellé, entité et catégorie obligatoires, code déjà utilisé refusé. L'entité et la catégorie se donnent par leur code ou leur nom ; les responsabilités se séparent par un point-virgule.",
-  'hr.referenceImport.jobPositions.created': 'Aucune fonction créée. | Une fonction créée. | {n} fonctions créées.'
+  'hr.referenceImport.jobPositions.hint':
+    "Chaque ligne suit les règles de la fiche : code, libellé, entité et catégorie obligatoires, code déjà utilisé refusé. L'entité et la catégorie se donnent par leur code ou leur nom ; les responsabilités se séparent par un point-virgule.",
+  'hr.referenceImport.jobPositions.created':
+    'Aucune fonction créée. | Une fonction créée. | {n} fonctions créées.',
+  'hr.orgUnits.noResultsCreate': 'Aucune entité. Créez-en une avec Nouveau.'
 }

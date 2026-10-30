@@ -110,6 +110,18 @@ const filterDefs: FilterFieldDef[] = [
     valueType: 'string',
     kind: 'reference',
     referenceKey: 'jobPositions'
+  },
+  {
+    field: 'eligible',
+    labelKey: 'fleet.drivers.col.eligible',
+    valueType: 'boolean',
+    kind: 'boolean'
+  },
+  {
+    field: 'drivingAuthorized',
+    labelKey: 'fleet.drivers.col.drivingAuthorized',
+    valueType: 'boolean',
+    kind: 'boolean'
   }
 ]
 

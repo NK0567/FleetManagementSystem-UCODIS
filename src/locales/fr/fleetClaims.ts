@@ -56,7 +56,7 @@ export default {
   'fleet.claims.listView.open': 'Dossiers ouverts',
   'fleet.claims.listView.closed': 'Dossiers clos',
   'fleet.claims.listView.all': 'Tous',
-  'fleet.claims.action.insurance': 'Suivi assurance',
+  'fleet.claims.action.insurance': 'Mettre à jour le suivi assurance',
   'fleet.claims.action.close': 'Clore le dossier',
   'fleet.claims.closureBlock.alreadyClosed': 'Le dossier est déjà clos',
   'fleet.claims.closureBlock.analysisRequired': "Rédigez l'analyse des causes",
@@ -83,5 +83,6 @@ export default {
   'fleet.claims.form.downtimeCode': "Code d'indisponibilité appliqué au véhicule : {code} · {name}",
   'fleet.claims.form.downtimeOpen': 'en cours',
   'fleet.claims.form.downtimeEnded': 'terminée',
-  'fleet.claims.summary': '{claims} accident(s) et incident(s) · {rate} accident(s) par million de km · dommages {damage} Ar · reste à charge {residual} Ar'
+  'fleet.claims.summary': 'Accidents et incidents : {claims} · par million de km : {rate} · dommages {damage} Ar · reste à charge {residual} Ar',
+  'fleet.claims.noResultsCreate': 'Aucun sinistre. Créez-en un avec Nouveau.'
 }

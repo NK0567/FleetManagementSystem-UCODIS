@@ -39,9 +39,11 @@ export default {
   'planning.products.form.referenceDensityRequired': 'Give the reference density of the fuel.',
   'planning.products.form.unitWeightKg': 'Weight of one unit (kg)',
   'planning.products.form.unitVolumeM3': 'Volume of one unit (m³)',
-  'planning.products.form.unitMeasuresHint': "Well filled, they give the weight and volume of each order line, compared with the vehicle's capacity.",
+  'planning.products.form.unitMeasuresHint':
+    "Well filled, they give the weight and volume of each order line, compared with the vehicle's capacity.",
   'planning.products.measures.title': 'Measures at loading and delivery',
-  'planning.products.measures.hint': 'What the depot takes at loading and the driver at delivery. For a fuel: the temperature, the density and the volume at 15 °C, from its reference density.',
+  'planning.products.measures.hint':
+    'What the depot takes at loading and the driver at delivery. For a fuel: the temperature, the density and the volume at 15 °C, from its reference density.',
   'planning.products.measures.loadingMeasures': 'At loading',
   'planning.products.measures.deliveryMeasures': 'At delivery',
   'planning.products.measures.quantity': 'Quantity',
@@ -50,5 +52,6 @@ export default {
   'planning.products.measures.density': 'Density',
   'planning.products.measures.volume15': 'Volume at 15 °C',
   'planning.products.measures.quantityRequired': 'The quantity is always one of the measures.',
-  'planning.products.measures.fuelOnly': 'Temperature, density and volume at 15 °C are measured for a fuel only.'
+  'planning.products.measures.fuelOnly':
+    'Temperature, density and volume at 15 °C are measured for a fuel only.'
 }

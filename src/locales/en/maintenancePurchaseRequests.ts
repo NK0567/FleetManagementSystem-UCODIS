@@ -43,5 +43,6 @@ export default {
     'The part enters the stock, then leaves at once for order {no}.',
   'maintenance.purchaseRequests.receiveToStock': 'The part enters the stock.',
   'maintenance.purchaseRequests.form.erpSent':
-    'Sent to the ERP on {date} under reference {reference} (link simulated in the mockup).'
+    'Sent to the ERP on {date} under reference {reference} (link simulated in the mockup).',
+  'maintenance.purchaseRequests.noResultsCreate': 'No purchase request. Create one with New.'
 }

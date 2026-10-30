@@ -129,10 +129,19 @@ export default {
   'planning.deliveryRequests.intake.apiSent': "Commande {no} reçue par l'API.",
   'planning.deliveryRequests.intake.apiInvalid': "Le contenu envoyé n'est pas un JSON valide.",
   'planning.deliveryRequests.intake.serviceClosed':
-    "L'entreprise ne reçoit pas les commandes transmises par un service : vous suivez ici vos commandes passées.",
+    'Transmission de commandes fermée : vous suivez ici vos commandes passées.',
   'planning.deliveryRequests.intake.manualClosed':
-    "L'entreprise n'autorise pas le planificateur à saisir lui-même une commande.",
+    'Saisie de commandes par le planificateur fermée.',
   'planning.deliveryRequests.form.recipientPhone': 'Téléphone du destinataire',
   'planning.deliveryRequests.form.recipientEmail': 'E-mail du destinataire',
-  'planning.deliveryRequests.form.contactFallback': 'Sinon celui de la fiche client'
+  'planning.deliveryRequests.form.contactFallback': 'Sinon celui de la fiche client',
+  'planning.deliveryRequests.view.all': 'Toutes',
+  'planning.deliveryRequests.view.pending': 'En attente',
+  'planning.deliveryRequests.view.planned': 'Planifiées',
+  'planning.deliveryRequests.view.expired': 'Expirées',
+  'planning.deliveryRequests.view.rejected': 'Rejetées',
+  'planning.deliveryRequests.view.cancelled': 'Annulées',
+  'planning.deliveryRequests.action.new': 'Nouvelle commande',
+  'planning.deliveryRequests.import.actionLong': 'Importer des commandes',
+  'planning.deliveryRequests.noResultsCreate': 'Aucune commande. Créez-en une avec Nouveau.'
 }

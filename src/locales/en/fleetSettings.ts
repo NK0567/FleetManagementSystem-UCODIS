@@ -1,7 +1,6 @@
 export default {
   'fleet.settings.title': 'Fleet settings',
-  'fleet.settings.subtitle':
-    'Thresholds and notices used by the fleet checks. Each section is saved on its own.',
+  'fleet.settings.subtitle': 'Thresholds and notices of the fleet checks.',
   'fleet.settings.lastModified': 'Changed on {date} by {user}',
   'fleet.settings.loadError': 'The fleet settings could not be loaded.',
   'fleet.settings.saveError': 'The settings could not be saved.',
@@ -89,12 +88,12 @@ export default {
   'fleet.settings.field.reporting.availabilityTargetPct': 'Target availability rate',
   'fleet.settings.field.fuel.deductionMaxSalaryPct': 'Highest share of the salary withheld per month (labour law)',
   'fleet.settings.section.integrations': 'Company systems',
-  'fleet.settings.section.integrations.hint': 'Simulated in the mock-up: when a system exists, people or providers are taken from it instead of being typed in again.',
+  'fleet.settings.section.integrations.hint': 'Simulated in the mockup: data is taken over instead of being typed again.',
   'fleet.settings.field.integrations.hrSystemConnected': 'HR system',
   'fleet.settings.field.integrations.managementSystemConnected': 'Company management system',
   'fleet.settings.scoreFamilies.title': 'Driving score families',
   'fleet.settings.scoreFamilies.count': 'No family | 1 family | {n} families',
-  'fleet.settings.scoreFamilies.hint': 'Each family has a code, a label and a weight, and counts the elements it is given; an element is counted in one family only. A family weighted 0 is left out.',
+  'fleet.settings.scoreFamilies.hint': 'Code, label and weight of each family. Weight 0: family ignored.',
   'fleet.settings.scoreFamilies.formulaTitle': 'Formula:',
   'fleet.settings.scoreFamilies.formula': 'family mark = 100 - sum (number of facts × points), never below 0 and capped while a document is missing; score = sum (mark × weight) / sum of weights.',
   'fleet.settings.scoreFamilies.saved': 'The score families are saved.',
@@ -130,7 +129,7 @@ export default {
   'fleet.settings.scoreSource.deliveryDispute': 'Contested deliveries',
   'fleet.settings.scoreSource.deliveryDispute.formula': 'points per contestation still open',
   'fleet.settings.importMappings.title': 'Data imports',
-  'fleet.settings.importMappings.hint': 'For each import, give the heading of the source file column that feeds each field. Without a heading, the default names are recognized; they still are once set.',
+  'fleet.settings.importMappings.hint': 'Column heading of the file for each field. Empty: default name.',
   'fleet.settings.importMappings.saved': 'The column mapping is saved.',
   'fleet.settings.importMappings.field': 'Field',
   'fleet.settings.importMappings.heading': 'Heading in the source file',
@@ -181,7 +180,7 @@ export default {
   'fleet.settings.importField.maintenanceHistory.odometerKm': 'Odometer',
   'fleet.settings.importField.maintenanceHistory.cost': 'Cost',
   'fleet.settings.indicators.title': 'Indicators: codes, labels and targets',
-  'fleet.settings.indicators.hint': 'Give each indicator the code and label the company uses, and its target. The availability and maintenance targets are the same as those of the dashboards.',
+  'fleet.settings.indicators.hint': 'Code, label and target of each indicator.',
   'fleet.settings.indicators.saved': 'The indicators are saved.',
   'fleet.settings.indicators.code': 'Code',
   'fleet.settings.indicators.label': 'Label',
@@ -210,5 +209,6 @@ export default {
   'fleet.settings.indicatorDefinition.costPerKm': 'Cost of maintenance, fuel, tyres and insurance divided by the kilometres run.',
   'fleet.settings.indicatorDefinition.fuelConsumption': 'Litres used per 100 km run, from one full tank to the next.',
   'fleet.settings.indicatorDefinition.documentCompliance': 'Share of the vehicles and drivers whose mandatory documents are all valid.',
-  'fleet.settings.indicatorDefinition.driverScore': 'Average of the driving scores of the drivers over the score period.'
+  'fleet.settings.indicatorDefinition.driverScore': 'Average of the driving scores of the drivers over the score period.',
+  'fleet.settings.importMappings.saveFirst': 'Save the current changes first.'
 }

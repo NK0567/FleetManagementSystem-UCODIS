@@ -42,5 +42,6 @@ export default {
   'fleet.trainings.form.attendedOn': 'Suivie le',
   'fleet.trainings.form.result': 'Résultat',
   'fleet.trainings.form.cancelledAt': 'Annulée le',
-  'fleet.trainings.form.cancelReason': "Motif de l'annulation"
+  'fleet.trainings.form.cancelReason': "Motif de l'annulation",
+  'fleet.trainings.noResultsCreate': 'Aucune formation. Créez-en une avec Nouveau.'
 }

@@ -224,7 +224,9 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('fleet.trainings.noResults')"
+        :no-results-message="
+          canInsert ? t('fleet.trainings.noResultsCreate') : t('fleet.trainings.noResults')
+        "
         :no-search-results-message="
           t('fleet.trainings.noSearchResults', { query: store.searchQuery })
         "

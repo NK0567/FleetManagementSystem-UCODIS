@@ -1,6 +1,9 @@
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { RouterLink } from 'vue-router'
+import { findFeatureForPath } from '@/core/navigation/featureRoutes'
+import { useMenuPermissionsStore } from '@/stores/menuPermissions'
 import { Container, FileExclamationPoint, Fuel, Route, Truck, UserRound } from '@lucide/vue'
 import { LIVE_SITUATIONS } from '@/modules/fleet/live-map/domain/livePosition'
 import { useOptionsStore } from '@/stores/optionsStore'
@@ -12,6 +15,14 @@ import type { FleetSupervision, SupervisedVehicle } from '../types/fleetDashboar
 const { t } = useI18n()
 const store = useFleetDashboardStore()
 const optionsStore = useOptionsStore()
+const permissions = useMenuPermissionsStore()
+
+/** A tile or a line opens its screen only for a user who may read it (the director reads less). */
+function canOpen(path: string): boolean {
+  const feature = findFeatureForPath(path)
+  return !feature || permissions.can(feature)
+}
+const linkTag = (path: string) => (canOpen(path) ? RouterLink : 'div')
 
 /** The four columns of the control room board, each vehicle opening on the live map. */
 const SUPERVISION_GROUPS: (keyof FleetSupervision)[] = [
@@ -23,7 +34,11 @@ const SUPERVISION_GROUPS: (keyof FleetSupervision)[] = [
 
 function supervisedDetail(vehicle: SupervisedVehicle, group: keyof FleetSupervision) {
   if (group === 'inAlert')
-    return t('fleet.dashboard.supervision.alerts', { count: vehicle.alertCount })
+    return t(
+      'fleet.dashboard.supervision.alerts',
+      { count: vehicle.alertCount },
+      vehicle.alertCount
+    )
   if (group === 'outOfZone') {
     return vehicle.corridorGapM !== null
       ? t('fleet.dashboard.supervision.offCorridor', {
@@ -149,7 +164,11 @@ onBeforeUnmount(() => {
           <h2 class="text-sm font-semibold text-card-foreground">
             {{ t('fleet.dashboard.park.title') }}
           </h2>
-          <RouterLink to="/fleet/fleet-status" class="text-xs text-primary hover:underline">
+          <RouterLink
+            v-if="canOpen('/fleet/fleet-status')"
+            to="/fleet/fleet-status"
+            class="text-xs text-primary hover:underline"
+          >
             {{ t('fleet.dashboard.park.openStatus') }}
           </RouterLink>
         </div>
@@ -209,7 +228,11 @@ onBeforeUnmount(() => {
           <h2 class="text-sm font-semibold text-card-foreground">
             {{ t('fleet.dashboard.supervision.title') }}
           </h2>
-          <RouterLink to="/fleet/live-map" class="text-xs text-primary hover:underline">
+          <RouterLink
+            v-if="canOpen('/fleet/live-map')"
+            to="/fleet/live-map"
+            class="text-xs text-primary hover:underline"
+          >
             {{ t('fleet.dashboard.openMap') }}
           </RouterLink>
         </div>
@@ -217,7 +240,14 @@ onBeforeUnmount(() => {
           <div v-for="group in SUPERVISION_GROUPS" :key="group" class="min-w-0">
             <h3 class="text-xs font-semibold text-muted-foreground mb-1">
               {{ t(`fleet.dashboard.supervision.${group}`) }}
-              <span class="text-card-foreground tabular-nums">
+              <span
+                class="tabular-nums"
+                :class="
+                  store.dashboard.supervision[group].length
+                    ? 'text-card-foreground'
+                    : 'text-muted-foreground opacity-60'
+                "
+              >
                 {{ store.dashboard.supervision[group].length }}
               </span>
             </h3>
@@ -226,8 +256,13 @@ onBeforeUnmount(() => {
               class="divide-y divide-border border border-border rounded"
             >
               <li v-for="vehicle in store.dashboard.supervision[group]" :key="vehicle.vehicleNo">
-                <RouterLink
-                  :to="{ path: '/fleet/live-map', query: { vehicle: vehicle.vehicleNo } }"
+                <component
+                  :is="linkTag('/fleet/live-map')"
+                  :to="
+                    canOpen('/fleet/live-map')
+                      ? { path: '/fleet/live-map', query: { vehicle: vehicle.vehicleNo } }
+                      : undefined
+                  "
                   class="block px-3 py-2 hover:bg-accent"
                 >
                   <span class="flex items-center justify-between gap-2">
@@ -242,7 +277,7 @@ onBeforeUnmount(() => {
                   <span class="block text-xs text-muted-foreground truncate">
                     {{ supervisedDetail(vehicle, group) }}
                   </span>
-                </RouterLink>
+                </component>
               </li>
             </ul>
             <p v-else class="text-xs text-muted-foreground">
@@ -253,10 +288,11 @@ onBeforeUnmount(() => {
       </section>
 
       <section class="grid grid-cols-2 xl:grid-cols-6 gap-3">
-        <RouterLink
+        <component
+          :is="linkTag(kpi.to)"
           v-for="kpi in kpis"
           :key="kpi.key"
-          :to="kpi.to"
+          :to="canOpen(kpi.to) ? kpi.to : undefined"
           class="bg-card border border-border rounded p-4 flex items-start gap-3 hover:bg-accent transition"
         >
           <span class="p-2 rounded bg-primary/10 text-primary shrink-0">
@@ -267,7 +303,7 @@ onBeforeUnmount(() => {
             <p class="text-2xl font-semibold text-card-foreground tabular-nums">{{ kpi.value }}</p>
             <p class="text-xs text-muted-foreground truncate">{{ kpi.sub }}</p>
           </div>
-        </RouterLink>
+        </component>
       </section>
 
       <section class="bg-card border border-border rounded">
@@ -275,22 +311,34 @@ onBeforeUnmount(() => {
           <h2 class="text-sm font-semibold text-card-foreground">
             {{ t('fleet.dashboard.movement') }}
           </h2>
-          <RouterLink to="/fleet/live-map" class="text-xs text-primary hover:underline">
+          <RouterLink
+            v-if="canOpen('/fleet/live-map')"
+            to="/fleet/live-map"
+            class="text-xs text-primary hover:underline"
+          >
             {{ t('fleet.dashboard.openMap') }}
           </RouterLink>
         </div>
         <div class="flex flex-wrap gap-2 p-4">
-          <RouterLink
+          <component
+            :is="linkTag('/fleet/live-map')"
             v-for="situation in LIVE_SITUATIONS"
             :key="situation"
-            to="/fleet/live-map"
+            :to="canOpen('/fleet/live-map') ? '/fleet/live-map' : undefined"
             class="inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded border border-border hover:bg-accent"
           >
             <LiveSituationPill :situation="situation" />
-            <span class="font-semibold text-card-foreground tabular-nums">
+            <span
+              class="font-semibold tabular-nums"
+              :class="
+                store.dashboard.movement[situation]
+                  ? 'text-card-foreground'
+                  : 'text-muted-foreground opacity-60'
+              "
+            >
               {{ store.dashboard.movement[situation] }}
             </span>
-          </RouterLink>
+          </component>
         </div>
       </section>
 
@@ -300,14 +348,23 @@ onBeforeUnmount(() => {
             <h2 class="text-sm font-semibold text-card-foreground">
               {{ t('fleet.dashboard.latestAlerts') }}
             </h2>
-            <RouterLink to="/fleet/alerts" class="text-xs text-primary hover:underline">
+            <RouterLink
+              v-if="canOpen('/fleet/alerts')"
+              to="/fleet/alerts"
+              class="text-xs text-primary hover:underline"
+            >
               {{ t('fleet.dashboard.seeAll') }}
             </RouterLink>
           </div>
           <ul v-if="store.dashboard.latestAlerts.length" class="divide-y divide-border">
             <li v-for="alert in store.dashboard.latestAlerts" :key="alert.no">
-              <RouterLink
-                :to="{ path: alert.path, query: { no: alert.recordNo, cardMode: 'view' } }"
+              <component
+                :is="linkTag(alert.path)"
+                :to="
+                  canOpen(alert.path)
+                    ? { path: alert.path, query: { no: alert.recordNo, cardMode: 'view' } }
+                    : undefined
+                "
                 class="flex items-center gap-3 px-4 py-2.5 hover:bg-accent"
               >
                 <span
@@ -326,7 +383,7 @@ onBeforeUnmount(() => {
                 <span class="text-xs text-muted-foreground shrink-0">
                   {{ formatDate(alert.since) }}
                 </span>
-              </RouterLink>
+              </component>
             </li>
           </ul>
           <p v-else class="px-4 py-6 text-sm text-muted-foreground">
@@ -343,11 +400,16 @@ onBeforeUnmount(() => {
             </div>
             <ul v-if="store.dashboard.immobilized.length" class="divide-y divide-border">
               <li v-for="vehicle in store.dashboard.immobilized" :key="vehicle.vehicleNo">
-                <RouterLink
-                  :to="{
-                    path: '/fleet/vehicles',
-                    query: { no: vehicle.vehicleNo, cardMode: 'view' }
-                  }"
+                <component
+                  :is="linkTag('/fleet/vehicles')"
+                  :to="
+                    canOpen('/fleet/vehicles')
+                      ? {
+                          path: '/fleet/vehicles',
+                          query: { no: vehicle.vehicleNo, cardMode: 'view' }
+                        }
+                      : undefined
+                  "
                   class="block px-4 py-2.5 hover:bg-accent"
                 >
                   <span class="block text-sm font-medium text-card-foreground">
@@ -356,7 +418,7 @@ onBeforeUnmount(() => {
                   <span class="block text-xs text-muted-foreground truncate">
                     {{ vehicle.reason }}
                   </span>
-                </RouterLink>
+                </component>
               </li>
             </ul>
             <p v-else class="px-4 py-6 text-sm text-muted-foreground">

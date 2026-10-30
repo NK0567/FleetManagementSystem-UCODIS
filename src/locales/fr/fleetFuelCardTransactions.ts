@@ -44,13 +44,13 @@ export default {
     'Détachée à la main : le rapprochement automatique ne la reprend pas.',
   'fleet.fuelCardTransactions.action.matchAll': 'Rapprocher automatiquement',
   'fleet.fuelCardTransactions.action.openRefill': 'Ouvrir le plein',
-  'fleet.fuelCardTransactions.action.detach': 'Détacher',
+  'fleet.fuelCardTransactions.action.detach': 'Détacher du plein',
   'fleet.fuelCardTransactions.action.match': 'Rapprocher',
   'fleet.fuelCardTransactions.action.createRefill': 'Créer le plein',
   'fleet.fuelCardTransactions.import.action': 'Importer des transactions',
   'fleet.fuelCardTransactions.import.title': 'Importer le relevé du prestataire',
-  'fleet.fuelCardTransactions.import.hint':
-    "Fichier CSV (séparateur ; ou ,) du prestataire de cartes, avec une ligne d'en-têtes. Chaque ligne suit les mêmes contrôles qu'une saisie (carte connue, date passée, doublon refusé), puis les transactions sont rapprochées des pleins.",
+  'fleet.fuelCardTransactions.import.hint': "Fichier CSV du prestataire de cartes, avec une ligne d'en-têtes. Chaque ligne est contrôlée puis rapprochée des pleins.",
   'fleet.fuelCardTransactions.import.created':
-    'Aucune transaction importée. | Une transaction importée. | {n} transactions importées.'
+    'Aucune transaction importée. | Une transaction importée. | {n} transactions importées.',
+  'fleet.fuelCardTransactions.noResultsCreate': 'Aucune transaction. Créez-en une avec Nouveau.'
 }

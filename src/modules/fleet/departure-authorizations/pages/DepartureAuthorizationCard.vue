@@ -135,12 +135,12 @@ async function refuse(reason: string) {
     <template v-if="showDecision" #action-buttons>
       <button
         type="button"
-        class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-card-foreground hover:bg-accent border border-border rounded transition disabled:opacity-60 disabled:cursor-not-allowed"
+        class="cursor-pointer inline-flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium text-primary-foreground bg-primary rounded hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
         :disabled="!item?.ready || deciding"
         :title="failedChecks.join(' ') || undefined"
         @click="grant"
       >
-        <CircleCheck class="w-5 h-5 text-primary" />
+        <CircleCheck class="w-4 h-4" />
         {{ t('fleet.departureAuthorizations.action.grant') }}
       </button>
       <button

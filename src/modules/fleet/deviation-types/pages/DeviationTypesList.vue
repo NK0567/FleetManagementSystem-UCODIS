@@ -100,6 +100,18 @@ const filterDefs: FilterFieldDef[] = [
     valueType: 'string',
     kind: 'option',
     optionsKey: 'deviationUnit'
+  },
+  {
+    field: 'autoDetected',
+    labelKey: 'fleet.deviationTypes.col.autoDetected',
+    valueType: 'boolean',
+    kind: 'boolean'
+  },
+  {
+    field: 'active',
+    labelKey: 'fleet.deviationTypes.col.active',
+    valueType: 'boolean',
+    kind: 'boolean'
   }
 ]
 
@@ -246,7 +258,11 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('fleet.deviationTypes.noResults')"
+        :no-results-message="
+          canInsert
+            ? t('fleet.deviationTypes.noResultsCreate')
+            : t('fleet.deviationTypes.noResults')
+        "
         :no-search-results-message="
           t('fleet.deviationTypes.noSearchResults', { query: store.searchQuery })
         "

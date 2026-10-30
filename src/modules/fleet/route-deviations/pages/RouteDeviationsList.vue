@@ -114,6 +114,13 @@ const filterDefs: FilterFieldDef[] = [
     valueType: 'string',
     kind: 'reference',
     referenceKey: 'openTrips'
+  },
+  {
+    field: 'severity',
+    labelKey: 'fleet.routeDeviations.col.severity',
+    valueType: 'string',
+    kind: 'option',
+    optionsKey: 'deviationSeverity'
   }
 ]
 
@@ -261,7 +268,11 @@ const {
         :selected-item="store.selectedItem"
         :error="store.error"
         :search-query="store.searchQuery"
-        :no-results-message="t('fleet.routeDeviations.noResults')"
+        :no-results-message="
+          canInsert
+            ? t('fleet.routeDeviations.noResultsCreate')
+            : t('fleet.routeDeviations.noResults')
+        "
         :no-search-results-message="
           t('fleet.routeDeviations.noSearchResults', { query: store.searchQuery })
         "

@@ -40,7 +40,7 @@ export default {
   'fleet.dashboard.supervision.inAlert': 'En alerte',
   'fleet.dashboard.supervision.outOfZone': 'Hors zone',
   'fleet.dashboard.supervision.none': 'Aucun véhicule.',
-  'fleet.dashboard.supervision.alerts': '{count} alerte(s) à traiter',
+  'fleet.dashboard.supervision.alerts': 'Aucune alerte à traiter | {count} alerte à traiter | {count} alertes à traiter',
   'fleet.dashboard.supervision.offCorridor': "À {km} km de l'itinéraire",
   'fleet.dashboard.supervision.offSites': 'Hors de tout site connu',
   'fleet.dashboard.supervision.speed': '{speed} km/h'
