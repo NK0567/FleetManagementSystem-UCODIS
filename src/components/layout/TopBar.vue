@@ -30,11 +30,13 @@ const showLogoutConfirm = ref(false)
 
 /* The guide of the user's role: opened on the first sign-in of an account, then from the button. */
 const guideOpen = ref(false)
+/** The role guide is switched off for now; set to true to bring back its button and first-sign-in opening. */
+const GUIDE_ENABLED = false
 const GUIDE_SEEN_KEY = 'guide.seen.'
 watch(
   () => userStore.user?.code,
   (code) => {
-    if (!code) return
+    if (!code || !GUIDE_ENABLED) return
     try {
       if (!localStorage.getItem(GUIDE_SEEN_KEY + code)) {
         guideOpen.value = true
@@ -107,6 +109,7 @@ function onConfirmLogout() {
           <PanelTop v-else class="w-4 h-4" />
         </button>
         <button
+          v-if="GUIDE_ENABLED"
           type="button"
           class="p-2 hover:bg-white/10 rounded flex items-center gap-1.5"
           :title="t('guide.title')"
@@ -196,7 +199,7 @@ function onConfirmLogout() {
       @cancel="showLogoutConfirm = false"
     />
     <Teleport to="body">
-      <RoleGuidePanel v-if="guideOpen" @close="guideOpen = false" />
+      <RoleGuidePanel v-if="GUIDE_ENABLED && guideOpen" @close="guideOpen = false" />
     </Teleport>
   </div>
 </template>
