@@ -122,5 +122,11 @@ export default {
   'nav.fuelReferences': 'Reference consumptions',
   'nav.myVehicle': 'My vehicle',
   'nav.providerTypes': 'Provider types',
-  'nav.stockMovements': 'Stock movements'
+  'nav.stockMovements': 'Stock movements',
+  'nav.group.confirmationQueue': 'Confirmation before departure',
+  'nav.confirmations.pending': 'To confirm',
+  'nav.confirmations.unavailable': 'Unavailable',
+  'nav.confirmations.confirmed': 'Confirmed',
+  'nav.confirmations.replanned': 'Replanned',
+  'nav.confirmations.answered': 'Already answered'
 }

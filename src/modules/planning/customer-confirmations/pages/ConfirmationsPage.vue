@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 import {
   CalendarClock,
   CircleCheck,
@@ -51,7 +52,16 @@ const { canExecute } = usePermissions('CUSTOMERCONFIRMATION')
 const userStore = useUserStore()
 const optionsStore = useOptionsStore()
 const me = computed(() => userStore.user?.code ?? '')
-const confirmationTab = ref<QueueTab>('pending')
+const route = useRoute()
+const router = useRouter()
+/* The queue shown follows the address, so that each queue has its entry in the menus. */
+const confirmationTab = computed<QueueTab>(() => {
+  const view = (route.params as Record<string, unknown>).view
+  return CONFIRMATION_TABS.find((tab) => tab === view) ?? 'pending'
+})
+function openTab(tab: QueueTab) {
+  void router.push(tab === 'pending' ? '/planning/confirmations' : `/planning/confirmations/${tab}`)
+}
 /** Only the calls due now, by the company's call moment (TRS01-US15). */
 const onlyCalls = ref(false)
 const ACTIVITY_TONES: Record<NonNullable<ConfirmationLineApi['activity']>, StatusTone> = {
@@ -180,7 +190,7 @@ onMounted(() => {
           type="button"
           class="cursor-pointer px-3 py-2 text-sm border-b-2 -mb-px transition"
           :class="tabClass(confirmationTab === state)"
-          @click="confirmationTab = state"
+          @click="openTab(state)"
         >
           {{ t(`planning.confirmations.state.${state}`) }}
           <span class="ml-1 text-xs tabular-nums text-muted-foreground">

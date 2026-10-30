@@ -63,7 +63,39 @@ export function registerPlanningModule(): void {
     to: '/planning/confirmations',
     menuKey: 'customerConfirmation',
     order: CONFIRMATIONS_MENU_ORDER,
-    subItems: []
+    /* The agent's queues, one entry each in the side bar. */
+    subItems: [
+      {
+        labelKey: 'nav.confirmations.pending',
+        to: '/planning/confirmations',
+        group: 'nav.group.confirmationQueue',
+        menuKey: 'customerConfirmation'
+      },
+      {
+        labelKey: 'nav.confirmations.unavailable',
+        to: '/planning/confirmations/unavailable',
+        group: 'nav.group.confirmationQueue',
+        menuKey: 'customerConfirmation'
+      },
+      {
+        labelKey: 'nav.confirmations.confirmed',
+        to: '/planning/confirmations/confirmed',
+        group: 'nav.group.confirmationQueue',
+        menuKey: 'customerConfirmation'
+      },
+      {
+        labelKey: 'nav.confirmations.replanned',
+        to: '/planning/confirmations/replanned',
+        group: 'nav.group.confirmationQueue',
+        menuKey: 'customerConfirmation'
+      },
+      {
+        labelKey: 'nav.confirmations.answered',
+        to: '/planning/confirmations/answered',
+        group: 'nav.group.confirmationQueue',
+        menuKey: 'customerConfirmation'
+      }
+    ]
   })
 
   registerNavMenu({
