@@ -18,12 +18,15 @@ const { mode } = useNavLayout()
       <div class="flex-1 flex min-h-0">
         <SideBar v-if="mode === 'sidebar'" class="hidden md:block" />
         <main
-          class="flex-1 min-w-0 overflow-y-auto"
+          class="flex-1 min-w-0 flex flex-col overflow-hidden"
           :class="
             mode === 'sidebar' ? 'px-0 sm:px-2 md:px-4' : 'px-0 sm:px-2 md:px-4 lg:px-14 xl:px-16'
           "
         >
-          <slot />
+          <SetupBackLink class="shrink-0" />
+          <div class="flex-1 min-h-0 overflow-y-auto">
+            <slot />
+          </div>
         </main>
       </div>
     </div>

@@ -134,5 +134,6 @@ export default {
   'guide.open': 'Ouvrir l’écran',
   'guide.empty': 'Aucun guide pour ce compte.',
   'nav.setupHub': 'Paramètres et référentiels',
-  'nav.setupHubEmpty': 'Aucun paramètre accessible avec ce compte.'
+  'nav.setupHubEmpty': 'Aucun paramètre accessible avec ce compte.',
+  'nav.backToSetup': 'Retour aux paramètres'
 }

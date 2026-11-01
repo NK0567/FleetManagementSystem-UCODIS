@@ -134,5 +134,6 @@ export default {
   'guide.open': 'Open the screen',
   'guide.empty': 'No guide for this account.',
   'nav.setupHub': 'Settings and reference lists',
-  'nav.setupHubEmpty': 'No setting available for this account.'
+  'nav.setupHubEmpty': 'No setting available for this account.',
+  'nav.backToSetup': 'Back to settings'
 }
