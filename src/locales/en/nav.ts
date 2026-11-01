@@ -132,5 +132,7 @@ export default {
   'guide.title': 'My role guide',
   'guide.button': 'Guide',
   'guide.open': 'Open the screen',
-  'guide.empty': 'No guide for this account.'
+  'guide.empty': 'No guide for this account.',
+  'nav.setupHub': 'Settings and reference lists',
+  'nav.setupHubEmpty': 'No setting available for this account.'
 }

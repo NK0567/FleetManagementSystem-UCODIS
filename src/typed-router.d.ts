@@ -108,6 +108,13 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/fleet/configuration': RouteRecordInfo<
+      '/fleet/configuration',
+      '/fleet/configuration',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/fleet/couplings/': RouteRecordInfo<
       '/fleet/couplings/',
       '/fleet/couplings',
@@ -584,6 +591,13 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/hr/configuration': RouteRecordInfo<
+      '/hr/configuration',
+      '/hr/configuration',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/hr/dashboard': RouteRecordInfo<
       '/hr/dashboard',
       '/hr/dashboard',
@@ -729,6 +743,13 @@ declare module 'vue-router/auto-routes' {
       '/maintenance/competences/:id',
       { id: ParamValue<true> },
       { id: ParamValue<false> },
+      | never
+    >,
+    '/maintenance/configuration': RouteRecordInfo<
+      '/maintenance/configuration',
+      '/maintenance/configuration',
+      Record<never, never>,
+      Record<never, never>,
       | never
     >,
     '/maintenance/dashboard': RouteRecordInfo<
@@ -1014,6 +1035,13 @@ declare module 'vue-router/auto-routes' {
     '/planning/carrier-invoices/': RouteRecordInfo<
       '/planning/carrier-invoices/',
       '/planning/carrier-invoices',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/planning/configuration': RouteRecordInfo<
+      '/planning/configuration',
+      '/planning/configuration',
       Record<never, never>,
       Record<never, never>,
       | never
@@ -1342,6 +1370,14 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | 'id'
+    }
+    'src/pages/fleet/configuration.vue': {
+      routes:
+        | '/fleet/configuration'
+      views:
+        | never
+      pathParamNames:
+        | never
     }
     'src/pages/fleet/couplings/index.vue': {
       routes:
@@ -1887,6 +1923,14 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | 'id'
     }
+    'src/pages/hr/configuration.vue': {
+      routes:
+        | '/hr/configuration'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
     'src/pages/hr/dashboard.vue': {
       routes:
         | '/hr/dashboard'
@@ -2054,6 +2098,14 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | 'id'
+    }
+    'src/pages/maintenance/configuration.vue': {
+      routes:
+        | '/maintenance/configuration'
+      views:
+        | never
+      pathParamNames:
+        | never
     }
     'src/pages/maintenance/dashboard.vue': {
       routes:
@@ -2378,6 +2430,14 @@ declare module 'vue-router/auto-routes' {
     'src/pages/planning/carrier-invoices/index.vue': {
       routes:
         | '/planning/carrier-invoices/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/planning/configuration.vue': {
+      routes:
+        | '/planning/configuration'
       views:
         | never
       pathParamNames:

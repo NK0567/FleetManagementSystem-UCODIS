@@ -28,6 +28,8 @@ function isRouteMatch(to?: string): boolean {
 
 /** Among sibling entries, only the closest match is active (`/a/b` wins over `/a`). */
 function isSubItemActive(menu: NavMenuItem, to?: string): boolean {
+  const entry = menu.subItems.find((item) => item.to === to)
+  if (entry?.children?.some((child) => isRouteMatch(child.to))) return true
   if (!to || !isRouteMatch(to)) return false
   return !menu.subItems.some(
     (item) => !!item.to && item.to.length > to.length && isRouteMatch(item.to)
@@ -36,7 +38,11 @@ function isSubItemActive(menu: NavMenuItem, to?: string): boolean {
 
 function isMenuActive(menu: NavMenuItem): boolean {
   if (menu.to && isRouteMatch(menu.to)) return true
-  return menu.subItems.some((item) => !!item.to && isRouteMatch(item.to))
+  return menu.subItems.some(
+    (item) =>
+      (!!item.to && isRouteMatch(item.to)) ||
+      !!item.children?.some((child) => isRouteMatch(child.to))
+  )
 }
 
 const navMenus = computed<NavMenuItem[]>(() => menuPermissionsStore.navMenus)

@@ -38,7 +38,9 @@ export function useNavLayout() {
 
   function isMenuActive(menu: NavMenuItem): boolean {
     if (menu.to && isRouteMatch(menu.to)) return true
-    return menu.subItems.some((item) => isRouteMatch(item.to))
+    return menu.subItems.some(
+      (item) => isRouteMatch(item.to) || !!item.children?.some((child) => isRouteMatch(child.to))
+    )
   }
 
   const currentMenu = computed<NavMenuItem | null>(
@@ -47,6 +49,8 @@ export function useNavLayout() {
 
   /** Among sibling entries, only the closest match is active (`/a/b` wins over `/a`). */
   function isSubItemActive(to: string): boolean {
+    const entry = currentMenu.value?.subItems.find((item) => item.to === to)
+    if (entry?.children?.some((child) => isRouteMatch(child.to))) return true
     if (!isRouteMatch(to)) return false
     return !currentMenu.value?.subItems.some(
       (item) => item.to.length > to.length && isRouteMatch(item.to)

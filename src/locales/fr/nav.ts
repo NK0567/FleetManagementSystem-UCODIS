@@ -132,5 +132,7 @@ export default {
   'guide.title': 'Guide de mon rôle',
   'guide.button': 'Guide',
   'guide.open': 'Ouvrir l’écran',
-  'guide.empty': 'Aucun guide pour ce compte.'
+  'guide.empty': 'Aucun guide pour ce compte.',
+  'nav.setupHub': 'Paramètres et référentiels',
+  'nav.setupHubEmpty': 'Aucun paramètre accessible avec ce compte.'
 }

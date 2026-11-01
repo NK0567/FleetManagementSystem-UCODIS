@@ -76,12 +76,14 @@ export function useCommandPalette() {
     menuPermissionsStore.navMenus.flatMap((menu): PageResult[] =>
       menu.to
         ? [{ type: 'page', labelKey: menu.labelKey, to: menu.to }]
-        : menu.subItems.map((item) => ({
-            type: 'page',
-            labelKey: item.labelKey,
-            to: item.to,
-            parentLabelKey: menu.labelKey
-          }))
+        : menu.subItems
+            .flatMap((item) => item.children ?? [item])
+            .map((item) => ({
+              type: 'page',
+              labelKey: item.labelKey,
+              to: item.to,
+              parentLabelKey: menu.labelKey
+            }))
     )
   )
 

@@ -9,6 +9,8 @@ export interface NavSubItem {
   icon?: Component
   /** Shown only when userMenu[menuKey] is true. */
   menuKey?: string
+  /** Screens gathered behind this entry: it stays active on any of them. */
+  children?: NavSubItem[]
 }
 
 export interface NavMenuItem {
@@ -39,6 +41,32 @@ function isVisible(menuKey: string | undefined, userMenu: UserMenu): boolean {
   return !menuKey || userMenu[menuKey] === true
 }
 
+/** The settings and reference lists of a module, gathered behind a single entry. */
+export const SETUP_GROUP = 'nav.group.setup'
+const SETUP_ICON_KEY = 'nav.setupHub'
+
+/** The page that lists the settings of a module, from the address of its first screen. */
+export function setupHubPath(items: readonly NavSubItem[]): string | null {
+  const segment = items[0]?.to.split('/')[1]
+  return segment ? `/${segment}/configuration` : null
+}
+
+function collapseSetup(menu: NavMenuItem): NavMenuItem {
+  const setup = menu.subItems.filter((item) => item.group === SETUP_GROUP)
+  const to = setupHubPath(setup)
+  if (setup.length < 2 || !to) return menu
+  const hub: NavSubItem = {
+    labelKey: SETUP_ICON_KEY,
+    to,
+    group: SETUP_GROUP,
+    icon: setup.find((item) => item.icon)?.icon,
+    children: setup
+  }
+  const first = menu.subItems.indexOf(setup[0]!)
+  const others = menu.subItems.filter((item) => item.group !== SETUP_GROUP)
+  return { ...menu, subItems: [...others.slice(0, first), hub, ...others.slice(first)] }
+}
+
 /** Menus the user may see; nothing is shown until the permissions are known. */
 export function visibleNavMenus(
   menus: readonly NavMenuItem[],
@@ -51,6 +79,7 @@ export function visibleNavMenus(
       subItems: menu.subItems.filter((item) => isVisible(item.menuKey, userMenu))
     }))
     .filter((menu) => (menu.to ? isVisible(menu.menuKey, userMenu) : menu.subItems.length > 0))
+    .map(collapseSetup)
 }
 
 export function clearNavMenus(): void {
