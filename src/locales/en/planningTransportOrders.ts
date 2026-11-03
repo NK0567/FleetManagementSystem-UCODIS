@@ -555,7 +555,8 @@ export default {
     'No expired transport order on this page | 1 expired transport order on this page | {n} expired transport orders on this page',
   'planning.transportOrders.noResultsCreate': 'No transport order. Create one with New.',
   'planning.transportOrders.action.addLines': 'Add lines',
-  'planning.transportOrders.closing.block.postponed': 'A postponed point is still to retry or cancel',
+  'planning.transportOrders.closing.block.postponed':
+    'A postponed point is still to retry or cancel',
   'planning.transportOrders.position.title': 'Vehicle position (fleet tracking)',
   'planning.transportOrders.position.reportedAt': 'reported {at}',
   'planning.transportOrders.position.next': 'Next stop: {site}, estimated {at}',
@@ -569,11 +570,25 @@ export default {
   'planning.transportOrders.plan.hint.vehicle': 'Choose a vehicle.',
   'planning.transportOrders.plan.hint.driver': 'Choose a driver.',
   'planning.transportOrders.createDialog.pickNeeded': 'Tick at least one order to deliver.',
-  'planning.transportOrders.linesDialog.incomplete': "For each line keyed in, give the delivery point, the product, the quantity, the weight and, if the company requires it, the orderer's reference.",
-  'planning.transportOrders.lines.agreementHint': 'The recipient agrees to a partial delivery of {product} for {point}, the order requiring a complete delivery. Record the agreement before the delivery.',
+  'planning.transportOrders.linesDialog.incomplete':
+    "For each line keyed in, give the delivery point, the product, the quantity, the weight and, if the company requires it, the orderer's reference.",
+  'planning.transportOrders.lines.agreementHint':
+    'The recipient agrees to a partial delivery of {product} for {point}, the order requiring a complete delivery. Record the agreement before the delivery.',
   'planning.transportOrders.lines.agreementBy': 'Person who gave the agreement',
   'planning.transportOrders.lines.agreementNote': 'Detail (optional)',
-  'planning.transportOrders.lines.agreementTraced': "Recipient's agreement to a partial delivery: {by}, on {date}",
+  'planning.transportOrders.lines.agreementTraced':
+    "Recipient's agreement to a partial delivery: {by}, on {date}",
   'planning.transportOrders.action.agreement': 'Record the agreement for a partial delivery',
-  'planning.transportOrders.history.partial_agreement': 'Partial delivery agreement'
+  'planning.transportOrders.history.partial_agreement': 'Partial delivery agreement',
+  'planning.transportOrders.board.emptyColumn': 'No orders found',
+  'planning.transportOrders.board.orders': 'Number of orders to transport',
+  'planning.transportOrders.board.parcels': 'Number of parcels transported',
+  'planning.transportOrders.board.lineStats': 'Line statistics',
+  'planning.transportOrders.board.stat.pending': 'Pending',
+  'planning.transportOrders.board.stat.executed': 'Executed',
+  'planning.transportOrders.board.stat.partial': 'Partially executed',
+  'planning.transportOrders.board.stat.postponed': 'Postponed',
+  'planning.transportOrders.board.stat.returned': 'Returned',
+  'planning.transportOrders.board.stat.notExecuted': 'Not executed',
+  'planning.transportOrders.board.stat.toReplan': 'To be replanned'
 }

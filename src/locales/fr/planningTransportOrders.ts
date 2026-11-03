@@ -559,7 +559,8 @@ export default {
     'Aucun ordre expiré sur cette page | 1 ordre expiré sur cette page | {n} ordres expirés sur cette page',
   'planning.transportOrders.noResultsCreate': 'Aucun ordre de transport. Créez-en un avec Nouveau.',
   'planning.transportOrders.action.addLines': 'Ajouter des lignes',
-  'planning.transportOrders.closing.block.postponed': 'Un point reporté reste à retenter ou à annuler',
+  'planning.transportOrders.closing.block.postponed':
+    'Un point reporté reste à retenter ou à annuler',
   'planning.transportOrders.position.title': 'Position du véhicule (suivi de la flotte)',
   'planning.transportOrders.position.reportedAt': 'relevée le {at}',
   'planning.transportOrders.position.next': 'Prochain arrêt : {site}, estimé {at}',
@@ -573,11 +574,25 @@ export default {
   'planning.transportOrders.plan.hint.vehicle': 'Choisissez un véhicule.',
   'planning.transportOrders.plan.hint.driver': 'Choisissez un conducteur.',
   'planning.transportOrders.createDialog.pickNeeded': 'Cochez au moins une commande à livrer.',
-  'planning.transportOrders.linesDialog.incomplete': 'Pour chaque ligne saisie, renseignez le point de livraison, le produit, la quantité, le poids et, si l’entreprise l’exige, la référence de l’ordonnateur.',
-  'planning.transportOrders.lines.agreementHint': 'Le destinataire accepte une livraison partielle de {product} pour {point}, la commande exigeant une livraison complète. Tracez son accord avant la livraison.',
+  'planning.transportOrders.linesDialog.incomplete':
+    'Pour chaque ligne saisie, renseignez le point de livraison, le produit, la quantité, le poids et, si l’entreprise l’exige, la référence de l’ordonnateur.',
+  'planning.transportOrders.lines.agreementHint':
+    'Le destinataire accepte une livraison partielle de {product} pour {point}, la commande exigeant une livraison complète. Tracez son accord avant la livraison.',
   'planning.transportOrders.lines.agreementBy': 'Personne qui a donné l’accord',
   'planning.transportOrders.lines.agreementNote': 'Précision (facultatif)',
-  'planning.transportOrders.lines.agreementTraced': 'Accord du destinataire à une livraison partielle : {by}, le {date}',
+  'planning.transportOrders.lines.agreementTraced':
+    'Accord du destinataire à une livraison partielle : {by}, le {date}',
   'planning.transportOrders.action.agreement': 'Tracer l’accord pour une livraison partielle',
-  'planning.transportOrders.history.partial_agreement': 'Accord de livraison partielle'
+  'planning.transportOrders.history.partial_agreement': 'Accord de livraison partielle',
+  'planning.transportOrders.board.emptyColumn': 'Aucun ordre trouvé',
+  'planning.transportOrders.board.orders': 'Nombre de commandes à transporter',
+  'planning.transportOrders.board.parcels': 'Nombre de colis transportés',
+  'planning.transportOrders.board.lineStats': 'Statistiques des lignes',
+  'planning.transportOrders.board.stat.pending': 'En attente',
+  'planning.transportOrders.board.stat.executed': 'Exécutée',
+  'planning.transportOrders.board.stat.partial': 'Partiellement exécutée',
+  'planning.transportOrders.board.stat.postponed': 'Reportée',
+  'planning.transportOrders.board.stat.returned': 'Retournée',
+  'planning.transportOrders.board.stat.notExecuted': 'Non exécutée',
+  'planning.transportOrders.board.stat.toReplan': 'À replanifier'
 }
