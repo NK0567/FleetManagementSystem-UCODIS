@@ -110,7 +110,7 @@ export default {
   'settings.company.field.country': 'Country',
   'settings.company.field.taxId': 'Tax numbers (NIF / STAT)',
   'settings.company.tractors': 'Tractors',
-  'settings.company.trailers': 'Semi-trailers',
+  'settings.company.trailers': 'Towed trailers (semi-trailers, tankers, trailers)',
   'settings.company.vehicles': 'Vehicles',
   'settings.company.loadError': 'The company record could not be loaded.',
   'settings.company.saveError': 'The company record could not be saved.',

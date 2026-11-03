@@ -260,7 +260,12 @@ function vehicleApi(
 }
 
 /** The free combinations of the fleet that day: a motorized vehicle and its coupled trailer. */
-function freeCombinations(db: MockDatabase, date: string, language: MockLanguage): Combination[] {
+function freeCombinations(
+  db: MockDatabase,
+  date: string,
+  language: MockLanguage,
+  withTankers = false
+): Combination[] {
   const window = { start: `${date}T00:00:00`, end: `${date}T23:59:00` }
   const { vehicles } = availabilityOver(db, window, language)
   const free = new Set(vehicles.filter((item) => item.available).map((item) => item.no))
@@ -270,14 +275,47 @@ function freeCombinations(db: MockDatabase, date: string, language: MockLanguage
       .filter((row) => row.startDate <= date && (!row.endDate || row.endDate >= date))
       .map((row) => [row.tractorNo, row.trailerNo])
   )
-  return vehicles
+  const combinations = vehicles
     .filter((item) => item.role === 'motorized' && item.available)
     .map((item) => {
       const trailerNo = coupled.get(item.no) ?? null
       return { vehicleNo: item.no, trailerNo: trailerNo && free.has(trailerNo) ? trailerNo : null }
     })
-    .filter((combination) => serving(db, combination.vehicleNo, combination.trailerNo).capacity)
+  // A free trailer with no tractor of its own, a tanker for instance, is offered behind a free
+  // tractor that has no trailer: the planner can still change the pair (TRS01-US10 CA04).
+  const coupledTrailers = new Set(coupled.values())
+  const bareTrailers = vehicles
+    .filter((item) => item.role === 'towed' && item.available && !coupledTrailers.has(item.no))
+    .map((item) => item.no)
+    .filter((no) => serving(db, no, null).capacity)
+  for (const combination of combinations) {
+    if (combination.trailerNo || serving(db, combination.vehicleNo, null).capacity) continue
+    combination.trailerNo = bareTrailers.shift() ?? null
+  }
+  // Fuel to carry that day: a free tanker takes the place of the dry trailer of the last free
+  // tractors, as many as there are free tankers with compartments.
+  if (withTankers) {
+    const tankers = bareTrailers.filter((no) => db.vehicles.findOrFail(no).compartments.length > 0)
+    for (const combination of [...combinations].reverse()) {
+      const tanker = tankers.shift()
+      if (!tanker) break
+      if (!combination.trailerNo || !isTank(db, combination.trailerNo))
+        combination.trailerNo = tanker
+    }
+  }
+  return combinations.filter(
+    (combination) => serving(db, combination.vehicleNo, combination.trailerNo).capacity
+  )
 }
+
+const isTank = (db: MockDatabase, vehicleNo: string) =>
+  db.vehicles.findOrFail(vehicleNo).compartments.length > 0
+
+/** Whether an order of the day carries a fuel, which only a tanker can take. */
+const needsTank = (db: MockDatabase, rows: readonly DeliveryRequestRow[]) =>
+  rows.some((row) =>
+    requestLines(row).some((line) => db.products.find(line.productNo)?.isFuel === true)
+  )
 
 /**
  * A first assignment to correct afterwards (TRS01-US10): the orders grouped by destination region,
@@ -287,7 +325,7 @@ function freeCombinations(db: MockDatabase, date: string, language: MockLanguage
 function propose(db: MockDatabase, date: string, request: MockRequest): LoadingProposalApi {
   const language = toMockLanguage(request.language)
   const rows = requestsOfDay(db, date, sessionUser(request).code)
-  const combinations = freeCombinations(db, date, language)
+  const combinations = freeCombinations(db, date, language, needsTank(db, rows))
     .map((combination) => ({
       combination,
       capacity: serving(db, combination.vehicleNo, combination.trailerNo).capacity!
@@ -478,7 +516,10 @@ function evaluate(
     vehicles,
     unassigned,
     remaining: remainingOf(db, unassigned),
-    available: availableOf(db, freeCombinations(db, date, language))
+    available: availableOf(
+      db,
+      freeCombinations(db, date, language, needsTank(db, [...open.values()]))
+    )
   }
 }
 

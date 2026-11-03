@@ -57,7 +57,8 @@ describe('loading control', () => {
     const failed = await post('/planning/transport-orders/TR-2026-0004/lines/1/nonconform', {
       reasonNo: 'NCF-QUANTITY'
     })
-    expect(failed.data.data).toMatchObject({ ready: false, status: 'confirmed' })
+    // Every line is checked: a non-conformity never blocks the order (TRS03-US02 CA06).
+    expect(failed.data.data).toMatchObject({ ready: true, status: 'ready' })
     expect((await post('/planning/transport-orders/TR-2026-0004/lines/1/conform')).status).toBe(409)
   })
 })

@@ -214,5 +214,6 @@ export default {
   'fleet.settings.indicatorDefinition.fuelConsumption': "Litres consommés pour 100 km parcourus, d'un plein complet au suivant.",
   'fleet.settings.indicatorDefinition.documentCompliance': 'Part des véhicules et des conducteurs dont tous les documents obligatoires sont valides.',
   'fleet.settings.indicatorDefinition.driverScore': 'Moyenne des scores de conduite des conducteurs sur la période du score.',
-  'fleet.settings.importMappings.saveFirst': "Enregistrez d'abord les changements en cours."
+  'fleet.settings.importMappings.saveFirst': "Enregistrez d'abord les changements en cours.",
+  'fleet.settings.warning.outOfRange': 'Attention : cette valeur sort des bornes habituelles (entre {min} et {max} {unit}). Elle sera enregistrée telle quelle.'
 }

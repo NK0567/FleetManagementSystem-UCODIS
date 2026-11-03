@@ -67,5 +67,7 @@ export default {
   'planning.quality.actor.external_carrier': 'Transporteur externe',
   'planning.quality.col.files': 'Pièces jointes',
   'planning.quality.files': 'Pièces jointes',
-  'planning.quality.noFile': 'Aucune pièce jointe.'
+  'planning.quality.noFile': 'Aucune pièce jointe.',
+  'planning.quality.factsRecorded': 'Faits enregistrés sur cette livraison',
+  'planning.quality.originSuggested': 'Origine proposée d’après ces faits : {origin}. Elle reste modifiable.'
 }

@@ -1,9 +1,17 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { CalendarPlus, ExternalLink, GripVertical, PackageCheck, Search, Undo2 } from '@lucide/vue'
+import {
+  CalendarPlus,
+  ExternalLink,
+  GripVertical,
+  Handshake,
+  PackageCheck,
+  Search,
+  Undo2
+} from '@lucide/vue'
 import { remainderQuantity } from '@/modules/planning/reception/domain/reception'
-import { formatNumber } from '@/utils/format'
+import { formatDate, formatNumber } from '@/utils/format'
 import {
   canDeclareLine,
   canHandBackLine,
@@ -30,6 +38,7 @@ const emit = defineEmits<{
   declare: [line: TransportOrderLineApi]
   handBack: [line: TransportOrderLineApi]
   remainder: [line: TransportOrderLineApi]
+  agreement: [line: TransportOrderLineApi]
 }>()
 
 const { t } = useI18n()
@@ -39,9 +48,14 @@ const actionsShown = computed(() =>
     (line) =>
       (props.canAct &&
         ((!props.driverDeclares && canDeclareLine(props.status, line)) || canHandBackLine(line))) ||
-      (props.canReplan && remainderQuantity(line) !== null)
+      (props.canReplan && remainderQuantity(line) !== null) ||
+      (props.canReplan && canAgree(line))
   )
 )
+
+/* The recipient's agreement to a partial delivery is traced before the delivery (TRS01-US17). */
+const canAgree = (line: TransportOrderLineApi) =>
+  line.fullDeliveryRequired && !line.partialAgreement && !line.declaredAt && !line.refusalAt
 
 /* The execution order is the order of the rows; it is changed by dragging a row (or with the
  * arrow keys on its handle). The line number stays the line's identifier. */
@@ -226,6 +240,14 @@ const actionClass =
             <p v-if="line.recipientName" class="text-xs text-muted-foreground">
               {{ line.recipientName }}
             </p>
+            <p v-if="line.partialAgreement" class="text-xs text-muted-foreground">
+              {{
+                t('planning.transportOrders.lines.agreementTraced', {
+                  by: line.partialAgreement.by,
+                  date: formatDate(line.partialAgreement.at)
+                })
+              }}
+            </p>
             <a
               v-if="line.trackingToken"
               :href="`#/suivi/${line.trackingToken}`"
@@ -286,6 +308,17 @@ const actionClass =
               @click="emit('handBack', line)"
             >
               <Undo2 class="w-4 h-4" />
+            </button>
+            <button
+              v-if="canReplan && canAgree(line)"
+              type="button"
+              :class="actionClass"
+              :disabled="busy"
+              :title="t('planning.transportOrders.action.agreement')"
+              :aria-label="t('planning.transportOrders.action.agreement')"
+              @click="emit('agreement', line)"
+            >
+              <Handshake class="w-4 h-4" />
             </button>
             <button
               v-if="canReplan && remainderQuantity(line) !== null"

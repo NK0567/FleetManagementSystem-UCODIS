@@ -232,7 +232,14 @@ export function registerFuelCardTransactionsHandlers(router: MockRouter, db: Moc
   router.post(
     '/fleet/fuel-card-transactions/match-all',
     { feature: 'FUELCARD', action: 'update' },
-    (request) => ok({ matched: matchAll(request) })
+    (request) => {
+      const matched = matchAll(request)
+      // What is still alone afterwards: the transactions no refill of the holder fits.
+      const remaining = db.fuelCardTransactions
+        .all()
+        .filter((row) => !row.refillNo && !row.matchMode).length
+      return ok({ matched, remaining })
+    }
   )
 
   router.post(

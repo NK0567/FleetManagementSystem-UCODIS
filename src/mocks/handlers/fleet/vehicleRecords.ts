@@ -15,11 +15,11 @@ import { workOrdersApi } from '../maintenance/workOrders'
  * first. It is read from the maintenance records, never typed in twice.
  */
 export function maintenanceLogApi(db: MockDatabase, vehicleNo: string): VehicleMaintenanceEntry[] {
-  const operations = new Map(
-    db.maintenancePlans
-      .all()
-      .flatMap((plan) => plan.operations)
-      .map((operation) => [operation.no, operation.label])
+  const operationList = db.maintenancePlans.all().flatMap((plan) => plan.operations)
+  const operations = new Map(operationList.map((operation) => [operation.no, operation.label]))
+  const codes = new Map(db.failureCodes.all().map((code) => [code.no, code.name]))
+  const operationSubsystems = new Map(
+    operationList.map((operation) => [operation.no, codes.get(operation.subsystemNo) ?? ''])
   )
   const orders: VehicleMaintenanceEntry[] = workOrdersApi(db)
     .filter((order) => order.vehicleNo === vehicleNo)
@@ -31,7 +31,13 @@ export function maintenanceLogApi(db: MockDatabase, vehicleNo: string): VehicleM
       maintenanceType: order.maintenanceType,
       status: order.status,
       km: order.odometerKmAtCompletion ?? order.odometerKmAtOpening,
-      cost: order.status === 'cancelled' ? null : order.totalCost
+      cost: order.status === 'cancelled' ? null : order.totalCost,
+      subsystemName: order.subsystemName,
+      partsCost: order.status === 'cancelled' ? null : order.partsCost,
+      labourCost: order.status === 'cancelled' ? null : order.labourCost,
+      externalCost: order.status === 'cancelled' ? null : order.subcontractingCost,
+      // An imported order brings its cost whole: it has no split between parts and labour.
+      importedCost: order.status === 'cancelled' ? null : (order.historicalCost ?? 0)
     }))
   const passages: VehicleMaintenanceEntry[] = db.serviceRecords
     .all()
@@ -45,6 +51,11 @@ export function maintenanceLogApi(db: MockDatabase, vehicleNo: string): VehicleM
       status: null,
       km: record.km,
       cost: null,
+      subsystemName: operationSubsystems.get(record.operationNo) ?? '',
+      partsCost: null,
+      labourCost: null,
+      externalCost: null,
+      importedCost: null,
       workOrderNo: record.workOrderNo
     }))
   return [...orders, ...passages].sort((a, b) => b.date.localeCompare(a.date))

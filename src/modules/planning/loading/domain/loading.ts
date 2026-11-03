@@ -6,11 +6,19 @@ export function stillToLoad(line: LineFollowUp): boolean {
   return !lineOutOfTour(line)
 }
 
-/** Ready to leave once every line still in the tour was checked conforming. */
+/**
+ * Ready to leave once the driver has checked every line (TRS03-US02 CA06): a conforming line must
+ * also have its loaded quantity, a non-conforming one never blocks. A line that left the tour
+ * before the check (unavailable recipient, replanned) is not checked.
+ */
 export function loadingReady(lines: readonly LineFollowUp[]): boolean {
-  const staying = lines.filter(stillToLoad)
+  const toCheck = lines.filter((line) => !lineOutOfTour({ ...line, nonconformityAt: null }))
   return (
-    staying.length > 0 &&
-    staying.every((line) => line.conformingAt !== null && line.loadedQuantity !== null)
+    toCheck.length > 0 &&
+    toCheck.every(
+      (line) =>
+        line.nonconformityAt !== null ||
+        (line.conformingAt !== null && line.loadedQuantity !== null)
+    )
   )
 }

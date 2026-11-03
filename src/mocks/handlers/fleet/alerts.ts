@@ -104,7 +104,7 @@ export function alertSignals(db: MockDatabase, language: MockLanguage): AlertSig
       signal('checklist', checklist.no, '/fleet/road-checklists', {
         severity: 'critical',
         subject: trip.no,
-        detail: blocking.map((point) => point.label).join(', '),
+        detail: `${label('checklistAlert', checklist.stage)} : ${blocking.map((point) => point.label).join(', ')}`,
         since: checklist.takenAt
       })
     )
@@ -125,7 +125,7 @@ export function alertSignals(db: MockDatabase, language: MockLanguage): AlertSig
       signal('checklist', checklist.no, '/fleet/road-checklists', {
         severity: 'warning',
         subject: `${trip.no} · ${checklist.vehiclePlate}`,
-        detail: found.map((point) => point.label).join(', '),
+        detail: `${label('checklistAlert', checklist.stage)} : ${found.map((point) => point.label).join(', ')}`,
         since: checklist.takenAt
       })
     )

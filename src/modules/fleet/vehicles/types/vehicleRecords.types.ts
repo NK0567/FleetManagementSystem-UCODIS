@@ -13,6 +13,12 @@ export interface VehicleMaintenanceEntry {
   status: WorkOrderStatus | null
   km: number | null
   cost: number | null
+  /** The subsystem diagnosed on the order, or the one the plan operation looks after. */
+  subsystemName: string
+  partsCost: number | null
+  labourCost: number | null
+  externalCost: number | null
+  importedCost: number | null
   workOrderNo?: string | null
 }
 

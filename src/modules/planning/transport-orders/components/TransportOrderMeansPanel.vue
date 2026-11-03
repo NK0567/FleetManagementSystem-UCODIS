@@ -1,12 +1,83 @@
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Building2, Truck } from '@lucide/vue'
+import { Building2, MapPin, Truck } from '@lucide/vue'
+import httpClient from '@/core/api/httpClient'
+import type { MapMarker, MapPolyline } from '@/components/shared/MapView.vue'
+import { useOptionsStore } from '@/stores/optionsStore'
+import { formatDateTime } from '@/utils/format'
 import type { TransportOrderApi } from '../types/transportOrder.types'
 
 const props = defineProps<{ order: TransportOrderApi }>()
 
 const { t } = useI18n()
+const optionsStore = useOptionsStore()
+
+/* The position of the vehicle comes from the tracking of the fleet; it completes the status of the
+ * order without replacing it (TRS02-US01 CA01). A carrier's vehicle is not tracked. */
+interface OrderPosition {
+  latitude: number
+  longitude: number
+  reportedAt: string
+  placeName: string
+  speedKmh: number
+  situation: string
+  nextStopName: string
+  nextStopExpectedAt: string | null
+  stops: { siteName: string; latitude: number; longitude: number }[]
+}
+const position = ref<OrderPosition | null>(null)
+const TRACKED = ['planned', 'confirmed', 'ready', 'in_progress']
+watch(
+  () => [props.order.no, props.order.status, props.order.tripNo] as const,
+  async ([no, status, tripNo]) => {
+    position.value = null
+    if (!tripNo || props.order.means !== 'fleet' || !TRACKED.includes(status)) return
+    try {
+      const response = await httpClient.get<{ data: { position: OrderPosition | null } }>(
+        `/planning/transport-orders/${encodeURIComponent(no)}/eta`
+      )
+      position.value = response.data.data.position
+    } catch {
+      position.value = null
+    }
+  },
+  { immediate: true }
+)
+const positionPlace = computed(() =>
+  position.value
+    ? position.value.placeName ||
+      optionsStore.getOptionLabel('liveSituation', position.value.situation)
+    : ''
+)
+const markers = computed<MapMarker[]>(() => {
+  const current = position.value
+  if (!current) return []
+  return [
+    ...current.stops.map((stop, index) => ({
+      id: `stop-${index}`,
+      latitude: stop.latitude,
+      longitude: stop.longitude,
+      label: stop.siteName,
+      color: '#6b7280'
+    })),
+    {
+      id: 'vehicle',
+      latitude: current.latitude,
+      longitude: current.longitude,
+      label: props.order.vehiclePlate,
+      sublabel: positionPlace.value,
+      color: '#c2410c'
+    }
+  ]
+})
+const polylines = computed<MapPolyline[]>(() => [
+  {
+    id: 'route',
+    points: (position.value?.stops ?? []).map((stop) => [stop.latitude, stop.longitude]),
+    dashed: true
+  }
+])
 
 const rows = computed(() =>
   props.order.means === 'carrier'
@@ -66,5 +137,35 @@ const rows = computed(() =>
         <dd class="font-medium text-card-foreground truncate">{{ row.value || '·' }}</dd>
       </div>
     </dl>
+    <div
+      v-if="position"
+      class="mt-4 border-t border-border pt-3 space-y-2"
+      data-testid="order-position"
+    >
+      <p class="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+        <MapPin class="w-4 h-4 text-primary" /> {{ t('planning.transportOrders.position.title') }}
+      </p>
+      <p class="text-sm text-card-foreground">
+        {{ positionPlace }} · {{ position.latitude.toFixed(4) }},
+        {{ position.longitude.toFixed(4) }}
+        <span class="text-muted-foreground">
+          ·
+          {{
+            t('planning.transportOrders.position.reportedAt', {
+              at: formatDateTime(position.reportedAt)
+            })
+          }}
+        </span>
+      </p>
+      <p v-if="position.nextStopName" class="text-xs text-muted-foreground">
+        {{
+          t('planning.transportOrders.position.next', {
+            site: position.nextStopName,
+            at: position.nextStopExpectedAt ? formatDateTime(position.nextStopExpectedAt) : '-'
+          })
+        }}
+      </p>
+      <MapView :markers="markers" :polylines="polylines" height="220px" />
+    </div>
   </div>
 </template>

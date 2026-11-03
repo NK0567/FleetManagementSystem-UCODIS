@@ -14,11 +14,13 @@ function add() {
 function remove(index: number) {
   vehicles.value = vehicles.value.filter((_, position) => position !== index)
 }
-function patch(index: number, field: keyof CarrierVehicle, value: string) {
+function patch(index: number, field: keyof CarrierVehicle, value: string | number | null) {
   vehicles.value = vehicles.value.map((vehicle, position) =>
     position === index ? { ...vehicle, [field]: value } : vehicle
   )
 }
+const numberOf = (value: string | number | null | undefined) =>
+  value === null || value === undefined || value === '' ? null : Number(value)
 </script>
 
 <template>
@@ -29,7 +31,7 @@ function patch(index: number, field: keyof CarrierVehicle, value: string) {
     <div
       v-for="(vehicle, index) in vehicles"
       :key="index"
-      class="grid grid-cols-[10rem_1fr_auto] gap-2 items-center"
+      class="grid grid-cols-[10rem_1fr_auto] gap-2 items-center border-b border-border pb-2"
     >
       <FormInput
         :model-value="vehicle.plate"
@@ -54,6 +56,38 @@ function patch(index: number, field: keyof CarrierVehicle, value: string) {
       >
         <Trash2 class="w-4 h-4" />
       </button>
+      <div class="col-span-3 grid grid-cols-3 gap-2">
+        <label class="text-xs text-muted-foreground space-y-1">
+          {{ t('fleet.providers.carrierVehicles.maxLoadKg') }}
+          <FormInput
+            type="number"
+            :min="0"
+            :model-value="vehicle.maxLoadKg ?? null"
+            :disabled="disabled"
+            @update:model-value="patch(index, 'maxLoadKg', numberOf($event))"
+          />
+        </label>
+        <label class="text-xs text-muted-foreground space-y-1">
+          {{ t('fleet.providers.carrierVehicles.maxVolumeM3') }}
+          <FormInput
+            type="number"
+            :min="0"
+            :model-value="vehicle.maxVolumeM3 ?? null"
+            :disabled="disabled"
+            @update:model-value="patch(index, 'maxVolumeM3', numberOf($event))"
+          />
+        </label>
+        <label class="text-xs text-muted-foreground space-y-1">
+          {{ t('fleet.providers.carrierVehicles.capacityL') }}
+          <FormInput
+            type="number"
+            :min="0"
+            :model-value="vehicle.capacityL ?? null"
+            :disabled="disabled"
+            @update:model-value="patch(index, 'capacityL', numberOf($event))"
+          />
+        </label>
+      </div>
     </div>
     <button
       v-if="!disabled"

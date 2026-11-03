@@ -66,7 +66,7 @@ describe('trips on the road', () => {
   it('put the vehicle in mission and the driver on trip', async () => {
     expect(await get<VehicleApi>('/fleet/vehicles/VEH-003')).toMatchObject({
       status: 'in_mission',
-      statusReason: 'On trip (TRP-00006)'
+      statusReason: 'On mission (TRP-00006)'
     })
     expect((await get<DriverApi>('/fleet/drivers/UCT-012')).availability).toBe('on_trip')
   })

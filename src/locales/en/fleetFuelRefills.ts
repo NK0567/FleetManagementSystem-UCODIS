@@ -41,8 +41,8 @@ export default {
   'fleet.fuelRefills.form.fullTank': 'Full tank',
   'fleet.fuelRefills.actionError': 'The action could not be completed.',
   'fleet.fuelRefills.listView.all': 'All refills',
-  'fleet.fuelRefills.listView.anomaly': 'With an anomaly',
-  'fleet.fuelRefills.action.qualify': 'Qualify the anomaly',
+  'fleet.fuelRefills.listView.anomaly': 'To qualify',
+  'fleet.fuelRefills.action.qualify': 'Qualify the refill',
   'fleet.fuelRefills.form.driverHint': 'Left empty, the driver assigned to the vehicle that day.',
   'fleet.fuelRefills.form.receipt': 'Receipt',
   'fleet.fuelRefills.form.amount': 'Amount',
@@ -55,5 +55,11 @@ export default {
   'fleet.fuelRefills.import.hint': 'CSV file with a header line: vehicle by plate, driver by employee number (deduced when missing).',
   'fleet.fuelRefills.import.created':
     'No refill created. | One refill created. | {n} refills created.',
-  'fleet.fuelRefills.noResultsCreate': 'No refill. Create one with New.'
+  'fleet.fuelRefills.noResultsCreate': 'No refill. Create one with New.',
+  'fleet.fuelRefills.form.tripNo': 'Trip',
+  'fleet.fuelRefills.col.tripNo': 'Trip',
+  'fleet.fuelRefills.form.tripHint': 'Left empty, the trip the vehicle was on at that moment.',
+  'fleet.fuelRefills.form.position': 'GPS position',
+  'fleet.fuelRefills.form.positionHint': 'Read by the GPS unit of the vehicle at the time of the refill and compared with the station site.',
+  'fleet.fuelRefills.form.positionNone': 'No position read.'
 }

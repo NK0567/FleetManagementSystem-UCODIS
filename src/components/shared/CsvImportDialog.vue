@@ -147,7 +147,7 @@ const rejected = computed(() => report.value?.results.filter((result) => result.
       />
 
       <p v-if="fileName && !report" class="text-card-foreground">
-        {{ t('common.import.read', { file: fileName, count: rows.length }) }}
+        {{ t('common.import.read', { file: fileName, count: rows.length }, rows.length) }}
       </p>
       <p v-if="missing.length" class="text-destructive">
         {{ t('common.import.missing', { columns: missingColumnNames }) }}

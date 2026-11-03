@@ -8,6 +8,7 @@ export type MobileInterventionRow = MockRow &
     | 'missionTypeNo'
     | 'vehicleNo'
     | 'location'
+    | 'vehiclePosition'
     | 'departedAt'
     | 'crewNos'
     | 'arrivedAt'
@@ -40,6 +41,7 @@ const SEED: Omit<MobileInterventionRow, keyof typeof seedAudit>[] = [
     missionTypeNo: 'ALCOHOL-DRUGS',
     vehicleNo: 'VEH-006',
     location: 'Dépôt Tanjombato, sortie des camions',
+    vehiclePosition: null,
     departedAt: '2026-08-12T05:30:00',
     crewNos: ['UCT-003'],
     arrivedAt: '2026-08-12T05:45:00',
@@ -56,6 +58,12 @@ const SEED: Omit<MobileInterventionRow, keyof typeof seedAudit>[] = [
     missionTypeNo: 'MECHANICAL',
     vehicleNo: 'VEH-004',
     location: 'RN7, PK 42 après Ambatolampy',
+    vehiclePosition: {
+      latitude: -19.3894,
+      longitude: 47.4217,
+      reportedAt: '2026-08-21T14:08:00',
+      placeName: ''
+    },
     departedAt: '2026-08-21T14:10:00',
     crewNos: ['UCT-003', 'UCT-008'],
     arrivedAt: '2026-08-21T15:20:00',
@@ -70,6 +78,12 @@ const SEED: Omit<MobileInterventionRow, keyof typeof seedAudit>[] = [
     missionTypeNo: 'ELECTRICAL',
     vehicleNo: 'VEH-009',
     location: 'RN2, sortie de Moramanga',
+    vehiclePosition: {
+      latitude: -18.9433,
+      longitude: 48.2253,
+      reportedAt: '2026-09-03T08:58:00',
+      placeName: ''
+    },
     departedAt: '2026-09-03T09:00:00',
     crewNos: ['UCT-008'],
     arrivedAt: '2026-09-03T10:30:00'

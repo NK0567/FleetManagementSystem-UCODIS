@@ -139,11 +139,10 @@ const meansOf = (order: TransportOrderApi) =>
                 </span>
               </span>
               <span class="block text-sm text-card-foreground truncate">
-                {{ order.recipientSummary || '·' }}
+                {{ order.routeName || order.no }}
               </span>
               <span class="block text-xs text-muted-foreground">
                 {{ formatDateTime(order.plannedDeparture) }}
-                <template v-if="order.routeName"> · {{ order.routeName }}</template>
               </span>
               <span class="flex items-center gap-1 text-xs text-muted-foreground">
                 <Truck class="w-3.5 h-3.5 shrink-0" />

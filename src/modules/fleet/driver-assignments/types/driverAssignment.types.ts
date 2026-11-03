@@ -4,6 +4,8 @@ export interface DriverAssignmentApi {
   no: string
   employeeNo: string
   vehicleNo: string
+  homeSiteNo: string
+  homeSiteName: string
   startDate: string
   endDate: string | null
   employeeName: string

@@ -20,6 +20,8 @@ const props = defineProps<{
   fields: readonly SettingField[]
   values: Values
   validate: (values: Values) => SectionIssue[]
+  /** Values outside the usual bounds that are still accepted: shown as a warning, never blocking. */
+  warn?: (values: Values) => SectionIssue[]
   canEdit: boolean
   saving: boolean
   /** Resolves to true once the server has accepted the values. */
@@ -27,7 +29,7 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{ 'update:dirty': [dirty: boolean] }>()
 
-const { t } = useI18n()
+const { t, te } = useI18n()
 
 type Draft = Record<string, string | number | boolean | null>
 const draft = ref<Draft | null>(null)
@@ -54,6 +56,10 @@ function inputValue(key: string): string | number | null {
 
 const issues = computed(() => (draft.value ? props.validate(toValues(draft.value)) : []))
 
+const warnings = computed(() =>
+  draft.value && props.warn ? props.warn(toValues(draft.value)) : []
+)
+
 const isDirty = computed(
   () => !!draft.value && JSON.stringify(toValues(draft.value)) !== JSON.stringify(props.values)
 )
@@ -71,9 +77,39 @@ function issueText(issue: SectionIssue): string {
   return t(`${props.labelPrefix}.issue.${issue.code}`, { max: issue.max ?? 0 })
 }
 
+function warningText(issue: SectionIssue): string {
+  const field = props.fields.find((item) => item.key === issue.field)
+  return t(`${props.labelPrefix}.warning.outOfRange`, {
+    min: issue.min ?? 0,
+    max: issue.max ?? 0,
+    unit: field && 'unit' in field ? t(`${props.labelPrefix}.unit.${field.unit}`) : ''
+  })
+}
+
 const issueMessages = computed(
   () => new Map(issues.value.map((issue) => [issue.field, issueText(issue)]))
 )
+const warningMessages = computed(
+  () =>
+    new Map(
+      warnings.value
+        .filter((issue) => !issueMessages.value.has(issue.field))
+        .map((issue) => [issue.field, warningText(issue)])
+    )
+)
+
+/** A list of codes read as labels; a code with no label stays as typed. */
+function codeLabels(field: SettingField, raw: unknown): string {
+  if (field.kind !== 'text' || !field.codeLabelPrefix) return ''
+  return String(raw ?? '')
+    .split(',')
+    .map((code) => code.trim())
+    .filter((code) => code !== '' && code !== '-')
+    .map((code) =>
+      te(`${field.codeLabelPrefix}${code}`) ? t(`${field.codeLabelPrefix}${code}`) : code
+    )
+    .join(', ')
+}
 
 function startEditing() {
   draft.value = { ...props.values } as Draft
@@ -157,6 +193,13 @@ async function submit() {
             :invalid="issueMessages.has(field.key)"
             @update:model-value="shown[field.key] = $event"
           />
+          <p
+            v-if="field.codeLabelPrefix"
+            class="text-xs text-muted-foreground mt-1"
+            data-testid="code-labels"
+          >
+            {{ codeLabels(field, shown[field.key]) || t('common.none') }}
+          </p>
         </div>
         <div v-else class="flex items-center gap-2">
           <div class="w-36 shrink-0">
@@ -175,6 +218,9 @@ async function submit() {
         </div>
         <p v-if="issueMessages.has(field.key)" class="text-xs text-destructive mt-1">
           {{ issueMessages.get(field.key) }}
+        </p>
+        <p v-else-if="warningMessages.has(field.key)" class="text-xs text-warning mt-1">
+          {{ warningMessages.get(field.key) }}
         </p>
       </BaseFormField>
     </div>

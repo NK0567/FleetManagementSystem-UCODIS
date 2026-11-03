@@ -282,7 +282,7 @@ export const FLEET_MESSAGES = {
   },
   causeMaintenance: { fr: 'Indisponible : {detail}', en: 'Unavailable: {detail}' },
   causeService: { fr: 'Entretien dépassé : {detail}', en: 'Service overdue: {detail}' },
-  causeTrip: { fr: 'En trajet ({detail})', en: 'On trip ({detail})' },
+  causeTrip: { fr: 'En mission ({detail})', en: 'On mission ({detail})' },
   causeDriver: { fr: 'Conducteur : {detail}', en: 'Driver: {detail}' },
   causeCoupling: { fr: 'Attelé à {detail}', en: 'Coupled with {detail}' },
   motorizedCannotBeTowed: {
@@ -637,6 +637,10 @@ export const FLEET_MESSAGES = {
     fr: 'Cette alerte est déjà traitée.',
     en: 'This alert is already handled.'
   },
+  refillTripOfOtherVehicle: {
+    fr: "Le trajet {trip} n'est pas un trajet de ce véhicule.",
+    en: 'Trip {trip} is not a trip of this vehicle.'
+  },
   refillDuplicate: {
     fr: 'Ce plein est déjà enregistré ({no}).',
     en: 'This refill is already recorded ({no}).'
@@ -646,8 +650,8 @@ export const FLEET_MESSAGES = {
     en: 'This refill is qualified: it can no longer change.'
   },
   refillNotAnomaly: {
-    fr: 'Seul un plein en anomalie se qualifie.',
-    en: 'Only a refill with an anomaly can be qualified.'
+    fr: 'Seul un plein à qualifier se qualifie.',
+    en: 'Only a refill to qualify can be qualified.'
   },
   fuelCauseInactive: {
     fr: "Cette cause n'est plus active.",
@@ -688,6 +692,10 @@ export const FLEET_MESSAGES = {
   refillCheckGps: {
     fr: 'Véhicule à {gap} km de la station (au plus {max} km)',
     en: 'Vehicle {gap} km from the station (at most {max} km)'
+  },
+  refillCheckGpsNoStation: {
+    fr: 'Position relevée ({latitude}, {longitude}) ; aucun site de station déclaré à comparer',
+    en: 'Position read ({latitude}, {longitude}); no station site declared to compare with'
   },
   refillCheckGpsNone: {
     fr: 'Position non relevée',

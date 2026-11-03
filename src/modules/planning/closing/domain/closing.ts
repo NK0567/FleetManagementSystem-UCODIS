@@ -4,6 +4,7 @@ import { protestStatus, type ProtestNote } from '@/modules/planning/delivery-qua
 
 export const CLOSING_BLOCKS = [
   'not_delivered',
+  'postponed',
   'reception',
   'contestation',
   'protest',
@@ -82,6 +83,9 @@ export function requiredDocumentKinds(text: string): string[] {
 }
 
 export interface ClosingLine {
+  /** A point simply postponed stays to retry; it blocks the end of the order (TRS03-US12 CA04). */
+  postponedAt?: string | null
+  refusalAt?: string | null
   declaredAt: string | null
   unavailableAt: string | null
   replannedAt: string | null
@@ -108,7 +112,20 @@ export function closingBlocks(order: {
   requiredKinds: readonly string[]
 }): ClosingBlock[] {
   const blocks: ClosingBlock[] = []
-  if (!order.delivered) blocks.push('not_delivered')
+  /* A point only postponed is neither delivered, refused nor sent back: it must be retried or
+   * cancelled before the order can end. It is named apart from the lines never delivered. */
+  const waitsForRetry = (line: ClosingLine) =>
+    !!line.postponedAt &&
+    !line.returnedAt &&
+    !line.declaredAt &&
+    !line.refusalAt &&
+    !lineOutOfTour(line)
+  const retrying = order.lines.some(waitsForRetry)
+  const undelivered = order.lines.some(
+    (line) => !lineOutOfTour(line) && !line.declaredAt && !line.refusalAt && !waitsForRetry(line)
+  )
+  if (retrying) blocks.push('postponed')
+  if (!order.delivered && (undelivered || !retrying)) blocks.push('not_delivered')
   const present = new Set(order.documentKinds)
   let reception = false
   let contestation = false

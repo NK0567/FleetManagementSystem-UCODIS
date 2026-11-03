@@ -167,9 +167,15 @@ const historyColumns = computed<SubListColumn[]>(() => [
       <div class="xl:col-span-2 min-w-0">
         <p v-if="order.partsWaitDays > 0 || order.status === 'awaiting_parts'" class="text-sm mb-2">
           {{
-            t('maintenance.workOrders.progress.partsWait', {
-              days: formatNumber(order.partsWaitDays, 1)
-            })
+            order.partsWaitDays <= 0
+              ? t('maintenance.workOrders.progress.partsWaitNotStarted')
+              : order.partsWaitDays < 1
+                ? t('maintenance.workOrders.progress.partsWaitHours', {
+                    hours: formatNumber(order.partsWaitDays * 24, 1)
+                  })
+                : t('maintenance.workOrders.progress.partsWait', {
+                    days: formatNumber(order.partsWaitDays, 1)
+                  })
           }}
         </p>
         <RecordSubList

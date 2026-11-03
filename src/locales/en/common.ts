@@ -136,7 +136,7 @@ export default {
   'common.error.loadCard': 'Could not load the record.',
   'common.error.unexpected': 'An unexpected error occurred.',
   'common.import.template': 'Download the template',
-  'common.import.read': '{file}: {count} lines read.',
+  'common.import.read': '{file}: no line read. | {file}: one line read. | {file}: {count} lines read.',
   'common.import.missing': 'Required columns missing: {columns}.',
   'common.import.run': 'Import | Import one line | Import {n} lines',
   'common.import.rejected': 'No line refused. | One line refused: | {n} lines refused:',
@@ -149,5 +149,8 @@ export default {
   'common.subList.noMatch': 'No line matches the filter.',
   'common.import.mapped': 'Column mapping set by the administrator for no field. | Column mapping set by the administrator for one field. | Column mapping set by the administrator for {n} fields.',
   'common.moreActions': 'More actions',
-  'common.createWithNew': 'Use New to create one.'
+  'common.createWithNew': 'Use New to create one.',
+  'common.confirmDisabledHint': 'Fill in the required fields to continue.',
+  'common.file.sizeBytes': '{size} B',
+  'common.none': 'None'
 }

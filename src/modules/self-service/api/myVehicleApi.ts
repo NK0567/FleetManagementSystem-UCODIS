@@ -8,6 +8,7 @@ export interface MyRefill {
   liters: number
   amount: number
   stationLabel: string
+  tripNo: string | null
   channel: string
   status: string
 }
@@ -15,6 +16,9 @@ export interface MyRefill {
 export interface MyRefills {
   vehicleNo: string
   vehiclePlate: string
+  /** The trip the vehicle is on right now, if any: the refill is attached to it unless he names another. */
+  currentTripNo: string | null
+  trips: { no: string; status: string }[]
   refills: MyRefill[]
 }
 
@@ -32,6 +36,7 @@ export interface MyRefillInput {
   unitPrice: number | null
   odometerKm: number | null
   stationName: string
+  tripNo: string | null
   fullTank: boolean
   receiptFileNo: string | null
 }

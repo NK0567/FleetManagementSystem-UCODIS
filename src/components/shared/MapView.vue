@@ -63,6 +63,8 @@ const map = shallowRef<Leaflet.Map | null>(null)
 let leaflet: typeof Leaflet | null = null
 let layers: Leaflet.LayerGroup | null = null
 let framed = false
+/** Set when the page is left: a late tile, animation or redraw must not touch a removed map. */
+let disposed = false
 
 const DEFAULT_COLOR = '#0b4480'
 
@@ -81,7 +83,7 @@ function tooltipContent(label: string, sublabel?: string): HTMLElement {
 }
 
 function draw() {
-  if (!leaflet || !map.value || !layers) return
+  if (disposed || !leaflet || !map.value || !layers) return
   const L = leaflet
   layers.clearLayers()
   const bounds: [number, number][] = []
@@ -126,14 +128,20 @@ function draw() {
   const [first] = bounds
   if (!framed && first) {
     framed = true
-    if (bounds.length === 1) map.value.setView(first, 13)
-    else map.value.fitBounds(L.latLngBounds(bounds), { padding: [24, 24], maxZoom: 14 })
+    // No animation: leaving the page during one is what broke the removed map (Leaflet _leaflet_pos).
+    if (bounds.length === 1) map.value.setView(first, 13, { animate: false })
+    else
+      map.value.fitBounds(L.latLngBounds(bounds), {
+        padding: [24, 24],
+        maxZoom: 14,
+        animate: false
+      })
   }
 }
 
 onMounted(async () => {
   leaflet = await import('leaflet')
-  if (!container.value) return
+  if (disposed || !container.value) return
   const L = leaflet
   map.value = L.map(container.value).setView(props.center, props.zoom)
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -162,6 +170,9 @@ watch(
 )
 
 onBeforeUnmount(() => {
+  disposed = true
+  map.value?.stop()
+  map.value?.off()
   map.value?.remove()
   map.value = null
   layers = null

@@ -114,6 +114,8 @@ const SEED: SeedRow[] = [
     quantity: 420,
     weightKg: 6300,
     volumeM3: null,
+    // This recipient asked for no notification: planning his order sends him nothing (TRS02-US02 CA03).
+    notificationChannel: 'none',
     desiredDate: '2026-09-08',
     validUntil: null,
     externalReference: 'LPA-5512',

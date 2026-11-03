@@ -52,5 +52,7 @@ export default {
   'fleet.fuelCardTransactions.import.hint': "Fichier CSV du prestataire de cartes, avec une ligne d'en-têtes. Chaque ligne est contrôlée puis rapprochée des pleins.",
   'fleet.fuelCardTransactions.import.created':
     'Aucune transaction importée. | Une transaction importée. | {n} transactions importées.',
-  'fleet.fuelCardTransactions.noResultsCreate': 'Aucune transaction. Créez-en une avec Nouveau.'
+  'fleet.fuelCardTransactions.noResultsCreate': 'Aucune transaction. Créez-en une avec Nouveau.',
+  'fleet.fuelCardTransactions.matchedNoneLeft': 'Aucune transaction rapprochée : {n} transaction(s) sans plein correspondant dans la tolérance de temps et de volume.',
+  'fleet.fuelCardTransactions.matchedAllDone': "Rien à rapprocher : toutes les transactions sont déjà rapprochées d'un plein (ou détachées à la main)."
 }

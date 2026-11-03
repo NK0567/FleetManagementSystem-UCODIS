@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { ClipboardCheck, Flag, MapPinCheck } from '@lucide/vue'
 import { apiErrorMessage } from '@/core/api/apiError'
 import { nowIsoDateTime } from '@/utils/date'
-import { formatDateTime } from '@/utils/format'
+import { formatDateTime, formatNumber } from '@/utils/format'
 import type { MobileInterventionAction } from '../api/mobileInterventionApi'
 import type { CardOpenMode } from '@/composables/cardOpenMode'
 import { useEntityCard } from '@/composables/useEntityCard'
@@ -230,6 +230,27 @@ const buttonClass =
                   {{ t('maintenance.mobileInterventions.form.crewNos') }}
                 </dt>
                 <dd>{{ item.crewNames }}</dd>
+                <dt class="text-muted-foreground">
+                  {{ t('maintenance.mobileInterventions.progress.position') }}
+                </dt>
+                <dd v-if="item.vehiclePosition">
+                  {{ formatNumber(item.vehiclePosition.latitude, 4) }},
+                  {{ formatNumber(item.vehiclePosition.longitude, 4) }}
+                  <span class="text-muted-foreground">
+                    ·
+                    {{
+                      t('maintenance.mobileInterventions.progress.positionAt', {
+                        at: formatDateTime(item.vehiclePosition.reportedAt)
+                      })
+                    }}
+                    <template v-if="item.vehiclePosition.placeName">
+                      · {{ item.vehiclePosition.placeName }}
+                    </template>
+                  </span>
+                </dd>
+                <dd v-else class="text-muted-foreground">
+                  {{ t('maintenance.mobileInterventions.progress.positionNone') }}
+                </dd>
                 <dt class="text-muted-foreground">
                   {{ t('maintenance.mobileInterventions.progress.arrivedAt') }}
                 </dt>

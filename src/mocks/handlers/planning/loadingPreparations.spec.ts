@@ -19,7 +19,7 @@ const send = (
 
 /* The tankers are trailers: each comes behind a free tractor. */
 const TRACTOR: Record<string, string> = {
-  'VEH-022': 'VEH-004',
+  'VEH-021': 'VEH-004',
   'VEH-023': 'VEH-006',
   'VEH-024': 'VEH-009',
   'VEH-020': 'VEH-010'
@@ -37,7 +37,7 @@ const header = (vehicles: string[]) => ({
   }))
 })
 
-async function create(vehicles = ['VEH-022', 'VEH-023']) {
+async function create(vehicles = ['VEH-021', 'VEH-023']) {
   const created = await send('post', BASE, header(vehicles))
   expect(created.status).toBe(200)
   return created.data.data as LoadingPreparationApi
@@ -45,7 +45,7 @@ async function create(vehicles = ['VEH-022', 'VEH-023']) {
 
 describe('loading preparation', () => {
   it('is created pending by the delivery manager, with the totals to compare', async () => {
-    expect((await send('post', BASE, header(['VEH-022']), 'PLN001')).status).toBe(403)
+    expect((await send('post', BASE, header(['VEH-021']), 'PLN001')).status).toBe(403)
     const prep = await create()
     expect(prep.status).toBe('pending')
     expect(prep.totals.quantityL).toBe(39000)
@@ -114,8 +114,8 @@ describe('loading preparation', () => {
   })
 
   it('refuses a vehicle without the equipment a delivery point requires', async () => {
-    const prep = await create(['VEH-022', 'VEH-023'])
-    // Only CT 4203 (VEH-023) carries a pump; CT 4202 (VEH-022) does not.
+    const prep = await create(['VEH-021', 'VEH-023'])
+    // Only CT 4203 (VEH-023) carries a pump; CT 4201 (VEH-021) does not.
     const bare = 'VEH-004'
     // DP-009 (order DL-2026-0004) asks for a pump.
     const result = await send('put', `${BASE}/${prep.no}/plan`, {
@@ -208,5 +208,33 @@ describe('loading preparation', () => {
     ).toHaveLength(orderNos.length)
     // Frozen: the plan no longer changes.
     expect((await send('put', `${BASE}/${prep.no}/plan`, { entries: [] })).status).toBe(409)
+    // The pickup note and the loading list follow the depot and the sharing of the preparation
+    // (TRS01-US23): the goods are collected where the preparation says, in the compartments chosen.
+    const noteOf = async (no: string) =>
+      (
+        await call(server, 'get', `/planning/transport-orders/${no}/pickup-note`, {
+          as: 'LIV001'
+        })
+      ).data.data as {
+        pickupSiteNo: string
+        compartments: {
+          no: number
+          entries: { loadedQuantity: number | null; expectedQuantity: number }[]
+        }[]
+      }
+    for (const no of orderNos) {
+      const note = await noteOf(no)
+      expect(note.pickupSiteNo).toBe('DEP-ALR')
+      const vehicleNo = done.vehicles.find((vehicle) => vehicle.orderNo === no)!.vehicleNo
+      for (const compartment of note.compartments) {
+        const planned = done.plan
+          .filter(
+            (entry) => entry.vehicleNo === vehicleNo && entry.compartmentNo === compartment.no
+          )
+          .reduce((sum, entry) => sum + entry.quantity, 0)
+        const shown = compartment.entries.reduce((sum, entry) => sum + entry.expectedQuantity, 0)
+        expect(Math.round(shown)).toBe(planned)
+      }
+    }
   })
 })

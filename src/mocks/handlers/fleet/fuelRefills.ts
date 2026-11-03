@@ -11,8 +11,9 @@ import type {
 } from '@/modules/fleet/fuel-refills/types/fuelRefill.types'
 import { employeeFullName } from '@/modules/hr/employees/domain/employee'
 
-import { nowIsoDateTime } from '@/utils/date'
+import { addMinutes, minutesBetween, nowIsoDateTime } from '@/utils/date'
 import { distanceKm } from '@/utils/geo'
+import { livePositions, trackHistory } from './livePositions'
 import { nowIso } from '../../clock'
 import type { MockDatabase } from '../../db/database'
 import { nextNo } from '../../db/numbering'
@@ -45,10 +46,14 @@ import { expectedDrivers, tripAt } from './links'
 import { FLEET_MESSAGES } from './messages'
 import { fleetSettings } from './settings'
 
+/** How far from the refill a GPS report still tells where the vehicle was. */
+const GPS_WINDOW_MIN = 30
+
 type EditableFields = Pick<
   FuelRefillRow,
   | 'refueledAt'
   | 'driverNo'
+  | 'tripNo'
   | 'stationSiteNo'
   | 'stationName'
   | 'liters'
@@ -139,9 +144,14 @@ export function fuelRefillsApi(db: MockDatabase, language: MockLanguage): FuelRe
         end: settings.refuelEndHour
       }),
       gps:
-        gpsGapKm === null
-          ? say(FLEET_MESSAGES.refillCheckGpsNone)
-          : say(FLEET_MESSAGES.refillCheckGps, { gap: number(gpsGapKm), max: settings.gpsGapMaxKm })
+        gpsGapKm !== null
+          ? say(FLEET_MESSAGES.refillCheckGps, { gap: number(gpsGapKm), max: settings.gpsGapMaxKm })
+          : refill.latitude !== null && refill.longitude !== null
+            ? say(FLEET_MESSAGES.refillCheckGpsNoStation, {
+                latitude: number(Math.round(refill.latitude * 10000) / 10000),
+                longitude: number(Math.round(refill.longitude * 10000) / 10000)
+              })
+            : say(FLEET_MESSAGES.refillCheckGpsNone)
     }
     const checks: RefillCheck[] = REFILL_CHECK_CODES.map((code) => ({
       code,
@@ -174,6 +184,7 @@ export function registerFuelRefillsHandlers(router: MockRouter, db: MockDatabase
       return value
     },
     driverNo: (input) => optionalReference(db.employees, input, 'driverNo'),
+    tripNo: (input) => optionalReference(db.trips, input, 'tripNo'),
     stationSiteNo: (input) => optionalReference(db.sites, input, 'stationSiteNo'),
     stationName: (input) => readString(input, 'stationName'),
     liters: (input) => readNumber(input, 'liters', { required: true, min: 0.1 }) ?? 0,
@@ -197,6 +208,26 @@ export function registerFuelRefillsHandlers(router: MockRouter, db: MockDatabase
     if (twin) throw conflict(FLEET_MESSAGES.refillDuplicate, { no: twin.no })
   }
 
+  /** Where the unit of the vehicle placed it at the time of the refill, within half an hour. */
+  function gpsFixAt(vehicleNo: string, at: string) {
+    const live = livePositions(db).find((position) => position.vehicleNo === vehicleNo)
+    if (!live) return null
+    if (Math.abs(minutesBetween(live.reportedAt, at)) <= GPS_WINDOW_MIN) return live
+    const from = addMinutes(at, -GPS_WINDOW_MIN)
+    const to = addMinutes(at, GPS_WINDOW_MIN)
+    const points = trackHistory(db, vehicleNo, from, to).points
+    let nearest: (typeof points)[number] | null = null
+    for (const point of points) {
+      if (
+        !nearest ||
+        Math.abs(minutesBetween(point.at, at)) < Math.abs(minutesBetween(nearest.at, at))
+      ) {
+        nearest = point
+      }
+    }
+    return nearest
+  }
+
   /** One way to build a refill, whether typed in or imported: the same rules apply to both. */
   function buildRefill(input: Record<string, unknown>, channel: 'manual' | 'import' | 'mobile') {
     const vehicleNo = requireReference(db.vehicles, input, 'vehicleNo')
@@ -211,7 +242,22 @@ export function registerFuelRefillsHandlers(router: MockRouter, db: MockDatabase
       fullTank: readers.fullTank(input),
       receiptFileNo: readers.receiptFileNo(input)
     }
-    const trip = tripAt(db, vehicleNo, fields.refueledAt)
+    // A trip named by the user must be one of the vehicle; left empty, it is the trip the vehicle was on.
+    const named = optionalReference(db.trips, input, 'tripNo')
+    if (named) {
+      const wanted = db.trips.findOrFail(named)
+      if (wanted.vehicleNo !== vehicleNo && wanted.trailerNo !== vehicleNo) {
+        throw unprocessable(FLEET_MESSAGES.refillTripOfOtherVehicle, { trip: named })
+      }
+    }
+    const trip = named ? db.trips.findOrFail(named) : tripAt(db, vehicleNo, fields.refueledAt)
+    // The GPS unit of the vehicle gives the position of the refill when it is known and none is typed.
+    const typedLatitude = readNumber(input, 'latitude', { min: -90, max: 90 })
+    const typedLongitude = readNumber(input, 'longitude', { min: -180, max: 180 })
+    const fix =
+      typedLatitude === null || typedLongitude === null
+        ? gpsFixAt(vehicleNo, fields.refueledAt)
+        : null
     // Left empty, the driver is the one assigned to the vehicle that day, or the one on the trip.
     const driverNo =
       fields.driverNo ??
@@ -227,8 +273,8 @@ export function registerFuelRefillsHandlers(router: MockRouter, db: MockDatabase
       ...fields,
       driverNo,
       tripNo: trip?.no ?? null,
-      latitude: readNumber(input, 'latitude', { min: -90, max: 90 }),
-      longitude: readNumber(input, 'longitude', { min: -180, max: 180 }),
+      latitude: fix ? fix.latitude : typedLatitude,
+      longitude: fix ? fix.longitude : typedLongitude,
       channel,
       qualification: null
     }
@@ -247,6 +293,12 @@ export function registerFuelRefillsHandlers(router: MockRouter, db: MockDatabase
     update: (existing, input) => {
       if (existing.qualification) throw conflict(FLEET_MESSAGES.refillQualified)
       const patch = readPatch(input, readers)
+      if (patch.tripNo) {
+        const wanted = db.trips.findOrFail(patch.tripNo)
+        if (wanted.vehicleNo !== existing.vehicleNo && wanted.trailerNo !== existing.vehicleNo) {
+          throw unprocessable(FLEET_MESSAGES.refillTripOfOtherVehicle, { trip: patch.tripNo })
+        }
+      }
       assertNotDuplicate({ ...existing, ...patch })
       return patch
     }
@@ -310,10 +362,21 @@ export function registerFuelRefillsHandlers(router: MockRouter, db: MockDatabase
         liters: refill.liters,
         amount: refill.amount,
         stationLabel: refill.stationLabel,
+        tripNo: refill.tripNo,
         channel: refill.channel,
         status: refill.status
       }))
-    return ok({ vehicleNo, vehiclePlate: plate, refills: mine })
+    // The trips he may name: the ones of his vehicle that are on the road or still to leave.
+    const trips = db.trips
+      .all()
+      .filter(
+        (trip) =>
+          (trip.vehicleNo === vehicleNo || trip.trailerNo === vehicleNo) &&
+          (trip.status === 'in_progress' || trip.status === 'planned')
+      )
+      .map((trip) => ({ no: trip.no, status: trip.status }))
+    const currentTripNo = tripAt(db, vehicleNo, nowIsoDateTime())?.no ?? null
+    return ok({ vehicleNo, vehiclePlate: plate, currentTripNo, trips, refills: mine })
   })
 
   // A file from a station or a card supplier names the vehicle by its plate, the driver by a number.

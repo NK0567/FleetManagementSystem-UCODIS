@@ -39,6 +39,11 @@ export const transportOrderApi = {
       `${linePath(no, lineNo)}/hand-back`,
       {}
     ),
+  partialAgreement: (no: string, lineNo: number, by: string, note: string) =>
+    httpClient.post<SingleResponse<unknown>>(`${linePath(no, lineNo)}/partial-agreement`, {
+      by,
+      note
+    }),
   remainder: (no: string, lineNo: number, date: string) =>
     httpClient.post<SingleResponse<unknown>>(`${linePath(no, lineNo)}/remainder`, { date }),
   closing: (no: string) =>

@@ -13,6 +13,7 @@ import {
   dossierComplete,
   gainLossText,
   requiredDocumentKinds,
+  type ClosingBlock,
   type DebriefingCompartment,
   type DossierPieceKind,
   type DossierPieceState,
@@ -34,6 +35,7 @@ import { requireReference } from '../../http/references'
 import { ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
 import { sessionUser, type MockRequest } from '../../http/types'
+import { localize, toMockLanguage, type LocalizedText } from '../../i18n'
 import { fileMetaOf } from '../files'
 import { deliveryNotesOf } from './deliveryNotes'
 import { PLANNING_MESSAGES } from './messages'
@@ -45,22 +47,39 @@ const FEATURE = 'TRANSPORTORDER'
 const KIND = /^[a-z0-9_]{1,40}$/
 const PLANNED_STATUSES = ['planned', 'confirmed', 'ready', 'in_progress', 'completed']
 
+/** The blocks read out in the refusal to close, the same words as the screen. */
+const CLOSING_BLOCK_TEXT: Record<ClosingBlock, LocalizedText> = {
+  not_delivered: {
+    fr: 'Toutes les lignes ne sont pas livrées',
+    en: 'Not every line is delivered'
+  },
+  postponed: {
+    fr: 'Un point reporté reste à retenter ou à annuler',
+    en: 'A postponed point is still to retry or cancel'
+  },
+  reception: { fr: 'Réception non attestée', en: 'Reception not attested' },
+  contestation: { fr: 'Contestation en cours', en: 'Contestation in progress' },
+  protest: { fr: 'Protêt ouvert', en: 'Protest open' },
+  gap: { fr: 'Écart non qualifié', en: 'Gap not qualified' },
+  document: { fr: 'Document requis manquant', en: 'Required document missing' }
+}
+
 function delivered(db: MockDatabase, order: TransportOrderRow): boolean {
   const trip = order.tripNo ? db.trips.find(order.tripNo) : undefined
   const fleetDeparted = !!trip && ['in_progress', 'completed', 'closed'].includes(trip.status)
-  return (
-    transportOrderStatus({
-      cancelledAt: order.cancelledAt,
-      closedAt: order.closedAt,
-      means: order.means,
-      tripStatus: trip?.status ?? null,
-      linesConfirmed: linesConfirmed(order.lines),
-      firstArrival: firstArrivalMarked(order.lines),
-      loadingReady: loadingReady(order.lines),
-      carrierDeparted: order.carrierDepartedAt !== null || fleetDeparted,
-      linesDelivered: linesDelivered(order.lines)
-    }) === 'in_progress' && linesDelivered(order.lines)
-  )
+  const status = transportOrderStatus({
+    cancelledAt: order.cancelledAt,
+    closedAt: order.closedAt,
+    means: order.means,
+    tripStatus: trip?.status ?? null,
+    linesConfirmed: linesConfirmed(order.lines),
+    firstArrival: firstArrivalMarked(order.lines),
+    loadingReady: loadingReady(order.lines),
+    carrierDeparted: order.carrierDepartedAt !== null || fleetDeparted,
+    linesDelivered: linesDelivered(order.lines)
+  })
+  // A finished order stays delivered: the closing section no longer blocks it (TRS05-US06).
+  return (status === 'in_progress' || status === 'completed') && linesDelivered(order.lines)
 }
 
 function blocksOf(db: MockDatabase, order: TransportOrderRow) {
@@ -586,8 +605,12 @@ export function registerClosingHandlers(router: MockRouter, db: MockDatabase): v
       const order = db.transportOrders.findOrFail(routeParam(request, 'no'))
       if (order.closedAt) throw conflict(PLANNING_MESSAGES.closingDone)
       const blocks = blocksOf(db, order)
-      if (blocks.length)
-        throw unprocessable(PLANNING_MESSAGES.closingBlocked, { blocks: blocks.join(', ') })
+      if (blocks.length) {
+        const language = toMockLanguage(request.language)
+        throw unprocessable(PLANNING_MESSAGES.closingBlocked, {
+          blocks: blocks.map((block) => localize(language, CLOSING_BLOCK_TEXT[block])).join(', ')
+        })
+      }
       save(
         db,
         order,

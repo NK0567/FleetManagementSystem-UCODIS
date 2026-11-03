@@ -10,6 +10,10 @@ export interface TripStopApi {
   longitude: number
   plannedAt: string
   passedAt: string | null
+  /** GPS entry into the zone of the site; absent for the departure site. */
+  enteredAt: string | null
+  /** GPS exit from the zone; absent while the vehicle is still inside, or at the last stop. */
+  exitedAt: string | null
 }
 
 export interface TripApi {

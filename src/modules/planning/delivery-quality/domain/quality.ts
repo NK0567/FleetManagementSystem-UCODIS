@@ -132,6 +132,15 @@ export function qualityFacts(line: QualityLine): QualityFact[] {
   return facts
 }
 
+/**
+ * The origin the recorded facts point to (TRS04-US08 CA01): goods not loaded or badly checked at
+ * the start come from the departure, the others from the transport. A problem of the orderer's
+ * order is the manager's call, no recorded fact says it.
+ */
+export function suggestedOrigin(facts: readonly QualityFact[]): QualityOrigin {
+  return facts.includes('loading_nonconformity') ? 'departure' : 'transport'
+}
+
 export function protestStatus(note: Pick<ProtestNote, 'issuedAt' | 'closedAt'>): ProtestStatus {
   if (note.closedAt) return 'closed'
   if (note.issuedAt) return 'issued'

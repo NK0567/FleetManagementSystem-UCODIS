@@ -84,6 +84,8 @@ export interface LoadingListApi {
       productName: string
       unit: string
       quantity: number
+      /** What the order says it contains (TRS01-US06). */
+      content: string
     }[]
   }[]
 }

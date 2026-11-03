@@ -46,6 +46,10 @@ export interface TransportOrderLineApi {
   volumeM3: number | null
   /** The order's reference in our management system, which follows it to the vehicle. */
   externalReference: string
+  /** The order asks for a complete delivery (TRS01-US17). */
+  fullDeliveryRequired: boolean
+  /** The recipient's agreement to a partial delivery, traced before it (TRS01-US17 CA05). */
+  partialAgreement: { by: string; note: string; at: string; recordedBy: string } | null
   /** Replanned to a day, into a pending order (TRS01-US16, US17). */
   replannedAt: string | null
   replannedOn: string | null
@@ -105,6 +109,8 @@ export interface TransportOrderLineInput {
   volumeM3?: number | null
   /** An order keyed in the transport order: who orders it (TRS01-US06). */
   ordererNo?: string
+  /** The orderer's own reference of an order keyed in the transport order (TRS01-US06). */
+  externalReference?: string
   /** A line already in the order without an order behind it, kept as it is. */
   lineNo?: number
   /** A part of the order's lines; empty takes them all. */

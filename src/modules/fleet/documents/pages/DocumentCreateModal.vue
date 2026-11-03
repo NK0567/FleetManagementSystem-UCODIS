@@ -7,7 +7,9 @@ import { documentService } from '../services/documentService'
 import type { DocumentApi } from '../types/document.types'
 
 /** Prefilled when renewing a document or filling a missing one. */
-const props = defineProps<{ initialData?: Partial<DocumentApi> }>()
+const props = withDefaults(defineProps<{ initialData?: Partial<DocumentApi> }>(), {
+  initialData: () => ({})
+})
 const emit = defineEmits<{ close: []; created: [document: DocumentApi] }>()
 
 const { t } = useI18n()
@@ -38,7 +40,7 @@ const { isSaving, saveError, validationErrors, createItem } = useEntityCreate({
       <DocumentForm
         ref="formRef"
         is-new
-        :initial-data="props.initialData ?? {}"
+        :initial-data="props.initialData"
         :validation-errors="validationErrors"
       />
     </template>

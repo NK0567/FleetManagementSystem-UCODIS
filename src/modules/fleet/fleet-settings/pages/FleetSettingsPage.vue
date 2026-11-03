@@ -8,6 +8,7 @@ import {
   FLEET_SETTING_FIELDS,
   FLEET_SETTINGS_SECTIONS,
   settingsSectionIssues,
+  settingsSectionWarnings,
   type FleetSettings,
   type FleetSettingsSection
 } from '../domain/fleetSettings'
@@ -59,6 +60,11 @@ function validate(section: FleetSettingsSection) {
     settingsSectionIssues(section, values as unknown as FleetSettings[FleetSettingsSection])
 }
 
+function warn(section: FleetSettingsSection) {
+  return (values: Record<string, unknown>) =>
+    settingsSectionWarnings(section, values as unknown as FleetSettings[FleetSettingsSection])
+}
+
 function sectionValues(section: FleetSettingsSection): Record<string, unknown> {
   return (store.settings?.[section] ?? {}) as unknown as Record<string, unknown>
 }
@@ -93,6 +99,7 @@ onMounted(() => void store.fetchSettings())
         :section="section"
         :fields="FLEET_SETTING_FIELDS[section]"
         :validate="validate(section)"
+        :warn="warn(section)"
         :values="sectionValues(section)"
         :can-edit="canUpdate"
         :saving="store.savingSection === section"

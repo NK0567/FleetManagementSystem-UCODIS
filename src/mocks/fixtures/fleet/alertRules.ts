@@ -131,7 +131,7 @@ const SEED: Omit<AlertRuleRow, keyof typeof seedAudit>[] = [
   {
     no: 'service',
     name: "Échéances d'entretien proches ou dépassées",
-    recipients: ['ADMIN', 'FLEET_MANAGER'],
+    recipients: ['ADMIN', 'FLEET_MANAGER', 'MAINTENANCE_MANAGER'],
     escalationHours: 48,
     escalateTo: 'MANAGEMENT',
     active: true

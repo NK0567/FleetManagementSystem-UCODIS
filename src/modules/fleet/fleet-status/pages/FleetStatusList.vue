@@ -421,16 +421,27 @@ function selectAndShow(item: FleetStatusApi) {
     >
       <div class="space-y-3 text-sm">
         <p class="text-muted-foreground">{{ t('fleet.fleetStatus.send.hint') }}</p>
-        <BaseFormField :label="t('fleet.fleetStatus.send.recipients')" required>
+        <div class="space-y-1.5">
+          <label
+            for="fleet-status-recipients"
+            class="block text-sm font-medium text-card-foreground"
+          >
+            {{ t('fleet.fleetStatus.send.recipients') }}
+            <span class="text-destructive">*</span>
+          </label>
           <FormInput
+            id="fleet-status-recipients"
             v-model="recipientsText"
             :invalid="!!invalidRecipient"
             :placeholder="t('fleet.fleetStatus.send.placeholder')"
           />
-          <p v-if="invalidRecipient" class="text-xs text-destructive mt-1">
+          <p v-if="invalidRecipient" class="text-xs text-destructive">
             {{ t('fleet.fleetStatus.send.invalid', { email: invalidRecipient }) }}
           </p>
-        </BaseFormField>
+          <p v-else-if="!recipients.length" class="text-xs text-muted-foreground">
+            {{ t('fleet.fleetStatus.send.required') }}
+          </p>
+        </div>
         <p class="text-xs text-muted-foreground">{{ t('fleet.fleetStatus.send.simulated') }}</p>
         <FormAlerts :error="sendError" @clear:error="sendError = null" />
         <div v-if="store.dispatches.length">

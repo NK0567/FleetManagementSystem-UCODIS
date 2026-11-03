@@ -9,6 +9,7 @@ import { dossierApi } from '@/modules/planning/closing/api/dossierApi'
 import type { OrderDossierApi } from '@/modules/planning/closing/types/dossier.types'
 import { FolderOpen } from '@lucide/vue'
 import {
+  formatDate,
   formatDateTime as formatDateTimeShort,
   formatNumber as formatDecimal
 } from '@/utils/format'
@@ -118,6 +119,13 @@ async function onPickupChanged() {
 }
 const formRef = ref<InstanceType<typeof TransportOrderForm> | null>(null)
 
+/* An order is named by its route and its day, never by its customers (meeting of 27 October):
+ * the recipients stay in its lines. */
+function orderName(order: { no: string; routeName: string; plannedDeparture: string | null }) {
+  const day = order.plannedDeparture ? formatDate(order.plannedDeparture) : ''
+  return [order.routeName, day].filter(Boolean).join(' · ') || order.no
+}
+
 const {
   item,
   isLoading,
@@ -143,16 +151,14 @@ const {
   form: formRef,
   update: transportOrderService.update,
   canUpdate,
-  label: (record) => record.recipientSummary || record.routeName || record.no,
+  label: (record) => orderName(record),
   saveErrorFallback: t('planning.transportOrders.saveError'),
   initialOpenMode: () => props.initialOpenMode,
   justCreated: () => !!props.showCreateSuccess
 })
 
 const pageTitle = computed(() =>
-  item.value
-    ? `${item.value.no}${item.value.recipientSummary ? ` · ${item.value.recipientSummary}` : ''}`
-    : t('planning.transportOrders.card')
+  item.value ? `${item.value.no} · ${orderName(item.value)}` : t('planning.transportOrders.card')
 )
 
 const acting = ref(false)
@@ -369,6 +375,9 @@ async function confirmLineAction(choice: OrderLineChoice) {
     }
     if (choice.action === 'remainder') {
       return transportOrderService.remainder(no, line.lineNo, choice.date)
+    }
+    if (choice.action === 'agreement') {
+      return transportOrderService.partialAgreement(no, line.lineNo, choice.by, choice.note)
     }
     return transportOrderService.handBack(no, line.lineNo)
   })
@@ -710,6 +719,7 @@ const buttonClass =
                   @declare="(line) => openLineAction('declare', line)"
                   @hand-back="(line) => openLineAction('handBack', line)"
                   @remainder="(line) => openLineAction('remainder', line)"
+                  @agreement="(line) => openLineAction('agreement', line)"
                 />
               </div>
             </FormSection>
@@ -919,10 +929,15 @@ const buttonClass =
               v-if="closing"
               v-model:open="expandedSections.closing"
               :title="t('planning.transportOrders.closing.title')"
-              :summary="[closingBlocked || t('planning.transportOrders.closing.ready')]"
+              :summary="[
+                item.status === 'completed'
+                  ? t('planning.transportOrders.closing.closed')
+                  : closingBlocked || t('planning.transportOrders.closing.ready')
+              ]"
             >
               <TransportOrderClosingPanel
                 :closing="closing"
+                :finished="item.status === 'completed'"
                 :editable="canFileClosing && item.status === 'in_progress'"
                 :busy="acting"
                 @attach="attachDocument"

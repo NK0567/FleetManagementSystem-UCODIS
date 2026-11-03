@@ -203,5 +203,13 @@ export default {
   'fleet.vehicles.col.currentSiteNo': 'Site actuel',
   'fleet.vehicles.filter.driverAssignment': 'Affectation',
   'fleet.vehicles.filter.couplingState': 'Attelage',
-  'fleet.vehicles.noResultsCreate': 'Aucun véhicule. Créez-en un avec Nouveau.'
+  'fleet.vehicles.noResultsCreate': 'Aucun véhicule. Créez-en un avec Nouveau.',
+  'fleet.vehicles.maintenanceLog.subsystem': 'Sous-système',
+  'fleet.vehicles.maintenanceLog.partsCost': 'Pièces',
+  'fleet.vehicles.maintenanceLog.labourCost': "Main d'œuvre",
+  'fleet.vehicles.maintenanceLog.externalCost': 'Atelier externe',
+  'fleet.vehicles.maintenanceLog.orders': 'Ordres',
+  'fleet.vehicles.maintenanceLog.bySubsystem': 'Coûts des ordres de travail par sous-système',
+  'fleet.vehicles.maintenanceLog.noSubsystem': 'Sans diagnostic',
+  'fleet.vehicles.maintenanceLog.importedCost': 'Coût importé'
 }

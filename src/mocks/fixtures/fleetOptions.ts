@@ -44,7 +44,7 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
   vehicleStatus: {
     available: { fr: 'Disponible', en: 'Available' },
     assigned: { fr: 'Affecté', en: 'Assigned' },
-    in_mission: { fr: 'En trajet', en: 'On trip' },
+    in_mission: { fr: 'En mission', en: 'On mission' },
     in_maintenance: { fr: 'En maintenance', en: 'In maintenance' },
     immobilized: { fr: 'Immobilisé', en: 'Immobilized' },
     out_of_service: { fr: 'Hors service', en: 'Out of service' },
@@ -221,6 +221,11 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
     anomaly: { fr: 'Anomalie', en: 'Anomaly' },
     na: { fr: 'Sans objet', en: 'Not applicable' }
   },
+  checklistAlert: {
+    departure: { fr: 'Check-list de départ', en: 'Departure checklist' },
+    stop: { fr: 'Check-list de pause', en: 'Stop checklist' },
+    arrival: { fr: "Check-list d'arrivée", en: 'Arrival checklist' }
+  },
   checklistStage: {
     departure: { fr: 'Départ', en: 'Departure' },
     stop: { fr: 'Pause', en: 'Stop' },
@@ -296,7 +301,7 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
   alertCategory: {
     document: { fr: 'Documents', en: 'Documents' },
     companyDocument: { fr: "Documents de l'entreprise", en: 'Company documents' },
-    checklist: { fr: 'Check-list de départ', en: 'Departure checklist' },
+    checklist: { fr: 'Check-lists sur route', en: 'Road checklists' },
     infraction: { fr: 'Infractions', en: 'Infractions' },
     training: { fr: 'Formations', en: 'Trainings' },
     departure: { fr: 'Départs', en: 'Departures' },
@@ -333,7 +338,7 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
   },
   refillStatus: {
     valid: { fr: 'Valide', en: 'Valid' },
-    anomaly: { fr: 'Anomalie', en: 'Anomaly' },
+    anomaly: { fr: 'À qualifier', en: 'To qualify' },
     qualified: { fr: 'Qualifié', en: 'Qualified' }
   },
   refillChannel: {

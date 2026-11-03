@@ -4,8 +4,7 @@ export default {
   'fleet.fuelConsumption.noResults': 'No consumption period.',
   'fleet.fuelConsumption.noSearchResults': 'No period matches “{query}”.',
   'fleet.fuelConsumption.actionError': 'The action could not be completed.',
-  'fleet.fuelConsumption.summary':
-    '{liters} L for {amount} · average {average} L/100 · {co2} kg of CO₂ · refills with an anomaly: {refills} · gaps to qualify: {gaps}',
+  'fleet.fuelConsumption.summary': '{liters} L for {amount} · average {average} L/100 · {co2} kg of CO₂ · refills to qualify: {refills} · gaps to qualify: {gaps}',
   'fleet.fuelConsumption.search.all': 'Vehicle or driver',
   'fleet.fuelConsumption.listView.gaps': 'Gaps to handle',
   'fleet.fuelConsumption.listView.toDecide': 'Deductions to decide',

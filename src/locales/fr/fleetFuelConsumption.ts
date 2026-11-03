@@ -4,8 +4,7 @@ export default {
   'fleet.fuelConsumption.noResults': 'Aucune période de consommation.',
   'fleet.fuelConsumption.noSearchResults': 'Aucune période ne correspond à « {query} ».',
   'fleet.fuelConsumption.actionError': "L'action n'a pas pu être effectuée.",
-  'fleet.fuelConsumption.summary':
-    '{liters} L pour {amount} · moyenne {average} L/100 · {co2} kg de CO₂ · pleins en anomalie : {refills} · écarts à qualifier : {gaps}',
+  'fleet.fuelConsumption.summary': '{liters} L pour {amount} · moyenne {average} L/100 · {co2} kg de CO₂ · pleins à qualifier : {refills} · écarts à qualifier : {gaps}',
   'fleet.fuelConsumption.search.all': 'Véhicule ou conducteur',
   'fleet.fuelConsumption.listView.gaps': 'Écarts à traiter',
   'fleet.fuelConsumption.listView.toDecide': 'Retenues à décider',

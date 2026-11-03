@@ -110,7 +110,7 @@ export default {
   'settings.company.field.country': 'Pays',
   'settings.company.field.taxId': 'NIF / STAT',
   'settings.company.tractors': 'Tracteurs',
-  'settings.company.trailers': 'Semi-remorques',
+  'settings.company.trailers': 'Remorques tractées (semi-remorques, citernes, remorques)',
   'settings.company.vehicles': 'Véhicules',
   'settings.company.loadError': "La fiche de la société n'a pas pu être chargée.",
   'settings.company.saveError': "La fiche de la société n'a pas pu être enregistrée.",

@@ -149,7 +149,9 @@ export function useEntityCard<T extends { no: string }>(options: UseEntityCardOp
 
   onMounted(async () => {
     await loadItem(options.no())
-    if (options.justCreated?.()) {
+    // The URL of a record just created asks for edit; the reading URL opened again afterwards
+    // must read, not stay in edit mode.
+    if (options.justCreated?.() && options.initialOpenMode?.() !== 'view') {
       isEditMode.value = options.canUpdate.value
       flashSaveSuccess()
       return

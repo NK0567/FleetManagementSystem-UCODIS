@@ -100,7 +100,7 @@ describe('card transactions', () => {
     const detached = before.find((item) => item.matchMode === 'detached')
     expect(detached?.candidateNo).toBeTruthy()
     const matched = await post('/fleet/fuel-card-transactions/match-all')
-    expect(matched.data.data).toEqual({ matched: 1 })
+    expect(matched.data.data).toEqual({ matched: 1, remaining: 2 })
     const after = await transactions()
     expect(after.find((item) => item.no === waiting?.no)).toMatchObject({
       refillNo: waiting?.candidateNo,

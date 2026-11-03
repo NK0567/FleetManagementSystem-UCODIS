@@ -202,9 +202,11 @@ const selectClass =
     <div class="max-h-[70vh] overflow-y-auto space-y-4 text-sm">
       <p class="text-muted-foreground">{{ t('planning.transportOrders.proposal.hint') }}</p>
       <div class="flex flex-wrap items-end gap-3">
-        <BaseFormField :label="t('planning.transportOrders.proposal.date')" required>
-          <DateFormInput v-model="date" />
-        </BaseFormField>
+        <div class="w-full sm:w-56 shrink-0">
+          <BaseFormField :label="t('planning.transportOrders.proposal.date')" required>
+            <DateFormInput v-model="date" />
+          </BaseFormField>
+        </div>
         <button type="button" :class="buttonClass" :disabled="busy || !date" @click="propose">
           <component :is="proposal ? RefreshCw : Sparkles" class="w-4 h-4 text-primary" />
           {{

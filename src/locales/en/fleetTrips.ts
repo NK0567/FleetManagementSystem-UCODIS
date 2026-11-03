@@ -90,5 +90,8 @@ export default {
   'fleet.trips.col.missedStopCount': 'Missed stops',
   'fleet.trips.filter.hasMissedStops': 'Missed stops',
   'fleet.trips.missedStopsSummary': 'Missed stops: {stops} · trips concerned: {trips}',
-  'fleet.trips.noResultsCreate': 'No trip. Create one with New.'
+  'fleet.trips.noResultsCreate': 'No trip. Create one with New.',
+  'fleet.trips.stops.entered': 'entered the zone {time}',
+  'fleet.trips.stops.exited': 'left the zone {time}',
+  'fleet.trips.stops.inside': 'still in the zone'
 }

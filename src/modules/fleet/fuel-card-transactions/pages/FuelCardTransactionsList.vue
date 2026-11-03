@@ -188,8 +188,13 @@ async function matchAll() {
   working.value = true
   actionError.value = null
   try {
-    const matched = await fuelCardTransactionService.matchAll()
-    info.value = t('fleet.fuelCardTransactions.matched', matched)
+    const { matched, remaining } = await fuelCardTransactionService.matchAll()
+    info.value =
+      matched > 0
+        ? t('fleet.fuelCardTransactions.matched', matched)
+        : remaining > 0
+          ? t('fleet.fuelCardTransactions.matchedNoneLeft', { n: remaining })
+          : t('fleet.fuelCardTransactions.matchedAllDone')
     await store.fetchItems(store.pagination.page, store.pagination.limit)
   } catch (error) {
     actionError.value = apiErrorMessage(error, t('fleet.fuelCardTransactions.actionError'))

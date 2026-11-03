@@ -43,6 +43,7 @@ const tableColumns = computed<TableColumn[]>(() => [
     minW: '110px',
     formatter: booleanLabel
   },
+  { sortKey: 'country', label: t('fleet.documentTypes.col.country'), minW: '140px' },
   {
     sortKey: 'active',
     label: t('fleet.documentTypes.col.active'),

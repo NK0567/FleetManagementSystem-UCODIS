@@ -210,6 +210,7 @@ async function confirm() {
       "
       :confirm-label="t('common.confirm')"
       :confirm-disabled="!valid"
+      :confirm-disabled-hint="t('planning.pickup.ops.incomplete')"
       :loading="busy"
       panel-class="max-w-lg"
       @confirm="confirm"

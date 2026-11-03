@@ -67,5 +67,7 @@ export default {
   'planning.quality.actor.external_carrier': 'External carrier',
   'planning.quality.col.files': 'Attachments',
   'planning.quality.files': 'Attachments',
-  'planning.quality.noFile': 'No attachment.'
+  'planning.quality.noFile': 'No attachment.',
+  'planning.quality.factsRecorded': 'Facts recorded on this delivery',
+  'planning.quality.originSuggested': 'Origin suggested by these facts: {origin}. You can change it.'
 }

@@ -141,6 +141,8 @@ export function transportOrdersApi(db: MockDatabase, userCode?: string): Transpo
           ...line,
           volumeM3: line.volumeM3 ?? null,
           externalReference: source?.externalReference ?? '',
+          fullDeliveryRequired: source?.fullDeliveryRequired ?? false,
+          partialAgreement: line.partialAgreement ?? null,
           replannedOn: line.replannedOn ?? null,
           replannedToOrderNo: line.replannedToOrderNo ?? null,
           replannedFrom: line.replannedFrom ?? null,
@@ -208,7 +210,11 @@ export function transportOrdersApi(db: MockDatabase, userCode?: string): Transpo
         regions: [...new Set(orderPlace(db, row).regions)],
         comment: row.comment,
         lines,
-        lineCount: lines.length,
+        // The lines still in the order: one that left it (unavailable recipient, goods not
+        // conforming, replanned) no longer counts (TRS01-US14 CA08, CA09).
+        lineCount: lines.filter(
+          (line) => !line.unavailableAt && !line.replannedAt && !line.nonconformityAt
+        ).length,
         recipientSummary: recipients.join(', '),
         totalWeightKg: weights.length ? weights.reduce((total, weight) => total + weight, 0) : null,
         totalVolumeM3: volumes.length
@@ -237,14 +243,23 @@ export function transportOrdersApi(db: MockDatabase, userCode?: string): Transpo
         vehiclePlate: trip ? (plates.get(trip.vehicleNo) ?? '') : '',
         trailerNo: trip?.trailerNo ?? null,
         trailerPlate: trip?.trailerNo ? (plates.get(trip.trailerNo) ?? '') : '',
-        compartmentPlan: trip
-          ? compartmentPlan(db, row.lines, trip.vehicleNo, trip.trailerNo ?? null)
-          : null,
+        compartmentPlan: trip ? plannedCompartments(db, row, trip) : null,
+        // The families the vehicle is kept for: the planned one, else the one proposed to the
+        // order, so that the orders offered are limited from the moment a vehicle is chosen
+        // (TRS01-US06 CA01).
         vehicleProductFamilies: trip
           ? goodsCarriers(db, trip.vehicleNo, trip.trailerNo ?? null).flatMap(
               (vehicle) => vehicle.productFamilies ?? []
             )
-          : [],
+          : !row.means && row.proposedVehicleNo && db.vehicles.exists(row.proposedVehicleNo)
+            ? goodsCarriers(
+                db,
+                row.proposedVehicleNo,
+                row.proposedTrailerNo && db.vehicles.exists(row.proposedTrailerNo)
+                  ? row.proposedTrailerNo
+                  : null
+              ).flatMap((vehicle) => vehicle.productFamilies ?? [])
+            : [],
         driverNo: trip?.driverNo ?? null,
         driverName: trip ? (names.get(trip.driverNo) ?? '') : '',
         carrierNo: row.carrierNo,
@@ -256,7 +271,15 @@ export function transportOrdersApi(db: MockDatabase, userCode?: string): Transpo
         cancellationComment: row.cancellationComment,
         cancelledAt: row.cancelledAt,
         cancelledBy: row.cancelledBy,
-        events: row.events,
+        // A code stored in the detail (a reason, a delivery point, a carrier) reads as its name.
+        events: row.events.map((event) => ({
+          ...event,
+          detail:
+            reasons.get(event.detail) ??
+            points.get(event.detail)?.name ??
+            carriers.get(event.detail) ??
+            event.detail
+        })),
         status: statusOf(db, row),
         awaitingClosing: awaitingClosing(statusOf(db, row), linesDelivered(row.lines)),
         archived: statusOf(db, row) === 'completed',
@@ -317,11 +340,33 @@ function capacityOfOrder(
   row: TransportOrderRow,
   trip: TripRow | undefined
 ): LoadCapacity | null {
+  if (row.means === 'carrier') {
+    return carrierCapacity(db, row.carrierNo, row.carrierVehiclePlate)
+  }
   const vehicleNo = trip?.vehicleNo ?? (row.means ? null : (row.proposedVehicleNo ?? null))
   if (!vehicleNo || !db.vehicles.exists(vehicleNo)) return null
   const trailerNo = trip ? (trip.trailerNo ?? null) : (row.proposedTrailerNo ?? null)
   return serving(db, vehicleNo, trailerNo && db.vehicles.exists(trailerNo) ? trailerNo : null)
     .capacity
+}
+
+/**
+ * What a vehicle of an external carrier can carry, as declared on the carrier's record
+ * (TRS01-US08 CA07, US09); null while the record states nothing, so that nothing is compared.
+ */
+function carrierCapacity(
+  db: MockDatabase,
+  carrierNo: string | null,
+  plate: string
+): LoadCapacity | null {
+  const vehicle = (db.providers.find(carrierNo ?? '')?.carrierVehicles ?? []).find(
+    (item) => item.plate === plate
+  )
+  if (!vehicle) return null
+  const maxLoadKg = vehicle.maxLoadKg ?? null
+  const maxVolumeM3 = vehicle.maxVolumeM3 ?? null
+  if (maxLoadKg === null && maxVolumeM3 === null && !vehicle.capacityL) return null
+  return { maxLoadKg, maxVolumeM3, capacityL: vehicle.capacityL ?? 0 }
 }
 
 function statusOf(db: MockDatabase, row: TransportOrderRow) {
@@ -374,6 +419,8 @@ interface RawLine {
   lineQuantities?: Map<number, number>
   /** An order keyed in the transport order: its orderer (TRS01-US06). */
   ordererNo?: string
+  /** The orderer's own reference of an order keyed in the transport order (TRS01-US06 CA04). */
+  externalReference?: string
   /** A line already in the order without an order behind it, kept as it stands. */
   keepLineNo?: number
 }
@@ -420,6 +467,7 @@ function readLines(input: Record<string, unknown>): RawLine[] {
       deliveryRequestNo: null,
       keepLineNo: keepLineNo ?? undefined,
       ordererNo: readString(row, 'ordererNo'),
+      externalReference: readString(row, 'externalReference').slice(0, 40),
       deliveryPointNo: readString(row, 'deliveryPointNo', { required: true }),
       productNo: readString(row, 'productNo', { required: true }),
       quantity:
@@ -482,6 +530,7 @@ interface RequestSplit {
 interface ManualEntry {
   lineIndex: number
   ordererNo: string
+  externalReference: string
 }
 
 /** A share of a weight or a volume, for a part of the quantity. */
@@ -601,7 +650,11 @@ function resolveLines(
       throw unprocessable(CIRCUIT_MESSAGES.manualLineNeedsOrderer)
     }
     if (!(Number(raw.weightKg) > 0)) throw unprocessable(CIRCUIT_MESSAGES.requestWeightRequired)
-    manual.push({ lineIndex: resolved.length, ordererNo })
+    manual.push({
+      lineIndex: resolved.length,
+      ordererNo,
+      externalReference: raw.externalReference ?? ''
+    })
     resolved.push({
       deliveryRequestNo: null,
       deliveryPointNo: raw.deliveryPointNo,
@@ -646,7 +699,7 @@ function recordManualRequests(
       deliveryPointNo: line.deliveryPointNo,
       desiredDate: (day ?? todayIso()).slice(0, 10),
       validUntil: null,
-      externalReference: '',
+      externalReference: item.externalReference,
       freightPayer: planningSettings(db).billing.defaultFreightPayer,
       comment: '',
       lines: [
@@ -1114,6 +1167,42 @@ export function compartmentPlan(
   return { compartments, ...plan }
 }
 
+/**
+ * The compartment plan of an order: the one frozen when a loading preparation was validated
+ * (TRS01-US23), else an automatic placement of its lines.
+ */
+function plannedCompartments(db: MockDatabase, row: TransportOrderRow, trip: TripRow) {
+  const base = compartmentPlan(db, row.lines, trip.vehicleNo, trip.trailerNo ?? null)
+  if (!base || !row.frozenPlan?.length) return base
+  const uses = base.compartments.map((compartment) => {
+    const lines = row
+      .frozenPlan!.filter((entry) => entry.compartmentNo === compartment.no)
+      .flatMap((entry) => {
+        const line = row.lines.find(
+          (item) =>
+            item.deliveryRequestNo === entry.requestNo &&
+            (item.requestLineNo ?? 1) === entry.requestLineNo
+        )
+        return line
+          ? [
+              {
+                lineNo: line.lineNo,
+                productName: db.products.find(line.productNo)?.name ?? line.productNo,
+                volumeL: entry.quantity
+              }
+            ]
+          : []
+      })
+    return {
+      no: compartment.no,
+      volumeL: compartment.volumeL,
+      usedL: lines.reduce((total, item) => total + item.volumeL, 0),
+      lines
+    }
+  })
+  return { ...base, uses, issues: [] }
+}
+
 function compartmentIssues(
   db: MockDatabase,
   lines: readonly TransportOrderLineRow[],
@@ -1454,6 +1543,15 @@ export function registerTransportOrdersHandlers(router: MockRouter, db: MockData
   )
 }
 
+/** How a channel reads in the history of an order. */
+const CHANNEL_LABELS: Record<string, { fr: string; en: string }> = {
+  sms: { fr: 'SMS', en: 'SMS' },
+  call: { fr: 'appel', en: 'call' },
+  email: { fr: 'e-mail', en: 'e-mail' },
+  whatsapp: { fr: 'WhatsApp', en: 'WhatsApp' },
+  none: { fr: 'aucun canal', en: 'no channel' }
+}
+
 /** The detail of the deliveries, as the driver's notification gives it (TRS01-US12). */
 function deliveriesDetail(db: MockDatabase, lines: readonly TransportOrderLineRow[]): string {
   const names = lines.map((line) => db.deliveryPoints.find(line.deliveryPointNo)?.name ?? '')
@@ -1470,13 +1568,14 @@ function notifyRecipients(
   request: MockRequest
 ): TransportOrderEventRow | null {
   const sent: string[] = []
+  const language = toMockLanguage(request.language)
   for (const line of order.lines) {
     const row = line.deliveryRequestNo ? db.deliveryRequests.find(line.deliveryRequestNo) : null
     const channel = row?.notificationChannel ?? 'sms'
     if (channel === 'none') continue
     const point = db.deliveryPoints.find(line.deliveryPointNo)
     const name = (point && db.customers.find(point.customerNo)?.name) || line.deliveryPointNo
-    const label = `${name} (${channel})`
+    const label = `${name} (${localize(language, CHANNEL_LABELS[channel] ?? CHANNEL_LABELS.none!)})`
     if (!sent.includes(label)) sent.push(label)
   }
   return sent.length ? eventOf(request, 'recipients_notified', sent.join(', ')) : null
@@ -1563,6 +1662,10 @@ export function createPlannedOrder(
     trailerNo: string | null
     driverNo: string
     comment: string
+    /** The depot of the preparation, where the goods are collected. */
+    depotSiteNo?: string
+    /** The plan of the preparation for this vehicle, as corrected by the planner. */
+    plan?: { compartmentNo: number; requestNo: string; requestLineNo: number; quantity: number }[]
   }
 ): string {
   const { lines, splits } = resolveLines(
@@ -1607,7 +1710,24 @@ export function createPlannedOrder(
     { vehicleNo: spec.vehicleNo, trailerNo: spec.trailerNo, driverNo: spec.driverNo, force: true },
     request
   )
-  db.transportOrders.update(no, { ...planned, ...stampModified(request) })
+  db.transportOrders.update(no, {
+    ...planned,
+    ...(spec.depotSiteNo
+      ? {
+          pickup: {
+            siteNo: spec.depotSiteNo,
+            sentAt: null,
+            sentTo: '',
+            confirmedAt: null,
+            confirmedBy: null,
+            documentRef: '',
+            entries: []
+          }
+        }
+      : {}),
+    ...(spec.plan?.length ? { frozenPlan: spec.plan } : {}),
+    ...stampModified(request)
+  })
   announcePlanned(db, no, request)
   return no
 }
@@ -1709,6 +1829,14 @@ function planCarrier(
   const plate = readLimited(body, 'carrierVehiclePlate', 20)
   if (!(carrier.carrierVehicles ?? []).some((vehicle) => vehicle.plate === plate)) {
     throw unprocessable(PLANNING_MESSAGES.orderCarrierVehicleUnknown)
+  }
+  // The load is compared with the carrier's vehicle as with an own one: a warning to accept,
+  // a refusal when the capacity check is strict (TRS01-US08 CA05, CA06, US09).
+  const overload = loadIssue(asLoad(db, order.lines), carrierCapacity(db, carrierNo, plate))
+  if (overload && overload.code !== 'nothingToCarry' && overload.code !== 'payloadUnknown') {
+    const warning = loadWarning(toMockLanguage(request.language), overload)
+    if (!warning || planningSettings(db).controls.strictCapacity) refuseLoad(overload)
+    confirmWarnings([warning], body)
   }
   return {
     means: 'carrier',

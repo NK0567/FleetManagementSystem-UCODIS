@@ -6,7 +6,11 @@ export function orderPlace(db: MockDatabase, order: TransportOrderRow): Place {
   const trip = order.tripNo ? db.trips.find(order.tripNo) : undefined
   const routeNo = trip?.routeTemplateNo ?? order.routeTemplateNo
   const route = routeNo ? db.routeTemplates.find(routeNo) : undefined
-  const siteNos = route?.stops.map((stop) => stop.siteNo) ?? []
+  const stopSiteNos = route?.stops.map((stop) => stop.siteNo) ?? []
+  // The depot of the order is where it is loaded: another pickup site replaces the route's first stop.
+  const siteNos = order.pickup?.siteNo
+    ? [order.pickup.siteNo, ...stopSiteNos.slice(1)]
+    : stopSiteNos
   const regions = siteNos
     .map((siteNo) => db.sites.find(siteNo)?.region ?? '')
     .filter((region) => region !== '')

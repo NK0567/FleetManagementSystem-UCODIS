@@ -460,7 +460,7 @@ onMounted(() => {
                 {{
                   line.agent === me
                     ? t('planning.confirmations.queue.mine')
-                    : t('planning.confirmations.queue.takenBy', { agent: line.agent })
+                    : t('planning.confirmations.queue.takenBy', { agent: line.agentName ?? line.agent })
                 }}
               </p>
             </td>
@@ -469,7 +469,7 @@ onMounted(() => {
                 v-if="canExecute && isOpen(line) && takenByOther(line)"
                 class="text-right text-xs text-muted-foreground"
               >
-                {{ t('planning.confirmations.queue.takenBy', { agent: line.agent }) }}
+                {{ t('planning.confirmations.queue.takenBy', { agent: line.agentName ?? line.agent }) }}
               </p>
               <div
                 v-else-if="canExecute && isOpen(line)"

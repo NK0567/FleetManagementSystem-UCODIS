@@ -37,6 +37,10 @@ export const PLANNING_MESSAGES = {
     fr: 'Le véhicule {plate} ne porte pas de marchandise : ajoutez sa remorque.',
     en: 'Vehicle {plate} carries no goods: add its trailer.'
   },
+  prepVehicleUnusable: {
+    fr: 'Le véhicule {plate} est immobilisé ou hors service : il ne peut pas partir.',
+    en: 'Vehicle {plate} is immobilized or out of service: it cannot go out.'
+  },
   prepVehicleNotMotorized: {
     fr: '{plate} ne roule pas seul : choisissez son tracteur, puis {plate} comme remorque.',
     en: '{plate} does not drive itself: choose its tractor, then {plate} as trailer.'
@@ -580,6 +584,18 @@ export const PLANNING_MESSAGES = {
   receptionNoRemainder: {
     fr: 'Cette livraison n’a pas de quantité restante à replanifier.',
     en: 'This delivery has no remaining quantity to replan.'
+  },
+  agreementNotNeeded: {
+    fr: 'Cette commande n’exige pas de livraison complète : aucun accord à tracer.',
+    en: 'This order does not require a complete delivery: no agreement to record.'
+  },
+  agreementSettled: {
+    fr: 'La ligne est déjà réglée : l’accord se trace avant la livraison.',
+    en: 'The line is already settled: the agreement is recorded before the delivery.'
+  },
+  agreementWho: {
+    fr: 'Indiquez qui, chez le destinataire, a donné son accord.',
+    en: 'Say who, at the recipient, gave the agreement.'
   },
   receptionRemainderTaken: {
     fr: 'Ce reliquat est déjà replanifié.',

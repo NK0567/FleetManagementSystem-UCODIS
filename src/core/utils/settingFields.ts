@@ -1,6 +1,8 @@
 /**
  * A setting edited on a settings page: a number within bounds, an optional number, a time, a
  * short text, a switch or a choice among fixed values.
+ * A text field whose value is a list of codes separated by commas may name `codeLabelPrefix`: the
+ * page then reads each code as a label under the input.
  * `unit` is a translation key suffix, read under the page's own prefix; `optionsKey` names the
  * option set that labels the values of a choice.
  */
@@ -8,7 +10,7 @@ export type SettingField<Unit extends string = string> =
   | { key: string; kind: 'number'; unit: Unit; min: number; max: number }
   | { key: string; kind: 'optionalNumber'; unit: Unit; min: number; max: number }
   | { key: string; kind: 'time' }
-  | { key: string; kind: 'text'; maxLength: number }
+  | { key: string; kind: 'text'; maxLength: number; codeLabelPrefix?: string }
   | { key: string; kind: 'boolean' }
   | { key: string; kind: 'choice'; optionsKey: string; values: readonly string[] }
 

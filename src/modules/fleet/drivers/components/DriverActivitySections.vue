@@ -207,7 +207,16 @@ const refillColumns = computed<SubListColumn[]>(() => [
               {{ training.topic }}
             </RouterLink>
             · {{ label('trainingStatus', training.status) }}
-            <template v-if="training.plannedOn"> · {{ formatDate(training.plannedOn) }}</template>
+            <template v-if="training.attendedOn">
+              ·
+              {{
+                t('fleet.drivers.activity.attendedOn', { date: formatDate(training.attendedOn) })
+              }}
+            </template>
+            <template v-else-if="training.plannedOn">
+              ·
+              {{ t('fleet.drivers.activity.plannedOn', { date: formatDate(training.plannedOn) }) }}
+            </template>
           </li>
         </ul>
       </div>

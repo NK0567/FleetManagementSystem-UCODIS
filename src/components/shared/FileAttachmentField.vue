@@ -25,9 +25,13 @@ const input = ref<HTMLInputElement | null>(null)
 const uploading = ref(false)
 const error = ref<string | null>(null)
 
-const sizeLabel = computed(() =>
-  props.file ? `${formatNumber(props.file.size / 1024, 0)} Ko` : ''
-)
+/* A file under one kilobyte is told in bytes: "0 Ko" would read as an empty file. */
+const sizeLabel = computed(() => {
+  if (!props.file) return ''
+  return props.file.size < 1024
+    ? t('common.file.sizeBytes', { size: props.file.size })
+    : `${formatNumber(props.file.size / 1024, 0)} Ko`
+})
 
 async function onPick(event: Event) {
   const picked = (event.target as HTMLInputElement).files?.[0]

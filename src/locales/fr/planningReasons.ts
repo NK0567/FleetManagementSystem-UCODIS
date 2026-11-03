@@ -27,5 +27,6 @@ export default {
     'Le moment où le motif est proposé : annulation, rejet de commande, refus à la livraison, etc.',
   'planning.reasons.form.active': 'Actif',
   'planning.reasons.dialog.reason': 'Motif',
-  'planning.reasons.dialog.comment': 'Commentaire'
+  'planning.reasons.dialog.comment': 'Commentaire',
+  'planning.reasons.dialog.reasonNeeded': 'Choisissez un motif.'
 }

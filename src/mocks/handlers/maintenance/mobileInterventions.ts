@@ -20,6 +20,7 @@ import { sessionUser } from '../../http/types'
 import { MAINTENANCE_MESSAGES } from './messages'
 import { maintenanceSettings } from './settings'
 import { techniciansApi } from './technicians'
+import { livePositions } from '../fleet/livePositions'
 import { createWorkOrder } from './workOrders'
 
 /** Shortest observation accepted when a mission could not solve the problem. */
@@ -88,6 +89,8 @@ export function registerMobileInterventionsHandlers(router: MockRouter, db: Mock
         .find((row) => row.vehicleNo === vehicle.no && !row.closedAt)
       if (busy) throw conflict(MAINTENANCE_MESSAGES.interventionInProgress, { no: busy.no })
       const location = readString(input, 'location', { required: true })
+      // The GPS unit of the vehicle gives its position when the team is sent; none without a unit.
+      const fix = livePositions(db).find((position) => position.vehicleNo === vehicle.no)
       const departedAt = readDateTime(input, 'departedAt') ?? nowIsoDateTime()
       if (departedAt > nowIsoDateTime()) throw unprocessable(MAINTENANCE_MESSAGES.dateInFuture)
       const crewNos = [...new Set(readStringList(input, 'crewNos'))]
@@ -106,6 +109,14 @@ export function registerMobileInterventionsHandlers(router: MockRouter, db: Mock
         missionTypeNo,
         vehicleNo: vehicle.no,
         location,
+        vehiclePosition: fix
+          ? {
+              latitude: fix.latitude,
+              longitude: fix.longitude,
+              reportedAt: fix.reportedAt,
+              placeName: fix.placeName
+            }
+          : null,
         departedAt,
         crewNos,
         arrivedAt: null,

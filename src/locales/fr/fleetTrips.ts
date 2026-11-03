@@ -90,5 +90,8 @@ export default {
   'fleet.trips.col.missedStopCount': 'Sites manqués',
   'fleet.trips.filter.hasMissedStops': 'Sites manqués',
   'fleet.trips.missedStopsSummary': 'Sites manqués : {stops} · trajets concernés : {trips}',
-  'fleet.trips.noResultsCreate': 'Aucun trajet. Créez-en un avec Nouveau.'
+  'fleet.trips.noResultsCreate': 'Aucun trajet. Créez-en un avec Nouveau.',
+  'fleet.trips.stops.entered': 'entrée en zone {time}',
+  'fleet.trips.stops.exited': 'sortie de zone {time}',
+  'fleet.trips.stops.inside': 'encore en zone'
 }

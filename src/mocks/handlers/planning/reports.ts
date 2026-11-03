@@ -105,13 +105,28 @@ function scopedOrders(
     .map((row) => ({ row, api: views.get(row.no)! }))
 }
 
-function filterChoices(db: MockDatabase) {
+function filterChoices(db: MockDatabase, userCode: string) {
   const sites = db.sites.all()
+  // The user sees only the depots and regions he is attached to (TRS07-US02 CA02): the screen says so.
+  const attached = db.perimeters.find(userCode)
+  const depotNos = attached?.depotNos ?? []
+  const attachedRegions = attached?.regions ?? []
+  const perimeter =
+    depotNos.length || attachedRegions.length
+      ? {
+          depots: depotNos.map((no) => db.sites.find(no)?.name ?? no),
+          regions: attachedRegions
+        }
+      : null
   return {
+    perimeter,
     depots: sites
       .filter((site) => site.siteTypeNo === 'DEPOT')
+      .filter((site) => !depotNos.length || depotNos.includes(site.no))
       .map((site) => ({ no: site.no, name: site.name })),
-    regions: [...new Set(sites.map((site) => site.region).filter(Boolean))].sort(),
+    regions: [...new Set(sites.map((site) => site.region).filter(Boolean))]
+      .filter((region) => !attachedRegions.length || attachedRegions.includes(region))
+      .sort(),
     orderers: db.customers
       .all()
       .filter((customer) => customer.isOrderer)
@@ -611,7 +626,7 @@ export function planningDashboard(
     .slice(0, DASHBOARD_CARRIERS)
   return {
     filters,
-    choices: filterChoices(db),
+    choices: filterChoices(db, userCode),
     orders: orders.length,
     byStatus,
     late,
@@ -639,7 +654,7 @@ export function transportReport(db: MockDatabase, userCode: string, filters: Rep
   const orders = scopedOrders(db, userCode, filters)
   return {
     filters,
-    choices: filterChoices(db),
+    choices: filterChoices(db, userCode),
     orders: orders.length,
     punctuality: punctualityOf(db, orders),
     costs: costsOf(db, orders),

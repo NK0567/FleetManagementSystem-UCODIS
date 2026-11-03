@@ -90,5 +90,7 @@ export default {
   'fleet.drivers.score.severity.critical': 'critique',
   'fleet.drivers.score.severity.major': 'majeure',
   'fleet.drivers.score.severity.minor': 'mineure',
-  'fleet.drivers.section.drivingTime': 'Temps de conduite'
+  'fleet.drivers.section.drivingTime': 'Temps de conduite',
+  'fleet.drivers.activity.attendedOn': 'suivie le {date}',
+  'fleet.drivers.activity.plannedOn': 'prévue le {date}'
 }

@@ -62,7 +62,7 @@ describe('closing', () => {
     await driverDeclare('TR-2026-0003', 1, { receivedQuantity: 150 })
     const blocked = await post(`${order}/close`)
     expect(blocked.status).toBe(422)
-    expect(blocked.data.message).toContain('reception')
+    expect(blocked.data.message).toContain('Reception not attested')
     await post(`${order}/lines/1/receive-confirm`, { signer: 'Rabe' }, 'CLI001')
     expect(
       (await post(`${order}/documents`, { kind: 'loading_list', fileNo: 'FIL-000000' }, 'LIV001'))
@@ -110,7 +110,7 @@ describe('closing', () => {
     await post('/planning/transport-orders/TR-2026-0004/lines/1/declare', { receivedQuantity: 50 })
     const blocked = await post('/planning/transport-orders/TR-2026-0004/close')
     expect(blocked.status).toBe(422)
-    expect(blocked.data.message).toContain('gap')
+    expect(blocked.data.message).toContain('Gap not qualified')
     expect(
       (
         await post(

@@ -95,7 +95,8 @@ describe('planning reports', () => {
     const boeny = await board({ region: 'Boeny' })
     expect(boeny.orders).toBe(1)
     expect(boeny.byStatus.planned).toBe(1)
-    expect((await board({ depotNo: 'DEP-ALR' })).orders).toBe(0)
+    // The fuel order is loaded at the Alarobia depot, whatever its route starts from.
+    expect((await board({ depotNo: 'DEP-ALR' })).orders).toBe(1)
     expect((await board({ depotNo: 'DEP-TNJ' })).orders).toBe(5)
     const orderer = await board({ ordererNo: 'CLI-010' })
     expect(orderer.pendingRequests.length).toBeGreaterThan(0)

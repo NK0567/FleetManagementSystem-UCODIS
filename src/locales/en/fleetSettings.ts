@@ -210,5 +210,6 @@ export default {
   'fleet.settings.indicatorDefinition.fuelConsumption': 'Litres used per 100 km run, from one full tank to the next.',
   'fleet.settings.indicatorDefinition.documentCompliance': 'Share of the vehicles and drivers whose mandatory documents are all valid.',
   'fleet.settings.indicatorDefinition.driverScore': 'Average of the driving scores of the drivers over the score period.',
-  'fleet.settings.importMappings.saveFirst': 'Save the current changes first.'
+  'fleet.settings.importMappings.saveFirst': 'Save the current changes first.',
+  'fleet.settings.warning.outOfRange': 'Warning: this value is outside the usual bounds (between {min} and {max} {unit}). It will be saved as entered.'
 }

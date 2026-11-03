@@ -43,7 +43,8 @@ const { draft, isRequired, expose } = useEntityForm({
     active: true,
     validity: 'limited' as DocumentValidity,
     durationMonths: null as number | null,
-    noticeDays: null as number | null
+    noticeDays: null as number | null,
+    country: ''
   }),
   createOnly: ['no', 'target'],
   required: ['no', 'name', 'target', 'validity'],
@@ -134,6 +135,12 @@ defineExpose(expose)
           <ToggleSwitch v-model="draft.mandatory" :disabled="disabled" />
           <p class="text-xs text-muted-foreground mt-1">
             {{ t('fleet.documentTypes.form.mandatoryHint') }}
+          </p>
+        </BaseFormField>
+        <BaseFormField :label="t('fleet.documentTypes.form.country')">
+          <FormInput v-model="draft.country" :maxlength="60" :disabled="disabled" />
+          <p class="text-xs text-muted-foreground mt-1">
+            {{ t('fleet.documentTypes.form.countryHint') }}
           </p>
         </BaseFormField>
         <BaseFormField :label="t('fleet.documentTypes.form.active')">

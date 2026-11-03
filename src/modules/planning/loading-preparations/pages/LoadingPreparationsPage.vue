@@ -129,7 +129,21 @@ function toggleRequest(no: string) {
   const nos = header.value.requestNos
   header.value.requestNos = nos.includes(no) ? nos.filter((item) => item !== no) : [...nos, no]
 }
-const goodsVehicles = computed(() => (options.value?.vehicles ?? []).filter((v) => v.carriesGoods))
+const tractors = computed(() => (options.value?.vehicles ?? []).filter((v) => v.motorized))
+const trailers = computed(() =>
+  (options.value?.vehicles ?? []).filter((v) => v.carriesGoods && !v.motorized)
+)
+/* Choosing a vehicle brings the trailer coupled to it and the driver assigned to it. */
+function chooseVehicle(vehicle: {
+  vehicleNo: string
+  trailerNo: string | null
+  driverNo: string | null
+}) {
+  const chosen = options.value?.vehicles.find((item) => item.no === vehicle.vehicleNo)
+  if (!chosen) return
+  vehicle.trailerNo = chosen.coupledTrailerNo
+  vehicle.driverNo = chosen.assignedDriverNo
+}
 const addVehicle = () =>
   header.value?.vehicles.push({
     vehicleNo: '',
@@ -331,9 +345,10 @@ onMounted(loadList)
                 :class="inputClass"
                 :disabled="!editable"
                 :aria-label="t('planning.preparation.vehicle')"
+                @change="chooseVehicle(vehicle)"
               >
                 <option value="" disabled>{{ t('planning.preparation.vehicle') }}</option>
-                <option v-for="item in options?.vehicles ?? []" :key="item.no" :value="item.no">
+                <option v-for="item in tractors" :key="item.no" :value="item.no">
                   {{ item.plate }} · {{ item.typeName }}
                 </option>
               </select>
@@ -344,7 +359,7 @@ onMounted(loadList)
                 :aria-label="t('planning.preparation.trailer')"
               >
                 <option :value="null">{{ t('planning.preparation.noTrailer') }}</option>
-                <option v-for="item in goodsVehicles" :key="item.no" :value="item.no">
+                <option v-for="item in trailers" :key="item.no" :value="item.no">
                   {{ item.plate }} · {{ item.typeName }}
                 </option>
               </select>

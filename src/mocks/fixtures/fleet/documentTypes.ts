@@ -16,6 +16,8 @@ export interface DocumentTypeRow extends MockRow {
   validity: DocumentValidity
   durationMonths: number | null
   noticeDays: number | null
+  /** Country whose regulation requires the document; empty when it holds in every country. */
+  country?: string
 }
 
 const SEED: Omit<DocumentTypeRow, keyof typeof seedAudit>[] = [

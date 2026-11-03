@@ -87,6 +87,7 @@ export function driverActivity(
       no: training.no,
       topic: training.topic,
       plannedOn: training.plannedOn,
+      attendedOn: training.attendedOn,
       status: training.status
     }))
   }

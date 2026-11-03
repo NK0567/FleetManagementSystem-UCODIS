@@ -177,5 +177,7 @@ export default {
   'planning.pickup.systemConfirm': 'Confirmation by the warehouse system (simulated)',
   'planning.loadingList.reference': 'Order ref.: {reference}',
   'planning.loading.tab.loading': 'Orders to load',
-  'planning.preparation.emptyCreate': 'No preparation. Create one with New preparation.'
+  'planning.preparation.emptyCreate': 'No preparation. Create one with New preparation.',
+  'planning.loadingList.content': 'Content: {content}',
+  'planning.pickup.ops.incomplete': 'Fill in the required fields of the operation.'
 }

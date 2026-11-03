@@ -19,6 +19,8 @@ export interface DocumentTypeApi {
   validity: DocumentValidity
   durationMonths: number | null
   noticeDays: number | null
+  /** Country whose regulation requires the document; empty for every country. */
+  country: string
   documentCount: number
   createdAt: string
   createdBy: string

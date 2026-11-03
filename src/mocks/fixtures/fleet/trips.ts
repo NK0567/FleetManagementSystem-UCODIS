@@ -181,6 +181,17 @@ const SEED: TripSeed[] = [
     status: 'planned'
   },
   {
+    // The tanker of the fuel order TR-2026-0000; numbered below the others so that the trips
+    // planned on screen keep the numbers of the story.
+    no: 'TRP-00000',
+    route: 'TNR-ATS',
+    vehicleNo: 'VEH-002',
+    trailerNo: 'VEH-024',
+    driverNo: 'UCT-011',
+    plannedDeparture: '2026-09-05T05:00:00',
+    status: 'planned'
+  },
+  {
     no: 'TRP-00009',
     route: 'TNR-ATS',
     vehicleNo: 'VEH-002',

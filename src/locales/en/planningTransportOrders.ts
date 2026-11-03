@@ -78,7 +78,7 @@ export default {
   'planning.transportOrders.plan.pick': 'Choose',
 
   'planning.transportOrders.linesDialog.title': 'Order lines',
-  'planning.transportOrders.linesDialog.requests': 'Requests to take',
+  'planning.transportOrders.linesDialog.requests': 'Orders to deliver',
   'planning.transportOrders.linesDialog.manual': 'Lines without a request',
   'planning.transportOrders.linesDialog.add': 'Add a line',
   'planning.transportOrders.linesDialog.remove': 'Remove',
@@ -554,5 +554,26 @@ export default {
   'planning.transportOrders.waiting.expiredOrders':
     'No expired transport order on this page | 1 expired transport order on this page | {n} expired transport orders on this page',
   'planning.transportOrders.noResultsCreate': 'No transport order. Create one with New.',
-  'planning.transportOrders.action.addLines': 'Add lines'
+  'planning.transportOrders.action.addLines': 'Add lines',
+  'planning.transportOrders.closing.block.postponed': 'A postponed point is still to retry or cancel',
+  'planning.transportOrders.position.title': 'Vehicle position (fleet tracking)',
+  'planning.transportOrders.position.reportedAt': 'reported {at}',
+  'planning.transportOrders.position.next': 'Next stop: {site}, estimated {at}',
+  'planning.calendar.all': 'Vehicles and drivers',
+  'planning.calendar.resource': 'Vehicle or driver',
+  'planning.calendar.vehicleTag': 'Vehicle',
+  'planning.calendar.driverTag': 'Driver',
+  'planning.transportOrders.plan.hint.carrier': 'Choose a carrier.',
+  'planning.transportOrders.plan.hint.carrierVehicle': 'Choose a vehicle of the carrier.',
+  'planning.transportOrders.plan.hint.trip': 'Choose a trip that is already planned.',
+  'planning.transportOrders.plan.hint.vehicle': 'Choose a vehicle.',
+  'planning.transportOrders.plan.hint.driver': 'Choose a driver.',
+  'planning.transportOrders.createDialog.pickNeeded': 'Tick at least one order to deliver.',
+  'planning.transportOrders.linesDialog.incomplete': "For each line keyed in, give the delivery point, the product, the quantity, the weight and, if the company requires it, the orderer's reference.",
+  'planning.transportOrders.lines.agreementHint': 'The recipient agrees to a partial delivery of {product} for {point}, the order requiring a complete delivery. Record the agreement before the delivery.',
+  'planning.transportOrders.lines.agreementBy': 'Person who gave the agreement',
+  'planning.transportOrders.lines.agreementNote': 'Detail (optional)',
+  'planning.transportOrders.lines.agreementTraced': "Recipient's agreement to a partial delivery: {by}, on {date}",
+  'planning.transportOrders.action.agreement': 'Record the agreement for a partial delivery',
+  'planning.transportOrders.history.partial_agreement': 'Partial delivery agreement'
 }

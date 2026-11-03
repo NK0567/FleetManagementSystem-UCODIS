@@ -5,11 +5,12 @@ import { remainderQuantity } from '@/modules/planning/reception/domain/reception
 import { formatNumber } from '@/utils/format'
 import type { TransportOrderLineApi } from '../types/transportOrder.types'
 
-export type OrderLineAction = 'declare' | 'handBack' | 'remainder'
+export type OrderLineAction = 'declare' | 'handBack' | 'remainder' | 'agreement'
 export type OrderLineChoice =
   | { action: 'declare'; receivedQuantity: number; justification: string }
   | { action: 'handBack' }
   | { action: 'remainder'; date: string }
+  | { action: 'agreement'; by: string; note: string }
 
 const props = defineProps<{
   action: OrderLineAction | null
@@ -22,6 +23,8 @@ const { t } = useI18n()
 const receivedQuantity = ref<number | null>(null)
 const justification = ref('')
 const date = ref('')
+const agreedBy = ref('')
+const agreementNote = ref('')
 
 watch(
   () => [props.action, props.line?.lineNo],
@@ -29,6 +32,8 @@ watch(
     receivedQuantity.value = null
     justification.value = ''
     date.value = ''
+    agreedBy.value = ''
+    agreementNote.value = ''
   }
 )
 
@@ -48,6 +53,7 @@ const left = computed(() => (props.line ? remainderQuantity(props.line) : null))
 const confirmDisabled = computed(() => {
   if (props.action === 'declare') return receivedQuantity.value === null
   if (props.action === 'remainder') return !date.value
+  if (props.action === 'agreement') return !agreedBy.value.trim()
   return false
 })
 
@@ -60,6 +66,12 @@ function confirm() {
     })
   } else if (props.action === 'remainder') {
     emit('confirm', { action: 'remainder', date: date.value })
+  } else if (props.action === 'agreement') {
+    emit('confirm', {
+      action: 'agreement',
+      by: agreedBy.value.trim(),
+      note: agreementNote.value.trim()
+    })
   } else if (props.action === 'handBack') {
     emit('confirm', { action: 'handBack' })
   }
@@ -98,6 +110,17 @@ function confirm() {
       <p v-else-if="action === 'handBack'" class="text-sm text-muted-foreground">
         {{ t('planning.transportOrders.lines.handBackHint', facts) }}
       </p>
+      <template v-else-if="action === 'agreement'">
+        <p class="text-sm text-muted-foreground">
+          {{ t('planning.transportOrders.lines.agreementHint', facts) }}
+        </p>
+        <BaseFormField :label="t('planning.transportOrders.lines.agreementBy')" required>
+          <FormInput v-model="agreedBy" :maxlength="80" />
+        </BaseFormField>
+        <BaseFormField :label="t('planning.transportOrders.lines.agreementNote')">
+          <FormTextarea v-model="agreementNote" :rows="2" :maxlength="300" />
+        </BaseFormField>
+      </template>
       <template v-else-if="action === 'remainder'">
         <p class="text-sm text-muted-foreground">
           {{

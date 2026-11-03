@@ -45,6 +45,18 @@ const internal = computed(() => carrierNo.value === INTERNAL)
 const scheduleReady = computed(
   () => !!props.order?.plannedDeparture && !!props.order?.plannedArrival
 )
+/* What is still missing, said on the disabled button. */
+const confirmHint = computed(() => {
+  if (!internal.value) {
+    return carrierNo.value
+      ? t('planning.transportOrders.plan.hint.carrierVehicle')
+      : t('planning.transportOrders.plan.hint.carrier')
+  }
+  if (useExistingTrip.value) return t('planning.transportOrders.plan.hint.trip')
+  if (!scheduleReady.value) return t('planning.transportOrders.plan.needsSchedule')
+  if (!vehicleNo.value) return t('planning.transportOrders.plan.hint.vehicle')
+  return t('planning.transportOrders.plan.hint.driver')
+})
 /* A vehicle whose document is expired is not offered at all (TRS01-US07). */
 const expired = computed(() => new Set(notes.value.expiredVehicles.map((item) => item.vehicleNo)))
 const vehicles = computed(() =>
@@ -255,6 +267,7 @@ function confirm() {
     :title="t('planning.transportOrders.plan.title')"
     :confirm-label="t('planning.transportOrders.action.plan')"
     :confirm-disabled="confirmDisabled"
+    :confirm-disabled-hint="confirmHint"
     :loading="loading"
     panel-class="max-w-lg"
     @confirm="confirm"

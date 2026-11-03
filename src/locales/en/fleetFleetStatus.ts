@@ -42,5 +42,6 @@ export default {
   'fleet.fleetStatus.send.done': 'Fleet status sent to {recipients}.',
   'fleet.fleetStatus.send.last': 'Last sent on {date} (status of {day}) to {recipients}.',
   'fleet.fleetStatus.send.history': 'Latest sendings',
-  'fleet.fleetStatus.send.line': '{date} · status of {day} · lines: {count} · {recipients} · by {user}'
+  'fleet.fleetStatus.send.line': '{date} · status of {day} · lines: {count} · {recipients} · by {user}',
+  'fleet.fleetStatus.send.required': 'Enter at least one e-mail address, separated by commas.'
 }

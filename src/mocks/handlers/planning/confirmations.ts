@@ -22,6 +22,7 @@ import { readDate } from '../../http/input'
 import { ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
 import { sessionUser, type MockRequest } from '../../http/types'
+import { MOCK_ACCOUNTS } from '../../fixtures/auth/users'
 import { PLANNING_MESSAGES } from './messages'
 import { readReason } from './planningReasons'
 import { planningSettings } from './settings'
@@ -51,6 +52,7 @@ export interface ConfirmationLineApi {
   recipientContact: string
   preferredSlot: DeliverySlot
   agent: string | null
+  agentName: string | null
   takenAt: string | null
   /** The recipient answered himself through the link of his SMS, WhatsApp or e-mail. */
   byLink: boolean
@@ -121,6 +123,12 @@ function assertOpen(db: MockDatabase, order: TransportOrderRow): void {
   }
 }
 
+/** The name of the agent behind an account code, so that screens never show the bare code. */
+function agentNameOf(code: string | null | undefined): string | null {
+  if (!code) return null
+  return MOCK_ACCOUNTS.find((account) => account.code === code)?.name ?? code
+}
+
 export function confirmationsApi(db: MockDatabase): ConfirmationLineApi[] {
   const points = new Map(db.deliveryPoints.all().map((point) => [point.no, point]))
   const products = new Map(db.products.all().map((product) => [product.no, product]))
@@ -161,6 +169,7 @@ export function confirmationsApi(db: MockDatabase): ConfirmationLineApi[] {
         ),
         preferredSlot: source?.preferredSlot ?? 'any',
         agent: line.confirmationAgent ?? null,
+        agentName: agentNameOf(line.confirmationAgent),
         takenAt: line.confirmationTakenAt ?? null,
         byLink: line.answerOrigin === 'link',
         activity: activityOf(

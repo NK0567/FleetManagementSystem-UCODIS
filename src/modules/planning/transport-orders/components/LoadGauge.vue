@@ -21,9 +21,10 @@ const props = defineProps<{
 const { t } = useI18n()
 
 const TONES: Record<FillTone, { bar: string; text: string }> = {
-  ok: { bar: 'bg-success', text: 'text-success' },
-  warning: { bar: 'bg-warning', text: 'text-warning' },
-  over: { bar: 'bg-destructive', text: 'text-destructive' }
+  // Green, orange from 90 %, red beyond 100 %: plain hues, as the criterion says (TRS01-US08).
+  ok: { bar: 'bg-green-600', text: 'text-green-700' },
+  warning: { bar: 'bg-orange-500', text: 'text-orange-700' },
+  over: { bar: 'bg-red-600', text: 'text-red-700' }
 }
 
 const gauges = computed(() => [

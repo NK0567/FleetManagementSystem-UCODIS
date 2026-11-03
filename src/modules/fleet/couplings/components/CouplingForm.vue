@@ -60,7 +60,7 @@ defineExpose(expose)
         >
           <ReferenceLookup
             v-model="draft.tractorNo"
-            reference-key="tractors"
+            :reference-key="isNew ? 'uncoupledTractors' : 'tractors'"
             :modal-title="t('fleet.couplings.form.tractorNo')"
             detail-path="/fleet/vehicles"
             :disabled="disabled"
@@ -74,7 +74,7 @@ defineExpose(expose)
         >
           <ReferenceLookup
             v-model="draft.trailerNo"
-            reference-key="trailers"
+            :reference-key="isNew ? 'uncoupledTrailers' : 'trailers'"
             :modal-title="t('fleet.couplings.form.trailerNo')"
             detail-path="/fleet/vehicles"
             :disabled="disabled"

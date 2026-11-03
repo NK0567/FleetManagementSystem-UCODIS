@@ -108,20 +108,19 @@ async function save() {
         class="border border-border rounded p-3 space-y-2"
       >
         <div class="flex flex-wrap items-end gap-3">
-          <BaseFormField :label="t('fleet.settings.scoreFamilies.code')" required>
-            <FormInput v-model="family.code" :maxlength="20" :disabled="!canEdit" class="w-36" />
+          <BaseFormField :label="t('fleet.settings.scoreFamilies.code')" required class="w-40">
+            <FormInput v-model="family.code" :maxlength="20" :disabled="!canEdit" />
           </BaseFormField>
-          <BaseFormField :label="t('fleet.settings.scoreFamilies.label')" required>
-            <FormInput v-model="family.label" :maxlength="60" :disabled="!canEdit" class="w-64" />
+          <BaseFormField :label="t('fleet.settings.scoreFamilies.label')" required class="w-72">
+            <FormInput v-model="family.label" :maxlength="60" :disabled="!canEdit" />
           </BaseFormField>
-          <BaseFormField :label="t('fleet.settings.scoreFamilies.weight')" required>
+          <BaseFormField :label="t('fleet.settings.scoreFamilies.weight')" required class="w-28">
             <FormInput
               v-model="family.weight"
               type="number"
               :min="0"
               :max="100"
               :disabled="!canEdit"
-              class="w-24"
             />
           </BaseFormField>
           <p class="text-xs text-muted-foreground pb-2">

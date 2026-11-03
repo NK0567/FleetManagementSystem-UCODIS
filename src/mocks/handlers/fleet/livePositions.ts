@@ -24,6 +24,7 @@ import type { MockRouter } from '../../http/router'
 import type { MockRequest } from '../../http/types'
 import { alertsApi } from './alerts'
 import { detectRouteDeviations } from './deviationDetection'
+import { playSimulatedReadings } from './simulatedReadings'
 import { activeLinks, employeeNames } from './links'
 import { routeDeviationsApi } from './routeDeviations'
 import { fleetSettings } from './settings'
@@ -313,7 +314,11 @@ export function trackHistory(
 
 export function registerLivePositionsHandlers(router: MockRouter, db: MockDatabase): void {
   router.get('/fleet/live/positions', { feature: 'LIVEMAP', action: 'read' }, (request) => {
-    if (simulation.active) simulation.offsetMin += SIMULATION_STEP_MIN
+    if (simulation.active) {
+      simulation.offsetMin += SIMULATION_STEP_MIN
+      // What the units of the vehicles on the road would report along the simulated time.
+      playSimulatedReadings(db, simulatedNow())
+    }
     // The control room watches the trips: what they show against their course is recorded.
     detectRouteDeviations(db, simulatedNow())
     return ok(livePositions(db, request))

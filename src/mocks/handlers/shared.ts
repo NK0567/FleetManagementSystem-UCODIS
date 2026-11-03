@@ -1,7 +1,7 @@
 import type { ReferenceData } from '@/types/reference.types'
 import type { MockDatabase } from '../db/database'
 import { optionsFor } from '../fixtures/options'
-import { toMockLanguage } from '../i18n'
+import { toMockLanguage, type MockLanguage } from '../i18n'
 import { ok } from '../http/responses'
 import type { MockRouter } from '../http/router'
 import { fleetReferenceData } from './fleet/references'
@@ -10,10 +10,10 @@ import { maintenanceReferenceData } from './maintenance/references'
 import { planningReferenceData } from './planning/references'
 
 /** Small lists used by selects and filters; each module adds its own entries. */
-function referenceData(db: MockDatabase): ReferenceData {
+function referenceData(db: MockDatabase, language: MockLanguage): ReferenceData {
   return {
     ...hrReferenceData(db),
-    ...fleetReferenceData(db),
+    ...fleetReferenceData(db, language),
     ...maintenanceReferenceData(db),
     ...planningReferenceData(db)
   }
@@ -24,7 +24,9 @@ export function registerSharedHandlers(router: MockRouter, db: MockDatabase): vo
     ok(optionsFor(toMockLanguage(request.query.language ?? request.language)))
   )
 
-  router.get('/reference/all', {}, () => ok(referenceData(db)))
+  router.get('/reference/all', {}, (request) =>
+    ok(referenceData(db, toMockLanguage(request.language)))
+  )
 
   router.post('/__mock/reset', {}, () => {
     db.reset()

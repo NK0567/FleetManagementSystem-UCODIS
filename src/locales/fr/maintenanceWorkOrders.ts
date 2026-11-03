@@ -141,5 +141,7 @@ export default {
   'maintenance.workOrders.progress.nomenclatureConfirmed':
     'Correspondance avec la nomenclature validée par {by} le {date}.',
   'maintenance.workOrders.listView.external': 'Chez un atelier externe',
-  'maintenance.workOrders.noResultsCreate': 'Aucun ordre de travail. Créez-en un avec Nouveau.'
+  'maintenance.workOrders.noResultsCreate': 'Aucun ordre de travail. Créez-en un avec Nouveau.',
+  'maintenance.workOrders.progress.partsWaitHours': "Attente des pièces commandées : {hours} h, comptées dans l'immobilisation du véhicule.",
+  'maintenance.workOrders.progress.partsWaitNotStarted': "Attente des pièces : le comptage commence à la commande de la demande d'achat et court jusqu'à la réception, dans l'immobilisation du véhicule."
 }

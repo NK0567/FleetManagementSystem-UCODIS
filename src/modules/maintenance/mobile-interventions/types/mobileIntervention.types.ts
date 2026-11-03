@@ -1,10 +1,20 @@
 import type { MobileInterventionStatus, MobileKpis } from '../domain/mobileIntervention'
 
+/** Where the GPS unit of the vehicle last placed it when the mission was triggered. */
+export interface VehiclePosition {
+  latitude: number
+  longitude: number
+  reportedAt: string
+  placeName: string
+}
+
 export interface MobileInterventionApi {
   no: string
   missionTypeNo: string
   vehicleNo: string
   location: string
+  /** Null when the vehicle has no GPS unit in working order. */
+  vehiclePosition: VehiclePosition | null
   departedAt: string
   /** Technicians sent, by employee number. */
   crewNos: string[]

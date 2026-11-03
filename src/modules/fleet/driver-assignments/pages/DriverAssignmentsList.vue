@@ -37,6 +37,7 @@ const tableColumns = computed<TableColumn[]>(() => [
   { sortKey: 'no', label: t('fleet.driverAssignments.col.no'), minW: '110px', cell: 'link' },
   { sortKey: 'employeeName', label: t('fleet.driverAssignments.col.employeeNo'), minW: '200px' },
   { sortKey: 'vehiclePlate', label: t('fleet.driverAssignments.col.vehicleNo'), minW: '140px' },
+  { sortKey: 'homeSiteName', label: t('fleet.driverAssignments.col.homeSiteNo'), minW: '170px' },
   {
     sortKey: 'startDate',
     label: t('fleet.driverAssignments.col.startDate'),
@@ -101,7 +102,14 @@ const filterDefs: FilterFieldDef[] = [
   }
 ]
 
-const detailKeys = ['vehiclePlate', 'coupledTrailerPlate', 'startDate', 'endDate', 'durationDays']
+const detailKeys = [
+  'vehiclePlate',
+  'homeSiteName',
+  'coupledTrailerPlate',
+  'startDate',
+  'endDate',
+  'durationDays'
+]
 const detailColumns = computed(() =>
   detailKeys
     .map((key) => tableColumns.value.find((column) => column.sortKey === key))

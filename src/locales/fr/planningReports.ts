@@ -163,5 +163,6 @@ export default {
   'planning.dashboard.col.orderer': 'Ordonnateur',
   'planning.dashboard.col.recipient': 'Destinataire',
   'planning.dashboard.col.product': 'Produit',
-  'planning.dashboard.col.desired': 'Date souhaitée'
+  'planning.dashboard.col.desired': 'Date souhaitée',
+  'planning.reports.perimeterNote': 'Vous voyez uniquement les ordres de transport de votre périmètre ({perimeter}). Les chiffres d’un compte sans rattachement sont plus larges.'
 }

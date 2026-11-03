@@ -304,6 +304,42 @@ export function registerReceptionHandlers(router: MockRouter, db: MockDatabase):
     }
   )
 
+  /* The recipient agrees to a partial delivery of an order that asked for a complete one; the
+   * agreement is traced before the delivery (TRS01-US17 CA05). */
+  router.post(
+    '/planning/transport-orders/:no/lines/:lineNo/partial-agreement',
+    { feature: 'TRANSPORTORDER', action: 'update' },
+    (request) => {
+      const { order, line } = findLine(db, request)
+      const source = line.deliveryRequestNo
+        ? db.deliveryRequests.find(line.deliveryRequestNo)
+        : null
+      if (!source?.fullDeliveryRequired) throw conflict(PLANNING_MESSAGES.agreementNotNeeded)
+      if (line.declaredAt || line.refusalAt) throw conflict(PLANNING_MESSAGES.agreementSettled)
+      const body = readBody(request)
+      const by = readString(body, 'by')
+      if (!by) throw unprocessable(PLANNING_MESSAGES.agreementWho)
+      replaceLine(
+        db,
+        order,
+        line.lineNo,
+        {
+          ...line,
+          partialAgreement: {
+            by,
+            note: readString(body, 'note'),
+            at: nowIsoDateTime(),
+            recordedBy: sessionUser(request).code
+          }
+        },
+        request,
+        'partial_agreement',
+        `${line.lineNo} : ${by}`
+      )
+      return ok({ recorded: true })
+    }
+  )
+
   router.post(
     '/planning/transport-orders/:no/lines/:lineNo/remainder',
     { feature: 'TRANSPORTORDER', action: 'update' },

@@ -178,5 +178,6 @@ export default {
   'planning.tracking.survey.pickScore': "Choisissez d'abord une note",
   'planning.tracking.needSigner': 'Indiquez le nom de la personne qui reçoit',
   'planning.tracking.needReason': 'Choisissez un motif',
-  'planning.tracking.needDate': 'Choisissez une date'
+  'planning.tracking.needDate': 'Choisissez une date',
+  'planning.tracking.unavailableNoDate': 'Merci, nous avons noté que vous n’êtes pas disponible à la date prévue. Notre équipe vous recontacte pour convenir d’une nouvelle date.'
 }

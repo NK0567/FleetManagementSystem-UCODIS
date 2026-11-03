@@ -217,7 +217,14 @@ export const PLANNING_SETTING_FIELDS: Record<PlanningSettingsSection, readonly F
     { key: 'strictCapacity', kind: 'boolean' },
     { key: 'strictCalendar', kind: 'boolean' }
   ],
-  closing: [{ key: 'requiredDocuments', kind: 'text', maxLength: 200 }]
+  closing: [
+    {
+      key: 'requiredDocuments',
+      kind: 'text',
+      maxLength: 200,
+      codeLabelPrefix: 'planning.transportOrders.closing.kinds.'
+    }
+  ]
 }
 
 export const DEFAULT_PLANNING_SETTINGS: PlanningSettings = {

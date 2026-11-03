@@ -15,6 +15,8 @@ withDefaults(
     loading?: boolean
     /** Keeps the confirm button off until the content of the dialog is valid. */
     confirmDisabled?: boolean
+    /** Why the confirm button is off, shown on hover; a general sentence when not given. */
+    confirmDisabledHint?: string
     panelClass?: string
   }>(),
   { panelClass: 'max-w-sm' }
@@ -70,6 +72,11 @@ const emit = defineEmits<{
           <button
             @click="emit('confirm')"
             :disabled="loading || confirmDisabled"
+            :title="
+              confirmDisabled && !loading
+                ? (confirmDisabledHint ?? t('common.confirmDisabledHint'))
+                : undefined
+            "
             :class="[
               'px-4 py-2 rounded hover:opacity-90 transition font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed',
               destructive ? 'bg-destructive text-white' : 'bg-primary text-primary-foreground'

@@ -54,5 +54,9 @@ export default {
   'maintenance.mobileInterventions.col.vehiclePlate': 'Véhicule',
   'maintenance.mobileInterventions.noResultsCreate':
     'Aucune intervention. Créez-en une avec Nouveau.',
-  'maintenance.mobileInterventions.hint.closeNeedsArrival': "Indiquez d'abord l'arrivée sur place."
+  'maintenance.mobileInterventions.hint.closeNeedsArrival': "Indiquez d'abord l'arrivée sur place.",
+  'maintenance.mobileInterventions.progress.position': 'Position du véhicule (GPS)',
+  'maintenance.mobileInterventions.progress.positionAt': 'relevée le {at}',
+  'maintenance.mobileInterventions.progress.positionNone': "Aucune position : le véhicule n'a pas de boîtier GPS en service.",
+  'maintenance.mobileInterventions.form.positionHint': "À l'enregistrement, la position GPS du véhicule est relevée et jointe à l'intervention."
 }

@@ -103,5 +103,8 @@ export default {
   'fleet.providers.import.hint': 'Type by its code or name. A provider already known or duplicated is refused.',
   'fleet.providers.import.created': 'No provider created. | One provider created. | {n} providers created.',
   'fleet.providerTypes.noResultsCreate': 'No provider type. Create one with New.',
-  'fleet.providers.noResultsCreate': 'No provider. Create one with New.'
+  'fleet.providers.noResultsCreate': 'No provider. Create one with New.',
+  'fleet.providers.carrierVehicles.maxLoadKg': 'Maximum load (kg)',
+  'fleet.providers.carrierVehicles.maxVolumeM3': 'Usable volume (m³)',
+  'fleet.providers.carrierVehicles.capacityL': 'Tank (L)'
 }

@@ -242,13 +242,37 @@ function nightWindowIssue(values: DrivingTimeSettings): SettingIssue | null {
   return null
 }
 
+/**
+ * The thresholds of driving and rest time follow the regulation of the company's country, which
+ * is not coded here: a value outside the usual bounds is warned about, never refused, as long as
+ * it is a positive number.
+ */
+function isSoftBound(section: FleetSettingsSection, issue: SettingFieldIssue, record: object) {
+  if (section !== 'drivingTime' || issue.code !== 'outOfRange') return false
+  const value = Number((record as Record<string, unknown>)[issue.field])
+  return Number.isFinite(value) && value > 0
+}
+
+/** Values outside the usual bounds that the section still accepts; the page warns about them. */
+export function settingsSectionWarnings<S extends FleetSettingsSection>(
+  section: S,
+  values: FleetSettings[S]
+): SettingFieldIssue[] {
+  const record = values as unknown as Record<string, unknown>
+  return settingFieldIssues(FLEET_SETTING_FIELDS[section], record).filter((issue) =>
+    isSoftBound(section, issue, record)
+  )
+}
+
 /** What prevents the values of a section from being saved; empty when they are valid. */
 export function settingsSectionIssues<S extends FleetSettingsSection>(
   section: S,
   values: FleetSettings[S]
 ): SettingIssue[] {
   const record = values as unknown as Record<string, unknown>
-  const issues: SettingIssue[] = settingFieldIssues(FLEET_SETTING_FIELDS[section], record)
+  const issues: SettingIssue[] = settingFieldIssues(FLEET_SETTING_FIELDS[section], record).filter(
+    (issue) => !isSoftBound(section, issue, record)
+  )
   if (section === 'drivingTime' && issues.length === 0) {
     const night = nightWindowIssue(values as DrivingTimeSettings)
     if (night) issues.push(night)

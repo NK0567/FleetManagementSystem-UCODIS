@@ -13,7 +13,10 @@ export const fuelCardTransactionApi = {
     httpClient.post<SingleResponse<ImportReport & { matched: number }>>(`${basePath}/import`, {
       rows
     }),
-  matchAll: () => httpClient.post<SingleResponse<{ matched: number }>>(`${basePath}/match-all`),
+  matchAll: () =>
+    httpClient.post<SingleResponse<{ matched: number; remaining: number }>>(
+      `${basePath}/match-all`
+    ),
   match: (no: string, refillNo: string) =>
     httpClient.post<Response>(`${resourcePath(basePath, no)}/match`, { refillNo }),
   detach: (no: string) => httpClient.post<Response>(`${resourcePath(basePath, no)}/detach`),

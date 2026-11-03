@@ -6,7 +6,7 @@ import type { MockDatabase } from '../../db/database'
 import { nextNo } from '../../db/numbering'
 import { readBody, registerCrudResource, routeParam, stampModified } from '../../http/crudResource'
 import { conflict, unprocessable } from '../../http/errors'
-import { requireReference } from '../../http/references'
+import { optionalReference, requireReference } from '../../http/references'
 import { ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
 import { assertUsable, readEndDate, readStartDate } from './couplings'
@@ -20,7 +20,10 @@ export function driverAssignmentsApi(db: MockDatabase): DriverAssignmentApi[] {
   const plates = vehiclePlates(db)
   const links = activeLinks(db)
   const today = todayIso()
+  const sites = new Map(db.sites.all().map((site) => [site.no, site.name]))
+  const homeSites = new Map(db.vehicles.all().map((vehicle) => [vehicle.no, vehicle.homeSiteNo]))
   return db.driverAssignments.all().map((assignment) => {
+    const homeSiteNo = assignment.homeSiteNo ?? homeSites.get(assignment.vehicleNo) ?? ''
     const coupling = assignment.endDate
       ? undefined
       : links.couplingByVehicle.get(assignment.vehicleNo)
@@ -28,6 +31,8 @@ export function driverAssignmentsApi(db: MockDatabase): DriverAssignmentApi[] {
       ...assignment,
       employeeName: names.get(assignment.employeeNo) ?? '',
       vehiclePlate: plates.get(assignment.vehicleNo) ?? '',
+      homeSiteNo,
+      homeSiteName: sites.get(homeSiteNo) ?? '',
       coupledTrailerPlate: coupling
         ? (plates.get(coupledWith(coupling, assignment.vehicleNo)) ?? '')
         : '',
@@ -77,6 +82,9 @@ export function registerDriverAssignmentsHandlers(router: MockRouter, db: MockDa
           reasons: ineligibilityText(request.language, reasons)
         })
       }
+      const homeSiteNo = optionalReference(db.sites, input, 'homeSiteNo') ?? vehicle.homeSiteNo
+      /* The base follows the assignment: the vehicle is attached to it from the start date. */
+      if (homeSiteNo !== vehicle.homeSiteNo) db.vehicles.update(vehicle.no, { homeSiteNo })
       return {
         no: nextNo(
           db.driverAssignments.all().map((row) => row.no),
@@ -85,6 +93,7 @@ export function registerDriverAssignmentsHandlers(router: MockRouter, db: MockDa
         ),
         employeeNo: employee.no,
         vehicleNo: vehicle.no,
+        homeSiteNo,
         startDate,
         endDate: null
       }

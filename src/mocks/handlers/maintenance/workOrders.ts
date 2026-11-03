@@ -56,7 +56,6 @@ import { SOURCED_ORIGINS, sourceRequest } from './workOrderSources'
 import { addMovement } from './stockLedger'
 import { technicianIssue } from '@/modules/maintenance/workshop-load/domain/workshopLoad'
 import { maintenanceSettings } from './settings'
-import { leadTimeDays } from '@/modules/maintenance/purchase-requests/domain/purchaseRequest'
 import {
   proposeSubsystem,
   type SubsystemKeywords
@@ -101,7 +100,10 @@ export function workOrdersApi(db: MockDatabase): WorkOrderApi[] {
   const waits = new Map<string, number>()
   for (const purchase of db.purchaseRequests.all()) {
     if (!purchase.workOrderNo || !purchase.orderedAt || purchase.cancelledAt) continue
-    const days = leadTimeDays(purchase.orderedAt, purchase.receivedAt ?? now) ?? 0
+    // Counted to the minute: a wait of a few hours must not round to zero days.
+    const days =
+      (new Date(purchase.receivedAt ?? now).getTime() - new Date(purchase.orderedAt).getTime()) /
+      86_400_000
     waits.set(purchase.workOrderNo, (waits.get(purchase.workOrderNo) ?? 0) + days)
   }
   return db.workOrders.all().map((row) => {
@@ -126,7 +128,7 @@ export function workOrdersApi(db: MockDatabase): WorkOrderApi[] {
       subcontractingCost: subcontracting,
       partsCost,
       pendingPartCount: row.parts.length - received.length,
-      partsWaitDays: Math.round((waits.get(row.no) ?? 0) * 10) / 10,
+      partsWaitDays: Math.round((waits.get(row.no) ?? 0) * 1000) / 1000,
       nomenclature: row.nomenclature ?? null,
       nomenclatureState: row.nomenclature
         ? row.nomenclature.confirmedAt

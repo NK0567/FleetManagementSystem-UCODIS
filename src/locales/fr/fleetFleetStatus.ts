@@ -42,5 +42,6 @@ export default {
   'fleet.fleetStatus.send.done': 'État de flotte envoyé à {recipients}.',
   'fleet.fleetStatus.send.last': 'Dernier envoi le {date} (état du {day}) à {recipients}.',
   'fleet.fleetStatus.send.history': 'Derniers envois',
-  'fleet.fleetStatus.send.line': '{date} · état du {day} · lignes : {count} · {recipients} · par {user}'
+  'fleet.fleetStatus.send.line': '{date} · état du {day} · lignes : {count} · {recipients} · par {user}',
+  'fleet.fleetStatus.send.required': 'Indiquez au moins une adresse e-mail, séparées par des virgules.'
 }

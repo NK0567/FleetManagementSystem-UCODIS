@@ -47,5 +47,8 @@ export default {
     'No type ticked: the document applies to every vehicle.',
   'fleet.documentTypes.form.vehicleTypeCount': '{n} vehicle type | {n} vehicle types',
   'fleet.documentTypes.form.allVehicleTypes': 'Every vehicle',
-  'fleet.documentTypes.noResultsCreate': 'No document type. Create one with New.'
+  'fleet.documentTypes.noResultsCreate': 'No document type. Create one with New.',
+  'fleet.documentTypes.col.country': 'Country',
+  'fleet.documentTypes.form.country': 'Country of the regulation',
+  'fleet.documentTypes.form.countryHint': 'Leave empty if the document is required in every country. When filled, it is only required of a company based in that country (see the Company page).'
 }

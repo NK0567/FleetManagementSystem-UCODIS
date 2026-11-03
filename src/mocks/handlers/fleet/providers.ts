@@ -90,7 +90,22 @@ function readCarrierVehicles(input: Record<string, unknown>): CarrierVehicle[] {
     if (seen.has(plate) || plate.length > 20) throw invalidField('carrierVehicles')
     seen.add(plate)
     const description = typeof line.description === 'string' ? line.description.trim() : ''
-    return [{ plate, description: description.slice(0, 80) }]
+    const number = (field: string, max: number) => {
+      const value = line[field]
+      if (value == null || value === '') return null
+      const parsed = Number(value)
+      if (!Number.isFinite(parsed) || parsed < 0 || parsed > max) throw invalidField(field)
+      return parsed
+    }
+    return [
+      {
+        plate,
+        description: description.slice(0, 80),
+        maxLoadKg: number('maxLoadKg', 1_000_000),
+        maxVolumeM3: number('maxVolumeM3', 10_000),
+        capacityL: number('capacityL', 1_000_000)
+      }
+    ]
   })
 }
 

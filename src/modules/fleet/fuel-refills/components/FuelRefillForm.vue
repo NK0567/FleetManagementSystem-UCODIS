@@ -31,6 +31,7 @@ const { draft, isRequired, expose } = useEntityForm({
     refueledAt: '',
     vehicleNo: '',
     driverNo: null as string | null,
+    tripNo: null as string | null,
     stationSiteNo: null as string | null,
     stationName: '',
     liters: 0,
@@ -134,6 +135,18 @@ defineExpose(expose)
             {{ t('fleet.fuelRefills.form.driverHint') }}
           </p>
         </BaseFormField>
+        <BaseFormField :label="t('fleet.fuelRefills.form.tripNo')">
+          <ReferenceLookup
+            v-model="draft.tripNo"
+            reference-key="allTrips"
+            :modal-title="t('fleet.fuelRefills.form.tripNo')"
+            detail-path="/fleet/trips"
+            :disabled="disabled"
+          />
+          <p v-if="isNew" class="text-xs text-muted-foreground mt-1">
+            {{ t('fleet.fuelRefills.form.tripHint') }}
+          </p>
+        </BaseFormField>
       </div>
       <div class="space-y-3 min-w-0">
         <BaseFormField :label="t('fleet.fuelRefills.form.stationSiteNo')">
@@ -151,6 +164,19 @@ defineExpose(expose)
             :maxlength="120"
             :disabled="disabled || !!draft.stationSiteNo"
           />
+        </BaseFormField>
+        <BaseFormField>
+          <template #label>{{ t('fleet.fuelRefills.form.position') }}</template>
+          <p class="text-sm text-card-foreground">
+            <template v-if="initialData.latitude != null && initialData.longitude != null">
+              {{ formatNumber(initialData.latitude, 4) }},
+              {{ formatNumber(initialData.longitude, 4) }}
+            </template>
+            <template v-else-if="!isNew">{{ t('fleet.fuelRefills.form.positionNone') }}</template>
+          </p>
+          <p class="text-xs text-muted-foreground mt-1">
+            {{ t('fleet.fuelRefills.form.positionHint') }}
+          </p>
         </BaseFormField>
         <BaseFormField :label="t('fleet.fuelRefills.form.receipt')">
           <FileAttachmentField

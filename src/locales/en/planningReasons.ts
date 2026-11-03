@@ -27,5 +27,6 @@ export default {
     'When the reason is offered: cancellation, request rejection, refusal on delivery, and so on.',
   'planning.reasons.form.active': 'Active',
   'planning.reasons.dialog.reason': 'Reason',
-  'planning.reasons.dialog.comment': 'Comment'
+  'planning.reasons.dialog.comment': 'Comment',
+  'planning.reasons.dialog.reasonNeeded': 'Choose a reason.'
 }

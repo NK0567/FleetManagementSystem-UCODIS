@@ -243,8 +243,20 @@ const SEED: Omit<ProviderRow, keyof typeof seedAudit>[] = [
     notAuthorizedReason: '',
     contracts: [],
     carrierVehicles: [
-      { plate: '2345 TBA', description: 'Semi-remorque bâchée 32 t' },
-      { plate: '2378 TBA', description: 'Porteur 19 t' }
+      {
+        plate: '2345 TBA',
+        description: 'Semi-remorque bâchée 32 t',
+        maxLoadKg: 32000,
+        maxVolumeM3: 80,
+        capacityL: null
+      },
+      {
+        plate: '2378 TBA',
+        description: 'Porteur 19 t',
+        maxLoadKg: 19000,
+        maxVolumeM3: 45,
+        capacityL: null
+      }
     ]
   },
   {
@@ -259,8 +271,20 @@ const SEED: Omit<ProviderRow, keyof typeof seedAudit>[] = [
     notAuthorizedReason: '',
     contracts: [],
     carrierVehicles: [
-      { plate: '5120 TAD', description: 'Citerne 3 compartiments 30 000 L' },
-      { plate: '5144 TAD', description: 'Citerne 2 compartiments 20 000 L' }
+      {
+        plate: '5120 TAD',
+        description: 'Citerne 3 compartiments 30 000 L',
+        maxLoadKg: 26000,
+        maxVolumeM3: 30,
+        capacityL: 30000
+      },
+      {
+        plate: '5144 TAD',
+        description: 'Citerne 2 compartiments 20 000 L',
+        maxLoadKg: 17000,
+        maxVolumeM3: 20,
+        capacityL: 20000
+      }
     ]
   }
 ]

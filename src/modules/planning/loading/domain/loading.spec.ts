@@ -13,6 +13,18 @@ describe('loading control', () => {
     expect(
       loadingReady([{ ...staying, loadedQuantity: 10, conformingAt: '2026-09-04T12:00:00' }, aside])
     ).toBe(true)
-    expect(loadingReady([aside])).toBe(false)
+    // A non-conformity never blocks: once every line is checked, the order is ready (TRS03-US02 CA06).
+    expect(loadingReady([aside])).toBe(true)
+  })
+
+  it('does not wait for a line that left the tour before the check', () => {
+    const unavailable = { ...line(), unavailableAt: '2026-09-04T08:00:00' }
+    expect(loadingReady([unavailable])).toBe(false)
+    expect(
+      loadingReady([
+        unavailable,
+        { ...line(), loadedQuantity: 5, conformingAt: '2026-09-04T12:00:00' }
+      ])
+    ).toBe(true)
   })
 })

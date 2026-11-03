@@ -174,5 +174,6 @@ export default {
   'planning.tracking.survey.pickScore': 'Pick a score first',
   'planning.tracking.needSigner': 'Enter the name of the person receiving',
   'planning.tracking.needReason': 'Pick a reason',
-  'planning.tracking.needDate': 'Pick a date'
+  'planning.tracking.needDate': 'Pick a date',
+  'planning.tracking.unavailableNoDate': 'Thank you, we noted that you are not available on the planned date. Our team will contact you to agree on a new date.'
 }

@@ -11,7 +11,7 @@ import { formatDate, formatDateTime } from '@/utils/format'
 import { todayIso } from '@/utils/date'
 import { addDays, overlappingKeys, weekStart } from '../domain/calendar'
 
-type RowKind = 'vehicles' | 'drivers'
+type RowKind = 'all' | 'vehicles' | 'drivers'
 
 interface Bar {
   key: string
@@ -24,7 +24,10 @@ interface Bar {
 }
 
 interface Row {
+  /** Unique across vehicles and drivers, which share the list on the left. */
   no: string
+  resourceNo: string
+  group: 'vehicles' | 'drivers'
   label: string
   bars: Bar[]
 }
@@ -33,7 +36,8 @@ const { t } = useI18n()
 const router = useRouter()
 
 const monday = ref(weekStart(todayIso()))
-const kind = ref<RowKind>('vehicles')
+/* Vehicles and drivers share the list on the left; the tabs only narrow it (TRS01-US07). */
+const kind = ref<RowKind>('all')
 const loading = ref(false)
 const error = ref<string | null>(null)
 const trips = ref<TripApi[]>([])
@@ -108,12 +112,22 @@ const weekTrips = computed(() =>
 )
 
 const rows = computed<Row[]>(() => {
-  const source = kind.value === 'vehicles' ? vehicleRows.value : driverRows.value
-  return source.map((resource) => ({
-    ...resource,
+  const sources = [
+    ...(kind.value === 'drivers'
+      ? []
+      : vehicleRows.value.map((resource) => ({ resource, group: 'vehicles' as const }))),
+    ...(kind.value === 'vehicles'
+      ? []
+      : driverRows.value.map((resource) => ({ resource, group: 'drivers' as const })))
+  ]
+  return sources.map(({ resource, group }) => ({
+    no: `${group}:${resource.no}`,
+    resourceNo: resource.no,
+    group,
+    label: resource.label,
     bars: weekTrips.value
       .filter((trip) =>
-        kind.value === 'vehicles'
+        group === 'vehicles'
           ? trip.vehicleNo === resource.no || trip.trailerNo === resource.no
           : trip.driverNo === resource.no
       )
@@ -189,6 +203,9 @@ const navClass =
         {{ t('planning.calendar.title') }}
       </h1>
       <nav class="flex gap-1 border-b border-border" :aria-label="t('planning.calendar.rows')">
+        <button type="button" :class="tabClass(kind === 'all')" @click="kind = 'all'">
+          {{ t('planning.calendar.all') }}
+        </button>
         <button type="button" :class="tabClass(kind === 'vehicles')" @click="kind = 'vehicles'">
           {{ t('planning.calendar.vehicles') }}
         </button>
@@ -246,7 +263,11 @@ const navClass =
         <div class="grid grid-cols-[220px_1fr] sticky top-0 z-10 bg-muted text-xs font-semibold">
           <div class="px-3 py-2 border-r border-border text-muted-foreground">
             {{
-              kind === 'vehicles' ? t('planning.calendar.vehicle') : t('planning.calendar.driver')
+              kind === 'all'
+                ? t('planning.calendar.resource')
+                : kind === 'vehicles'
+                  ? t('planning.calendar.vehicle')
+                  : t('planning.calendar.driver')
             }}
           </div>
           <div
@@ -273,7 +294,18 @@ const navClass =
         >
           <div
             class="px-3 py-2 border-r border-border text-sm font-medium text-card-foreground truncate"
+            :title="row.label"
           >
+            <span
+              v-if="kind === 'all'"
+              class="mr-1.5 inline-block rounded bg-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase text-muted-foreground"
+            >
+              {{
+                row.group === 'vehicles'
+                  ? t('planning.calendar.vehicleTag')
+                  : t('planning.calendar.driverTag')
+              }}
+            </span>
             {{ row.label }}
           </div>
           <div class="relative h-11">

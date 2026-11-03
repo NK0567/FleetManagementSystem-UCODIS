@@ -124,6 +124,9 @@ defineExpose(expose)
             :invalid="hasValidationError('location')"
           />
         </BaseFormField>
+        <p v-if="isNew" class="text-xs text-muted-foreground">
+          {{ t('maintenance.mobileInterventions.form.positionHint') }}
+        </p>
         <BaseFormField
           field="departedAt"
           :label="t('maintenance.mobileInterventions.form.departedAt')"

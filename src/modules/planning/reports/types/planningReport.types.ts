@@ -33,6 +33,8 @@ export interface ReportFilters {
 }
 
 export interface ReportChoices {
+  /** The depots and regions the user is attached to; null when he sees everything. */
+  perimeter: { depots: string[]; regions: string[] } | null
   depots: { no: string; name: string }[]
   regions: string[]
   orderers: { no: string; name: string }[]

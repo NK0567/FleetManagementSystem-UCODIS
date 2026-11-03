@@ -32,6 +32,8 @@ export interface TransportOrderLineRow extends LineFollowUp, QualityFields {
   replannedToOrderNo?: string | null
   /** On a line taken back by replanning: the order and line it comes from. */
   replannedFrom?: { orderNo: string; lineNo: number } | null
+  /** The recipient's agreement to a partial delivery, traced before it (TRS01-US17 CA05). */
+  partialAgreement?: { by: string; note: string; at: string; recordedBy: string } | null
 }
 
 export interface TransportOrderEventRow {
@@ -60,6 +62,16 @@ export interface TransportOrderRow extends MockRow, OrderDossier {
   events: TransportOrderEventRow[]
   /** The pickup note: sent to the site, then confirmed with its data (TRS03-US03, US04). */
   pickup?: PickupRecord | null
+  /**
+   * The compartment plan frozen by a validated loading preparation (TRS01-US23): the pickup note
+   * and the loading list follow it instead of a new automatic placement.
+   */
+  frozenPlan?: {
+    compartmentNo: number
+    requestNo: string
+    requestLineNo: number
+    quantity: number
+  }[]
   /** Mode of transport (TRS01-US11); absent reads as road. */
   transportMode?: TransportMode
   /** The pending order gathering the lines replanned to one day (TRS01-US16). */
@@ -254,6 +266,56 @@ const SEED: Omit<TransportOrderRow, keyof typeof seedAudit | keyof OrderDossier>
       event('2026-09-02T08:30:00', 'created'),
       event('2026-09-03T11:00:00', 'cancelled', 'CXL-CUSTOMER')
     ]
+  },
+  {
+    // Fuel for two stations on a tanker with compartments, loaded at the Alarobia depot: it lets the
+    // measures at 15 °C be played at the pickup and at each delivery (TRS03-US01, US04, US10, US16),
+    // and its two points the arrival rule (TRS03-US09). Its lines carry no commande, so the
+    // commandes of the story keep their counts, and its number sits below the others so that the
+    // orders created on screen keep the numbers of the story.
+    no: 'TR-2026-0000',
+    routeTemplateNo: 'TNR-ATS',
+    plannedDeparture: '2026-09-05T05:00:00',
+    comment: 'Carburant pour deux stations, chargé au dépôt pétrolier d’Alarobia.',
+    lines: [
+      {
+        ...line(1, null, 'DP-011', 'PRD-007', 9000, null),
+        confirmedAt: '2026-09-04T10:00:00'
+      },
+      {
+        ...line(2, null, 'DP-012', 'PRD-006', 12000, null),
+        confirmedAt: '2026-09-04T10:05:00'
+      },
+      // A second product for the same station: a delivery can be partial, line by line (TRS03-US11).
+      {
+        ...line(3, null, 'DP-012', 'PRD-008', 3000, null),
+        confirmedAt: '2026-09-04T10:05:00'
+      }
+    ],
+    means: 'fleet',
+    tripNo: 'TRP-00000',
+    carrierNo: null,
+    carrierVehiclePlate: '',
+    carrierDriverName: '',
+    carrierDepartedAt: null,
+    carrierArrivedAt: null,
+    cancellationReasonNo: null,
+    cancellationComment: '',
+    cancelledAt: null,
+    cancelledBy: null,
+    pickup: {
+      siteNo: 'DEP-ALR',
+      sentAt: null,
+      sentTo: '',
+      confirmedAt: null,
+      confirmedBy: null,
+      documentRef: '',
+      entries: []
+    },
+    events: [
+      event('2026-09-04T09:00:00', 'created'),
+      event('2026-09-04T09:10:00', 'planned', 'TRP-00000')
+    ]
   }
 ]
 
@@ -273,6 +335,8 @@ export const transportOrdersCollection: CollectionDefinition<TransportOrderRow> 
     'cancelledAt',
     'events[].at',
     'lines[].trackingExpiresOn',
-    'lines[].conformingAt'
+    'lines[].conformingAt',
+    'lines[].confirmedAt',
+    'lines[].arrivedAt'
   ]
 }

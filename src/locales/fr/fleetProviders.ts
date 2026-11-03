@@ -103,5 +103,8 @@ export default {
   'fleet.providers.import.hint': 'Type par son code ou son nom. Un prestataire déjà connu ou en double est refusé.',
   'fleet.providers.import.created': 'Aucun prestataire créé. | Un prestataire créé. | {n} prestataires créés.',
   'fleet.providerTypes.noResultsCreate': 'Aucun type de prestataire. Créez-en un avec Nouveau.',
-  'fleet.providers.noResultsCreate': 'Aucun prestataire. Créez-en un avec Nouveau.'
+  'fleet.providers.noResultsCreate': 'Aucun prestataire. Créez-en un avec Nouveau.',
+  'fleet.providers.carrierVehicles.maxLoadKg': 'Charge maximale (kg)',
+  'fleet.providers.carrierVehicles.maxVolumeM3': 'Volume utile (m³)',
+  'fleet.providers.carrierVehicles.capacityL': 'Citerne (L)'
 }

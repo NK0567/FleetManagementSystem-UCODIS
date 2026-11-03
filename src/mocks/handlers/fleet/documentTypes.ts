@@ -30,6 +30,7 @@ export function documentTypesApi(db: MockDatabase): DocumentTypeApi[] {
   const documents = db.documents.all()
   return db.documentTypes.all().map((type) => ({
     ...type,
+    country: type.country ?? '',
     documentCount: documents.filter(
       (document) => document.documentTypeNo === type.no && !document.replacedByNo
     ).length
@@ -53,7 +54,8 @@ export function registerDocumentTypesHandlers(router: MockRouter, db: MockDataba
     validity: (input) =>
       readEnum(input, 'validity', DOCUMENT_VALIDITIES, { required: true }) ?? 'limited',
     durationMonths: (input) => readNumber(input, 'durationMonths', { min: 1, max: 240 }),
-    noticeDays: (input) => readNumber(input, 'noticeDays', { min: 0, max: 365 })
+    noticeDays: (input) => readNumber(input, 'noticeDays', { min: 0, max: 365 }),
+    country: (input) => readString(input, 'country')
   }
 
   registerCrudResource(router, {

@@ -30,6 +30,7 @@ export const TRANSPORT_ORDER_EVENT_KINDS = [
   'route_changed',
   'rescheduled',
   'recipients_notified',
+  'partial_agreement',
   'pickup_sent',
   'pickup_confirmed',
   'pickup_vehicle_changed',

@@ -23,7 +23,13 @@ const searchColumnOptions = computed<{ value: AlertRuleSearchColumn; label: stri
 ])
 
 const tableColumns = computed<TableColumn[]>(() => [
-  { sortKey: 'no', label: t('fleet.alertRules.col.no'), minW: '110px', cell: 'link' },
+  {
+    sortKey: 'no',
+    label: t('fleet.alertRules.col.no'),
+    minW: '200px',
+    cell: 'link',
+    formatter: (value) => optionsStore.getOptionLabel('alertCategory', String(value))
+  },
   { sortKey: 'name', label: t('fleet.alertRules.col.name'), minW: '240px' },
   {
     sortKey: 'escalationHours',
@@ -32,7 +38,12 @@ const tableColumns = computed<TableColumn[]>(() => [
     align: 'right',
     formatter: formatInteger
   },
-  { sortKey: 'escalateTo', label: t('fleet.alertRules.col.escalateTo'), minW: '150px' },
+  {
+    sortKey: 'escalateTo',
+    label: t('fleet.alertRules.col.escalateTo'),
+    minW: '180px',
+    formatter: (value) => (value ? optionsStore.getOptionLabel('userProfile', String(value)) : '')
+  },
   {
     sortKey: 'severity',
     label: t('fleet.alertRules.col.severity'),

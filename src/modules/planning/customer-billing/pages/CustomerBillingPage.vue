@@ -7,8 +7,9 @@ import { formatDate, formatNumber } from '@/utils/format'
 import { useCustomerBillingStore } from '../stores/customerBillingStore'
 import type { BillRow } from '../types/customerBilling.types'
 
-type BillState = 'ready' | 'blocked' | 'invoiced'
-type BillFilter = 'all' | BillState
+/* A delivery paid by an internal department has no freight invoice: it is not blocked (TRS05-US01). */
+type BillState = 'ready' | 'blocked' | 'invoiced' | 'internal'
+type BillFilter = 'all' | Exclude<BillState, 'internal'>
 
 const { t } = useI18n()
 const store = useCustomerBillingStore()
@@ -19,7 +20,13 @@ const target = ref<BillRow | null>(null)
 const reference = ref('')
 
 const stateOf = (row: BillRow): BillState =>
-  row.reference ? 'invoiced' : row.issue ? 'blocked' : 'ready'
+  row.reference
+    ? 'invoiced'
+    : row.issue === 'internal'
+      ? 'internal'
+      : row.issue
+        ? 'blocked'
+        : 'ready'
 
 const rowsOf = (state: BillState) => store.rows.filter((row) => stateOf(row) === state)
 const total = (rows: BillRow[]) => rows.reduce((sum, row) => sum + (row.amount ?? 0), 0)
@@ -66,6 +73,7 @@ function pill(row: BillRow): { label: string; tone: 'success' | 'info' | 'warnin
   const state = stateOf(row)
   if (state === 'invoiced') return { label: t('planning.billing.state.invoiced'), tone: 'success' }
   if (state === 'ready') return { label: t('planning.billing.state.ready'), tone: 'info' }
+  if (state === 'internal') return { label: t('planning.billing.issue.internal'), tone: 'neutral' }
   return {
     label: t(`planning.billing.issue.${row.issue}`),
     tone: row.issue === 'internal' ? 'neutral' : 'warning'

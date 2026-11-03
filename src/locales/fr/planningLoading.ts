@@ -179,5 +179,7 @@ export default {
   'planning.pickup.systemConfirm': 'Confirmation par le système de l’entrepôt (simulée)',
   'planning.loadingList.reference': 'Réf. commande : {reference}',
   'planning.loading.tab.loading': 'Ordres à charger',
-  'planning.preparation.emptyCreate': 'Aucune préparation. Créez-en une avec Nouvelle préparation.'
+  'planning.preparation.emptyCreate': 'Aucune préparation. Créez-en une avec Nouvelle préparation.',
+  'planning.loadingList.content': 'Contenu : {content}',
+  'planning.pickup.ops.incomplete': 'Renseignez les champs obligatoires de l’opération.'
 }

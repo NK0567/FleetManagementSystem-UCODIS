@@ -37,6 +37,7 @@ watch(
     :title="title"
     :confirm-label="t('common.confirm')"
     :confirm-disabled="!reasonNo"
+    :confirm-disabled-hint="t('planning.reasons.dialog.reasonNeeded')"
     :loading="loading"
     :destructive="destructive"
     panel-class="max-w-md"

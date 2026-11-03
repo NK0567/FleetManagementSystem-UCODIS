@@ -1,27 +1,21 @@
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { productService } from '@/modules/planning/products'
+import { useReferenceStore } from '@/stores/referenceStore'
 
 /** Product families to keep a vehicle or a compartment for; none ticked means any family. */
 const props = defineProps<{ disabled?: boolean }>()
 const families = defineModel<string[]>({ required: true })
 
 const { t } = useI18n()
-const known = ref<string[]>([])
-const failed = ref(false)
+const referenceStore = useReferenceStore()
+const known = computed(() => referenceStore.getItems('productFamilies').map((item) => item.code))
+const failed = computed(() => referenceStore.error)
 
 /* A family already chosen stays listed even when no active product uses it any more. */
 const shown = computed(() => [...new Set([...known.value, ...families.value])].sort())
 
-onMounted(async () => {
-  try {
-    const page = await productService.getAll({ page: 1, pageSize: 500, sortBy: 'family' })
-    known.value = [...new Set(page.data.items.map((item) => item.family).filter(Boolean))]
-  } catch {
-    failed.value = true
-  }
-})
+onMounted(() => void referenceStore.fetchAll())
 
 function toggle(family: string) {
   families.value = families.value.includes(family)

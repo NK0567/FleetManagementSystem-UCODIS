@@ -6,6 +6,8 @@ export interface DriverAssignmentRow extends MockRow {
   vehicleNo: string
   startDate: string
   endDate: string | null
+  /** Base given with the assignment; seeds without one use the home site of the vehicle. */
+  homeSiteNo?: string
 }
 
 const SEED: Omit<DriverAssignmentRow, keyof typeof seedAudit>[] = [

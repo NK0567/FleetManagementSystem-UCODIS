@@ -142,5 +142,6 @@ export default {
   'planning.deliveryRequests.view.cancelled': 'Cancelled',
   'planning.deliveryRequests.action.new': 'New order',
   'planning.deliveryRequests.import.actionLong': 'Import orders',
-  'planning.deliveryRequests.noResultsCreate': 'No order. Create one with New.'
+  'planning.deliveryRequests.noResultsCreate': 'No order. Create one with New.',
+  'planning.deliveryRequests.splitDisabled': 'Give a quantity above zero and below the quantity of the order.'
 }

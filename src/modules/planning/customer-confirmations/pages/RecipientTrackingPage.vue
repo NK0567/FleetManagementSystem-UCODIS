@@ -459,7 +459,11 @@ watch(token, load)
         >
           <CalendarClock class="w-5 h-5 text-warning shrink-0" />
           <p>
-            {{ t('planning.tracking.unavailable', { date: formatDate(tracking.availableOn) }) }}
+            {{
+              tracking.availableOn
+                ? t('planning.tracking.unavailable', { date: formatDate(tracking.availableOn) })
+                : t('planning.tracking.unavailableNoDate')
+            }}
           </p>
         </div>
 

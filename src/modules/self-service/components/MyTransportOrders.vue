@@ -258,6 +258,14 @@ function canArrive(order: MyOrderApi, point: Point): boolean {
   const index = points.findIndex((item) => item.no === point.no)
   return index === 0 || points[index - 1]!.lines.every(settled)
 }
+/** The previous point is not settled yet: the arrival here waits for it (TRS03-US09 CA02). */
+function waitsForPrevious(order: MyOrderApi, point: Point): boolean {
+  if (order.status !== 'ready' && order.status !== 'in_progress') return false
+  if (arrived(point) || point.lines.every(settled)) return false
+  const points = pointsOf(order)
+  const index = points.findIndex((item) => item.no === point.no)
+  return index > 0 && !points[index - 1]!.lines.every(settled)
+}
 /** The point to handle now: the first one that is not settled yet. */
 function currentPointNo(order: MyOrderApi): string | null {
   if (order.status !== 'ready' && order.status !== 'in_progress') return null
@@ -286,7 +294,11 @@ type Correction =
 const correcting = ref<Correction | null>(null)
 const correctionComment = ref('')
 const canCancelNonconformity = (order: MyOrderApi, line: MyOrderLineApi) =>
-  order.status === 'confirmed' && !!line.nonconformityAt
+  (order.status === 'confirmed' || order.status === 'ready') && !!line.nonconformityAt
+/** The check stays on screen while it can still be corrected, even once the order is ready. */
+const showsCheck = (order: MyOrderApi) =>
+  order.status === 'confirmed' ||
+  (order.status === 'ready' && order.lines.some((line) => !!line.nonconformityAt))
 function canCancelDeclaration(order: MyOrderApi, point: Point): boolean {
   const declared = point.lines.filter((line) => !!line.declaredAt)
   return (
@@ -590,7 +602,7 @@ onMounted(load)
       </header>
 
       <!-- Loading check, before leaving -->
-      <div v-if="order.status === 'confirmed'" class="px-4 py-3 border-b border-border space-y-2">
+      <div v-if="showsCheck(order)" class="px-4 py-3 border-b border-border space-y-2">
         <div class="flex flex-wrap items-center justify-between gap-2">
           <h3 class="text-sm font-semibold text-card-foreground">
             {{ t('selfService.orders.checkTitle') }}
@@ -705,6 +717,9 @@ onMounted(load)
                     at: formatDateTime(point.lines.find((line) => line.arrivedAt)!.arrivedAt)
                   })
                 }}
+              </p>
+              <p v-else-if="waitsForPrevious(order, point)" class="text-xs text-muted-foreground">
+                {{ t('selfService.orders.waitsForPrevious') }}
               </p>
             </div>
             <button

@@ -41,8 +41,8 @@ export default {
   'fleet.fuelRefills.form.fullTank': 'Plein complet',
   'fleet.fuelRefills.actionError': "L'action n'a pas pu être effectuée.",
   'fleet.fuelRefills.listView.all': 'Tous les pleins',
-  'fleet.fuelRefills.listView.anomaly': 'En anomalie',
-  'fleet.fuelRefills.action.qualify': "Qualifier l'anomalie",
+  'fleet.fuelRefills.listView.anomaly': 'À qualifier',
+  'fleet.fuelRefills.action.qualify': 'Qualifier le plein',
   'fleet.fuelRefills.form.driverHint': 'Laissé vide, le conducteur affecté au véhicule ce jour-là.',
   'fleet.fuelRefills.form.receipt': 'Reçu',
   'fleet.fuelRefills.form.amount': 'Montant',
@@ -54,5 +54,11 @@ export default {
   'fleet.fuelRefills.import.title': 'Importer des pleins',
   'fleet.fuelRefills.import.hint': "Fichier CSV avec une ligne d'en-têtes : véhicule par immatriculation, conducteur par matricule (déduit s'il manque).",
   'fleet.fuelRefills.import.created': 'Aucun plein créé. | Un plein créé. | {n} pleins créés.',
-  'fleet.fuelRefills.noResultsCreate': 'Aucun plein. Créez-en un avec Nouveau.'
+  'fleet.fuelRefills.noResultsCreate': 'Aucun plein. Créez-en un avec Nouveau.',
+  'fleet.fuelRefills.form.tripNo': 'Trajet',
+  'fleet.fuelRefills.col.tripNo': 'Trajet',
+  'fleet.fuelRefills.form.tripHint': 'Laissé vide, le trajet sur lequel se trouvait le véhicule à ce moment-là.',
+  'fleet.fuelRefills.form.position': 'Position GPS',
+  'fleet.fuelRefills.form.positionHint': 'Relevée par le boîtier du véhicule au moment du plein et comparée au site de la station.',
+  'fleet.fuelRefills.form.positionNone': 'Aucune position relevée.'
 }

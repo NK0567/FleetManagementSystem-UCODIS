@@ -55,7 +55,15 @@ const route = computed<MapPolyline[]>(() => [
           <p class="text-xs text-muted-foreground">
             {{ t('fleet.trips.stops.planned', { time: formatDateTime(stop.plannedAt) }) }}
             <template v-if="stop.passedAt">
-              · {{ t('fleet.trips.stops.passed', { time: formatDateTime(stop.passedAt) }) }}
+              <template v-if="stop.enteredAt">
+                · {{ t('fleet.trips.stops.entered', { time: formatDateTime(stop.enteredAt) }) }}
+              </template>
+              <template v-if="stop.exitedAt">
+                · {{ t('fleet.trips.stops.exited', { time: formatDateTime(stop.exitedAt) }) }}
+              </template>
+              <template v-else-if="stop.enteredAt">
+                · {{ t('fleet.trips.stops.inside') }}
+              </template>
             </template>
           </p>
         </div>

@@ -11,6 +11,8 @@ const props = defineProps<{
   closing: TransportOrderClosingApi
   editable?: boolean
   busy?: boolean
+  /** The order is terminated: nothing blocks it any more, it is final (TRS05-US06 CA04). */
+  finished?: boolean
 }>()
 const emit = defineEmits<{
   attach: [kind: string, fileNo: string]
@@ -82,7 +84,11 @@ const buttonClass =
       class="flex items-center gap-2 rounded border border-border bg-success-bg px-4 py-3 text-sm text-success"
     >
       <CircleCheck class="w-5 h-5 shrink-0" />
-      {{ t('planning.transportOrders.closing.ready') }}
+      {{
+        finished
+          ? t('planning.transportOrders.closing.closed')
+          : t('planning.transportOrders.closing.ready')
+      }}
     </div>
     <div v-else class="rounded border border-border px-4 py-3 text-sm">
       <p class="text-xs font-semibold text-muted-foreground mb-2">

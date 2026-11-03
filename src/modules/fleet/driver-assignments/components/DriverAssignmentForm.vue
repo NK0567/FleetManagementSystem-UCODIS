@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useReferenceStore } from '@/stores/referenceStore'
 import { useI18n } from 'vue-i18n'
 import { useEntityForm } from '@/composables/useEntityForm'
 import { useFormValidationUi } from '@/composables/useFormValidationUi'
@@ -28,6 +29,7 @@ const { draft, isRequired, expose } = useEntityForm({
   empty: () => ({
     employeeNo: '',
     vehicleNo: '',
+    homeSiteNo: '',
     startDate: ''
   }),
   required: ['employeeNo', 'vehicleNo', 'startDate'],
@@ -38,9 +40,20 @@ const expandedSections = ref({ general: true, audit: false })
 const { hasValidationError } = useFormValidationUi({
   validationErrors: () => props.validationErrors,
   expandedSections,
-  fieldSections: { employeeNo: 'general', vehicleNo: 'general', startDate: 'general' },
+  fieldSections: {
+    employeeNo: 'general',
+    vehicleNo: 'general',
+    homeSiteNo: 'general',
+    startDate: 'general'
+  },
   fieldValues: () => ({ ...draft })
 })
+
+const referenceStore = useReferenceStore()
+/** Drivers the list does not offer, each with the reason, so their absence is explained. */
+const excludedDrivers = computed(() =>
+  props.isNew ? referenceStore.getItems('excludedDrivers') : []
+)
 
 defineExpose(expose)
 </script>
@@ -66,6 +79,20 @@ defineExpose(expose)
             :disabled="disabled"
             :invalid="hasValidationError('employeeNo')"
           />
+          <p v-if="isNew" class="text-xs text-muted-foreground mt-1">
+            {{ t('fleet.driverAssignments.form.employeeHint') }}
+          </p>
+          <div
+            v-if="excludedDrivers.length"
+            class="mt-2 rounded border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground"
+          >
+            <p class="font-semibold">{{ t('fleet.driverAssignments.form.excluded') }}</p>
+            <ul class="mt-1 space-y-0.5">
+              <li v-for="driver in excludedDrivers" :key="driver.code">
+                {{ driver.description }}
+              </li>
+            </ul>
+          </div>
         </BaseFormField>
         <BaseFormField
           field="vehicleNo"
@@ -80,6 +107,19 @@ defineExpose(expose)
             :disabled="disabled"
             :invalid="hasValidationError('vehicleNo')"
           />
+        </BaseFormField>
+        <BaseFormField field="homeSiteNo" :label="t('fleet.driverAssignments.form.homeSiteNo')">
+          <ReferenceLookup
+            v-model="draft.homeSiteNo"
+            reference-key="sites"
+            :modal-title="t('fleet.driverAssignments.form.homeSiteNo')"
+            detail-path="/fleet/sites"
+            :disabled="disabled || !isNew"
+            :invalid="hasValidationError('homeSiteNo')"
+          />
+          <p v-if="isNew" class="text-xs text-muted-foreground mt-1">
+            {{ t('fleet.driverAssignments.form.homeSiteHint') }}
+          </p>
         </BaseFormField>
       </div>
       <div class="space-y-3 min-w-0">

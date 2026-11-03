@@ -24,6 +24,7 @@ interface ManualLine {
   /** A line already in the order without an order behind it, kept as it is. */
   lineNo?: number
   ordererNo: string
+  externalReference: string
   deliveryPointNo: string
   productNo: string
   quantity: number | null
@@ -52,7 +53,11 @@ const incomplete = computed(() =>
   manual.value.some(
     (line) =>
       !line.lineNo &&
-      (!line.deliveryPointNo || !line.productNo || !line.quantity || !(Number(line.weightKg) > 0))
+      (!line.deliveryPointNo ||
+        !line.productNo ||
+        !line.quantity ||
+        !(Number(line.weightKg) > 0) ||
+        (circuit.value.externalReferenceRequired && !line.externalReference.trim()))
   )
 )
 
@@ -76,6 +81,7 @@ watch(
         key: nextKey++,
         lineNo: line.lineNo,
         ordererNo: '',
+        externalReference: '',
         deliveryPointNo: line.deliveryPointNo,
         productNo: line.productNo,
         quantity: line.quantity,
@@ -104,6 +110,7 @@ function addManual() {
     {
       key: nextKey++,
       ordererNo: '',
+      externalReference: '',
       deliveryPointNo: '',
       productNo: '',
       quantity: null,
@@ -123,6 +130,9 @@ function confirm() {
     ...manual.value.map((line) => ({
       ...(line.lineNo ? { lineNo: line.lineNo } : {}),
       ...(line.ordererNo ? { ordererNo: line.ordererNo } : {}),
+      ...(line.externalReference.trim()
+        ? { externalReference: line.externalReference.trim() }
+        : {}),
       deliveryPointNo: line.deliveryPointNo,
       productNo: line.productNo,
       quantity: line.quantity,
@@ -142,6 +152,7 @@ const buttonClass =
     :title="t('planning.transportOrders.linesDialog.title')"
     :confirm-label="t('common.save')"
     :confirm-disabled="incomplete"
+    :confirm-disabled-hint="t('planning.transportOrders.linesDialog.incomplete')"
     :loading="loading"
     panel-class="max-w-2xl"
     @confirm="confirm"
@@ -222,6 +233,13 @@ const buttonClass =
                 <p class="text-xs text-muted-foreground mt-1">
                   {{ t('planning.transportOrders.linesDialog.ordererHint') }}
                 </p>
+              </BaseFormField>
+              <BaseFormField
+                v-if="!line.lineNo"
+                :label="circuit.externalReferenceLabel"
+                :required="circuit.externalReferenceRequired"
+              >
+                <FormInput v-model="line.externalReference" :maxlength="40" />
               </BaseFormField>
               <BaseFormField :label="t('planning.transportOrders.linesDialog.point')" required>
                 <ReferenceLookup

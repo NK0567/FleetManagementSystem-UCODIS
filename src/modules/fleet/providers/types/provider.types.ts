@@ -25,6 +25,11 @@ export interface ProviderContract {
 export interface CarrierVehicle {
   plate: string
   description: string
+  /** What the vehicle can carry, compared with the load of an order (TRS01-US08, US09). */
+  maxLoadKg?: number | null
+  maxVolumeM3?: number | null
+  /** The tank volume of a tanker, in litres. */
+  capacityL?: number | null
 }
 
 export interface ProviderApi {

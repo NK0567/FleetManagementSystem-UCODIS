@@ -43,6 +43,9 @@ export const transportOrderService = {
   async handBack(no: string, lineNo: number): Promise<void> {
     await transportOrderApi.handBack(no, lineNo)
   },
+  async partialAgreement(no: string, lineNo: number, by: string, note: string): Promise<void> {
+    await transportOrderApi.partialAgreement(no, lineNo, by, note)
+  },
   async remainder(no: string, lineNo: number, date: string): Promise<void> {
     await transportOrderApi.remainder(no, lineNo, date)
   },

@@ -4,7 +4,9 @@ import { isUsable } from '@/modules/fleet/vehicles/domain/vehicleStatus'
 import type { ReferenceItem } from '@/types/reference.types'
 import { todayIso } from '@/utils/date'
 import type { MockDatabase } from '../../db/database'
-import { driverEmployees, driverFacts } from './drivers'
+import type { MockLanguage } from '../../i18n'
+import { driverEmployees, driverFacts, ineligibilityText } from './drivers'
+import { activeLinks } from './links'
 import { vehicleStatuses } from './vehicleState'
 
 type VehicleKind = 'tows' | 'towed' | 'motorized'
@@ -30,6 +32,12 @@ function vehiclesOfKind(db: MockDatabase, kind: VehicleKind): ReferenceItem[] {
     })
 }
 
+/** Vehicles already in a running coupling are not offered again: they have to be uncoupled first. */
+function uncoupled(db: MockDatabase, items: ReferenceItem[]): ReferenceItem[] {
+  const coupled = activeLinks(db).couplingByVehicle
+  return items.filter((item) => !coupled.has(item.code))
+}
+
 function documentTypesFor(
   db: MockDatabase,
   target: 'vehicle' | 'person' | 'company'
@@ -41,7 +49,10 @@ function documentTypesFor(
 }
 
 /** Fleet lists served by GET /reference/all for selects, lookups and filters. */
-export function fleetReferenceData(db: MockDatabase): Record<string, ReferenceItem[]> {
+export function fleetReferenceData(
+  db: MockDatabase,
+  language: MockLanguage = 'fr'
+): Record<string, ReferenceItem[]> {
   return {
     vehicleTypes: db.vehicleTypes
       .all()
@@ -60,12 +71,37 @@ export function fleetReferenceData(db: MockDatabase): Record<string, ReferenceIt
       .map((site) => ({ code: site.no, description: site.name, active: site.active })),
     tractors: vehiclesOfKind(db, 'tows'),
     trailers: vehiclesOfKind(db, 'towed'),
+    uncoupledTractors: uncoupled(db, vehiclesOfKind(db, 'tows')),
+    uncoupledTrailers: uncoupled(db, vehiclesOfKind(db, 'towed')),
     motorizedVehicles: vehiclesOfKind(db, 'motorized'),
     drivers: driverEmployees(db).map((employee) => ({
       code: employee.no,
       description: employeeFullName(employee),
       active: driverIneligibility(driverFacts(db, employee, todayIso())).length === 0
     })),
+    /* Read by the vehicle forms, whoever may or may not read the product list itself. */
+    productFamilies: [
+      ...new Set(
+        db.products
+          .all()
+          .filter((product) => product.active)
+          .map((product) => product.family)
+          .filter(Boolean)
+      )
+    ]
+      .sort()
+      .map((family) => ({ code: family, description: family })),
+    excludedDrivers: driverEmployees(db).flatMap((employee) => {
+      const reasons = driverIneligibility(driverFacts(db, employee, todayIso()))
+      return reasons.length
+        ? [
+            {
+              code: employee.no,
+              description: `${employeeFullName(employee)} : ${ineligibilityText(language, reasons)}`
+            }
+          ]
+        : []
+    }),
     vehicles: db.vehicles
       .all()
       .filter((vehicle) => !vehicle.removal)
@@ -85,6 +121,13 @@ export function fleetReferenceData(db: MockDatabase): Record<string, ReferenceIt
     openTrips: db.trips
       .all()
       .filter((trip) => trip.status !== 'closed' && trip.status !== 'cancelled')
+      .map((trip) => ({
+        code: trip.no,
+        description: `${trip.no} · ${trip.plannedDeparture.slice(0, 10)}`
+      })),
+    allTrips: db.trips
+      .all()
+      .filter((trip) => trip.status !== 'cancelled')
       .map((trip) => ({
         code: trip.no,
         description: `${trip.no} · ${trip.plannedDeparture.slice(0, 10)}`

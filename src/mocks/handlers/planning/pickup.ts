@@ -192,7 +192,9 @@ export function loadingListOf(db: MockDatabase, row: TransportOrderRow): Loading
       deliveryPointName: line.deliveryPointName,
       productName: line.productName,
       unit: line.unit,
-      quantity: line.quantity
+      quantity: line.quantity,
+      // What the order says it contains, which pre-fills the loading (TRS01-US06 CA06).
+      content: db.deliveryRequests.find(line.deliveryRequestNo ?? '')?.content?.trim() ?? ''
     }
   }
   const compartmented = !!plan && plan.compartments.length > 1
@@ -508,6 +510,8 @@ export function registerPickupOperations(router: MockRouter, db: MockDatabase): 
       if (reason) throw unprocessable({ fr: reason.fr, en: reason.en })
       const trip = db.trips.findOrFail(row.tripNo)
       const previousDriver = trip.driverNo
+      // Another tanker no longer follows the compartment plan frozen for the first one.
+      const sameCarrier = (trailerNo ?? vehicleNo) === (trip.trailerNo ?? trip.vehicleNo)
       db.trips.update(trip.no, { vehicleNo, trailerNo, driverNo, ...stampModified(request) })
       const plate = db.vehicles.find(trailerNo ?? vehicleNo)?.plate ?? vehicleNo
       db.transportOrders.update(row.no, {
@@ -520,6 +524,7 @@ export function registerPickupOperations(router: MockRouter, db: MockDatabase): 
             detail: plate
           }
         ],
+        ...(sameCarrier ? {} : { frozenPlan: undefined }),
         ...stampModified(request)
       })
       if (previousDriver !== driverNo) {

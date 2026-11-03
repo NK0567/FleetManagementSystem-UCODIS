@@ -94,6 +94,7 @@ watch([picked, pickedLines], () => (warning.value = null), { deep: true })
         : t('planning.transportOrders.action.createFromRequests')
     "
     :confirm-disabled="!picked.length"
+    :confirm-disabled-hint="t('planning.transportOrders.createDialog.pickNeeded')"
     :loading="loading"
     panel-class="max-w-2xl"
     @confirm="confirm"

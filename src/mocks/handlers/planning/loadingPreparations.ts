@@ -24,6 +24,9 @@ import { ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
 import { localize, toMockLanguage, type MockLanguage } from '../../i18n'
 import { driverEmployees, driverFacts } from '../fleet/drivers'
+import { activeLinks, coupledWith } from '../fleet/links'
+import { vehicleStatuses } from '../fleet/vehicleState'
+import { isUsable } from '@/modules/fleet/vehicles/domain/vehicleStatus'
 import { driverIneligibility } from '@/modules/fleet/drivers/domain/driver'
 import { PLANNING_MESSAGES } from './messages'
 import { requestPlace } from './perimeter'
@@ -464,6 +467,17 @@ function readHeader(db: MockDatabase, body: Record<string, unknown>, except: str
     const departureTime = readString(entry, 'departureTime') || '06:00'
     if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(departureTime)) throw invalidField('vehicles')
     const plate = plateOf(db, trailerNo) || plateOf(db, vehicleNo)
+    // A vehicle that is immobilized or out of service is not sent out, unless the preparation
+    // already had it (it then shows on the vehicle's own line).
+    const kept = except ? (db.loadingPreparations.find(except)?.vehicles ?? []) : []
+    const statuses = vehicleStatuses(db)
+    for (const no of [vehicleNo, trailerNo]) {
+      const status = no ? statuses.get(no) : undefined
+      const alreadyThere = kept.some((v) => v.vehicleNo === no || v.trailerNo === no)
+      if (status && !isUsable(status.status) && !alreadyThere) {
+        throw unprocessable(PLANNING_MESSAGES.prepVehicleUnusable, { plate: plateOf(db, no) })
+      }
+    }
     // The vehicle drives: a tanker or a semi-trailer comes as the trailer of a tractor.
     const type = db.vehicleTypes.find(db.vehicles.find(vehicleNo)!.vehicleTypeNo)
     if (!type?.motorized) throw unprocessable(PLANNING_MESSAGES.prepVehicleNotMotorized, { plate })
@@ -597,6 +611,8 @@ export function registerLoadingPreparationHandlers(router: MockRouter, db: MockD
   router.get(`${BASE}/options`, { feature: FEATURE, action: 'read' }, (request) => {
     const except = request.query?.except ? String(request.query.except) : null
     const types = new Map(db.vehicleTypes.all().map((type) => [type.no, type]))
+    const statuses = vehicleStatuses(db)
+    const links = activeLinks(db)
     const options: PreparationOptionsApi = {
       depots: db.sites
         .all()
@@ -630,12 +646,25 @@ export function registerLoadingPreparationHandlers(router: MockRouter, db: MockD
               .join(', ')
           }
         }),
-      vehicles: db.vehicles.all().map((vehicle) => ({
-        no: vehicle.no,
-        plate: vehicle.plate,
-        typeName: types.get(vehicle.vehicleTypeNo)?.name ?? '',
-        carriesGoods: types.get(vehicle.vehicleTypeNo)?.carriesGoods ?? false
-      })),
+      // Only the vehicles that may go out are offered: not immobilized, not out of service.
+      vehicles: db.vehicles
+        .all()
+        .filter((vehicle) => {
+          const status = statuses.get(vehicle.no)
+          return !vehicle.removal && (!status || isUsable(status.status))
+        })
+        .map((vehicle) => ({
+          no: vehicle.no,
+          plate: vehicle.plate,
+          typeName: types.get(vehicle.vehicleTypeNo)?.name ?? '',
+          carriesGoods: types.get(vehicle.vehicleTypeNo)?.carriesGoods ?? false,
+          motorized: types.get(vehicle.vehicleTypeNo)?.motorized ?? false,
+          // Choosing a tractor brings its trailer and its driver (TRS01-US20).
+          coupledTrailerNo: links.couplingByVehicle.has(vehicle.no)
+            ? coupledWith(links.couplingByVehicle.get(vehicle.no)!, vehicle.no)
+            : null,
+          assignedDriverNo: links.assignmentByVehicle.get(vehicle.no)?.employeeNo ?? null
+        })),
       // Only the drivers who may drive today are offered (licence, documents, status).
       drivers: driverEmployees(db)
         .filter((employee) => !driverIneligibility(driverFacts(db, employee, todayIso())).length)
@@ -747,7 +776,16 @@ export function registerLoadingPreparationHandlers(router: MockRouter, db: MockD
         vehicleNo: vehicle.vehicleNo,
         trailerNo: vehicle.trailerNo,
         driverNo: vehicle.driverNo!,
-        comment: row.no
+        comment: row.no,
+        depotSiteNo: row.depotSiteNo,
+        plan: row.plan
+          .filter((entry) => entry.vehicleNo === vehicle.vehicleNo)
+          .map(({ compartmentNo, requestNo, requestLineNo, quantity }) => ({
+            compartmentNo,
+            requestNo,
+            requestLineNo,
+            quantity
+          }))
       })
       return { ...vehicle, orderNo }
     })

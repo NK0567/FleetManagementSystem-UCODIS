@@ -59,7 +59,14 @@ export function currentDocuments(db: MockDatabase): DocumentRow[] {
  */
 export function documentCompliance(db: MockDatabase) {
   const statuses = documentStatuses(db)
-  const types = db.documentTypes.all().filter((type) => type.mandatory)
+  /* A type tied to a country only binds the company when that country is its own. */
+  const country = db.companySettings.all()[0]?.country.trim().toLowerCase() ?? ''
+  const types = db.documentTypes
+    .all()
+    .filter(
+      (type) =>
+        type.mandatory && (!type.country?.trim() || type.country.trim().toLowerCase() === country)
+    )
   const current = currentDocuments(db)
   const bySubject = (target: DocumentRow['target'], subjectNo: string) =>
     current

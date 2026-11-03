@@ -427,7 +427,8 @@ export function registerExecutionHandlers(router: MockRouter, db: MockDatabase):
       const lineNo = Number(routeParam(request, 'lineNo'))
       const line = order.lines.find((item) => item.lineNo === lineNo)
       if (!line?.nonconformityAt) throw conflict(PLANNING_MESSAGES.correctionNoNonconformity)
-      if (statusOf(db, order) !== 'confirmed')
+      // The check stays open until the driver arrives at the first point (TRS03-US02 CA06).
+      if (!['confirmed', 'ready'].includes(statusOf(db, order)))
         throw conflict(PLANNING_MESSAGES.correctionLoadingOver)
       if (line.replannedAt) throw conflict(PLANNING_MESSAGES.correctionReplanned)
       const comment = readString(readBody(request), 'comment', { required: true })

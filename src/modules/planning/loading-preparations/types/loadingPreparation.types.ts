@@ -93,7 +93,17 @@ export interface PreparationOptionsApi {
     desiredDate: string
     summary: string
   }[]
-  vehicles: { no: string; plate: string; typeName: string; carriesGoods: boolean }[]
+  vehicles: {
+    no: string
+    plate: string
+    typeName: string
+    carriesGoods: boolean
+    motorized: boolean
+    /** The trailer coupled to a tractor, brought with it when it is chosen. */
+    coupledTrailerNo: string | null
+    /** The driver assigned to the vehicle, brought with it when it is chosen. */
+    assignedDriverNo: string | null
+  }[]
   drivers: { no: string; name: string }[]
   routes: { no: string; name: string }[]
 }

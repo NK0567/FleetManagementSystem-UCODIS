@@ -14,6 +14,7 @@ import {
   QUALITY_ORIGINS,
   mainActor,
   protestQuantityAllowed,
+  suggestedOrigin,
   type ProtestStatus,
   type QualityActor,
   type QualityOrigin
@@ -233,7 +234,7 @@ function openResponsibility(row: QualityRowApi) {
         ? 'internal_carrier'
         : 'logistics'
   responsibility.value = {
-    origin: current?.origin ?? 'transport',
+    origin: current?.origin ?? suggestedOrigin(row.facts),
     actor: current ? mainActor(current.shares) : fallback,
     comment: current?.comment ?? '',
     credit: creditOf(row)
@@ -633,6 +634,26 @@ onMounted(() => void store.fetchRows())
     @cancel="qualifying = null"
   >
     <div class="space-y-3">
+      <div v-if="qualifying?.facts.length" class="space-y-1">
+        <p class="text-xs font-semibold text-muted-foreground">
+          {{ t('planning.quality.factsRecorded') }}
+        </p>
+        <div class="flex flex-wrap gap-1">
+          <StatusPill
+            v-for="fact in qualifying.facts"
+            :key="fact"
+            :label="t(`planning.quality.fact.${fact}`)"
+            tone="warning"
+          />
+        </div>
+        <p class="text-xs text-muted-foreground">
+          {{
+            t('planning.quality.originSuggested', {
+              origin: t(`planning.quality.origin.${suggestedOrigin(qualifying.facts)}`)
+            })
+          }}
+        </p>
+      </div>
       <BaseFormField :label="t('planning.quality.originLabel')" required>
         <div class="flex flex-wrap gap-1">
           <button

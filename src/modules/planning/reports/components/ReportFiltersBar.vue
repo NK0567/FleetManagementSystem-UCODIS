@@ -18,6 +18,11 @@ const regions = computed(() =>
 const orderers = computed(() =>
   (props.choices?.orderers ?? []).map((orderer) => ({ value: orderer.no, label: orderer.name }))
 )
+const perimeterText = computed(() => {
+  const perimeter = props.choices?.perimeter
+  if (!perimeter) return ''
+  return [...perimeter.depots, ...perimeter.regions].join(', ')
+})
 const active = computed(() => Object.values(filters.value).some((value) => value !== ''))
 
 function reset() {
@@ -68,4 +73,7 @@ function reset() {
       </button>
     </div>
   </section>
+  <p v-if="perimeterText" class="text-xs text-muted-foreground">
+    {{ t('planning.reports.perimeterNote', { perimeter: perimeterText }) }}
+  </p>
 </template>

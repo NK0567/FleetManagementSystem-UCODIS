@@ -13,8 +13,8 @@ export const fuelCardTransactionService = {
   async importRows(rows: Record<string, unknown>[]): Promise<ImportReport & { matched: number }> {
     return (await fuelCardTransactionApi.importRows(rows)).data.data
   },
-  async matchAll(): Promise<number> {
-    return (await fuelCardTransactionApi.matchAll()).data.data.matched
+  async matchAll(): Promise<{ matched: number; remaining: number }> {
+    return (await fuelCardTransactionApi.matchAll()).data.data
   },
   async match(no: string, refillNo: string): Promise<FuelCardTransactionApi> {
     return (await fuelCardTransactionApi.match(no, refillNo)).data.data

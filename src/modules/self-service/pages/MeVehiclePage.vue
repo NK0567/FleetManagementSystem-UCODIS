@@ -35,6 +35,7 @@ const emptyRefill = (): MyRefillInput => ({
   unitPrice: null,
   odometerKm: null,
   stationName: '',
+  tripNo: null,
   fullTank: true,
   receiptFileNo: null
 })
@@ -52,6 +53,18 @@ const canDeclareRefill = computed(
     refill.value.odometerKm !== null &&
     !!refill.value.receiptFileNo
 )
+const tripChoices = computed(() =>
+  (vehicle.value?.trips ?? []).map((trip) => ({
+    value: trip.no,
+    label: `${trip.no} · ${optionsStore.getOptionLabel('tripStatus', trip.status)}`
+  }))
+)
+const tripNo = computed({
+  get: () => refill.value.tripNo ?? '',
+  set: (value: string) => {
+    refill.value.tripNo = value || null
+  }
+})
 const canReport = computed(
   () => !saving.value && breakdown.value.symptom.trim().length >= MIN_SYMPTOM
 )
@@ -193,6 +206,18 @@ onMounted(load)
           <BaseFormField :label="t('selfService.vehicle.station')">
             <FormInput v-model="refill.stationName" :maxlength="120" />
           </BaseFormField>
+          <BaseFormField :label="t('fleet.fuelRefills.form.tripNo')">
+            <ChoiceSelect
+              v-model="tripNo"
+              :choices="tripChoices"
+              :placeholder="
+                vehicle.currentTripNo
+                  ? t('selfService.vehicle.tripCurrent', { trip: vehicle.currentTripNo })
+                  : t('selfService.vehicle.tripNone')
+              "
+              clearable
+            />
+          </BaseFormField>
           <BaseFormField :label="t('fleet.fuelRefills.form.fullTank')">
             <ToggleSwitch v-model="refill.fullTank" />
           </BaseFormField>
@@ -239,7 +264,8 @@ onMounted(load)
           >
             <span
               >{{ formatDateTime(row.refueledAt) }} ·
-              {{ row.stationLabel || t('selfService.vehicle.noStation') }}</span
+              {{ row.stationLabel || t('selfService.vehicle.noStation') }}
+              <template v-if="row.tripNo"> · {{ row.tripNo }}</template></span
             >
             <span class="text-muted-foreground">
               {{ formatNumber(row.liters, 1) }} L ·

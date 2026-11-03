@@ -174,5 +174,9 @@ export default {
   'selfService.vehicle.refillIncomplete': 'Fill in the litres, price, odometer and receipt photo.',
   'selfService.vehicle.noRefill': 'No refill declared.',
   'selfService.vehicle.noBreakdown': 'No breakdown reported.',
-  'selfService.vehicle.noStation': 'Station not given'
+  'selfService.vehicle.noStation': 'Station not given',
+  'selfService.vehicle.tripCurrent': 'Current trip: {trip}',
+  'selfService.vehicle.tripNone': 'No trip under way',
+  'selfService.orders.waitsForPrevious': 'Settle the previous point first (delivery declared, postponed or refused) before marking your arrival here.',
+  'selfService.notifications.order_route_changed': 'The route of transport order {no} has changed: {reason}'
 }

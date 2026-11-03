@@ -26,6 +26,8 @@ export interface ConfirmationLineApi {
   preferredSlot: DeliverySlot
   /** The agent handling the line, if any: it is not offered to the others meanwhile. */
   agent: string | null
+  /** Name of the agent, for display; the code stays the identity. */
+  agentName: string | null
   takenAt: string | null
   byLink: boolean
   /** A call to make now, a call to come by the company's call moment, or an automated answer. */

@@ -105,5 +105,12 @@ export interface DriverActivityApi {
     occurredAt: string
     status: InfractionStatus
   }[]
-  trainings: { no: string; topic: string; plannedOn: string | null; status: TrainingStatus }[]
+  trainings: {
+    no: string
+    topic: string
+    plannedOn: string | null
+    /** The day the training was followed; null while it has not been. */
+    attendedOn: string | null
+    status: TrainingStatus
+  }[]
 }

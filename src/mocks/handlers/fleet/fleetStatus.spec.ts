@@ -44,7 +44,9 @@ describe('fleet status of the day', () => {
       state: 'IMMOBILIZED',
       immobilizationReason: 'Out of service: Accident, expertise en cours.'
     })
-    expect(today.find((line) => line.plate === '4022 TBA')?.state).toBe('AVAILABLE')
+    // 4022 TBA pulls the fuel tanker of TR-2026-0000 the next morning; 4021 TBA has no trip.
+    expect(today.find((line) => line.plate === '4022 TBA')?.state).toBe('TRIP_PLANNED')
+    expect(today.find((line) => line.plate === '4021 TBA')?.state).toBe('AVAILABLE')
   })
 
   it('keeps the note of the day and refuses a return to service in the past', async () => {

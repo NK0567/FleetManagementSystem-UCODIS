@@ -262,6 +262,7 @@ const moreActions = computed<MoreAction[]>(() => {
     :confirm-disabled="
       !splitQuantity || splitQuantity <= 0 || splitQuantity >= (item?.quantity ?? 0)
     "
+    :confirm-disabled-hint="t('planning.deliveryRequests.splitDisabled')"
     :loading="acting"
     panel-class="max-w-md"
     @confirm="split"

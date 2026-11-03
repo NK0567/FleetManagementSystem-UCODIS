@@ -28,9 +28,37 @@ export function orderEta(db: MockDatabase, order: TransportOrderRow) {
   const item = transportOrdersApi(db).find((row) => row.no === order.no)
   const planned = item?.plannedArrival ?? null
   const trip = order.tripNo ? db.trips.find(order.tripNo) : undefined
-  const position = trip ? livePositions(db).find((row) => row.tripNo === trip.no) : undefined
+  const positions = trip ? livePositions(db) : []
+  const position = trip ? positions.find((row) => row.tripNo === trip.no) : undefined
   const delayMin = position?.delayMin ?? null
-  return { plannedArrival: planned, ...etaFrom(planned, delayMin), tracked: !!position }
+  // The vehicle's position comes from the FMS tracking, also before it leaves (TRS02-US01 CA01).
+  const located = trip
+    ? (position ?? positions.find((row) => row.vehicleNo === trip.vehicleNo))
+    : undefined
+  return {
+    plannedArrival: planned,
+    ...etaFrom(planned, delayMin),
+    tracked: !!position,
+    position: located
+      ? {
+          latitude: located.latitude,
+          longitude: located.longitude,
+          reportedAt: located.reportedAt,
+          placeName: located.placeName,
+          speedKmh: located.speedKmh,
+          situation: located.situation,
+          nextStopName: located.nextStopName,
+          nextStopExpectedAt: located.nextStopExpectedAt,
+          // The stops of the trip, to show the vehicle on its route.
+          stops: (trip?.stops ?? []).flatMap((stop) => {
+            const site = db.sites.find(stop.siteNo)
+            return site
+              ? [{ siteName: site.name, latitude: site.latitude, longitude: site.longitude }]
+              : []
+          })
+        }
+      : null
+  }
 }
 
 export function registerEtaHandlers(router: MockRouter, db: MockDatabase): void {

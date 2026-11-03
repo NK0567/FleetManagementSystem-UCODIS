@@ -116,7 +116,12 @@ defineExpose({ root })
                 {{ t('planning.loadingList.reference', { reference: references[line.lineNo] }) }}
               </span>
             </td>
-            <td class="px-2 py-1.5">{{ line.productName }}</td>
+            <td class="px-2 py-1.5">
+              {{ line.productName }}
+              <span v-if="line.content" class="block text-muted-foreground">
+                {{ t('planning.loadingList.content', { content: line.content }) }}
+              </span>
+            </td>
             <td v-if="simulate && list.mode === 'one_space'" class="px-2 py-1.5 whitespace-nowrap">
               {{ t(`planning.loadingList.places.${slots[index]?.place ?? 'middle'}`) }} ·
               {{

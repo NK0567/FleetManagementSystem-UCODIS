@@ -8,7 +8,7 @@ import {
   type TripAction
 } from '@/modules/fleet/trips/domain/trip'
 import type { TripApi } from '@/modules/fleet/trips/types/trip.types'
-import { minutesBetween, nowIsoDateTime, todayIso } from '@/utils/date'
+import { addMinutes, minutesBetween, nowIsoDateTime, todayIso } from '@/utils/date'
 import type { MockDatabase } from '../../db/database'
 import { nextNo } from '../../db/numbering'
 import type { TripRow } from '../../fixtures/fleet/trips'
@@ -37,6 +37,20 @@ function authorizationRequired(db: MockDatabase): boolean {
   return !disabledFeatures(db.moduleToggles.all()).has('DEPARTUREAUTHORIZATION')
 }
 
+/** Entry into and exit from the geofence of a stop, as the GPS stamps them. */
+function zoneTimes(
+  stops: readonly { passedAt: string | null; breakMin: number }[],
+  index: number
+): { enteredAt: string | null; exitedAt: string | null } {
+  const stop = stops[index]
+  if (!stop?.passedAt) return { enteredAt: null, exitedAt: null }
+  if (index === 0) return { enteredAt: null, exitedAt: stop.passedAt }
+  const next = stops.slice(index + 1).find((later) => later.passedAt)?.passedAt ?? null
+  if (!next) return { enteredAt: stop.passedAt, exitedAt: null }
+  const afterStay = addMinutes(stop.passedAt, stop.breakMin)
+  return { enteredAt: stop.passedAt, exitedAt: afterStay < next ? afterStay : next }
+}
+
 export function tripsApi(db: MockDatabase): TripApi[] {
   const required = authorizationRequired(db)
   const routes = new Map(db.routeTemplates.all().map((route) => [route.no, route.name]))
@@ -54,7 +68,8 @@ export function tripsApi(db: MockDatabase): TripApi[] {
         latitude: site?.latitude ?? 0,
         longitude: site?.longitude ?? 0,
         plannedAt: schedule[index] ?? trip.plannedDeparture,
-        passedAt: stop.passedAt
+        passedAt: stop.passedAt,
+        ...zoneTimes(trip.stops, index)
       }
     })
     const arrival = plannedArrival(trip)

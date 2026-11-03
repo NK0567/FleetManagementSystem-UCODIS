@@ -6,7 +6,9 @@ import CompanyDocumentForm from '../components/CompanyDocumentForm.vue'
 import { companyDocumentService } from '../services/companyDocumentService'
 import type { CompanyDocumentApi } from '../types/companyDocument.types'
 
-const props = defineProps<{ initialData?: Partial<CompanyDocumentApi> }>()
+const props = withDefaults(defineProps<{ initialData?: Partial<CompanyDocumentApi> }>(), {
+  initialData: () => ({})
+})
 const emit = defineEmits<{ close: []; created: [companyDocument: CompanyDocumentApi] }>()
 
 const { t } = useI18n()
@@ -42,7 +44,7 @@ const { isSaving, saveError, validationErrors, createItem } = useEntityCreate({
       <CompanyDocumentForm
         ref="formRef"
         is-new
-        :initial-data="props.initialData ?? {}"
+        :initial-data="props.initialData"
         :validation-errors="validationErrors"
       />
     </template>
