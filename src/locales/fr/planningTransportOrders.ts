@@ -594,5 +594,7 @@ export default {
   'planning.transportOrders.board.stat.postponed': 'Reportée',
   'planning.transportOrders.board.stat.returned': 'Retournée',
   'planning.transportOrders.board.stat.notExecuted': 'Non exécutée',
-  'planning.transportOrders.board.stat.toReplan': 'À replanifier'
+  'planning.transportOrders.board.stat.toReplan': 'À replanifier',
+  'planning.transportOrders.closing.kinds.depot_document': 'Document remis par le dépôt',
+  'planning.transportOrders.closing.kindPlaceholder': 'Choisissez le type de document'
 }

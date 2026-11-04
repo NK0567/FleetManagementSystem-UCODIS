@@ -5,6 +5,7 @@ import { CircleAlert, CircleCheck, Save } from '@lucide/vue'
 import type { FileMeta } from '@/types/file.types'
 import DocumentaryDossierList from '@/modules/planning/closing/components/DocumentaryDossierList.vue'
 import { EMPTY_CELL, formatDateTime, formatNumber } from '@/utils/format'
+import ChoiceSelect, { type Choice } from './ChoiceSelect.vue'
 import type { DebriefingInput, TransportOrderClosingApi } from '../types/transportOrder.types'
 
 const props = defineProps<{
@@ -38,6 +39,15 @@ watch(
     kind.value = missing[0] ?? ''
   },
   { immediate: true }
+)
+/* A list of document kinds with their French names, instead of a code to type: the kinds the
+ * settings require, then the usual ones. */
+const KNOWN_KINDS = ['loading_list', 'delivery_note', 'depot_document']
+const kindChoices = computed<Choice[]>(() =>
+  [...new Set([...props.closing.requiredDocuments, ...KNOWN_KINDS])].map((value) => ({
+    value,
+    label: kindLabel(value)
+  }))
 )
 const kindValid = computed(() => /^[a-z0-9_]{1,40}$/.test(kind.value.trim()))
 
@@ -189,10 +199,11 @@ const buttonClass =
 
     <div v-if="editable" class="rounded border border-border p-3 space-y-3">
       <BaseFormField :label="t('planning.transportOrders.closing.kind')" required>
-        <FormInput v-model="kind" :maxlength="40" :invalid="!!kind && !kindValid" />
-        <p class="text-xs text-muted-foreground mt-1">
-          {{ t('planning.transportOrders.closing.kindHint') }}
-        </p>
+        <ChoiceSelect
+          v-model="kind"
+          :choices="kindChoices"
+          :placeholder="t('planning.transportOrders.closing.kindPlaceholder')"
+        />
       </BaseFormField>
       <FileAttachmentField :file="null" :disabled="busy || !kindValid" @uploaded="onUploaded" />
     </div>

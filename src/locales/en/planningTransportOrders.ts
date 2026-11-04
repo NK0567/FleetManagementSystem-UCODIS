@@ -590,5 +590,7 @@ export default {
   'planning.transportOrders.board.stat.postponed': 'Postponed',
   'planning.transportOrders.board.stat.returned': 'Returned',
   'planning.transportOrders.board.stat.notExecuted': 'Not executed',
-  'planning.transportOrders.board.stat.toReplan': 'To be replanned'
+  'planning.transportOrders.board.stat.toReplan': 'To be replanned',
+  'planning.transportOrders.closing.kinds.depot_document': 'Document handed over by the depot',
+  'planning.transportOrders.closing.kindPlaceholder': 'Choose the document type'
 }

@@ -34,7 +34,7 @@ export default {
   'fleet.fleetStatus.send.title': "Envoyer l'état de flotte du {day}",
   'fleet.fleetStatus.send.hint': "Tout l'état du jour est envoyé, sans les filtres, puis archivé.",
   'fleet.fleetStatus.send.recipients': 'Destinataires',
-  'fleet.fleetStatus.send.placeholder': 'direction@ucodis.mg, client@exemple.com',
+  'fleet.fleetStatus.send.placeholder': "direction{'@'}ucodis.mg, client{'@'}exemple.com",
   'fleet.fleetStatus.send.invalid': "L'adresse « {email} » n'est pas valide.",
   'fleet.fleetStatus.send.simulated': "Maquette : l'envoi est enregistré, aucun e-mail ne part.",
   'fleet.fleetStatus.send.confirm': 'Envoyer',
@@ -42,6 +42,8 @@ export default {
   'fleet.fleetStatus.send.done': 'État de flotte envoyé à {recipients}.',
   'fleet.fleetStatus.send.last': 'Dernier envoi le {date} (état du {day}) à {recipients}.',
   'fleet.fleetStatus.send.history': 'Derniers envois',
-  'fleet.fleetStatus.send.line': '{date} · état du {day} · lignes : {count} · {recipients} · par {user}',
-  'fleet.fleetStatus.send.required': 'Indiquez au moins une adresse e-mail, séparées par des virgules.'
+  'fleet.fleetStatus.send.line':
+    '{date} · état du {day} · lignes : {count} · {recipients} · par {user}',
+  'fleet.fleetStatus.send.required':
+    'Indiquez au moins une adresse e-mail, séparées par des virgules.'
 }
