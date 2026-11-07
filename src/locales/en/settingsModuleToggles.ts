@@ -157,5 +157,7 @@ export default {
   'settings.userAccounts.noResultsCreate': 'No account. Create one with New.',
   'settings.company.seeVehicles': 'See the vehicles',
   'settings.company.noChange': 'No change to save.',
-  'settings.company.missingFields': 'Fill in the required fields.'
+  'settings.company.missingFields': 'Fill in the required fields.',
+  'settings.userAccounts.form.employee': 'Driver record',
+  'settings.userAccounts.form.employeeHint': 'Links this account to the driver in the staff list: it is what shows his transport order in My space.'
 }

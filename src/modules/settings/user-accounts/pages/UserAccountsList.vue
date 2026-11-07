@@ -123,6 +123,12 @@ type Dialog = 'create' | 'edit' | 'disable' | 'enable' | null
 const dialog = ref<Dialog>(null)
 const working = ref(false)
 const actionError = ref<string | null>(null)
+/* Only a driver or a driver's assistant account is tied to a person of the staff list: it is what
+ * shows his own transport order in « My space ». Any other account needs no such record. */
+const needsDriverRecord = computed(
+  () => form.profile === 'DRIVER' || form.profile === 'DRIVER_ASSISTANT'
+)
+
 const form = reactive({
   no: '',
   name: '',
@@ -384,12 +390,15 @@ const dialogTitle = computed(() =>
               </option>
             </select>
           </BaseFormField>
-          <BaseFormField :label="t('settings.userAccounts.col.employeeNo')">
+          <BaseFormField v-if="needsDriverRecord" :label="t('settings.userAccounts.form.employee')">
             <ReferenceLookup
               v-model="form.employeeNo"
               reference-key="employees"
-              :modal-title="t('settings.userAccounts.col.employeeNo')"
+              :modal-title="t('settings.userAccounts.form.employee')"
             />
+            <p class="text-xs text-muted-foreground mt-1">
+              {{ t('settings.userAccounts.form.employeeHint') }}
+            </p>
           </BaseFormField>
           <BaseFormField :label="t('settings.userAccounts.col.email')">
             <FormInput v-model="form.email" type="email" :maxlength="120" />

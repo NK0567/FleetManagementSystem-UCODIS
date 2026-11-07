@@ -108,7 +108,7 @@ export default {
   'settings.company.field.activity': 'Activité',
   'settings.company.field.address': 'Adresse',
   'settings.company.field.country': 'Pays',
-  'settings.company.field.taxId': 'NIF / STAT',
+  'settings.company.field.taxId': 'NIF / STAT (numéros fiscal et statistique)',
   'settings.company.tractors': 'Tracteurs',
   'settings.company.trailers': 'Remorques tractées (semi-remorques, citernes, remorques)',
   'settings.company.vehicles': 'Véhicules',
@@ -157,5 +157,7 @@ export default {
   'settings.userAccounts.noResultsCreate': 'Aucun compte. Créez-en un avec Nouveau.',
   'settings.company.seeVehicles': 'Voir les véhicules',
   'settings.company.noChange': 'Aucune modification à enregistrer.',
-  'settings.company.missingFields': 'Renseignez les champs obligatoires.'
+  'settings.company.missingFields': 'Renseignez les champs obligatoires.',
+  'settings.userAccounts.form.employee': 'Fiche du conducteur',
+  'settings.userAccounts.form.employeeHint': "Relie ce compte au conducteur dans la liste du personnel : c'est ce qui affiche son ordre de transport dans « Mon espace »."
 }
