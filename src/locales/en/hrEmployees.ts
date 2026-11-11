@@ -80,5 +80,12 @@ export default {
   'hr.employees.sync.done':
     'Synchronization done: {created} created, {updated} updated, {unchanged} unchanged, {skipped} left out.',
   'hr.employees.sync.error': 'The synchronization could not be done.',
-  'hr.employees.noResultsCreate': 'No employee. Create one with New.'
+  'hr.employees.noResultsCreate': 'No employee. Create one with New.',
+  'hr.employees.score.title': 'Driving score, for bonuses',
+  'hr.employees.score.outOf': 'out of 100',
+  'hr.employees.score.previous': 'End of last month',
+  'hr.employees.score.rank': 'Rank',
+  'hr.employees.score.threshold': 'Training threshold',
+  'hr.employees.score.bonusRule': 'Bonus calculation from this score: to be decided.',
+  'hr.employees.score.unavailable': 'The driving score could not be loaded.'
 }

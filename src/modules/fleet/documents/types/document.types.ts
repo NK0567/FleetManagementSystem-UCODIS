@@ -3,7 +3,8 @@ import type {
   ComplianceGapReason,
   DeclaredStatus,
   DocumentState,
-  DocumentValidityKind
+  DocumentValidityKind,
+  RenewalLevel
 } from '../domain/document'
 
 export const SUBJECT_KINDS = ['vehicle', 'person'] as const
@@ -34,6 +35,11 @@ export interface DocumentApi {
   declaredAt: string | null
   declaredBy: string | null
   state: DocumentState
+  /** Renewal follow-up: where it stands, the planned closing day and the real one. */
+  renewalLevel: RenewalLevel
+  renewalTargetOn: string | null
+  renewalClosedOn: string | null
+  renewalLate: boolean
   /** E-mails and SMS sent for this document by the document alert rule (simulated). */
   notifications: { channel: 'email' | 'sms'; to: string; sentAt: string }[]
   version: number
@@ -58,6 +64,8 @@ export interface MissingDocumentApi {
   documentTypeName: string
   reason: ComplianceGapReason
   documentNo: string | null
+  renewalLevel: RenewalLevel | null
+  renewalTargetOn: string | null
 }
 
 export type MissingDocumentSearchColumn =

@@ -21,6 +21,12 @@ interface Bar {
   start: string
   end: string
   status: string
+  /** What really happened: the departure, and the arrival or else the present moment. */
+  actualStart: string | null
+  actualEnd: string | null
+  /** Realized ended after the plan, or still running past it. */
+  late: boolean
+  running: boolean
 }
 
 interface Row {
@@ -52,6 +58,13 @@ const winFrom = weekFrom
 const winTo = weekTo
 const columns = computed(() => days.value.map((day) => ({ key: day, label: formatDate(day), day })))
 const today = todayIso()
+
+/** Now, in the local format of the trips (no zone), to draw a trip still on the road. */
+function nowLocal(): string {
+  const now = new Date()
+  const pad = (value: number) => String(value).padStart(2, '0')
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}:00`
+}
 
 async function load() {
   loading.value = true
@@ -93,7 +106,17 @@ const ordersByTrip = computed(() => {
 })
 
 function barOf(trip: TripApi): Bar {
+  const running = !!trip.actualDeparture && !trip.actualArrival
+  const actualEnd = trip.actualArrival ?? (running ? nowLocal() : null)
   return {
+    actualStart: trip.actualDeparture,
+    actualEnd,
+    running,
+    late:
+      !!actualEnd &&
+      (trip.actualArrival
+        ? trip.actualArrival > trip.plannedArrival
+        : actualEnd > trip.plannedArrival),
     key: trip.no,
     tripNo: trip.no,
     orderNos: ordersByTrip.value.get(trip.no) ?? [],
@@ -150,9 +173,9 @@ const shownRows = computed(() =>
 )
 
 const span = computed(() => new Date(winTo.value).getTime() - new Date(winFrom.value).getTime())
-function position(bar: Bar) {
-  const from = Math.max(new Date(bar.start).getTime(), new Date(winFrom.value).getTime())
-  const to = Math.min(new Date(bar.end).getTime(), new Date(winTo.value).getTime())
+function position(bar: Bar, from_ = bar.start, to_ = bar.end) {
+  const from = Math.max(new Date(from_).getTime(), new Date(winFrom.value).getTime())
+  const to = Math.min(new Date(to_).getTime(), new Date(winTo.value).getTime())
   const base = new Date(winFrom.value).getTime()
   const left = ((from - base) / span.value) * 100
   const width = Math.max(((to - from) / span.value) * 100, 0.6)
@@ -175,8 +198,17 @@ function barTitle(bar: Bar) {
   return [
     bar.orderNos.length ? bar.orderNos.join(', ') : bar.tripNo,
     bar.label,
-    `${formatDateTime(bar.start)} → ${formatDateTime(bar.end)}`
-  ].join(' · ')
+    `${t('planning.calendar.legend.planned')} ${formatDateTime(bar.start)} → ${formatDateTime(bar.end)}`,
+    bar.actualStart
+      ? `${t('planning.calendar.legend.realized')} ${formatDateTime(bar.actualStart)} → ${
+          bar.actualEnd && !bar.running
+            ? formatDateTime(bar.actualEnd)
+            : t('planning.calendar.running')
+        }`
+      : ''
+  ]
+    .filter(Boolean)
+    .join(' · ')
 }
 
 const weekLabel = computed(() =>
@@ -240,6 +272,15 @@ const navClass =
     <div class="flex flex-wrap items-center gap-4 px-4 sm:px-6 py-2 text-xs text-muted-foreground">
       <span class="inline-flex items-center gap-1.5">
         <span class="w-3 h-3 rounded-sm bg-primary/70" />{{ t('planning.calendar.legend.planned') }}
+      </span>
+      <span class="inline-flex items-center gap-1.5">
+        <span class="w-3 h-3 rounded-sm bg-success" />{{ t('planning.calendar.legend.onTime') }}
+      </span>
+      <span class="inline-flex items-center gap-1.5">
+        <span class="w-3 h-3 rounded-sm bg-warning" />{{ t('planning.calendar.legend.late') }}
+      </span>
+      <span class="inline-flex items-center gap-1.5">
+        <span class="w-3 h-3 rounded-sm bg-info" />{{ t('planning.calendar.legend.running') }}
       </span>
       <span class="inline-flex items-center gap-1.5">
         <span class="w-3 h-3 rounded-sm bg-destructive" />{{
@@ -308,7 +349,7 @@ const navClass =
             </span>
             {{ row.label }}
           </div>
-          <div class="relative h-11">
+          <div class="relative h-14">
             <div
               class="absolute inset-0 grid pointer-events-none"
               :style="{ gridTemplateColumns: `repeat(${columns.length}, minmax(0, 1fr))` }"
@@ -324,7 +365,7 @@ const navClass =
               v-for="bar in row.bars"
               :key="bar.key"
               type="button"
-              class="absolute top-1.5 h-8 rounded px-1.5 text-left text-xs text-white truncate cursor-pointer shadow-sm hover:opacity-90"
+              class="absolute top-1 h-6 rounded px-1.5 text-left text-xs text-white truncate cursor-pointer shadow-sm hover:opacity-90"
               :class="overlaps.has(`${row.no}|${bar.key}`) ? 'bg-destructive' : 'bg-primary/70'"
               :style="position(bar)"
               :title="barTitle(bar)"
@@ -332,6 +373,16 @@ const navClass =
             >
               {{ bar.orderNos[0] ?? bar.tripNo }} · {{ bar.label }}
             </button>
+            <button
+              v-for="bar in row.bars.filter((item) => item.actualStart && item.actualEnd)"
+              :key="`real-${bar.key}`"
+              type="button"
+              class="absolute bottom-1 h-5 rounded cursor-pointer shadow-sm hover:opacity-90"
+              :class="bar.late ? 'bg-warning' : bar.running ? 'bg-info' : 'bg-success'"
+              :style="position(bar, bar.actualStart!, bar.actualEnd!)"
+              :title="barTitle(bar)"
+              @click="open(bar)"
+            />
           </div>
         </div>
       </div>

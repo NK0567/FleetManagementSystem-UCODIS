@@ -19,7 +19,7 @@ const { t } = useI18n()
 const router = useRouter()
 const store = useMissingDocumentStore()
 const { canInsert } = usePermissions('DOCUMENT')
-const { optionLabel } = useListCellFormatters()
+const { optionLabel, formatDate } = useListCellFormatters()
 
 const searchColumnOptions = computed<{ value: MissingDocumentSearchColumn; label: string }[]>(
   () => [
@@ -41,6 +41,18 @@ const tableColumns = computed<TableColumn[]>(() => [
     sortKey: 'documentTypeName',
     label: t('fleet.missingDocuments.col.documentTypeName'),
     minW: '220px'
+  },
+  {
+    sortKey: 'renewalLevel',
+    label: t('fleet.missingDocuments.col.renewalLevel'),
+    minW: '200px',
+    formatter: optionLabel('renewalLevel')
+  },
+  {
+    sortKey: 'renewalTargetOn',
+    label: t('fleet.missingDocuments.col.renewalTargetOn'),
+    minW: '150px',
+    formatter: formatDate
   },
   {
     sortKey: 'reason',

@@ -7,7 +7,7 @@ import { documentTypeService, type DocumentTypeApi } from '@/modules/fleet/docum
 import type { FileMeta } from '@/types/file.types'
 import { todayIso } from '@/utils/date'
 import { formatDate, formatDateTime } from '@/utils/format'
-import { documentIssues, suggestedExpiry } from '../domain/document'
+import { documentIssues, suggestedExpiry, type RenewalLevel } from '../domain/document'
 import type { DocumentApi, SubjectKind } from '../types/document.types'
 
 const props = withDefaults(
@@ -41,7 +41,9 @@ const { draft, expose } = useEntityForm({
     issueDate: null as string | null,
     expiryDate: null as string | null,
     noticeDays: null as number | null,
-    fileNo: null as string | null
+    fileNo: null as string | null,
+    renewalLevel: 'not_started' as RenewalLevel,
+    renewalTargetOn: null as string | null
   }),
   createOnly: ['target', 'subjectNo', 'documentTypeNo'],
   required: ['target', 'subjectNo', 'documentTypeNo'],
@@ -107,7 +109,13 @@ function onRemoved() {
   draft.fileNo = null
 }
 
-const expandedSections = ref({ general: true, lifetime: true, status: true, audit: false })
+const expandedSections = ref({
+  general: true,
+  lifetime: true,
+  status: true,
+  renewal: true,
+  audit: false
+})
 const { hasValidationError } = useFormValidationUi({
   validationErrors: () => props.validationErrors,
   expandedSections,
@@ -275,6 +283,27 @@ defineExpose(expose)
             <p class="text-xs text-muted-foreground mt-1">
               {{ formatDateTime(initialData.declaredAt) }} · {{ initialData.declaredBy }}
             </p>
+          </BaseFormField>
+        </div>
+      </FormSection>
+
+      <FormSection
+        v-if="limited && !initialData.replacedByNo"
+        v-model:open="expandedSections.renewal"
+        :title="t('fleet.documents.form.renewal')"
+        :summary="[]"
+      >
+        <div class="space-y-3 min-w-0">
+          <BaseFormField :label="t('fleet.documents.form.renewalLevel')">
+            <OptionsSelect
+              :model-value="draft.renewalLevel"
+              options-key="renewalLevel"
+              :disabled="disabled"
+              @update:model-value="draft.renewalLevel = String($event) as RenewalLevel"
+            />
+          </BaseFormField>
+          <BaseFormField :label="t('fleet.documents.form.renewalTargetOn')">
+            <DateFormInput v-model="draft.renewalTargetOn" :disabled="disabled" />
           </BaseFormField>
         </div>
       </FormSection>

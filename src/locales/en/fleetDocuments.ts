@@ -63,5 +63,13 @@ export default {
   'fleet.documents.alert.expiring': 'Document to renew: it expires on {date} ({days} days notice).',
   'fleet.documents.alert.sent.email': 'E-mail sent to {to} on {date} (simulated).',
   'fleet.documents.alert.sent.sms': 'SMS sent to {to} on {date} (simulated).',
-  'fleet.documents.noResultsCreate': 'No document. Create one with New.'
+  'fleet.documents.noResultsCreate': 'No document. Create one with New.',
+  'fleet.documents.form.renewal': 'Renewal follow-up',
+  'fleet.documents.form.renewalLevel': 'Handling level',
+  'fleet.documents.form.renewalTargetOn': 'Planned closing date',
+  'fleet.documents.col.renewalLevel': 'Handling level',
+  'fleet.documents.col.renewalTargetOn': 'Planned closing',
+  'fleet.documents.col.renewalClosedOn': 'Actual closing',
+  'fleet.missingDocuments.col.renewalLevel': 'Handling level',
+  'fleet.missingDocuments.col.renewalTargetOn': 'Planned closing'
 }

@@ -592,5 +592,10 @@ export default {
   'planning.transportOrders.board.stat.notExecuted': 'Not executed',
   'planning.transportOrders.board.stat.toReplan': 'To be replanned',
   'planning.transportOrders.closing.kinds.depot_document': 'Document handed over by the depot',
-  'planning.transportOrders.closing.kindPlaceholder': 'Choose the document type'
+  'planning.transportOrders.closing.kindPlaceholder': 'Choose the document type',
+  'planning.calendar.legend.realized': 'Realized',
+  'planning.calendar.legend.onTime': 'Done on time',
+  'planning.calendar.legend.late': 'Done late',
+  'planning.calendar.legend.running': 'Under way',
+  'planning.calendar.running': 'under way'
 }

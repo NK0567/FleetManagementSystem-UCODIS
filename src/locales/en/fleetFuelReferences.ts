@@ -24,5 +24,6 @@ export default {
     'Leave empty for a reference valid on every corridor of the vehicle.',
   'fleet.fuelReferences.form.referenceL100': 'Reference consumption (L/100 km)',
   'fleet.fuelReferences.form.comment': 'Comment',
-  'fleet.fuelReferences.noResultsCreate': 'No reference consumption per vehicle. Create one with New.'
+  'fleet.fuelReferences.noResultsCreate':
+    'No reference consumption per vehicle. Create one with New.'
 }

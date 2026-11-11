@@ -13,6 +13,10 @@ export interface TrainingRow extends MockRow {
   trainer: string
   attendedOn: string | null
   result: string
+  /** Mark out of 20 given when the training was followed. */
+  score?: number | null
+  /** When the driver is due for the next training. */
+  nextTrainingOn?: string | null
   cancelledAt: string | null
   cancelReason: string
 }
@@ -32,6 +36,8 @@ const SEED: Omit<TrainingRow, keyof typeof seedAudit>[] = [
     trainer: SCHOOL,
     attendedOn: day(-60),
     result: 'Validée, très bon niveau.',
+    score: 17,
+    nextTrainingOn: day(120),
     cancelledAt: null,
     cancelReason: ''
   },
@@ -59,6 +65,36 @@ const SEED: Omit<TrainingRow, keyof typeof seedAudit>[] = [
     ...pending
   },
   {
+    no: 'FOR-00006',
+    employeeNo: 'UCT-013',
+    topic: 'Conduite défensive',
+    reason: 'other',
+    originNo: '',
+    plannedOn: day(-90),
+    trainer: SCHOOL,
+    attendedOn: day(-90),
+    result: 'Acquis, à revoir sur le freinage en descente.',
+    score: 12,
+    nextTrainingOn: day(14),
+    cancelledAt: null,
+    cancelReason: ''
+  },
+  {
+    no: 'FOR-00007',
+    employeeNo: 'UCT-014',
+    topic: 'Sécurité du transport de carburant',
+    reason: 'other',
+    originNo: '',
+    plannedOn: day(-45),
+    trainer: SCHOOL,
+    attendedOn: day(-45),
+    result: 'Validée.',
+    score: 15,
+    nextTrainingOn: day(-3),
+    cancelledAt: null,
+    cancelReason: ''
+  },
+  {
     no: 'FOR-00004',
     employeeNo: 'UCT-013',
     topic: 'Excès de vitesse',
@@ -84,5 +120,5 @@ export const trainingsCollection: CollectionDefinition<TrainingRow> = {
   name: 'trainings',
   seed: () =>
     SEED.map((row) => ({ ...row, ...seedAudit, createdBy: 'FLT001', modifiedBy: 'FLT001' })),
-  dateFields: ['plannedOn', 'attendedOn', 'cancelledAt']
+  dateFields: ['plannedOn', 'attendedOn', 'nextTrainingOn', 'cancelledAt']
 }

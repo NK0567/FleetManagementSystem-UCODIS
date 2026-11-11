@@ -728,6 +728,7 @@ export function registerWorkOrdersHandlers(router: MockRouter, db: MockDatabase)
           subsystemNo: diagnosis.subsystemNo ?? '',
           modeNo: diagnosis.modeNo,
           causeNo: diagnosis.causeNo,
+          observation: readString(body, 'observation').slice(0, 500),
           by: sessionUser(request).code,
           at: nowIsoDateTime()
         },

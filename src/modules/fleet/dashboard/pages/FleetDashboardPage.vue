@@ -4,7 +4,20 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import { findFeatureForPath } from '@/core/navigation/featureRoutes'
 import { useMenuPermissionsStore } from '@/stores/menuPermissions'
-import { Container, FileExclamationPoint, Fuel, Route, Truck, UserRound } from '@lucide/vue'
+import {
+  Container,
+  FileExclamationPoint,
+  Fuel,
+  Gauge,
+  Package,
+  Route,
+  Truck,
+  UserRound,
+  TriangleAlert,
+  OctagonX,
+  CircleSlash
+} from '@lucide/vue'
+import { IMMOBILIZATION_CATEGORIES } from '@/modules/fleet/vehicles/domain/vehicleStatus'
 import { LIVE_SITUATIONS } from '@/modules/fleet/live-map/domain/livePosition'
 import { useOptionsStore } from '@/stores/optionsStore'
 import { EMPTY_CELL, formatDate, formatNumber } from '@/utils/format'
@@ -132,6 +145,74 @@ const kpis = computed(() => {
   ]
 })
 
+/** The figures of the day first; the month stays beside them so a quiet day still says something. */
+const dailyTiles = computed(() => {
+  const daily = store.dashboard?.daily
+  if (!daily) return []
+  const month = (value: string) => t('fleet.dashboard.daily.month', { value })
+  return [
+    {
+      key: 'km',
+      icon: Gauge,
+      label: t('fleet.dashboard.daily.km'),
+      value: `${formatNumber(daily.distanceKm)} km`,
+      sub: month(`${formatNumber(daily.distanceKmMonth)} km`),
+      tone: ''
+    },
+    {
+      key: 'quantity',
+      icon: Package,
+      label: t('fleet.dashboard.daily.quantity'),
+      value: `${formatNumber(daily.transportedTonnes, 1)} t`,
+      sub: month(`${formatNumber(daily.transportedTonnesMonth, 1)} t`),
+      tone: ''
+    },
+    {
+      key: 'fuel',
+      icon: Fuel,
+      label: t('fleet.dashboard.daily.fuel'),
+      value: `${formatNumber(daily.fuelLiters)} L`,
+      sub: month(`${formatNumber(daily.fuelLitersMonth)} L`),
+      tone: ''
+    },
+    {
+      key: 'immobilized',
+      icon: CircleSlash,
+      label: t('fleet.dashboard.daily.immobilized'),
+      value: String(store.dashboard?.immobilized.length ?? 0),
+      sub: IMMOBILIZATION_CATEGORIES.map(
+        (category) =>
+          `${optionsStore.getOptionLabel('immobilizationCategory', category)} ${store.dashboard?.immobilizedByCategory[category] ?? 0}`
+      ).join(' · '),
+      tone: (store.dashboard?.immobilized.length ?? 0) > 0 ? 'text-destructive' : ''
+    },
+    {
+      key: 'accidents',
+      icon: TriangleAlert,
+      label: t('fleet.dashboard.daily.accidents'),
+      value: String(daily.accidents),
+      sub: month(String(daily.accidentsMonth)),
+      tone: daily.accidents > 0 ? 'text-destructive' : ''
+    },
+    {
+      key: 'incidents',
+      icon: TriangleAlert,
+      label: t('fleet.dashboard.daily.incidents'),
+      value: String(daily.incidents),
+      sub: month(String(daily.incidentsMonth)),
+      tone: daily.incidents > 0 ? 'text-destructive' : ''
+    },
+    {
+      key: 'stops',
+      icon: OctagonX,
+      label: t('fleet.dashboard.daily.stops'),
+      value: String(daily.unauthorizedStops),
+      sub: month(String(daily.unauthorizedStopsMonth)),
+      tone: daily.unauthorizedStops > 0 ? 'text-destructive' : ''
+    }
+  ]
+})
+
 const fleetTotal = computed(() =>
   (store.dashboard?.fleetByStatus ?? []).reduce((total, item) => total + item.count, 0)
 )
@@ -159,6 +240,28 @@ onBeforeUnmount(() => {
     <LoadingSpinner v-if="store.loading && !store.dashboard" :text="t('common.loading')" />
 
     <template v-if="store.dashboard">
+      <section>
+        <h2 class="text-sm font-semibold text-card-foreground mb-2">
+          {{ t('fleet.dashboard.daily.title') }}
+        </h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-3">
+          <div
+            v-for="tile in dailyTiles"
+            :key="tile.key"
+            class="bg-card border border-border rounded p-3 flex items-start gap-2"
+          >
+            <span class="p-2 rounded bg-primary/10 text-primary shrink-0">
+              <component :is="tile.icon" class="w-4 h-4" />
+            </span>
+            <div class="min-w-0">
+              <p class="text-xs text-muted-foreground">{{ tile.label }}</p>
+              <p class="text-xl font-semibold tabular-nums" :class="tile.tone">{{ tile.value }}</p>
+              <p class="text-xs text-muted-foreground">{{ tile.sub }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section v-if="park" class="bg-card border border-border rounded">
         <div class="flex items-center justify-between px-4 py-3 border-b border-border">
           <h2 class="text-sm font-semibold text-card-foreground">
@@ -412,10 +515,17 @@ onBeforeUnmount(() => {
                   "
                   class="block px-4 py-2.5 hover:bg-accent"
                 >
-                  <span class="block text-sm font-medium text-card-foreground">
-                    {{ vehicle.plate }}
+                  <span class="flex items-center justify-between gap-2">
+                    <span class="text-sm font-medium text-card-foreground">
+                      {{ vehicle.plate }}
+                    </span>
+                    <span
+                      class="text-xs px-2 py-0.5 rounded border border-border text-card-foreground"
+                    >
+                      {{ optionsStore.getOptionLabel('immobilizationCategory', vehicle.category) }}
+                    </span>
                   </span>
-                  <span class="block text-xs text-muted-foreground truncate">
+                  <span class="block text-xs text-muted-foreground">
                     {{ vehicle.reason }}
                   </span>
                 </component>
@@ -423,6 +533,32 @@ onBeforeUnmount(() => {
             </ul>
             <p v-else class="px-4 py-6 text-sm text-muted-foreground">
               {{ t('fleet.dashboard.noImmobilized') }}
+            </p>
+          </div>
+
+          <div class="bg-card border border-border rounded">
+            <div class="px-4 py-3 border-b border-border">
+              <h2 class="text-sm font-semibold text-card-foreground">
+                {{ t('fleet.dashboard.unavailableDrivers') }}
+              </h2>
+            </div>
+            <ul v-if="store.dashboard.unavailableDrivers.length" class="divide-y divide-border">
+              <li
+                v-for="driver in store.dashboard.unavailableDrivers"
+                :key="driver.driverNo"
+                class="px-4 py-2.5"
+              >
+                <span class="block text-sm font-medium text-card-foreground">
+                  {{ driver.fullName }}
+                </span>
+                <span class="block text-xs text-muted-foreground">
+                  {{ optionsStore.getOptionLabel('driverAvailability', driver.availability) }}
+                  · {{ driver.reason }}
+                </span>
+              </li>
+            </ul>
+            <p v-else class="px-4 py-6 text-sm text-muted-foreground">
+              {{ t('fleet.dashboard.noUnavailableDriver') }}
             </p>
           </div>
 

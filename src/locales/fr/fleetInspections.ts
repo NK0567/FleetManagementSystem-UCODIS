@@ -35,7 +35,8 @@ export default {
   'fleet.inspections.form.recheckDueOn': 'Contre-visite avant le',
   'fleet.inspections.form.recheckDoneOn': 'Contre-visite passée le',
   'fleet.inspections.form.recheckAwaited': 'En attente : le véhicule est immobilisé',
-  'fleet.inspections.form.resultHint': 'Un poste non conforme rend la visite non conforme et programme la contre-visite.',
+  'fleet.inspections.form.resultHint':
+    'Un poste non conforme rend la visite non conforme et programme la contre-visite.',
   'fleet.inspections.form.findingsHint':
     'Laissé vide, il reprend les postes non conformes et leurs constats.',
   'fleet.inspections.form.items': "Grille d'inspection",

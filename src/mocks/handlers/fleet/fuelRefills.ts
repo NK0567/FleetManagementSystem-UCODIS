@@ -1,8 +1,11 @@
 import {
   isDuplicateRefill,
+  paymentModeOf,
+  plannedGap,
   refillChecks,
   refillStatus,
   REFILL_CHECK_CODES,
+  REFILL_PAYMENT_MODES,
   type RefillCheckCode
 } from '@/modules/fleet/fuel-refills/domain/refill'
 import type {
@@ -29,6 +32,7 @@ import { conflict, unprocessable } from '../../http/errors'
 import {
   readBoolean,
   readDateTime,
+  readEnum,
   readNumber,
   readPatch,
   readString,
@@ -49,18 +53,22 @@ import { fleetSettings } from './settings'
 /** How far from the refill a GPS report still tells where the vehicle was. */
 const GPS_WINDOW_MIN = 30
 
-type EditableFields = Pick<
-  FuelRefillRow,
-  | 'refueledAt'
-  | 'driverNo'
-  | 'tripNo'
-  | 'stationSiteNo'
-  | 'stationName'
-  | 'liters'
-  | 'unitPrice'
-  | 'odometerKm'
-  | 'fullTank'
-  | 'receiptFileNo'
+type EditableFields = Required<
+  Pick<
+    FuelRefillRow,
+    | 'refueledAt'
+    | 'driverNo'
+    | 'tripNo'
+    | 'stationSiteNo'
+    | 'stationName'
+    | 'liters'
+    | 'unitPrice'
+    | 'odometerKm'
+    | 'fullTank'
+    | 'receiptFileNo'
+    | 'paymentMode'
+    | 'plannedLiters'
+  >
 >
 
 export function fuelRefillsApi(db: MockDatabase, language: MockLanguage): FuelRefillApi[] {
@@ -164,6 +172,9 @@ export function fuelRefillsApi(db: MockDatabase, language: MockLanguage): FuelRe
       driverName,
       stationLabel: site?.name ?? refill.stationName,
       amount: Math.round(refill.liters * refill.unitPrice),
+      paymentMode: paymentModeOf(refill.paymentMode, refill.channel),
+      plannedLiters: refill.plannedLiters ?? null,
+      gapLiters: plannedGap(refill.liters, refill.plannedLiters),
       transactionNo: transactions.get(refill.no) ?? null,
       checks,
       status: refillStatus(results, !!refill.qualification),
@@ -191,11 +202,27 @@ export function registerFuelRefillsHandlers(router: MockRouter, db: MockDatabase
     unitPrice: (input) => readNumber(input, 'unitPrice', { required: true, min: 1 }) ?? 0,
     odometerKm: (input) => readNumber(input, 'odometerKm', { required: true, min: 0 }) ?? 0,
     fullTank: (input) => readBoolean(input, 'fullTank', true),
+    paymentMode: (input) => readEnum(input, 'paymentMode', REFILL_PAYMENT_MODES) ?? 'cash',
+    plannedLiters: (input) => readNumber(input, 'plannedLiters', { min: 0 }),
     receiptFileNo: (input) => {
       const fileNo = readString(input, 'receiptFileNo')
       if (!fileNo) return null
       if (!db.files.exists(fileNo)) throw unknownReference('receiptFileNo')
       return fileNo
+    }
+  }
+
+  /** Outside a card, only the trucks negotiated with the station may fill up there. */
+  function assertApprovedAtStation(refill: {
+    vehicleNo: string
+    stationSiteNo: string | null
+    paymentMode?: string
+  }) {
+    if (!refill.paymentMode || refill.paymentMode === 'card' || !refill.stationSiteNo) return
+    const station = db.sites.find(refill.stationSiteNo)
+    const approved = station?.approvedVehicleNos ?? []
+    if (station && approved.length && !approved.includes(refill.vehicleNo)) {
+      throw unprocessable(FLEET_MESSAGES.refillVehicleNotApproved, { station: station.name })
     }
   }
 
@@ -240,6 +267,8 @@ export function registerFuelRefillsHandlers(router: MockRouter, db: MockDatabase
       unitPrice: readers.unitPrice(input),
       odometerKm: readers.odometerKm(input),
       fullTank: readers.fullTank(input),
+      paymentMode: readers.paymentMode(input),
+      plannedLiters: readers.plannedLiters(input),
       receiptFileNo: readers.receiptFileNo(input)
     }
     // A trip named by the user must be one of the vehicle; left empty, it is the trip the vehicle was on.
@@ -278,6 +307,7 @@ export function registerFuelRefillsHandlers(router: MockRouter, db: MockDatabase
       channel,
       qualification: null
     }
+    assertApprovedAtStation(refill)
     assertNotDuplicate(refill)
     return refill
   }
@@ -288,7 +318,11 @@ export function registerFuelRefillsHandlers(router: MockRouter, db: MockDatabase
     collection: db.fuelRefills,
     list: (request) => fuelRefillsApi(db, request.language),
     searchColumns: ['no', 'vehiclePlate', 'driverName', 'stationLabel'],
-    optionFields: { status: 'refillStatus', channel: 'refillChannel' },
+    optionFields: {
+      status: 'refillStatus',
+      channel: 'refillChannel',
+      paymentMode: 'refillPaymentMode'
+    },
     create: (input) => buildRefill(input, 'manual'),
     update: (existing, input) => {
       if (existing.qualification) throw conflict(FLEET_MESSAGES.refillQualified)
@@ -299,6 +333,7 @@ export function registerFuelRefillsHandlers(router: MockRouter, db: MockDatabase
           throw unprocessable(FLEET_MESSAGES.refillTripOfOtherVehicle, { trip: patch.tripNo })
         }
       }
+      assertApprovedAtStation({ ...existing, ...patch })
       assertNotDuplicate({ ...existing, ...patch })
       return patch
     }

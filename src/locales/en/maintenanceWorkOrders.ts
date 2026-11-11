@@ -143,6 +143,11 @@ export default {
     'Mapping with the nomenclature confirmed by {by} on {date}.',
   'maintenance.workOrders.listView.external': 'At an outside garage',
   'maintenance.workOrders.noResultsCreate': 'No work order. Create one with New.',
-  'maintenance.workOrders.progress.partsWaitHours': 'Wait for the ordered parts: {hours} h, counted in the vehicle downtime.',
-  'maintenance.workOrders.progress.partsWaitNotStarted': 'Wait for the parts: counting starts when the purchase request is ordered and runs until it is received, in the vehicle downtime.'
+  'maintenance.workOrders.progress.partsWaitHours':
+    'Wait for the ordered parts: {hours} h, counted in the vehicle downtime.',
+  'maintenance.workOrders.progress.partsWaitNotStarted':
+    'Wait for the parts: counting starts when the purchase request is ordered and runs until it is received, in the vehicle downtime.',
+  'maintenance.workOrders.dialog.observation': 'Note on the cause',
+  'maintenance.workOrders.dialog.observationHint':
+    'E.g. faulty part, harsh braking by the driver, preventive service not done'
 }

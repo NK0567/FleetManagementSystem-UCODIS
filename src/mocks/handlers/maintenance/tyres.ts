@@ -4,8 +4,10 @@ import {
   rotationDue,
   safetyAlert,
   stintKm,
+  tyreWear,
   type TyreStatus
 } from '@/modules/maintenance/tyres/domain/tyre'
+import { DEFAULT_MAINTENANCE_SETTINGS } from '@/modules/maintenance/maintenance-settings/domain/maintenanceSettings'
 import type { TyreApi, TyreEvent } from '@/modules/maintenance/tyres/types/tyre.types'
 import { nowIsoDateTime, todayIso } from '@/utils/date'
 import type { MockDatabase } from '../../db/database'
@@ -34,7 +36,7 @@ function tyreStatus(row: TyreRow): TyreStatus {
 }
 
 export function tyresApi(db: MockDatabase): TyreApi[] {
-  const thresholds = maintenanceSettings(db).tyres
+  const thresholds = { ...DEFAULT_MAINTENANCE_SETTINGS.tyres, ...maintenanceSettings(db).tyres }
   const vehicles = new Map(db.vehicles.all().map((vehicle) => [vehicle.no, vehicle]))
   const suppliers = new Map(db.providers.all().map((provider) => [provider.no, provider.name]))
   const odometer = (vehicleNo: string) => vehicles.get(vehicleNo)?.odometerKm ?? 0
@@ -65,6 +67,10 @@ export function tyresApi(db: MockDatabase): TyreApi[] {
       costPerKm: costPerKm(totalCost, kmRun),
       lastReading,
       safetyIssues,
+      wear: tyreWear(
+        { kmRun, measuredTreadMm: lastReading?.treadMm ?? null, retreadCount: row.retreadCount },
+        thresholds
+      ),
       alert: safetyIssues.length ? 'safety' : due ? 'rotation' : 'none',
       supplierName: row.supplierNo ? (suppliers.get(row.supplierNo) ?? row.supplierNo) : ''
     }

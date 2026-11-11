@@ -29,6 +29,10 @@ export interface TyreSettings {
   minTreadMm: number
   rotationKm: number
   rotationMonths: number
+  /** Tread depth of a new tyre, the wear a tyre is expected to take per 10 000 km, and the gap tolerated. */
+  newTreadMm: number
+  wearMmPer10000Km: number
+  wearToleranceMm: number
 }
 
 export interface MobileTeamSettings {
@@ -46,6 +50,16 @@ export interface MaintenanceTargetSettings {
   mttrTargetHours: number
   /** Shortest acceptable mean distance between failures. */
   mtbfTargetKm: number
+  /** The three age groups of the park: from this age the vehicle is in the middle, then the old group. */
+  ageMidFromYears: number
+  ageOldFromYears: number
+  /** Targets by age group: the older the vehicle, the less is asked of it. */
+  mttrTargetHoursYoung: number
+  mttrTargetHoursMid: number
+  mttrTargetHoursOld: number
+  mtbfTargetKmYoung: number
+  mtbfTargetKmMid: number
+  mtbfTargetKmOld: number
 }
 
 export interface MaintenanceSettings {
@@ -79,6 +93,7 @@ export type MaintenanceSettingUnit =
   | 'bar'
   | 'mm'
   | 'months'
+  | 'years'
   | 'percent'
   | 'min'
 
@@ -89,7 +104,15 @@ export const MAINTENANCE_SETTING_FIELDS: Record<MaintenanceSettingsSection, read
     { key: 'preventiveShareTargetPct', kind: 'number', unit: 'percent', min: 0, max: 100 },
     { key: 'preventiveCompletionTargetPct', kind: 'number', unit: 'percent', min: 0, max: 100 },
     { key: 'mttrTargetHours', kind: 'number', unit: 'h', min: 1, max: 720 },
-    { key: 'mtbfTargetKm', kind: 'number', unit: 'km', min: 100, max: 1_000_000 }
+    { key: 'mtbfTargetKm', kind: 'number', unit: 'km', min: 100, max: 1_000_000 },
+    { key: 'ageMidFromYears', kind: 'number', unit: 'years', min: 1, max: 30 },
+    { key: 'ageOldFromYears', kind: 'number', unit: 'years', min: 2, max: 40 },
+    { key: 'mttrTargetHoursYoung', kind: 'number', unit: 'h', min: 1, max: 720 },
+    { key: 'mttrTargetHoursMid', kind: 'number', unit: 'h', min: 1, max: 720 },
+    { key: 'mttrTargetHoursOld', kind: 'number', unit: 'h', min: 1, max: 720 },
+    { key: 'mtbfTargetKmYoung', kind: 'number', unit: 'km', min: 100, max: 1_000_000 },
+    { key: 'mtbfTargetKmMid', kind: 'number', unit: 'km', min: 100, max: 1_000_000 },
+    { key: 'mtbfTargetKmOld', kind: 'number', unit: 'km', min: 100, max: 1_000_000 }
   ],
   workshop: [
     { key: 'stations', kind: 'number', unit: 'count', min: 1, max: 50 },
@@ -111,7 +134,10 @@ export const MAINTENANCE_SETTING_FIELDS: Record<MaintenanceSettingsSection, read
     { key: 'minPressureBar', kind: 'number', unit: 'bar', min: 1, max: 15 },
     { key: 'minTreadMm', kind: 'number', unit: 'mm', min: 0.5, max: 10 },
     { key: 'rotationKm', kind: 'number', unit: 'km', min: 5_000, max: 200_000 },
-    { key: 'rotationMonths', kind: 'number', unit: 'months', min: 1, max: 24 }
+    { key: 'rotationMonths', kind: 'number', unit: 'months', min: 1, max: 24 },
+    { key: 'newTreadMm', kind: 'number', unit: 'mm', min: 5, max: 30 },
+    { key: 'wearMmPer10000Km', kind: 'number', unit: 'mm', min: 0.1, max: 10 },
+    { key: 'wearToleranceMm', kind: 'number', unit: 'mm', min: 0, max: 10 }
   ],
   mobileTeam: [
     { key: 'interventionsPerMonth', kind: 'number', unit: 'count', min: 1, max: 500 },
@@ -126,13 +152,29 @@ export const DEFAULT_MAINTENANCE_SETTINGS: MaintenanceSettings = {
     preventiveShareTargetPct: 60,
     preventiveCompletionTargetPct: 90,
     mttrTargetHours: 24,
-    mtbfTargetKm: 20_000
+    mtbfTargetKm: 20_000,
+    ageMidFromYears: 5,
+    ageOldFromYears: 10,
+    mttrTargetHoursYoung: 24,
+    mttrTargetHoursMid: 24,
+    mttrTargetHoursOld: 24,
+    mtbfTargetKmYoung: 25_000,
+    mtbfTargetKmMid: 20_000,
+    mtbfTargetKmOld: 15_000
   },
   workshop: { stations: 2, hoursPerDay: 8, workingDaysPerWeek: 6 },
   labour: { hourlyRate: 10_000 },
   downtimeCost: { dayCost: 450_000, tractorDayCost: null, trailerDayCost: null },
   service: { noticeKm: 1_000, noticeDays: 15, noticeHours: 50 },
-  tyres: { minPressureBar: 7, minTreadMm: 2, rotationKm: 30_000, rotationMonths: 6 },
+  tyres: {
+    minPressureBar: 7,
+    minTreadMm: 2,
+    rotationKm: 30_000,
+    rotationMonths: 6,
+    newTreadMm: 16,
+    wearMmPer10000Km: 1,
+    wearToleranceMm: 1.5
+  },
   mobileTeam: {
     interventionsPerMonth: 10,
     resolutionRatePct: 90,

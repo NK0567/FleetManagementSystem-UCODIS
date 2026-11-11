@@ -63,8 +63,17 @@ export default {
   'fleet.documents.form.declaredStatus': 'Déclaration',
   'fleet.documents.form.declaredReason': 'Motif de la déclaration',
   'fleet.documents.alert.expired': 'Document expiré depuis le {date} : à régulariser.',
-  'fleet.documents.alert.expiring': 'Document à renouveler : il expire le {date} (préavis de {days} jours).',
+  'fleet.documents.alert.expiring':
+    'Document à renouveler : il expire le {date} (préavis de {days} jours).',
   'fleet.documents.alert.sent.email': 'E-mail envoyé à {to} le {date} (simulé).',
   'fleet.documents.alert.sent.sms': 'SMS envoyé au {to} le {date} (simulé).',
-  'fleet.documents.noResultsCreate': 'Aucun document. Créez-en un avec Nouveau.'
+  'fleet.documents.noResultsCreate': 'Aucun document. Créez-en un avec Nouveau.',
+  'fleet.documents.form.renewal': 'Suivi du renouvellement',
+  'fleet.documents.form.renewalLevel': 'Niveau de traitement',
+  'fleet.documents.form.renewalTargetOn': 'Date prévue de clôture',
+  'fleet.documents.col.renewalLevel': 'Niveau de traitement',
+  'fleet.documents.col.renewalTargetOn': 'Clôture prévue',
+  'fleet.documents.col.renewalClosedOn': 'Clôture réelle',
+  'fleet.missingDocuments.col.renewalLevel': 'Niveau de traitement',
+  'fleet.missingDocuments.col.renewalTargetOn': 'Clôture prévue'
 }

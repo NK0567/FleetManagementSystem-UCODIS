@@ -82,5 +82,12 @@ export default {
   'hr.employees.sync.done':
     'Synchronisation terminée : {created} créée(s), {updated} mise(s) à jour, {unchanged} inchangée(s), {skipped} écartée(s).',
   'hr.employees.sync.error': "La synchronisation n'a pas pu être faite.",
-  'hr.employees.noResultsCreate': 'Aucun employé. Créez-en un avec Nouveau.'
+  'hr.employees.noResultsCreate': 'Aucun employé. Créez-en un avec Nouveau.',
+  'hr.employees.score.title': 'Score de conduite, pour les primes',
+  'hr.employees.score.outOf': 'sur 100',
+  'hr.employees.score.previous': 'Fin du mois dernier',
+  'hr.employees.score.rank': 'Rang',
+  'hr.employees.score.threshold': 'Seuil de formation',
+  'hr.employees.score.bonusRule': 'Calcul de la prime à partir de ce score : à décider.',
+  'hr.employees.score.unavailable': "Le score de conduite n'a pas pu être chargé."
 }

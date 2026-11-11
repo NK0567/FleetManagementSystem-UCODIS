@@ -124,8 +124,10 @@ export default {
   'fleet.vehicles.dialog.reason': 'Reason',
   'fleet.vehicles.dialog.km': 'Mileage read',
   'fleet.vehicles.dialog.lastReading': 'Last reading: {km} km. The mileage cannot go down.',
-  'fleet.vehicles.dialog.outOfServiceHint': 'The vehicle will not be offered again until it is back in service.',
-  'fleet.vehicles.dialog.removalHint': '{plate} will leave the fleet and its record will no longer be editable.',
+  'fleet.vehicles.dialog.outOfServiceHint':
+    'The vehicle will not be offered again until it is back in service.',
+  'fleet.vehicles.dialog.removalHint':
+    '{plate} will leave the fleet and its record will no longer be editable.',
   'fleet.vehicles.dialog.removalDate': 'Removal date',
   'fleet.vehicles.dialog.finalKm': 'Mileage at removal',
   'fleet.vehicles.dialog.comment': 'Comment',
@@ -156,7 +158,8 @@ export default {
   'fleet.vehicles.form.administrativeStatus': 'Administrative status',
   'fleet.vehicles.form.operationalStatus': 'Operational status',
   'fleet.vehicles.form.noOperationalStatus': 'Not applicable: the vehicle left the fleet.',
-  'fleet.vehicles.form.operationalStatusHint': 'It updates on its own from maintenance, compliance and trips.',
+  'fleet.vehicles.form.operationalStatusHint':
+    'It updates on its own from maintenance, compliance and trips.',
   'fleet.vehicles.form.statusCauseCode': 'Coded cause: {code} · {name}',
   'fleet.vehicles.form.lifecycle': 'Life cycle',
   'fleet.vehicles.form.maintenanceLog': 'Maintenance log',
@@ -176,7 +179,8 @@ export default {
   'fleet.vehicles.maintenanceLog.status': 'Status',
   'fleet.vehicles.maintenanceLog.km': 'Odometer',
   'fleet.vehicles.maintenanceLog.cost': 'Cost',
-  'fleet.vehicles.maintenanceLog.noAccess': 'The maintenance log is kept for the profiles that follow the maintenance.',
+  'fleet.vehicles.maintenanceLog.noAccess':
+    'The maintenance log is kept for the profiles that follow the maintenance.',
   'fleet.vehicles.maintenanceLog.empty': 'No intervention recorded for this vehicle.',
   'fleet.vehicles.ownership.title': 'Total cost of ownership',
   'fleet.vehicles.ownership.summary': '{total} in all',
@@ -188,15 +192,19 @@ export default {
   'fleet.vehicles.ownership.tyres': 'Tyres',
   'fleet.vehicles.ownership.insurance': 'Insurance',
   'fleet.vehicles.ownership.total': 'Total cost of ownership',
-  'fleet.vehicles.ownership.noAcquisition': 'No acquisition cost is recorded: the total leaves it out.',
+  'fleet.vehicles.ownership.noAcquisition':
+    'No acquisition cost is recorded: the total leaves it out.',
   'fleet.vehicles.ownership.noKm': 'No kilometre run over the period: no cost per kilometre.',
   'fleet.vehicles.ownership.perKm': '{km} km run, that is {cost} per kilometre.',
-  'fleet.vehicles.ownership.residualValue': 'Residual value recorded: {value} (not deducted from the total).',
+  'fleet.vehicles.ownership.residualValue':
+    'Residual value recorded: {value} (not deducted from the total).',
   'fleet.vehicles.ownership.hint': 'Taken from work orders, refills, tyres and insurance policies.',
   'fleet.vehicles.import.action': 'Import',
   'fleet.vehicles.import.title': 'Import vehicles',
-  'fleet.vehicles.import.hint': 'Type and site by code or name; compartments written 8000+8000+6000. A vehicle already known or duplicated is refused.',
-  'fleet.vehicles.import.created': 'No vehicle created. | One vehicle created. | {n} vehicles created.',
+  'fleet.vehicles.import.hint':
+    'Type and site by code or name; compartments written 8000+8000+6000. A vehicle already known or duplicated is refused.',
+  'fleet.vehicles.import.created':
+    'No vehicle created. | One vehicle created. | {n} vehicles created.',
   'fleet.vehicles.form.noLink': 'None',
   'fleet.vehicles.col.currentSiteNo': 'Current site',
   'fleet.vehicles.filter.driverAssignment': 'Assignment',

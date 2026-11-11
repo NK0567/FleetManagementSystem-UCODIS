@@ -139,7 +139,8 @@ export default {
   'common.error.loadCard': 'Impossible de charger la fiche.',
   'common.error.unexpected': 'Une erreur inattendue est survenue.',
   'common.import.template': 'Télécharger le modèle',
-  'common.import.read': '{file} : aucune ligne lue. | {file} : une ligne lue. | {file} : {count} lignes lues.',
+  'common.import.read':
+    '{file} : aucune ligne lue. | {file} : une ligne lue. | {file} : {count} lignes lues.',
   'common.import.missing': 'Colonnes obligatoires absentes : {columns}.',
   'common.import.run': 'Importer | Importer une ligne | Importer {n} lignes',
   'common.import.rejected': 'Aucune ligne refusée. | Une ligne refusée : | {n} lignes refusées :',
@@ -150,7 +151,8 @@ export default {
   'common.subList.clear': 'Effacer',
   'common.subList.count': '{shown} sur {total}',
   'common.subList.noMatch': 'Aucune ligne ne correspond au filtre.',
-  'common.import.mapped': "Correspondance des colonnes réglée par l'administrateur pour aucun champ. | Correspondance des colonnes réglée par l'administrateur pour un champ. | Correspondance des colonnes réglée par l'administrateur pour {n} champs.",
+  'common.import.mapped':
+    "Correspondance des colonnes réglée par l'administrateur pour aucun champ. | Correspondance des colonnes réglée par l'administrateur pour un champ. | Correspondance des colonnes réglée par l'administrateur pour {n} champs.",
   'common.moreActions': "Plus d'actions",
   'common.createWithNew': 'Utilisez Nouveau pour en créer.',
   'common.confirmDisabledHint': 'Renseignez les champs obligatoires pour continuer.',

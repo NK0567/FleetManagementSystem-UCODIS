@@ -50,5 +50,6 @@ export default {
   'fleet.documentTypes.noResultsCreate': 'Aucun type de document. Créez-en un avec Nouveau.',
   'fleet.documentTypes.col.country': 'Pays',
   'fleet.documentTypes.form.country': 'Pays de la réglementation',
-  'fleet.documentTypes.form.countryHint': "Laissez vide si le document est exigé quel que soit le pays. Renseigné, il n'est exigé que pour une société établie dans ce pays (voir la fiche Société)."
+  'fleet.documentTypes.form.countryHint':
+    "Laissez vide si le document est exigé quel que soit le pays. Renseigné, il n'est exigé que pour une société établie dans ce pays (voir la fiche Société)."
 }

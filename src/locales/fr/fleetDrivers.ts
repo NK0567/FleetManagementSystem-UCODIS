@@ -84,7 +84,8 @@ export default {
   'fleet.drivers.activity.col.amount': 'Montant',
   'fleet.drivers.score.formula': 'Formule : {formula}',
   'fleet.drivers.score.term': '{source} : {count} × {points} points',
-  'fleet.drivers.score.cap': 'Note plafonnée à {cap} tant qu’un document obligatoire manque ou est expiré',
+  'fleet.drivers.score.cap':
+    'Note plafonnée à {cap} tant qu’un document obligatoire manque ou est expiré',
   'fleet.drivers.score.capped': ', plafonnée à {cap}',
   'fleet.drivers.score.overallFormula': 'Score : {formula}',
   'fleet.drivers.score.severity.critical': 'critique',

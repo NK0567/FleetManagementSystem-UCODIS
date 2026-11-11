@@ -30,13 +30,16 @@ export default {
   'fleet.alertRules.form.event': 'Événement',
   'fleet.alertRules.form.threshold': 'Seuil',
   'fleet.alertRules.form.setThreshold': 'régler',
-  'fleet.alertRules.form.thresholdHint': "Le seuil se règle là où l'événement se définit ; il se lit ici.",
+  'fleet.alertRules.form.thresholdHint':
+    "Le seuil se règle là où l'événement se définit ; il se lit ici.",
   'fleet.alertRules.form.severity': 'Gravité',
   'fleet.alertRules.form.channels': 'Canaux',
-  'fleet.alertRules.form.appHint': "L'alerte s'affiche toujours dans l'application, pour les destinataires.",
+  'fleet.alertRules.form.appHint':
+    "L'alerte s'affiche toujours dans l'application, pour les destinataires.",
   'fleet.alertRules.form.emailTo': 'Adresses e-mail',
   'fleet.alertRules.form.smsTo': 'Numéros pour les SMS',
-  'fleet.alertRules.form.channelsHint': 'Séparez les adresses par des virgules. Les envois sont simulés dans la maquette.',
+  'fleet.alertRules.form.channelsHint':
+    'Séparez les adresses par des virgules. Les envois sont simulés dans la maquette.',
   'fleet.alertRules.form.emailToRequired': "L'envoi par e-mail demande au moins une adresse",
   'fleet.alertRules.form.emailToInvalid': 'Une adresse e-mail est invalide',
   'fleet.alertRules.form.smsToRequired': "L'envoi par SMS demande au moins un numéro",

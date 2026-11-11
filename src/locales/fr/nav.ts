@@ -90,7 +90,7 @@ export default {
   'nav.tyres': 'Pneumatiques',
   'nav.tyreLayouts': 'Plans de pneus',
   'nav.maintenancePlans': "Plans d'entretien",
-  'nav.downtimes': 'Indisponibilités',
+  'nav.downtimes': 'Indisponibilités techniques',
   'nav.stockItems': 'Stock de pièces',
   'nav.purchaseRequests': "Demandes d'achat",
   'nav.mySpace': 'Mon espace',

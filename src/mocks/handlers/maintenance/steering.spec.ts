@@ -60,6 +60,7 @@ describe('maintenance steering', () => {
     const saved = await call(server, 'put', '/maintenance/settings/targets', {
       as: 'FLT001',
       body: {
+        ...data.targets,
         preventiveShareTargetPct: 70,
         preventiveCompletionTargetPct: 95,
         mttrTargetHours: 12,
@@ -69,6 +70,7 @@ describe('maintenance steering', () => {
     expect(saved.status).toBe(200)
     const after = (await get<MaintenanceDashboardApi>('/maintenance/dashboard')).data
     expect(after.targets).toEqual({
+      ...data.targets,
       preventiveShareTargetPct: 70,
       preventiveCompletionTargetPct: 95,
       mttrTargetHours: 12,

@@ -165,5 +165,9 @@ export default {
   'planning.dashboard.col.recipient': 'Recipient',
   'planning.dashboard.col.product': 'Product',
   'planning.dashboard.col.desired': 'Desired date',
-  'planning.reports.perimeterNote': 'You only see the transport orders of your perimeter ({perimeter}). The figures of an account with no attachment are wider.'
+  'planning.reports.perimeterNote':
+    'You only see the transport orders of your perimeter ({perimeter}). The figures of an account with no attachment are wider.',
+  'planning.reports.col.incidents': 'Incidents',
+  'planning.reports.col.accidents': 'Accidents',
+  'planning.reports.col.infractions': 'Infractions'
 }

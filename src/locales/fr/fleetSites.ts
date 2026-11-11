@@ -56,7 +56,11 @@ export default {
   'fleet.sites.map.modes.centre': 'placer le centre',
   'fleet.sites.map.modes.edge': 'tracer le bord de la zone',
   'fleet.sites.map.useDefaultRadius': 'Reprendre le rayon par défaut',
-  'fleet.sites.map.edgeHint': 'Cliquez sur la carte au bord de la zone : le rayon prend la distance au centre.',
+  'fleet.sites.map.edgeHint':
+    'Cliquez sur la carte au bord de la zone : le rayon prend la distance au centre.',
   'fleet.sites.noResultsCreate': 'Aucun site. Créez-en un avec Nouveau.',
-  'fleet.sites.map.centreFirst': "Placez d'abord le centre du site."
+  'fleet.sites.map.centreFirst': "Placez d'abord le centre du site.",
+  'fleet.sites.form.approved': 'Camions agréés pour le carburant hors carte',
+  'fleet.sites.form.approvedHint':
+    'Liste négociée avec la station. Vide, tous les camions sont acceptés.'
 }

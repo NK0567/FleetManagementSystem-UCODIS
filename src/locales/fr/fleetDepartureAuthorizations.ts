@@ -41,9 +41,12 @@ export default {
   'fleet.departureAuthorizations.form.refusalReason': 'Motif du refus',
   'fleet.departureAuthorizations.activation.title': 'Activé à la délivrance',
   'fleet.departureAuthorizations.activation.gps.activated': 'Suivi GPS du véhicule activé.',
-  'fleet.departureAuthorizations.activation.gps.no_unit': 'Pas de boîtier de suivi en service sur le véhicule : suivi GPS non activé.',
+  'fleet.departureAuthorizations.activation.gps.no_unit':
+    'Pas de boîtier de suivi en service sur le véhicule : suivi GPS non activé.',
   'fleet.departureAuthorizations.activation.camera.activated': 'Caméra du véhicule activée.',
   'fleet.departureAuthorizations.activation.camera.no_camera': 'Pas de caméra sur le véhicule.',
-  'fleet.departureAuthorizations.activation.simulated': 'Ordre envoyé aux équipements le {date} (simulé dans la maquette).',
-  'fleet.departureAuthorizations.noResultsCreate': 'Aucune autorisation de départ. Créez-en une avec Nouveau.'
+  'fleet.departureAuthorizations.activation.simulated':
+    'Ordre envoyé aux équipements le {date} (simulé dans la maquette).',
+  'fleet.departureAuthorizations.noResultsCreate':
+    'Aucune autorisation de départ. Créez-en une avec Nouveau.'
 }

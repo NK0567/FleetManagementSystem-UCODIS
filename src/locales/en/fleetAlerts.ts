@@ -26,7 +26,8 @@ export default {
   'fleet.alerts.bell.title': 'Alerts and requests to handle',
   'fleet.alerts.bell.alerts': 'Open alerts | Open alert (1) | Open alerts ({n})',
   'fleet.alerts.bell.noAlert': 'No open alert.',
-  'fleet.alerts.bell.requests': 'Requests to handle | Request to handle (1) | Requests to handle ({n})',
+  'fleet.alerts.bell.requests':
+    'Requests to handle | Request to handle (1) | Requests to handle ({n})',
   'fleet.alerts.bell.noRequest': 'No request awaiting your decision.',
   'fleet.alerts.bell.kind.leave': 'Leave request',
   'fleet.alerts.bell.kind.companyDocument': 'Document to approve',

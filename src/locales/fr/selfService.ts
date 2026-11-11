@@ -178,6 +178,8 @@ export default {
   'selfService.vehicle.noStation': 'Station non précisée',
   'selfService.vehicle.tripCurrent': 'Trajet en cours : {trip}',
   'selfService.vehicle.tripNone': 'Aucun trajet en cours',
-  'selfService.orders.waitsForPrevious': 'Réglez d’abord le point précédent (livraison déclarée, reportée ou refusée) avant de marquer votre arrivée ici.',
-  'selfService.notifications.order_route_changed': 'L’itinéraire de l’ordre de transport {no} a changé : {reason}'
+  'selfService.orders.waitsForPrevious':
+    'Réglez d’abord le point précédent (livraison déclarée, reportée ou refusée) avant de marquer votre arrivée ici.',
+  'selfService.notifications.order_route_changed':
+    'L’itinéraire de l’ordre de transport {no} a changé : {reason}'
 }

@@ -43,5 +43,9 @@ export default {
   'fleet.trainings.form.result': 'Result',
   'fleet.trainings.form.cancelledAt': 'Cancelled on',
   'fleet.trainings.form.cancelReason': 'Reason for the cancellation',
-  'fleet.trainings.noResultsCreate': 'No training. Create one with New.'
+  'fleet.trainings.noResultsCreate': 'No training. Create one with New.',
+  'fleet.trainings.col.score': 'Mark',
+  'fleet.trainings.col.nextTrainingOn': 'Next training',
+  'fleet.trainings.form.score': 'Mark (out of 20)',
+  'fleet.trainings.form.nextTrainingOn': 'Next training due'
 }

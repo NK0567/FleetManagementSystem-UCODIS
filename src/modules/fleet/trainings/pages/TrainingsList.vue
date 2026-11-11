@@ -37,7 +37,12 @@ const tableColumns = computed<TableColumn[]>(() => [
     minW: '120px',
     formatter: optionLabel('trainingReason')
   },
-  { sortKey: 'originNo', label: t('fleet.trainings.col.originNo'), minW: '130px' },
+  {
+    sortKey: 'originNo',
+    label: t('fleet.trainings.col.originNo'),
+    minW: '130px',
+    defaultHidden: true
+  },
   {
     sortKey: 'plannedOn',
     label: t('fleet.trainings.col.plannedOn'),
@@ -61,7 +66,18 @@ const tableColumns = computed<TableColumn[]>(() => [
     sortKey: 'attendedOn',
     label: t('fleet.trainings.col.attendedOn'),
     minW: '120px',
-    defaultHidden: true,
+    formatter: formatDate
+  },
+  {
+    sortKey: 'score',
+    label: t('fleet.trainings.col.score'),
+    minW: '100px',
+    formatter: (value) => (value === null || value === undefined ? '' : `${value} / 20`)
+  },
+  {
+    sortKey: 'nextTrainingOn',
+    label: t('fleet.trainings.col.nextTrainingOn'),
+    minW: '150px',
     formatter: formatDate
   },
   {

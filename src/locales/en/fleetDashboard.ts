@@ -40,8 +40,20 @@ export default {
   'fleet.dashboard.supervision.inAlert': 'In alert',
   'fleet.dashboard.supervision.outOfZone': 'Out of zone',
   'fleet.dashboard.supervision.none': 'No vehicle.',
-  'fleet.dashboard.supervision.alerts': 'No alert to handle | {count} alert to handle | {count} alerts to handle',
+  'fleet.dashboard.supervision.alerts':
+    'No alert to handle | {count} alert to handle | {count} alerts to handle',
   'fleet.dashboard.supervision.offCorridor': '{km} km from the route',
   'fleet.dashboard.supervision.offSites': 'Outside every known site',
-  'fleet.dashboard.supervision.speed': '{speed} km/h'
+  'fleet.dashboard.supervision.speed': '{speed} km/h',
+  'fleet.dashboard.daily.title': 'Today',
+  'fleet.dashboard.daily.month': 'This month: {value}',
+  'fleet.dashboard.daily.km': 'Kilometres driven',
+  'fleet.dashboard.daily.quantity': 'Quantity carried',
+  'fleet.dashboard.daily.fuel': 'Fuel used',
+  'fleet.dashboard.daily.immobilized': 'Immobilized vehicles',
+  'fleet.dashboard.daily.accidents': 'Accidents',
+  'fleet.dashboard.daily.incidents': 'Incidents',
+  'fleet.dashboard.daily.stops': 'Unauthorized stops',
+  'fleet.dashboard.unavailableDrivers': 'Unavailable drivers',
+  'fleet.dashboard.noUnavailableDriver': 'Every driver is available.'
 }

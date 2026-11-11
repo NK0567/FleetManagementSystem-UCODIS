@@ -55,7 +55,11 @@ export default {
   'fleet.sites.map.modes.centre': 'place the centre',
   'fleet.sites.map.modes.edge': 'trace the edge of the zone',
   'fleet.sites.map.useDefaultRadius': 'Use the default radius',
-  'fleet.sites.map.edgeHint': 'Click on the map at the edge of the zone: the radius takes the distance to the centre.',
+  'fleet.sites.map.edgeHint':
+    'Click on the map at the edge of the zone: the radius takes the distance to the centre.',
   'fleet.sites.noResultsCreate': 'No site. Create one with New.',
-  'fleet.sites.map.centreFirst': 'Place the centre of the site first.'
+  'fleet.sites.map.centreFirst': 'Place the centre of the site first.',
+  'fleet.sites.form.approved': 'Approved trucks for refills outside a card',
+  'fleet.sites.form.approvedHint':
+    'List negotiated with the station. Empty, every truck is accepted.'
 }

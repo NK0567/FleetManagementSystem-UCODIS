@@ -59,6 +59,25 @@ const tableColumns = computed<TableColumn[]>(() => [
     formatter: optionLabel('documentState')
   },
   {
+    sortKey: 'renewalLevel',
+    label: t('fleet.documents.col.renewalLevel'),
+    minW: '200px',
+    formatter: optionLabel('renewalLevel')
+  },
+  {
+    sortKey: 'renewalTargetOn',
+    label: t('fleet.documents.col.renewalTargetOn'),
+    minW: '150px',
+    formatter: formatDate
+  },
+  {
+    sortKey: 'renewalClosedOn',
+    label: t('fleet.documents.col.renewalClosedOn'),
+    minW: '150px',
+    defaultHidden: true,
+    formatter: formatDate
+  },
+  {
     sortKey: 'notifyOn',
     label: t('fleet.documents.col.notifyOn'),
     minW: '120px',

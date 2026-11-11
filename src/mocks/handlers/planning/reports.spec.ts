@@ -159,7 +159,7 @@ describe('planning reports', () => {
     expect(means?.weightRate).toBe(Math.round((2200 / (means?.capacityKg ?? 1)) * 100))
     expect(means?.deliveries).toBe(1)
 
-    expect(data.carriers[0]).toMatchObject({
+    expect(data.carriers.find((row) => row.carrierNo === 'PRS-016')).toMatchObject({
       carrierNo: 'PRS-016',
       orders: 1,
       partials: 1,

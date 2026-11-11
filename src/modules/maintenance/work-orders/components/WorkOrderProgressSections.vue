@@ -119,6 +119,10 @@ const historyColumns = computed<SubListColumn[]>(() => [
         <dd>{{ order.modeName || '-' }}</dd>
         <dt class="text-muted-foreground">{{ t('maintenance.workOrders.dialog.cause') }}</dt>
         <dd>{{ order.causeName || '-' }}</dd>
+        <dt class="text-muted-foreground">
+          {{ t('maintenance.workOrders.dialog.observation') }}
+        </dt>
+        <dd class="whitespace-pre-line">{{ order.diagnosis.observation || '-' }}</dd>
         <dt class="text-muted-foreground">{{ t('maintenance.workOrders.progress.by') }}</dt>
         <dd>{{ order.diagnosis.by }} · {{ formatDateTime(order.diagnosis.at) }}</dd>
       </dl>

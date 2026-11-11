@@ -56,7 +56,7 @@ export default {
   'settings.moduleToggles.item.service-due.label': 'Due services',
   'settings.moduleToggles.item.service-due.description':
     'Upcoming, close or overdue preventive maintenance across all vehicles.',
-  'settings.moduleToggles.item.downtimes.label': 'Downtimes',
+  'settings.moduleToggles.item.downtimes.label': 'Technical downtimes',
   'settings.moduleToggles.item.downtimes.description':
     'Detailed history of fleet downtimes, by cause and cause family.',
   'settings.moduleToggles.item.reliability.label': 'Reliability',
@@ -159,5 +159,6 @@ export default {
   'settings.company.noChange': 'No change to save.',
   'settings.company.missingFields': 'Fill in the required fields.',
   'settings.userAccounts.form.employee': 'Driver record',
-  'settings.userAccounts.form.employeeHint': 'Links this account to the driver in the staff list: it is what shows his transport order in My space.'
+  'settings.userAccounts.form.employeeHint':
+    'Links this account to the driver in the staff list: it is what shows his transport order in My space.'
 }

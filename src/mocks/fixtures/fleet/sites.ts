@@ -13,6 +13,8 @@ export interface SiteRow extends MockRow {
   latitude: number
   longitude: number
   radiusM: number | null
+  /** Vehicles negotiated with this fuel station for refills outside a card (cash or credit). */
+  approvedVehicleNos?: string[]
 }
 
 const SEED: Omit<SiteRow, keyof typeof seedAudit>[] = [
@@ -160,6 +162,7 @@ const SEED: Omit<SiteRow, keyof typeof seedAudit>[] = [
     no: 'STA-AMB',
     name: 'Station Ambatolampy',
     siteTypeNo: 'CHECKPOINT',
+    approvedVehicleNos: ['VEH-001', 'VEH-002', 'VEH-003'],
     city: 'Ambatolampy',
     region: 'Vakinankaratra',
     address: '',

@@ -90,7 +90,7 @@ export default {
   'nav.tyres': 'Tyres',
   'nav.tyreLayouts': 'Tyre layouts',
   'nav.maintenancePlans': 'Maintenance plans',
-  'nav.downtimes': 'Downtimes',
+  'nav.downtimes': 'Technical downtimes',
   'nav.stockItems': 'Parts stock',
   'nav.purchaseRequests': 'Purchase requests',
   'nav.mySpace': 'My space',

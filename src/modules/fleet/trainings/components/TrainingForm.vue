@@ -151,8 +151,20 @@ defineExpose(expose)
         <BaseFormField :label="t('fleet.trainings.form.attendedOn')">
           <FormInput :model-value="formatDate(initialData.attendedOn)" disabled />
         </BaseFormField>
+        <BaseFormField :label="t('fleet.trainings.form.score')">
+          <FormInput
+            :model-value="initialData.score === null ? '-' : `${initialData.score} / 20`"
+            disabled
+          />
+        </BaseFormField>
         <BaseFormField :label="t('fleet.trainings.form.result')">
           <p class="text-sm text-card-foreground">{{ initialData.result || '-' }}</p>
+        </BaseFormField>
+        <BaseFormField :label="t('fleet.trainings.form.nextTrainingOn')">
+          <FormInput
+            :model-value="initialData.nextTrainingOn ? formatDate(initialData.nextTrainingOn) : '-'"
+            disabled
+          />
         </BaseFormField>
       </div>
       <div v-else class="space-y-3 min-w-0">

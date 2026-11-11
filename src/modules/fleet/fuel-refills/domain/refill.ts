@@ -9,6 +9,25 @@ export type RefillStatus = (typeof REFILL_STATUSES)[number]
 export const REFILL_CHANNELS = ['manual', 'mobile', 'import', 'card'] as const
 export type RefillChannel = (typeof REFILL_CHANNELS)[number]
 
+export const REFILL_PAYMENT_MODES = ['card', 'cash', 'station_credit'] as const
+export type RefillPaymentMode = (typeof REFILL_PAYMENT_MODES)[number]
+
+/** The mode told by the record, else the one the channel implies (a card transaction is a card). */
+export function paymentModeOf(
+  mode: RefillPaymentMode | null | undefined,
+  channel: RefillChannel
+): RefillPaymentMode {
+  return mode ?? (channel === 'card' ? 'card' : 'cash')
+}
+
+/** Liters beyond (positive) or under (negative) what was planned; null when nothing was planned. */
+export function plannedGap(
+  liters: number,
+  plannedLiters: number | null | undefined
+): number | null {
+  return plannedLiters == null ? null : Math.round((liters - plannedLiters) * 10) / 10
+}
+
 export interface RefillFacts {
   liters: number
   tankCapacityL: number | null

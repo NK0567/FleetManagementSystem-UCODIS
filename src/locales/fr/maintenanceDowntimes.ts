@@ -1,6 +1,6 @@
 export default {
-  'maintenance.downtimes.title': 'Indisponibilités',
-  'maintenance.downtimes.card': 'Fiche indisponibilité',
+  'maintenance.downtimes.title': 'Indisponibilités techniques',
+  'maintenance.downtimes.card': 'Fiche indisponibilité technique',
   'maintenance.downtimes.new': 'Déclarer une indisponibilité',
   'maintenance.downtimes.loadingList': 'Chargement des indisponibilités…',
   'maintenance.downtimes.noResults': 'Aucune indisponibilité.',

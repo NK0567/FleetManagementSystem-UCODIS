@@ -6,6 +6,7 @@ import { useFormValidationUi } from '@/composables/useFormValidationUi'
 import { useReferenceStore } from '@/stores/referenceStore'
 import type { FileMeta } from '@/types/file.types'
 import { formatDateTime, formatNumber } from '@/utils/format'
+import type { RefillPaymentMode } from '../domain/refill'
 import type { FuelRefillApi } from '../types/fuelRefill.types'
 
 const props = withDefaults(
@@ -38,6 +39,8 @@ const { draft, isRequired, expose } = useEntityForm({
     unitPrice: 0,
     odometerKm: 0,
     fullTank: true,
+    paymentMode: 'cash' as RefillPaymentMode,
+    plannedLiters: null as number | null,
     receiptFileNo: null as string | null
   }),
   createOnly: ['vehicleNo'],
@@ -46,6 +49,21 @@ const { draft, isRequired, expose } = useEntityForm({
 })
 
 const referenceStore = useReferenceStore()
+const gapLiters = computed(() =>
+  draft.plannedLiters === null ||
+  draft.plannedLiters === undefined ||
+  draft.plannedLiters === ('' as unknown)
+    ? null
+    : Math.round(((draft.liters || 0) - Number(draft.plannedLiters)) * 10) / 10
+)
+const gapText = computed(() => {
+  const gap = gapLiters.value
+  if (gap === null) return ''
+  if (gap === 0) return t('fleet.fuelRefills.gap.none')
+  return t(gap > 0 ? 'fleet.fuelRefills.gap.over' : 'fleet.fuelRefills.gap.under', {
+    liters: formatNumber(Math.abs(gap), 1)
+  })
+})
 const amount = computed(() => Math.round((draft.liters || 0) * (draft.unitPrice || 0)))
 
 const receipt = ref<FileMeta | null>(props.initialData.receipt ?? null)
@@ -238,6 +256,20 @@ defineExpose(expose)
             :disabled="disabled"
             :invalid="hasValidationError('odometerKm')"
           />
+        </BaseFormField>
+        <BaseFormField :label="t('fleet.fuelRefills.form.paymentMode')">
+          <OptionsSelect
+            :model-value="draft.paymentMode"
+            options-key="refillPaymentMode"
+            :disabled="disabled"
+            @update:model-value="draft.paymentMode = String($event) as RefillPaymentMode"
+          />
+        </BaseFormField>
+        <BaseFormField :label="t('fleet.fuelRefills.form.plannedLiters')">
+          <FormInput v-model="draft.plannedLiters" type="number" :min="0" :disabled="disabled" />
+        </BaseFormField>
+        <BaseFormField v-if="gapLiters !== null" :label="t('fleet.fuelRefills.form.gapLiters')">
+          <FormInput :model-value="gapText" disabled />
         </BaseFormField>
         <BaseFormField :label="t('fleet.fuelRefills.form.fullTank')">
           <ToggleSwitch v-model="draft.fullTank" :disabled="disabled" />

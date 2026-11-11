@@ -26,7 +26,8 @@ export default {
   'fleet.alerts.bell.title': 'Alertes et demandes à traiter',
   'fleet.alerts.bell.alerts': 'Alertes en cours | Alerte en cours (1) | Alertes en cours ({n})',
   'fleet.alerts.bell.noAlert': 'Aucune alerte en cours.',
-  'fleet.alerts.bell.requests': 'Demandes à traiter | Demande à traiter (1) | Demandes à traiter ({n})',
+  'fleet.alerts.bell.requests':
+    'Demandes à traiter | Demande à traiter (1) | Demandes à traiter ({n})',
   'fleet.alerts.bell.noRequest': 'Aucune demande en attente de votre décision.',
   'fleet.alerts.bell.kind.leave': 'Demande de congé',
   'fleet.alerts.bell.kind.companyDocument': 'Document à valider',
@@ -35,5 +36,6 @@ export default {
   'fleet.alerts.col.notifications': 'Notifications envoyées',
   'fleet.alerts.notification.email': 'E-mail à {to}',
   'fleet.alerts.notification.sms': 'SMS au {to}',
-  'fleet.alerts.averageHandling': 'Délai moyen de traitement : {hours} h · alertes traitées : {count}'
+  'fleet.alerts.averageHandling':
+    'Délai moyen de traitement : {hours} h · alertes traitées : {count}'
 }

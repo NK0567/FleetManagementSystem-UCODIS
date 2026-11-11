@@ -45,5 +45,6 @@ export default {
   'fleet.fleetStatus.send.line':
     '{date} · état du {day} · lignes : {count} · {recipients} · par {user}',
   'fleet.fleetStatus.send.required':
-    'Indiquez au moins une adresse e-mail, séparées par des virgules.'
+    'Indiquez au moins une adresse e-mail, séparées par des virgules.',
+  'fleet.fleetStatus.col.immobilizationCategory': "Type d'immobilisation"
 }

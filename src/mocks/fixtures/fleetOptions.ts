@@ -181,6 +181,11 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
     major: { fr: 'Majeure', en: 'Major' },
     serious: { fr: 'Grave', en: 'Serious' }
   },
+  infractionHandlingLevel: {
+    manager: { fr: 'Responsable', en: 'Manager' },
+    superior: { fr: 'Supérieur hiérarchique', en: 'Line superior' },
+    general_management: { fr: 'Direction générale', en: 'General management' }
+  },
   infractionSource: {
     manual: { fr: 'Saisie', en: 'Recorded' },
     telematics: { fr: 'Télématique', en: 'Telematics' },
@@ -347,6 +352,11 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
     import: { fr: 'Import', en: 'Import' },
     card: { fr: 'Carte carburant', en: 'Fuel card' }
   },
+  refillPaymentMode: {
+    card: { fr: 'Carte carburant', en: 'Fuel card' },
+    cash: { fr: 'Espèces', en: 'Cash' },
+    station_credit: { fr: 'Crédit station', en: 'Station credit' }
+  },
   refillCheck: {
     tank: { fr: 'Réservoir', en: 'Tank' },
     odometer: { fr: 'Kilométrage', en: 'Odometer' },
@@ -459,6 +469,18 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
     discipline: { fr: 'Discipline', en: 'Discipline' },
     ecoDriving: { fr: 'Écoconduite', en: 'Eco-driving' },
     deliveryQuality: { fr: 'Qualité de livraison', en: 'Delivery quality' }
+  },
+  renewalLevel: {
+    not_started: { fr: 'Pas commencé', en: 'Not started' },
+    internal_service: { fr: 'Service interne', en: 'In-house service' },
+    external_center: { fr: 'Centre extérieur', en: 'External centre' },
+    signature: { fr: 'Direction générale (signature)', en: 'General management (signature)' },
+    completed: { fr: 'Terminé', en: 'Completed' }
+  },
+  immobilizationCategory: {
+    technical: { fr: 'Technique', en: 'Technical' },
+    administrative: { fr: 'Administratif', en: 'Administrative' },
+    human: { fr: 'Humain', en: 'Human' }
   },
   liveSituation: {
     moving: { fr: 'En route', en: 'On the road' },

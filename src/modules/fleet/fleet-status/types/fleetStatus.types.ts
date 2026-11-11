@@ -1,3 +1,4 @@
+import type { ImmobilizationCategory } from '@/modules/fleet/vehicles/domain/vehicleStatus'
 import type { FleetState, FleetStateGroup } from '../domain/fleetState'
 
 /** One line of the daily fleet status: a vehicle with what it is doing on that day. */
@@ -18,6 +19,8 @@ export interface FleetStatusApi {
   /** Where the tracked vehicle is now: the site holding it, or its coordinates. */
   position?: string
   immobilizationReason: string
+  /** Family of the cause (technical, administrative, human), empty when the vehicle can leave. */
+  immobilizationCategory: ImmobilizationCategory | ''
   observation: string
   expectedBackOn: string | null
 }

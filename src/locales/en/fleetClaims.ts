@@ -83,6 +83,7 @@ export default {
   'fleet.claims.form.downtimeCode': 'Unavailability code put on the vehicle: {code} · {name}',
   'fleet.claims.form.downtimeOpen': 'ongoing',
   'fleet.claims.form.downtimeEnded': 'ended',
-  'fleet.claims.summary': 'Accidents and incidents: {claims} · per million km: {rate} · damage {damage} Ar · left to pay {residual} Ar',
+  'fleet.claims.summary':
+    'Accidents and incidents: {claims} · per million km: {rate} · damage {damage} Ar · left to pay {residual} Ar',
   'fleet.claims.noResultsCreate': 'No claim. Create one with New.'
 }

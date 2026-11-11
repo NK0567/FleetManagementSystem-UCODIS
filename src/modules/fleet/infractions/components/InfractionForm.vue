@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useEntityForm } from '@/composables/useEntityForm'
 import { useFormValidationUi } from '@/composables/useFormValidationUi'
 import type { InfractionSeverity } from '@/modules/fleet/infraction-types'
+import type { InfractionHandlingLevel } from '../domain/infraction'
 import { useOptionsStore } from '@/stores/optionsStore'
 import { formatDateTime } from '@/utils/format'
 import type { InfractionApi, InfractionEvent } from '../types/infraction.types'
@@ -35,7 +36,9 @@ const { draft, isRequired, expose } = useEntityForm({
     driverNo: null as string | null,
     severity: 'major' as InfractionSeverity,
     fineAmount: null as number | null,
-    detail: ''
+    detail: '',
+    dueOn: '',
+    handlingLevel: 'manager' as InfractionHandlingLevel
   }),
   createOnly: ['infractionTypeNo'],
   required: ['infractionTypeNo', 'occurredAt', 'location', 'vehicleNo'],
@@ -147,6 +150,17 @@ defineExpose(expose)
             :disabled="disabled"
             :invalid="hasValidationError('severity')"
             @update:model-value="draft.severity = String($event) as InfractionSeverity"
+          />
+        </BaseFormField>
+        <BaseFormField :label="t('fleet.infractions.form.dueOn')">
+          <DateFormInput v-model="draft.dueOn" :disabled="disabled" />
+        </BaseFormField>
+        <BaseFormField :label="t('fleet.infractions.form.handlingLevel')">
+          <OptionsSelect
+            :model-value="draft.handlingLevel"
+            options-key="infractionHandlingLevel"
+            :disabled="disabled"
+            @update:model-value="draft.handlingLevel = String($event) as InfractionHandlingLevel"
           />
         </BaseFormField>
         <BaseFormField :label="t('fleet.infractions.form.fineAmount')">

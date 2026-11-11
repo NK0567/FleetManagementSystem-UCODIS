@@ -12,6 +12,7 @@ import {
   Wrench
 } from '@lucide/vue'
 import { EMPTY_CELL, formatNumber } from '@/utils/format'
+import AgeGroupKpisPanel from '../components/AgeGroupKpisPanel.vue'
 import MaintenanceTargetsPanel from '../components/MaintenanceTargetsPanel.vue'
 import { useReliabilityStore } from '../stores/reliabilityStore'
 
@@ -131,6 +132,8 @@ onMounted(() => void store.fetchDashboard())
         :preventive-completion="store.dashboard.preventiveCompletion"
         :targets="store.dashboard.targets"
       />
+
+      <AgeGroupKpisPanel :groups="store.dashboard.ageGroups" />
 
       <section class="grid grid-cols-2 xl:grid-cols-4 gap-3">
         <RouterLink

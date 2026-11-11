@@ -88,18 +88,24 @@ export default {
   'fleet.settings.field.driverScore.missingDocumentCap': 'Note plafond si un document manque',
   'fleet.settings.field.driverScore.trainingThreshold': 'Seuil de formation',
   'fleet.settings.section.reporting': 'Pilotage',
-  'fleet.settings.section.reporting.hint': 'Cibles auxquelles le tableau de bord du parc compare ses indicateurs.',
+  'fleet.settings.section.reporting.hint':
+    'Cibles auxquelles le tableau de bord du parc compare ses indicateurs.',
   'fleet.settings.field.reporting.availabilityTargetPct': 'Taux de disponibilité visé',
-  'fleet.settings.field.fuel.deductionMaxSalaryPct': 'Part maximale du salaire retenue par mois (droit du travail)',
+  'fleet.settings.field.fuel.deductionMaxSalaryPct':
+    'Part maximale du salaire retenue par mois (droit du travail)',
   'fleet.settings.section.integrations': 'Systèmes de l’entreprise',
-  'fleet.settings.section.integrations.hint': "Simulé dans la maquette : les données sont reprises au lieu d'être ressaisies.",
+  'fleet.settings.section.integrations.hint':
+    "Simulé dans la maquette : les données sont reprises au lieu d'être ressaisies.",
   'fleet.settings.field.integrations.hrSystemConnected': 'Système de gestion du personnel',
-  'fleet.settings.field.integrations.managementSystemConnected': "Système de gestion de l'entreprise",
+  'fleet.settings.field.integrations.managementSystemConnected':
+    "Système de gestion de l'entreprise",
   'fleet.settings.scoreFamilies.title': 'Familles du score de conduite',
   'fleet.settings.scoreFamilies.count': 'Aucune famille | 1 famille | {n} familles',
-  'fleet.settings.scoreFamilies.hint': 'Code, libellé et poids de chaque famille. Poids 0 : famille ignorée.',
+  'fleet.settings.scoreFamilies.hint':
+    'Code, libellé et poids de chaque famille. Poids 0 : famille ignorée.',
   'fleet.settings.scoreFamilies.formulaTitle': 'Formule :',
-  'fleet.settings.scoreFamilies.formula': "note de la famille = 100 - somme (nombre de faits × points), jamais sous 0 et plafonnée tant qu'un document manque ; score = somme (note × poids) / somme des poids.",
+  'fleet.settings.scoreFamilies.formula':
+    "note de la famille = 100 - somme (nombre de faits × points), jamais sous 0 et plafonnée tant qu'un document manque ; score = somme (note × poids) / somme des poids.",
   'fleet.settings.scoreFamilies.saved': 'Les familles du score sont enregistrées.',
   'fleet.settings.scoreFamilies.code': 'Code',
   'fleet.settings.scoreFamilies.label': 'Libellé',
@@ -112,28 +118,35 @@ export default {
   'fleet.settings.scoreFamilies.issue.noFamily': 'Il faut au moins une famille.',
   'fleet.settings.scoreFamilies.issue.noWeight': 'Au moins une famille doit avoir un poids.',
   'fleet.settings.scoreFamilies.issue.codeRequired': 'Une famille n’a pas de code.',
-  'fleet.settings.scoreFamilies.issue.codeInvalid': 'Un code ne contient que des lettres, des chiffres et _ (20 au plus) et commence par une lettre.',
+  'fleet.settings.scoreFamilies.issue.codeInvalid':
+    'Un code ne contient que des lettres, des chiffres et _ (20 au plus) et commence par une lettre.',
   'fleet.settings.scoreFamilies.issue.labelRequired': 'Une famille n’a pas de libellé.',
   'fleet.settings.scoreFamilies.issue.weightOutOfRange': 'Un poids va de 0 à 100.',
   'fleet.settings.scoreFamilies.issue.duplicateCode': 'Deux familles ont le même code.',
   'fleet.settings.scoreFamilies.issue.noSource': 'Une famille ne compte aucun élément.',
-  'fleet.settings.scoreFamilies.issue.sourceTwice': 'Un même élément est compté dans deux familles.',
+  'fleet.settings.scoreFamilies.issue.sourceTwice':
+    'Un même élément est compté dans deux familles.',
   'fleet.settings.scoreSource.stopDeviation': 'Arrêts, repos et temps de conduite injustifiés',
-  'fleet.settings.scoreSource.stopDeviation.formula': 'points d’un arrêt critique ou des autres, selon les réglages',
+  'fleet.settings.scoreSource.stopDeviation.formula':
+    'points d’un arrêt critique ou des autres, selon les réglages',
   'fleet.settings.scoreSource.confirmedBehaviour': 'Comportements confirmés par une infraction',
-  'fleet.settings.scoreSource.confirmedBehaviour.formula': 'points selon la gravité (critique, majeure, mineure)',
+  'fleet.settings.scoreSource.confirmedBehaviour.formula':
+    'points selon la gravité (critique, majeure, mineure)',
   'fleet.settings.scoreSource.routeDeviation': 'Écarts d’itinéraire injustifiés',
   'fleet.settings.scoreSource.routeDeviation.formula': 'points par écart d’itinéraire',
   'fleet.settings.scoreSource.documents': 'Documents obligatoires',
-  'fleet.settings.scoreSource.documents.formula': 'plafonne la note tant qu’un document manque ou est expiré',
+  'fleet.settings.scoreSource.documents.formula':
+    'plafonne la note tant qu’un document manque ou est expiré',
   'fleet.settings.scoreSource.manualInfraction': 'Infractions retenues',
-  'fleet.settings.scoreSource.manualInfraction.formula': 'points selon la gravité (critique, majeure, mineure)',
+  'fleet.settings.scoreSource.manualInfraction.formula':
+    'points selon la gravité (critique, majeure, mineure)',
   'fleet.settings.scoreSource.ecoEvent': 'Habitudes de conduite mesurées',
   'fleet.settings.scoreSource.ecoEvent.formula': 'points par événement d’écoconduite',
   'fleet.settings.scoreSource.deliveryDispute': 'Livraisons contestées',
   'fleet.settings.scoreSource.deliveryDispute.formula': 'points par contestation encore ouverte',
   'fleet.settings.importMappings.title': 'Imports de données',
-  'fleet.settings.importMappings.hint': 'Intitulé de la colonne du fichier pour chaque champ. Vide : nom par défaut.',
+  'fleet.settings.importMappings.hint':
+    'Intitulé de la colonne du fichier pour chaque champ. Vide : nom par défaut.',
   'fleet.settings.importMappings.saved': 'La correspondance des colonnes est enregistrée.',
   'fleet.settings.importMappings.field': 'Champ',
   'fleet.settings.importMappings.heading': 'Intitulé dans le fichier source',
@@ -194,10 +207,12 @@ export default {
   'fleet.settings.indicators.issue.unknownIndicator': 'Un indicateur est inconnu.',
   'fleet.settings.indicators.issue.missingIndicator': 'Un indicateur manque.',
   'fleet.settings.indicators.issue.codeRequired': 'Un indicateur n’a pas de code.',
-  'fleet.settings.indicators.issue.codeInvalid': 'Un code ne contient que des majuscules, des chiffres et _ (12 au plus).',
+  'fleet.settings.indicators.issue.codeInvalid':
+    'Un code ne contient que des majuscules, des chiffres et _ (12 au plus).',
   'fleet.settings.indicators.issue.duplicateCode': 'Deux indicateurs ont le même code.',
   'fleet.settings.indicators.issue.labelRequired': 'Un indicateur n’a pas de libellé.',
-  'fleet.settings.indicators.issue.targetOutOfRange': 'Une cible sort des bornes de son indicateur.',
+  'fleet.settings.indicators.issue.targetOutOfRange':
+    'Une cible sort des bornes de son indicateur.',
   'fleet.settings.indicatorUnit.percent': '%',
   'fleet.settings.indicatorUnit.hours': 'h',
   'fleet.settings.indicatorUnit.km': 'km',
@@ -206,14 +221,23 @@ export default {
   'fleet.settings.indicatorUnit.points': 'points',
   'fleet.settings.indicatorDirection.higher': 'Mieux au-dessus de la cible',
   'fleet.settings.indicatorDirection.lower': 'Mieux en dessous de la cible',
-  'fleet.settings.indicatorDefinition.availabilityRate': 'Part des véhicules du parc prêts à travailler (ni en maintenance, ni immobilisés, ni hors service) sur la période.',
-  'fleet.settings.indicatorDefinition.preventiveShare': 'Part des ordres de travail préventifs parmi les ordres de travail validés de la période.',
-  'fleet.settings.indicatorDefinition.mtbf': 'Kilomètres parcourus entre deux pannes, en moyenne, par véhicule.',
-  'fleet.settings.indicatorDefinition.mttr': "Durée moyenne entre l'ouverture d'un ordre de travail correctif et sa validation.",
-  'fleet.settings.indicatorDefinition.costPerKm': "Coût de maintenance, de carburant, de pneus et d'assurance divisé par les kilomètres parcourus.",
-  'fleet.settings.indicatorDefinition.fuelConsumption': "Litres consommés pour 100 km parcourus, d'un plein complet au suivant.",
-  'fleet.settings.indicatorDefinition.documentCompliance': 'Part des véhicules et des conducteurs dont tous les documents obligatoires sont valides.',
-  'fleet.settings.indicatorDefinition.driverScore': 'Moyenne des scores de conduite des conducteurs sur la période du score.',
+  'fleet.settings.indicatorDefinition.availabilityRate':
+    'Part des véhicules du parc prêts à travailler (ni en maintenance, ni immobilisés, ni hors service) sur la période.',
+  'fleet.settings.indicatorDefinition.preventiveShare':
+    'Part des ordres de travail préventifs parmi les ordres de travail validés de la période.',
+  'fleet.settings.indicatorDefinition.mtbf':
+    'Kilomètres parcourus entre deux pannes, en moyenne, par véhicule.',
+  'fleet.settings.indicatorDefinition.mttr':
+    "Durée moyenne entre l'ouverture d'un ordre de travail correctif et sa validation.",
+  'fleet.settings.indicatorDefinition.costPerKm':
+    "Coût de maintenance, de carburant, de pneus et d'assurance divisé par les kilomètres parcourus.",
+  'fleet.settings.indicatorDefinition.fuelConsumption':
+    "Litres consommés pour 100 km parcourus, d'un plein complet au suivant.",
+  'fleet.settings.indicatorDefinition.documentCompliance':
+    'Part des véhicules et des conducteurs dont tous les documents obligatoires sont valides.',
+  'fleet.settings.indicatorDefinition.driverScore':
+    'Moyenne des scores de conduite des conducteurs sur la période du score.',
   'fleet.settings.importMappings.saveFirst': "Enregistrez d'abord les changements en cours.",
-  'fleet.settings.warning.outOfRange': 'Attention : cette valeur sort des bornes habituelles (entre {min} et {max} {unit}). Elle sera enregistrée telle quelle.'
+  'fleet.settings.warning.outOfRange':
+    'Attention : cette valeur sort des bornes habituelles (entre {min} et {max} {unit}). Elle sera enregistrée telle quelle.'
 }

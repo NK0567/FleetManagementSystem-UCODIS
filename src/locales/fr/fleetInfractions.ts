@@ -56,5 +56,9 @@ export default {
   'fleet.infractions.form.noOutcome': 'Pas encore de suite donnée.',
   'fleet.infractions.form.training': 'Formation',
   'fleet.infractions.form.history': 'Historique',
-  'fleet.infractions.noResultsCreate': 'Aucune infraction. Créez-en une avec Nouveau.'
+  'fleet.infractions.noResultsCreate': 'Aucune infraction. Créez-en une avec Nouveau.',
+  'fleet.infractions.col.dueOn': 'Délai',
+  'fleet.infractions.col.handlingLevel': 'Niveau de traitement',
+  'fleet.infractions.form.dueOn': 'Délai de traitement',
+  'fleet.infractions.form.handlingLevel': 'Niveau de traitement'
 }

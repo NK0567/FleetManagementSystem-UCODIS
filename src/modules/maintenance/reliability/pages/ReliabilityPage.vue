@@ -3,6 +3,7 @@ import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useOptionsStore } from '@/stores/optionsStore'
 import { EMPTY_CELL, formatNumber } from '@/utils/format'
+import AgeGroupKpisPanel from '../components/AgeGroupKpisPanel.vue'
 import MaintenanceTargetsPanel from '../components/MaintenanceTargetsPanel.vue'
 import { useReliabilityStore } from '../stores/reliabilityStore'
 
@@ -125,6 +126,8 @@ onMounted(() => void store.fetchReliability())
         :preventive-completion="store.reliability.preventiveCompletion"
         :targets="store.reliability.targets"
       />
+
+      <AgeGroupKpisPanel :groups="store.reliability.byAgeGroup" />
 
       <div class="grid gap-3 xl:grid-cols-2">
         <section class="bg-card border border-border rounded">

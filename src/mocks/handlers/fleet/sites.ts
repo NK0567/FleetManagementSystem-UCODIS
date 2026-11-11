@@ -13,6 +13,7 @@ import {
   readNumber,
   readPatch,
   readString,
+  readStringList,
   type FieldReaders
 } from '../../http/input'
 import { requireReference } from '../../http/references'
@@ -29,6 +30,7 @@ export function sitesApi(db: MockDatabase): SiteApi[] {
     const type = types.get(site.siteTypeNo)
     return {
       ...site,
+      approvedVehicleNos: site.approvedVehicleNos ?? [],
       siteTypeName: type?.name ?? '',
       effectiveRadiusM: site.radiusM ?? type?.defaultRadiusM ?? fallbackRadius
     }
@@ -69,7 +71,9 @@ export function registerSitesHandlers(router: MockRouter, db: MockDatabase): voi
     latitude: (input) => readNumber(input, 'latitude', { required: true, min: -90, max: 90 }) ?? 0,
     longitude: (input) =>
       readNumber(input, 'longitude', { required: true, min: -180, max: 180 }) ?? 0,
-    radiusM: (input) => readNumber(input, 'radiusM', { min: 50, max: 20000 })
+    radiusM: (input) => readNumber(input, 'radiusM', { min: 50, max: 20000 }),
+    approvedVehicleNos: (input) =>
+      readStringList(input, 'approvedVehicleNos').map((no) => db.vehicles.findOrFail(no).no)
   }
 
   const assertUniqueName = (name: string | undefined, no?: string) => {

@@ -11,6 +11,7 @@ export interface SiteApi {
   latitude: number
   longitude: number
   radiusM: number | null
+  approvedVehicleNos: string[]
   siteTypeName: string
   effectiveRadiusM: number
   createdAt: string

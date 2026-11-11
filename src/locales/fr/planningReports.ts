@@ -164,5 +164,9 @@ export default {
   'planning.dashboard.col.recipient': 'Destinataire',
   'planning.dashboard.col.product': 'Produit',
   'planning.dashboard.col.desired': 'Date souhaitée',
-  'planning.reports.perimeterNote': 'Vous voyez uniquement les ordres de transport de votre périmètre ({perimeter}). Les chiffres d’un compte sans rattachement sont plus larges.'
+  'planning.reports.perimeterNote':
+    'Vous voyez uniquement les ordres de transport de votre périmètre ({perimeter}). Les chiffres d’un compte sans rattachement sont plus larges.',
+  'planning.reports.col.incidents': 'Incidents',
+  'planning.reports.col.accidents': 'Accidents',
+  'planning.reports.col.infractions': 'Infractions'
 }

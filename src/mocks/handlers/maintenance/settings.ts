@@ -22,7 +22,7 @@ export function maintenanceSettings(db: MockDatabase): MaintenanceSettings {
 
 /** Targets of the indicators; a record saved before they existed falls back on the defaults. */
 export function maintenanceTargets(db: MockDatabase): MaintenanceSettings['targets'] {
-  return maintenanceSettings(db).targets ?? DEFAULT_MAINTENANCE_SETTINGS.targets
+  return { ...DEFAULT_MAINTENANCE_SETTINGS.targets, ...maintenanceSettings(db).targets }
 }
 
 /** One settings record for the workshop, saved one section at a time. */

@@ -144,5 +144,6 @@ export default {
   'planning.deliveryRequests.action.new': 'Nouvelle commande',
   'planning.deliveryRequests.import.actionLong': 'Importer des commandes',
   'planning.deliveryRequests.noResultsCreate': 'Aucune commande. Créez-en une avec Nouveau.',
-  'planning.deliveryRequests.splitDisabled': 'Indiquez une quantité supérieure à zéro et inférieure à celle de la commande.'
+  'planning.deliveryRequests.splitDisabled':
+    'Indiquez une quantité supérieure à zéro et inférieure à celle de la commande.'
 }

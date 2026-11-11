@@ -54,6 +54,8 @@ export default {
   'maintenance.mobileInterventions.hint.closeNeedsArrival': 'Record the arrival on site first.',
   'maintenance.mobileInterventions.progress.position': 'Vehicle position (GPS)',
   'maintenance.mobileInterventions.progress.positionAt': 'reported on {at}',
-  'maintenance.mobileInterventions.progress.positionNone': 'No position: the vehicle has no GPS unit in working order.',
-  'maintenance.mobileInterventions.form.positionHint': 'On saving, the GPS position of the vehicle is read and attached to the mission.'
+  'maintenance.mobileInterventions.progress.positionNone':
+    'No position: the vehicle has no GPS unit in working order.',
+  'maintenance.mobileInterventions.form.positionHint':
+    'On saving, the GPS position of the vehicle is read and attached to the mission.'
 }

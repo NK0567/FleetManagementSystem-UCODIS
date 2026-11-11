@@ -7,10 +7,18 @@ const basePath = '/fleet/trainings'
 
 export const trainingApi = {
   ...createCrudApi<TrainingApi>({ basePath }),
-  attend: (no: string, attendedOn: string, result: string) =>
+  attend: (
+    no: string,
+    attendedOn: string,
+    result: string,
+    score: number | null,
+    nextTrainingOn: string | null
+  ) =>
     httpClient.post<SingleResponse<TrainingApi>>(`${resourcePath(basePath, no)}/attend`, {
       attendedOn,
-      result
+      result,
+      score,
+      nextTrainingOn
     }),
   cancel: (no: string, reason: string) =>
     httpClient.post<SingleResponse<TrainingApi>>(`${resourcePath(basePath, no)}/cancel`, { reason })

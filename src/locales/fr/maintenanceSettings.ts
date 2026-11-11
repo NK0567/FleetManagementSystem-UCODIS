@@ -66,5 +66,22 @@ export default {
   'maintenance.settings.field.targets.preventiveCompletionTargetPct':
     'Taux de réalisation du préventif visé',
   'maintenance.settings.field.targets.mttrTargetHours': 'MTTR à ne pas dépasser',
-  'maintenance.settings.field.targets.mtbfTargetKm': 'MTBF minimal'
+  'maintenance.settings.field.targets.mtbfTargetKm': 'MTBF minimal',
+  'maintenance.settings.unit.years': 'ans',
+  'maintenance.settings.field.targets.ageMidFromYears':
+    'Groupe intermédiaire à partir de (âge du véhicule)',
+  'maintenance.settings.field.targets.ageOldFromYears':
+    'Groupe ancien à partir de (âge du véhicule)',
+  'maintenance.settings.field.targets.mttrTargetHoursYoung':
+    'MTTR à ne pas dépasser, véhicules récents',
+  'maintenance.settings.field.targets.mttrTargetHoursMid':
+    'MTTR à ne pas dépasser, véhicules intermédiaires',
+  'maintenance.settings.field.targets.mttrTargetHoursOld':
+    'MTTR à ne pas dépasser, véhicules anciens',
+  'maintenance.settings.field.targets.mtbfTargetKmYoung': 'MTBF minimal, véhicules récents',
+  'maintenance.settings.field.targets.mtbfTargetKmMid': 'MTBF minimal, véhicules intermédiaires',
+  'maintenance.settings.field.targets.mtbfTargetKmOld': 'MTBF minimal, véhicules anciens',
+  'maintenance.settings.field.tyres.newTreadMm': 'Profondeur d’un pneu neuf',
+  'maintenance.settings.field.tyres.wearMmPer10000Km': 'Usure attendue pour 10 000 km',
+  'maintenance.settings.field.tyres.wearToleranceMm': 'Écart toléré avant alerte'
 }

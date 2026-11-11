@@ -1,5 +1,10 @@
 import type { InfractionSeverity } from '@/modules/fleet/infraction-types'
-import type { InfractionOutcome, InfractionSource, InfractionStatus } from '../domain/infraction'
+import type {
+  InfractionHandlingLevel,
+  InfractionOutcome,
+  InfractionSource,
+  InfractionStatus
+} from '../domain/infraction'
 
 export interface InfractionEvent {
   at: string
@@ -20,6 +25,10 @@ export interface InfractionApi {
   detail: string
   source: InfractionSource
   handlerCode: string | null
+  /** Deadline to settle the file: the one typed in, else the usual delay of the severity. */
+  dueOn: string
+  handlingLevel: InfractionHandlingLevel
+  overdue: boolean
   outcome: InfractionOutcome | null
   outcomeComment: string
   closedAt: string | null

@@ -495,7 +495,11 @@ function meansOf(db: MockDatabase, orders: readonly ScopedOrder[]) {
 }
 
 /** Each external carrier (TRS08-US04): orders, punctuality, quality, invoices against tariff. */
-function carrierRows(db: MockDatabase, orders: readonly ScopedOrder[]) {
+function carrierRows(
+  db: MockDatabase,
+  orders: readonly ScopedOrder[],
+  filters?: Partial<ReportFilters>
+) {
   const settings = planningSettings(db)
   const tolerance = settings.billing.carrierInvoiceToleranceAmount
   const tacit = settings.confirmation.tacitConfirmationDays
@@ -551,10 +555,90 @@ function carrierRows(db: MockDatabase, orders: readonly ScopedOrder[]) {
       if (Math.abs(gap) > tolerance) row.invoicesOutside += 1
     }
   }
-  return [...figures.values()].map((row) => ({
+  const safety = carrierSafety(db, orders, filters)
+  const external = [...figures.values()].map((row) => ({
     ...carrierIndicators(row),
-    carrierName: db.providers.find(row.carrierNo)?.name ?? null
+    carrierName: db.providers.find(row.carrierNo)?.name ?? null,
+    ...(safety.get(row.carrierNo) ?? { incidents: 0, accidents: null, infractions: null })
   }))
+  const own = orders.filter((order) => order.api.means !== 'carrier')
+  if (!own.length) return external
+  const ownFigures = carrierIndicators({
+    carrierNo: 'fleet',
+    orders: own.length,
+    onTime: 0,
+    arrived: 0,
+    attested: 0,
+    contested: 0,
+    refused: 0,
+    partial: 0,
+    declared: 0,
+    invoices: 0,
+    invoicesOutside: 0,
+    withoutTariff: 0,
+    invoiceGap: 0
+  })
+  return [
+    {
+      ...ownFigures,
+      punctuality: punctualityRate(
+        deliveriesOf(db, own).filter((delivery) => delivery.onTime).length,
+        deliveriesOf(db, own).length
+      ),
+      carrierName: null,
+      ...(safety.get('fleet') ?? { incidents: 0, accidents: 0, infractions: 0 })
+    },
+    ...external
+  ]
+}
+
+/**
+ * Incidents, accidents and infractions of each carrier, for the CSR reviews. The own fleet counts
+ * its declared claims and infractions on the vehicles that ran the orders of the period. An
+ * external carrier declares nothing in the FMS: its incidents are the delivery anomalies charged
+ * to it, and its accidents and infractions are not known here.
+ */
+function carrierSafety(
+  db: MockDatabase,
+  orders: readonly ScopedOrder[],
+  filters?: Partial<ReportFilters>
+) {
+  const inRange = (at: string) =>
+    (!filters?.from || at.slice(0, 10) >= filters.from.slice(0, 10)) &&
+    (!filters?.to || at.slice(0, 10) <= filters.to.slice(0, 10))
+  const result = new Map<
+    string,
+    { incidents: number; accidents: number | null; infractions: number | null }
+  >()
+  const vehicles = new Set<string>()
+  for (const order of orders) {
+    if (order.api.means === 'carrier') {
+      const carrierNo = order.api.carrierNo
+      if (!carrierNo) continue
+      const row = result.get(carrierNo) ?? { incidents: 0, accidents: null, infractions: null }
+      row.incidents += order.row.lines.filter((line) =>
+        line.responsibility?.shares.some(
+          (share) => share.actor === 'external_carrier' && share.percent > 0
+        )
+      ).length
+      result.set(carrierNo, row)
+    } else {
+      const trip = order.row.tripNo ? db.trips.find(order.row.tripNo) : undefined
+      if (trip?.vehicleNo) vehicles.add(trip.vehicleNo)
+    }
+  }
+  const claims = db.claims.all().filter((claim) => vehicles.has(claim.vehicleNo))
+  result.set('fleet', {
+    incidents: claims.filter((claim) => claim.nature === 'incident' && inRange(claim.occurredAt))
+      .length,
+    accidents: claims.filter((claim) => claim.nature === 'accident' && inRange(claim.occurredAt))
+      .length,
+    infractions: db.infractions
+      .all()
+      .filter((infraction) => vehicles.has(infraction.vehicleNo) && inRange(infraction.occurredAt))
+      .length
+  })
+  return result
 }
 
 export function carrierReport(
@@ -562,7 +646,7 @@ export function carrierReport(
   userCode: string,
   filters?: Partial<ReportFilters>
 ) {
-  return carrierRows(db, scopedOrders(db, userCode, filters))
+  return carrierRows(db, scopedOrders(db, userCode, filters), filters)
 }
 
 export function planningDashboard(

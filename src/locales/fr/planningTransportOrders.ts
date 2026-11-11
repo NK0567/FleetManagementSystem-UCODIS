@@ -596,5 +596,10 @@ export default {
   'planning.transportOrders.board.stat.notExecuted': 'Non exécutée',
   'planning.transportOrders.board.stat.toReplan': 'À replanifier',
   'planning.transportOrders.closing.kinds.depot_document': 'Document remis par le dépôt',
-  'planning.transportOrders.closing.kindPlaceholder': 'Choisissez le type de document'
+  'planning.transportOrders.closing.kindPlaceholder': 'Choisissez le type de document',
+  'planning.calendar.legend.realized': 'Réalisé',
+  'planning.calendar.legend.onTime': 'Réalisé dans les temps',
+  'planning.calendar.legend.late': 'Réalisé en retard',
+  'planning.calendar.legend.running': 'En cours',
+  'planning.calendar.running': 'en cours'
 }

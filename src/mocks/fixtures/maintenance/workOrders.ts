@@ -126,6 +126,8 @@ const SEED: Seed[] = [
       subsystemNo: 'AIR',
       modeNo: 'LEAK',
       causeNo: 'POOR-MAINTENANCE',
+      observation:
+        'Joint du raccord d’air jamais remplacé depuis la dernière révision : défaut de suivi préventif, pas de faute du conducteur.',
       by: 'MNT001',
       at: '2026-08-27T11:00:00'
     },

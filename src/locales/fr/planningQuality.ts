@@ -69,5 +69,6 @@ export default {
   'planning.quality.files': 'Pièces jointes',
   'planning.quality.noFile': 'Aucune pièce jointe.',
   'planning.quality.factsRecorded': 'Faits enregistrés sur cette livraison',
-  'planning.quality.originSuggested': 'Origine proposée d’après ces faits : {origin}. Elle reste modifiable.'
+  'planning.quality.originSuggested':
+    'Origine proposée d’après ces faits : {origin}. Elle reste modifiable.'
 }

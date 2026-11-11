@@ -25,7 +25,8 @@ export default {
   'fleet.equipmentTypes.form.no': 'Code',
   'fleet.equipmentTypes.form.name': 'Name',
   'fleet.equipmentTypes.form.capability': 'Capability',
-  'fleet.equipmentTypes.form.capabilityHint': 'What the equipment brings to the vehicle (position, camera, unloading).',
+  'fleet.equipmentTypes.form.capabilityHint':
+    'What the equipment brings to the vehicle (position, camera, unloading).',
   'fleet.equipmentTypes.form.hasDueDate': 'Has a due date',
   'fleet.equipmentTypes.form.noticeDays': 'Notice before the due date (days)',
   'fleet.equipmentTypes.form.active': 'Active',

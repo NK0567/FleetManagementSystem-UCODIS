@@ -168,7 +168,7 @@ type Dialog =
   | null
 const dialog = ref<Dialog>(null)
 const reasonDialog = ref<'refuse' | 'cancel' | null>(null)
-const diagnosis = ref({ subsystemNo: '', modeNo: '', causeNo: '' })
+const diagnosis = ref({ subsystemNo: '', modeNo: '', causeNo: '', observation: '' })
 const labour = ref({ technicianNo: '', date: todayIso(), hours: null as number | null })
 const completion = ref({ workDone: '', odometerKm: null as number | null })
 const referenceStore = useReferenceStore()
@@ -234,7 +234,8 @@ function open(next: Dialog) {
   diagnosis.value = {
     subsystemNo: order?.diagnosis?.subsystemNo ?? '',
     modeNo: order?.diagnosis?.modeNo ?? '',
-    causeNo: order?.diagnosis?.causeNo ?? ''
+    causeNo: order?.diagnosis?.causeNo ?? '',
+    observation: order?.diagnosis?.observation ?? ''
   }
   labour.value = { technicianNo: '', date: todayIso(), hours: null }
   completion.value = { workDone: '', odometerKm: order?.odometerKmAtOpening ?? null }
@@ -328,7 +329,8 @@ async function confirm() {
         return act('diagnose', {
           subsystemNo: diagnosis.value.subsystemNo,
           modeNo: diagnosis.value.modeNo || null,
-          causeNo: diagnosis.value.causeNo || null
+          causeNo: diagnosis.value.causeNo || null,
+          observation: diagnosis.value.observation
         })
       case 'labour':
         return act('labour', labour.value)
@@ -637,6 +639,14 @@ const secondaryActions = computed(() =>
             v-model="diagnosis.causeNo"
             reference-key="failureCauses"
             :modal-title="t('maintenance.workOrders.dialog.cause')"
+          />
+        </BaseFormField>
+        <BaseFormField :label="t('maintenance.workOrders.dialog.observation')">
+          <FormTextarea
+            v-model="diagnosis.observation"
+            :rows="3"
+            :maxlength="500"
+            :placeholder="t('maintenance.workOrders.dialog.observationHint')"
           />
         </BaseFormField>
       </template>

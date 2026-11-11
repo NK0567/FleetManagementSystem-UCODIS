@@ -105,5 +105,8 @@ export default {
   'maintenance.tyres.plan.tyre': 'Pneu en stock',
   'maintenance.tyres.plan.pickTyre': 'Choisir un pneu',
   'maintenance.tyres.plan.noStock': 'Aucun pneu en stock.',
-  'maintenance.tyres.noResultsCreate': 'Aucun pneu. Créez-en un avec Nouveau.'
+  'maintenance.tyres.noResultsCreate': 'Aucun pneu. Créez-en un avec Nouveau.',
+  'maintenance.tyres.life.wear':
+    'Usure théorique : {theoretical} mm restants. Mesurée : {measured} mm. Écart : {gap} mm.',
+  'maintenance.tyres.life.wearFast': 'Usure plus rapide que prévu, à rapprocher de la conduite.'
 }

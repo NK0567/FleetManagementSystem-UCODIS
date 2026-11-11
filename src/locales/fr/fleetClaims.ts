@@ -83,6 +83,7 @@ export default {
   'fleet.claims.form.downtimeCode': "Code d'indisponibilité appliqué au véhicule : {code} · {name}",
   'fleet.claims.form.downtimeOpen': 'en cours',
   'fleet.claims.form.downtimeEnded': 'terminée',
-  'fleet.claims.summary': 'Accidents et incidents : {claims} · par million de km : {rate} · dommages {damage} Ar · reste à charge {residual} Ar',
+  'fleet.claims.summary':
+    'Accidents et incidents : {claims} · par million de km : {rate} · dommages {damage} Ar · reste à charge {residual} Ar',
   'fleet.claims.noResultsCreate': 'Aucun sinistre. Créez-en un avec Nouveau.'
 }

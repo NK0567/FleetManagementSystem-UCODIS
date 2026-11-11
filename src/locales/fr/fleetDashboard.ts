@@ -40,8 +40,20 @@ export default {
   'fleet.dashboard.supervision.inAlert': 'En alerte',
   'fleet.dashboard.supervision.outOfZone': 'Hors zone',
   'fleet.dashboard.supervision.none': 'Aucun véhicule.',
-  'fleet.dashboard.supervision.alerts': 'Aucune alerte à traiter | {count} alerte à traiter | {count} alertes à traiter',
+  'fleet.dashboard.supervision.alerts':
+    'Aucune alerte à traiter | {count} alerte à traiter | {count} alertes à traiter',
   'fleet.dashboard.supervision.offCorridor': "À {km} km de l'itinéraire",
   'fleet.dashboard.supervision.offSites': 'Hors de tout site connu',
-  'fleet.dashboard.supervision.speed': '{speed} km/h'
+  'fleet.dashboard.supervision.speed': '{speed} km/h',
+  'fleet.dashboard.daily.title': "Aujourd'hui",
+  'fleet.dashboard.daily.month': 'Ce mois : {value}',
+  'fleet.dashboard.daily.km': 'Kilomètres parcourus',
+  'fleet.dashboard.daily.quantity': 'Quantité transportée',
+  'fleet.dashboard.daily.fuel': 'Carburant consommé',
+  'fleet.dashboard.daily.immobilized': 'Véhicules immobilisés',
+  'fleet.dashboard.daily.accidents': 'Accidents',
+  'fleet.dashboard.daily.incidents': 'Incidents',
+  'fleet.dashboard.daily.stops': 'Arrêts non autorisés',
+  'fleet.dashboard.unavailableDrivers': 'Conducteurs indisponibles',
+  'fleet.dashboard.noUnavailableDriver': 'Tous les conducteurs sont disponibles.'
 }

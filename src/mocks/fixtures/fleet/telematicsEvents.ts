@@ -186,6 +186,16 @@ const SEED: EventSeed[] = [
     source: 'box',
     value: 94,
     position: [-18.93, 47.85]
+  },
+  {
+    type: 'CAMERA-OFFLINE',
+    vehicleNo: 'VEH-003',
+    driverNo: 'UCT-012',
+    occurredAt: at(-1, '09:40'),
+    value: 35,
+    source: 'camera',
+    position: [-18.9, 47.52],
+    detail: 'La caméra de cabine ne répond plus depuis 35 minutes, le GPS continue d’émettre.'
   }
 ]
 

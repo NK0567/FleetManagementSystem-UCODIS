@@ -1,4 +1,4 @@
-import type { DeclaredStatus } from '@/modules/fleet/documents/domain/document'
+import type { DeclaredStatus, RenewalLevel } from '@/modules/fleet/documents/domain/document'
 import type { SubjectKind } from '@/modules/fleet/documents/types/document.types'
 import { addDays, addMonths } from '@/utils/date'
 import type { CollectionDefinition, MockRow } from '../../db/collection'
@@ -21,6 +21,9 @@ export interface DocumentRow extends MockRow {
   declaredBy: string | null
   version: number
   replacedByNo: string | null
+  renewalLevel?: RenewalLevel
+  renewalTargetOn?: string | null
+  renewalClosedOn?: string | null
 }
 
 type Seed = Omit<DocumentRow, keyof typeof seedAudit | 'no'>
@@ -184,10 +187,18 @@ function personDocuments(): Seed[] {
   return docs
 }
 
+/** Renewals under way for documents past their validity (the visit, the licence, the medicals). */
+const RENEWALS: Record<string, Pick<DocumentRow, 'renewalLevel' | 'renewalTargetOn'>> = {
+  'VEH-005|VEH-INSP': { renewalLevel: 'internal_service', renewalTargetOn: inDays(5) },
+  'UCT-016|PER-LIC': { renewalLevel: 'signature', renewalTargetOn: inDays(-2) },
+  'UCT-018|PER-MED': { renewalLevel: 'external_center', renewalTargetOn: inDays(3) }
+}
+
 function seed(): Omit<DocumentRow, keyof typeof seedAudit>[] {
   const current = [...vehicleDocuments(), ...personDocuments()].map((doc, index) => ({
     no: `DOC-${pad(index + 1, 5)}`,
-    ...doc
+    ...doc,
+    ...RENEWALS[`${doc.subjectNo}|${doc.documentTypeNo}`]
   }))
   const insurance = current.find(
     (doc) => doc.subjectNo === 'VEH-001' && doc.documentTypeNo === 'VEH-INS'
@@ -201,7 +212,9 @@ function seed(): Omit<DocumentRow, keyof typeof seedAudit>[] {
     issueDate: addMonths(insurance.issueDate ?? DEMO_REFERENCE_DATE, -12),
     expiryDate: addMonths(insurance.expiryDate ?? DEMO_REFERENCE_DATE, -12),
     version: 1,
-    replacedByNo: insurance.no
+    replacedByNo: insurance.no,
+    renewalLevel: 'completed' as const,
+    renewalClosedOn: insurance.issueDate
   }
   return [...current, previous]
 }
@@ -209,5 +222,5 @@ function seed(): Omit<DocumentRow, keyof typeof seedAudit>[] {
 export const documentsCollection: CollectionDefinition<DocumentRow> = {
   name: 'documents',
   seed: () => seed().map((row) => ({ ...row, ...seedAudit })),
-  dateFields: ['issueDate', 'expiryDate', 'declaredAt']
+  dateFields: ['issueDate', 'expiryDate', 'declaredAt', 'renewalTargetOn', 'renewalClosedOn']
 }

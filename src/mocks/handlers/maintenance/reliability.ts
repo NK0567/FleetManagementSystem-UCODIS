@@ -1,3 +1,4 @@
+import { vehicleAgeYears } from '@/modules/fleet/dashboard/domain/park'
 import { dayCostOf, downtimeDaysWithin } from '@/modules/maintenance/downtimes/domain/downtime'
 import {
   kmAt,
@@ -8,6 +9,7 @@ import {
   type OdometerPoint
 } from '@/modules/maintenance/reliability/domain/reliability'
 import type {
+  AgeGroupKpi,
   MaintenanceDashboardApi,
   MaintenanceSteering,
   ReliabilityApi,
@@ -180,6 +182,16 @@ export function reliabilityApi(db: MockDatabase, from: string, to: string): Reli
       from: fromAt,
       to: toAt
     }),
+    byAgeGroup: ageGroupKpis({
+      vehicles,
+      orders,
+      kmByVehicle,
+      lostByVehicle,
+      periodDays,
+      fromAt,
+      toAt,
+      targets: maintenanceTargets(db)
+    }),
     bySubsystem: top(
       count((order) => order.subsystemName || null),
       (n) => n,
@@ -209,6 +221,75 @@ export function reliabilityApi(db: MockDatabase, from: string, to: string): Reli
     ),
     ...maintenanceSteering(db, orders, fromAt, toAt, lostByFamily)
   }
+}
+
+/** The park by vehicle age: the same indicators on each cut, against the targets of the cut. */
+function ageGroupKpis(input: {
+  vehicles: { no: string; firstRegistrationDate: string | null; year: number | null }[]
+  orders: ReturnType<typeof workOrdersApi>
+  kmByVehicle: Map<string, number>
+  lostByVehicle: Map<string, number>
+  periodDays: number
+  fromAt: string
+  toAt: string
+  targets: ReturnType<typeof maintenanceTargets>
+}): AgeGroupKpi[] {
+  const { targets } = input
+  const today = todayIso()
+  const groups = [
+    { key: 'young', from: 0, to: targets.ageMidFromYears },
+    { key: 'mid', from: targets.ageMidFromYears, to: targets.ageOldFromYears },
+    { key: 'old', from: targets.ageOldFromYears, to: null }
+  ] as const
+  const mttrTarget = {
+    young: targets.mttrTargetHoursYoung,
+    mid: targets.mttrTargetHoursMid,
+    old: targets.mttrTargetHoursOld
+  }
+  const mtbfTarget = {
+    young: targets.mtbfTargetKmYoung,
+    mid: targets.mtbfTargetKmMid,
+    old: targets.mtbfTargetKmOld
+  }
+  return groups.map((group) => {
+    const members = new Set(
+      input.vehicles
+        .filter((vehicle) => {
+          const age = vehicleAgeYears(vehicle, today)
+          return age !== null && age >= group.from && (group.to === null || age < group.to)
+        })
+        .map((vehicle) => vehicle.no)
+    )
+    const kpis = reliabilityKpis({
+      orders: input.orders
+        .filter((order) => members.has(order.vehicleNo))
+        .map((order) => ({
+          maintenanceType: order.maintenanceType,
+          imported: order.origin === 'history',
+          cancelled: order.status === 'cancelled',
+          declaredAt: order.declaredAt,
+          completedAt: order.completedAt,
+          validatedAt: order.validatedAt,
+          totalCost: order.totalCost
+        })),
+      fleetKm: [...members].reduce((total, no) => total + (input.kmByVehicle.get(no) ?? 0), 0),
+      lostDays: [...members].reduce((total, no) => total + (input.lostByVehicle.get(no) ?? 0), 0),
+      vehicleDays: members.size * input.periodDays,
+      from: input.fromAt,
+      to: input.toAt
+    })
+    return {
+      key: group.key,
+      fromYears: group.from,
+      toYears: group.to,
+      vehicles: members.size,
+      failures: kpis.failures,
+      mttrHours: kpis.mttrHours,
+      mtbfKm: kpis.mtbfKm,
+      mttrTargetHours: mttrTarget[group.key],
+      mtbfTargetKm: mtbfTarget[group.key]
+    }
+  })
 }
 
 /**
@@ -306,7 +387,8 @@ export function maintenanceDashboardApi(db: MockDatabase): MaintenanceDashboardA
       (request) => request.status === 'requested' || request.status === 'ordered'
     ).length,
     tyreAlerts: tyresApi(db).filter((tyre) => tyre.alert === 'safety').length,
-    last30Days: last30.kpis
+    last30Days: last30.kpis,
+    ageGroups: last30.byAgeGroup
   }
 }
 

@@ -1,6 +1,9 @@
 import { INFRACTION_SEVERITIES } from '@/modules/fleet/infraction-types/types/infractionType.types'
 import {
+  defaultDueOn,
+  INFRACTION_HANDLING_LEVELS,
   INFRACTION_OUTCOMES,
+  isOverdue,
   infractionStatus,
   isDuplicate,
   isUpheld,
@@ -11,7 +14,7 @@ import type {
   InfractionEvent
 } from '@/modules/fleet/infractions/types/infraction.types'
 import { employeeFullName } from '@/modules/hr/employees/domain/employee'
-import { nowIsoDateTime } from '@/utils/date'
+import { nowIsoDateTime, todayIso } from '@/utils/date'
 import { nowIso } from '../../clock'
 import type { MockDatabase } from '../../db/database'
 import { nextNo } from '../../db/numbering'
@@ -26,6 +29,7 @@ import {
 import { conflict, unprocessable } from '../../http/errors'
 import {
   readAll,
+  readDate,
   readDateTime,
   readEnum,
   readNumber,
@@ -43,7 +47,15 @@ import { createTraining } from './trainings'
 
 type EditableFields = Pick<
   InfractionRow,
-  'occurredAt' | 'location' | 'vehicleNo' | 'driverNo' | 'severity' | 'fineAmount' | 'detail'
+  | 'occurredAt'
+  | 'location'
+  | 'vehicleNo'
+  | 'driverNo'
+  | 'severity'
+  | 'fineAmount'
+  | 'detail'
+  | 'dueOn'
+  | 'handlingLevel'
 >
 
 export function infractionsApi(db: MockDatabase): InfractionApi[] {
@@ -53,19 +65,28 @@ export function infractionsApi(db: MockDatabase): InfractionApi[] {
     db.employees.all().map((employee) => [employee.no, employeeFullName(employee)])
   )
   const trainings = db.trainings.all()
-  return db.infractions.all().map((infraction) => ({
-    ...infraction,
-    infractionTypeName: types.get(infraction.infractionTypeNo) ?? infraction.infractionTypeNo,
-    vehiclePlate: plates.get(infraction.vehicleNo) ?? infraction.vehicleNo,
-    driverName: infraction.driverNo ? (names.get(infraction.driverNo) ?? infraction.driverNo) : '',
-    status: infractionStatus(infraction),
-    upheld: isUpheld(infraction.outcome),
-    trainingNo:
-      trainings.find(
-        (training) =>
-          training.originNo === infraction.no && training.employeeNo === infraction.driverNo
-      )?.no ?? null
-  }))
+  const today = todayIso()
+  return db.infractions.all().map((infraction) => {
+    const dueOn = infraction.dueOn ?? defaultDueOn(infraction.occurredAt, infraction.severity)
+    return {
+      ...infraction,
+      dueOn,
+      handlingLevel: infraction.handlingLevel ?? 'manager',
+      overdue: isOverdue({ dueOn, outcome: infraction.outcome }, today),
+      infractionTypeName: types.get(infraction.infractionTypeNo) ?? infraction.infractionTypeNo,
+      vehiclePlate: plates.get(infraction.vehicleNo) ?? infraction.vehicleNo,
+      driverName: infraction.driverNo
+        ? (names.get(infraction.driverNo) ?? infraction.driverNo)
+        : '',
+      status: infractionStatus(infraction),
+      upheld: isUpheld(infraction.outcome),
+      trainingNo:
+        trainings.find(
+          (training) =>
+            training.originNo === infraction.no && training.employeeNo === infraction.driverNo
+        )?.no ?? null
+    }
+  })
 }
 
 function infractionApiOf(db: MockDatabase, no: string): InfractionApi | undefined {
@@ -124,7 +145,10 @@ export function registerInfractionsHandlers(router: MockRouter, db: MockDatabase
     driverNo: (input) => optionalReference(db.employees, input, 'driverNo'),
     severity: (input) => readEnum(input, 'severity', INFRACTION_SEVERITIES) ?? 'major',
     fineAmount: (input) => readNumber(input, 'fineAmount', { min: 0 }),
-    detail: (input) => readString(input, 'detail')
+    detail: (input) => readString(input, 'detail'),
+    dueOn: (input) => readDate(input, 'dueOn'),
+    handlingLevel: (input) =>
+      readEnum(input, 'handlingLevel', INFRACTION_HANDLING_LEVELS) ?? 'manager'
   }
 
   function assertNotDuplicate(

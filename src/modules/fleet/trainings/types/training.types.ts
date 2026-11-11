@@ -14,6 +14,10 @@ export interface TrainingApi {
   trainer: string
   attendedOn: string | null
   result: string
+  score: number | null
+  nextTrainingOn: string | null
+  /** The next training date is past and nothing is planned yet. */
+  nextTrainingLate: boolean
   cancelledAt: string | null
   cancelReason: string
   employeeName: string

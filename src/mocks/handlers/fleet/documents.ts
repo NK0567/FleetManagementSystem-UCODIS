@@ -5,6 +5,8 @@ import {
 import {
   DECLARED_STATUSES,
   documentIssues,
+  isRenewalLate,
+  RENEWAL_LEVELS,
   type DocumentIssue
 } from '@/modules/fleet/documents/domain/document'
 import {
@@ -47,7 +49,14 @@ import { FLEET_MESSAGES } from './messages'
 
 type EditableFields = Pick<
   DocumentRow,
-  'number' | 'detail' | 'issueDate' | 'expiryDate' | 'noticeDays' | 'fileNo'
+  | 'number'
+  | 'detail'
+  | 'issueDate'
+  | 'expiryDate'
+  | 'noticeDays'
+  | 'fileNo'
+  | 'renewalLevel'
+  | 'renewalTargetOn'
 >
 
 const ISSUE_MESSAGES: Record<DocumentIssue, (typeof FLEET_MESSAGES)['documentExpiryRequired']> = {
@@ -90,6 +99,16 @@ export function documentsApi(db: MockDatabase): DocumentApi[] {
       notifyOn: status?.notifyOn ?? null,
       file: document.fileNo ? fileMetaOf(db, document.fileNo) : null,
       state,
+      renewalLevel: document.renewalLevel ?? 'not_started',
+      renewalTargetOn: document.renewalTargetOn ?? null,
+      renewalClosedOn: document.renewalClosedOn ?? null,
+      renewalLate: isRenewalLate(
+        {
+          level: document.renewalLevel ?? 'not_started',
+          targetOn: document.renewalTargetOn ?? null
+        },
+        todayIso()
+      ),
       current: !document.replacedByNo,
       notifications: alerting ? alertNotifications(rule, since) : []
     }
@@ -106,22 +125,26 @@ export function missingDocumentsApi(db: MockDatabase): MissingDocumentApi[] {
     gaps: Map<string, { documentTypeNo: string; reason: MissingDocumentApi['reason'] }[]>
   ) =>
     [...gaps.entries()].flatMap(([subjectNo, subjectGaps]) =>
-      subjectGaps.map((gap) => ({
-        no: `${target}-${subjectNo}-${gap.documentTypeNo}`,
-        target,
-        subjectNo,
-        subjectName: names[target].get(subjectNo) ?? subjectNo,
-        documentTypeNo: gap.documentTypeNo,
-        documentTypeName: typeNames.get(gap.documentTypeNo) ?? gap.documentTypeNo,
-        reason: gap.reason,
-        documentNo:
-          current.find(
-            (document) =>
-              document.target === target &&
-              document.subjectNo === subjectNo &&
-              document.documentTypeNo === gap.documentTypeNo
-          )?.no ?? null
-      }))
+      subjectGaps.map((gap) => {
+        const held = current.find(
+          (document) =>
+            document.target === target &&
+            document.subjectNo === subjectNo &&
+            document.documentTypeNo === gap.documentTypeNo
+        )
+        return {
+          no: `${target}-${subjectNo}-${gap.documentTypeNo}`,
+          target,
+          subjectNo,
+          subjectName: names[target].get(subjectNo) ?? subjectNo,
+          documentTypeNo: gap.documentTypeNo,
+          documentTypeName: typeNames.get(gap.documentTypeNo) ?? gap.documentTypeNo,
+          reason: gap.reason,
+          renewalLevel: held ? (held.renewalLevel ?? 'not_started') : null,
+          renewalTargetOn: held?.renewalTargetOn ?? null,
+          documentNo: held?.no ?? null
+        }
+      })
     )
   return [...rows('vehicle', vehicles), ...rows('person', persons)]
 }
@@ -140,7 +163,9 @@ export function registerDocumentsHandlers(router: MockRouter, db: MockDatabase):
     issueDate: (input) => readDate(input, 'issueDate'),
     expiryDate: (input) => readDate(input, 'expiryDate'),
     noticeDays: (input) => readNumber(input, 'noticeDays', { min: 0, max: 365 }),
-    fileNo: (input) => readFileNo(db, input)
+    fileNo: (input) => readFileNo(db, input),
+    renewalLevel: (input) => readEnum(input, 'renewalLevel', RENEWAL_LEVELS) ?? 'not_started',
+    renewalTargetOn: (input) => readDate(input, 'renewalTargetOn')
   }
 
   /** The subject exists, is still in the fleet or on staff, and the type concerns it. */
@@ -194,7 +219,9 @@ export function registerDocumentsHandlers(router: MockRouter, db: MockDatabase):
         issueDate: readers.issueDate(input),
         expiryDate: type.validity === 'unlimited' ? null : readers.expiryDate(input),
         noticeDays: readers.noticeDays(input),
-        fileNo: readers.fileNo(input)
+        fileNo: readers.fileNo(input),
+        renewalLevel: 'not_started' as const,
+        renewalTargetOn: null
       }
       assertValid(fields, type.validity)
 
@@ -213,7 +240,14 @@ export function registerDocumentsHandlers(router: MockRouter, db: MockDatabase):
             document.documentTypeNo === documentTypeNo &&
             !document.replacedByNo
         )
-      if (previous) db.documents.update(previous.no, { replacedByNo: no })
+      if (previous) {
+        // The renewal is over the day the new document takes the place of the old one.
+        db.documents.update(previous.no, {
+          replacedByNo: no,
+          renewalLevel: 'completed',
+          renewalClosedOn: todayIso()
+        })
+      }
       return {
         no,
         target,

@@ -56,7 +56,7 @@ export default {
   'settings.moduleToggles.item.service-due.label': 'Échéances',
   'settings.moduleToggles.item.service-due.description':
     'Entretiens préventifs à venir, proches ou dépassés, tous véhicules confondus.',
-  'settings.moduleToggles.item.downtimes.label': 'Indisponibilités',
+  'settings.moduleToggles.item.downtimes.label': 'Indisponibilités techniques',
   'settings.moduleToggles.item.downtimes.description':
     'Historique détaillé des indisponibilités du parc, par cause et par famille de cause.',
   'settings.moduleToggles.item.reliability.label': 'Fiabilité',
@@ -159,5 +159,6 @@ export default {
   'settings.company.noChange': 'Aucune modification à enregistrer.',
   'settings.company.missingFields': 'Renseignez les champs obligatoires.',
   'settings.userAccounts.form.employee': 'Fiche du conducteur',
-  'settings.userAccounts.form.employeeHint': "Relie ce compte au conducteur dans la liste du personnel : c'est ce qui affiche son ordre de transport dans « Mon espace »."
+  'settings.userAccounts.form.employeeHint':
+    "Relie ce compte au conducteur dans la liste du personnel : c'est ce qui affiche son ordre de transport dans « Mon espace »."
 }

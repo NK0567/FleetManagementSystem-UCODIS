@@ -52,13 +52,25 @@ export default {
   'fleet.fuelRefills.form.comment': 'Commentaire',
   'fleet.fuelRefills.import.action': 'Importer',
   'fleet.fuelRefills.import.title': 'Importer des pleins',
-  'fleet.fuelRefills.import.hint': "Fichier CSV avec une ligne d'en-têtes : véhicule par immatriculation, conducteur par matricule (déduit s'il manque).",
+  'fleet.fuelRefills.import.hint':
+    "Fichier CSV avec une ligne d'en-têtes : véhicule par immatriculation, conducteur par matricule (déduit s'il manque).",
   'fleet.fuelRefills.import.created': 'Aucun plein créé. | Un plein créé. | {n} pleins créés.',
   'fleet.fuelRefills.noResultsCreate': 'Aucun plein. Créez-en un avec Nouveau.',
   'fleet.fuelRefills.form.tripNo': 'Trajet',
   'fleet.fuelRefills.col.tripNo': 'Trajet',
-  'fleet.fuelRefills.form.tripHint': 'Laissé vide, le trajet sur lequel se trouvait le véhicule à ce moment-là.',
+  'fleet.fuelRefills.form.tripHint':
+    'Laissé vide, le trajet sur lequel se trouvait le véhicule à ce moment-là.',
   'fleet.fuelRefills.form.position': 'Position GPS',
-  'fleet.fuelRefills.form.positionHint': 'Relevée par le boîtier du véhicule au moment du plein et comparée au site de la station.',
-  'fleet.fuelRefills.form.positionNone': 'Aucune position relevée.'
+  'fleet.fuelRefills.form.positionHint':
+    'Relevée par le boîtier du véhicule au moment du plein et comparée au site de la station.',
+  'fleet.fuelRefills.form.positionNone': 'Aucune position relevée.',
+  'fleet.fuelRefills.col.plannedLiters': 'Prévu (L)',
+  'fleet.fuelRefills.col.gapLiters': 'Écart (L)',
+  'fleet.fuelRefills.col.paymentMode': 'Paiement',
+  'fleet.fuelRefills.form.paymentMode': 'Mode de paiement',
+  'fleet.fuelRefills.form.plannedLiters': 'Quantité prévue (L)',
+  'fleet.fuelRefills.form.gapLiters': 'Écart avec le prévu',
+  'fleet.fuelRefills.gap.none': 'Conforme au prévu',
+  'fleet.fuelRefills.gap.over': '{liters} L de plus que prévu',
+  'fleet.fuelRefills.gap.under': '{liters} L de moins que prévu'
 }

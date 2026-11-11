@@ -25,7 +25,8 @@ import { activeLinks, coupledWith, employeeNames, vehiclePlates } from './links'
 import { livePositions } from './livePositions'
 import { FLEET_MESSAGES } from './messages'
 import { registerFleetStatusDispatchHandlers } from './fleetStatusDispatch'
-import { statusReason, vehicleStatuses } from './vehicleState'
+import { vehicleImmobilizations } from './immobilizations'
+import { vehicleStatuses } from './vehicleState'
 
 const MAX_OBSERVATION = 500
 
@@ -52,6 +53,9 @@ function currentTrip(trips: TripRow[], vehicleNo: string): TripRow | undefined {
 export function liveFleetStatus(db: MockDatabase, language: MockLanguage): FleetStatusApi[] {
   const today = todayIso()
   const statuses = vehicleStatuses(db)
+  const immobilizations = new Map(
+    vehicleImmobilizations(db, language).map((item) => [item.vehicleNo, item])
+  )
   const links = activeLinks(db)
   const plates = vehiclePlates(db)
   const names = employeeNames(db)
@@ -83,11 +87,14 @@ export function liveFleetStatus(db: MockDatabase, language: MockLanguage): Fleet
     const result = statuses.get(vehicle.no) ?? { status: 'available' as const, cause: null }
     const trip = currentTrip(trips, vehicle.no)
     const ahead = trip?.status === 'in_progress' ? trip.stops.filter((stop) => !stop.passedAt) : []
-    const state = fleetState({
-      vehicleStatus: result.status,
-      tripStatus: trip?.status ?? null,
-      stopsAhead: ahead.map((stop) => stop.role)
-    })
+    const held = immobilizations.get(vehicle.no)
+    const state = held
+      ? 'IMMOBILIZED'
+      : fleetState({
+          vehicleStatus: result.status,
+          tripStatus: trip?.status ?? null,
+          stopsAhead: ahead.map((stop) => stop.role)
+        })
     const coupling = links.couplingByVehicle.get(vehicle.no)
     const assignment = links.assignmentByVehicle.get(vehicle.no)
     const note = notes.get(vehicle.no)
@@ -122,7 +129,8 @@ export function liveFleetStatus(db: MockDatabase, language: MockLanguage): Fleet
       mission,
       location: trip?.status === 'in_progress' ? nextSite : (sites.get(vehicle.homeSiteNo) ?? ''),
       position: positions.get(vehicle.no) ?? '',
-      immobilizationReason: immobilized ? statusReason(result.cause, vehicle, language) : '',
+      immobilizationReason: held?.reason ?? '',
+      immobilizationCategory: held?.category ?? '',
       observation: note?.observation ?? '',
       expectedBackOn: note?.expectedBackOn ?? null
     }

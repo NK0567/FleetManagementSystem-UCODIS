@@ -21,7 +21,8 @@ export default {
   'fleet.liveMap.openCard': 'Open the card',
   'fleet.liveMap.flag.alert': 'In alert',
   'fleet.liveMap.flag.outOfZone': 'Out of zone',
-  'fleet.liveMap.alertCount': 'No alert to handle | {count} alert to handle | {count} alerts to handle',
+  'fleet.liveMap.alertCount':
+    'No alert to handle | {count} alert to handle | {count} alerts to handle',
   'fleet.liveMap.outOfCorridor': 'Out of the corridor: {km} km from the route',
   'fleet.liveMap.outOfSites': 'Outside every known site',
   'fleet.liveMap.history.button': 'Replay the history',
@@ -38,9 +39,11 @@ export default {
   'fleet.liveMap.history.speed': 'Speed',
   'fleet.liveMap.history.place': 'Place',
   'fleet.liveMap.history.trip': 'Trip',
-  'fleet.liveMap.history.summary': 'Positions: {points} · trips: {trips} · events reported: {events}',
+  'fleet.liveMap.history.summary':
+    'Positions: {points} · trips: {trips} · events reported: {events}',
   'fleet.liveMap.journal.title': 'Telematics journal',
-  'fleet.liveMap.journal.summary': 'No event over the period | {count} event over the period | {count} events over the period',
+  'fleet.liveMap.journal.summary':
+    'No event over the period | {count} event over the period | {count} events over the period',
   'fleet.liveMap.journal.from': 'From',
   'fleet.liveMap.journal.to': 'To',
   'fleet.liveMap.journal.family': 'Family',
@@ -65,7 +68,8 @@ export default {
   'fleet.liveMap.alerts.title': 'Alerts in progress',
   'fleet.liveMap.alerts.all': 'See the alerts ({count})',
   'fleet.liveMap.alerts.empty': 'No alert in progress.',
-  'fleet.liveMap.alerts.button': 'No alert in progress | {count} alert in progress | {count} alerts in progress',
+  'fleet.liveMap.alerts.button':
+    'No alert in progress | {count} alert in progress | {count} alerts in progress',
   'fleet.liveMap.readings.title': 'Telemetry',
   'fleet.liveMap.readings.summary': 'Last reading on {date}',
   'fleet.liveMap.readings.loadError': 'The telemetry could not be loaded.',

@@ -131,3 +131,37 @@ export function isDotCode(value: string): boolean {
   const week = Number(value.slice(0, 2))
   return week >= 1 && week <= 53
 }
+
+export interface TyreWear {
+  newTreadMm: number
+  /** Depth the tyre should show after the km it has run, at the expected wear. */
+  theoreticalTreadMm: number
+  measuredTreadMm: number
+  /** Measured minus theoretical: negative when the tyre is worn faster than expected. */
+  gapMm: number
+  fasterThanExpected: boolean
+}
+
+/**
+ * Expected against measured wear: the gap tells how the tyre was driven. A retreaded tyre does not
+ * start from a new depth, so it is not compared.
+ */
+export function tyreWear(
+  facts: { kmRun: number; measuredTreadMm: number | null; retreadCount: number },
+  settings: { newTreadMm: number; wearMmPer10000Km: number; wearToleranceMm: number }
+): TyreWear | null {
+  if (facts.measuredTreadMm === null || facts.retreadCount > 0) return null
+  const round = (value: number) => Math.round(value * 10) / 10
+  const theoretical = Math.max(
+    0,
+    settings.newTreadMm - (facts.kmRun / 10_000) * settings.wearMmPer10000Km
+  )
+  const gap = round(facts.measuredTreadMm - theoretical)
+  return {
+    newTreadMm: settings.newTreadMm,
+    theoreticalTreadMm: round(theoretical),
+    measuredTreadMm: facts.measuredTreadMm,
+    gapMm: gap,
+    fasterThanExpected: gap < -settings.wearToleranceMm
+  }
+}

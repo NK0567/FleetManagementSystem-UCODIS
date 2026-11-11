@@ -9,6 +9,8 @@ export interface WorkOrderDiagnosis {
   subsystemNo: string
   modeNo: string | null
   causeNo: string | null
+  /** Free note of the workshop head on what really caused the failure (part, driving, planning). */
+  observation?: string
   by: string
   at: string
 }

@@ -1,4 +1,4 @@
-import type { RefillChannel } from '@/modules/fleet/fuel-refills/domain/refill'
+import type { RefillChannel, RefillPaymentMode } from '@/modules/fleet/fuel-refills/domain/refill'
 import type { RefillQualification } from '@/modules/fleet/fuel-refills/types/fuelRefill.types'
 import { addDays } from '@/utils/date'
 import type { CollectionDefinition, MockRow } from '../../db/collection'
@@ -19,6 +19,8 @@ export interface FuelRefillRow extends MockRow {
   odometerKm: number
   fullTank: boolean
   channel: RefillChannel
+  paymentMode?: RefillPaymentMode
+  plannedLiters?: number | null
   receiptFileNo: string | null
   qualification: RefillQualification | null
 }
@@ -76,6 +78,10 @@ function vehicleRefills(vehicle: (typeof FLEET)[number], fleetIndex: number): Se
       odometerKm: odometers[index] ?? 0,
       fullTank: true,
       channel: 'manual',
+      // Filled at the depot it is paid by card; elsewhere on credit with the station, or in cash.
+      paymentMode: atDepot ? 'card' : fleetIndex % 2 === 0 ? 'station_credit' : 'cash',
+      // Planned from the distance and the usual consumption of the truck.
+      plannedLiters: index === 0 ? 310 : Math.round((distance * vehicle.l100) / 100),
       receiptFileNo: null,
       qualification: null
     }
@@ -98,6 +104,8 @@ function oversizedRefill(): Seed {
     odometerKm: 98_500 - 30,
     fullTank: false,
     channel: 'manual',
+    paymentMode: 'cash',
+    plannedLiters: 300,
     receiptFileNo: null,
     qualification: null
   }

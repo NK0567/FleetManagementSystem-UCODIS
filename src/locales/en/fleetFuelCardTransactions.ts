@@ -49,10 +49,13 @@ export default {
   'fleet.fuelCardTransactions.action.createRefill': 'Create the refill',
   'fleet.fuelCardTransactions.import.action': 'Import transactions',
   'fleet.fuelCardTransactions.import.title': 'Import the supplier statement',
-  'fleet.fuelCardTransactions.import.hint': 'CSV file from the card provider, with a header line. Each line is checked, then matched with the refills.',
+  'fleet.fuelCardTransactions.import.hint':
+    'CSV file from the card provider, with a header line. Each line is checked, then matched with the refills.',
   'fleet.fuelCardTransactions.import.created':
     'No transaction imported. | One transaction imported. | {n} transactions imported.',
   'fleet.fuelCardTransactions.noResultsCreate': 'No transaction. Create one with New.',
-  'fleet.fuelCardTransactions.matchedNoneLeft': 'No transaction matched: {n} transaction(s) without a refill within the time and volume tolerance.',
-  'fleet.fuelCardTransactions.matchedAllDone': 'Nothing to match: every transaction is already matched with a refill (or detached by hand).'
+  'fleet.fuelCardTransactions.matchedNoneLeft':
+    'No transaction matched: {n} transaction(s) without a refill within the time and volume tolerance.',
+  'fleet.fuelCardTransactions.matchedAllDone':
+    'Nothing to match: every transaction is already matched with a refill (or detached by hand).'
 }

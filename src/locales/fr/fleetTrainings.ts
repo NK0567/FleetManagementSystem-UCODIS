@@ -43,5 +43,9 @@ export default {
   'fleet.trainings.form.result': 'Résultat',
   'fleet.trainings.form.cancelledAt': 'Annulée le',
   'fleet.trainings.form.cancelReason': "Motif de l'annulation",
-  'fleet.trainings.noResultsCreate': 'Aucune formation. Créez-en une avec Nouveau.'
+  'fleet.trainings.noResultsCreate': 'Aucune formation. Créez-en une avec Nouveau.',
+  'fleet.trainings.col.score': 'Note',
+  'fleet.trainings.col.nextTrainingOn': 'Prochaine formation',
+  'fleet.trainings.form.score': 'Note (sur 20)',
+  'fleet.trainings.form.nextTrainingOn': 'Prochaine formation prévue'
 }

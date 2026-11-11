@@ -104,6 +104,21 @@ const historyColumns = computed<SubListColumn[]>(() => [
             })
           }}
         </p>
+        <p
+          v-if="tyre.wear"
+          :class="tyre.wear.fasterThanExpected ? 'text-destructive' : 'text-card-foreground'"
+        >
+          {{
+            t('maintenance.tyres.life.wear', {
+              theoretical: formatNumber(tyre.wear.theoreticalTreadMm, 1),
+              measured: formatNumber(tyre.wear.measuredTreadMm, 1),
+              gap: formatNumber(tyre.wear.gapMm, 1)
+            })
+          }}
+          <template v-if="tyre.wear.fasterThanExpected">
+            {{ t('maintenance.tyres.life.wearFast') }}
+          </template>
+        </p>
         <p v-if="!tyre.stints.length" class="text-muted-foreground">
           {{ t('maintenance.tyres.life.neverMounted') }}
         </p>

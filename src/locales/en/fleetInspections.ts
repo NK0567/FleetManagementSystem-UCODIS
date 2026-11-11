@@ -35,7 +35,8 @@ export default {
   'fleet.inspections.form.recheckDueOn': 'Re-inspection by',
   'fleet.inspections.form.recheckDoneOn': 'Re-inspected on',
   'fleet.inspections.form.recheckAwaited': 'Awaited: the vehicle is immobilized',
-  'fleet.inspections.form.resultHint': 'One non-conforming item makes the inspection non-conforming and schedules the re-inspection.',
+  'fleet.inspections.form.resultHint':
+    'One non-conforming item makes the inspection non-conforming and schedules the re-inspection.',
   'fleet.inspections.form.findingsHint':
     'Left empty, it takes the non-conforming items and what was found.',
   'fleet.inspections.form.items': 'Inspection grid',

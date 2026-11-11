@@ -1,6 +1,6 @@
 export default {
-  'maintenance.downtimes.title': 'Downtimes',
-  'maintenance.downtimes.card': 'Downtime card',
+  'maintenance.downtimes.title': 'Technical downtimes',
+  'maintenance.downtimes.card': 'Technical downtime card',
   'maintenance.downtimes.new': 'Declare a downtime',
   'maintenance.downtimes.loadingList': 'Loading downtimes…',
   'maintenance.downtimes.noResults': 'No downtime.',

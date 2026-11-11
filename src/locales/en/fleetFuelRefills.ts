@@ -52,7 +52,8 @@ export default {
   'fleet.fuelRefills.form.comment': 'Comment',
   'fleet.fuelRefills.import.action': 'Import',
   'fleet.fuelRefills.import.title': 'Import refills',
-  'fleet.fuelRefills.import.hint': 'CSV file with a header line: vehicle by plate, driver by employee number (deduced when missing).',
+  'fleet.fuelRefills.import.hint':
+    'CSV file with a header line: vehicle by plate, driver by employee number (deduced when missing).',
   'fleet.fuelRefills.import.created':
     'No refill created. | One refill created. | {n} refills created.',
   'fleet.fuelRefills.noResultsCreate': 'No refill. Create one with New.',
@@ -60,6 +61,16 @@ export default {
   'fleet.fuelRefills.col.tripNo': 'Trip',
   'fleet.fuelRefills.form.tripHint': 'Left empty, the trip the vehicle was on at that moment.',
   'fleet.fuelRefills.form.position': 'GPS position',
-  'fleet.fuelRefills.form.positionHint': 'Read by the GPS unit of the vehicle at the time of the refill and compared with the station site.',
-  'fleet.fuelRefills.form.positionNone': 'No position read.'
+  'fleet.fuelRefills.form.positionHint':
+    'Read by the GPS unit of the vehicle at the time of the refill and compared with the station site.',
+  'fleet.fuelRefills.form.positionNone': 'No position read.',
+  'fleet.fuelRefills.col.plannedLiters': 'Planned (L)',
+  'fleet.fuelRefills.col.gapLiters': 'Gap (L)',
+  'fleet.fuelRefills.col.paymentMode': 'Payment',
+  'fleet.fuelRefills.form.paymentMode': 'Payment mode',
+  'fleet.fuelRefills.form.plannedLiters': 'Planned quantity (L)',
+  'fleet.fuelRefills.form.gapLiters': 'Gap against plan',
+  'fleet.fuelRefills.gap.none': 'As planned',
+  'fleet.fuelRefills.gap.over': '{liters} L more than planned',
+  'fleet.fuelRefills.gap.under': '{liters} L less than planned'
 }

@@ -37,7 +37,9 @@ export default {
   'fleet.driverAssignments.noResultsCreate': 'No assignment. Create one with New.',
   'fleet.driverAssignments.col.homeSiteNo': 'Home site',
   'fleet.driverAssignments.form.homeSiteNo': 'Home site',
-  'fleet.driverAssignments.form.homeSiteHint': 'Leave empty to keep the current home site of the vehicle; otherwise the vehicle moves to the chosen site.',
-  'fleet.driverAssignments.form.employeeHint': 'Only drivers who are active, authorized and whose documents are valid are offered.',
+  'fleet.driverAssignments.form.homeSiteHint':
+    'Leave empty to keep the current home site of the vehicle; otherwise the vehicle moves to the chosen site.',
+  'fleet.driverAssignments.form.employeeHint':
+    'Only drivers who are active, authorized and whose documents are valid are offered.',
   'fleet.driverAssignments.form.excluded': 'Drivers not offered, with the reason:'
 }

@@ -46,5 +46,25 @@ export default {
     'No overdue item | 1 overdue item | {count} overdue items',
   'maintenance.serviceDue.summary.blocking': 'none blocking | 1 blocking | {count} blocking',
   'maintenance.serviceDue.summary.dueSoon':
-    'None close to the threshold | 1 close to the threshold | {count} close to the threshold'
+    'None close to the threshold | 1 close to the threshold | {count} close to the threshold',
+  'maintenance.serviceDue.tab.list': 'List',
+  'maintenance.serviceDue.tab.calendar': 'Calendar',
+  'maintenance.serviceDue.calendar.title': 'Maintenance calendar',
+  'maintenance.serviceDue.calendar.today': 'Today',
+  'maintenance.serviceDue.calendar.range': 'From {from} to {to}',
+  'maintenance.serviceDue.calendar.late': 'Overdue',
+  'maintenance.serviceDue.calendar.later': 'Later',
+  'maintenance.serviceDue.calendar.meter': 'By distance or hours',
+  'maintenance.serviceDue.calendar.empty': 'No due service to show.',
+  'maintenance.serviceDue.calendar.onlyIssues': 'Only overdue and close ones',
+  'maintenance.serviceDue.calendar.loadError': 'The calendar could not be loaded.',
+  'maintenance.serviceDue.calendar.kmLate': '{km} km overdue',
+  'maintenance.serviceDue.calendar.kmLeft': '{km} km left',
+  'maintenance.serviceDue.calendar.hoursLeft': '{hours} h left',
+  'maintenance.serviceDue.calendar.legend.late': 'Overdue',
+  'maintenance.serviceDue.calendar.legend.soon': 'Close',
+  'maintenance.serviceDue.calendar.legend.ok': 'On track',
+  'maintenance.serviceDue.calendar.more': '+ {count} more in the list',
+  'maintenance.serviceDue.calendar.unknown':
+    '{count} services without a known last passage are not shown: see the list, « To fill in » view.'
 }

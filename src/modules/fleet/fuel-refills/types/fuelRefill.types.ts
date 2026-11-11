@@ -1,5 +1,10 @@
 import type { FileMeta } from '@/types/file.types'
-import type { RefillChannel, RefillCheckCode, RefillStatus } from '../domain/refill'
+import type {
+  RefillChannel,
+  RefillCheckCode,
+  RefillPaymentMode,
+  RefillStatus
+} from '../domain/refill'
 
 export interface RefillQualification {
   causeNo: string
@@ -30,6 +35,12 @@ export interface FuelRefillApi {
   odometerKm: number
   fullTank: boolean
   channel: RefillChannel
+  /** How the refill is paid: card, cash, or on credit with the station. */
+  paymentMode: RefillPaymentMode
+  /** Liters planned for the refill, when someone planned them. */
+  plannedLiters: number | null
+  /** Actual minus planned liters; positive is over, negative under. */
+  gapLiters: number | null
   receiptFileNo: string | null
   transactionNo: string | null
   qualification: RefillQualification | null

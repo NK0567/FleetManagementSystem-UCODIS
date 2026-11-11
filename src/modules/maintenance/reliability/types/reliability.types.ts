@@ -24,10 +24,25 @@ export interface MaintenanceSteering {
   targets: MaintenanceTargetSettings
 }
 
+/** The park cut by vehicle age, each cut read against its own targets. */
+export interface AgeGroupKpi {
+  key: 'young' | 'mid' | 'old'
+  /** Age in years from which a vehicle is in the group; the last group has no upper limit. */
+  fromYears: number
+  toYears: number | null
+  vehicles: number
+  failures: number
+  mttrHours: number | null
+  mtbfKm: number | null
+  mttrTargetHours: number
+  mtbfTargetKm: number
+}
+
 export interface ReliabilityApi extends MaintenanceSteering {
   from: string
   to: string
   kpis: ReliabilityKpis
+  byAgeGroup: AgeGroupKpi[]
   bySubsystem: NamedCount[]
   byMode: NamedCount[]
   byCause: NamedCount[]
@@ -56,6 +71,7 @@ export interface MaintenanceDashboardApi extends Pick<
   pendingPurchases: number
   tyreAlerts: number
   last30Days: ReliabilityKpis
+  ageGroups: AgeGroupKpi[]
 }
 
 export interface VehicleCostApi extends OwnershipCost {

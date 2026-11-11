@@ -85,11 +85,15 @@ async function run(action: () => ReturnType<typeof trainingService.cancel>) {
 const showAttend = ref(false)
 const attendedOn = ref<string | null>(null)
 const result = ref('')
+const score = ref<number | null>(null)
+const nextTrainingOn = ref<string | null>(null)
 
 function openAttend() {
   const planned = item.value?.plannedOn ?? null
   attendedOn.value = planned && planned <= todayIso() ? planned : todayIso()
   result.value = ''
+  score.value = null
+  nextTrainingOn.value = null
   showAttend.value = true
 }
 
@@ -97,7 +101,12 @@ async function confirmAttend() {
   const no = item.value?.no
   const day = attendedOn.value
   if (!no || !day) return
-  if (await run(() => trainingService.attend(no, day, result.value))) showAttend.value = false
+  if (
+    await run(() =>
+      trainingService.attend(no, day, result.value, score.value, nextTrainingOn.value)
+    )
+  )
+    showAttend.value = false
 }
 
 const cancelling = ref(false)
@@ -200,8 +209,14 @@ async function cancelTraining(reason: string) {
       <BaseFormField :label="t('fleet.trainings.form.attendedOn')" required>
         <DateFormInput v-model="attendedOn" />
       </BaseFormField>
+      <BaseFormField :label="t('fleet.trainings.form.score')">
+        <FormInput v-model="score" type="number" :min="0" :max="20" />
+      </BaseFormField>
       <BaseFormField :label="t('fleet.trainings.form.result')">
         <FormTextarea v-model="result" :rows="3" :maxlength="300" />
+      </BaseFormField>
+      <BaseFormField :label="t('fleet.trainings.form.nextTrainingOn')">
+        <DateFormInput v-model="nextTrainingOn" />
       </BaseFormField>
     </div>
   </ConfirmDialog>

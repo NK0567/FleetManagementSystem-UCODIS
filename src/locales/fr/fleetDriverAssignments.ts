@@ -38,7 +38,9 @@ export default {
   'fleet.driverAssignments.noResultsCreate': 'Aucune affectation. Créez-en une avec Nouveau.',
   'fleet.driverAssignments.col.homeSiteNo': 'Base',
   'fleet.driverAssignments.form.homeSiteNo': 'Base',
-  'fleet.driverAssignments.form.homeSiteHint': 'Laissez vide pour garder la base actuelle du véhicule ; sinon le véhicule est rattaché à la base choisie.',
-  'fleet.driverAssignments.form.employeeHint': 'Seuls les conducteurs actifs, habilités et dont les pièces sont en règle sont proposés.',
+  'fleet.driverAssignments.form.homeSiteHint':
+    'Laissez vide pour garder la base actuelle du véhicule ; sinon le véhicule est rattaché à la base choisie.',
+  'fleet.driverAssignments.form.employeeHint':
+    'Seuls les conducteurs actifs, habilités et dont les pièces sont en règle sont proposés.',
   'fleet.driverAssignments.form.excluded': 'Conducteurs non proposés, avec la raison :'
 }

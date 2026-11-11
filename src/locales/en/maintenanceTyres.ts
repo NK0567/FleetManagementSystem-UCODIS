@@ -105,5 +105,8 @@ export default {
   'maintenance.tyres.plan.tyre': 'Tyre in stock',
   'maintenance.tyres.plan.pickTyre': 'Pick a tyre',
   'maintenance.tyres.plan.noStock': 'No tyre in stock.',
-  'maintenance.tyres.noResultsCreate': 'No tyre. Create one with New.'
+  'maintenance.tyres.noResultsCreate': 'No tyre. Create one with New.',
+  'maintenance.tyres.life.wear':
+    'Expected tread: {theoretical} mm left. Measured: {measured} mm. Gap: {gap} mm.',
+  'maintenance.tyres.life.wearFast': 'Wearing faster than expected, to relate to the driving.'
 }

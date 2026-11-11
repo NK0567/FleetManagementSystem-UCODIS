@@ -1,4 +1,4 @@
-import type { TyreStatus } from '../domain/tyre'
+import type { TyreStatus, TyreWear } from '../domain/tyre'
 
 export type TyreAlert = 'none' | 'safety' | 'rotation'
 
@@ -62,6 +62,8 @@ export interface TyreApi {
   costPerKm: number | null
   lastReading: TyreReading | null
   safetyIssues: ('pressure' | 'tread')[]
+  /** Expected against measured wear; null while no reading allows the comparison. */
+  wear: TyreWear | null
   alert: TyreAlert
   supplierName: string
   createdAt: string

@@ -84,18 +84,23 @@ export default {
   'fleet.settings.field.driverScore.missingDocumentCap': 'Highest mark while a document is missing',
   'fleet.settings.field.driverScore.trainingThreshold': 'Training threshold',
   'fleet.settings.section.reporting': 'Steering',
-  'fleet.settings.section.reporting.hint': 'Targets the park dashboard compares its indicators with.',
+  'fleet.settings.section.reporting.hint':
+    'Targets the park dashboard compares its indicators with.',
   'fleet.settings.field.reporting.availabilityTargetPct': 'Target availability rate',
-  'fleet.settings.field.fuel.deductionMaxSalaryPct': 'Highest share of the salary withheld per month (labour law)',
+  'fleet.settings.field.fuel.deductionMaxSalaryPct':
+    'Highest share of the salary withheld per month (labour law)',
   'fleet.settings.section.integrations': 'Company systems',
-  'fleet.settings.section.integrations.hint': 'Simulated in the mockup: data is taken over instead of being typed again.',
+  'fleet.settings.section.integrations.hint':
+    'Simulated in the mockup: data is taken over instead of being typed again.',
   'fleet.settings.field.integrations.hrSystemConnected': 'HR system',
   'fleet.settings.field.integrations.managementSystemConnected': 'Company management system',
   'fleet.settings.scoreFamilies.title': 'Driving score families',
   'fleet.settings.scoreFamilies.count': 'No family | 1 family | {n} families',
-  'fleet.settings.scoreFamilies.hint': 'Code, label and weight of each family. Weight 0: family ignored.',
+  'fleet.settings.scoreFamilies.hint':
+    'Code, label and weight of each family. Weight 0: family ignored.',
   'fleet.settings.scoreFamilies.formulaTitle': 'Formula:',
-  'fleet.settings.scoreFamilies.formula': 'family mark = 100 - sum (number of facts × points), never below 0 and capped while a document is missing; score = sum (mark × weight) / sum of weights.',
+  'fleet.settings.scoreFamilies.formula':
+    'family mark = 100 - sum (number of facts × points), never below 0 and capped while a document is missing; score = sum (mark × weight) / sum of weights.',
   'fleet.settings.scoreFamilies.saved': 'The score families are saved.',
   'fleet.settings.scoreFamilies.code': 'Code',
   'fleet.settings.scoreFamilies.label': 'Label',
@@ -108,28 +113,34 @@ export default {
   'fleet.settings.scoreFamilies.issue.noFamily': 'At least one family is needed.',
   'fleet.settings.scoreFamilies.issue.noWeight': 'At least one family needs a weight.',
   'fleet.settings.scoreFamilies.issue.codeRequired': 'A family has no code.',
-  'fleet.settings.scoreFamilies.issue.codeInvalid': 'A code holds only letters, digits and _ (20 at most) and starts with a letter.',
+  'fleet.settings.scoreFamilies.issue.codeInvalid':
+    'A code holds only letters, digits and _ (20 at most) and starts with a letter.',
   'fleet.settings.scoreFamilies.issue.labelRequired': 'A family has no label.',
   'fleet.settings.scoreFamilies.issue.weightOutOfRange': 'A weight goes from 0 to 100.',
   'fleet.settings.scoreFamilies.issue.duplicateCode': 'Two families share a code.',
   'fleet.settings.scoreFamilies.issue.noSource': 'A family counts nothing.',
   'fleet.settings.scoreFamilies.issue.sourceTwice': 'One element is counted in two families.',
   'fleet.settings.scoreSource.stopDeviation': 'Unjustified stops, rests and driving times',
-  'fleet.settings.scoreSource.stopDeviation.formula': 'points of a critical stop or of the others, from the settings',
+  'fleet.settings.scoreSource.stopDeviation.formula':
+    'points of a critical stop or of the others, from the settings',
   'fleet.settings.scoreSource.confirmedBehaviour': 'Behaviours confirmed by an infraction',
-  'fleet.settings.scoreSource.confirmedBehaviour.formula': 'points by severity (critical, major, minor)',
+  'fleet.settings.scoreSource.confirmedBehaviour.formula':
+    'points by severity (critical, major, minor)',
   'fleet.settings.scoreSource.routeDeviation': 'Unjustified route deviations',
   'fleet.settings.scoreSource.routeDeviation.formula': 'points per route deviation',
   'fleet.settings.scoreSource.documents': 'Mandatory documents',
-  'fleet.settings.scoreSource.documents.formula': 'caps the mark while a document is missing or expired',
+  'fleet.settings.scoreSource.documents.formula':
+    'caps the mark while a document is missing or expired',
   'fleet.settings.scoreSource.manualInfraction': 'Upheld infractions',
-  'fleet.settings.scoreSource.manualInfraction.formula': 'points by severity (critical, major, minor)',
+  'fleet.settings.scoreSource.manualInfraction.formula':
+    'points by severity (critical, major, minor)',
   'fleet.settings.scoreSource.ecoEvent': 'Measured driving habits',
   'fleet.settings.scoreSource.ecoEvent.formula': 'points per eco-driving event',
   'fleet.settings.scoreSource.deliveryDispute': 'Contested deliveries',
   'fleet.settings.scoreSource.deliveryDispute.formula': 'points per contestation still open',
   'fleet.settings.importMappings.title': 'Data imports',
-  'fleet.settings.importMappings.hint': 'Column heading of the file for each field. Empty: default name.',
+  'fleet.settings.importMappings.hint':
+    'Column heading of the file for each field. Empty: default name.',
   'fleet.settings.importMappings.saved': 'The column mapping is saved.',
   'fleet.settings.importMappings.field': 'Field',
   'fleet.settings.importMappings.heading': 'Heading in the source file',
@@ -190,10 +201,12 @@ export default {
   'fleet.settings.indicators.issue.unknownIndicator': 'An indicator is unknown.',
   'fleet.settings.indicators.issue.missingIndicator': 'An indicator is missing.',
   'fleet.settings.indicators.issue.codeRequired': 'An indicator has no code.',
-  'fleet.settings.indicators.issue.codeInvalid': 'A code holds only capitals, digits and _ (12 at most).',
+  'fleet.settings.indicators.issue.codeInvalid':
+    'A code holds only capitals, digits and _ (12 at most).',
   'fleet.settings.indicators.issue.duplicateCode': 'Two indicators share a code.',
   'fleet.settings.indicators.issue.labelRequired': 'An indicator has no label.',
-  'fleet.settings.indicators.issue.targetOutOfRange': 'A target is outside the bounds of its indicator.',
+  'fleet.settings.indicators.issue.targetOutOfRange':
+    'A target is outside the bounds of its indicator.',
   'fleet.settings.indicatorUnit.percent': '%',
   'fleet.settings.indicatorUnit.hours': 'h',
   'fleet.settings.indicatorUnit.km': 'km',
@@ -202,14 +215,23 @@ export default {
   'fleet.settings.indicatorUnit.points': 'points',
   'fleet.settings.indicatorDirection.higher': 'Better above the target',
   'fleet.settings.indicatorDirection.lower': 'Better below the target',
-  'fleet.settings.indicatorDefinition.availabilityRate': 'Share of the vehicles of the fleet ready to work (neither in maintenance, immobilized nor out of service) over the period.',
-  'fleet.settings.indicatorDefinition.preventiveShare': 'Share of preventive work orders among the work orders validated over the period.',
-  'fleet.settings.indicatorDefinition.mtbf': 'Kilometres run between two breakdowns, on average, per vehicle.',
-  'fleet.settings.indicatorDefinition.mttr': 'Average time between the opening of a corrective work order and its validation.',
-  'fleet.settings.indicatorDefinition.costPerKm': 'Cost of maintenance, fuel, tyres and insurance divided by the kilometres run.',
-  'fleet.settings.indicatorDefinition.fuelConsumption': 'Litres used per 100 km run, from one full tank to the next.',
-  'fleet.settings.indicatorDefinition.documentCompliance': 'Share of the vehicles and drivers whose mandatory documents are all valid.',
-  'fleet.settings.indicatorDefinition.driverScore': 'Average of the driving scores of the drivers over the score period.',
+  'fleet.settings.indicatorDefinition.availabilityRate':
+    'Share of the vehicles of the fleet ready to work (neither in maintenance, immobilized nor out of service) over the period.',
+  'fleet.settings.indicatorDefinition.preventiveShare':
+    'Share of preventive work orders among the work orders validated over the period.',
+  'fleet.settings.indicatorDefinition.mtbf':
+    'Kilometres run between two breakdowns, on average, per vehicle.',
+  'fleet.settings.indicatorDefinition.mttr':
+    'Average time between the opening of a corrective work order and its validation.',
+  'fleet.settings.indicatorDefinition.costPerKm':
+    'Cost of maintenance, fuel, tyres and insurance divided by the kilometres run.',
+  'fleet.settings.indicatorDefinition.fuelConsumption':
+    'Litres used per 100 km run, from one full tank to the next.',
+  'fleet.settings.indicatorDefinition.documentCompliance':
+    'Share of the vehicles and drivers whose mandatory documents are all valid.',
+  'fleet.settings.indicatorDefinition.driverScore':
+    'Average of the driving scores of the drivers over the score period.',
   'fleet.settings.importMappings.saveFirst': 'Save the current changes first.',
-  'fleet.settings.warning.outOfRange': 'Warning: this value is outside the usual bounds (between {min} and {max} {unit}). It will be saved as entered.'
+  'fleet.settings.warning.outOfRange':
+    'Warning: this value is outside the usual bounds (between {min} and {max} {unit}). It will be saved as entered.'
 }

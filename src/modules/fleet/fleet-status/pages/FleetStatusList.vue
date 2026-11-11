@@ -12,12 +12,14 @@ import { useListCellFormatters } from '@/composables/useListCellFormatters'
 import { useListPage } from '@/composables/useListPage'
 import { usePermissions } from '@/composables/usePermissions'
 import { formatDate, formatDateTime } from '@/utils/format'
+import { useOptionsStore } from '@/stores/optionsStore'
 import { useFleetStatusStore, type FleetStatusListView } from '../stores/fleetStatusStore'
 import type { FleetStatusApi, FleetStatusSearchColumn } from '../types/fleetStatus.types'
 
 const { t } = useI18n()
 const store = useFleetStatusStore()
 const { canUpdate, canExecute } = usePermissions('FLEETSTATUS')
+const optionsStore = useOptionsStore()
 const { optionLabel, formatDate: formatDateCell } = useListCellFormatters()
 
 const listViewOptions = computed<{ value: FleetStatusListView; label: string }[]>(() => [
@@ -44,14 +46,20 @@ const tableColumns = computed<TableColumn[]>(() => [
     minW: '220px',
     formatter: optionLabel('fleetState')
   },
-  { sortKey: 'mission', label: t('fleet.fleetStatus.col.mission'), minW: '280px' },
-  { sortKey: 'location', label: t('fleet.fleetStatus.col.location'), minW: '180px' },
-  { sortKey: 'position', label: t('fleet.fleetStatus.col.position'), minW: '180px' },
+  {
+    sortKey: 'immobilizationCategory',
+    label: t('fleet.fleetStatus.col.immobilizationCategory'),
+    minW: '150px',
+    formatter: optionLabel('immobilizationCategory')
+  },
   {
     sortKey: 'immobilizationReason',
     label: t('fleet.fleetStatus.col.immobilizationReason'),
-    minW: '240px'
+    minW: '260px'
   },
+  { sortKey: 'mission', label: t('fleet.fleetStatus.col.mission'), minW: '280px' },
+  { sortKey: 'location', label: t('fleet.fleetStatus.col.location'), minW: '180px' },
+  { sortKey: 'position', label: t('fleet.fleetStatus.col.position'), minW: '180px' },
   {
     sortKey: 'expectedBackOn',
     label: t('fleet.fleetStatus.col.expectedBackOn'),
@@ -69,6 +77,13 @@ const filterDefs: FilterFieldDef[] = [
     valueType: 'string',
     kind: 'option',
     optionsKey: 'fleetState'
+  },
+  {
+    field: 'immobilizationCategory',
+    labelKey: 'fleet.fleetStatus.col.immobilizationCategory',
+    valueType: 'string',
+    kind: 'option',
+    optionsKey: 'immobilizationCategory'
   }
 ]
 
@@ -373,6 +388,15 @@ function selectAndShow(item: FleetStatusApi) {
                     v-if="store.selectedItem.immobilizationReason"
                     class="text-muted-foreground mt-1"
                   >
+                    <span v-if="store.selectedItem.immobilizationCategory" class="font-medium">
+                      {{
+                        optionsStore.getOptionLabel(
+                          'immobilizationCategory',
+                          store.selectedItem.immobilizationCategory
+                        )
+                      }}
+                      :
+                    </span>
                     {{ store.selectedItem.immobilizationReason }}
                   </p>
                 </div>

@@ -126,8 +126,10 @@ export default {
   'fleet.vehicles.dialog.km': 'Kilométrage relevé',
   'fleet.vehicles.dialog.lastReading':
     'Dernier relevé : {km} km. Le kilométrage ne peut pas baisser.',
-  'fleet.vehicles.dialog.outOfServiceHint': "Le véhicule ne sera plus proposé jusqu'à sa remise en service.",
-  'fleet.vehicles.dialog.removalHint': '{plate} quittera le parc et sa fiche ne sera plus modifiable.',
+  'fleet.vehicles.dialog.outOfServiceHint':
+    "Le véhicule ne sera plus proposé jusqu'à sa remise en service.",
+  'fleet.vehicles.dialog.removalHint':
+    '{plate} quittera le parc et sa fiche ne sera plus modifiable.',
   'fleet.vehicles.dialog.removalDate': 'Date de sortie',
   'fleet.vehicles.dialog.finalKm': 'Kilométrage à la sortie',
   'fleet.vehicles.dialog.comment': 'Commentaire',
@@ -158,7 +160,8 @@ export default {
   'fleet.vehicles.form.administrativeStatus': 'Statut administratif',
   'fleet.vehicles.form.operationalStatus': 'Statut opérationnel',
   'fleet.vehicles.form.noOperationalStatus': 'Sans objet : le véhicule est sorti du parc.',
-  'fleet.vehicles.form.operationalStatusHint': 'Il se met à jour seul depuis la maintenance, la conformité et les trajets.',
+  'fleet.vehicles.form.operationalStatusHint':
+    'Il se met à jour seul depuis la maintenance, la conformité et les trajets.',
   'fleet.vehicles.form.statusCauseCode': 'Cause codifiée : {code} · {name}',
   'fleet.vehicles.form.lifecycle': 'Cycle de vie',
   'fleet.vehicles.form.maintenanceLog': "Carnet d'entretien",
@@ -178,27 +181,35 @@ export default {
   'fleet.vehicles.maintenanceLog.status': 'Statut',
   'fleet.vehicles.maintenanceLog.km': 'Kilométrage',
   'fleet.vehicles.maintenanceLog.cost': 'Coût',
-  'fleet.vehicles.maintenanceLog.noAccess': "Le carnet d'entretien est réservé aux profils qui suivent la maintenance.",
+  'fleet.vehicles.maintenanceLog.noAccess':
+    "Le carnet d'entretien est réservé aux profils qui suivent la maintenance.",
   'fleet.vehicles.maintenanceLog.empty': 'Aucune intervention enregistrée pour ce véhicule.',
   'fleet.vehicles.ownership.title': 'Coût total de possession',
   'fleet.vehicles.ownership.summary': '{total} au total',
   'fleet.vehicles.ownership.loadError': "Le coût de possession n'a pas pu être calculé.",
-  'fleet.vehicles.ownership.period': 'Depuis l’entrée du véhicule dans le parc : du {from} au {to}.',
+  'fleet.vehicles.ownership.period':
+    'Depuis l’entrée du véhicule dans le parc : du {from} au {to}.',
   'fleet.vehicles.ownership.acquisition': 'Acquisition',
   'fleet.vehicles.ownership.maintenance': 'Maintenance',
   'fleet.vehicles.ownership.fuel': 'Carburant',
   'fleet.vehicles.ownership.tyres': 'Pneumatiques',
   'fleet.vehicles.ownership.insurance': 'Assurances',
   'fleet.vehicles.ownership.total': 'Coût total de possession',
-  'fleet.vehicles.ownership.noAcquisition': "Aucun coût d'acquisition n'est saisi : le total ne le compte pas.",
-  'fleet.vehicles.ownership.noKm': 'Aucun kilomètre parcouru sur la période : pas de coût au kilomètre.',
+  'fleet.vehicles.ownership.noAcquisition':
+    "Aucun coût d'acquisition n'est saisi : le total ne le compte pas.",
+  'fleet.vehicles.ownership.noKm':
+    'Aucun kilomètre parcouru sur la période : pas de coût au kilomètre.',
   'fleet.vehicles.ownership.perKm': '{km} km parcourus, soit {cost} par kilomètre.',
-  'fleet.vehicles.ownership.residualValue': 'Valeur résiduelle saisie : {value} (non déduite du total).',
-  'fleet.vehicles.ownership.hint': "Repris des ordres de travail, pleins, pneus et polices d'assurance.",
+  'fleet.vehicles.ownership.residualValue':
+    'Valeur résiduelle saisie : {value} (non déduite du total).',
+  'fleet.vehicles.ownership.hint':
+    "Repris des ordres de travail, pleins, pneus et polices d'assurance.",
   'fleet.vehicles.import.action': 'Importer',
   'fleet.vehicles.import.title': 'Importer des véhicules',
-  'fleet.vehicles.import.hint': 'Type et site par leur code ou leur nom ; compartiments sous la forme 8000+8000+6000. Un véhicule déjà connu ou en double est refusé.',
-  'fleet.vehicles.import.created': 'Aucun véhicule créé. | Un véhicule créé. | {n} véhicules créés.',
+  'fleet.vehicles.import.hint':
+    'Type et site par leur code ou leur nom ; compartiments sous la forme 8000+8000+6000. Un véhicule déjà connu ou en double est refusé.',
+  'fleet.vehicles.import.created':
+    'Aucun véhicule créé. | Un véhicule créé. | {n} véhicules créés.',
   'fleet.vehicles.form.noLink': 'Aucun',
   'fleet.vehicles.col.currentSiteNo': 'Site actuel',
   'fleet.vehicles.filter.driverAssignment': 'Affectation',

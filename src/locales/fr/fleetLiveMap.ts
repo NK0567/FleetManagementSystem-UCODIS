@@ -21,7 +21,8 @@ export default {
   'fleet.liveMap.openCard': 'Ouvrir la fiche',
   'fleet.liveMap.flag.alert': 'En alerte',
   'fleet.liveMap.flag.outOfZone': 'Hors zone',
-  'fleet.liveMap.alertCount': 'Aucune alerte à traiter | {count} alerte à traiter | {count} alertes à traiter',
+  'fleet.liveMap.alertCount':
+    'Aucune alerte à traiter | {count} alerte à traiter | {count} alertes à traiter',
   'fleet.liveMap.outOfCorridor': "Hors du corridor : à {km} km de l'itinéraire",
   'fleet.liveMap.outOfSites': 'Hors de tout site connu',
   'fleet.liveMap.history.button': "Rejouer l'historique",
@@ -38,9 +39,11 @@ export default {
   'fleet.liveMap.history.speed': 'Vitesse',
   'fleet.liveMap.history.place': 'Lieu',
   'fleet.liveMap.history.trip': 'Trajet',
-  'fleet.liveMap.history.summary': 'Positions : {points} · trajets : {trips} · événements remontés : {events}',
+  'fleet.liveMap.history.summary':
+    'Positions : {points} · trajets : {trips} · événements remontés : {events}',
   'fleet.liveMap.journal.title': 'Journal télématique',
-  'fleet.liveMap.journal.summary': 'Aucun événement sur la période | {count} événement sur la période | {count} événements sur la période',
+  'fleet.liveMap.journal.summary':
+    'Aucun événement sur la période | {count} événement sur la période | {count} événements sur la période',
   'fleet.liveMap.journal.from': 'Du',
   'fleet.liveMap.journal.to': 'Au',
   'fleet.liveMap.journal.family': 'Famille',
@@ -65,7 +68,8 @@ export default {
   'fleet.liveMap.alerts.title': 'Alertes en cours',
   'fleet.liveMap.alerts.all': 'Voir les alertes ({count})',
   'fleet.liveMap.alerts.empty': 'Aucune alerte en cours.',
-  'fleet.liveMap.alerts.button': 'Aucune alerte en cours | {count} alerte en cours | {count} alertes en cours',
+  'fleet.liveMap.alerts.button':
+    'Aucune alerte en cours | {count} alerte en cours | {count} alertes en cours',
   'fleet.liveMap.readings.title': 'Télémétrie',
   'fleet.liveMap.readings.summary': 'Dernière mesure du {date}',
   'fleet.liveMap.readings.loadError': "La télémétrie n'a pas pu être chargée.",

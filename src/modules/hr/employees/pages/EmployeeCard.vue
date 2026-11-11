@@ -7,6 +7,7 @@ import { apiErrorMessage } from '@/core/api/apiError'
 import type { CardOpenMode } from '@/composables/cardOpenMode'
 import { useEntityCard } from '@/composables/useEntityCard'
 import { usePermissions } from '@/composables/usePermissions'
+import EmployeeDrivingScore from '../components/EmployeeDrivingScore.vue'
 import EmployeeForm from '../components/EmployeeForm.vue'
 import {
   MANUAL_EMPLOYEE_STATUSES,
@@ -228,6 +229,7 @@ const moreActions = computed<MoreAction[]>(() => [
             :disabled="!isEditMode || isSaving"
             :validation-errors="validationErrors"
           />
+          <EmployeeDrivingScore v-if="item?.drivingAuthorized" :employee-no="employeeNo" />
         </div>
       </div>
     </template>
@@ -279,9 +281,4 @@ const moreActions = computed<MoreAction[]>(() => [
       <p class="text-sm text-muted-foreground">
         {{ t('hr.employees.archiveWarning', { name: item?.fullName ?? '' }) }}
       </p>
-      <BaseFormField :label="t('hr.employees.form.statusReason')">
-        <FormTextarea v-model="archiveReason" :rows="3" :maxlength="300" />
-      </BaseFormField>
-    </div>
-  </ConfirmDialog>
-</template>
+      <BaseFormField :label="t('hr.employe

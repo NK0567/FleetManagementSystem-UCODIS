@@ -4,7 +4,8 @@ export default {
   'fleet.fuelConsumption.noResults': 'Aucune période de consommation.',
   'fleet.fuelConsumption.noSearchResults': 'Aucune période ne correspond à « {query} ».',
   'fleet.fuelConsumption.actionError': "L'action n'a pas pu être effectuée.",
-  'fleet.fuelConsumption.summary': '{liters} L pour {amount} · moyenne {average} L/100 · {co2} kg de CO₂ · pleins à qualifier : {refills} · écarts à qualifier : {gaps}',
+  'fleet.fuelConsumption.summary':
+    '{liters} L pour {amount} · moyenne {average} L/100 · {co2} kg de CO₂ · pleins à qualifier : {refills} · écarts à qualifier : {gaps}',
   'fleet.fuelConsumption.search.all': 'Véhicule ou conducteur',
   'fleet.fuelConsumption.listView.gaps': 'Écarts à traiter',
   'fleet.fuelConsumption.listView.toDecide': 'Retenues à décider',
@@ -37,10 +38,13 @@ export default {
   'fleet.fuelConsumption.col.routeName': 'Corridor',
   'fleet.fuelConsumption.col.referenceSource': 'Référence de',
   'fleet.fuelConsumption.col.co2Kg': 'CO₂ (kg)',
-  'fleet.fuelConsumption.lowEmission': 'Faibles émissions : {low} sur {total} véhicules motorisés ({share} %).',
-  'fleet.fuelConsumption.withholdable': 'Salaire net déclaré : {salary} · retenue possible ce mois-ci : {max} au plus.',
+  'fleet.fuelConsumption.lowEmission':
+    'Faibles émissions : {low} sur {total} véhicules motorisés ({share} %).',
+  'fleet.fuelConsumption.withholdable':
+    'Salaire net déclaré : {salary} · retenue possible ce mois-ci : {max} au plus.',
   'fleet.fuelConsumption.form.monthlySalary': 'Salaire mensuel net du conducteur',
-  'fleet.fuelConsumption.form.monthlySalaryHint': 'Retenues du mois comprises, au plus la part du salaire fixée dans les réglages.',
+  'fleet.fuelConsumption.form.monthlySalaryHint':
+    'Retenues du mois comprises, au plus la part du salaire fixée dans les réglages.',
   'fleet.fuelConsumption.emissions.title': 'Émissions et écoconduite par véhicule',
   'fleet.fuelConsumption.emissions.summary': 'Véhicules : {count} · {tons} t de CO₂',
   'fleet.fuelConsumption.emissions.loadError': "Les émissions n'ont pas pu être chargées.",
@@ -50,6 +54,7 @@ export default {
   'fleet.fuelConsumption.emissions.col.co2Kg': 'CO₂ émis (kg)',
   'fleet.fuelConsumption.emissions.col.gramsPerKm': 'g de CO₂ / km',
   'fleet.fuelConsumption.emissions.col.ecoEvents': 'Écoconduite',
-  'fleet.fuelConsumption.emissions.ecoCount': 'Aucun événement | {count} événement | {count} événements',
+  'fleet.fuelConsumption.emissions.ecoCount':
+    'Aucun événement | {count} événement | {count} événements',
   'fleet.fuelConsumption.emissions.noEco': 'Aucun'
 }

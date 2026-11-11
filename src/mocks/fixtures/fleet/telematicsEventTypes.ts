@@ -152,6 +152,18 @@ const SEED: Omit<TelematicsEventTypeRow, keyof typeof seedAudit>[] = [
     active: true
   },
   {
+    no: 'CAMERA-OFFLINE',
+    name: 'Caméra déconnectée',
+    family: 'signal',
+    severity: 'major',
+    threshold: 10,
+    unit: 'min',
+    raisesAlert: true,
+    affectsScore: false,
+    infractionTypeNo: null,
+    active: true
+  },
+  {
     no: 'SIGNAL-LOST',
     name: 'Perte de signal',
     family: 'signal',

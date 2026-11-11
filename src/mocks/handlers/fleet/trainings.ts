@@ -22,7 +22,14 @@ import {
   stampModified
 } from '../../http/crudResource'
 import { conflict, unprocessable } from '../../http/errors'
-import { readDate, readEnum, readPatch, readString, type FieldReaders } from '../../http/input'
+import {
+  readDate,
+  readEnum,
+  readNumber,
+  readPatch,
+  readString,
+  type FieldReaders
+} from '../../http/input'
 import { requireReference } from '../../http/references'
 import { ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
@@ -35,8 +42,12 @@ export function trainingsApi(db: MockDatabase): TrainingApi[] {
   const names = new Map(
     db.employees.all().map((employee) => [employee.no, employeeFullName(employee)])
   )
+  const today = todayIso()
   return db.trainings.all().map((training) => ({
     ...training,
+    score: training.score ?? null,
+    nextTrainingOn: training.nextTrainingOn ?? null,
+    nextTrainingLate: !!training.nextTrainingOn && training.nextTrainingOn < today,
     employeeName: names.get(training.employeeNo) ?? training.employeeNo,
     status: trainingStatus(training)
   }))
@@ -144,6 +155,8 @@ export function registerTrainingsHandlers(router: MockRouter, db: MockDatabase):
       db.trainings.update(training.no, {
         attendedOn,
         result: readString(body, 'result'),
+        score: readNumber(body, 'score', { min: 0, max: 20 }),
+        nextTrainingOn: readDate(body, 'nextTrainingOn'),
         ...stampModified(request)
       })
       return ok(trainingApiOf(db, training.no))

@@ -284,6 +284,10 @@ export const FLEET_MESSAGES = {
   causeService: { fr: 'Entretien dépassé : {detail}', en: 'Service overdue: {detail}' },
   causeTrip: { fr: 'En mission ({detail})', en: 'On mission ({detail})' },
   causeDriver: { fr: 'Conducteur : {detail}', en: 'Driver: {detail}' },
+  causeDriverOut: {
+    fr: 'Conducteur indisponible : {driver} {reasons}',
+    en: 'Driver unavailable: {driver} {reasons}'
+  },
   causeCoupling: { fr: 'Attelé à {detail}', en: 'Coupled with {detail}' },
   motorizedCannotBeTowed: {
     fr: 'Un véhicule motorisé ne peut pas être attelé à un tracteur.',
@@ -640,6 +644,10 @@ export const FLEET_MESSAGES = {
   refillTripOfOtherVehicle: {
     fr: "Le trajet {trip} n'est pas un trajet de ce véhicule.",
     en: 'Trip {trip} is not a trip of this vehicle.'
+  },
+  refillVehicleNotApproved: {
+    fr: 'Ce camion ne figure pas sur la liste agréée de la station {station} pour un plein hors carte.',
+    en: 'This truck is not on the approved list of station {station} for a refill outside a card.'
   },
   refillDuplicate: {
     fr: 'Ce plein est déjà enregistré ({no}).',

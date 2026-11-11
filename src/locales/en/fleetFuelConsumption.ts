@@ -4,7 +4,8 @@ export default {
   'fleet.fuelConsumption.noResults': 'No consumption period.',
   'fleet.fuelConsumption.noSearchResults': 'No period matches “{query}”.',
   'fleet.fuelConsumption.actionError': 'The action could not be completed.',
-  'fleet.fuelConsumption.summary': '{liters} L for {amount} · average {average} L/100 · {co2} kg of CO₂ · refills to qualify: {refills} · gaps to qualify: {gaps}',
+  'fleet.fuelConsumption.summary':
+    '{liters} L for {amount} · average {average} L/100 · {co2} kg of CO₂ · refills to qualify: {refills} · gaps to qualify: {gaps}',
   'fleet.fuelConsumption.search.all': 'Vehicle or driver',
   'fleet.fuelConsumption.listView.gaps': 'Gaps to handle',
   'fleet.fuelConsumption.listView.toDecide': 'Deductions to decide',
@@ -37,10 +38,13 @@ export default {
   'fleet.fuelConsumption.col.routeName': 'Corridor',
   'fleet.fuelConsumption.col.referenceSource': 'Reference from',
   'fleet.fuelConsumption.col.co2Kg': 'CO₂ (kg)',
-  'fleet.fuelConsumption.lowEmission': 'Low emission: {low} of {total} motorised vehicles ({share} %).',
-  'fleet.fuelConsumption.withholdable': 'Declared net salary: {salary} · possible deduction this month: {max} at most.',
+  'fleet.fuelConsumption.lowEmission':
+    'Low emission: {low} of {total} motorised vehicles ({share} %).',
+  'fleet.fuelConsumption.withholdable':
+    'Declared net salary: {salary} · possible deduction this month: {max} at most.',
   'fleet.fuelConsumption.form.monthlySalary': "Driver's net monthly salary",
-  'fleet.fuelConsumption.form.monthlySalaryHint': 'Other deductions of the month included, at most the share of salary set in the settings.',
+  'fleet.fuelConsumption.form.monthlySalaryHint':
+    'Other deductions of the month included, at most the share of salary set in the settings.',
   'fleet.fuelConsumption.emissions.title': 'Emissions and eco-driving by vehicle',
   'fleet.fuelConsumption.emissions.summary': 'Vehicles: {count} · {tons} t of CO₂',
   'fleet.fuelConsumption.emissions.loadError': 'The emissions could not be loaded.',

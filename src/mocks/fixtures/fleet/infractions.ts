@@ -1,5 +1,6 @@
 import type { InfractionSeverity } from '@/modules/fleet/infraction-types/types/infractionType.types'
 import type {
+  InfractionHandlingLevel,
   InfractionOutcome,
   InfractionSource
 } from '@/modules/fleet/infractions/domain/infraction'
@@ -20,6 +21,8 @@ export interface InfractionRow extends MockRow {
   detail: string
   source: InfractionSource
   handlerCode: string | null
+  dueOn?: string | null
+  handlingLevel?: InfractionHandlingLevel
   outcome: InfractionOutcome | null
   outcomeComment: string
   closedAt: string | null
@@ -64,6 +67,8 @@ const SEED: Seed[] = [
   },
   {
     no: 'INF-2026-002',
+    handlingLevel: 'superior',
+    dueOn: addDays(DEMO_REFERENCE_DATE, -2),
     infractionTypeNo: 'PHONE',
     occurredAt: at(-6, '15:20'),
     location: 'Route digue, Antananarivo',
@@ -131,5 +136,5 @@ const SEED: Seed[] = [
 export const infractionsCollection: CollectionDefinition<InfractionRow> = {
   name: 'infractions',
   seed: () => SEED.map((row) => ({ ...row, ...seedAudit })),
-  dateFields: ['occurredAt', 'closedAt', 'history[].at']
+  dateFields: ['occurredAt', 'closedAt', 'dueOn', 'history[].at']
 }

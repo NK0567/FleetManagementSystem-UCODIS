@@ -49,5 +49,25 @@ export default {
   'maintenance.serviceDue.summary.blocking':
     'dont aucune bloquante | dont 1 bloquante | dont {count} bloquantes',
   'maintenance.serviceDue.summary.dueSoon':
-    'Aucune proche du seuil | 1 proche du seuil | {count} proches du seuil'
+    'Aucune proche du seuil | 1 proche du seuil | {count} proches du seuil',
+  'maintenance.serviceDue.tab.list': 'Liste',
+  'maintenance.serviceDue.tab.calendar': 'Calendrier',
+  'maintenance.serviceDue.calendar.title': 'Calendrier des entretiens',
+  'maintenance.serviceDue.calendar.today': "Aujourd'hui",
+  'maintenance.serviceDue.calendar.range': 'Du {from} au {to}',
+  'maintenance.serviceDue.calendar.late': 'En retard',
+  'maintenance.serviceDue.calendar.later': 'Plus tard',
+  'maintenance.serviceDue.calendar.meter': 'Selon le kilométrage ou les heures',
+  'maintenance.serviceDue.calendar.empty': 'Aucune échéance à afficher.',
+  'maintenance.serviceDue.calendar.onlyIssues': 'Seulement les retards et les échéances proches',
+  'maintenance.serviceDue.calendar.loadError': "Le calendrier n'a pas pu être chargé.",
+  'maintenance.serviceDue.calendar.kmLate': '{km} km de retard',
+  'maintenance.serviceDue.calendar.kmLeft': '{km} km restants',
+  'maintenance.serviceDue.calendar.hoursLeft': '{hours} h restantes',
+  'maintenance.serviceDue.calendar.legend.late': 'Dépassée',
+  'maintenance.serviceDue.calendar.legend.soon': 'Proche',
+  'maintenance.serviceDue.calendar.legend.ok': 'Dans les temps',
+  'maintenance.serviceDue.calendar.more': '+ {count} autres dans la liste',
+  'maintenance.serviceDue.calendar.unknown':
+    '{count} entretiens sans dernier passage connu ne figurent pas ici : voir la liste, vue « À renseigner ».'
 }

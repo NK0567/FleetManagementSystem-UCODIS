@@ -46,6 +46,29 @@ const tableColumns = computed<TableColumn[]>(() => [
     formatter: formatDecimal
   },
   {
+    sortKey: 'plannedLiters',
+    label: t('fleet.fuelRefills.col.plannedLiters'),
+    minW: '110px',
+    align: 'right',
+    formatter: formatDecimal
+  },
+  {
+    sortKey: 'gapLiters',
+    label: t('fleet.fuelRefills.col.gapLiters'),
+    minW: '110px',
+    align: 'right',
+    formatter: (value, item) =>
+      value === null || value === undefined
+        ? ''
+        : `${Number(value) > 0 ? '+' : ''}${formatDecimal(value, item)}`
+  },
+  {
+    sortKey: 'paymentMode',
+    label: t('fleet.fuelRefills.col.paymentMode'),
+    minW: '140px',
+    formatter: optionLabel('refillPaymentMode')
+  },
+  {
     sortKey: 'unitPrice',
     label: t('fleet.fuelRefills.col.unitPrice'),
     minW: '110px',

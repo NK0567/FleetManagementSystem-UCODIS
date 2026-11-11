@@ -76,3 +76,29 @@ export function isUsable(status: VehicleStatus): boolean {
 export function normalizePlate(plate: string): string {
   return plate.trim().replace(/\s+/g, ' ').toUpperCase()
 }
+
+/** The three families of immobilization the managers read on their boards. */
+export const IMMOBILIZATION_CATEGORIES = ['technical', 'administrative', 'human'] as const
+export type ImmobilizationCategory = (typeof IMMOBILIZATION_CATEGORIES)[number]
+
+/**
+ * Family of the cause that keeps a vehicle from leaving: a breakdown, a check or an overdue
+ * service is technical, a missing or expired paper is administrative. A vehicle held back by its
+ * driver (leave, suspension) is human; that one is told from the driver, not from the vehicle.
+ */
+export function immobilizationCategory(
+  cause: VehicleStatusCause | null
+): ImmobilizationCategory | null {
+  if (!cause) return null
+  switch (cause.kind) {
+    case 'maintenance':
+    case 'inspection':
+    case 'service':
+    case 'out_of_service':
+      return 'technical'
+    case 'document':
+      return 'administrative'
+    default:
+      return null
+  }
+}

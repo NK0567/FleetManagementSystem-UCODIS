@@ -12,7 +12,7 @@ import type { InfractionApi, InfractionSearchColumn } from '../types/infraction.
 
 const { t } = useI18n()
 const store = useInfractionStore()
-const { formatDateTime, optionLabel, formatInteger } = useListCellFormatters()
+const { formatDate, formatDateTime, optionLabel, formatInteger } = useListCellFormatters()
 
 const listViewOptions = computed<{ value: InfractionListView; label: string }[]>(() => [
   { value: 'open', label: t('fleet.infractions.listView.open') },
@@ -36,7 +36,12 @@ const tableColumns = computed<TableColumn[]>(() => [
     minW: '150px',
     formatter: formatDateTime
   },
-  { sortKey: 'location', label: t('fleet.infractions.col.location'), minW: '180px' },
+  {
+    sortKey: 'location',
+    label: t('fleet.infractions.col.location'),
+    minW: '180px',
+    defaultHidden: true
+  },
   {
     sortKey: 'severity',
     label: t('fleet.infractions.col.severity'),
@@ -70,6 +75,18 @@ const tableColumns = computed<TableColumn[]>(() => [
     label: t('fleet.infractions.col.status'),
     minW: '120px',
     formatter: optionLabel('infractionStatus')
+  },
+  {
+    sortKey: 'dueOn',
+    label: t('fleet.infractions.col.dueOn'),
+    minW: '130px',
+    formatter: formatDate
+  },
+  {
+    sortKey: 'handlingLevel',
+    label: t('fleet.infractions.col.handlingLevel'),
+    minW: '180px',
+    formatter: optionLabel('infractionHandlingLevel')
   },
   {
     sortKey: 'outcome',

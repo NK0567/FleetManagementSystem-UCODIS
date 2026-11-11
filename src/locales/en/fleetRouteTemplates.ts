@@ -45,12 +45,15 @@ export default {
   'fleet.routeTemplates.stops.remove': 'Remove the stop',
   'fleet.routeTemplates.stops.add': 'Add a stop',
   'fleet.routeTemplates.stops.duration': 'Planned duration: {duration}',
-  'fleet.routeTemplates.stops.invalid': 'At least two stops, departure first, one site per stop, never the same site twice in a row.',
+  'fleet.routeTemplates.stops.invalid':
+    'At least two stops, departure first, one site per stop, never the same site twice in a row.',
   'fleet.routeTemplates.form.fuelReferenceL100': 'Reference consumption (L/100 km)',
   'fleet.routeTemplates.form.fuelReferenceL100Hint':
     'Takes precedence over the vehicle type for trips on this route.',
-  'fleet.routeTemplates.form.distanceComputedHint': 'Recomputed at each save (simulation: straight line × 1.25).',
+  'fleet.routeTemplates.form.distanceComputedHint':
+    'Recomputed at each save (simulation: straight line × 1.25).',
   'fleet.routeTemplates.form.referenceDuration': 'Reference time',
-  'fleet.routeTemplates.form.referenceDurationHint': 'Distance at average speed, plus the stops. Basis of the trip plan.',
+  'fleet.routeTemplates.form.referenceDurationHint':
+    'Distance at average speed, plus the stops. Basis of the trip plan.',
   'fleet.routeTemplates.noResultsCreate': 'No route template. Create one with New.'
 }

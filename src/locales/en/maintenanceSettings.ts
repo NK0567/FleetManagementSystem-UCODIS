@@ -67,5 +67,17 @@ export default {
   'maintenance.settings.field.targets.preventiveCompletionTargetPct':
     'Target completion rate of preventive work',
   'maintenance.settings.field.targets.mttrTargetHours': 'Highest MTTR',
-  'maintenance.settings.field.targets.mtbfTargetKm': 'Lowest MTBF'
+  'maintenance.settings.field.targets.mtbfTargetKm': 'Lowest MTBF',
+  'maintenance.settings.unit.years': 'years',
+  'maintenance.settings.field.targets.ageMidFromYears': 'Middle group from (vehicle age)',
+  'maintenance.settings.field.targets.ageOldFromYears': 'Old group from (vehicle age)',
+  'maintenance.settings.field.targets.mttrTargetHoursYoung': 'Highest MTTR, recent vehicles',
+  'maintenance.settings.field.targets.mttrTargetHoursMid': 'Highest MTTR, middle-aged vehicles',
+  'maintenance.settings.field.targets.mttrTargetHoursOld': 'Highest MTTR, old vehicles',
+  'maintenance.settings.field.targets.mtbfTargetKmYoung': 'Lowest MTBF, recent vehicles',
+  'maintenance.settings.field.targets.mtbfTargetKmMid': 'Lowest MTBF, middle-aged vehicles',
+  'maintenance.settings.field.targets.mtbfTargetKmOld': 'Lowest MTBF, old vehicles',
+  'maintenance.settings.field.tyres.newTreadMm': 'Tread depth of a new tyre',
+  'maintenance.settings.field.tyres.wearMmPer10000Km': 'Expected wear per 10,000 km',
+  'maintenance.settings.field.tyres.wearToleranceMm': 'Gap tolerated before alert'
 }

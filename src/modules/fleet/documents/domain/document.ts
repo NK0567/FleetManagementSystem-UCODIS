@@ -77,3 +77,24 @@ export function complianceGaps(
     return [{ documentTypeNo: typeNo, reason: document.state as ComplianceGapReason }]
   })
 }
+
+/**
+ * Where the renewal of a document stands. The steps are the ones the managers named; the client
+ * still has to confirm the list.
+ */
+export const RENEWAL_LEVELS = [
+  'not_started',
+  'internal_service',
+  'external_center',
+  'signature',
+  'completed'
+] as const
+export type RenewalLevel = (typeof RENEWAL_LEVELS)[number]
+
+/** Late: still being renewed past the planned closing day. */
+export function isRenewalLate(
+  facts: { level: RenewalLevel; targetOn: string | null },
+  today: string
+): boolean {
+  return facts.level !== 'completed' && !!facts.targetOn && facts.targetOn < today
+}

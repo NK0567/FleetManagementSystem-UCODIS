@@ -1,5 +1,6 @@
 import type { AlertCategory, AlertSeverity } from '@/modules/fleet/alerts/domain/alert'
 import type { LiveSituation } from '@/modules/fleet/live-map'
+import type { ImmobilizationCategory } from '@/modules/fleet/vehicles/domain/vehicleStatus'
 import type { VehicleStatus } from '@/modules/fleet/vehicles/types/vehicle.types'
 
 export interface Availability {
@@ -22,7 +23,32 @@ export interface DashboardImmobilization {
   vehicleNo: string
   plate: string
   status: VehicleStatus
+  category: ImmobilizationCategory
   reason: string
+}
+
+/** A driver who cannot be given a trip today, with the reason read straight on the board. */
+export interface DashboardUnavailableDriver {
+  driverNo: string
+  fullName: string
+  availability: string
+  reason: string
+}
+
+/** What a transport manager reads first each day, with the month alongside. */
+export interface DashboardDaily {
+  distanceKm: number
+  distanceKmMonth: number
+  transportedTonnes: number
+  transportedTonnesMonth: number
+  fuelLiters: number
+  fuelLitersMonth: number
+  accidents: number
+  accidentsMonth: number
+  incidents: number
+  incidentsMonth: number
+  unauthorizedStops: number
+  unauthorizedStopsMonth: number
 }
 
 /** A tracked vehicle as the control room board lists it. */
@@ -68,6 +94,9 @@ export interface FleetDashboardApi {
   movement: Record<LiveSituation, number>
   latestAlerts: DashboardAlert[]
   immobilized: DashboardImmobilization[]
+  immobilizedByCategory: Record<ImmobilizationCategory, number>
+  unavailableDrivers: DashboardUnavailableDriver[]
+  daily: DashboardDaily
   fleetByStatus: { status: VehicleStatus; count: number }[]
   fuelThisMonth: { liters: number; amount: number; averageL100: number | null }
   compliance: {

@@ -25,7 +25,8 @@ export default {
   'fleet.equipmentTypes.form.no': 'Code',
   'fleet.equipmentTypes.form.name': 'Libellé',
   'fleet.equipmentTypes.form.capability': 'Fonction',
-  'fleet.equipmentTypes.form.capabilityHint': "Ce que l'équipement apporte au véhicule (position, caméra, dépotage).",
+  'fleet.equipmentTypes.form.capabilityHint':
+    "Ce que l'équipement apporte au véhicule (position, caméra, dépotage).",
   'fleet.equipmentTypes.form.hasDueDate': 'Avec échéance',
   'fleet.equipmentTypes.form.noticeDays': "Préavis avant l'échéance (jours)",
   'fleet.equipmentTypes.form.active': 'Actif',

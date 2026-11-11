@@ -59,7 +59,8 @@ export default {
   'maintenance.vehicleCost.insurance': 'Insurance (prorated)',
   'maintenance.vehicleCost.total': 'Period total',
   'maintenance.vehicleCost.perKm': '{km} km run · {cost} per km',
-  'maintenance.vehicleCost.acquisition': 'Acquisition: {cost}, counted in the "Total cost of ownership" above',
+  'maintenance.vehicleCost.acquisition':
+    'Acquisition: {cost}, counted in the "Total cost of ownership" above',
   'maintenance.vehicleCost.noAcquisition': 'Acquisition cost not entered.',
   'maintenance.dashboard.workload.title': 'Work orders',
   'maintenance.dashboard.workload.open': 'See the work orders',
@@ -97,5 +98,13 @@ export default {
   'maintenance.reliability.kmRun': 'Km run',
   'maintenance.reliability.daysLost': 'Days lost',
   'maintenance.reliability.per10000Km': 'Per 10,000 km',
-  'maintenance.reliability.daysValue': '{days} d'
+  'maintenance.reliability.daysValue': '{days} d',
+  'maintenance.reliability.ageGroups.title': 'Indicators by vehicle age',
+  'maintenance.reliability.ageGroups.group': 'Group',
+  'maintenance.reliability.ageGroups.vehicles': 'Vehicles',
+  'maintenance.reliability.ageGroups.young': 'Recent',
+  'maintenance.reliability.ageGroups.mid': 'Middle-aged',
+  'maintenance.reliability.ageGroups.old': 'Old',
+  'maintenance.reliability.ageGroups.between': '{from} to {to} years',
+  'maintenance.reliability.ageGroups.over': '{from} years and over'
 }
