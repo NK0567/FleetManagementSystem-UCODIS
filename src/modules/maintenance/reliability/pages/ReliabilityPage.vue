@@ -57,10 +57,10 @@ onMounted(() => void store.fetchReliability())
         <p class="text-sm text-muted-foreground">{{ t('maintenance.reliability.subtitle') }}</p>
       </div>
       <form class="flex items-end gap-2" @submit.prevent="valid && store.fetchReliability()">
-        <BaseFormField :label="t('maintenance.reliability.from')">
+        <BaseFormField class="w-44" :label="t('maintenance.reliability.from')">
           <DateFormInput v-model="store.from" />
         </BaseFormField>
-        <BaseFormField :label="t('maintenance.reliability.to')">
+        <BaseFormField class="w-44" :label="t('maintenance.reliability.to')">
           <DateFormInput v-model="store.to" />
         </BaseFormField>
         <button
