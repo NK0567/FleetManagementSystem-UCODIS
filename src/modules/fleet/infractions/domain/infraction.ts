@@ -61,15 +61,17 @@ export function isDuplicate(a: Occurrence, b: Occurrence): boolean {
 export const INFRACTION_HANDLING_LEVELS = ['manager', 'superior', 'general_management'] as const
 export type InfractionHandlingLevel = (typeof INFRACTION_HANDLING_LEVELS)[number]
 
-/** Days given to settle an infraction before it is late, by severity (to be confirmed by the client). */
-const HANDLING_DELAY_DAYS: Record<InfractionSeverity, number> = {
-  minor: 15,
-  major: 10,
-  serious: 5
-}
+/** Days given to settle an infraction before it is late, by severity; set in the fleet settings. */
+export type HandlingDelays = Record<InfractionSeverity, number>
 
-export function defaultDueOn(occurredAt: string, severity: InfractionSeverity): string {
-  return addDays(occurredAt.slice(0, 10), HANDLING_DELAY_DAYS[severity])
+export const DEFAULT_HANDLING_DELAYS: HandlingDelays = { minor: 15, major: 10, serious: 5 }
+
+export function defaultDueOn(
+  occurredAt: string,
+  severity: InfractionSeverity,
+  delays: HandlingDelays = DEFAULT_HANDLING_DELAYS
+): string {
+  return addDays(occurredAt.slice(0, 10), delays[severity])
 }
 
 /** Late: still open past its deadline. */

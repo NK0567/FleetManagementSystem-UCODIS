@@ -38,6 +38,10 @@ export interface SafetySettings {
   recheckDelayDays: number
   /** Hours the driver has to explain a route deviation. */
   justificationDelayH: number
+  /** Days given to settle an infraction before it is late, by severity. */
+  infractionDelayMinorDays: number
+  infractionDelayMajorDays: number
+  infractionDelaySeriousDays: number
 }
 
 export interface FuelSettings {
@@ -66,6 +70,8 @@ export interface FuelSettings {
 export interface TelematicsSettings {
   /** A unit silent for longer is shown as having lost its signal. */
   signalLossMin: number
+  /** Cameras a vehicle that carries any must have connected; fewer is shown and alerted. */
+  minimumCameras: number
 }
 
 export interface ReportingSettings {
@@ -119,6 +125,7 @@ export type SettingUnit =
   | 'gPerL'
   | 'amount'
   | 'points'
+  | 'count'
 
 export type SettingField = GenericSettingField<SettingUnit>
 
@@ -139,7 +146,10 @@ export const FLEET_SETTING_FIELDS: Record<FleetSettingsSection, readonly Setting
   documents: [{ key: 'defaultNoticeDays', kind: 'number', unit: 'days', min: 1, max: 180 }],
   safety: [
     { key: 'recheckDelayDays', kind: 'number', unit: 'days', min: 1, max: 60 },
-    { key: 'justificationDelayH', kind: 'number', unit: 'h', min: 1, max: 168 }
+    { key: 'justificationDelayH', kind: 'number', unit: 'h', min: 1, max: 168 },
+    { key: 'infractionDelayMinorDays', kind: 'number', unit: 'days', min: 1, max: 90 },
+    { key: 'infractionDelayMajorDays', kind: 'number', unit: 'days', min: 1, max: 90 },
+    { key: 'infractionDelaySeriousDays', kind: 'number', unit: 'days', min: 1, max: 90 }
   ],
   fuel: [
     { key: 'refuelStartHour', kind: 'number', unit: 'h', min: 0, max: 23 },
@@ -153,7 +163,10 @@ export const FLEET_SETTING_FIELDS: Record<FleetSettingsSection, readonly Setting
     { key: 'matchingToleranceMin', kind: 'number', unit: 'min', min: 5, max: 1440 },
     { key: 'matchingTolerancePct', kind: 'number', unit: 'percent', min: 0, max: 20 }
   ],
-  telematics: [{ key: 'signalLossMin', kind: 'number', unit: 'min', min: 5, max: 240 }],
+  telematics: [
+    { key: 'signalLossMin', kind: 'number', unit: 'min', min: 5, max: 240 },
+    { key: 'minimumCameras', kind: 'number', unit: 'count', min: 1, max: 12 }
+  ],
   reporting: [{ key: 'availabilityTargetPct', kind: 'number', unit: 'percent', min: 1, max: 100 }],
   driverScore: [
     { key: 'periodDays', kind: 'number', unit: 'days', min: 30, max: 365 },
@@ -166,7 +179,9 @@ export const FLEET_SETTING_FIELDS: Record<FleetSettingsSection, readonly Setting
     { key: 'ecoEventPoints', kind: 'number', unit: 'points', min: 0, max: 100 },
     { key: 'deliveryDisputePoints', kind: 'number', unit: 'points', min: 0, max: 100 },
     { key: 'missingDocumentCap', kind: 'number', unit: 'points', min: 0, max: 100 },
-    { key: 'trainingThreshold', kind: 'number', unit: 'points', min: 0, max: 100 }
+    { key: 'trainingThreshold', kind: 'number', unit: 'points', min: 0, max: 100 },
+    { key: 'bonusFullScore', kind: 'number', unit: 'points', min: 0, max: 100 },
+    { key: 'bonusHalfScore', kind: 'number', unit: 'points', min: 0, max: 100 }
   ],
   integrations: [
     { key: 'hrSystemConnected', kind: 'boolean' },
@@ -189,7 +204,13 @@ export const DEFAULT_FLEET_SETTINGS: FleetSettings = {
   },
   geofencing: { defaultSiteRadiusM: 5_000 },
   documents: { defaultNoticeDays: 30 },
-  safety: { recheckDelayDays: 15, justificationDelayH: 48 },
+  safety: {
+    recheckDelayDays: 15,
+    justificationDelayH: 48,
+    infractionDelayMinorDays: 15,
+    infractionDelayMajorDays: 10,
+    infractionDelaySeriousDays: 5
+  },
   fuel: {
     refuelStartHour: 4,
     refuelEndHour: 20,
@@ -202,7 +223,7 @@ export const DEFAULT_FLEET_SETTINGS: FleetSettings = {
     matchingToleranceMin: 120,
     matchingTolerancePct: 2
   },
-  telematics: { signalLossMin: 15 },
+  telematics: { signalLossMin: 15, minimumCameras: 5 },
   reporting: { availabilityTargetPct: 90 },
   driverScore: {
     periodDays: 90,
@@ -215,7 +236,9 @@ export const DEFAULT_FLEET_SETTINGS: FleetSettings = {
     ecoEventPoints: 5,
     deliveryDisputePoints: 20,
     missingDocumentCap: 60,
-    trainingThreshold: 70
+    trainingThreshold: 70,
+    bonusFullScore: 90,
+    bonusHalfScore: 75
   },
   integrations: { hrSystemConnected: false, managementSystemConnected: false }
 }

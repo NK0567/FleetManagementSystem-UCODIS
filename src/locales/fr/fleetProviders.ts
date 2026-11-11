@@ -56,6 +56,18 @@ export default {
   'fleet.providers.contracts.issue.startRequired': 'Indiquez la date de début.',
   'fleet.providers.contracts.issue.endBeforeStart': 'La fin précède le début.',
   'fleet.providers.contracts.issue.negativeAmount': 'Le montant ne peut pas être négatif.',
+  'fleet.providers.safetyEvents.title': 'Accidents et infractions déclarés',
+  'fleet.providers.safetyEvents.hint':
+    "Le transporteur ne remonte rien dans le système : ses accidents et infractions se saisissent ici, d'après ses déclarations. Le rapport par transporteur les reprend sur la période choisie.",
+  'fleet.providers.safetyEvents.count': 'Aucune déclaration | Une déclaration | {n} déclarations',
+  'fleet.providers.safetyEvents.empty': 'Aucune déclaration.',
+  'fleet.providers.safetyEvents.date': 'Date',
+  'fleet.providers.safetyEvents.kind': 'Nature',
+  'fleet.providers.safetyEvents.accident': 'Accident',
+  'fleet.providers.safetyEvents.infraction': 'Infraction',
+  'fleet.providers.safetyEvents.plate': 'Immatriculation du véhicule',
+  'fleet.providers.safetyEvents.add': 'Ajouter une déclaration',
+  'fleet.providers.safetyEvents.remove': 'Retirer la déclaration',
   'fleet.providers.carrierVehicles.title': 'Véhicules du transporteur',
   'fleet.providers.carrierVehicles.hint':
     'Véhicules de ce transporteur, seuls proposés quand il est choisi à la planification.',

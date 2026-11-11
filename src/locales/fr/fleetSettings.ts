@@ -87,6 +87,8 @@ export default {
   'fleet.settings.field.driverScore.deliveryDisputePoints': 'Points par livraison encore contestée',
   'fleet.settings.field.driverScore.missingDocumentCap': 'Note plafond si un document manque',
   'fleet.settings.field.driverScore.trainingThreshold': 'Seuil de formation',
+  'fleet.settings.field.driverScore.bonusFullScore': 'Score donnant la prime entière',
+  'fleet.settings.field.driverScore.bonusHalfScore': 'Score donnant la demi-prime',
   'fleet.settings.section.reporting': 'Pilotage',
   'fleet.settings.section.reporting.hint':
     'Cibles auxquelles le tableau de bord du parc compare ses indicateurs.',
@@ -239,5 +241,13 @@ export default {
     'Moyenne des scores de conduite des conducteurs sur la période du score.',
   'fleet.settings.importMappings.saveFirst': "Enregistrez d'abord les changements en cours.",
   'fleet.settings.warning.outOfRange':
-    'Attention : cette valeur sort des bornes habituelles (entre {min} et {max} {unit}). Elle sera enregistrée telle quelle.'
+    'Attention : cette valeur sort des bornes habituelles (entre {min} et {max} {unit}). Elle sera enregistrée telle quelle.',
+  'fleet.settings.unit.count': '',
+  'fleet.settings.field.safety.infractionDelayMinorDays':
+    "Délai de traitement d'une infraction mineure",
+  'fleet.settings.field.safety.infractionDelayMajorDays':
+    "Délai de traitement d'une infraction majeure",
+  'fleet.settings.field.safety.infractionDelaySeriousDays':
+    "Délai de traitement d'une infraction grave",
+  'fleet.settings.field.telematics.minimumCameras': 'Caméras connectées au minimum par véhicule'
 }

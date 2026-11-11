@@ -19,7 +19,9 @@ const settings: DriverScoreSettings = {
   routeDeviationPoints: 20,
   ecoEventPoints: 5,
   missingDocumentCap: 60,
-  trainingThreshold: 70
+  trainingThreshold: 70,
+  bonusFullScore: 90,
+  bonusHalfScore: 75
 }
 
 const clean: ScoreFacts = {

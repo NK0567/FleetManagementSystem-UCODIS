@@ -115,6 +115,8 @@ const historyColumns = computed<SubListColumn[]>(() => [
       <dl v-else class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm xl:col-span-2">
         <dt class="text-muted-foreground">{{ t('maintenance.workOrders.dialog.subsystem') }}</dt>
         <dd>{{ order.subsystemName }}</dd>
+        <dt class="text-muted-foreground">{{ t('maintenance.workOrders.dialog.component') }}</dt>
+        <dd>{{ order.componentName || '-' }}</dd>
         <dt class="text-muted-foreground">{{ t('maintenance.workOrders.dialog.mode') }}</dt>
         <dd>{{ order.modeName || '-' }}</dd>
         <dt class="text-muted-foreground">{{ t('maintenance.workOrders.dialog.cause') }}</dt>

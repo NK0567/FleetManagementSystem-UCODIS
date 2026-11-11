@@ -281,4 +281,9 @@ const moreActions = computed<MoreAction[]>(() => [
       <p class="text-sm text-muted-foreground">
         {{ t('hr.employees.archiveWarning', { name: item?.fullName ?? '' }) }}
       </p>
-      <BaseFormField :label="t('hr.employe
+      <BaseFormField :label="t('hr.employees.form.statusReason')">
+        <FormTextarea v-model="archiveReason" :rows="3" :maxlength="300" />
+      </BaseFormField>
+    </div>
+  </ConfirmDialog>
+</template>

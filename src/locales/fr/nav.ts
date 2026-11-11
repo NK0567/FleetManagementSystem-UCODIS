@@ -135,5 +135,6 @@ export default {
   'guide.empty': 'Aucun guide pour ce compte.',
   'nav.setupHub': 'Paramètres et référentiels',
   'nav.setupHubEmpty': 'Aucun paramètre accessible avec ce compte.',
-  'nav.backToSetup': 'Retour aux paramètres'
+  'nav.backToSetup': 'Retour aux paramètres',
+  'nav.fuelStations': 'Stations agréées'
 }

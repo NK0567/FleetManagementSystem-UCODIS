@@ -63,6 +63,8 @@ export interface DriverScoreApi {
   driverCount: number
   threshold: number
   belowThreshold: boolean
+  /** Share of the bonus earned with this score, from the thresholds set in the settings. */
+  bonusPercent: number
   families: FamilyScore[]
   /** The score training still to come, if one was proposed. */
   trainingNo: string | null

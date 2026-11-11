@@ -77,7 +77,7 @@ describe('sites and site types', () => {
     const types = (await call(server, 'get', '/fleet/site-types', { as: 'FLT001' })).data.data as {
       items: SiteTypeApi[]
     }
-    expect(types.items.find((type) => type.no === 'CHECKPOINT')?.siteCount).toBe(4)
+    expect(types.items.find((type) => type.no === 'CHECKPOINT')?.siteCount).toBe(3)
   })
 
   it('lets employees reference a fleet site', async () => {

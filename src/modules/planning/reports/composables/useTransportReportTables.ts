@@ -266,11 +266,35 @@ export function useTransportReportTables(report: Ref<TransportReportApi | null>)
           col('invoices'),
           col('invoicesOutside'),
           col('invoiceGap'),
-          col('withoutTariff')
+          col('withoutTariff'),
+          col('incidents'),
+          col('accidents'),
+          col('infractions')
         ],
-        numeric: [false, true, true, true, true, true, true, true, true, true, true],
+        numeric: [
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
         rows: rows.map((row) => [
-          text(row.carrierName ? `${row.carrierName} (${row.carrierNo})` : row.carrierNo),
+          text(
+            row.carrierNo === 'fleet'
+              ? t('planning.reports.fleet')
+              : row.carrierName
+                ? `${row.carrierName} (${row.carrierNo})`
+                : row.carrierNo
+          ),
           num(row.orders),
           pct(row.punctuality),
           pct(row.confirmation),
@@ -280,7 +304,10 @@ export function useTransportReportTables(report: Ref<TransportReportApi | null>)
           num(row.invoices),
           num(row.invoicesOutside),
           num(row.invoiceGap),
-          num(row.withoutTariff)
+          num(row.withoutTariff),
+          num(row.incidents),
+          num(row.accidents),
+          num(row.infractions)
         ])
       }
     ]

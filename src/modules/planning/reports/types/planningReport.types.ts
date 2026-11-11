@@ -21,6 +21,11 @@ export interface CarrierReportRow {
   withoutTariff: number
   /** Invoiced above (positive) or below the tariff, over the invoices with a tariff. */
   invoiceGap: number
+  /** Declared by the carrier, or charged to it by a delivery anomaly. */
+  incidents: number
+  /** Null when the carrier's vehicles are not followed in the FMS. */
+  accidents: number | null
+  infractions: number | null
 }
 
 /** Planned departure bounds, depot, region and orderer; an empty value does not filter. */

@@ -86,6 +86,8 @@ export default {
   'hr.employees.score.previous': 'End of last month',
   'hr.employees.score.rank': 'Rank',
   'hr.employees.score.threshold': 'Training threshold',
-  'hr.employees.score.bonusRule': 'Bonus calculation from this score: to be decided.',
+  'hr.employees.score.bonus': 'Share of the bonus earned with this score: {percent}%',
+  'hr.employees.score.bonusRule':
+    'The steps (full bonus, half bonus, none) are set in the fleet settings, in the driving score block.',
   'hr.employees.score.unavailable': 'The driving score could not be loaded.'
 }

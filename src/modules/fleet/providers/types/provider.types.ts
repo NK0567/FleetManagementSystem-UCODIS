@@ -32,6 +32,13 @@ export interface CarrierVehicle {
   capacityL?: number | null
 }
 
+/** An accident or an infraction an external carrier reports on its own vehicles. */
+export interface CarrierSafetyEvent {
+  date: string
+  kind: 'accident' | 'infraction'
+  plate: string
+}
+
 export interface ProviderApi {
   no: string
   name: string
@@ -50,6 +57,8 @@ export interface ProviderApi {
   contracts: ProviderContract[]
   /** Only for a carrier: the means of transport attached to it. */
   carrierVehicles: CarrierVehicle[]
+  /** Only for a carrier: the accidents and infractions it declared, for the safety reports. */
+  safetyEvents: CarrierSafetyEvent[]
   activeContractCount: number
   createdAt: string
   createdBy: string

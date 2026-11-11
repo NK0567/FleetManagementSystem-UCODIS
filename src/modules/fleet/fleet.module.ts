@@ -223,6 +223,13 @@ export function registerFleetModule(): void {
         menuKey: 'fuelCard'
       },
       {
+        labelKey: 'nav.fuelStations',
+        to: '/fleet/fuel-cards/stations',
+        group: 'nav.group.fuel',
+        icon: MapPin,
+        menuKey: 'fuelCard'
+      },
+      {
         labelKey: 'nav.documents',
         to: '/fleet/documents',
         group: 'nav.group.documents',

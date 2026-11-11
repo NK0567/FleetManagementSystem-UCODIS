@@ -83,6 +83,16 @@ const SEED: Omit<SiteTypeRow, keyof typeof seedAudit>[] = [
     active: true
   },
   {
+    no: 'FUEL-STATION',
+    name: 'Station-service',
+    defaultRadiusM: 300,
+    color: '#dc2626',
+    loadingDepot: false,
+    restAllowed: false,
+    restricted: false,
+    active: true
+  },
+  {
     no: 'RELAY',
     name: 'Relais',
     defaultRadiusM: 1000,

@@ -46,5 +46,6 @@ export default {
   'fleet.fleetStatus.send.line':
     '{date} · status of {day} · lines: {count} · {recipients} · by {user}',
   'fleet.fleetStatus.send.required': 'Enter at least one e-mail address, separated by commas.',
-  'fleet.fleetStatus.col.immobilizationCategory': 'Type of immobilization'
+  'fleet.fleetStatus.col.immobilizationCategory': 'Type of immobilization',
+  'fleet.fleetStatus.col.cameras': 'Cameras'
 }

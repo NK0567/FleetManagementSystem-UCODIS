@@ -71,6 +71,24 @@ function tractorEquipment(index: number): Omit<Seed, 'no'>[] {
   return items
 }
 
+/**
+ * A tanker carries at least five cameras. The first one is in the main list; the others follow,
+ * one of VEH-003 is disconnected and VEH-006 has only four.
+ */
+function extraCameras(index: number): Omit<Seed, 'no'>[] {
+  if (index % 3 === 2) return []
+  const vehicleNo = `VEH-${String(index).padStart(3, '0')}`
+  const count = index === 6 ? 3 : 4
+  return Array.from({ length: count }, (_unused, position) => ({
+    vehicleNo,
+    equipmentTypeNo: 'DMS',
+    serialNumber: `DMS-${3024000 + index}-${position + 2}`,
+    state: (index === 3 && position === 3 ? 'out_of_service' : 'operational') as EquipmentState,
+    dueDate: null,
+    installedOn: '2025-01-15'
+  }))
+}
+
 const SEED: Seed[] = [
   ...Array.from({ length: TRACTOR_COUNT }, (_unused, index) => tractorEquipment(index + 1)).flat(),
   {
@@ -80,7 +98,8 @@ const SEED: Seed[] = [
     state: 'operational' as const,
     dueDate: null,
     installedOn: '2024-06-01'
-  }
+  },
+  ...Array.from({ length: TRACTOR_COUNT }, (_unused, index) => extraCameras(index + 1)).flat()
 ].map((item, index) => ({ no: `EQ-${String(index + 1).padStart(5, '0')}`, ...item }))
 
 /** On-board equipment, numbered EQ-00001…; the extinguisher due dates follow the demo calendar. */

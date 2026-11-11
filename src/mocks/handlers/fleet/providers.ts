@@ -1,5 +1,6 @@
 import { contractIssues, isContractActive } from '@/modules/fleet/providers/domain/provider'
 import {
+  type CarrierSafetyEvent,
   type CarrierVehicle,
   type ProviderApi,
   type ProviderContract
@@ -40,6 +41,7 @@ export function providersApi(db: MockDatabase): ProviderApi[] {
     source: provider.source ?? 'fms',
     externalId: provider.externalId ?? null,
     carrierVehicles: provider.carrierVehicles ?? [],
+    safetyEvents: provider.safetyEvents ?? [],
     activeContractCount: provider.contracts.filter((contract) => isContractActive(contract, today))
       .length
   }))
@@ -109,6 +111,23 @@ function readCarrierVehicles(input: Record<string, unknown>): CarrierVehicle[] {
   })
 }
 
+/** The accidents and infractions a carrier declares, kept only for a carrier. */
+function readSafetyEvents(input: Record<string, unknown>): CarrierSafetyEvent[] {
+  const raw = input.safetyEvents
+  if (raw == null) return []
+  if (!Array.isArray(raw)) throw invalidField('safetyEvents')
+  return raw.flatMap((item: unknown) => {
+    if (!item || typeof item !== 'object') throw invalidField('safetyEvents')
+    const line = item as Record<string, unknown>
+    const date = typeof line.date === 'string' ? line.date.slice(0, 10) : ''
+    if (!date) return []
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw invalidField('safetyEvents')
+    if (line.kind !== 'accident' && line.kind !== 'infraction') throw invalidField('safetyEvents')
+    const plate = typeof line.plate === 'string' ? line.plate.trim().toUpperCase().slice(0, 20) : ''
+    return [{ date, kind: line.kind, plate }]
+  })
+}
+
 export function registerProvidersHandlers(router: MockRouter, db: MockDatabase): void {
   /** A provider keeps a type deactivated since; none may newly take it. */
   function assertTypeActive(code: string): void {
@@ -133,6 +152,10 @@ export function registerProvidersHandlers(router: MockRouter, db: MockDatabase):
     carrierVehicles: (input) =>
       input.providerType === 'carrier' || input.providerType === undefined
         ? readCarrierVehicles(input)
+        : [],
+    safetyEvents: (input) =>
+      input.providerType === 'carrier' || input.providerType === undefined
+        ? readSafetyEvents(input)
         : []
   }
 

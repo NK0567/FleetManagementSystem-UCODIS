@@ -649,6 +649,10 @@ export const FLEET_MESSAGES = {
     fr: 'Ce camion ne figure pas sur la liste agréée de la station {station} pour un plein hors carte.',
     en: 'This truck is not on the approved list of station {station} for a refill outside a card.'
   },
+  camerasShort: {
+    fr: 'Caméras connectées : {text}',
+    en: 'Cameras connected: {text}'
+  },
   refillDuplicate: {
     fr: 'Ce plein est déjà enregistré ({no}).',
     en: 'This refill is already recorded ({no}).'

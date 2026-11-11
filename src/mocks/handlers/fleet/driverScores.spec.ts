@@ -48,7 +48,12 @@ describe('driver scores', () => {
 
   it('count only what was confirmed: unjustified deviations, upheld infractions', async () => {
     const jaona = await score('UCT-013')
-    expect(jaona).toMatchObject({ score: 93, threshold: 70, belowThreshold: false })
+    expect(jaona).toMatchObject({
+      score: 93,
+      threshold: 70,
+      belowThreshold: false,
+      bonusPercent: 100
+    })
     expect(mark(jaona, 'route')).toBe(80)
     expect(mark(jaona, 'discipline')).toBe(92)
     expect(mark(jaona, 'ecoDriving')).toBe(90)

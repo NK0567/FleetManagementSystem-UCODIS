@@ -43,6 +43,13 @@ export function registerFailureCodesHandlers(router: MockRouter, db: MockDatabas
 
   /** Only a subsystem hangs under a system and calls for a skill. */
   function assertShape(code: Pick<FailureCodeRow, 'kind' | 'parentNo' | 'competenceNo'>) {
+    if (code.kind === 'component') {
+      if (!code.parentNo || db.failureCodes.find(code.parentNo)?.kind !== 'subsystem') {
+        throw unprocessable(MAINTENANCE_MESSAGES.failureComponentNeedsSubsystem)
+      }
+      if (code.competenceNo) throw unprocessable(MAINTENANCE_MESSAGES.failureCodeOnlySubsystemLinks)
+      return
+    }
     if (code.kind !== 'subsystem') {
       if (code.parentNo || code.competenceNo) {
         throw unprocessable(MAINTENANCE_MESSAGES.failureCodeOnlySubsystemLinks)

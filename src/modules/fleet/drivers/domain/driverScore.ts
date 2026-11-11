@@ -53,6 +53,9 @@ export interface DriverScoreSettings {
   missingDocumentCap: number
   /** Below this score, a training is called for. */
   trainingThreshold: number
+  /** From this score the whole bonus is earned; from the next one, half of it; below, none. */
+  bonusFullScore: number
+  bonusHalfScore: number
 }
 
 export const DEFAULT_SCORE_FAMILIES: ScoreFamilyRule[] = [

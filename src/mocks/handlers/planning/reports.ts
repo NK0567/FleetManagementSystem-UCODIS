@@ -595,8 +595,8 @@ function carrierRows(
 /**
  * Incidents, accidents and infractions of each carrier, for the CSR reviews. The own fleet counts
  * its declared claims and infractions on the vehicles that ran the orders of the period. An
- * external carrier declares nothing in the FMS: its incidents are the delivery anomalies charged
- * to it, and its accidents and infractions are not known here.
+ * external carrier's incidents are the delivery anomalies charged to it; its accidents and
+ * infractions are the ones declared on its sheet.
  */
 function carrierSafety(
   db: MockDatabase,
@@ -615,7 +615,14 @@ function carrierSafety(
     if (order.api.means === 'carrier') {
       const carrierNo = order.api.carrierNo
       if (!carrierNo) continue
-      const row = result.get(carrierNo) ?? { incidents: 0, accidents: null, infractions: null }
+      const declared = (db.providers.find(carrierNo)?.safetyEvents ?? []).filter((event) =>
+        inRange(event.date)
+      )
+      const row = result.get(carrierNo) ?? {
+        incidents: 0,
+        accidents: declared.filter((event) => event.kind === 'accident').length,
+        infractions: declared.filter((event) => event.kind === 'infraction').length
+      }
       row.incidents += order.row.lines.filter((line) =>
         line.responsibility?.shares.some(
           (share) => share.actor === 'external_carrier' && share.percent > 0

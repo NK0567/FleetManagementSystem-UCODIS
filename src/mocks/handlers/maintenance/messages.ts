@@ -41,6 +41,10 @@ export const MAINTENANCE_MESSAGES = {
     fr: 'Indiquez la compétence nécessaire pour réparer ce sous-système.',
     en: 'Give the skill needed to repair this subsystem.'
   },
+  failureComponentNeedsSubsystem: {
+    fr: "Un composant dépend d'un sous-système.",
+    en: 'A component belongs to a subsystem.'
+  },
   failureSystemHasSubsystems: {
     fr: 'Ce système regroupe des sous-systèmes : désactivez-le plutôt.',
     en: 'This system groups subsystems: deactivate it instead.'

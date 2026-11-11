@@ -262,6 +262,13 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/fleet/fuel-cards/stations': RouteRecordInfo<
+      '/fleet/fuel-cards/stations',
+      '/fleet/fuel-cards/stations',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/fleet/fuel-cards/transactions': RouteRecordInfo<
       '/fleet/fuel-cards/transactions',
       '/fleet/fuel-cards/transactions',
@@ -1546,6 +1553,14 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | 'id'
+    }
+    'src/pages/fleet/fuel-cards/stations.vue': {
+      routes:
+        | '/fleet/fuel-cards/stations'
+      views:
+        | never
+      pathParamNames:
+        | never
     }
     'src/pages/fleet/fuel-cards/transactions.vue': {
       routes:

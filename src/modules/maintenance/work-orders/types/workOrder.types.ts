@@ -7,6 +7,8 @@ import type {
 
 export interface WorkOrderDiagnosis {
   subsystemNo: string
+  /** The part that failed, within the subsystem (injection, turbo, clutch...). */
+  componentNo?: string | null
   modeNo: string | null
   causeNo: string | null
   /** Free note of the workshop head on what really caused the failure (part, driving, planning). */
@@ -119,6 +121,7 @@ export interface WorkOrderApi {
   history: WorkOrderEvent[]
   vehiclePlate: string
   subsystemName: string
+  componentName: string
   modeName: string
   causeName: string
   technicianNames: string

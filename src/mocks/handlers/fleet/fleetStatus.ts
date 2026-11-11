@@ -26,6 +26,7 @@ import { livePositions } from './livePositions'
 import { FLEET_MESSAGES } from './messages'
 import { registerFleetStatusDispatchHandlers } from './fleetStatusDispatch'
 import { vehicleImmobilizations } from './immobilizations'
+import { cameraCounts, cameraText, minimumCameras } from './cameras'
 import { vehicleStatuses } from './vehicleState'
 
 const MAX_OBSERVATION = 500
@@ -63,6 +64,7 @@ export function liveFleetStatus(db: MockDatabase, language: MockLanguage): Fleet
   const sites = new Map(db.sites.all().map((site) => [site.no, site.name]))
   const routes = new Map(db.routeTemplates.all().map((route) => [route.no, route.name]))
   const trips = db.trips.all()
+  const cameras = cameraCounts(db)
   const notes = new Map(
     db.fleetStatusNotes
       .all()
@@ -131,6 +133,7 @@ export function liveFleetStatus(db: MockDatabase, language: MockLanguage): Fleet
       position: positions.get(vehicle.no) ?? '',
       immobilizationReason: held?.reason ?? '',
       immobilizationCategory: held?.category ?? '',
+      cameras: cameraText(cameras.get(vehicle.no), minimumCameras(db)),
       observation: note?.observation ?? '',
       expectedBackOn: note?.expectedBackOn ?? null
     }

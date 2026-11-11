@@ -102,7 +102,7 @@ describe('maintenance history import', () => {
     expect((await confirm(painted!.no, 'LEAK')).status).toBe(422)
     expect((await confirm(painted!.no, 'CHASSIS')).data.data).toMatchObject({
       nomenclatureState: 'confirmed',
-      subsystemName: 'Châssis et tôlerie'
+      subsystemName: 'Châssis, tôlerie et sécurités'
     })
     expect((await confirm(painted!.no, 'CHASSIS')).status).toBe(409)
     expect((await confirm('OT-2026-0001', 'ENGINE')).status).toBe(409)

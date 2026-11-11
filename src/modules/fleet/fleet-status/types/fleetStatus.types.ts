@@ -21,6 +21,8 @@ export interface FleetStatusApi {
   immobilizationReason: string
   /** Family of the cause (technical, administrative, human), empty when the vehicle can leave. */
   immobilizationCategory: ImmobilizationCategory | ''
+  /** Cameras connected over the minimum required, such as « 4 / 5 »; empty without a camera. */
+  cameras?: string
   observation: string
   expectedBackOn: string | null
 }

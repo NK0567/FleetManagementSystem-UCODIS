@@ -148,5 +148,6 @@ export default {
     "Attente des pièces : le comptage commence à la commande de la demande d'achat et court jusqu'à la réception, dans l'immobilisation du véhicule.",
   'maintenance.workOrders.dialog.observation': 'Observation sur la cause',
   'maintenance.workOrders.dialog.observationHint':
-    'Ex. défaut de la pièce, freinage brusque du conducteur, entretien préventif non fait'
+    'Ex. défaut de la pièce, freinage brusque du conducteur, entretien préventif non fait',
+  'maintenance.workOrders.dialog.component': 'Composant'
 }

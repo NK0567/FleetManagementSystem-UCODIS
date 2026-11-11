@@ -164,7 +164,9 @@ describe('planning reports', () => {
       orders: 1,
       partials: 1,
       invoices: 1,
-      invoiceGap: 100000 - agreed
+      invoiceGap: 100000 - agreed,
+      accidents: 1,
+      infractions: 1
     })
   })
 

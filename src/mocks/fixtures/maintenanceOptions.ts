@@ -4,6 +4,7 @@ export const MAINTENANCE_OPTION_SETS: Record<string, Record<string, LocalizedTex
   failureCodeKind: {
     system: { fr: 'Système', en: 'System' },
     subsystem: { fr: 'Sous-système', en: 'Subsystem' },
+    component: { fr: 'Composant', en: 'Component' },
     mode: { fr: 'Mode de défaillance', en: 'Failure mode' },
     cause: { fr: 'Cause racine', en: 'Root cause' }
   },

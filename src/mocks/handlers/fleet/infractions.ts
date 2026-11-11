@@ -1,6 +1,8 @@
 import { INFRACTION_SEVERITIES } from '@/modules/fleet/infraction-types/types/infractionType.types'
 import {
+  DEFAULT_HANDLING_DELAYS,
   defaultDueOn,
+  type HandlingDelays,
   INFRACTION_HANDLING_LEVELS,
   INFRACTION_OUTCOMES,
   isOverdue,
@@ -17,6 +19,7 @@ import { employeeFullName } from '@/modules/hr/employees/domain/employee'
 import { nowIsoDateTime, todayIso } from '@/utils/date'
 import { nowIso } from '../../clock'
 import type { MockDatabase } from '../../db/database'
+import { fleetSettings } from './settings'
 import { nextNo } from '../../db/numbering'
 import type { InfractionRow } from '../../fixtures/fleet/infractions'
 import {
@@ -67,7 +70,9 @@ export function infractionsApi(db: MockDatabase): InfractionApi[] {
   const trainings = db.trainings.all()
   const today = todayIso()
   return db.infractions.all().map((infraction) => {
-    const dueOn = infraction.dueOn ?? defaultDueOn(infraction.occurredAt, infraction.severity)
+    const dueOn =
+      infraction.dueOn ??
+      defaultDueOn(infraction.occurredAt, infraction.severity, handlingDelays(db))
     return {
       ...infraction,
       dueOn,
@@ -131,6 +136,15 @@ export function infractionFromTelematics(
   }
   db.infractions.insert(stampCreated(infraction, request))
   return infraction.no
+}
+
+function handlingDelays(db: MockDatabase): HandlingDelays {
+  const safety = fleetSettings(db).safety
+  return {
+    minor: safety.infractionDelayMinorDays ?? DEFAULT_HANDLING_DELAYS.minor,
+    major: safety.infractionDelayMajorDays ?? DEFAULT_HANDLING_DELAYS.major,
+    serious: safety.infractionDelaySeriousDays ?? DEFAULT_HANDLING_DELAYS.serious
+  }
 }
 
 export function registerInfractionsHandlers(router: MockRouter, db: MockDatabase): void {

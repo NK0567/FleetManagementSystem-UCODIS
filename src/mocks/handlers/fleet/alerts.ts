@@ -26,6 +26,7 @@ import { documentsApi, missingDocumentsApi } from './documents'
 import { infractionsApi } from './infractions'
 import { inspectionsApi } from './inspections'
 import { insurancePoliciesApi } from './insurancePolicies'
+import { cameraCounts, cameraText, camerasShort, minimumCameras } from './cameras'
 import { FLEET_MESSAGES } from './messages'
 import { departureChecklist, roadChecklistsApi } from './roadChecklists'
 import { routeDeviationsApi } from './routeDeviations'
@@ -182,6 +183,21 @@ export function alertSignals(db: MockDatabase, language: MockLanguage): AlertSig
         subject: vehicle.plate,
         detail: `${type?.name ?? item.equipmentTypeNo} · ${label('equipmentDueState', due)}`,
         since: item.dueDate ?? today
+      })
+    )
+  }
+  const minimum = minimumCameras(db)
+  for (const [vehicleNo, count] of cameraCounts(db)) {
+    const vehicle = plates.get(vehicleNo)
+    if (!vehicle || vehicle.removal || !camerasShort(count, minimum)) continue
+    signals.push(
+      signal('equipment', `CAM-${vehicleNo}`, '/fleet/vehicles', {
+        severity: 'warning',
+        subject: vehicle.plate,
+        detail: localize(language, FLEET_MESSAGES.camerasShort, {
+          text: cameraText(count, minimum)
+        }),
+        since: today
       })
     )
   }

@@ -168,7 +168,13 @@ type Dialog =
   | null
 const dialog = ref<Dialog>(null)
 const reasonDialog = ref<'refuse' | 'cancel' | null>(null)
-const diagnosis = ref({ subsystemNo: '', modeNo: '', causeNo: '', observation: '' })
+const diagnosis = ref({
+  subsystemNo: '',
+  componentNo: '',
+  modeNo: '',
+  causeNo: '',
+  observation: ''
+})
 const labour = ref({ technicianNo: '', date: todayIso(), hours: null as number | null })
 const completion = ref({ workDone: '', odometerKm: null as number | null })
 const referenceStore = useReferenceStore()
@@ -233,6 +239,7 @@ function open(next: Dialog) {
   const order = item.value
   diagnosis.value = {
     subsystemNo: order?.diagnosis?.subsystemNo ?? '',
+    componentNo: order?.diagnosis?.componentNo ?? '',
     modeNo: order?.diagnosis?.modeNo ?? '',
     causeNo: order?.diagnosis?.causeNo ?? '',
     observation: order?.diagnosis?.observation ?? ''
@@ -328,6 +335,7 @@ async function confirm() {
       case 'diagnose':
         return act('diagnose', {
           subsystemNo: diagnosis.value.subsystemNo,
+          componentNo: diagnosis.value.componentNo || null,
           modeNo: diagnosis.value.modeNo || null,
           causeNo: diagnosis.value.causeNo || null,
           observation: diagnosis.value.observation
@@ -619,6 +627,13 @@ const secondaryActions = computed(() =>
             v-model="diagnosis.subsystemNo"
             reference-key="failureSubsystems"
             :modal-title="t('maintenance.workOrders.dialog.subsystem')"
+          />
+        </BaseFormField>
+        <BaseFormField :label="t('maintenance.workOrders.dialog.component')">
+          <ReferenceLookup
+            v-model="diagnosis.componentNo"
+            reference-key="failureComponents"
+            :modal-title="t('maintenance.workOrders.dialog.component')"
           />
         </BaseFormField>
         <BaseFormField

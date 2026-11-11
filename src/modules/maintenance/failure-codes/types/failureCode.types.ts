@@ -1,4 +1,4 @@
-export const FAILURE_CODE_KINDS = ['system', 'subsystem', 'mode', 'cause'] as const
+export const FAILURE_CODE_KINDS = ['system', 'subsystem', 'component', 'mode', 'cause'] as const
 export type FailureCodeKind = (typeof FAILURE_CODE_KINDS)[number]
 
 export interface FailureCodeApi {

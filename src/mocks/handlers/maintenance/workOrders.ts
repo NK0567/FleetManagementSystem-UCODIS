@@ -116,6 +116,7 @@ export function workOrdersApi(db: MockDatabase): WorkOrderApi[] {
       ...row,
       vehiclePlate: plates.get(row.vehicleNo) ?? row.vehicleNo,
       subsystemName: row.diagnosis ? (codes.get(row.diagnosis.subsystemNo) ?? '') : '',
+      componentName: row.diagnosis?.componentNo ? (codes.get(row.diagnosis.componentNo) ?? '') : '',
       modeName: row.diagnosis?.modeNo ? (codes.get(row.diagnosis.modeNo) ?? '') : '',
       causeName: row.diagnosis?.causeNo ? (codes.get(row.diagnosis.causeNo) ?? '') : '',
       technicianNames: [...new Set(row.labour.map((line) => line.technicianNo))]
@@ -716,6 +717,7 @@ export function registerWorkOrdersHandlers(router: MockRouter, db: MockDatabase)
       const body = readBody(request)
       const diagnosis = {
         subsystemNo: readDiagnosisCode(body, 'subsystemNo', 'subsystem'),
+        componentNo: readDiagnosisCode(body, 'componentNo', 'component'),
         modeNo: readDiagnosisCode(body, 'modeNo', 'mode'),
         causeNo: readDiagnosisCode(body, 'causeNo', 'cause')
       }
@@ -726,6 +728,7 @@ export function registerWorkOrdersHandlers(router: MockRouter, db: MockDatabase)
       db.workOrders.update(order.no, {
         diagnosis: {
           subsystemNo: diagnosis.subsystemNo ?? '',
+          componentNo: diagnosis.componentNo,
           modeNo: diagnosis.modeNo,
           causeNo: diagnosis.causeNo,
           observation: readString(body, 'observation').slice(0, 500),

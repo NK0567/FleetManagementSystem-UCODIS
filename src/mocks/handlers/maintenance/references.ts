@@ -20,6 +20,7 @@ export function maintenanceReferenceData(db: MockDatabase): Record<string, Refer
       .map((item) => ({ code: item.no, description: item.name, active: item.active })),
     failureSystems: ofKind('system'),
     failureSubsystems: ofKind('subsystem'),
+    failureComponents: ofKind('component'),
     failureModes: ofKind('mode'),
     failureCauses: ofKind('cause'),
     downtimeCodes: db.downtimeCodes

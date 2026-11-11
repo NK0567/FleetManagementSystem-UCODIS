@@ -56,6 +56,18 @@ export default {
   'fleet.providers.contracts.issue.startRequired': 'Give the start date.',
   'fleet.providers.contracts.issue.endBeforeStart': 'The end is before the start.',
   'fleet.providers.contracts.issue.negativeAmount': 'The amount cannot be negative.',
+  'fleet.providers.safetyEvents.title': 'Declared accidents and infractions',
+  'fleet.providers.safetyEvents.hint':
+    'The carrier reports nothing to the system: its accidents and infractions are entered here from its declarations. The carrier report picks them up over the chosen period.',
+  'fleet.providers.safetyEvents.count': 'No declaration | One declaration | {n} declarations',
+  'fleet.providers.safetyEvents.empty': 'No declaration.',
+  'fleet.providers.safetyEvents.date': 'Date',
+  'fleet.providers.safetyEvents.kind': 'Kind',
+  'fleet.providers.safetyEvents.accident': 'Accident',
+  'fleet.providers.safetyEvents.infraction': 'Infraction',
+  'fleet.providers.safetyEvents.plate': 'Vehicle plate',
+  'fleet.providers.safetyEvents.add': 'Add a declaration',
+  'fleet.providers.safetyEvents.remove': 'Remove the declaration',
   'fleet.providers.carrierVehicles.title': "Carrier's vehicles",
   'fleet.providers.carrierVehicles.hint':
     'Vehicles of this carrier, the only ones offered when it is chosen in planning.',

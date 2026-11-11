@@ -59,7 +59,15 @@ export default {
     'Click on the map at the edge of the zone: the radius takes the distance to the centre.',
   'fleet.sites.noResultsCreate': 'No site. Create one with New.',
   'fleet.sites.map.centreFirst': 'Place the centre of the site first.',
-  'fleet.sites.form.approved': 'Approved trucks for refills outside a card',
-  'fleet.sites.form.approvedHint':
-    'List negotiated with the station. Empty, every truck is accepted.'
+  'fleet.sites.stations.title': 'Fuel stations and approved trucks',
+  'fleet.sites.stations.hint':
+    'For refills outside a card, in cash or on credit, only the trucks on the list negotiated with the station are accepted.',
+  'fleet.sites.stations.listHint':
+    'Tick the approved trucks. With none ticked, the station accepts every truck.',
+  'fleet.sites.stations.count': '{count} approved trucks',
+  'fleet.sites.stations.openToAll': 'Open to every truck',
+  'fleet.sites.stations.empty': 'No fuel station. Create a site of type Fuel station.',
+  'fleet.sites.stations.loadError': 'The stations could not be loaded.',
+  'fleet.sites.stations.saveError': 'The list could not be saved.',
+  'fleet.sites.stations.saved': 'List saved.'
 }

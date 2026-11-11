@@ -57,6 +57,7 @@ const tableColumns = computed<TableColumn[]>(() => [
     label: t('fleet.fleetStatus.col.immobilizationReason'),
     minW: '260px'
   },
+  { sortKey: 'cameras', label: t('fleet.fleetStatus.col.cameras'), minW: '110px' },
   { sortKey: 'mission', label: t('fleet.fleetStatus.col.mission'), minW: '280px' },
   { sortKey: 'location', label: t('fleet.fleetStatus.col.location'), minW: '180px' },
   { sortKey: 'position', label: t('fleet.fleetStatus.col.position'), minW: '180px' },

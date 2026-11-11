@@ -60,7 +60,15 @@ export default {
     'Cliquez sur la carte au bord de la zone : le rayon prend la distance au centre.',
   'fleet.sites.noResultsCreate': 'Aucun site. Créez-en un avec Nouveau.',
   'fleet.sites.map.centreFirst': "Placez d'abord le centre du site.",
-  'fleet.sites.form.approved': 'Camions agréés pour le carburant hors carte',
-  'fleet.sites.form.approvedHint':
-    'Liste négociée avec la station. Vide, tous les camions sont acceptés.'
+  'fleet.sites.stations.title': 'Stations-service et camions agréés',
+  'fleet.sites.stations.hint':
+    'Pour les pleins hors carte, en espèces ou à crédit, seuls les camions de la liste négociée avec la station sont acceptés.',
+  'fleet.sites.stations.listHint':
+    'Cochez les camions agréés. Sans aucun camion coché, la station accepte tous les camions.',
+  'fleet.sites.stations.count': '{count} camions agréés',
+  'fleet.sites.stations.openToAll': 'Ouverte à tous les camions',
+  'fleet.sites.stations.empty': 'Aucune station-service. Créez un site de type Station-service.',
+  'fleet.sites.stations.loadError': "Les stations n'ont pas pu être chargées.",
+  'fleet.sites.stations.saveError': "La liste n'a pas pu être enregistrée.",
+  'fleet.sites.stations.saved': 'Liste enregistrée.'
 }

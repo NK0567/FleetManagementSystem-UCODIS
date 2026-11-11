@@ -1,9 +1,7 @@
 <script lang="ts" setup>
 import SiteZonePicker from './SiteZonePicker.vue'
 import { ref } from 'vue'
-import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useReferenceStore } from '@/stores/referenceStore'
 import { useEntityForm, type FormValidationError } from '@/composables/useEntityForm'
 import { useFormValidationUi } from '@/composables/useFormValidationUi'
 import { CODE_MAX_LENGTH, isValidCode } from '@/utils/code'
@@ -42,8 +40,7 @@ const { draft, isRequired, expose } = useEntityForm({
     active: true,
     latitude: null as number | null,
     longitude: null as number | null,
-    radiusM: null as number | null,
-    approvedVehicleNos: [] as string[]
+    radiusM: null as number | null
   }),
   createOnly: ['no'],
   required: ['no', 'name', 'siteTypeNo', 'latitude', 'longitude'],
@@ -60,17 +57,7 @@ const { draft, isRequired, expose } = useEntityForm({
   }
 })
 
-const referenceStore = useReferenceStore()
-onMounted(() => referenceStore.fetchAll())
-const vehicleChoices = computed(() => referenceStore.getItems('motorizedVehicles'))
-function toggleApproved(no: string, checked: boolean) {
-  const list = new Set(draft.approvedVehicleNos ?? [])
-  if (checked) list.add(no)
-  else list.delete(no)
-  draft.approvedVehicleNos = [...list]
-}
-
-const expandedSections = ref({ general: true, geofence: true, approved: false, audit: false })
+const expandedSections = ref({ general: true, geofence: true, audit: false })
 const { hasValidationError } = useFormValidationUi({
   validationErrors: () => props.validationErrors,
   expandedSections,
@@ -207,32 +194,6 @@ defineExpose(expose)
         <BaseFormField v-if="!isNew" :label="t('fleet.sites.form.effectiveRadiusM')">
           <FormInput :model-value="formatNumber(initialData.effectiveRadiusM ?? 0, 0)" disabled />
         </BaseFormField>
-      </div>
-    </FormSection>
-
-    <FormSection
-      v-model:open="expandedSections.approved"
-      :title="t('fleet.sites.form.approved')"
-      :summary="[String((draft.approvedVehicleNos ?? []).length)]"
-    >
-      <div class="min-w-0 md:col-span-2">
-        <p class="text-xs text-muted-foreground mb-2">{{ t('fleet.sites.form.approvedHint') }}</p>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-          <label
-            v-for="vehicle in vehicleChoices"
-            :key="vehicle.code"
-            class="flex items-center gap-2 text-sm text-card-foreground"
-          >
-            <input
-              type="checkbox"
-              class="h-4 w-4 accent-primary"
-              :checked="(draft.approvedVehicleNos ?? []).includes(vehicle.code)"
-              :disabled="disabled"
-              @change="toggleApproved(vehicle.code, ($event.target as HTMLInputElement).checked)"
-            />
-            {{ vehicle.description }}
-          </label>
-        </div>
       </div>
     </FormSection>
 

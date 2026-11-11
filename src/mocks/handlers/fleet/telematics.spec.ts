@@ -64,7 +64,7 @@ describe('live positions', () => {
     expect((silent?.reportedAt ?? '') < `${DEMO_REFERENCE_DATE}T10:00:00`).toBe(true)
     await call(server, 'put', '/fleet/settings/telematics', {
       as: 'FLT001',
-      body: { signalLossMin: 60 }
+      body: { signalLossMin: 60, minimumCameras: 5 }
     })
     expect((await vehicle('VEH-003'))?.situation).toBe('moving')
     at('10:45')

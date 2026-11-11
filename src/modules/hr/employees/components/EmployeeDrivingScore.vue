@@ -65,7 +65,10 @@ const tone = computed(() =>
         {{ family.label }} : {{ family.mark }}
       </li>
     </ul>
-    <p class="mt-3 text-xs text-muted-foreground">{{ t('hr.employees.score.bonusRule') }}</p>
+    <p class="mt-3 text-sm text-card-foreground">
+      {{ t('hr.employees.score.bonus', { percent: score.bonusPercent }) }}
+    </p>
+    <p class="text-xs text-muted-foreground">{{ t('hr.employees.score.bonusRule') }}</p>
   </section>
   <p v-else-if="failed" class="mx-6 mb-4 text-xs text-muted-foreground">
     {{ t('hr.employees.score.unavailable') }}

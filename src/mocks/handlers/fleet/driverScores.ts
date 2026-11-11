@@ -112,7 +112,11 @@ function scoresAsOf(db: MockDatabase, asOf: string) {
 /** Every driver's score today and at the end of last month, with the training it may call for. */
 export function driverScoresApi(db: MockDatabase): DriverScoreApi[] {
   const today = todayIso()
-  const threshold = fleetSettings(db).driverScore.trainingThreshold
+  const {
+    trainingThreshold: threshold,
+    bonusFullScore,
+    bonusHalfScore
+  } = fleetSettings(db).driverScore
   const current = scoresAsOf(db, today)
   const previous = scoresAsOf(db, addDays(`${today.slice(0, 7)}-01`, -1))
   const trainings = db.trainings.all()
@@ -136,6 +140,7 @@ export function driverScoresApi(db: MockDatabase): DriverScoreApi[] {
       driverCount: 0,
       threshold,
       belowThreshold: score < threshold,
+      bonusPercent: score >= bonusFullScore ? 100 : score >= bonusHalfScore ? 50 : 0,
       families,
       trainingNo: pending?.no ?? null
     }

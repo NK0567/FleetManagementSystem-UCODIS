@@ -149,5 +149,6 @@ export default {
     'Wait for the parts: counting starts when the purchase request is ordered and runs until it is received, in the vehicle downtime.',
   'maintenance.workOrders.dialog.observation': 'Note on the cause',
   'maintenance.workOrders.dialog.observationHint':
-    'E.g. faulty part, harsh braking by the driver, preventive service not done'
+    'E.g. faulty part, harsh braking by the driver, preventive service not done',
+  'maintenance.workOrders.dialog.component': 'Component'
 }

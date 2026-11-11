@@ -83,6 +83,8 @@ export default {
   'fleet.settings.field.driverScore.deliveryDisputePoints': 'Points per delivery still contested',
   'fleet.settings.field.driverScore.missingDocumentCap': 'Highest mark while a document is missing',
   'fleet.settings.field.driverScore.trainingThreshold': 'Training threshold',
+  'fleet.settings.field.driverScore.bonusFullScore': 'Score giving the full bonus',
+  'fleet.settings.field.driverScore.bonusHalfScore': 'Score giving the half bonus',
   'fleet.settings.section.reporting': 'Steering',
   'fleet.settings.section.reporting.hint':
     'Targets the park dashboard compares its indicators with.',
@@ -233,5 +235,11 @@ export default {
     'Average of the driving scores of the drivers over the score period.',
   'fleet.settings.importMappings.saveFirst': 'Save the current changes first.',
   'fleet.settings.warning.outOfRange':
-    'Warning: this value is outside the usual bounds (between {min} and {max} {unit}). It will be saved as entered.'
+    'Warning: this value is outside the usual bounds (between {min} and {max} {unit}). It will be saved as entered.',
+  'fleet.settings.unit.count': '',
+  'fleet.settings.field.safety.infractionDelayMinorDays': 'Handling delay of a minor infraction',
+  'fleet.settings.field.safety.infractionDelayMajorDays': 'Handling delay of a major infraction',
+  'fleet.settings.field.safety.infractionDelaySeriousDays':
+    'Handling delay of a serious infraction',
+  'fleet.settings.field.telematics.minimumCameras': 'Minimum cameras connected per vehicle'
 }
