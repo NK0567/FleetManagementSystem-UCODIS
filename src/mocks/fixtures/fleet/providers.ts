@@ -261,8 +261,8 @@ const SEED: Omit<ProviderRow, keyof typeof seedAudit>[] = [
       }
     ],
     safetyEvents: [
-      { date: '2026-09-18', kind: 'infraction', plate: '2345 TBA' },
-      { date: '2026-10-09', kind: 'accident', plate: '2345 TBA' }
+      { date: '2026-07-14', kind: 'infraction', plate: '2345 TBA' },
+      { date: '2026-08-12', kind: 'accident', plate: '2345 TBA' }
     ]
   },
   {

@@ -101,9 +101,9 @@ const SEED: Omit<DowntimeRow, keyof typeof seedAudit>[] = [
     vehicleNo: 'VEH-012',
     downtimeCodeNo: 'ABS',
     origin: 'manual',
-    startedAt: '2026-09-22T06:00:00',
-    comment: 'Aucun conducteur disponible, le titulaire étant en congé maladie.',
-    endedAt: '2026-09-25T06:00:00',
+    startedAt: '2026-08-26T06:00:00',
+    comment: 'Aucun conducteur disponible pour ce camion.',
+    endedAt: '2026-08-29T06:00:00',
     endedBy: 'FLT001',
     endComment: 'Conducteur de remplacement affecté.'
   }

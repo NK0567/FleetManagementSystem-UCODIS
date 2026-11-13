@@ -4,12 +4,14 @@ import { useI18n } from 'vue-i18n'
 import { Landmark, Truck } from '@lucide/vue'
 import { apiErrorMessage } from '@/core/api/apiError'
 import { usePermissions } from '@/composables/usePermissions'
+import { useBrandName } from '@/composables/useBrandName'
 import { companySettingsApi } from '../api/companySettingsApi'
 import type { CompanySettingsApi, CompanySettingsInput } from '../types/companySettings.types'
 
 const FIELDS: (keyof CompanySettingsInput)[] = [
   'legalName',
   'entityName',
+  'displayName',
   'activity',
   'address',
   'country',
@@ -18,6 +20,7 @@ const FIELDS: (keyof CompanySettingsInput)[] = [
 const REQUIRED = new Set<keyof CompanySettingsInput>(['legalName', 'entityName', 'country'])
 
 const { t } = useI18n()
+const { setBrandName } = useBrandName()
 const { canUpdate } = usePermissions('COMPANYSETTINGS')
 /* The tiles open the vehicle list, for whoever may read it. */
 const { canRead: canSeeVehicles } = usePermissions('VEHICLE')
@@ -35,6 +38,7 @@ const company = ref<CompanySettingsApi | null>(null)
 const draft = reactive<CompanySettingsInput>({
   legalName: '',
   entityName: '',
+  displayName: '',
   activity: '',
   address: '',
   country: '',
@@ -73,6 +77,7 @@ async function save() {
   saved.value = false
   try {
     fill(await companySettingsApi.update({ ...draft }))
+    setBrandName(draft.displayName)
     saved.value = true
   } catch (cause) {
     error.value = apiErrorMessage(cause, t('settings.company.saveError'))

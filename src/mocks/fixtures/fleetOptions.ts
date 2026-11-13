@@ -211,6 +211,73 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
     infraction: { fr: 'Infraction', en: 'Infraction' },
     other: { fr: 'Autre', en: 'Other' }
   },
+  driverReportKind: {
+    technical: { fr: 'Anomalie technique', en: 'Technical anomaly' },
+    documentary: { fr: 'Anomalie documentaire', en: 'Document anomaly' },
+    safety: { fr: 'Anomalie de sécurité', en: 'Safety anomaly' },
+    road_incident: { fr: 'Incident routier', en: 'Road incident' },
+    suggestion: { fr: "Suggestion d'amélioration", en: 'Improvement suggestion' },
+    feedback: { fr: "Retour d'expérience", en: 'Lessons learned' }
+  },
+  driverReportSeverity: {
+    minor: { fr: 'Mineure', en: 'Minor' },
+    major: { fr: 'Majeure', en: 'Major' },
+    critical: { fr: 'Critique', en: 'Critical' }
+  },
+  driverReportUrgency: {
+    immediate: { fr: 'Immédiate', en: 'Immediate' },
+    to_plan: { fr: 'À planifier', en: 'To plan' },
+    observation: { fr: 'Observation simple', en: 'Simple observation' }
+  },
+  driverReportChannel: {
+    app: { fr: 'Application', en: 'App' },
+    phone: { fr: 'Téléphone', en: 'Phone' },
+    debriefing: { fr: 'Fiche de débriefing', en: 'Debriefing form' },
+    oral: { fr: 'Oral', en: 'Verbal' }
+  },
+  driverReportActionKind: {
+    corrective: { fr: 'Corrective', en: 'Corrective' },
+    preventive: { fr: 'Préventive', en: 'Preventive' }
+  },
+  driverReportStatus: {
+    open: { fr: 'Ouvert', en: 'Open' },
+    in_progress: { fr: 'En cours', en: 'In progress' },
+    closed: { fr: 'Clôturé', en: 'Closed' }
+  },
+  medicalFollowUpKind: {
+    visit: { fr: 'Visite médicale', en: 'Medical visit' },
+    alcohol_test: { fr: "Test d'alcoolémie", en: 'Alcohol test' },
+    drug_test: { fr: 'Test de dépistage de drogues', en: 'Drug test' },
+    psychotechnic: { fr: 'Test psychotechnique', en: 'Psychotechnical test' },
+    complementary_exam: { fr: 'Examen complémentaire', en: 'Complementary exam' },
+    vaccination: { fr: 'Vaccination', en: 'Vaccination' }
+  },
+  medicalFollowUpResult: {
+    fit: { fr: 'Apte', en: 'Fit' },
+    fit_restrictions: { fr: 'Apte avec restrictions', en: 'Fit with restrictions' },
+    unfit_temporary: { fr: 'Inapte temporaire', en: 'Temporarily unfit' },
+    unfit_permanent: { fr: 'Inapte définitif', en: 'Permanently unfit' },
+    negative: { fr: 'Négatif', en: 'Negative' },
+    positive: { fr: 'Positif', en: 'Positive' },
+    pending: { fr: 'En attente', en: 'Pending' }
+  },
+  medicalFollowUpStatus: {
+    compliant: { fr: 'Conforme', en: 'Compliant' },
+    non_compliant: { fr: 'Non conforme', en: 'Non compliant' },
+    pending: { fr: 'En attente', en: 'Pending' }
+  },
+  tripDebriefStatus: {
+    draft: { fr: 'Brouillon', en: 'Draft' },
+    partly_signed: { fr: 'Signature en cours', en: 'Partly signed' },
+    signed: { fr: 'Signée', en: 'Signed' },
+    closed: { fr: 'Clôturée', en: 'Closed' }
+  },
+  tripDebriefStop: {
+    none: { fr: 'Aucun arrêt', en: 'No stop' },
+    pause: { fr: 'Pause autorisée', en: 'Pause allowed' },
+    rest: { fr: 'Repos autorisé', en: 'Rest allowed' },
+    pause_rest: { fr: 'Pause ou repos autorisé', en: 'Pause or rest allowed' }
+  },
   trainingStatus: {
     to_plan: { fr: 'À planifier', en: 'To plan' },
     planned: { fr: 'Planifiée', en: 'Planned' },

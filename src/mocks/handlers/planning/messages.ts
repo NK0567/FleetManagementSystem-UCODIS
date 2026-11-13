@@ -170,8 +170,8 @@ export const PLANNING_MESSAGES = {
     en: 'An internal department is not billed: customer tariffs are for outside customers.'
   },
   tariffNotCarrier: {
-    fr: 'Ce prestataire n’est pas un transporteur.',
-    en: 'This provider is not a carrier.'
+    fr: 'Ce fournisseur n’est pas un transporteur.',
+    en: 'This supplier is not a carrier.'
   },
   tariffCarrierNotAuthorized: {
     fr: 'Ce transporteur n’est plus autorisé : son tarif ne peut pas être actif.',
@@ -354,8 +354,8 @@ export const PLANNING_MESSAGES = {
     en: 'Only a trip that is still planned can take an order.'
   },
   orderNotCarrier: {
-    fr: 'Ce prestataire n’est pas un transporteur.',
-    en: 'This provider is not a carrier.'
+    fr: 'Ce fournisseur n’est pas un transporteur.',
+    en: 'This supplier is not a carrier.'
   },
   orderCarrierNotAuthorized: {
     fr: 'Ce transporteur n’est plus autorisé.',

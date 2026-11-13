@@ -3,7 +3,7 @@ import type { ImportColumns } from '@/core/utils/csvImport'
 /** Column names a provider file may use, in French or English; the first one goes into the template. */
 export const PROVIDER_IMPORT_COLUMNS = {
   name: ['nom', 'raison_sociale', 'name'],
-  providerType: ['type', 'type_prestataire', 'provider_type'],
+  providerType: ['type', 'type_fournisseur', 'type_prestataire', 'provider_type'],
   contactName: ['contact', 'interlocuteur', 'contact_name'],
   phone: ['telephone', 'tel', 'phone'],
   email: ['email', 'e_mail', 'courriel', 'mail'],

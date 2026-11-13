@@ -48,9 +48,9 @@ export default {
   'fleet.fuelCardTransactions.action.match': 'Rapprocher',
   'fleet.fuelCardTransactions.action.createRefill': 'Créer le plein',
   'fleet.fuelCardTransactions.import.action': 'Importer des transactions',
-  'fleet.fuelCardTransactions.import.title': 'Importer le relevé du prestataire',
+  'fleet.fuelCardTransactions.import.title': 'Importer le relevé du fournisseur',
   'fleet.fuelCardTransactions.import.hint':
-    "Fichier CSV du prestataire de cartes, avec une ligne d'en-têtes. Chaque ligne est contrôlée puis rapprochée des pleins.",
+    "Fichier CSV du fournisseur de cartes, avec une ligne d'en-têtes. Chaque ligne est contrôlée puis rapprochée des pleins.",
   'fleet.fuelCardTransactions.import.created':
     'Aucune transaction importée. | Une transaction importée. | {n} transactions importées.',
   'fleet.fuelCardTransactions.noResultsCreate': 'Aucune transaction. Créez-en une avec Nouveau.',

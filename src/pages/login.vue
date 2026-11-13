@@ -40,7 +40,7 @@ async function handleSubmit() {
     <Card class="w-full max-w-md border-none">
       <CardHeader class="text-center space-y-4">
         <div class="flex justify-center">
-          <img :src="logo" :alt="appConfig.companyName" class="h-12" />
+          <img :src="logo" :alt="appConfig.name" class="h-12" />
         </div>
         <CardTitle class="text-2xl">{{ t('auth.login') }}</CardTitle>
         <CardDescription>{{ t('auth.loginDescription') }}</CardDescription>

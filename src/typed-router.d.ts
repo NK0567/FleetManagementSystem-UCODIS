@@ -213,6 +213,20 @@ declare module 'vue-router/auto-routes' {
       { id: ParamValue<false> },
       | never
     >,
+    '/fleet/driver-reports/': RouteRecordInfo<
+      '/fleet/driver-reports/',
+      '/fleet/driver-reports',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/driver-reports/[id]': RouteRecordInfo<
+      '/fleet/driver-reports/[id]',
+      '/fleet/driver-reports/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/fleet/drivers/': RouteRecordInfo<
       '/fleet/drivers/',
       '/fleet/drivers',
@@ -402,6 +416,20 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/fleet/medical-follow-ups/': RouteRecordInfo<
+      '/fleet/medical-follow-ups/',
+      '/fleet/medical-follow-ups',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/medical-follow-ups/[id]': RouteRecordInfo<
+      '/fleet/medical-follow-ups/[id]',
+      '/fleet/medical-follow-ups/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/fleet/provider-types/': RouteRecordInfo<
       '/fleet/provider-types/',
       '/fleet/provider-types',
@@ -552,6 +580,20 @@ declare module 'vue-router/auto-routes' {
     '/fleet/trainings/[id]': RouteRecordInfo<
       '/fleet/trainings/[id]',
       '/fleet/trainings/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
+    '/fleet/trip-debriefs/': RouteRecordInfo<
+      '/fleet/trip-debriefs/',
+      '/fleet/trip-debriefs',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/fleet/trip-debriefs/[id]': RouteRecordInfo<
+      '/fleet/trip-debriefs/[id]',
+      '/fleet/trip-debriefs/:id',
       { id: ParamValue<true> },
       { id: ParamValue<false> },
       | never
@@ -1014,6 +1056,13 @@ declare module 'vue-router/auto-routes' {
     '/me/checklist': RouteRecordInfo<
       '/me/checklist',
       '/me/checklist',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/me/reports': RouteRecordInfo<
+      '/me/reports',
+      '/me/reports',
       Record<never, never>,
       Record<never, never>,
       | never
@@ -1498,6 +1547,22 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | 'id'
     }
+    'src/pages/fleet/driver-reports/index.vue': {
+      routes:
+        | '/fleet/driver-reports/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/driver-reports/[id].vue': {
+      routes:
+        | '/fleet/driver-reports/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
     'src/pages/fleet/drivers/index.vue': {
       routes:
         | '/fleet/drivers/'
@@ -1714,6 +1779,22 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
+    'src/pages/fleet/medical-follow-ups/index.vue': {
+      routes:
+        | '/fleet/medical-follow-ups/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/medical-follow-ups/[id].vue': {
+      routes:
+        | '/fleet/medical-follow-ups/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
     'src/pages/fleet/provider-types/index.vue': {
       routes:
         | '/fleet/provider-types/'
@@ -1885,6 +1966,22 @@ declare module 'vue-router/auto-routes' {
     'src/pages/fleet/trainings/[id].vue': {
       routes:
         | '/fleet/trainings/[id]'
+      views:
+        | never
+      pathParamNames:
+        | 'id'
+    }
+    'src/pages/fleet/trip-debriefs/index.vue': {
+      routes:
+        | '/fleet/trip-debriefs/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/fleet/trip-debriefs/[id].vue': {
+      routes:
+        | '/fleet/trip-debriefs/[id]'
       views:
         | never
       pathParamNames:
@@ -2413,6 +2510,14 @@ declare module 'vue-router/auto-routes' {
     'src/pages/me/checklist.vue': {
       routes:
         | '/me/checklist'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/me/reports.vue': {
+      routes:
+        | '/me/reports'
       views:
         | never
       pathParamNames:

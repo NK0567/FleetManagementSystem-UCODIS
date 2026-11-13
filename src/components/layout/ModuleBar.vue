@@ -2,9 +2,11 @@
 import { useI18n } from 'vue-i18n'
 import { appConfig } from '@/core/app/appConfig'
 import { useNavLayout } from '@/composables/useNavLayout'
+import { useBrandName } from '@/composables/useBrandName'
 import logo from '@/assets/logo-ucodis.png'
 
 const { t } = useI18n()
+const { brandName } = useBrandName()
 const { menus, isMenuActive, pickMenu } = useNavLayout()
 </script>
 
@@ -12,9 +14,12 @@ const { menus, isMenuActive, pickMenu } = useNavLayout()
   <header class="bg-card border-b border-border shadow-xs shrink-0 z-30 relative">
     <div class="flex items-center gap-6 px-4 py-2">
       <RouterLink to="/" class="inline-flex items-center gap-2 shrink-0">
-        <img :src="logo" :alt="appConfig.companyName" class="h-7" />
-        <span class="pt-1 text-base font-semibold text-card-foreground whitespace-nowrap">
-          {{ appConfig.companyName }}
+        <img :src="logo" :alt="brandName || appConfig.name" class="h-7" />
+        <span
+          v-if="brandName"
+          class="pt-1 text-base font-semibold text-card-foreground whitespace-nowrap"
+        >
+          {{ brandName }}
         </span>
       </RouterLink>
       <div class="h-4 w-px bg-border"></div>

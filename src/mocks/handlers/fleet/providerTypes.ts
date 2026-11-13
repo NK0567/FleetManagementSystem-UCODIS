@@ -19,16 +19,16 @@ type Fields = Omit<ProviderTypeRow, 'no' | 'systemRole' | keyof AuditFields>
 
 export const PROVIDER_TYPE_MESSAGES = {
   inUse: {
-    fr: 'Des prestataires sont de ce type : il ne peut pas être supprimé. Désactivez-le plutôt.',
-    en: 'Providers use this type: it cannot be deleted. Deactivate it instead.'
+    fr: 'Des fournisseurs sont de ce type : il ne peut pas être supprimé. Désactivez-le plutôt.',
+    en: 'Suppliers use this type: it cannot be deleted. Deactivate it instead.'
   },
   hasRole: {
     fr: "L'application utilise ce type ({role}) : il ne peut pas être supprimé.",
     en: 'The application uses this type ({role}): it cannot be deleted.'
   },
   inactive: {
-    fr: "Ce type de prestataire n'est plus actif.",
-    en: 'This provider type is no longer active.'
+    fr: "Ce type de fournisseur n'est plus actif.",
+    en: 'This supplier type is no longer active.'
   }
 } satisfies Record<string, LocalizedText>
 

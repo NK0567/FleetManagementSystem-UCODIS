@@ -90,6 +90,6 @@ export default {
   'hr.employees.score.threshold': 'Seuil de formation',
   'hr.employees.score.bonus': 'Part de la prime obtenue avec ce score : {percent} %',
   'hr.employees.score.bonusRule':
-    'Les paliers (prime entière, demi-prime, aucune) se règlent dans les réglages de la flotte, au bloc score de conduite.',
+    'Les paliers (prime entière, demi-prime, aucune) se règlent dans les réglages de la flotte, à la carte « Score conducteur ».',
   'hr.employees.score.unavailable': "Le score de conduite n'a pas pu être chargé."
 }

@@ -1,5 +1,19 @@
 @import 'tailwindcss';
 
+/*
+ * Computer layout: a mouse-driven computer from 768 px wide, or any screen wider than 1366 px.
+ * Phones and tablets (touch screens, up to the largest iPad in landscape) keep the compact
+ * top-bar layout, with no menu position button.
+ */
+@custom-variant desk {
+  @media (min-width: 768px) and (pointer: fine) {
+    @slot;
+  }
+  @media (min-width: 1367px) {
+    @slot;
+  }
+}
+
 @source not "../legacy";
 
 @theme {
@@ -44,7 +58,7 @@
   --radius-md: 0.25rem;
   --radius-lg: 0.5rem;
 
-  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
   --color-header: #1e252e;

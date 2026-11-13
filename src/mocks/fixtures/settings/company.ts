@@ -5,6 +5,7 @@ import { seedAudit } from '../seedAudit'
 export interface CompanySettingsRow extends MockRow {
   legalName: string
   entityName: string
+  displayName: string
   activity: string
   address: string
   country: string
@@ -20,6 +21,7 @@ export const companySettingsCollection: CollectionDefinition<CompanySettingsRow>
       no: COMPANY_SETTINGS_NO,
       legalName: 'UCODIS',
       entityName: 'UCODIS Transport',
+      displayName: '',
       activity: "Transport de marchandises sur longue distance pour le compte d'UCODIS",
       address: 'Antananarivo',
       country: 'Madagascar',

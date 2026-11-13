@@ -181,5 +181,16 @@ export default {
   'selfService.orders.waitsForPrevious':
     'Réglez d’abord le point précédent (livraison déclarée, reportée ou refusée) avant de marquer votre arrivée ici.',
   'selfService.notifications.order_route_changed':
-    'L’itinéraire de l’ordre de transport {no} a changé : {reason}'
+    'L’itinéraire de l’ordre de transport {no} a changé : {reason}',
+  'nav.myReports': 'Mes remontées',
+  'selfService.reports.title': 'Mes remontées',
+  'selfService.reports.subtitle':
+    "Signalez une anomalie, un incident, une suggestion ou un retour d'expérience.",
+  'selfService.reports.new': 'Nouvelle remontée',
+  'selfService.reports.send': 'Envoyer la remontée',
+  'selfService.reports.sent': 'Remontée envoyée. Elle est transmise au responsable.',
+  'selfService.reports.mine': 'Mes remontées',
+  'selfService.reports.empty': 'Aucune remontée pour le moment.',
+  'selfService.reports.loadError': "Les remontées n'ont pas pu être chargées.",
+  'selfService.reports.sendError': "La remontée n'a pas pu être envoyée."
 }

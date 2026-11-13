@@ -13,7 +13,7 @@ const message = computed(() => t('common.gettingReady'))
   <Teleport to="body">
     <div
       v-if="store.active"
-      class="fixed inset-0 z-[99999] bg-white flex flex-col items-center justify-center font-[family-name:var(--font-sans,Poppins,system-ui,sans-serif)]"
+      class="fixed inset-0 z-[99999] bg-white flex flex-col items-center justify-center font-[family-name:var(--font-sans,Inter,system-ui,sans-serif)]"
       aria-live="polite"
       aria-busy="true"
     >

@@ -11,7 +11,7 @@ export interface ProviderTypeRow extends MockRow {
 
 /** The types the application works with keep their role as code, so that existing providers keep theirs. */
 const SEED: Omit<ProviderTypeRow, keyof typeof seedAudit>[] = [
-  { no: 'garage', name: 'Atelier', systemRole: 'garage', active: true },
+  { no: 'garage', name: 'Garage', systemRole: 'garage', active: true },
   {
     no: 'parts_supplier',
     name: 'Fournisseur de pièces',

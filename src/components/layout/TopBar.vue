@@ -101,7 +101,7 @@ function onConfirmLogout() {
         </button>
         <button
           type="button"
-          class="p-2 hover:bg-white/10 rounded"
+          class="hidden desk:block p-2 hover:bg-white/10 rounded"
           :title="t(navMode === 'topbar' ? 'nav.layoutSidebar' : 'nav.layoutTopbar')"
           @click="toggleNavMode"
         >

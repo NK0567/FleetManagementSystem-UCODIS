@@ -44,7 +44,7 @@ describe('vehicle status', () => {
       statusCauseCode: 'DOC',
       statusCauseCodeName: 'Document obligatoire expiré'
     })
-    expect((await vehicle('VEH-022')).statusCauseCode).toBe('CVI')
+    expect((await vehicle('VEH-022')).statusCauseCode).toBe('CTV')
     expect(server.db.downtimeCodes.findOrFail('DOC').family).toBe('regulatory')
   })
 

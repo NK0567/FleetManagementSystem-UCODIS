@@ -180,5 +180,16 @@ export default {
   'selfService.orders.waitsForPrevious':
     'Settle the previous point first (delivery declared, postponed or refused) before marking your arrival here.',
   'selfService.notifications.order_route_changed':
-    'The route of transport order {no} has changed: {reason}'
+    'The route of transport order {no} has changed: {reason}',
+  'nav.myReports': 'My reports',
+  'selfService.reports.title': 'My reports',
+  'selfService.reports.subtitle':
+    'Report an anomaly, an incident, a suggestion or lessons learned.',
+  'selfService.reports.new': 'New report',
+  'selfService.reports.send': 'Send the report',
+  'selfService.reports.sent': 'Report sent. It is passed on to the manager.',
+  'selfService.reports.mine': 'My reports',
+  'selfService.reports.empty': 'No report yet.',
+  'selfService.reports.loadError': 'The reports could not be loaded.',
+  'selfService.reports.sendError': 'The report could not be sent.'
 }

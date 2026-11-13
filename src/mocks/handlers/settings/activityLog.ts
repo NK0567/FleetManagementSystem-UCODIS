@@ -52,7 +52,7 @@ const ENTITIES: Record<string, LocalizedText> = {
   claims: { fr: 'Sinistre', en: 'Claim' },
   infractions: { fr: 'Infraction', en: 'Infraction' },
   'fuel-refills': { fr: 'Plein', en: 'Refill' },
-  providers: { fr: 'Prestataire', en: 'Provider' },
+  providers: { fr: 'Fournisseur', en: 'Supplier' },
   sites: { fr: 'Site', en: 'Site' },
   'work-orders': { fr: 'Ordre de travail', en: 'Work order' },
   downtimes: { fr: 'Indisponibilité', en: 'Downtime' },

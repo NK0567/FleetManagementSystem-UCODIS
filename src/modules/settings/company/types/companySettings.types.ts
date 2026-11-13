@@ -1,6 +1,8 @@
 export interface CompanySettingsApi {
   legalName: string
   entityName: string
+  /** Name shown next to the logo; empty shows the logo alone. */
+  displayName: string
   activity: string
   address: string
   country: string
@@ -16,5 +18,5 @@ export interface CompanySettingsApi {
 
 export type CompanySettingsInput = Pick<
   CompanySettingsApi,
-  'legalName' | 'entityName' | 'activity' | 'address' | 'country' | 'taxId'
+  'legalName' | 'entityName' | 'displayName' | 'activity' | 'address' | 'country' | 'taxId'
 >

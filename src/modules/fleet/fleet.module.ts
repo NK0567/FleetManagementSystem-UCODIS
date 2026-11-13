@@ -18,12 +18,15 @@ import {
   Gauge,
   Gavel,
   GraduationCap,
+  FileCheck,
   Handshake,
   IdCard,
   LayoutDashboard,
   Link2,
   ListChecks,
   Map,
+  MessageSquareWarning,
+  Stethoscope,
   MapPin,
   MapPinned,
   Package,
@@ -69,6 +72,9 @@ export function registerFleetModule(): void {
     CLAIM: { to: '/fleet/claims', menuKey: 'claim' },
     INFRACTION: { to: '/fleet/infractions', menuKey: 'infraction' },
     TRAINING: { to: '/fleet/trainings', menuKey: 'training' },
+    DRIVERREPORT: { to: '/fleet/driver-reports', menuKey: 'driverReport' },
+    MEDICALFOLLOWUP: { to: '/fleet/medical-follow-ups', menuKey: 'medicalFollowUp' },
+    TRIPDEBRIEF: { to: '/fleet/trip-debriefs', menuKey: 'tripDebrief' },
     INFRACTIONTYPE: { to: '/fleet/infraction-types', menuKey: 'infractionType' },
     ROUTEDEVIATION: { to: '/fleet/route-deviations', menuKey: 'routeDeviation' },
     DEVIATIONTYPE: { to: '/fleet/deviation-types', menuKey: 'deviationType' },
@@ -270,6 +276,27 @@ export function registerFleetModule(): void {
         group: 'nav.group.drivers',
         icon: GraduationCap,
         menuKey: 'training'
+      },
+      {
+        labelKey: 'nav.driverReports',
+        to: '/fleet/driver-reports',
+        group: 'nav.group.drivers',
+        icon: MessageSquareWarning,
+        menuKey: 'driverReport'
+      },
+      {
+        labelKey: 'nav.medicalFollowUps',
+        to: '/fleet/medical-follow-ups',
+        group: 'nav.group.drivers',
+        icon: Stethoscope,
+        menuKey: 'medicalFollowUp'
+      },
+      {
+        labelKey: 'nav.tripDebriefs',
+        to: '/fleet/trip-debriefs',
+        group: 'nav.group.drivers',
+        icon: FileCheck,
+        menuKey: 'tripDebrief'
       },
       {
         labelKey: 'nav.roadChecklists',

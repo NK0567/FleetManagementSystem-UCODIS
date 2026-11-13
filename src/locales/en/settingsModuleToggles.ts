@@ -105,6 +105,7 @@ export default {
   'settings.company.park': 'Size of the park',
   'settings.company.field.legalName': 'Company name',
   'settings.company.field.entityName': 'Entity',
+  'settings.company.field.displayName': 'Name shown next to the logo (optional)',
   'settings.company.field.activity': 'Activity',
   'settings.company.field.address': 'Address',
   'settings.company.field.country': 'Country',

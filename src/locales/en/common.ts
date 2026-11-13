@@ -1,5 +1,5 @@
 export default {
-  'common.appName': 'FMS UCODIS',
+  'common.appName': 'Productive 247 Logistics',
   'common.gettingReady': 'Getting ready…',
   'common.loading': 'Loading…',
 

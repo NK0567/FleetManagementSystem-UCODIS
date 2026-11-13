@@ -10,13 +10,13 @@ const { mode } = useNavLayout()
 
     <div id="below-topbar" class="flex-1 flex flex-col min-h-0 relative">
       <template v-if="mode === 'sidebar'">
-        <ModuleBar class="hidden md:block" />
-        <NavBar class="md:hidden" />
+        <ModuleBar class="hidden desk:block" />
+        <NavBar class="desk:hidden" />
       </template>
       <NavBar v-else />
 
       <div class="flex-1 flex min-h-0">
-        <SideBar v-if="mode === 'sidebar'" class="hidden md:block" />
+        <SideBar v-if="mode === 'sidebar'" class="hidden desk:block" />
         <main
           class="flex-1 min-w-0 flex flex-col overflow-hidden"
           :class="

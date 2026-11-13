@@ -6,7 +6,15 @@ import { readString } from '../../http/input'
 import { ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
 
-const TEXT_FIELDS = ['legalName', 'entityName', 'activity', 'address', 'country', 'taxId'] as const
+const TEXT_FIELDS = [
+  'legalName',
+  'entityName',
+  'displayName',
+  'activity',
+  'address',
+  'country',
+  'taxId'
+] as const
 const REQUIRED = new Set<string>(['legalName', 'entityName', 'country'])
 
 /** The identity of the company and the size of its park, counted from the vehicles in service. */
@@ -18,6 +26,7 @@ export function companySettingsApi(db: MockDatabase): CompanySettingsApi {
   return {
     legalName: row.legalName,
     entityName: row.entityName,
+    displayName: row.displayName,
     activity: row.activity,
     address: row.address,
     country: row.country,
@@ -31,6 +40,11 @@ export function companySettingsApi(db: MockDatabase): CompanySettingsApi {
 }
 
 export function registerCompanySettingsHandlers(router: MockRouter, db: MockDatabase): void {
+  /** The name shown next to the logo; read before sign-in, so it needs no permission. */
+  router.get('/settings/brand', { public: true }, () =>
+    ok({ displayName: db.companySettings.findOrFail(COMPANY_SETTINGS_NO).displayName })
+  )
+
   router.get('/settings/company', { feature: 'COMPANYSETTINGS', action: 'read' }, () =>
     ok(companySettingsApi(db))
   )

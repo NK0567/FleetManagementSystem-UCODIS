@@ -157,7 +157,7 @@ describe('providers from the management system', () => {
     ).data.data as { items: ProviderApi[] }
     const insurer = providers.items.find((row) => row.externalId === 'ERP-F-0057')
     expect(insurer).toMatchObject({ source: 'management_system', authorized: false })
-    expect(providers.items.find((row) => row.no === 'PRS-001')?.providerTypeName).toBe('Atelier')
+    expect(providers.items.find((row) => row.no === 'PRS-001')?.providerTypeName).toBe('Garage')
   })
 })
 

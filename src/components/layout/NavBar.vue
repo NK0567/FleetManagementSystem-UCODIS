@@ -7,9 +7,11 @@ import { useUserStore } from '@/stores/user'
 import { useMenuPermissionsStore } from '@/stores/menuPermissions'
 import { ChevronDown, ChevronLeft, ChevronRight } from '@lucide/vue'
 import { appConfig } from '@/core/app/appConfig'
+import { useBrandName } from '@/composables/useBrandName'
 import logo from '@/assets/logo-ucodis.png'
 
 const { t } = useI18n()
+const { brandName } = useBrandName()
 const route = useRoute()
 const userStore = useUserStore()
 const menuPermissionsStore = useMenuPermissionsStore()
@@ -235,11 +237,12 @@ watch(openMenuIndex, async (idx) => {
             to="/"
             class="inline-flex items-center gap-2 text-base font-semibold text-gray-900 whitespace-nowrap hover:text-gray-700 cursor-pointer transition-colors hover:underline shrink-0"
           >
-            <img :src="logo" :alt="appConfig.companyName" class="h-7" />
+            <img :src="logo" :alt="brandName || appConfig.name" class="h-7" />
             <span
+              v-if="brandName"
               class="pt-1 text-base font-semibold text-gray-900 whitespace-nowrap hover:text-gray-700 cursor-pointer transition-colors hover:underline shrink-0"
             >
-              {{ appConfig.companyName }}
+              {{ brandName }}
             </span>
           </router-link>
 
@@ -433,7 +436,7 @@ watch(openMenuIndex, async (idx) => {
   right: 6px;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1024px), (min-width: 768px) and (pointer: fine) {
   .nav-scroll-btn {
     display: none;
   }

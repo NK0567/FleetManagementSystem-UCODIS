@@ -318,12 +318,12 @@ export const FLEET_MESSAGES = {
     en: 'Org units belong to this site: it cannot be deleted. Deactivate it instead.'
   },
   duplicateProvider: {
-    fr: 'Un prestataire de ce type porte déjà ce nom ({no}).',
-    en: 'A provider of this type already has this name ({no}).'
+    fr: 'Un fournisseur de ce type porte déjà ce nom ({no}).',
+    en: 'A supplier of this type already has this name ({no}).'
   },
   notAuthorizedReasonRequired: {
-    fr: "Indiquez pourquoi le prestataire n'est plus autorisé.",
-    en: 'Give the reason why the provider is no longer authorized.'
+    fr: "Indiquez pourquoi le fournisseur n'est plus autorisé.",
+    en: 'Give the reason why the supplier is no longer authorized.'
   },
   invalidContract: {
     fr: 'Le contrat n° {line} est incomplet ou incohérent : objet, début, fin après le début et montant positif.',
@@ -868,6 +868,78 @@ export const FLEET_MESSAGES = {
   scoreAlertDetail: {
     fr: 'Score de {score}/100, seuil {threshold}',
     en: 'Score {score}/100, threshold {threshold}'
+  },
+  driverReportInFuture: {
+    fr: 'Une remontée ne peut pas porter sur une date à venir.',
+    en: 'A report cannot be about a future date.'
+  },
+  driverReportDateOrder: {
+    fr: 'La remontée ne peut pas précéder les faits : vérifiez les deux dates.',
+    en: 'The report cannot come before the facts: check both dates.'
+  },
+  driverReportDueBeforeReport: {
+    fr: "L'échéance de l'action doit être postérieure à la remontée.",
+    en: 'The action due date must be after the report.'
+  },
+  driverReportCloseNeedsAction: {
+    fr: "Décrivez l'action menée avant de clôturer la remontée.",
+    en: 'Describe the action taken before closing the report.'
+  },
+  driverReportClosed: {
+    fr: 'Cette remontée est clôturée : elle ne peut plus être modifiée.',
+    en: 'This report is closed: it can no longer change.'
+  },
+  medicalInFuture: {
+    fr: 'Un suivi médical ne peut pas être daté dans le futur.',
+    en: 'A medical follow-up cannot be dated in the future.'
+  },
+  medicalResultMismatch: {
+    fr: 'Ce résultat ne correspond pas au type de suivi : un test donne négatif ou positif, les autres suivis donnent une aptitude.',
+    en: 'This result does not match the follow-up type: a test gives negative or positive, the others give an aptitude.'
+  },
+  medicalNextBeforeDone: {
+    fr: 'La prochaine échéance doit être postérieure à la date du suivi.',
+    en: 'The next due date must be after the follow-up date.'
+  },
+  medicalFollowUpRequired: {
+    fr: 'Indiquez le suivi décidé (restrictions, contre-expertise, mesures) pour un résultat positif ou une inaptitude.',
+    en: 'Give the follow-up decided (restrictions, second opinion, measures) for a positive result or an unfit decision.'
+  },
+  tripDebriefInFuture: {
+    fr: 'Les dates de chargement et de déchargement ne peuvent pas être à venir.',
+    en: 'Loading and unloading dates cannot be in the future.'
+  },
+  tripDebriefDateOrder: {
+    fr: 'Le déchargement ne peut pas précéder le chargement.',
+    en: 'Unloading cannot come before loading.'
+  },
+  tripDebriefKmOrder: {
+    fr: 'Le kilométrage de fin doit être supérieur ou égal à celui de début.',
+    en: 'The end mileage must be at least the start mileage.'
+  },
+  tripDebriefPlanInvalid: {
+    fr: 'Le plan de trajet est invalide : chaque étape a un lieu et des heures au format HH:MM.',
+    en: 'The travel plan is invalid: each stop has a place and times as HH:MM.'
+  },
+  tripDebriefVoucherUsed: {
+    fr: 'Le bon {voucherNo} a déjà une fiche de débriefing.',
+    en: 'Voucher {voucherNo} already has a debriefing form.'
+  },
+  tripDebriefClosed: {
+    fr: 'Cette fiche est clôturée : elle ne peut plus changer.',
+    en: 'This form is closed: it can no longer change.'
+  },
+  tripDebriefAlreadySigned: {
+    fr: 'Cette fiche est déjà signée par cette personne.',
+    en: 'This form is already signed by this person.'
+  },
+  tripDebriefKmMissing: {
+    fr: 'Renseignez les kilométrages de début et de fin avant de signer.',
+    en: 'Fill in the start and end mileage before signing.'
+  },
+  tripDebriefNotSigned: {
+    fr: 'Le responsable et le conducteur doivent signer avant la clôture.',
+    en: 'The manager and the driver must sign before closing.'
   },
   reportPeriodInvalid: {
     fr: 'La période du rapport est invalide : indiquez deux dates, la première avant la seconde.',

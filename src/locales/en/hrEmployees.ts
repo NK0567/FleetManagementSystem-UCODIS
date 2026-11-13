@@ -88,6 +88,6 @@ export default {
   'hr.employees.score.threshold': 'Training threshold',
   'hr.employees.score.bonus': 'Share of the bonus earned with this score: {percent}%',
   'hr.employees.score.bonusRule':
-    'The steps (full bonus, half bonus, none) are set in the fleet settings, in the driving score block.',
+    'The steps (full bonus, half bonus, none) are set in the fleet settings, in the "Driver score" card.',
   'hr.employees.score.unavailable': 'The driving score could not be loaded.'
 }

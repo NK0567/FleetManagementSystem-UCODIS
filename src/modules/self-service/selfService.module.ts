@@ -1,4 +1,4 @@
-import { CalendarOff, ClipboardCheck, Fuel, House, Route } from '@lucide/vue'
+import { CalendarOff, ClipboardCheck, Fuel, House, MessageSquareWarning, Route } from '@lucide/vue'
 import { registerFeatureRoutes } from '@/core/navigation/featureRoutes'
 import { registerNavMenu } from '@/core/navigation/moduleRegistry'
 
@@ -39,6 +39,13 @@ export function registerSelfServiceModule(): void {
         to: '/me/vehicle',
         group: 'nav.group.mySpace',
         icon: Fuel,
+        menuKey: 'mySpace'
+      },
+      {
+        labelKey: 'nav.myReports',
+        to: '/me/reports',
+        group: 'nav.group.mySpace',
+        icon: MessageSquareWarning,
         menuKey: 'mySpace'
       },
       {
