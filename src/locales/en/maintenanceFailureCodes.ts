@@ -1,5 +1,5 @@
 export default {
-  'maintenance.failureCodes.title': 'Failure codes',
+  'maintenance.failureCodes.title': 'Failure codes (based on ISO 14224)',
   'maintenance.failureCodes.card': 'Failure code card',
   'maintenance.failureCodes.new': 'New failure code',
   'maintenance.failureCodes.loadingList': 'Loading failure codes…',

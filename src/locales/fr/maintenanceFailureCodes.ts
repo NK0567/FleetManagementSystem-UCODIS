@@ -1,5 +1,5 @@
 export default {
-  'maintenance.failureCodes.title': 'Nomenclature des pannes',
+  'maintenance.failureCodes.title': "Nomenclature des pannes (inspirée de l'ISO 14224)",
   'maintenance.failureCodes.card': 'Fiche code de panne',
   'maintenance.failureCodes.new': 'Nouveau code de panne',
   'maintenance.failureCodes.loadingList': 'Chargement de la nomenclature…',

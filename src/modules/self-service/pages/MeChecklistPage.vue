@@ -123,7 +123,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="px-2 py-4 space-y-4 w-full max-w-3xl mx-auto">
+  <div class="driver-touch px-3 py-4 space-y-4 w-full max-w-5xl mx-auto">
     <header>
       <h1 class="text-xl font-semibold text-card-foreground">
         {{ t('selfService.checklist.title') }}

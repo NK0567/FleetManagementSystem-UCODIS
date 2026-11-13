@@ -72,3 +72,18 @@
     color: var(--color-foreground);
   }
 }
+
+/*
+ * Driver space: the drivers work on a tablet, so controls are sized for a finger (48 px at least)
+ * and text is not smaller than 16 px, which also stops iPad from zooming into a field.
+ */
+.driver-touch input:not([type='checkbox']):not([type='radio']):not([type='file']),
+.driver-touch select,
+.driver-touch textarea {
+  min-height: 3rem;
+  font-size: 1rem;
+}
+
+.driver-touch button {
+  min-height: 3rem;
+}

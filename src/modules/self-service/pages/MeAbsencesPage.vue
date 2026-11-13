@@ -57,7 +57,7 @@ onMounted(() => void store.fetchAbsences())
 </script>
 
 <template>
-  <div class="px-2 py-4 space-y-4 w-full max-w-3xl mx-auto">
+  <div class="driver-touch px-3 py-4 space-y-4 w-full max-w-5xl mx-auto">
     <header class="flex flex-wrap items-end justify-between gap-3">
       <div>
         <h1 class="text-xl font-semibold text-card-foreground">

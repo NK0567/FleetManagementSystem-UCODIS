@@ -79,7 +79,7 @@ onMounted(load)
 </script>
 
 <template>
-  <div class="px-2 py-4 space-y-4 w-full max-w-3xl mx-auto">
+  <div class="driver-touch px-3 py-4 space-y-4 w-full max-w-5xl mx-auto">
     <header>
       <h1 class="text-xl font-semibold text-card-foreground">
         {{ t('selfService.reports.title') }}
@@ -94,75 +94,77 @@ onMounted(load)
       @clear:success="notice = null"
     />
 
-    <section v-if="canExecute" class="bg-card border border-border rounded p-4 space-y-3">
-      <h2 class="text-sm font-semibold text-card-foreground">
-        {{ t('selfService.reports.new') }}
-      </h2>
-      <BaseFormField :label="t('fleet.driverReports.form.kind')" required>
-        <OptionsSelect
-          :model-value="form.kind"
-          options-key="driverReportKind"
-          @update:model-value="form.kind = String($event)"
-        />
-      </BaseFormField>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <BaseFormField :label="t('fleet.driverReports.form.severity')">
+    <div class="grid gap-4 md:items-start" :class="canExecute ? 'md:grid-cols-2' : ''">
+      <section v-if="canExecute" class="bg-card border border-border rounded p-4 space-y-3">
+        <h2 class="text-sm font-semibold text-card-foreground">
+          {{ t('selfService.reports.new') }}
+        </h2>
+        <BaseFormField :label="t('fleet.driverReports.form.kind')" required>
           <OptionsSelect
-            :model-value="form.severity"
-            options-key="driverReportSeverity"
-            @update:model-value="form.severity = String($event)"
+            :model-value="form.kind"
+            options-key="driverReportKind"
+            @update:model-value="form.kind = String($event)"
           />
         </BaseFormField>
-        <BaseFormField :label="t('fleet.driverReports.form.urgency')">
-          <OptionsSelect
-            :model-value="form.urgency"
-            options-key="driverReportUrgency"
-            @update:model-value="form.urgency = String($event)"
-          />
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <BaseFormField :label="t('fleet.driverReports.form.severity')">
+            <OptionsSelect
+              :model-value="form.severity"
+              options-key="driverReportSeverity"
+              @update:model-value="form.severity = String($event)"
+            />
+          </BaseFormField>
+          <BaseFormField :label="t('fleet.driverReports.form.urgency')">
+            <OptionsSelect
+              :model-value="form.urgency"
+              options-key="driverReportUrgency"
+              @update:model-value="form.urgency = String($event)"
+            />
+          </BaseFormField>
+        </div>
+        <BaseFormField :label="t('fleet.driverReports.form.subject')" required>
+          <FormInput v-model="form.subject" :maxlength="120" />
         </BaseFormField>
-      </div>
-      <BaseFormField :label="t('fleet.driverReports.form.subject')" required>
-        <FormInput v-model="form.subject" :maxlength="120" />
-      </BaseFormField>
-      <BaseFormField :label="t('fleet.driverReports.form.occurredOn')" required>
-        <DateFormInput v-model="form.occurredOn" />
-      </BaseFormField>
-      <BaseFormField :label="t('fleet.driverReports.form.description')">
-        <FormTextarea v-model="form.description" :rows="3" :maxlength="500" />
-      </BaseFormField>
-      <button
-        type="button"
-        class="w-full sm:w-auto inline-flex justify-center items-center gap-2 px-4 py-2 rounded bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
-        :disabled="!canSend"
-        @click="send"
-      >
-        <MessageSquareWarning class="w-5 h-5" />
-        {{ t('selfService.reports.send') }}
-      </button>
-    </section>
+        <BaseFormField :label="t('fleet.driverReports.form.occurredOn')" required>
+          <DateFormInput v-model="form.occurredOn" />
+        </BaseFormField>
+        <BaseFormField :label="t('fleet.driverReports.form.description')">
+          <FormTextarea v-model="form.description" :rows="3" :maxlength="500" />
+        </BaseFormField>
+        <button
+          type="button"
+          class="w-full sm:w-auto inline-flex justify-center items-center gap-2 px-4 py-2 rounded bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          :disabled="!canSend"
+          @click="send"
+        >
+          <MessageSquareWarning class="w-5 h-5" />
+          {{ t('selfService.reports.send') }}
+        </button>
+      </section>
 
-    <section class="bg-card border border-border rounded">
-      <h2 class="px-4 py-3 border-b border-border text-sm font-semibold text-card-foreground">
-        {{ t('selfService.reports.mine') }}
-      </h2>
-      <LoadingSpinner v-if="loading && !reports.length" :text="t('common.loading')" />
-      <p v-else-if="!reports.length" class="p-6 text-center text-sm text-muted-foreground">
-        {{ t('selfService.reports.empty') }}
-      </p>
-      <ul v-else class="divide-y divide-border">
-        <li v-for="report in reports" :key="report.no" class="px-4 py-3 space-y-1">
-          <div class="flex items-start justify-between gap-2">
-            <p class="text-sm font-medium text-card-foreground min-w-0 break-words">
-              {{ report.subject }}
+      <section class="bg-card border border-border rounded">
+        <h2 class="px-4 py-3 border-b border-border text-sm font-semibold text-card-foreground">
+          {{ t('selfService.reports.mine') }}
+        </h2>
+        <LoadingSpinner v-if="loading && !reports.length" :text="t('common.loading')" />
+        <p v-else-if="!reports.length" class="p-6 text-center text-sm text-muted-foreground">
+          {{ t('selfService.reports.empty') }}
+        </p>
+        <ul v-else class="divide-y divide-border">
+          <li v-for="report in reports" :key="report.no" class="px-4 py-3 space-y-1">
+            <div class="flex items-start justify-between gap-2">
+              <p class="text-sm font-medium text-card-foreground min-w-0 break-words">
+                {{ report.subject }}
+              </p>
+              <DriverReportStatusPill :status="report.status" />
+            </div>
+            <p class="text-xs text-muted-foreground">
+              {{ report.no }} · {{ optionsStore.getOptionLabel('driverReportKind', report.kind) }} ·
+              {{ formatDate(report.reportedOn) }}
             </p>
-            <DriverReportStatusPill :status="report.status" />
-          </div>
-          <p class="text-xs text-muted-foreground">
-            {{ report.no }} · {{ optionsStore.getOptionLabel('driverReportKind', report.kind) }} ·
-            {{ formatDate(report.reportedOn) }}
-          </p>
-        </li>
-      </ul>
-    </section>
+          </li>
+        </ul>
+      </section>
+    </div>
   </div>
 </template>
