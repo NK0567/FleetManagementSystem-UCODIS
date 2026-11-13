@@ -341,6 +341,18 @@ export const FLEET_MESSAGES = {
     fr: "L'heure de fin de la conduite de nuit interdite doit différer de l'heure de début.",
     en: 'The end of the night driving ban must differ from its start.'
   },
+  drivingOrderIncoherent: {
+    fr: 'Les limites ne sont pas cohérentes : la conduite continue doit tenir dans la conduite journalière, et la conduite journalière dans le travail journalier.',
+    en: 'The limits do not fit together: continuous driving must fit in the daily driving, and daily driving in the daily work.'
+  },
+  dailyCycleIncoherent: {
+    fr: 'Le travail journalier et le repos minimal ne tiennent pas dans 24 heures.',
+    en: 'The daily work and the minimum rest do not fit in 24 hours.'
+  },
+  weeklyBelowDaily: {
+    fr: "La conduite hebdomadaire maximale ne peut pas être inférieure à la conduite d'une journée.",
+    en: 'The weekly driving limit cannot be lower than one day of driving.'
+  },
   companyDocumentFileRequired: {
     fr: 'Joignez le document scanné.',
     en: 'Attach the scanned document.'

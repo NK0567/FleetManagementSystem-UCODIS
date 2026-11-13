@@ -38,6 +38,11 @@ export default {
   'fleet.settings.issue.invalidTime': 'Enter a time as HH:MM.',
   'fleet.settings.issue.nightWindowIncomplete':
     'Give both the start and the end, or leave both empty.',
+  'fleet.settings.issue.drivingOrderIncoherent':
+    'Continuous driving must fit in the daily driving, and daily driving in the daily work.',
+  'fleet.settings.issue.dailyCycleIncoherent': 'Daily work and minimum rest must fit in 24 hours.',
+  'fleet.settings.issue.weeklyBelowDaily':
+    'Weekly driving cannot be lower than one day of driving.',
   'fleet.settings.issue.nightWindowEmpty': 'The end must differ from the start.',
   'fleet.settings.section.safety': 'Safety',
   'fleet.settings.section.safety.hint': 'Delays applied to vehicle checks.',
@@ -241,5 +246,10 @@ export default {
   'fleet.settings.field.safety.infractionDelayMajorDays': 'Handling delay of a major infraction',
   'fleet.settings.field.safety.infractionDelaySeriousDays':
     'Handling delay of a serious infraction',
+  'fleet.settings.field.safety.reportTargetDays':
+    'Reporting delay of a driver (a report is in time if made within this number of days)',
+  'fleet.settings.field.safety.medicalAlertDays': 'Warning delay before a medical renewal',
+  'fleet.settings.field.safety.infractionRateBaseKm':
+    'Reference distance of the infraction rate (1000 km for the client)',
   'fleet.settings.field.telematics.minimumCameras': 'Minimum cameras connected per vehicle'
 }

@@ -23,6 +23,12 @@ function issueError(issue: SettingIssue) {
       return unprocessable(FLEET_MESSAGES.nightWindowIncomplete)
     case 'nightWindowEmpty':
       return unprocessable(FLEET_MESSAGES.nightWindowEmpty)
+    case 'drivingOrderIncoherent':
+      return unprocessable(FLEET_MESSAGES.drivingOrderIncoherent)
+    case 'dailyCycleIncoherent':
+      return unprocessable(FLEET_MESSAGES.dailyCycleIncoherent)
+    case 'weeklyBelowDaily':
+      return unprocessable(FLEET_MESSAGES.weeklyBelowDaily)
     default:
       return settingFieldError(issue)
   }

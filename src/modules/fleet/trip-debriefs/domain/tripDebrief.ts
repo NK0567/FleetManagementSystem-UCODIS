@@ -47,10 +47,14 @@ export function tripDistanceKm(startKm: number | null, endKm: number | null): nu
   return startKm === null || endKm === null ? null : endKm - startKm
 }
 
-/** The client's indicator: infractions counted per 1000 km driven. */
-export function infractionRate(total: number, distanceKm: number | null): number | null {
+/** The client's indicator: infractions counted per base distance (1000 km), set in the fleet settings. */
+export function infractionRate(
+  total: number,
+  distanceKm: number | null,
+  baseKm: number
+): number | null {
   if (!distanceKm || distanceKm <= 0) return null
-  return Math.round((total * 10000) / distanceKm) / 10
+  return Math.round((total * baseKm * 10) / distanceKm) / 10
 }
 
 export function isEditable(status: TripDebriefStatus): boolean {

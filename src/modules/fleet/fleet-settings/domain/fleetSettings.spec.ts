@@ -67,3 +67,23 @@ describe('settingsSectionIssues', () => {
     expect(isFleetSettingsSection('weather')).toBe(false)
   })
 })
+
+describe('driving limits coherence', () => {
+  const base = { ...DEFAULT_FLEET_SETTINGS.drivingTime }
+
+  it('accepts the defaults', () => {
+    expect(settingsSectionIssues('drivingTime', base)).toEqual([])
+  })
+
+  it('refuses limits that do not fit together', () => {
+    const codes = (patch: Partial<typeof base>) =>
+      settingsSectionIssues('drivingTime', { ...base, ...patch }).map((issue) => issue.code)
+    expect(
+      codes({ continuousDrivingMaxMin: 360, dailyDrivingMaxMin: 360, dailyWorkMaxMin: 480 })
+    ).toEqual([])
+    expect(codes({ dailyDrivingMaxMin: 600, dailyWorkMaxMin: 540 })).toContain(
+      'drivingOrderIncoherent'
+    )
+    expect(codes({ restBeforeDepartureMinH: 15 })).toContain('dailyCycleIncoherent')
+  })
+})

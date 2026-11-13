@@ -25,16 +25,16 @@ export type DriverReportStatus = (typeof DRIVER_REPORT_STATUSES)[number]
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
-/** Days between the facts and the report; a report made the next day is still within 24 hours. */
+/** Days between the facts and the report. */
 export function reportDelayDays(occurredOn: string, reportedOn: string): number {
   const gap =
     new Date(`${reportedOn}T00:00:00Z`).getTime() - new Date(`${occurredOn}T00:00:00Z`).getTime()
   return Math.round(gap / DAY_MS)
 }
 
-/** The 24 hour target of the client: same day or next day. */
-export function isWithin24h(occurredOn: string, reportedOn: string): boolean {
-  return reportDelayDays(occurredOn, reportedOn) <= 1
+/** In time: reported within the delay set in the fleet settings (one day, so 24 hours, at the client). */
+export function isWithinDelay(occurredOn: string, reportedOn: string, maxDays: number): boolean {
+  return reportDelayDays(occurredOn, reportedOn) <= maxDays
 }
 
 export function isOpen(status: DriverReportStatus): boolean {

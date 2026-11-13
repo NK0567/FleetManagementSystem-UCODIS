@@ -24,7 +24,7 @@ export default {
   'fleet.driverReports.col.employeeName': 'Conducteur',
   'fleet.driverReports.col.occurredOn': 'Date des faits',
   'fleet.driverReports.col.reportedOn': 'Remontée le',
-  'fleet.driverReports.col.within24h': 'Remontée sous 24 h',
+  'fleet.driverReports.col.within24h': 'Remontée dans le délai',
   'fleet.driverReports.col.channel': 'Mode de remontée',
   'fleet.driverReports.col.status': 'Statut',
   'fleet.driverReports.col.ownerName': 'Responsable',

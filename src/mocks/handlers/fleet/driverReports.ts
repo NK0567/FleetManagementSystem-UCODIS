@@ -5,12 +5,13 @@ import {
   DRIVER_REPORT_SEVERITIES,
   DRIVER_REPORT_STATUSES,
   DRIVER_REPORT_URGENCIES,
-  isWithin24h,
+  isWithinDelay,
   reportDelayDays,
   type DriverReportActionKind,
   type DriverReportStatus
 } from '@/modules/fleet/driver-reports/domain/driverReport'
 import type { DriverReportApi } from '@/modules/fleet/driver-reports/types/driverReport.types'
+import { DEFAULT_FLEET_SETTINGS } from '@/modules/fleet/fleet-settings/domain/fleetSettings'
 import { employeeFullName, isOnStaff } from '@/modules/hr/employees/domain/employee'
 import { todayIso } from '@/utils/date'
 import type { MockDatabase } from '../../db/database'
@@ -24,17 +25,20 @@ import { created, ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
 import { sessionUser, type MockRequest } from '../../http/types'
 import { FLEET_MESSAGES } from './messages'
+import { fleetSettings } from './settings'
 
 export function driverReportsApi(db: MockDatabase): DriverReportApi[] {
   const names = new Map(
     db.employees.all().map((employee) => [employee.no, employeeFullName(employee)])
   )
   const today = todayIso()
+  const maxDays =
+    fleetSettings(db).safety.reportTargetDays ?? DEFAULT_FLEET_SETTINGS.safety.reportTargetDays
   return db.driverReports.all().map((report) => ({
     ...report,
     employeeName: names.get(report.employeeNo) ?? report.employeeNo,
     delayDays: reportDelayDays(report.occurredOn, report.reportedOn),
-    within24h: isWithin24h(report.occurredOn, report.reportedOn),
+    within24h: isWithinDelay(report.occurredOn, report.reportedOn, maxDays),
     late: !!report.dueOn && report.dueOn < today && report.status !== 'closed'
   }))
 }

@@ -166,7 +166,7 @@ export default {
   'selfService.profile.responsibilities': 'What I have to do',
   'selfService.profile.limits.title': 'The limits in force',
   'selfService.profile.limits.dailyDriving': 'Maximum driving per day',
-  'selfService.profile.limits.dailyRest': 'Minimum rest per day',
+  'selfService.profile.limits.dailyRest': 'Minimum rest between two days',
   'selfService.profile.limits.weeklyDriving': 'Maximum driving per week',
   'selfService.checklist.sign': 'I, {name}, sign this checklist',
   'selfService.checklist.location': 'Stopping place',

@@ -29,7 +29,7 @@ export default {
   'fleet.tripDebriefs.col.deliveryPlace': 'Lieu de livraison',
   'fleet.tripDebriefs.col.distanceKm': 'Distance (km)',
   'fleet.tripDebriefs.col.infractionTotal': 'Infractions',
-  'fleet.tripDebriefs.col.infractionRate': 'Infractions pour 1000 km',
+  'fleet.tripDebriefs.col.infractionRate': "Taux d'infraction",
   'fleet.tripDebriefs.col.gainLoss': 'Gain ou coulage (L)',
   'fleet.tripDebriefs.col.status': 'Statut',
   'fleet.tripDebriefs.col.closedOn': 'Clôturée le',

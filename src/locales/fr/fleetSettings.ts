@@ -39,6 +39,12 @@ export default {
   'fleet.settings.issue.invalidTime': 'Indiquez une heure au format HH:MM.',
   'fleet.settings.issue.nightWindowIncomplete':
     "Indiquez l'heure de début et l'heure de fin, ou laissez les deux vides.",
+  'fleet.settings.issue.drivingOrderIncoherent':
+    'La conduite continue doit tenir dans la conduite journalière, et la conduite journalière dans le travail journalier.',
+  'fleet.settings.issue.dailyCycleIncoherent':
+    'Le travail journalier et le repos minimal doivent tenir dans 24 heures.',
+  'fleet.settings.issue.weeklyBelowDaily':
+    "La conduite hebdomadaire ne peut pas être inférieure à la conduite d'une journée.",
   'fleet.settings.issue.nightWindowEmpty': "L'heure de fin doit différer de l'heure de début.",
   'fleet.settings.section.safety': 'Sécurité',
   'fleet.settings.section.safety.hint': 'Délais appliqués aux contrôles des véhicules.',
@@ -249,5 +255,10 @@ export default {
     "Délai de traitement d'une infraction majeure",
   'fleet.settings.field.safety.infractionDelaySeriousDays':
     "Délai de traitement d'une infraction grave",
+  'fleet.settings.field.safety.reportTargetDays':
+    "Délai de remontée d'un conducteur (la remontée est dans le délai si elle est faite sous ce nombre de jours)",
+  'fleet.settings.field.safety.medicalAlertDays': "Délai d'alerte avant une échéance médicale",
+  'fleet.settings.field.safety.infractionRateBaseKm':
+    "Distance de référence du taux d'infraction (1000 km chez le client)",
   'fleet.settings.field.telematics.minimumCameras': 'Caméras connectées au minimum par véhicule'
 }

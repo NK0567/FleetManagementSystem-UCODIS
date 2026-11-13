@@ -3,6 +3,7 @@ import type { DriverReportApi } from '@/modules/fleet/driver-reports/types/drive
 import type { MedicalFollowUpApi } from '@/modules/fleet/medical-follow-ups/types/medicalFollowUp.types'
 import type { TripDebriefApi } from '@/modules/fleet/trip-debriefs/types/tripDebrief.types'
 import { todayIso } from '@/utils/date'
+import { FLEET_SETTINGS_NO } from '../../fixtures/fleet/settings'
 import { call, createTestServer } from '../../testing'
 import type { MockServer } from '../../index'
 
@@ -230,5 +231,37 @@ describe('driver space reports', () => {
       (await send('post', '/me/reports', { kind: 'safety', subject: 'Sujet valide' }, 'AID001'))
         .status
     ).toBe(403)
+  })
+})
+
+describe('settings behind the new registers', () => {
+  function setSafety(patch: Record<string, number>) {
+    const current = server.db.fleetSettings.findOrFail(FLEET_SETTINGS_NO)
+    server.db.fleetSettings.update(FLEET_SETTINGS_NO, {
+      safety: { ...current.safety, ...patch }
+    })
+  }
+
+  it('judges the reporting delay with the delay of the fleet settings', async () => {
+    const find = async () =>
+      (
+        (await send('get', '/fleet/driver-reports')).data.data as { items: DriverReportApi[] }
+      ).items.find((row) => row.no === 'REM-00006')
+    expect((await find())?.within24h).toBe(false)
+    setSafety({ reportTargetDays: 30 })
+    expect((await find())?.within24h).toBe(true)
+  })
+
+  it('counts the infraction rate on the base distance of the fleet settings', async () => {
+    setSafety({ infractionRateBaseKm: 100 })
+    const response = await send('post', '/fleet/trip-debriefs', {
+      voucherNo: 'OT-26-7777',
+      employeeNo: 'UCT-012',
+      vehicleNo: 'VEH-001',
+      startKm: 1000,
+      endKm: 1500,
+      overspeed: 4
+    })
+    expect((response.data.data as TripDebriefApi).infractionRate).toBe(0.8)
   })
 })

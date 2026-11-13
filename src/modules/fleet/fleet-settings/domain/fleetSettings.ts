@@ -42,6 +42,12 @@ export interface SafetySettings {
   infractionDelayMinorDays: number
   infractionDelayMajorDays: number
   infractionDelaySeriousDays: number
+  /** Days within which a driver must report what he met; a report made later is out of delay. */
+  reportTargetDays: number
+  /** Days before a medical renewal falls due to warn of it. */
+  medicalAlertDays: number
+  /** Distance the infraction rate is counted on (the client counts per 1000 km). */
+  infractionRateBaseKm: number
 }
 
 export interface FuelSettings {
@@ -149,7 +155,10 @@ export const FLEET_SETTING_FIELDS: Record<FleetSettingsSection, readonly Setting
     { key: 'justificationDelayH', kind: 'number', unit: 'h', min: 1, max: 168 },
     { key: 'infractionDelayMinorDays', kind: 'number', unit: 'days', min: 1, max: 90 },
     { key: 'infractionDelayMajorDays', kind: 'number', unit: 'days', min: 1, max: 90 },
-    { key: 'infractionDelaySeriousDays', kind: 'number', unit: 'days', min: 1, max: 90 }
+    { key: 'infractionDelaySeriousDays', kind: 'number', unit: 'days', min: 1, max: 90 },
+    { key: 'reportTargetDays', kind: 'number', unit: 'days', min: 1, max: 30 },
+    { key: 'medicalAlertDays', kind: 'number', unit: 'days', min: 1, max: 180 },
+    { key: 'infractionRateBaseKm', kind: 'number', unit: 'km', min: 100, max: 100000 }
   ],
   fuel: [
     { key: 'refuelStartHour', kind: 'number', unit: 'h', min: 0, max: 23 },
@@ -209,7 +218,10 @@ export const DEFAULT_FLEET_SETTINGS: FleetSettings = {
     justificationDelayH: 48,
     infractionDelayMinorDays: 15,
     infractionDelayMajorDays: 10,
-    infractionDelaySeriousDays: 5
+    infractionDelaySeriousDays: 5,
+    reportTargetDays: 1,
+    medicalAlertDays: 30,
+    infractionRateBaseKm: 1000
   },
   fuel: {
     refuelStartHour: 4,
@@ -247,6 +259,9 @@ export type SettingIssue =
   | SettingFieldIssue
   | { field: string; code: 'nightWindowIncomplete' }
   | { field: string; code: 'nightWindowEmpty' }
+  | { field: string; code: 'drivingOrderIncoherent' }
+  | { field: string; code: 'dailyCycleIncoherent' }
+  | { field: string; code: 'weeklyBelowDaily' }
 
 export function isFleetSettingsSection(value: string): value is FleetSettingsSection {
   return (FLEET_SETTINGS_SECTIONS as readonly string[]).includes(value)
@@ -261,6 +276,26 @@ function nightWindowIssue(values: DrivingTimeSettings): SettingIssue | null {
   const startMinutes = timeToMinutes(start)
   if (startMinutes !== null && startMinutes === timeToMinutes(end)) {
     return { field: 'nightBanEnd', code: 'nightWindowEmpty' }
+  }
+  return null
+}
+
+/**
+ * The limits must fit together: continuous driving within the day's driving, the day's driving
+ * within the day's work, work plus rest within 24 hours, and a week's driving at least a day's.
+ */
+function drivingCoherenceIssue(values: DrivingTimeSettings): SettingIssue | null {
+  if (values.continuousDrivingMaxMin > values.dailyDrivingMaxMin) {
+    return { field: 'continuousDrivingMaxMin', code: 'drivingOrderIncoherent' }
+  }
+  if (values.dailyDrivingMaxMin > values.dailyWorkMaxMin) {
+    return { field: 'dailyDrivingMaxMin', code: 'drivingOrderIncoherent' }
+  }
+  if (values.dailyWorkMaxMin / 60 + values.restBeforeDepartureMinH > 24) {
+    return { field: 'restBeforeDepartureMinH', code: 'dailyCycleIncoherent' }
+  }
+  if (values.weeklyDrivingMaxH * 60 < values.dailyDrivingMaxMin) {
+    return { field: 'weeklyDrivingMaxH', code: 'weeklyBelowDaily' }
   }
   return null
 }
@@ -299,6 +334,8 @@ export function settingsSectionIssues<S extends FleetSettingsSection>(
   if (section === 'drivingTime' && issues.length === 0) {
     const night = nightWindowIssue(values as DrivingTimeSettings)
     if (night) issues.push(night)
+    const coherence = drivingCoherenceIssue(values as DrivingTimeSettings)
+    if (coherence) issues.push(coherence)
   }
   return issues
 }

@@ -10,6 +10,7 @@ import {
   type PlanStopKind
 } from '@/modules/fleet/trip-debriefs/domain/tripDebrief'
 import type { TripDebriefApi } from '@/modules/fleet/trip-debriefs/types/tripDebrief.types'
+import { DEFAULT_FLEET_SETTINGS } from '@/modules/fleet/fleet-settings/domain/fleetSettings'
 import { employeeFullName, isOnStaff } from '@/modules/hr/employees/domain/employee'
 import { todayIso } from '@/utils/date'
 import type { MockDatabase } from '../../db/database'
@@ -29,11 +30,15 @@ import { requireReference } from '../../http/references'
 import { ok } from '../../http/responses'
 import type { MockRouter } from '../../http/router'
 import { FLEET_MESSAGES } from './messages'
+import { fleetSettings } from './settings'
 
 export function tripDebriefsApi(db: MockDatabase): TripDebriefApi[] {
   const names = new Map(
     db.employees.all().map((employee) => [employee.no, employeeFullName(employee)])
   )
+  const baseKm =
+    fleetSettings(db).safety.infractionRateBaseKm ??
+    DEFAULT_FLEET_SETTINGS.safety.infractionRateBaseKm
   const plates = new Map(db.vehicles.all().map((vehicle) => [vehicle.no, vehicle.plate]))
   return db.tripDebriefs.all().map((row) => {
     const total = infractionTotal(row)
@@ -44,7 +49,7 @@ export function tripDebriefsApi(db: MockDatabase): TripDebriefApi[] {
       vehiclePlate: plates.get(row.vehicleNo) ?? row.vehicleNo,
       distanceKm,
       infractionTotal: total,
-      infractionRate: infractionRate(total, distanceKm),
+      infractionRate: infractionRate(total, distanceKm, baseKm),
       status: debriefStatus(row)
     }
   })

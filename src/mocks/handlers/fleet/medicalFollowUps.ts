@@ -8,6 +8,7 @@ import {
   type MedicalFollowUpResult
 } from '@/modules/fleet/medical-follow-ups/domain/medicalFollowUp'
 import type { MedicalFollowUpApi } from '@/modules/fleet/medical-follow-ups/types/medicalFollowUp.types'
+import { DEFAULT_FLEET_SETTINGS } from '@/modules/fleet/fleet-settings/domain/fleetSettings'
 import { employeeFullName, isOnStaff } from '@/modules/hr/employees/domain/employee'
 import { addDays, todayIso } from '@/utils/date'
 import type { MockDatabase } from '../../db/database'
@@ -26,13 +27,17 @@ import {
 import { requireReference } from '../../http/references'
 import type { MockRouter } from '../../http/router'
 import { FLEET_MESSAGES } from './messages'
+import { fleetSettings } from './settings'
 
 export function medicalFollowUpsApi(db: MockDatabase): MedicalFollowUpApi[] {
   const names = new Map(
     db.employees.all().map((employee) => [employee.no, employeeFullName(employee)])
   )
   const today = todayIso()
-  const soon = addDays(today, 30)
+  const soon = addDays(
+    today,
+    fleetSettings(db).safety.medicalAlertDays ?? DEFAULT_FLEET_SETTINGS.safety.medicalAlertDays
+  )
   return db.medicalFollowUps.all().map((row) => {
     const status = medicalStatus({ result: row.result, nextDueOn: row.nextDueOn, today })
     return {

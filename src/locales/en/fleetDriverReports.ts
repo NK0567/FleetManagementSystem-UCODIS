@@ -24,7 +24,7 @@ export default {
   'fleet.driverReports.col.employeeName': 'Driver',
   'fleet.driverReports.col.occurredOn': 'Date of facts',
   'fleet.driverReports.col.reportedOn': 'Reported on',
-  'fleet.driverReports.col.within24h': 'Reported within 24 h',
+  'fleet.driverReports.col.within24h': 'Reported in time',
   'fleet.driverReports.col.channel': 'Channel',
   'fleet.driverReports.col.status': 'Status',
   'fleet.driverReports.col.ownerName': 'Owner',
