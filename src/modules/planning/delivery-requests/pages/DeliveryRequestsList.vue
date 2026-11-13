@@ -262,6 +262,12 @@ const filterDefs: FilterFieldDef[] = [
     valueType: 'string',
     kind: 'option',
     optionsKey: 'freightPayer'
+  },
+  {
+    field: 'desiredDate',
+    labelKey: 'planning.deliveryRequests.col.desiredDate',
+    valueType: 'date',
+    kind: 'date'
   }
 ]
 
