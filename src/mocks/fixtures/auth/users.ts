@@ -28,7 +28,7 @@ export const MOCK_ACCOUNTS: readonly MockAccount[] = [
     employeeNo: 'UCT-001',
     orgUnitNo: 'UCT',
     language: 'fr',
-    landingRoute: '/hr',
+    landingRoute: '/fleet/vehicles',
     active: true
   },
   {

@@ -37,6 +37,40 @@ export function getNavMenus(): readonly NavMenuItem[] {
   return navMenus
 }
 
+/** The reference data of every module is gathered in one menu, placed ahead of the modules. */
+export const REFERENTIAL_MENU_KEY = 'nav.referential'
+export const REFERENTIAL_MENU_ORDER = 8
+/** The data every module reads: vehicles, drivers, approved stations. */
+export const BASE_DATA_GROUP = 'nav.group.baseData'
+
+export function registerReferentialItems(group: string, items: readonly NavSubItem[]): void {
+  if (!items.length) return
+  registerNavMenu({
+    labelKey: REFERENTIAL_MENU_KEY,
+    order: REFERENTIAL_MENU_ORDER,
+    subItems: items.map((item) => ({ ...item, group }))
+  })
+}
+
+/**
+ * Registers the menu of a module. The base data it lists (`baseData`, by address) and its settings
+ * screens leave it for the reference menu, so each piece of data is maintained in one place.
+ */
+export function registerModuleMenu(
+  menu: NavMenuItem,
+  options: { settingsGroup: string; baseData?: readonly string[] }
+): void {
+  const baseData = new Set(options.baseData ?? [])
+  const isBaseData = (item: NavSubItem) => baseData.has(item.to)
+  const isSettings = (item: NavSubItem) => item.group === SETUP_GROUP
+  registerNavMenu({
+    ...menu,
+    subItems: menu.subItems.filter((item) => !isBaseData(item) && !isSettings(item))
+  })
+  registerReferentialItems(BASE_DATA_GROUP, menu.subItems.filter(isBaseData))
+  registerReferentialItems(options.settingsGroup, menu.subItems.filter(isSettings))
+}
+
 function isVisible(menuKey: string | undefined, userMenu: UserMenu): boolean {
   return !menuKey || userMenu[menuKey] === true
 }

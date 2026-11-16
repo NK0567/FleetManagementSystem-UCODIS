@@ -62,7 +62,7 @@ export default {
   'planning.reports.hint.punctuality':
     'Pour chaque livraison, l’arrivée réelle au point (sinon la déclaration du conducteur) est comparée à l’heure prévue de l’étape ; elle est à l’heure jusqu’à {margin} min de retard (réglages planning).',
   'planning.reports.hint.costs':
-    'Ordres partis : coût du véhicule (entretien, pneus et assurance du FMS sur douze mois, rapportés au kilomètre, fois la distance) et carburant des pleins du trajet ; pour un transporteur externe, sa facture.',
+    'Ordres partis : coût du véhicule (entretien, pneus et assurance du FMS sur douze mois, rapportés au kilomètre, fois la distance) et carburant des pleins du voyage ; pour un transporteur externe, sa facture.',
   'planning.reports.hint.quality':
     'Lignes arrivées chez le destinataire : livrées, refusées ou reportées. Les écarts de carburant sont mesurés à 15 °C.',
   'planning.reports.hint.means':
@@ -148,7 +148,7 @@ export default {
   'planning.dashboard.alert.contestation': 'Contestation à traiter',
   'planning.dashboard.alert.gap': 'Écart à qualifier',
   'planning.dashboard.alert.protest': 'Protêt ouvert',
-  'planning.dashboard.alert.deviation': 'Écart de trajet à qualifier',
+  'planning.dashboard.alert.deviation': "Écart d'itinéraire à qualifier",
   'planning.dashboard.col.indicator': 'Indicateur',
   'planning.dashboard.col.value': 'Valeur',
   'planning.dashboard.col.detail': 'Détail',

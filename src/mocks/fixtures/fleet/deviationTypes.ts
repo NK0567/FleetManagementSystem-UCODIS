@@ -39,7 +39,7 @@ const SEED: Omit<DeviationTypeRow, keyof typeof seedAudit>[] = [
   },
   {
     no: 'TRIP-TIME',
-    name: 'Dépassement du temps de trajet',
+    name: 'Dépassement du temps de voyage',
     category: 'route',
     severity: 'minor',
     threshold: 30,

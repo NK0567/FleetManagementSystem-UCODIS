@@ -9,8 +9,8 @@ import { registerSettingsModule } from './settings/settings.module'
 export function registerModules(): void {
   registerHrModule()
   registerFleetModule()
+  registerMaintenanceModule()
   registerPlanningModule()
   registerSelfServiceModule()
-  registerMaintenanceModule()
   registerSettingsModule()
 }

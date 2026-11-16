@@ -116,7 +116,11 @@ export function registerRouteDeviationsHandlers(router: MockRouter, db: MockData
       return routeDeviationsApi(db)
     },
     searchColumns: ['no', 'tripNo', 'vehiclePlate', 'driverName'],
-    optionFields: { severity: 'deviationSeverity', nature: 'deviationNature' },
+    optionFields: {
+      severity: 'deviationSeverity',
+      nature: 'deviationNature',
+      source: 'deviationSource'
+    },
     create: (input) => {
       const tripNo = requireReference(db.trips, input, 'tripNo')
       const trip = db.trips.findOrFail(tripNo)

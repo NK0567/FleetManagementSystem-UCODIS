@@ -31,7 +31,7 @@ export default {
   'selfService.absences.submit': 'Envoyer la demande',
   'selfService.absences.sent': 'Demande envoyée.',
   'selfService.tour.title': 'Mon ordre de transport',
-  'selfService.tour.subtitle': 'Trajet en cours ou prochain, dans l’ordre des arrêts.',
+  'selfService.tour.subtitle': 'Voyage en cours ou prochain, dans l’ordre des arrêts.',
   'selfService.tour.loadError': 'L’ordre de transport n’a pas pu être chargé.',
   'selfService.tour.empty': 'Aucun ordre de transport ne vous est confié.',
   'selfService.tour.vehicle': 'Véhicule',
@@ -176,8 +176,8 @@ export default {
   'selfService.vehicle.noRefill': 'Aucun plein déclaré.',
   'selfService.vehicle.noBreakdown': 'Aucune panne signalée.',
   'selfService.vehicle.noStation': 'Station non précisée',
-  'selfService.vehicle.tripCurrent': 'Trajet en cours : {trip}',
-  'selfService.vehicle.tripNone': 'Aucun trajet en cours',
+  'selfService.vehicle.tripCurrent': 'Voyage en cours : {trip}',
+  'selfService.vehicle.tripNone': 'Aucun voyage en cours',
   'selfService.orders.waitsForPrevious':
     'Réglez d’abord le point précédent (livraison déclarée, reportée ou refusée) avant de marquer votre arrivée ici.',
   'selfService.notifications.order_route_changed':

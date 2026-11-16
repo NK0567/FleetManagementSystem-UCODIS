@@ -107,7 +107,7 @@ export const CIRCUIT_MESSAGES = {
     en: 'This transport mode has no means available: only the truck is offered.'
   },
   routeChangeReason: {
-    fr: 'Une modification d’itinéraire en cours de trajet exige un motif.',
+    fr: 'Une modification d’itinéraire en cours de voyage exige un motif.',
     en: 'A change of route during the trip requires a reason.'
   },
   routeChangeSame: {
@@ -115,7 +115,7 @@ export const CIRCUIT_MESSAGES = {
     en: 'Choose another route template than the one followed.'
   },
   routeChangeClosed: {
-    fr: 'L’itinéraire ne se modifie en cours de trajet que pour un ordre en cours.',
+    fr: 'L’itinéraire ne se modifie en cours de voyage que pour un ordre en cours.',
     en: 'The route changes during the trip only for an order in progress.'
   },
   proposalNoVehicle: {

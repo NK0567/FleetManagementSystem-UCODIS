@@ -74,7 +74,7 @@ export default {
   'settings.moduleToggles.item.vehicle-checks.label': 'Vehicle checks',
   'settings.moduleToggles.item.vehicle-checks.description':
     'Workshop checks before loading, on return from a trip and on receiving a new vehicle.',
-  'settings.moduleToggles.group.planning': 'Planning',
+  'settings.moduleToggles.group.planning': 'Transport',
   'settings.moduleToggles.item.delivery-requests.label': 'Orders',
   'settings.moduleToggles.item.delivery-requests.description':
     'Sales staff enter or import their customers’ requests. Without this module, the planner creates orders directly.',

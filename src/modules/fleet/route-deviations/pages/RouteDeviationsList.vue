@@ -69,6 +69,12 @@ const tableColumns = computed<TableColumn[]>(() => [
     label: t('fleet.routeDeviations.col.deviationTypeName'),
     minW: '200px'
   },
+  {
+    sortKey: 'source',
+    label: t('fleet.routeDeviations.col.source'),
+    minW: '190px',
+    formatter: optionLabel('deviationSource')
+  },
   { sortKey: 'vehiclePlate', label: t('fleet.routeDeviations.col.vehiclePlate'), minW: '120px' },
   { sortKey: 'driverName', label: t('fleet.routeDeviations.col.driverName'), minW: '170px' },
   {
@@ -94,6 +100,13 @@ const tableColumns = computed<TableColumn[]>(() => [
 ])
 
 const filterDefs: FilterFieldDef[] = [
+  {
+    field: 'source',
+    labelKey: 'fleet.routeDeviations.col.source',
+    valueType: 'string',
+    kind: 'option',
+    optionsKey: 'deviationSource'
+  },
   {
     field: 'nature',
     labelKey: 'fleet.routeDeviations.col.nature',

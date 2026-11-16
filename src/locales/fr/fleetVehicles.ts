@@ -95,7 +95,7 @@ export default {
   'fleet.vehicles.form.previousPlate': 'Ancienne',
   'fleet.vehicles.form.newPlate': 'Nouvelle',
   'fleet.vehicles.odometerSource.manual': 'Saisie',
-  'fleet.vehicles.odometerSource.trip': 'Fin de trajet',
+  'fleet.vehicles.odometerSource.trip': 'Fin de voyage',
   'fleet.vehicles.odometerSource.refill': 'Plein',
   'fleet.vehicles.odometerSource.removal': 'Sortie du parc',
   'fleet.vehicles.odometerSource.work_order': 'Ordre de travail',
@@ -161,7 +161,7 @@ export default {
   'fleet.vehicles.form.operationalStatus': 'Statut opérationnel',
   'fleet.vehicles.form.noOperationalStatus': 'Sans objet : le véhicule est sorti du parc.',
   'fleet.vehicles.form.operationalStatusHint':
-    'Il se met à jour seul depuis la maintenance, la conformité et les trajets.',
+    'Il se met à jour seul depuis la maintenance, la conformité et les voyages.',
   'fleet.vehicles.form.statusCauseCode': 'Cause codifiée : {code} · {name}',
   'fleet.vehicles.form.lifecycle': 'Cycle de vie',
   'fleet.vehicles.form.maintenanceLog': "Carnet d'entretien",

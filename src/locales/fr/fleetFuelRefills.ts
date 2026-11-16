@@ -56,10 +56,10 @@ export default {
     "Fichier CSV avec une ligne d'en-têtes : véhicule par immatriculation, conducteur par matricule (déduit s'il manque).",
   'fleet.fuelRefills.import.created': 'Aucun plein créé. | Un plein créé. | {n} pleins créés.',
   'fleet.fuelRefills.noResultsCreate': 'Aucun plein. Créez-en un avec Nouveau.',
-  'fleet.fuelRefills.form.tripNo': 'Trajet',
-  'fleet.fuelRefills.col.tripNo': 'Trajet',
+  'fleet.fuelRefills.form.tripNo': 'Voyage',
+  'fleet.fuelRefills.col.tripNo': 'Voyage',
   'fleet.fuelRefills.form.tripHint':
-    'Laissé vide, le trajet sur lequel se trouvait le véhicule à ce moment-là.',
+    'Laissé vide, le voyage sur lequel se trouvait le véhicule à ce moment-là.',
   'fleet.fuelRefills.form.position': 'Position GPS',
   'fleet.fuelRefills.form.positionHint':
     'Relevée par le boîtier du véhicule au moment du plein et comparée au site de la station.',

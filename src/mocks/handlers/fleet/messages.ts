@@ -6,7 +6,7 @@ export const FLEET_MESSAGES = {
     en: 'This account is not linked to a driver.'
   },
   driverNoVehicle: {
-    fr: 'Aucun véhicule ne vous est affecté et aucun trajet ne vous est confié.',
+    fr: 'Aucun véhicule ne vous est affecté et aucun voyage ne vous est confié.',
     en: 'No vehicle is assigned to you and no trip is given to you.'
   },
   refillReceiptRequired: {
@@ -90,7 +90,7 @@ export const FLEET_MESSAGES = {
     en: 'The stops of the route are inconsistent: at least two stops, a departure first, a site on each stop, positive durations.'
   },
   routeInUse: {
-    fr: 'Des trajets suivent cet itinéraire : il ne peut pas être supprimé. Désactivez-le plutôt.',
+    fr: 'Des voyages suivent cet itinéraire : il ne peut pas être supprimé. Désactivez-le plutôt.',
     en: 'Trips follow this route: it cannot be deleted. Deactivate it instead.'
   },
   invalidDateTime: {
@@ -106,15 +106,15 @@ export const FLEET_MESSAGES = {
     en: 'The end of the period comes before its start.'
   },
   resourceBusy: {
-    fr: '{name} est déjà pris sur un autre trajet à ce moment-là ({no}).',
+    fr: '{name} est déjà pris sur un autre voyage à ce moment-là ({no}).',
     en: '{name} is already taken by another trip at that time ({no}).'
   },
   tripActionNotAllowed: {
-    fr: "Cette action n'est pas possible pour un trajet dans cet état.",
+    fr: "Cette action n'est pas possible pour un voyage dans cet état.",
     en: 'This action is not possible for a trip in this state.'
   },
   noStopToPass: {
-    fr: "Il ne reste aucun arrêt intermédiaire à passer : terminez le trajet à l'arrivée.",
+    fr: "Il ne reste aucun arrêt intermédiaire à passer : terminez le voyage à l'arrivée.",
     en: 'No intermediate stop is left to pass: complete the trip on arrival.'
   },
   endOdometerBeforeStart: {
@@ -122,11 +122,11 @@ export const FLEET_MESSAGES = {
     en: 'The arrival mileage cannot be lower than the departure one ({km} km).'
   },
   tripInProgress: {
-    fr: 'Un trajet est en cours ({no}) : attendez son arrivée.',
+    fr: 'Un voyage est en cours ({no}) : attendez son arrivée.',
     en: 'A trip is on the road ({no}): wait for its arrival.'
   },
   tripsStillOpen: {
-    fr: 'Des trajets sont encore prévus ou en cours pour ce véhicule.',
+    fr: 'Des voyages sont encore prévus ou en cours pour ce véhicule.',
     en: 'Trips are still planned or on the road for this vehicle.'
   },
   notATractor: {
@@ -518,7 +518,7 @@ export const FLEET_MESSAGES = {
     en: 'Explain every anomaly found.'
   },
   checklistTripOver: {
-    fr: 'Ce trajet est clôturé ou annulé : il ne reçoit plus de check-list.',
+    fr: 'Ce voyage est clôturé ou annulé : il ne reçoit plus de check-list.',
     en: 'This trip is closed or cancelled: it takes no more checklists.'
   },
   checklistSignedBeforeTaken: {
@@ -538,7 +538,7 @@ export const FLEET_MESSAGES = {
     en: 'The re-inspection follows the inspection and cannot be in the future.'
   },
   checkChecklistMissing: {
-    fr: 'Aucune check-list de départ pour ce trajet.',
+    fr: 'Aucune check-list de départ pour ce voyage.',
     en: 'No departure checklist for this trip.'
   },
   checkChecklistBlocking: {
@@ -570,11 +570,11 @@ export const FLEET_MESSAGES = {
     en: '{name} may drive.'
   },
   checkRestOk: {
-    fr: '{hours} h de repos depuis le dernier trajet (minimum {min} h).',
+    fr: '{hours} h de repos depuis le dernier voyage (minimum {min} h).',
     en: '{hours} h of rest since the last trip (at least {min} h).'
   },
   checkRestNone: {
-    fr: 'Aucun trajet récent.',
+    fr: 'Aucun voyage récent.',
     en: 'No recent trip.'
   },
   checkWeeklyRest: {
@@ -594,7 +594,7 @@ export const FLEET_MESSAGES = {
     en: 'The departure cannot be granted: {checks}'
   },
   departureAlreadyRequested: {
-    fr: 'Une demande existe déjà pour ce trajet ({no}).',
+    fr: 'Une demande existe déjà pour ce voyage ({no}).',
     en: 'A request already exists for this trip ({no}).'
   },
   departureNotPending: {
@@ -602,11 +602,11 @@ export const FLEET_MESSAGES = {
     en: 'This request has already been decided.'
   },
   departureTripNotPlanned: {
-    fr: 'Seul un trajet planifié peut demander son départ.',
+    fr: 'Seul un voyage planifié peut demander son départ.',
     en: 'Only a planned trip can request its departure.'
   },
   tripNeedsAuthorization: {
-    fr: "Le trajet n'a pas d'autorisation de départ accordée.",
+    fr: "Le voyage n'a pas d'autorisation de départ accordée.",
     en: 'The trip has no granted departure authorization.'
   },
   deviationTypeInUse: {
@@ -618,7 +618,7 @@ export const FLEET_MESSAGES = {
     en: 'This deviation type is inactive.'
   },
   deviationTripOver: {
-    fr: "Ce trajet est clôturé ou annulé : il ne reçoit plus d'écart.",
+    fr: "Ce voyage est clôturé ou annulé : il ne reçoit plus d'écart.",
     en: 'This trip is closed or cancelled: it takes no more deviations.'
   },
   deviationQualified: {
@@ -642,7 +642,7 @@ export const FLEET_MESSAGES = {
     en: 'An authorized or endured deviation can only be dismissed.'
   },
   tripDeviationsToQualify: {
-    fr: 'Écarts encore à qualifier sur ce trajet : {count}.',
+    fr: 'Écarts encore à qualifier sur ce voyage : {count}.',
     en: 'Deviations still to qualify on this trip: {count}.'
   },
   alertAlreadyTaken: {
@@ -654,7 +654,7 @@ export const FLEET_MESSAGES = {
     en: 'This alert is already handled.'
   },
   refillTripOfOtherVehicle: {
-    fr: "Le trajet {trip} n'est pas un trajet de ce véhicule.",
+    fr: "Le voyage {trip} n'est pas un voyage de ce véhicule.",
     en: 'Trip {trip} is not a trip of this vehicle.'
   },
   refillVehicleNotApproved: {
@@ -930,7 +930,7 @@ export const FLEET_MESSAGES = {
     en: 'The end mileage must be at least the start mileage.'
   },
   tripDebriefPlanInvalid: {
-    fr: 'Le plan de trajet est invalide : chaque étape a un lieu et des heures au format HH:MM.',
+    fr: 'Le plan de voyage est invalide : chaque étape a un lieu et des heures au format HH:MM.',
     en: 'The travel plan is invalid: each stop has a place and times as HH:MM.'
   },
   tripDebriefVoucherUsed: {

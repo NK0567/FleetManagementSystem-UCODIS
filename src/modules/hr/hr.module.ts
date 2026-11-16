@@ -21,6 +21,13 @@ import { orgUnitService, type OrgUnitApi } from './org-units'
 
 const HR_MENU_ORDER = 10
 
+/**
+ * The HR screens stay in the application but are not offered in the navigation: the logistics
+ * platform reads its drivers from the HR data, it does not manage them (meeting of 13/11/2026).
+ * Set to true to show the module again.
+ */
+const HR_IN_NAVIGATION = false
+
 export function registerHrModule(): void {
   registerFeatureRoutes({
     HRDASHBOARD: { to: '/hr/dashboard', menuKey: 'hrDashboard' },
@@ -35,6 +42,8 @@ export function registerHrModule(): void {
     WORKINGCALENDAR: { to: '/hr/working-calendar', menuKey: 'workingCalendar' },
     PUBLICHOLIDAY: { to: '/hr/public-holidays', menuKey: 'publicHoliday' }
   })
+
+  if (!HR_IN_NAVIGATION) return
 
   registerNavMenu({
     labelKey: 'nav.hr',

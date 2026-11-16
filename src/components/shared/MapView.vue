@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type * as Leaflet from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
@@ -58,7 +59,12 @@ const emit = defineEmits<{
   'marker-click': [id: string]
 }>()
 
+const { t } = useI18n()
 const container = ref<HTMLElement | null>(null)
+/** The background comes from the internet: without it the markers and routes still show. */
+const tilesUnavailable = ref(false)
+const TILE_ERRORS_BEFORE_NOTICE = 3
+let tileErrors = 0
 const map = shallowRef<Leaflet.Map | null>(null)
 let leaflet: typeof Leaflet | null = null
 let layers: Leaflet.LayerGroup | null = null
@@ -144,10 +150,19 @@ onMounted(async () => {
   if (disposed || !container.value) return
   const L = leaflet
   map.value = L.map(container.value).setView(props.center, props.zoom)
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18,
     attribution: '&copy; OpenStreetMap'
-  }).addTo(map.value)
+  })
+  tiles.on('tileerror', () => {
+    tileErrors += 1
+    if (tileErrors >= TILE_ERRORS_BEFORE_NOTICE) tilesUnavailable.value = true
+  })
+  tiles.on('tileload', () => {
+    tileErrors = 0
+    tilesUnavailable.value = false
+  })
+  tiles.addTo(map.value)
   layers = L.layerGroup().addTo(map.value)
   map.value.on('click', (event: Leaflet.LeafletMouseEvent) =>
     emit('map-click', event.latlng.lat, event.latlng.lng)
@@ -180,5 +195,14 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="container" class="w-full rounded border border-border z-0" :style="{ height }" />
+  <div class="relative">
+    <div ref="container" class="w-full rounded border border-border z-0" :style="{ height }" />
+    <p
+      v-if="tilesUnavailable"
+      class="absolute left-3 bottom-8 z-10 max-w-[70%] rounded bg-card/95 border border-border px-2.5 py-1.5 text-xs text-muted-foreground shadow"
+      role="status"
+    >
+      {{ t('common.map.tilesUnavailable') }}
+    </p>
+  </div>
 </template>

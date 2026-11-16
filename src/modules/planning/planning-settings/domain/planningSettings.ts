@@ -53,6 +53,8 @@ export interface ChannelSettings {
   call: boolean
   email: boolean
   whatsapp: boolean
+  /** An interactive voice server answers the calls: the recipient confirms by keypad, no agent needed (TRS03-US17). */
+  voiceServer: boolean
 }
 
 export const CHANNEL_KEYS = ['sms', 'call', 'email', 'whatsapp'] as const
@@ -168,7 +170,8 @@ export const PLANNING_SETTING_FIELDS: Record<PlanningSettingsSection, readonly F
     { key: 'sms', kind: 'boolean' },
     { key: 'call', kind: 'boolean' },
     { key: 'email', kind: 'boolean' },
-    { key: 'whatsapp', kind: 'boolean' }
+    { key: 'whatsapp', kind: 'boolean' },
+    { key: 'voiceServer', kind: 'boolean' }
   ],
   goods: [
     { key: 'countingUnit', kind: 'text', maxLength: 30 },
@@ -238,7 +241,7 @@ export const DEFAULT_PLANNING_SETTINGS: PlanningSettings = {
     serviceTransmission: true,
     plannerDirectEntry: true
   },
-  channels: { sms: true, call: true, email: true, whatsapp: true },
+  channels: { sms: true, call: true, email: true, whatsapp: true, voiceServer: false },
   goods: { countingUnit: 'cartons', prefillQuantities: true },
   requests: {
     externalReferenceLabel: 'N° de commande client',

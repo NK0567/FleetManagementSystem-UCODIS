@@ -24,6 +24,8 @@ export default {
   'common.confirm': 'Confirm',
   'common.confirmTitle': 'Confirm',
   'common.close': 'Close',
+  'common.map.tilesUnavailable':
+    'Map background unavailable: no or slow connection. Positions are still shown.',
   'common.remove': 'Remove',
   'common.previous': 'Previous',
   'common.next': 'Next',

@@ -7,7 +7,7 @@ export default {
 
   'fleet.settings.section.drivingTime': 'Temps de conduite et de repos',
   'fleet.settings.section.drivingTime.hint':
-    'Limites réglementaires contrôlées avant un départ et pendant les trajets.',
+    'Limites réglementaires contrôlées avant un départ et pendant les voyages.',
   'fleet.settings.section.geofencing': 'Sites et géorepères',
   'fleet.settings.section.geofencing.hint':
     "Rayon appliqué à un site lorsque ni le site ni son type n'en fixent un.",

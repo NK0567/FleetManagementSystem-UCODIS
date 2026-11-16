@@ -115,7 +115,7 @@ const SEED: Omit<TripDebriefRow, keyof typeof seedAudit>[] = [
     dailyRest: 1,
     plan: OUTBOUND(false),
     events: 'Pause de Moramanga raccourcie.',
-    actionText: 'Rappel du respect des pauses prévues au plan de trajet.',
+    actionText: 'Rappel du respect des pauses prévues au plan de voyage.',
     actionOwner: 'Responsable sécurité',
     actionDueOn: day(3),
     driverSignedOn: day(-3),

@@ -63,7 +63,7 @@ const SEED: Omit<DriverReportRow, keyof typeof seedAudit>[] = [
     description: 'Véhicules en stationnement sur la voie au croisement, visibilité réduite.',
     ownerName: 'Responsable sécurité',
     actionKind: 'preventive',
-    actionText: 'Rappel du point de vigilance dans le plan de trajet et à la causerie du matin.',
+    actionText: 'Rappel du point de vigilance dans le plan de voyage et à la causerie du matin.',
     dueOn: day(5),
     closedOn: null,
     status: 'in_progress'
@@ -96,7 +96,7 @@ const SEED: Omit<DriverReportRow, keyof typeof seedAudit>[] = [
     channel: 'oral',
     occurredOn: day(-4),
     reportedOn: day(-4),
-    description: 'Camion en panne sur la RN2, trente minutes de retard sur le plan de trajet.',
+    description: 'Camion en panne sur la RN2, trente minutes de retard sur le plan de voyage.',
     ownerName: '',
     actionKind: '',
     actionText: '',

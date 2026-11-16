@@ -262,7 +262,7 @@ export const PLANNING_MESSAGES = {
     en: 'This order can no longer be changed.'
   },
   orderScheduleLocked: {
-    fr: 'L’itinéraire et l’heure se lisent sur le trajet une fois l’ordre planifié.',
+    fr: 'L’itinéraire et l’heure se lisent sur le voyage une fois l’ordre planifié.',
     en: 'Once the order is planned, the route and the time are read from the trip.'
   },
   orderLinesLocked: {
@@ -350,7 +350,7 @@ export const PLANNING_MESSAGES = {
     en: '{productA} and {productB} do not travel together.'
   },
   orderTripNotPlanned: {
-    fr: 'Seul un trajet encore planifié peut recevoir un ordre.',
+    fr: 'Seul un voyage encore planifié peut recevoir un ordre.',
     en: 'Only a trip that is still planned can take an order.'
   },
   orderNotCarrier: {
@@ -394,7 +394,7 @@ export const PLANNING_MESSAGES = {
     en: 'The note was not sent to the warehouse system: the confirmation is entered in the TMS.'
   },
   pickupFleetOnly: {
-    fr: 'Le changement de véhicule concerne un ordre de la flotte, déjà planifié sur un trajet.',
+    fr: 'Le changement de véhicule concerne un ordre de la flotte, déjà planifié sur un voyage.',
     en: 'A vehicle change applies to a fleet order already planned on a trip.'
   },
   pickupDeviationRefused: {
@@ -474,7 +474,7 @@ export const PLANNING_MESSAGES = {
     en: 'The warehouse has not declared the loading of this line yet.'
   },
   executionNotCarrier: {
-    fr: 'Le départ et l’arrivée se saisissent pour un transporteur. Pour la flotte, ils sont sur le trajet.',
+    fr: 'Le départ et l’arrivée se saisissent pour un transporteur. Pour la flotte, ils sont sur le voyage.',
     en: 'Departure and arrival are entered for a carrier. For the fleet, they belong to the trip.'
   },
   executionNotReady: {
@@ -702,7 +702,7 @@ export const PLANNING_MESSAGES = {
     en: 'Enter the voucher number.'
   },
   closingVehicle: {
-    fr: 'Le véhicule se lit sur le trajet : aucun n’est associé à cet ordre.',
+    fr: 'Le véhicule se lit sur le voyage : aucun n’est associé à cet ordre.',
     en: 'The vehicle is read from the trip: none is linked to this order.'
   },
   closingDates: {

@@ -9,10 +9,10 @@ export default {
   'fleet.roadChecklists.saveError': "La check-list n'a pas pu être enregistrée.",
   'fleet.roadChecklists.createError': "La check-list n'a pas pu être enregistrée.",
 
-  'fleet.roadChecklists.search.all': 'N°, trajet ou véhicule',
+  'fleet.roadChecklists.search.all': 'N°, voyage ou véhicule',
 
   'fleet.roadChecklists.col.no': 'N°',
-  'fleet.roadChecklists.col.tripNo': 'Trajet',
+  'fleet.roadChecklists.col.tripNo': 'Voyage',
   'fleet.roadChecklists.col.stage': 'Moment',
   'fleet.roadChecklists.col.takenAt': 'Date et heure',
   'fleet.roadChecklists.col.vehiclePlate': 'Véhicule',
@@ -22,7 +22,7 @@ export default {
   'fleet.roadChecklists.form.general': 'Relevé',
   'fleet.roadChecklists.form.results': 'Points contrôlés',
   'fleet.roadChecklists.form.no': 'N°',
-  'fleet.roadChecklists.form.tripNo': 'Trajet',
+  'fleet.roadChecklists.form.tripNo': 'Voyage',
   'fleet.roadChecklists.form.stage': 'Moment',
   'fleet.roadChecklists.form.takenAt': 'Date et heure',
   'fleet.roadChecklists.anomalies': 'Aucune anomalie | {n} anomalie | {n} anomalies',

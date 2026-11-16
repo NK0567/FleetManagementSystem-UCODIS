@@ -77,8 +77,8 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
   },
   driverAvailability: {
     available: { fr: 'Disponible', en: 'Available' },
-    on_trip: { fr: 'En trajet', en: 'On trip' },
-    trip_planned: { fr: 'Trajet prévu', en: 'Trip planned' },
+    on_trip: { fr: 'En voyage', en: 'On trip' },
+    trip_planned: { fr: 'Voyage prévu', en: 'Trip planned' },
     on_leave: { fr: 'En congé', en: 'On leave' },
     unavailable: { fr: 'Indisponible', en: 'Unavailable' }
   },
@@ -360,6 +360,10 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
     endured: { fr: 'Subi', en: 'Endured' },
     unjustified: { fr: 'Non justifié', en: 'Unjustified' }
   },
+  deviationSource: {
+    telematics: { fr: 'Détecté automatiquement', en: 'Detected automatically' },
+    manual: { fr: 'Saisi', en: 'Entered' }
+  },
   deviationDecision: {
     dismissed: { fr: 'Classé', en: 'Dismissed' },
     warning: { fr: 'Avertissement', en: 'Warning' },
@@ -525,7 +529,7 @@ export const FLEET_OPTION_SETS: Record<string, Record<string, LocalizedText>> = 
     },
     departures: { fr: 'Départs autorisés sur la période', en: 'Departures granted in the period' },
     deviations: {
-      fr: 'Écarts de trajet justifiés ou subis',
+      fr: "Écarts d'itinéraire justifiés ou subis",
       en: 'Trip deviations authorized or endured'
     }
   },

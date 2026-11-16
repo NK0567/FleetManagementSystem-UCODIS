@@ -47,7 +47,7 @@ const ENTITIES: Record<string, LocalizedText> = {
   vehicles: { fr: 'Véhicule', en: 'Vehicle' },
   couplings: { fr: 'Attelage', en: 'Coupling' },
   'driver-assignments': { fr: 'Affectation', en: 'Assignment' },
-  trips: { fr: 'Trajet', en: 'Trip' },
+  trips: { fr: 'Voyage', en: 'Trip' },
   documents: { fr: 'Document', en: 'Document' },
   claims: { fr: 'Sinistre', en: 'Claim' },
   infractions: { fr: 'Infraction', en: 'Infraction' },

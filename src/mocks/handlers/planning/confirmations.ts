@@ -100,7 +100,11 @@ function activityOf(
   plannedDeparture: string | null
 ): ConfirmationLineApi['activity'] {
   if (state !== 'pending') return null
-  if (channel === 'call') return callDue(db, plannedDeparture) ? 'call' : 'call_later'
+  if (channel === 'call') {
+    /* With an interactive voice server the recipient answers by keypad: nothing for the agents. */
+    if (planningSettings(db).channels.voiceServer) return 'await_answer'
+    return callDue(db, plannedDeparture) ? 'call' : 'call_later'
+  }
   return channel === 'none' ? null : 'await_answer'
 }
 

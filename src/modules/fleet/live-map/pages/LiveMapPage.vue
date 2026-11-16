@@ -68,7 +68,12 @@ const cardNo = ref<string | null>(null)
 const fitKey = ref(0)
 let timer: ReturnType<typeof setInterval> | null = null
 
-/* ── Alerts in progress, listed from the floating button over the map ── */
+/*
+ * ── Alerts of the road in progress, listed from the floating button over the map ──
+ * What happens to a vehicle on the road: deviations and telematics. Document and inspection
+ * deadlines are not read off a map: they are in the alert center, with all the other alerts.
+ */
+const ROAD_ALERT_CATEGORIES = ['deviation', 'telematics']
 const ALERT_PAGE_SIZE = 100
 const alerts = ref<AlertApi[]>([])
 const alertTotal = ref(0)
@@ -81,7 +86,10 @@ async function loadAlerts() {
       pageSize: ALERT_PAGE_SIZE,
       sortBy: 'since',
       sortDirection: 'DESC',
-      filters: [{ field: 'status', valueType: 'string', value: ['new', 'acknowledged'] }]
+      filters: [
+        { field: 'status', valueType: 'string', value: ['new', 'acknowledged'] },
+        { field: 'category', valueType: 'string', value: ROAD_ALERT_CATEGORIES }
+      ]
     })
     alerts.value = page.data.items
     alertTotal.value = page.data.meta.total
@@ -707,7 +715,7 @@ function delayLabel(minutes: number | null) {
                   {{ t('fleet.liveMap.alerts.title') }}
                 </span>
                 <RouterLink to="/fleet/alerts" class="text-xs text-primary hover:underline">
-                  {{ t('fleet.liveMap.alerts.all', { count: alertTotal }) }}
+                  {{ t('fleet.liveMap.alerts.all') }}
                 </RouterLink>
               </div>
               <p v-if="!alerts.length" class="px-3 py-4 text-sm text-muted-foreground">

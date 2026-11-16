@@ -40,7 +40,7 @@ export default {
   'fleet.telematicsEvents.form.longitude': 'Longitude',
   'fleet.telematicsEvents.form.detail': 'Détail',
   'fleet.telematicsEvents.form.driverName': 'Conducteur',
-  'fleet.telematicsEvents.form.tripNo': 'Trajet',
+  'fleet.telematicsEvents.form.tripNo': 'Voyage',
   'fleet.telematicsEvents.form.measure': 'Mesure',
   'fleet.telematicsEvents.form.status': 'Statut',
   'fleet.telematicsEvents.form.acknowledged': 'Pris en compte',

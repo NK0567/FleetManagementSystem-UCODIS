@@ -24,6 +24,8 @@ export default {
   'common.confirm': 'Confirmer',
   'common.confirmTitle': 'Confirmer',
   'common.close': 'Fermer',
+  'common.map.tilesUnavailable':
+    'Fond de carte indisponible : connexion absente ou lente. Les positions restent affichées.',
   'common.remove': 'Retirer',
   'common.previous': 'Précédent',
   'common.next': 'Suivant',

@@ -23,7 +23,7 @@ export default {
   'fleet.routeTemplates.col.destinationName': 'Destination',
   'fleet.routeTemplates.col.stopCount': 'Arrêts',
   'fleet.routeTemplates.col.plannedDurationMin': 'Durée prévue (min)',
-  'fleet.routeTemplates.col.tripCount': 'Trajets',
+  'fleet.routeTemplates.col.tripCount': 'Voyages',
 
   'fleet.routeTemplates.form.general': 'Général',
   'fleet.routeTemplates.form.stops': 'Arrêts',
@@ -32,9 +32,9 @@ export default {
   'fleet.routeTemplates.form.recurring': 'Récurrent',
   'fleet.routeTemplates.form.estimatedDistanceKm': 'Distance par la route (km)',
   'fleet.routeTemplates.form.estimatedDistanceKmHint':
-    'Distance réelle par la route, saisie une fois : elle sert de référence aux trajets.',
+    'Distance réelle par la route, saisie une fois : elle sert de référence aux voyages.',
   'fleet.routeTemplates.form.active': 'Actif',
-  'fleet.routeTemplates.form.tripCount': 'Trajets sur cet itinéraire',
+  'fleet.routeTemplates.form.tripCount': 'Voyages sur cet itinéraire',
   'fleet.routeTemplates.stops.site': 'Site',
   'fleet.routeTemplates.stops.role': 'Rôle',
   'fleet.routeTemplates.stops.interval': 'Conduite (min)',
@@ -48,11 +48,11 @@ export default {
     'Au moins deux arrêts, le départ en premier, un site par arrêt, jamais deux fois le même site à la suite.',
   'fleet.routeTemplates.form.fuelReferenceL100': 'Consommation de référence (L/100 km)',
   'fleet.routeTemplates.form.fuelReferenceL100Hint':
-    'Prime sur celle du type de véhicule pour les trajets de cet itinéraire.',
+    'Prime sur celle du type de véhicule pour les voyages de cet itinéraire.',
   'fleet.routeTemplates.form.distanceComputedHint':
     "Recalculée à chaque enregistrement (simulation : vol d'oiseau × 1,25).",
   'fleet.routeTemplates.form.referenceDuration': 'Temps de référence',
   'fleet.routeTemplates.form.referenceDurationHint':
-    'Distance à la vitesse moyenne, plus les arrêts. Base du plan de trajet.',
+    'Distance à la vitesse moyenne, plus les arrêts. Base du plan de voyage.',
   'fleet.routeTemplates.noResultsCreate': 'Aucun itinéraire type. Créez-en un avec Nouveau.'
 }

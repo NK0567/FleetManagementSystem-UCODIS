@@ -115,6 +115,14 @@ defineExpose(expose)
         </BaseFormField>
       </div>
       <div class="space-y-3 min-w-0">
+        <BaseFormField
+          v-if="!isNew && initialData.source"
+          :label="t('fleet.routeDeviations.form.source')"
+        >
+          <p class="text-sm text-card-foreground">
+            {{ optionsStore.getOptionLabel('deviationSource', initialData.source) }}
+          </p>
+        </BaseFormField>
         <BaseFormField :label="t('fleet.routeDeviations.form.location')">
           <FormInput v-model="draft.location" :maxlength="120" :disabled="disabled" />
         </BaseFormField>

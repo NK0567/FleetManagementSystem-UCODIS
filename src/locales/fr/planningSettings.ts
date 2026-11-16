@@ -83,6 +83,7 @@ export default {
   'planning.settings.field.channels.call': 'Appel',
   'planning.settings.field.channels.email': 'E-mail',
   'planning.settings.field.channels.whatsapp': 'WhatsApp',
+  'planning.settings.field.channels.voiceServer': 'Serveur vocal interactif',
   'planning.settings.field.confirmation.callMoment': 'Moment des appels',
   'planning.settings.incidents.title': "Types d'incident, types de motif et codes motif",
   'planning.settings.incidents.hint':

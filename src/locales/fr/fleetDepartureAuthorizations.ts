@@ -10,10 +10,10 @@ export default {
   'fleet.departureAuthorizations.saveError': "L'autorisation n'a pas pu être enregistrée.",
   'fleet.departureAuthorizations.createError': "La demande n'a pas pu être enregistrée.",
 
-  'fleet.departureAuthorizations.search.all': 'N°, trajet, véhicule ou conducteur',
+  'fleet.departureAuthorizations.search.all': 'N°, voyage, véhicule ou conducteur',
 
   'fleet.departureAuthorizations.col.no': 'N°',
-  'fleet.departureAuthorizations.col.tripNo': 'Trajet',
+  'fleet.departureAuthorizations.col.tripNo': 'Voyage',
   'fleet.departureAuthorizations.col.plannedDeparture': 'Départ prévu',
   'fleet.departureAuthorizations.col.vehiclePlate': 'Véhicule',
   'fleet.departureAuthorizations.col.driverName': 'Conducteur',
@@ -23,7 +23,7 @@ export default {
   'fleet.departureAuthorizations.form.general': 'Demande',
   'fleet.departureAuthorizations.form.checks': 'Contrôles',
   'fleet.departureAuthorizations.form.no': 'N°',
-  'fleet.departureAuthorizations.form.tripNo': 'Trajet',
+  'fleet.departureAuthorizations.form.tripNo': 'Voyage',
   'fleet.departureAuthorizations.actionError': "L'action n'a pas pu être effectuée.",
   'fleet.departureAuthorizations.decidedBy': 'Décision de {user} le {date}.',
   'fleet.departureAuthorizations.listView.pending': 'En attente',
