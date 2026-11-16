@@ -178,6 +178,13 @@ const closeMenu = () => {
   openMenuIndex.value = null
 }
 
+// Un menu est déjà ouvert : survoler un autre onglet bascule dessus, comme une barre de menus classique.
+const hoverMenu = (index: number) => {
+  if (openMenuIndex.value === null || openMenuIndex.value === index) return
+  if (!navMenus.value[index]?.subItems.length) return
+  openMenuIndex.value = index
+}
+
 function onDocumentClick(e: MouseEvent) {
   if (openMenuIndex.value === null) return
   const target = e.target as HTMLElement
@@ -187,7 +194,10 @@ function onDocumentClick(e: MouseEvent) {
 }
 
 function onDocumentKeydown(e: KeyboardEvent) {
-  if (e.key === 'Escape') closeMenu()
+  if (e.key !== 'Escape') return
+  const idx = openMenuIndex.value
+  closeMenu()
+  if (idx !== null) menuTriggerEls.value[idx]?.focus()
 }
 
 function onWindowResize() {
@@ -295,7 +305,10 @@ watch(openMenuIndex, async (idx) => {
                     isMenuActive(menu) ? 'nav-top-link--active' : ''
                   ]"
                   :ref="(el) => setMenuTriggerEl(index, el as HTMLElement | null)"
+                  :aria-expanded="openMenuIndex === index"
+                  aria-haspopup="menu"
                   @click.stop="toggleMenu(index)"
+                  @mouseenter="hoverMenu(index)"
                 >
                   {{ t(menu.labelKey) }}
                   <ChevronDown
@@ -445,6 +458,15 @@ watch(openMenuIndex, async (idx) => {
     padding-left: 0;
     padding-right: 0;
   }
+}
+
+.nav-top-link:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+.nav-top-link--active:hover {
+  background-color: var(--color-gray-100, #f3f4f6);
 }
 
 .nav-top-link--active {

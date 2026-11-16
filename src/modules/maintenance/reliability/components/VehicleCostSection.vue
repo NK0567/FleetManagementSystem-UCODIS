@@ -49,10 +49,10 @@ const lines = computed(() =>
     >
       <div class="xl:col-span-2 min-w-0 space-y-3 text-sm">
         <form class="flex flex-wrap items-end gap-2" @submit.prevent="load">
-          <BaseFormField :label="t('maintenance.reliability.from')">
+          <BaseFormField class="w-44" :label="t('maintenance.reliability.from')">
             <DateFormInput v-model="from" />
           </BaseFormField>
-          <BaseFormField :label="t('maintenance.reliability.to')">
+          <BaseFormField class="w-44" :label="t('maintenance.reliability.to')">
             <DateFormInput v-model="to" />
           </BaseFormField>
           <button

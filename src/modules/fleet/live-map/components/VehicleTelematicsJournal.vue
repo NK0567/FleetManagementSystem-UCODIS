@@ -102,16 +102,16 @@ const recordLink = (entry: VehicleJournalEntry) => ({
     >
       <div class="xl:col-span-2 min-w-0 space-y-3 text-sm">
         <form class="flex flex-wrap items-end gap-2" @submit.prevent="load">
-          <BaseFormField :label="t('fleet.liveMap.journal.from')">
+          <BaseFormField class="w-44" :label="t('fleet.liveMap.journal.from')">
             <DateFormInput v-model="from" />
           </BaseFormField>
-          <BaseFormField :label="t('fleet.liveMap.journal.to')">
+          <BaseFormField class="w-44" :label="t('fleet.liveMap.journal.to')">
             <DateFormInput v-model="to" />
           </BaseFormField>
-          <BaseFormField :label="t('fleet.liveMap.journal.family')">
+          <BaseFormField class="w-52" :label="t('fleet.liveMap.journal.family')">
             <select
               v-model="family"
-              class="h-9 px-2 border border-border rounded text-sm bg-card"
+              class="h-9 w-full px-2 border border-border rounded text-sm bg-card"
               :aria-label="t('fleet.liveMap.journal.family')"
             >
               <option value="">{{ t('fleet.liveMap.journal.allFamilies') }}</option>
