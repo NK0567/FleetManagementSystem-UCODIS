@@ -293,14 +293,6 @@ export const ROLE_GUIDES: Record<UserProfileCode, RoleGuide> = {
         }
       ),
       step(
-        '/planning/loading-preparations',
-        { fr: 'Préparer un chargement', en: 'Prepare a loading' },
-        {
-          fr: 'Nouvelle préparation : dépôt, commandes, véhicules. Proposer une répartition, ajustez, puis Valider.',
-          en: 'New preparation: depot, orders, vehicles. Propose a split, adjust, then Validate.'
-        }
-      ),
-      step(
         '/planning/loading',
         { fr: 'Envoyer le bon d’enlèvement', en: 'Send the pickup note' },
         {

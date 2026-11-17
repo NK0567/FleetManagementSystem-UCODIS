@@ -230,13 +230,6 @@ export function registerFleetModule(): void {
           menuKey: 'fuelCard'
         },
         {
-          labelKey: 'nav.fuelStations',
-          to: '/fleet/fuel-cards/stations',
-          group: 'nav.group.fuel',
-          icon: MapPin,
-          menuKey: 'fuelCard'
-        },
-        {
           labelKey: 'nav.documents',
           to: '/fleet/documents',
           group: 'nav.group.documents',
@@ -333,6 +326,13 @@ export function registerFleetModule(): void {
           group: 'nav.group.setup',
           icon: MapPinned,
           menuKey: 'site'
+        },
+        {
+          labelKey: 'nav.fuelStations',
+          to: '/fleet/fuel-cards/stations',
+          group: 'nav.group.setup',
+          icon: MapPin,
+          menuKey: 'fuelCard'
         },
         {
           labelKey: 'nav.providers',
@@ -443,7 +443,7 @@ export function registerFleetModule(): void {
     },
     {
       settingsGroup: 'nav.group.refFleet',
-      baseData: ['/fleet/vehicles', '/fleet/drivers', '/fleet/fuel-cards/stations']
+      baseData: ['/fleet/vehicles', '/fleet/drivers', '/fleet/route-templates']
     }
   )
 

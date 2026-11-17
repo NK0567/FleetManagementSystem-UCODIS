@@ -240,7 +240,7 @@ const moreActions = computed<MoreAction[]>(() => {
             </p>
             <p v-for="field in SURVEY_FIELDS" :key="field" class="text-muted-foreground">
               {{ t(`planning.deliveryRequests.survey.${field}`) }} :
-              <span class="text-warning">{{ '★'.repeat(item.ordererSurvey[field]) }}</span>
+              <span class="text-yellow-400">{{ '★'.repeat(item.ordererSurvey[field]) }}</span>
             </p>
             <p v-if="item.ordererSurvey.comment">{{ item.ordererSurvey.comment }}</p>
           </div>
@@ -301,7 +301,7 @@ const moreActions = computed<MoreAction[]>(() => {
             :key="value"
             type="button"
             class="cursor-pointer text-2xl leading-none"
-            :class="value <= survey[field] ? 'text-warning' : 'text-muted-foreground'"
+            :class="value <= survey[field] ? 'text-yellow-400' : 'text-border'"
             :aria-label="`${t(`planning.deliveryRequests.survey.${field}`)} ${value}`"
             @click="survey[field] = value"
           >

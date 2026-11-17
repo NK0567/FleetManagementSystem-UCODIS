@@ -35,8 +35,14 @@ const emit = defineEmits<{
       class="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50"
       @click="!loading && emit('cancel')"
     >
-      <div :class="['bg-card rounded-lg shadow-lg p-6 w-full mx-4', panelClass]" @click.stop>
-        <div class="flex items-center justify-between mb-2">
+      <div
+        :class="[
+          'bg-card rounded-lg shadow-lg p-6 w-full mx-4 max-h-[calc(100vh-8rem)] flex flex-col',
+          panelClass
+        ]"
+        @click.stop
+      >
+        <div class="flex items-center justify-between mb-2 shrink-0">
           <h3 class="text-lg font-semibold text-card-foreground">
             {{ title ?? t('common.confirmTitle') }}
           </h3>
@@ -51,7 +57,7 @@ const emit = defineEmits<{
 
         <div
           v-if="loading"
-          class="mb-4 flex items-center gap-2 rounded-md border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground"
+          class="mb-4 shrink-0 flex items-center gap-2 rounded-md border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground"
           role="status"
         >
           <LoaderCircle class="h-4 w-4 shrink-0 animate-spin" aria-hidden="true" />
@@ -59,9 +65,12 @@ const emit = defineEmits<{
         </div>
 
         <p v-if="message" class="text-muted-foreground mb-4">{{ message }}</p>
-        <slot v-else />
+        <!-- A long content scrolls inside the panel; the title and the buttons stay in view. -->
+        <div v-else class="min-h-0 flex-1 overflow-y-auto -mx-1 px-1">
+          <slot />
+        </div>
 
-        <div class="flex gap-3 justify-end mt-4">
+        <div class="flex gap-3 justify-end mt-4 shrink-0">
           <button
             @click="emit('cancel')"
             :disabled="loading"

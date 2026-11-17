@@ -41,6 +41,8 @@ const acting = ref<'receive-confirm' | 'receive-contest' | 'refuse' | null>(null
 const signer = ref('')
 
 const STEPS = ['planned', 'on_the_way', 'on_site', 'received'] as const
+/** The carrier in charge of the delivery; the company itself when it delivers with its own fleet. */
+const carrierLabel = computed(() => tracking.value?.carrierName || appConfig.companyName)
 const stepIndex = computed(() => (tracking.value ? STEPS.indexOf(tracking.value.step) : 0))
 const canAnswerReception = computed(
   () =>
@@ -216,7 +218,12 @@ watch(token, load)
     <div class="w-full max-w-md space-y-4">
       <header class="flex items-center gap-3">
         <img :src="logo" :alt="appConfig.companyName" class="h-10" />
-        <p class="text-sm text-muted-foreground">{{ t('planning.tracking.title') }}</p>
+        <div class="min-w-0">
+          <p class="text-sm text-muted-foreground">{{ t('planning.tracking.title') }}</p>
+          <p v-if="tracking" class="text-sm font-medium text-foreground">
+            {{ t('planning.tracking.carrier', { name: carrierLabel }) }}
+          </p>
+        </div>
       </header>
 
       <LoadingSpinner v-if="loading" :text="t('common.loading')" />
@@ -238,6 +245,14 @@ watch(token, load)
           </dd>
           <dt class="text-muted-foreground">{{ t('planning.tracking.date') }}</dt>
           <dd>{{ formatDate(tracking.plannedDeparture) }}</dd>
+          <template v-if="tracking.vehiclePlate">
+            <dt class="text-muted-foreground">{{ t('planning.tracking.vehicle') }}</dt>
+            <dd>{{ tracking.vehiclePlate }}</dd>
+          </template>
+          <template v-if="tracking.driverName">
+            <dt class="text-muted-foreground">{{ t('planning.tracking.driver') }}</dt>
+            <dd>{{ tracking.driverName }}</dd>
+          </template>
           <template v-if="tracking.expectedArrival && tracking.step !== 'received'">
             <dt class="text-muted-foreground">{{ t('planning.tracking.eta') }}</dt>
             <dd :class="tracking.late ? 'text-warning font-medium' : ''">
@@ -613,8 +628,8 @@ watch(token, load)
           <p class="font-medium">{{ t('planning.tracking.survey.title') }}</p>
           <template v-if="tracking.satisfactionScore !== null">
             <p>
-              {{ '★'.repeat(tracking.satisfactionScore)
-              }}{{ '☆'.repeat(5 - tracking.satisfactionScore) }}
+              <span class="text-yellow-400">{{ '★'.repeat(tracking.satisfactionScore) }}</span
+              ><span class="text-border">{{ '★'.repeat(5 - tracking.satisfactionScore) }}</span>
               <span v-if="tracking.satisfactionComment" class="text-muted-foreground">
                 · {{ tracking.satisfactionComment }}
               </span>
@@ -633,7 +648,7 @@ watch(token, load)
                 :key="value"
                 type="button"
                 class="cursor-pointer text-2xl leading-none"
-                :class="value <= score ? 'text-warning' : 'text-muted-foreground'"
+                :class="value <= score ? 'text-yellow-400' : 'text-border'"
                 :aria-label="String(value)"
                 @click="score = value"
               >
