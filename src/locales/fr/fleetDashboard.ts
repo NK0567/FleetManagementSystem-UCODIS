@@ -45,7 +45,7 @@ export default {
   'fleet.dashboard.supervision.offCorridor': "À {km} km de l'itinéraire",
   'fleet.dashboard.supervision.offSites': 'Hors de tout site connu',
   'fleet.dashboard.supervision.speed': '{speed} km/h',
-  'fleet.dashboard.daily.title': "Aujourd'hui",
+  'fleet.dashboard.daily.title': 'Activité du jour et du mois',
   'fleet.dashboard.daily.month': 'Ce mois : {value}',
   'fleet.dashboard.daily.km': 'Kilomètres parcourus',
   'fleet.dashboard.daily.quantity': 'Quantité transportée',
