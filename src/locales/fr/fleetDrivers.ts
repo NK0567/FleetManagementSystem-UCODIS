@@ -48,8 +48,8 @@ export default {
   'fleet.drivers.score.aboveThreshold': 'Seuil de formation : {threshold}',
   'fleet.drivers.score.trainingPending': 'Formation prévue : {no}',
   'fleet.drivers.score.proposeTraining': 'Proposer une formation',
-  'fleet.drivers.score.points': '{earned} sur {max} points du score',
-  'fleet.drivers.score.weight': '{weight} % du score',
+  'fleet.drivers.score.points': '{earned} points sur {max}',
+  'fleet.drivers.score.weight': 'pèse {weight} % du score',
   'fleet.drivers.score.explain.safety':
     'Aucun arrêt non justifié ni comportement à risque confirmé. | Un arrêt non justifié ou comportement confirmé par une infraction retenue. | {n} arrêts non justifiés ou comportements confirmés par une infraction retenue.',
   'fleet.drivers.score.explain.route':

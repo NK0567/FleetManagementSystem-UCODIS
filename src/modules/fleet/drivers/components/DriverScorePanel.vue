@@ -11,7 +11,7 @@ import type { FamilyScore, ScoreTerm } from '../domain/driverScore'
 const props = defineProps<{ driverNo: string }>()
 const emit = defineEmits<{ changed: [] }>()
 
-const { t } = useI18n()
+const { t, te } = useI18n()
 const { canInsert: canProposeTraining } = usePermissions('TRAINING')
 
 const detail = ref<DriverScoreApi | null>(null)
@@ -48,14 +48,6 @@ const deltaText = computed(() => {
   return t('fleet.drivers.score.delta', { delta: delta > 0 ? `+${delta}` : String(delta) })
 })
 
-/** mark = min(cap, max(0, 100 - sum of count x points)), written out with its figures. */
-function formulaOf(family: FamilyScore): string {
-  const terms = family.terms.map((term) => `${term.count} × ${term.points}`)
-  const lost = terms.length ? ` - (${terms.join(' + ')})` : ''
-  const cap = family.cap !== null ? t('fleet.drivers.score.capped', { cap: family.cap }) : ''
-  return `100${lost}${cap} = ${family.mark}`
-}
-
 function sourceLabel(term: ScoreTerm): string {
   const source = t(`fleet.settings.scoreSource.${term.source}`)
   return term.severity
@@ -80,6 +72,12 @@ function pointsText(family: FamilyScore): string {
     earned: decimal((family.mark * family.weightPct) / 100),
     max: decimal(family.weightPct)
   })
+}
+
+/** What feeds the family, in plain words; the families the administrator added have no ready-made sentence. */
+function explainOf(family: FamilyScore): string {
+  const key = `fleet.drivers.score.explain.${family.family}`
+  return te(key) ? t(key, { n: family.events }, family.events) : ''
 }
 
 const barTone = (mark: number) =>
@@ -157,8 +155,8 @@ const barTone = (mark: number) =>
               :style="{ width: `${family.mark}%` }"
             />
           </div>
-          <p class="text-xs text-muted-foreground" data-testid="score-formula">
-            {{ t('fleet.drivers.score.formula', { formula: formulaOf(family) }) }}
+          <p v-if="explainOf(family)" class="text-xs text-muted-foreground">
+            {{ explainOf(family) }}
           </p>
           <ul
             v-if="family.terms.length || family.cap !== null"
