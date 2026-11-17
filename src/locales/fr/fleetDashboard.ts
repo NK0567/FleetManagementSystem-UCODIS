@@ -9,7 +9,7 @@ export default {
   'fleet.dashboard.kpi.driversSub': 'Ni en congé, ni en voyage, ni inéligibles',
   'fleet.dashboard.kpi.documents': 'Documents à régulariser',
   'fleet.dashboard.kpi.documentsSub': 'Expirés ou manquants · {expiring} à renouveler',
-  'fleet.dashboard.kpi.fuel': 'Carburant du mois',
+  'fleet.dashboard.kpi.fuel': 'Pleins du mois',
   'fleet.dashboard.kpi.fuelSub': 'Moyenne {average} L/100 km',
   'fleet.dashboard.kpi.compliance': 'Voyages conformes',
   'fleet.dashboard.kpi.complianceSub':

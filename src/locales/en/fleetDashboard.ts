@@ -9,7 +9,7 @@ export default {
   'fleet.dashboard.kpi.driversSub': 'Not on leave, not on a trip, eligible',
   'fleet.dashboard.kpi.documents': 'Documents to sort out',
   'fleet.dashboard.kpi.documentsSub': 'Expired or missing · {expiring} to renew',
-  'fleet.dashboard.kpi.fuel': 'Fuel this month',
+  'fleet.dashboard.kpi.fuel': 'Refuels this month',
   'fleet.dashboard.kpi.fuelSub': 'Average {average} L/100 km',
   'fleet.dashboard.kpi.compliance': 'Compliant trips',
   'fleet.dashboard.kpi.complianceSub':
