@@ -79,6 +79,10 @@ export default {
     'Conduite relevée d’après les passages aux étapes : {duration}.',
   'fleet.trips.drivingTime.driven.planned':
     'Conduite prévue d’après l’itinéraire type : {duration}.',
+  'fleet.trips.drivingTime.realTitle': 'Temps de conduite réel sur les {days} derniers jours',
+  'fleet.trips.drivingTime.tripsOfPeriod':
+    'Aucun voyage sur la période | 1 voyage sur la période | {n} voyages sur la période',
+  'fleet.trips.drivingTime.overrunTitle': 'Dépassements des temps réglementaires',
   'fleet.trips.drivingTime.noBreach': 'Aucun seuil de conduite ou de repos dépassé.',
   'fleet.trips.drivingTime.hint':
     'Seuils des réglages de la flotte ; le temps passé à une étape est sa pause prévue.',

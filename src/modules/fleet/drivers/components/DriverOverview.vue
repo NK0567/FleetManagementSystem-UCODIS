@@ -54,6 +54,9 @@ const expandedSections = ref({
             :model-value="driver.drivingAuthorized ? t('common.yes') : t('common.no')"
             disabled
           />
+          <p class="mt-1 text-xs text-muted-foreground" data-testid="driving-authorized-hint">
+            {{ t('fleet.drivers.drivingAuthorizedHint') }}
+          </p>
         </BaseFormField>
       </div>
     </FormSection>

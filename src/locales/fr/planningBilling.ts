@@ -14,7 +14,7 @@ export default {
   'planning.billing.issue.contestation': 'Contestation à traiter',
   'planning.billing.issue.tariff': 'Pas de tarif',
   'planning.billing.line': 'Ligne {n}',
-  'planning.billing.kpi.ready': 'Prêtes à facturer',
+  'planning.billing.kpi.ready': 'En attente de facturation',
   'planning.billing.kpi.blocked': 'Bloquées',
   'planning.billing.kpi.blockedSub': 'Un préalable manque avant la facture',
   'planning.billing.kpi.invoiced': 'Facturées',

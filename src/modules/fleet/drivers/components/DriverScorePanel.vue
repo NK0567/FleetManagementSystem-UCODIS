@@ -71,6 +71,17 @@ const overallFormula = computed(() => {
   return `${parts.join(' + ')} = ${detail.value.score}`
 })
 
+const decimal = (value: number) =>
+  value.toLocaleString(undefined, { maximumFractionDigits: 1, minimumFractionDigits: 0 })
+
+/** What the family brings to the overall score, out of what its weight allows. */
+function pointsText(family: FamilyScore): string {
+  return t('fleet.drivers.score.points', {
+    earned: decimal((family.mark * family.weightPct) / 100),
+    max: decimal(family.weightPct)
+  })
+}
+
 const barTone = (mark: number) =>
   mark >= 80 ? 'bg-success' : mark >= 60 ? 'bg-warning' : 'bg-destructive'
 </script>
@@ -132,7 +143,12 @@ const barTone = (mark: number) =>
                 · {{ t('fleet.drivers.score.weight', { weight: Math.round(family.weightPct) }) }}
               </span>
             </span>
-            <span class="text-card-foreground font-medium">{{ family.mark }}</span>
+            <span class="text-card-foreground font-medium">
+              {{ family.mark }}/100
+              <span class="text-xs font-normal text-muted-foreground">
+                · {{ pointsText(family) }}
+              </span>
+            </span>
           </div>
           <div class="h-1.5 rounded bg-muted overflow-hidden">
             <div

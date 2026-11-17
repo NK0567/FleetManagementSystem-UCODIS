@@ -14,5 +14,10 @@ export interface TripDrivingTimeApi {
 export interface DriverDrivingTimeApi {
   driverNo: string
   periodDays: number
+  /** What the driver really drove over the period, whether or not a limit was broken. */
+  drivenMin: number
+  /** Trips of the period that count in drivenMin. */
+  tripCount: number
+  /** Only the trips that broke a limit. */
   trips: (TripDrivingTimeApi & { plannedDeparture: string; status: string })[]
 }

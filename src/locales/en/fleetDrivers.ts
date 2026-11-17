@@ -17,6 +17,8 @@ export default {
   'fleet.drivers.col.availability': 'Availability',
   'fleet.drivers.col.eligible': 'Can be given a vehicle',
   'fleet.drivers.col.ineligibilityReasons': 'Reasons',
+  'fleet.drivers.drivingAuthorizedHint':
+    'Depends on the driving licence, the medical check-up and the driving-related trainings all being valid.',
   'fleet.drivers.col.drivingAuthorized': 'Authorized to drive',
   'fleet.drivers.col.employeeStatus': 'HR status',
   'fleet.drivers.col.siteName': 'Site',
@@ -46,6 +48,7 @@ export default {
   'fleet.drivers.score.aboveThreshold': 'Training threshold: {threshold}',
   'fleet.drivers.score.trainingPending': 'Training to come: {no}',
   'fleet.drivers.score.proposeTraining': 'Propose a training',
+  'fleet.drivers.score.points': '{earned} of {max} score points',
   'fleet.drivers.score.weight': '{weight}% of the score',
   'fleet.drivers.score.explain.safety':
     'No unjustified stop and no confirmed risky behaviour. | One unjustified stop or behaviour confirmed by an upheld infraction. | {n} unjustified stops or behaviours confirmed by an upheld infraction.',

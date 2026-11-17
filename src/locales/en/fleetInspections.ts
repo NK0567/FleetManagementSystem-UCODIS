@@ -29,6 +29,9 @@ export default {
   'fleet.inspections.form.inspectedOn': 'Inspection date',
   'fleet.inspections.form.center': 'Inspection centre',
   'fleet.inspections.form.result': 'Result',
+  'fleet.inspections.form.report': 'Report of the inspection centre',
+  'fleet.inspections.form.reportHint':
+    'The report handed over after the visit (PDF or image), until AI can read the details from it.',
   'fleet.inspections.form.findings': 'Findings',
   'fleet.inspections.actionError': 'The action could not be completed.',
   'fleet.inspections.action.recheck': 'Record the re-inspection',

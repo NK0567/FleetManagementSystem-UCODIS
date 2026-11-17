@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { apiErrorMessage } from '@/core/api/apiError'
 import DrivingBreachList from '@/modules/fleet/trips/components/DrivingBreachList.vue'
@@ -11,8 +11,8 @@ import { formatDateTime } from '@/utils/format'
 const props = defineProps<{ driverNo: string }>()
 
 const { t } = useI18n()
-/* Opened only when a breach needs reading. */
-const open = ref(false)
+/* Opened by default: the real driving time is the first thing a manager looks for here. */
+const open = ref(true)
 const detail = ref<DriverDrivingTimeApi | null>(null)
 const error = ref<string | null>(null)
 
@@ -20,13 +20,20 @@ async function load() {
   error.value = null
   try {
     detail.value = await drivingTimeService.ofDriver(props.driverNo)
-    open.value = detail.value.trips.length > 0
   } catch (cause) {
     error.value = apiErrorMessage(cause, t('fleet.trips.drivingTime.loadError'))
   }
 }
 
 watch(() => props.driverNo, load, { immediate: true })
+
+const drivenText = computed(() => {
+  const minutes = detail.value?.drivenMin ?? 0
+  return t('fleet.trips.drivingTime.duration', {
+    h: Math.floor(minutes / 60),
+    m: String(minutes % 60).padStart(2, '0')
+  })
+})
 </script>
 
 <template>
@@ -34,12 +41,31 @@ watch(() => props.driverNo, load, { immediate: true })
     v-model:open="open"
     :title="t('fleet.drivers.section.drivingTime')"
     :summary="
-      detail?.trips.length ? [t('fleet.trips.drivingTime.tripCount', detail.trips.length)] : []
+      detail
+        ? [
+            drivenText,
+            ...(detail.trips.length
+              ? [t('fleet.trips.drivingTime.tripCount', detail.trips.length)]
+              : [])
+          ]
+        : []
     "
   >
     <div class="xl:col-span-2 min-w-0 space-y-3 text-sm" data-testid="driver-driving-time">
       <FormAlerts :error="error" @clear:error="error = null" />
       <template v-if="detail">
+        <div data-testid="driver-driven-time">
+          <p class="text-xs text-muted-foreground">
+            {{ t('fleet.trips.drivingTime.realTitle', { days: detail.periodDays }) }}
+          </p>
+          <p class="text-2xl font-semibold text-card-foreground">{{ drivenText }}</p>
+          <p class="text-xs text-muted-foreground">
+            {{ t('fleet.trips.drivingTime.tripsOfPeriod', detail.tripCount) }}
+          </p>
+        </div>
+        <p class="pt-1 text-xs text-muted-foreground">
+          {{ t('fleet.trips.drivingTime.overrunTitle') }}
+        </p>
         <p v-if="!detail.trips.length" class="text-success">
           {{ t('fleet.trips.drivingTime.driverClean', { days: detail.periodDays }) }}
         </p>

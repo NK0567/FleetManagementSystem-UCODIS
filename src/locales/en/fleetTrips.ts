@@ -77,6 +77,10 @@ export default {
   'fleet.trips.drivingTime.driven.actual':
     'Driving read from the passages at the stops: {duration}.',
   'fleet.trips.drivingTime.driven.planned': 'Driving planned from the route template: {duration}.',
+  'fleet.trips.drivingTime.realTitle': 'Actual driving time over the last {days} days',
+  'fleet.trips.drivingTime.tripsOfPeriod':
+    'No trip over the period | 1 trip over the period | {n} trips over the period',
+  'fleet.trips.drivingTime.overrunTitle': 'Breaches of the regulated driving times',
   'fleet.trips.drivingTime.noBreach': 'No driving or rest threshold exceeded.',
   'fleet.trips.drivingTime.hint':
     'Thresholds of the fleet settings; the time at a stop is its planned break.',

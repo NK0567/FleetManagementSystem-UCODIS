@@ -28,6 +28,7 @@ import { requireReference, unknownReference } from '../../http/references'
 import { ok } from '../../http/responses'
 import { sessionUser } from '../../http/types'
 import { nowIso } from '../../clock'
+import { fileMetaOf } from '../files'
 import { activeInspectionItems } from './inspectionItems'
 import type { MockRouter } from '../../http/router'
 import { FLEET_MESSAGES } from './messages'
@@ -45,6 +46,7 @@ export function inspectionsApi(db: MockDatabase): InspectionApi[] {
     vehiclePlate: plates.get(inspection.vehicleNo) ?? inspection.vehicleNo,
     recheckItemNos: itemsToRecheck(inspection.items).map((item) => item.itemNo),
     recheckDueOn: recheckDueOn(inspection, delay),
+    report: inspection.reportFileNo ? fileMetaOf(db, inspection.reportFileNo) : null,
     state: inspectionState(inspection, delay, today)
   }))
 }
@@ -115,7 +117,13 @@ export function registerInspectionsHandlers(router: MockRouter, db: MockDatabase
     )
   })
 
-  const editable: FieldReaders<Pick<InspectionRow, 'center' | 'findings'>> = {
+  const editable: FieldReaders<Pick<InspectionRow, 'center' | 'findings' | 'reportFileNo'>> = {
+    reportFileNo: (input) => {
+      const fileNo = readString(input, 'reportFileNo')
+      if (!fileNo) return null
+      if (!db.files.exists(fileNo)) throw unknownReference('reportFileNo')
+      return fileNo
+    },
     center: (input) => readString(input, 'center', { required: true }),
     findings: (input) => readString(input, 'findings')
   }
@@ -160,6 +168,7 @@ export function registerInspectionsHandlers(router: MockRouter, db: MockDatabase
         result,
         findings,
         recheckDoneOn: null,
+        reportFileNo: editable.reportFileNo(input),
         items,
         inspector,
         signedBy: sessionUser(request).code,

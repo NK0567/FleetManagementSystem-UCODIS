@@ -5,6 +5,7 @@ import { formatDate, formatDateTime } from '@/utils/format'
 import { useEntityForm, type FormValidationError } from '@/composables/useEntityForm'
 import { useFormValidationUi } from '@/composables/useFormValidationUi'
 import { useOptionsStore } from '@/stores/optionsStore'
+import type { FileMeta } from '@/types/file.types'
 import { gridResult, inspectionGridIssues, type InspectionItemResult } from '../domain/inspection'
 import { inspectionService } from '../services/inspectionService'
 import type { InspectionApi } from '../types/inspection.types'
@@ -35,6 +36,7 @@ const { draft, isRequired, expose } = useEntityForm({
     inspectedOn: '',
     center: '',
     findings: '',
+    reportFileNo: null as string | null,
     items: [] as InspectionItemResult[],
     inspector: '',
     signed: false
@@ -76,6 +78,22 @@ watch(
     }
   }
 )
+
+const report = ref<FileMeta | null>(props.initialData.report ?? null)
+watch(
+  () => props.initialData.report,
+  (value) => {
+    report.value = value ?? null
+  }
+)
+function onReportUploaded(uploaded: FileMeta) {
+  report.value = uploaded
+  draft.reportFileNo = uploaded.no
+}
+function onReportRemoved() {
+  report.value = null
+  draft.reportFileNo = null
+}
 
 const result = computed(() =>
   props.isNew ? gridResult(draft.items) : (props.initialData.result ?? 'conforming')
@@ -166,6 +184,17 @@ defineExpose(expose)
           <FormTextarea v-model="draft.findings" :rows="3" :disabled="disabled" />
           <p v-if="isNew" class="text-xs text-muted-foreground mt-1">
             {{ t('fleet.inspections.form.findingsHint') }}
+          </p>
+        </BaseFormField>
+        <BaseFormField :label="t('fleet.inspections.form.report')">
+          <FileAttachmentField
+            :file="report"
+            :disabled="disabled"
+            @uploaded="onReportUploaded"
+            @removed="onReportRemoved"
+          />
+          <p class="text-xs text-muted-foreground mt-1">
+            {{ t('fleet.inspections.form.reportHint') }}
           </p>
         </BaseFormField>
       </div>

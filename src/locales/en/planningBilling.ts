@@ -14,7 +14,7 @@ export default {
   'planning.billing.issue.contestation': 'Contestation to handle',
   'planning.billing.issue.tariff': 'No tariff',
   'planning.billing.line': 'Line {n}',
-  'planning.billing.kpi.ready': 'Ready to invoice',
+  'planning.billing.kpi.ready': 'Awaiting invoicing',
   'planning.billing.kpi.blocked': 'Blocked',
   'planning.billing.kpi.blockedSub': 'A prerequisite is missing before the invoice',
   'planning.billing.kpi.invoiced': 'Invoiced',

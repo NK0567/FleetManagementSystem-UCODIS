@@ -46,24 +46,26 @@ export function tripDrivingTime(db: MockDatabase, trip: TripRow): TripDrivingTim
 
 export function driverDrivingTime(db: MockDatabase, driverNo: string): DriverDrivingTimeApi {
   const since = addDays(todayIso(), -PERIOD_DAYS)
+  const all = db.trips
+    .all()
+    .filter(
+      (trip) =>
+        trip.driverNo === driverNo &&
+        trip.status !== 'cancelled' &&
+        trip.plannedDeparture.slice(0, 10) > since
+    )
+    .sort((a, b) => b.plannedDeparture.localeCompare(a.plannedDeparture))
+    .map((trip) => ({
+      ...tripDrivingTime(db, trip),
+      plannedDeparture: trip.plannedDeparture,
+      status: trip.status
+    }))
   return {
     driverNo,
     periodDays: PERIOD_DAYS,
-    trips: db.trips
-      .all()
-      .filter(
-        (trip) =>
-          trip.driverNo === driverNo &&
-          trip.status !== 'cancelled' &&
-          trip.plannedDeparture.slice(0, 10) > since
-      )
-      .sort((a, b) => b.plannedDeparture.localeCompare(a.plannedDeparture))
-      .map((trip) => ({
-        ...tripDrivingTime(db, trip),
-        plannedDeparture: trip.plannedDeparture,
-        status: trip.status
-      }))
-      .filter((trip) => trip.breaches.length > 0)
+    drivenMin: all.reduce((total, trip) => total + trip.drivenMin, 0),
+    tripCount: all.length,
+    trips: all.filter((trip) => trip.breaches.length > 0)
   }
 }
 

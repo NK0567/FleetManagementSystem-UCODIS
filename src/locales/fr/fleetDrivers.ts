@@ -17,6 +17,8 @@ export default {
   'fleet.drivers.col.availability': 'Disponibilité',
   'fleet.drivers.col.eligible': 'Peut recevoir un véhicule',
   'fleet.drivers.col.ineligibilityReasons': 'Motifs',
+  'fleet.drivers.drivingAuthorizedHint':
+    'Dépend du permis de conduire, de la visite médicale et des formations liées à la conduite, tous en règle.',
   'fleet.drivers.col.drivingAuthorized': 'Habilité à conduire',
   'fleet.drivers.col.employeeStatus': 'Statut RH',
   'fleet.drivers.col.siteName': 'Site',
@@ -46,6 +48,7 @@ export default {
   'fleet.drivers.score.aboveThreshold': 'Seuil de formation : {threshold}',
   'fleet.drivers.score.trainingPending': 'Formation prévue : {no}',
   'fleet.drivers.score.proposeTraining': 'Proposer une formation',
+  'fleet.drivers.score.points': '{earned} sur {max} points du score',
   'fleet.drivers.score.weight': '{weight} % du score',
   'fleet.drivers.score.explain.safety':
     'Aucun arrêt non justifié ni comportement à risque confirmé. | Un arrêt non justifié ou comportement confirmé par une infraction retenue. | {n} arrêts non justifiés ou comportements confirmés par une infraction retenue.',

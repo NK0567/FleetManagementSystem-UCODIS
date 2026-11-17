@@ -16,6 +16,8 @@ export interface InspectionRow extends MockRow {
   inspector: string
   signedBy: string | null
   signedAt: string | null
+  /** The report issued by the inspection centre, kept as an attachment. */
+  reportFileNo?: string | null
 }
 
 const day = (days: number) => addDays(DEMO_REFERENCE_DATE, days)

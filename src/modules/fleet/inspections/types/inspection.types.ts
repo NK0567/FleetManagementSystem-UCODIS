@@ -1,3 +1,4 @@
+import type { FileMeta } from '@/types/file.types'
 import type { InspectionItemResult, InspectionState } from '../domain/inspection'
 
 export const INSPECTION_RESULTS = ['conforming', 'non_conforming'] as const
@@ -19,6 +20,8 @@ export interface InspectionApi {
   inspector: string
   signedBy: string | null
   signedAt: string | null
+  /** The report of the inspection centre, attached to the record. */
+  report: FileMeta | null
   /** Codes of the non-conforming items, which the re-inspection looks at again. */
   recheckItemNos: string[]
   vehiclePlate: string

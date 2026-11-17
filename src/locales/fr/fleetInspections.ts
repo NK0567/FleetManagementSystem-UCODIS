@@ -29,6 +29,9 @@ export default {
   'fleet.inspections.form.inspectedOn': 'Date de la visite',
   'fleet.inspections.form.center': 'Centre de contrôle',
   'fleet.inspections.form.result': 'Résultat',
+  'fleet.inspections.form.report': 'Rapport du centre de contrôle',
+  'fleet.inspections.form.reportHint':
+    'Le rapport remis à l’issue de la visite (PDF ou image), en attendant que l’IA en extraie les informations.',
   'fleet.inspections.form.findings': 'Défauts relevés',
   'fleet.inspections.actionError': "L'action n'a pas pu être effectuée.",
   'fleet.inspections.action.recheck': 'Enregistrer la contre-visite',
