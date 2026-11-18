@@ -310,32 +310,32 @@ export const PLANNING_MESSAGES = {
     en: 'This product is inactive.'
   },
   orderNothingToCarry: {
-    fr: 'Cet ensemble ne porte rien : un tracteur a besoin de sa remorque, un porteur de sa propre charge.',
-    en: 'This combination carries nothing: a tractor needs its trailer, a rigid truck its own load.'
+    fr: 'Cet ensemble ne porte rien : un tracteur a besoin de sa remorque, un porteur de sa propre charge. Ajoutez une remorque ou choisissez un porteur.',
+    en: 'This combination carries nothing: a tractor needs its trailer, a rigid truck its own load. Add a trailer or pick a rigid truck.'
   },
   orderPayloadUnknown: {
-    fr: 'La charge utile de cet ensemble n’est pas connue.',
-    en: 'The payload of this combination is not known.'
+    fr: 'La charge utile de cet ensemble n’est pas connue. Renseignez-la sur la fiche du véhicule, ou choisissez un autre véhicule.',
+    en: 'The payload of this combination is not known. Fill it in on the vehicle card, or pick another vehicle.'
   },
   orderOverWeight: {
-    fr: 'Le poids ({weightKg} kg) dépasse la charge utile ({maxLoadKg} kg).',
-    en: 'The weight ({weightKg} kg) exceeds the payload ({maxLoadKg} kg).'
+    fr: 'Le poids ({weightKg} kg) dépasse la charge utile ({maxLoadKg} kg). Choisissez un véhicule plus grand ou retirez une ligne de l’ordre.',
+    en: 'The weight ({weightKg} kg) exceeds the payload ({maxLoadKg} kg). Pick a larger vehicle or remove a line from the order.'
   },
   orderOverFuel: {
-    fr: 'Le carburant ({liters} L) dépasse la citerne ({capacityL} L).',
-    en: 'The fuel ({liters} L) exceeds the tank ({capacityL} L).'
+    fr: 'Le carburant ({liters} L) dépasse la citerne ({capacityL} L). Choisissez une citerne plus grande ou retirez une ligne de l’ordre.',
+    en: 'The fuel ({liters} L) exceeds the tank ({capacityL} L). Pick a larger tank or remove a line from the order.'
   },
   orderPumpRequired: {
     fr: 'Le point {point} exige une pompe, et cet ensemble n’en a pas. Choisissez un véhicule ou une remorque « avec pompe ».',
     en: 'Delivery point {point} requires a pump, and this combination has none. Pick a vehicle or a trailer marked "with pump".'
   },
   orderVehicleTypeRefused: {
-    fr: 'Le point {point} n’accepte pas ce type de véhicule.',
-    en: 'Delivery point {point} does not accept this vehicle type.'
+    fr: 'Le point {point} n’accepte pas ce type de véhicule. Choisissez un autre véhicule, ou ajoutez ce type sur la fiche du point de livraison.',
+    en: 'Delivery point {point} does not accept this vehicle type. Pick another vehicle, or add this type on the delivery point card.'
   },
   orderFamilyRefused: {
-    fr: 'Le véhicule {plate} ne transporte pas la catégorie {family} ({product}).',
-    en: 'Vehicle {plate} does not carry the {family} category ({product}).'
+    fr: 'Le véhicule {plate} ne transporte pas la catégorie {family} ({product}). Choisissez un véhicule qui la transporte.',
+    en: 'Vehicle {plate} does not carry the category {family} ({product}). Pick a vehicle that does.'
   },
   compartmentNoRoom: {
     fr: 'Aucun compartiment ne peut recevoir {product} selon ses règles.',
@@ -346,8 +346,8 @@ export const PLANNING_MESSAGES = {
     en: 'Compartment {no} must be full: {used} L out of {volume} L.'
   },
   orderProductsIncompatible: {
-    fr: '{productA} et {productB} ne voyagent pas ensemble.',
-    en: '{productA} and {productB} do not travel together.'
+    fr: '{productA} et {productB} ne voyagent pas ensemble. Mettez-les sur deux ordres différents.',
+    en: '{productA} and {productB} do not travel together. Put them on two separate orders.'
   },
   orderTripNotPlanned: {
     fr: 'Seul un voyage encore planifié peut recevoir un ordre.',

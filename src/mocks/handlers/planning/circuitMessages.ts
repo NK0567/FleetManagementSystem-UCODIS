@@ -3,8 +3,8 @@ import type { LocalizedText } from '../../i18n'
 /** Messages of the order circuit, the replanning and the loading proposal. */
 export const CIRCUIT_MESSAGES = {
   equipmentRequired: {
-    fr: 'La commande {no} exige un véhicule équipé de : {equipment}.',
-    en: 'Order {no} requires a vehicle fitted with: {equipment}.'
+    fr: 'La commande {no} exige un véhicule équipé de : {equipment}. Choisissez un véhicule qui l’a, ou retirez cette commande de l’ordre.',
+    en: 'Order {no} requires a vehicle fitted with: {equipment}. Pick a vehicle that has it, or remove this order from the transport order.'
   },
   incident_nameRequired: {
     fr: 'Chaque élément des listes doit avoir un libellé.',
