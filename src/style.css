@@ -79,11 +79,27 @@
  */
 .driver-touch input:not([type='checkbox']):not([type='radio']):not([type='file']),
 .driver-touch select,
-.driver-touch textarea {
+.driver-touch textarea,
+.tablet-mode input:not([type='checkbox']):not([type='radio']):not([type='file']),
+.tablet-mode select,
+.tablet-mode textarea {
   min-height: 3rem;
   font-size: 1rem;
 }
 
-.driver-touch button {
+.driver-touch button,
+.tablet-mode main button,
+.tablet-mode [role='dialog'] button {
   min-height: 3rem;
+}
+
+/* Tablet mode: the menu entries and the table rows are easy to hit with a finger. */
+.tablet-mode nav a,
+.tablet-mode nav button {
+  min-height: 3rem;
+  display: inline-flex;
+  align-items: center;
+}
+.tablet-mode tbody tr {
+  height: 3.25rem;
 }

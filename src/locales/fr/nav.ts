@@ -23,6 +23,8 @@ export default {
   'nav.group.execution': 'Exécution',
   'nav.group.billing': 'Facturation',
   'nav.group.mySpace': 'Mon espace',
+  'nav.displayTablet': 'Passer en mode tablette',
+  'nav.displayDesktop': 'Passer en mode ordinateur',
   'nav.layoutSidebar': 'Afficher le menu en barre latérale',
   'nav.layoutTopbar': 'Afficher le menu en haut',
   'nav.settings': 'Paramètres',

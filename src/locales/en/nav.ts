@@ -23,6 +23,8 @@ export default {
   'nav.group.execution': 'Execution',
   'nav.group.billing': 'Billing',
   'nav.group.mySpace': 'My space',
+  'nav.displayTablet': 'Switch to tablet mode',
+  'nav.displayDesktop': 'Switch to desktop mode',
   'nav.layoutSidebar': 'Show the menu as a sidebar',
   'nav.layoutTopbar': 'Show the menu at the top',
   'nav.settings': 'Settings',

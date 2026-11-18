@@ -1,11 +1,13 @@
 <script lang="ts" setup>
 import { useNavLayout } from '@/composables/useNavLayout'
+import { useTabletMode } from '@/composables/useTabletMode'
 
 const { mode } = useNavLayout()
+const { isTablet } = useTabletMode()
 </script>
 
 <template>
-  <div class="h-screen bg-white flex flex-col overflow-hidden">
+  <div class="h-screen bg-white flex flex-col overflow-hidden" :class="{ 'tablet-mode': isTablet }">
     <TopBar />
 
     <div id="below-topbar" class="flex-1 flex flex-col min-h-0 relative">
