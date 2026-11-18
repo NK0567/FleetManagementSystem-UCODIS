@@ -66,6 +66,11 @@ export default {
   'planning.transportOrders.plan.fleetNew': 'Nouveau voyage de flotte',
   'planning.transportOrders.plan.fleetTrip': 'Rattacher à un voyage déjà planifié',
   'planning.transportOrders.plan.carrier': 'Transporteur',
+  'planning.transportOrders.plan.withPump': 'avec pompe',
+  'planning.transportOrders.plan.pumpNeeded':
+    'Un point de cet ordre exige une pompe : choisissez un véhicule ou une remorque marqué « avec pompe ».',
+  'planning.transportOrders.plan.pumpMissing':
+    'Ce véhicule et cette remorque n’ont pas de pompe, or un point de l’ordre en exige une. Choisissez un véhicule ou une remorque marqué « avec pompe ».',
   'planning.transportOrders.plan.vehicle': 'Véhicule',
   'planning.transportOrders.plan.trailer': 'Remorque',
   'planning.transportOrders.plan.driver': 'Conducteur',

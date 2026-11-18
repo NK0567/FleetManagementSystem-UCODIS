@@ -184,6 +184,8 @@ export interface TransportOrderApi {
   expired: boolean
   /** Gathers the lines replanned to that day (TRS01-US16). */
   replanDate: string | null
+  /** A point of the order requires a pump: the vehicle or the trailer must carry one. */
+  pumpRequired: boolean
   proposedVehicleNo: string | null
   proposedTrailerNo: string | null
   proposedCarrierNo: string | null

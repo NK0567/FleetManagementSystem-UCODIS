@@ -9,6 +9,8 @@ export interface ResourceAvailabilityApi {
   reasons: string[]
   /** Only held by another trip at that time: an overlap the planner may accept. */
   busyOnly: boolean
+  /** A vehicle or a trailer fitted with a working pump. */
+  hasPump?: boolean
   /** For a motorized vehicle: the driver assigned to it, proposed by default. */
   assignedDriverNo?: string | null
 }

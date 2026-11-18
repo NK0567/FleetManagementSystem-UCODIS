@@ -118,13 +118,23 @@ function choicesOf(items: ResourceAvailabilityApi[]): Choice[] {
           ...item.reasons
         ]
       : item.reasons
+    const pump = item.hasPump ? ` · ${t('planning.transportOrders.plan.withPump')}` : ''
     return {
       value: item.no,
-      label: item.available ? item.label : `${item.label} · ${reasons.join(', ')}`,
+      label: (item.available ? item.label : `${item.label} · ${reasons.join(', ')}`) + pump,
       disabled: !item.available && !item.busyOnly
     }
   })
 }
+
+/* A point of the order requires a pump: said before the planner picks, and again when the chosen
+ * vehicle and trailer have none, with the way out. */
+const pumpMissing = computed(() => {
+  if (!props.order?.pumpRequired || !vehicleNo.value) return false
+  const trailer = trailers.value.find((item) => item.no === trailerNo.value)
+  const vehicle = vehicles.value.find((item) => item.no === vehicleNo.value)
+  return !trailer?.hasPump && !vehicle?.hasPump
+})
 
 /* The load of the order against the chosen combination: the trailer carries, else the vehicle. */
 const chosenCapacity = computed(() => {
@@ -315,6 +325,23 @@ function confirm() {
                 clearable
               />
             </BaseFormField>
+            <p
+              v-if="order?.pumpRequired"
+              class="rounded border px-3 py-2 text-sm"
+              :class="
+                pumpMissing
+                  ? 'border-destructive/40 bg-destructive/5 text-destructive'
+                  : 'border-border bg-muted/40 text-muted-foreground'
+              "
+            >
+              {{
+                t(
+                  pumpMissing
+                    ? 'planning.transportOrders.plan.pumpMissing'
+                    : 'planning.transportOrders.plan.pumpNeeded'
+                )
+              }}
+            </p>
             <BaseFormField :label="t('planning.transportOrders.plan.driver')" required>
               <ChoiceSelect
                 v-model="driverNo"

@@ -226,6 +226,9 @@ export function transportOrdersApi(db: MockDatabase, userCode?: string): Transpo
         transportMode: row.transportMode ?? 'road',
         expired: isExpired(status, departure, today),
         replanDate: row.replanDate ?? null,
+        pumpRequired: inOrder.some(
+          (line) => points.get(line.deliveryPointNo)?.pumpRequired === true
+        ),
         proposedVehicleNo: row.proposedVehicleNo ?? null,
         proposedTrailerNo: row.proposedTrailerNo ?? null,
         proposedCarrierNo: row.proposedCarrierNo ?? null,

@@ -66,6 +66,11 @@ export default {
   'planning.transportOrders.plan.fleetNew': 'New fleet trip',
   'planning.transportOrders.plan.fleetTrip': 'Attach to a trip already planned',
   'planning.transportOrders.plan.carrier': 'Carrier',
+  'planning.transportOrders.plan.withPump': 'with pump',
+  'planning.transportOrders.plan.pumpNeeded':
+    'A point of this order requires a pump: pick a vehicle or a trailer marked "with pump".',
+  'planning.transportOrders.plan.pumpMissing':
+    'This vehicle and trailer have no pump, but a point of the order requires one. Pick a vehicle or a trailer marked "with pump".',
   'planning.transportOrders.plan.vehicle': 'Vehicle',
   'planning.transportOrders.plan.trailer': 'Trailer',
   'planning.transportOrders.plan.driver': 'Driver',

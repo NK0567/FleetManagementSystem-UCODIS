@@ -14,6 +14,7 @@ import type {
 import { combinationCapacity } from '@/modules/fleet/vehicles/domain/capacity'
 import { isUsable, type VehicleStatusResult } from '@/modules/fleet/vehicles/domain/vehicleStatus'
 import type { MockDatabase } from '../../db/database'
+import { equipmentApi } from './vehicles'
 import type { EmployeeRow } from '../../fixtures/hr/employees'
 import { badRequest, conflict, unprocessable, type MockHttpError } from '../../http/errors'
 import { readDateTime } from '../../http/input'
@@ -185,6 +186,11 @@ export function availabilityOver(
   const availability = createAvailability(db, window, language)
   const types = new Map(db.vehicleTypes.all().map((type) => [type.no, type]))
   const vehicles: ResourceAvailabilityApi[] = []
+  const withPump = new Set(
+    equipmentApi(db)
+      .filter((item) => item.state === 'operational' && item.capability === 'pump')
+      .map((item) => item.vehicleNo)
+  )
   for (const vehicle of db.vehicles.all()) {
     const type = types.get(vehicle.vehicleTypeNo)
     if (!type || vehicle.removal) continue
@@ -209,6 +215,7 @@ export function availabilityOver(
         },
         null
       ),
+      hasPump: withPump.has(vehicle.no),
       available: reasons.length === 0,
       reasons,
       busyOnly: items.length > 0 && items.every((item) => item.code === 'busy'),

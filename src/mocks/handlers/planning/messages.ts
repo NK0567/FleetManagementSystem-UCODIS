@@ -326,8 +326,8 @@ export const PLANNING_MESSAGES = {
     en: 'The fuel ({liters} L) exceeds the tank ({capacityL} L).'
   },
   orderPumpRequired: {
-    fr: 'Le point {point} exige une pompe, et cet ensemble n’en a pas.',
-    en: 'Delivery point {point} requires a pump, and this combination has none.'
+    fr: 'Le point {point} exige une pompe, et cet ensemble n’en a pas. Choisissez un véhicule ou une remorque « avec pompe ».',
+    en: 'Delivery point {point} requires a pump, and this combination has none. Pick a vehicle or a trailer marked "with pump".'
   },
   orderVehicleTypeRefused: {
     fr: 'Le point {point} n’accepte pas ce type de véhicule.',
