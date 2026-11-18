@@ -74,6 +74,8 @@ export interface TrackingApi {
   /** What the planned message gives him: vehicle, driver and estimated arrival (TRS02-US02). */
   vehiclePlate: string
   driverName: string
+  /** The carrier in charge of the delivery; empty when the company delivers with its own fleet. */
+  carrierName: string
   expectedArrival: string | null
   late: boolean
   /** His own answer to the satisfaction survey, once he confirmed (TRS04-US06). */
@@ -241,6 +243,7 @@ function vehicleOf(db: MockDatabase, order: TransportOrderRow) {
   return {
     vehiclePlate: (carrier ? item?.carrierVehiclePlate : item?.vehiclePlate) ?? '',
     driverName: (carrier ? item?.carrierDriverName : item?.driverName) ?? '',
+    carrierName: (carrier ? item?.carrierName : '') ?? '',
     // The estimated arrival moves with the position of the vehicle (TRS02-US01).
     expectedArrival: orderEta(db, order).expectedArrival,
     late: orderEta(db, order).late

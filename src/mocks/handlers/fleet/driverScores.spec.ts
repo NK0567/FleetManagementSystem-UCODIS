@@ -49,18 +49,18 @@ describe('driver scores', () => {
   it('count only what was confirmed: unjustified deviations, upheld infractions', async () => {
     const jaona = await score('UCT-013')
     expect(jaona).toMatchObject({
-      score: 93,
+      score: 91,
       threshold: 70,
       belowThreshold: false,
       bonusPercent: 100
     })
     expect(mark(jaona, 'route')).toBe(80)
     expect(mark(jaona, 'discipline')).toBe(92)
-    expect(mark(jaona, 'ecoDriving')).toBe(90)
+    expect(mark(jaona, 'ecoDriving')).toBe(65)
     const { items: drivers } = (
       await call(server, 'get', '/fleet/drivers', { as: 'FLT001', query: { pageSize: 100 } })
     ).data.data as { items: DriverApi[] }
-    expect(drivers.find((driver) => driver.no === 'UCT-013')?.score).toBe(93)
+    expect(drivers.find((driver) => driver.no === 'UCT-013')?.score).toBe(91)
   })
 
   it('drop when a deviation is qualified unjustified, and tell the change since last month', async () => {
@@ -102,7 +102,7 @@ describe('driver scores', () => {
     ).toBe(200)
     const jaona = await score('UCT-013')
     expect(jaona.families.map((family) => family.family)).not.toContain('route')
-    expect(jaona.score).toBe(97)
+    expect(jaona.score).toBe(94)
   })
 
   it('follow the families the administrator sets up, with the terms of their formula', async () => {
@@ -174,7 +174,7 @@ describe('score trainings', () => {
       employeeNo: 'UCT-013',
       reason: 'score',
       status: 'to_plan',
-      topic: 'Driving score of 93/100, below the threshold of 95'
+      topic: 'Driving score of 91/100, below the threshold of 95'
     })
     expect((await post('/fleet/drivers/UCT-013/score-training')).status).toBe(409)
     expect((await alerts()).map((alert) => alert.recordNo)).not.toContain('UCT-013')

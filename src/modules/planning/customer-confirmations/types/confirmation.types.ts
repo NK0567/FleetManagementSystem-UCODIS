@@ -113,6 +113,8 @@ export interface TrackingApi {
   deliveryNote: DeliveryNoteApi | null
   vehiclePlate: string
   driverName: string
+  /** Carrier in charge of the delivery; empty with the company's own fleet. */
+  carrierName: string
   expectedArrival: string | null
   late: boolean
   satisfactionScore: number | null

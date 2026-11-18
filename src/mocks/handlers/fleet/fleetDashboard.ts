@@ -41,7 +41,7 @@ function tripKm(trip: TripRow): number {
   return Math.round((trip.referenceKm * trip.stops.filter((stop) => stop.passedAt).length) / total)
 }
 
-function dailyFigures(db: MockDatabase, today: string): DashboardDaily {
+function dailyFigures(db: MockDatabase, today: string, averageL100: number): DashboardDaily {
   const month = today.slice(0, 7)
   const trips = db.trips.all().filter((trip) => trip.status !== 'cancelled')
   const orders = db.transportOrders.all()
@@ -54,13 +54,10 @@ function dailyFigures(db: MockDatabase, today: string): DashboardDaily {
     trips
       .filter((trip) => inPeriod(trip.actualDeparture, prefix))
       .reduce((total, trip) => total + value(trip), 0)
-  const refills = db.fuelRefills.all()
+  // Fuel consumed follows the kilometres run, at the fleet's average consumption: a refill is a
+  // purchase on one day and says nothing about what was burnt that day.
   const liters = (prefix: string) =>
-    Math.round(
-      refills
-        .filter((refill) => inPeriod(refill.refueledAt, prefix))
-        .reduce((total, refill) => total + refill.liters, 0)
-    )
+    Math.round((sum(prefix, tripKm) * (Number.isFinite(averageL100) ? averageL100 : 0)) / 100)
   const claims = db.claims.all()
   const claimCount = (nature: 'accident' | 'incident', prefix: string) =>
     claims.filter((claim) => claim.nature === nature && inPeriod(claim.occurredAt, prefix)).length
@@ -174,7 +171,7 @@ export function fleetDashboard(db: MockDatabase, request: MockRequest): FleetDas
         availability: driver.availability,
         reason: driver.ineligibilityReasons
       })),
-    daily: dailyFigures(db, todayIso()),
+    daily: dailyFigures(db, todayIso(), averageLitersPer100(fuelConsumptionApi(db))),
     fleetByStatus: VEHICLE_STATUSES.map((status) => ({
       status,
       count: vehicles.filter((vehicle) => statusOf(vehicle.no) === status).length

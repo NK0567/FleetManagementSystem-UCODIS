@@ -876,7 +876,9 @@ const buttonClass =
                     :key="line.lineNo"
                   >
                     {{ line.recipientName }}
-                    <span class="text-warning">{{ '★'.repeat(line.satisfactionScore ?? 0) }}</span>
+                    <span class="text-yellow-400">{{
+                      '★'.repeat(line.satisfactionScore ?? 0)
+                    }}</span>
                     <span v-if="line.satisfactionComment" class="text-muted-foreground">
                       · {{ line.satisfactionComment }}
                     </span>

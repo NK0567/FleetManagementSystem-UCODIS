@@ -48,8 +48,8 @@ export default {
   'fleet.drivers.score.aboveThreshold': 'Training threshold: {threshold}',
   'fleet.drivers.score.trainingPending': 'Training to come: {no}',
   'fleet.drivers.score.proposeTraining': 'Propose a training',
-  'fleet.drivers.score.points': '{earned} of {max} score points',
-  'fleet.drivers.score.weight': '{weight}% of the score',
+  'fleet.drivers.score.points': '{earned} of {max} points',
+  'fleet.drivers.score.weight': 'worth {weight}% of the score',
   'fleet.drivers.score.explain.safety':
     'No unjustified stop and no confirmed risky behaviour. | One unjustified stop or behaviour confirmed by an upheld infraction. | {n} unjustified stops or behaviours confirmed by an upheld infraction.',
   'fleet.drivers.score.explain.route':

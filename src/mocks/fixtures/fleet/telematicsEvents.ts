@@ -196,6 +196,126 @@ const SEED: EventSeed[] = [
     source: 'camera',
     position: [-18.9, 47.52],
     detail: 'La caméra de cabine ne répond plus depuis 35 minutes, le GPS continue d’émettre.'
+  },
+  {
+    type: 'HARSH-BRAKING',
+    vehicleNo: 'VEH-002',
+    driverNo: 'UCT-011',
+    tripNo: 'TRP-00002',
+    occurredAt: '2026-08-20T07:40:00',
+    source: 'box',
+    value: 0.48,
+    position: [-18.95, 47.6]
+  },
+  {
+    type: 'IDLING',
+    vehicleNo: 'VEH-002',
+    driverNo: 'UCT-011',
+    tripNo: 'TRP-00002',
+    occurredAt: '2026-08-20T11:15:00',
+    source: 'box',
+    value: 22,
+    position: [-19.2, 47.8]
+  },
+  {
+    type: 'HARSH-ACCEL',
+    vehicleNo: 'VEH-002',
+    driverNo: 'UCT-011',
+    tripNo: 'TRP-00009',
+    occurredAt: '2026-09-03T09:10:00',
+    source: 'box',
+    value: 0.41,
+    position: [-18.9, 47.55]
+  },
+  {
+    type: 'SHARP-TURN',
+    vehicleNo: 'VEH-002',
+    driverNo: 'UCT-011',
+    tripNo: 'TRP-00009',
+    occurredAt: '2026-09-03T10:30:00',
+    source: 'box',
+    value: 0.46,
+    position: [-18.93, 47.58]
+  },
+  {
+    type: 'IDLING',
+    vehicleNo: 'VEH-004',
+    driverNo: 'UCT-013',
+    tripNo: 'TRP-00003',
+    occurredAt: '2026-08-26T08:20:00',
+    source: 'box',
+    value: 18,
+    position: [-19.5, 47.1]
+  },
+  {
+    type: 'HARSH-BRAKING',
+    vehicleNo: 'VEH-004',
+    driverNo: 'UCT-013',
+    tripNo: 'TRP-00003',
+    occurredAt: '2026-08-26T12:45:00',
+    source: 'box',
+    value: 0.55,
+    position: [-19.7, 47.05]
+  },
+  {
+    type: 'IDLING',
+    vehicleNo: 'VEH-006',
+    driverNo: 'UCT-015',
+    tripNo: 'TRP-00004',
+    occurredAt: '2026-08-10T09:30:00',
+    source: 'box',
+    value: 17,
+    position: [-18.7, 47.4]
+  },
+  {
+    type: 'HARSH-BRAKING',
+    vehicleNo: 'VEH-006',
+    driverNo: 'UCT-015',
+    tripNo: 'TRP-00004',
+    occurredAt: '2026-08-10T13:00:00',
+    source: 'box',
+    value: 0.44,
+    position: [-18.75, 47.45]
+  },
+  {
+    type: 'HARSH-ACCEL',
+    vehicleNo: 'VEH-010',
+    driverNo: 'UCT-019',
+    tripNo: 'TRP-00005',
+    occurredAt: '2026-08-22T09:05:00',
+    source: 'box',
+    value: 0.4,
+    position: [-18.85, 47.9]
+  },
+  {
+    type: 'HARSH-ACCEL',
+    vehicleNo: 'VEH-004',
+    driverNo: 'UCT-013',
+    tripNo: 'TRP-00003',
+    occurredAt: '2026-08-26T10:05:00',
+    source: 'box',
+    value: 0.43,
+    position: [-19.6, 47.08]
+  },
+  {
+    type: 'SHARP-TURN',
+    vehicleNo: 'VEH-004',
+    driverNo: 'UCT-013',
+    tripNo: 'TRP-00003',
+    occurredAt: '2026-08-26T14:20:00',
+    source: 'box',
+    value: 0.47,
+    position: [-19.6, 47.08]
+  },
+  {
+    type: 'IDLING',
+    vehicleNo: 'VEH-004',
+    driverNo: 'UCT-013',
+    tripNo: 'TRP-00003',
+    occurredAt: '2026-08-26T15:40:00',
+    source: 'box',
+    value: 25,
+    position: [-19.6, 47.08]
   }
 ]
 

@@ -9,7 +9,7 @@ export default {
   'fleet.dashboard.kpi.driversSub': 'Ni en congé, ni en voyage, ni inéligibles',
   'fleet.dashboard.kpi.documents': 'Documents à régulariser',
   'fleet.dashboard.kpi.documentsSub': 'Expirés ou manquants · {expiring} à renouveler',
-  'fleet.dashboard.kpi.fuel': 'Carburant du mois',
+  'fleet.dashboard.kpi.fuel': 'Pleins du mois',
   'fleet.dashboard.kpi.fuelSub': 'Moyenne {average} L/100 km',
   'fleet.dashboard.kpi.compliance': 'Voyages conformes',
   'fleet.dashboard.kpi.complianceSub':
@@ -45,7 +45,7 @@ export default {
   'fleet.dashboard.supervision.offCorridor': "À {km} km de l'itinéraire",
   'fleet.dashboard.supervision.offSites': 'Hors de tout site connu',
   'fleet.dashboard.supervision.speed': '{speed} km/h',
-  'fleet.dashboard.daily.title': "Aujourd'hui",
+  'fleet.dashboard.daily.title': 'Activité du jour et du mois',
   'fleet.dashboard.daily.month': 'Ce mois : {value}',
   'fleet.dashboard.daily.km': 'Kilomètres parcourus',
   'fleet.dashboard.daily.quantity': 'Quantité transportée',

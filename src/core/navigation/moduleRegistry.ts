@@ -40,7 +40,7 @@ export function getNavMenus(): readonly NavMenuItem[] {
 /** The reference data of every module is gathered in one menu, placed ahead of the modules. */
 export const REFERENTIAL_MENU_KEY = 'nav.referential'
 export const REFERENTIAL_MENU_ORDER = 8
-/** The data every module reads: vehicles, drivers, approved stations. */
+/** The data every module reads: vehicles, drivers, route templates. */
 export const BASE_DATA_GROUP = 'nav.group.baseData'
 
 export function registerReferentialItems(group: string, items: readonly NavSubItem[]): void {

@@ -138,13 +138,8 @@ export function registerPlanningModule(): void {
           icon: CalendarDays,
           menuKey: 'planningCalendar'
         },
-        {
-          labelKey: 'nav.loadingPreparations',
-          to: '/planning/loading-preparations',
-          group: 'nav.group.execution',
-          icon: Layers,
-          menuKey: 'loadingPreparation'
-        },
+        /* « Préparations de chargement » is hidden from the menu (review of 17 November): the
+         * loading starts from the transport order. The page stays in the code. */
         {
           labelKey: 'nav.loading',
           to: '/planning/loading',
